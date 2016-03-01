@@ -59,7 +59,7 @@ namespace nxsimd
         vector4f(const __m128& rhs);
         vector4f& operator=(const __m128& rhs);
 
-        vector4f operator __m128() const;
+        operator __m128() const;
 
         vector4f& load_aligned(const float* src);
         vector4f& load_unaligned(const float* src);
@@ -188,7 +188,7 @@ namespace nxsimd
         return *this;
     }
 
-    inline vector4f vector4f::operator __m128() const
+    inline vector4f::operator __m128() const
     {
         return m_value;
     }

@@ -1,5 +1,14 @@
+//
+// Copyright (c) 2012 - 2016 Johan Mabille
+//
+// All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+//
+
 #ifndef NX_SSE_DOUBLE_HPP
 #define NX_SSE_DOUBLE_HPP
+
+#include "nx_simd_base.hpp"
 
 namespace nxsimd
 {
@@ -99,7 +108,7 @@ namespace nxsimd
     }
 
     inline vector2db::vector2db(bool b0, bool b1)
-        : m_value(_mm_castsi128_pd(_mm_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3)))
+        : m_value(_mm_castsi128_pd(_mm_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1)))
     {
     }
 
