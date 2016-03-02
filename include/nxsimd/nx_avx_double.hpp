@@ -4,7 +4,7 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 //
-//
+
 #ifndef NX_AVX_DOUBLE_HPP
 #define NX_AVX_DOUBLE_HPP
 
@@ -64,8 +64,8 @@ namespace nxsimd
         vector4d& load_aligned(const double* src);
         vector4d& load_unaligned(const double* src);
 
-        void store_aligned(double* dst);
-        void store_unaligned(double* dst);
+        void store_aligned(double* dst) const;
+        void store_unaligned(double* dst) const;
 
     private:
 
@@ -207,12 +207,12 @@ namespace nxsimd
         return *this;
     }
 
-    inline void vector4d::store_aligned(double* dst)
+    inline void vector4d::store_aligned(double* dst) const
     {
         _mm256_store_pd(dst, m_value);
     }
 
-    inline void vector4d::store_unaligned(double* dst)
+    inline void vector4d::store_unaligned(double* dst) const
     {
         _mm256_storeu_pd(dst, m_value);
     }
@@ -312,6 +312,7 @@ namespace nxsimd
     {
         return _mm256_blendv_pd(b, a, cond);
     }
+
 }
 
 #endif

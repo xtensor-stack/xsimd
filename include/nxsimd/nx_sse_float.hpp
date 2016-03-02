@@ -64,8 +64,8 @@ namespace nxsimd
         vector4f& load_aligned(const float* src);
         vector4f& load_unaligned(const float* src);
 
-        void store_aligned(float* dst);
-        void store_unaligned(float* dst);
+        void store_aligned(float* dst) const;
+        void store_unaligned(float* dst) const;
 
     private:
 
@@ -205,12 +205,12 @@ namespace nxsimd
         return *this;
     }
 
-    inline void vector4f::store_aligned(float* dst)
+    inline void vector4f::store_aligned(float* dst) const
     {
         _mm_store_ps(dst, m_value);
     }
 
-    inline void vector4f::store_unaligned(float* dst)
+    inline void vector4f::store_unaligned(float* dst) const
     {
         _mm_storeu_ps(dst, m_value);
     }

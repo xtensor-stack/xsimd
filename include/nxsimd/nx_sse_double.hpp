@@ -64,8 +64,8 @@ namespace nxsimd
         vector2d& load_aligned(const double* src);
         vector2d& load_unaligned(const double* src);
 
-        void store_aligned(double* dst);
-        void store_unaligned(double* dst);
+        void store_aligned(double* dst) const;
+        void store_unaligned(double* dst) const;
 
     private:
 
@@ -205,12 +205,12 @@ namespace nxsimd
         return *this;
     }
 
-    inline void vector2d::store_aligned(double* dst)
+    inline void vector2d::store_aligned(double* dst) const
     {
         _mm_store_pd(dst, m_value);
     }
 
-    inline void vector2d::store_unaligned(double* dst)
+    inline void vector2d::store_unaligned(double* dst) const
     {
         _mm_storu_pd(dst, value);
     }
