@@ -88,6 +88,15 @@ namespace nxsimd
     vector4d operator^(const vector4d& lhs, const vector4d& rhs);
     vector4d operator~(const vector4d& rhs);
 
+    vector4d min(const vector4d& lhs, const vector4d& rhs);
+    vector4d max(const vector4d& lhs, const vector4d& rhs);
+
+    vector4d abs(const vector4d& rhs);
+
+    vector4d fma(const vector4d& x, const vector4d& y, const vector4d& z);
+
+    vector4d sqrt(const vector4d& rhs);
+
     double hadd(const vector4d& rhs);
     vector4d haddp(const vector4d* row);
 
@@ -280,6 +289,36 @@ namespace nxsimd
     inline vector4d operator~(const vector4d& rhs)
     {
         return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi32(-1)));
+    }
+
+    inline vector4d min(const vector4d& lhs, const vector4d& rhs)
+    {
+        return _mm256_min_pd(lhs, rhs);
+    }
+
+    inline vector4d max(const vector4d& lhs, const vector4d& rhs)
+    {
+        return _mm256_max_pd(lhs, rhs);
+    }
+
+    inline vector4d abs(const vector4d& rhs)
+    {
+        __m256d sign_mask = _mm256_set1_pd(-0.); // -0. = 1 << 63
+        return _mm256_andnot_pd(sign_mask, rhs);
+    }
+
+    inline vector4d fma(const vector4d& x, const vector4d& y, const vector4d& z)
+    {
+#ifdef __FMA__
+        return _mm256_fmadd_pd(x, y, z);
+#else
+        return x * y + z;
+#endif
+    }
+
+    inline vector4d sqrt(const vector4d& rhs)
+    {
+        return _mm256_sqrt_pd(rhs);
     }
 
     double hadd(const vector4d& rhs)

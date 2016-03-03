@@ -88,6 +88,15 @@ namespace nxsimd
     vector2d operator^(const vector2d& lhs, const vector2d& rhs);
     vector2d operator~(const vector2d& rhs);
 
+    vector2d min(const vector2d& lhs, const vector2d& rhs);
+    vector2d max(const vector2d& lhs, const vector2d& rhs);
+
+    vector2d abs(const vector2d& rhs);
+
+    vector4d fma(const vector2d& x, const vector2d& y, const vector2d& z);
+
+    vector2d sqrt(const vector2d& rhs);
+
     double hadd(const vector2d& rhs);
     vector2d haddp(const vector2d* row);
 
@@ -279,6 +288,36 @@ namespace nxsimd
     inline vector2d operator~(const vector2d& rhs)
     {
         return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
+    }
+
+    inline vector2d min(const vector2d& lhs, const vector2d& rhs)
+    {
+        return _mm_min_pd(lhs, rhs);
+    }
+
+    inline vector2d max(const vector2d& lhs, const vector2d& rhs)
+    {
+        return _mm_max_pd(lhs, rhs);
+    }
+
+    inline vector2d abs(const vector2d& rhs)
+    {
+        __m128d sign_mask = _mm_set1_pd(-0.); // -0. = 1 << 63
+        return _mm_andnot_pd(sign_mask, rhs);
+    }
+    
+    inline vector4d fma(const vector2d& x, const vector2d& y, const vector2d& z)
+    {
+#ifdef __FMA__
+        return _mm_fmadd_pd(x, y, z);
+#else
+        return x * y + z;
+#endif
+    }
+
+    inline vector2d sqrt(const vector2d& rhs)
+    {
+        return _mm_sqrt_pd(rhs);
     }
 
     inline double hadd(const vector2d& rhs)

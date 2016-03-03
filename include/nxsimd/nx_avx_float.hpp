@@ -90,6 +90,15 @@ namespace nxsimd
     vector8f operator^(const vector8f& lhs, const vector8f& rhs);
     vector8f operator~(const vector8f& rhs);
 
+    vector8f min(const vector8f& lhs, const vector8f& rhs);
+    vector8f max(const vector8f& lhs, const vector8f& rhs);
+
+    vector8f abs(const vector8f& rhs);
+
+    vector8f fma(const vector8f& x, const vector8f& y, const vector8f& z);
+
+    vector8f sqrt(const vector8f& rhs);
+
     float hadd(const vector8f& rhs);
     vector8f haddp(const vector8f* row);
 
@@ -283,6 +292,36 @@ namespace nxsimd
     inline vector8f operator~(const vector8f& rhs)
     {
         return _mm256_xor_ps(rhs, _mm256_castsi256_ps(_mm256_set1_epi32(-1)));
+    }
+
+    inline vector8f min(const vector8f& lhs, const vector8f& rhs)
+    {
+        return _mm256_min_ps(lhs, rhs);
+    }
+
+    inline vector8f max(const vector8f& lhs, const vector8f& rhs)
+    {
+        return _mm256_max_ps(lhs, rhs);
+    }
+
+    inline vector8f abs(const vector8f& rhs)
+    {
+        __m256 sign_mask = _mm256_set1_ps(-0.f); // -0.f = 1 << 31
+        return _mm256_andnot_ps(sign_mask, rhs);
+    }
+
+    inline vector8f fma(const vector8f& x, const vector8f& y, const vector8f& z)
+    {
+#ifdef __FMA__
+        return _mm256_fmadd_ps(x, y, z);
+#else
+        return x * y + z;
+#endif
+    }
+
+    inline vector8f sqrt(const vector8f& rhs)
+    {
+        return _mm256_sqrt_ps(rhs);
     }
 
     inline float hadd(const vector8f& rhs)
