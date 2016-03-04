@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 - 2016 Johan Mabille
+// Copyright (c) 2016 Johan Mabille
 //
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -87,6 +87,15 @@ namespace nxsimd
     vector4f operator|(const vector4f& lhs, const vector4f& rhs);
     vector4f operator^(const vector4f& lhs, const vector4f& rhs);
     vector4f operator~(const vector4f& rhs);
+
+    vector4f min(const vector4f& lhs, const vector4f& rhs);
+    vector4f max(const vector4f& lhs, const vector4f& rhs);
+
+    vector4f abs(const vector4f& rhs);
+
+    vector4f fma(const vector4f& x, const vector4f& y, const vector4f& z);
+
+    vector4f sqrt(const vector4f& rhs);
 
     float hadd(const vector4f& rhs);
     vector4f haddp(const vector4f* row);
@@ -278,6 +287,36 @@ namespace nxsimd
     inline vector4f operator~(const vector4f& rhs)
     {
         return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(-1)));
+    }
+
+    inline vector4f min(const vector4f& lhs, const vector4f& rhs)
+    {
+        return _mm_min_ps(lhs, rhs);
+    }
+
+    inline vector4f max(const vector4f& lhs, const vector4f& rhs)
+    {
+        return _mm_max_ps(lhs, rhs);
+    }
+
+    inline vector4f abs(const vector4f& rhs)
+    {
+        __m128 sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+        return _mm_andnot_ps(sign_mask, rhs);
+    }
+
+    inline vector4f fma(const vector4f& x, const vector4f& y, const vetcor4f& z)
+    {
+#ifdef __FMA__
+        return _mm_fmadd_ps(x, y, z);
+#else
+        return x * y + z;
+#endif
+    }
+
+    inline vector4f sqrt(const vector4f& rhs)
+    {
+        return _mm_sqrt_ps(rhs);
     }
 
     inline float hadd(const vector4f& rhs)
