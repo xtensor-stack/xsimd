@@ -8,7 +8,7 @@
 #ifndef NX_SIMD_HPP
 #define NX_SIMD_HPP
 
-#include "nx_simd_traits.hpp"
+#include "types/nx_simd_traits.hpp"
 
 namespace nxsimd
 {
