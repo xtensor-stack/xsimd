@@ -1,3 +1,10 @@
+//
+// Copyright (c) 2016 Johan Mabille
+//
+// All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+//
+
 #ifndef NX_ALIGNED_ALLOCATOR_HPP
 #define NX_ALIGNED_ALLOCATOR_HPP
 
