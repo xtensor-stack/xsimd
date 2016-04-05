@@ -8,6 +8,19 @@
 #ifndef NX_ALIGNED_ALLOCATOR_HPP
 #define NX_ALIGNED_ALLOCATOR_HPP
 
+#include "../config/nx_platform_config.hpp"
+
+#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
+    #include <malloc.h>
+#elif defined(__GNUC__)
+    #include <mm_malloc.h>
+    #if defined(NX_ALLOCA)
+        #include <alloca.h>
+    #endif
+#else
+    #include <stdlib.h>
+#endif
+
 namespace nxsimd
 {
 

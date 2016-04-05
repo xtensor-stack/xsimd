@@ -8,12 +8,10 @@
 #ifndef NX_SIMD_TRAITS_HPP
 #define NX_SIMD_TRAITS_HPP
 
-#if (NX_SSE_INSTR_SET > 6 && !NX_DISABLE_AVX)
-#define NX_USE_AVX
+#if defined(NX_USE_AVX)
 #include "nx_avx_float.hpp"
 #include "nx_avx_double.hpp"
-#elif (NX_SSE_INSTR_SET > 0 && !NX_DISABLE_SSE)
-#define NX_USE_SSE
+#elif defined(NX_USE_SSE)
 #include "nx_sse_float.hpp"
 #include "nx_sse_double.hpp"
 #endif
