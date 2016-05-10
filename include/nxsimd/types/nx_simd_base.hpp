@@ -31,10 +31,10 @@ namespace nxsimd
         ~simd_vector_bool() = default;
 
         simd_vector_bool(const simd_vector_bool&) = default;
-        simd_vector_bool& operator=(const simd_vector_bool) = default;
+        simd_vector_bool& operator=(const simd_vector_bool&) = default;
 
         simd_vector_bool(simd_vector_bool&&) = default;
-        simd_vector_bool operator=(simd_vector_bool&&) = default;
+        simd_vector_bool& operator=(simd_vector_bool&&) = default;
     };
 
     template <class X>
@@ -199,6 +199,7 @@ namespace nxsimd
     X operator&&(bool lhs, const simd_vector_bool<X>& rhs)
     {
         return X(lhs) & rhs();
+    }
 
     template <class X>
     X operator||(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)

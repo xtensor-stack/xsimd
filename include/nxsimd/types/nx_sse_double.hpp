@@ -93,7 +93,7 @@ namespace nxsimd
 
     vector2d abs(const vector2d& rhs);
 
-    vector4d fma(const vector2d& x, const vector2d& y, const vector2d& z);
+    vector2d fma(const vector2d& x, const vector2d& y, const vector2d& z);
 
     vector2d sqrt(const vector2d& rhs);
 
@@ -112,7 +112,7 @@ namespace nxsimd
     }
 
     inline vector2db::vector2db(bool b)
-        : m_value(_mm_castsi128_pd(_mm_set_epi32(-(int)b)))
+        : m_value(_mm_castsi128_pd(_mm_set1_epi32(-(int)b)))
     {
     }
 
@@ -126,7 +126,7 @@ namespace nxsimd
     {
     }
 
-    inline vector2db::vector2db& operator=(const __m128d& rhs)
+    inline vector2db& vector2db::operator=(const __m128d& rhs)
     {
         m_value = rhs;
         return *this;
@@ -154,12 +154,12 @@ namespace nxsimd
 
     inline vector2db operator~(const vector2db& rhs)
     {
-        return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set_epi32(-1)));
+        return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
     }
 
     inline vector2db operator==(const vector2db& lhs, const vector2db& rhs)
     {
-        return _mm_cmpeq_pd(lhs, rgs);
+        return _mm_cmpeq_pd(lhs, rhs);
     }
 
     inline vector2db operator!=(const vector2db& lhs, const vector2db& rhs)
@@ -191,7 +191,7 @@ namespace nxsimd
     {
     }
 
-    inline vector2d::vector2d& operator=(const __m128d& rhs)
+    inline vector2d& vector2d::operator=(const __m128d& rhs)
     {
         m_value = rhs;
         return *this;
@@ -221,13 +221,13 @@ namespace nxsimd
 
     inline void vector2d::store_unaligned(double* dst) const
     {
-        _mm_storu_pd(dst, value);
+        _mm_storeu_pd(dst, m_value);
     }
 
     inline vector2d operator-(const vector2d& rhs)
     {
-        return _mm_xor_pd(_mm_castsi128_pd(_mm_setr_epi32(0, 0x80000000,
-                                                          0, 0x80000000)));
+        return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_setr_epi32(0, 0x80000000,
+                                                               0, 0x80000000)));
     }
 
     inline vector2d operator+(const vector2d& lhs, const vector2d& rhs)
@@ -257,7 +257,7 @@ namespace nxsimd
 
     inline vector2db operator!=(const vector2d& lhs, const vector2d& rhs)
     {
-        return _mm_cmpneq(lhs, rhs);
+        return _mm_cmpneq_pd(lhs, rhs);
     }
 
     inline vector2db operator<(const vector2d& lhs, const vector2d& rhs)
