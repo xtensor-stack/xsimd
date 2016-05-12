@@ -29,3 +29,6 @@
 
 # Vim tmp files
 *.swp
+
+# Build folder
+build/
