@@ -19,12 +19,12 @@ namespace nxsimd
     public:
 
         vector4fb();
-        vector4fb(bool b);
+        explicit vector4fb(bool b);
         vector4fb(bool b0, bool b1, bool b2, bool b3);
         vector4fb(const __m128& rhs);
         vector4fb& operator=(const __m128& rhs);
 
-        operator __128() const;
+        operator __m128() const;
 
     private:
 
@@ -54,7 +54,7 @@ namespace nxsimd
     public:
 
         vector4f();
-        vector4f(float f);
+        explicit vector4f(float f);
         vector4f(float f0, float f1, float f2, float f3);
         vector4f(const __m128& rhs);
         vector4f& operator=(const __m128& rhs);
@@ -132,7 +132,7 @@ namespace nxsimd
         return *this;
     }
 
-    inline vector4fb::operator __128() const
+    inline vector4fb::operator __m128() const
     {
         return m_value;
     }
@@ -164,7 +164,7 @@ namespace nxsimd
 
     inline vector4fb operator!=(const vector4fb& lhs, const vector4fb& rhs)
     {
-        return _mm_cmpneq(lhs, rhs);
+        return _mm_cmpneq_ps(lhs, rhs);
     }
 
 
@@ -191,7 +191,7 @@ namespace nxsimd
     {
     }
 
-    inline vector4f& vetcor4f::operator=(const __m128& rhs)
+    inline vector4f& vector4f::operator=(const __m128& rhs)
     {
         m_value = rhs;
         return *this;
@@ -305,7 +305,7 @@ namespace nxsimd
         return _mm_andnot_ps(sign_mask, rhs);
     }
 
-    inline vector4f fma(const vector4f& x, const vector4f& y, const vetcor4f& z)
+    inline vector4f fma(const vector4f& x, const vector4f& y, const vector4f& z)
     {
 #ifdef __FMA__
         return _mm_fmadd_ps(x, y, z);
