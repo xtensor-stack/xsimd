@@ -5,6 +5,8 @@
 #include "nxsimd/memory/nx_aligned_allocator.hpp"
 #include "nxsimd/types/nx_sse_double.hpp"
 #include "nxsimd/types/nx_sse_float.hpp"
+#include "nxsimd/types/nx_avx_double.hpp"
+#include "nxsimd/types/nx_avx_float.hpp"
 #include "nx_simd_common_test.hpp"
 
 namespace nxsimd
@@ -15,6 +17,7 @@ namespace nxsimd
         simd_basic_tester<V, N, A> tester(name);
         return test_simd_common(out, tester);
     }
+
 }
 
 bool test_sse_float_basic()
@@ -31,12 +34,29 @@ bool test_sse_double_basic()
     return res;
 }
 
+bool test_avx_float_basic()
+{
+    std::ofstream out("log/avx_float_basic.log", std::ios_base::out);
+    bool res = nxsimd::test_simd<nxsimd::vector8f, 8, 32>(out, "avx float");
+    return res;
+}
+
+bool test_avx_double_basic()
+{
+    std::ofstream out("log/avx_double_basic.log", std::ios_base::out);
+    bool res = nxsimd::test_simd<nxsimd::vector4d, 4, 32>(out, "avx double");
+    return res;
+}
+
+
 int main(int argc, char* argv[])
 {
     using test_list_type = std::map<std::string, bool (*)()>;
     test_list_type test_list;
-    test_list["sse double basic"] = test_sse_double_basic;
-    test_list["sse float basic"] = test_sse_float_basic;
+    //test_list["sse float basic"] = test_sse_float_basic;
+    //test_list["sse double basic"] = test_sse_double_basic;
+    //test_list["avx float basic"] = test_avx_float_basic;
+    test_list["avx double basic"] = test_avx_double_basic;
 
     int nb_failed = 0;
     for(auto iter : test_list)

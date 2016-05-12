@@ -132,7 +132,7 @@ namespace nxsimd
         else
         {
             out << "BAD" << std::endl;
-            out << "Expected : " << std::endl << ref;
+            out << "Expected : " << std::endl << ref << std::endl;
             out << "Got      : " << std::endl << res << std::endl;
             return false;
         }

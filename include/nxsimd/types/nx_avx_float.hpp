@@ -19,13 +19,13 @@ namespace nxsimd
     public:
 
         vector8fb();
-        vector8fb(bool b);
+        explicit vector8fb(bool b);
         vector8fb(bool b0, bool b1, bool b2, bool b3,
                   bool b4, bool b5, bool b6, bool b7);
         vector8fb(const __m256& rhs);
         vector8fb& operator=(const __m256& rhs);
 
-        operator __256() const;
+        operator __m256() const;
 
     private:
 
@@ -55,13 +55,13 @@ namespace nxsimd
     public:
 
         vector8f();
-        vector8f(float f);
+        explicit vector8f(float f);
         vector8f(float f0, float f1, float f2, float f3,
                  float f4, float f5, float f6, float f7);
-        vector8f(const __m128& rhs);
-        vector8f& operator=(const __m128& rhs);
+        vector8f(const __m256& rhs);
+        vector8f& operator=(const __m256& rhs);
 
-        operator __m128() const;
+        operator __m256() const;
 
         vector8f& load_aligned(const float* src);
         vector8f& load_unaligned(const float* src);
@@ -71,7 +71,7 @@ namespace nxsimd
 
     private:
 
-        __m128 m_value;
+        __m256 m_value;
     };
 
     vector8f operator-(const vector8f& rhs);
@@ -137,7 +137,7 @@ namespace nxsimd
         return *this;
     }
 
-    inline vector8fb::operator __256() const
+    inline vector8fb::operator __m256() const
     {
         return m_value;
     }
@@ -191,18 +191,18 @@ namespace nxsimd
     {
     }
 
-    inline vector8f::vector8f(const __m128& rhs)
+    inline vector8f::vector8f(const __m256& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector8f& vector8f::operator=(const __m128& rhs)
+    inline vector8f& vector8f::operator=(const __m256& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector8f::operator __m128() const
+    inline vector8f::operator __m256() const
     {
         return m_value;
     }
@@ -213,7 +213,7 @@ namespace nxsimd
         return *this;
     }
 
-    inline vector8f& vetcor8f::load_unaligned(const float* src)
+    inline vector8f& vector8f::load_unaligned(const float* src)
     {
         m_value = _mm256_loadu_ps(src);
         return *this;
