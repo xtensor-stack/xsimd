@@ -184,43 +184,43 @@ namespace nxsimd
     }
 
     template <class X>
-    X operator&&(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)
+    inline X operator&&(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)
     {
         return lhs() & rhs();
     }
 
     template <class X>
-    X operator&&(const simd_vector_bool<X>& lhs, bool rhs)
+    inline X operator&&(const simd_vector_bool<X>& lhs, bool rhs)
     {
         return lhs() & X(rhs);
     }
 
     template <class X>
-    X operator&&(bool lhs, const simd_vector_bool<X>& rhs)
+    inline X operator&&(bool lhs, const simd_vector_bool<X>& rhs)
     {
         return X(lhs) & rhs();
     }
 
     template <class X>
-    X operator||(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)
+    inline X operator||(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)
     {
         return lhs() | rhs();
     }
 
     template <class X>
-    X operator||(const simd_vector_bool<X>& lhs, bool rhs)
+    inline X operator||(const simd_vector_bool<X>& lhs, bool rhs)
     {
         return lhs() | X(rhs);
     }
 
     template <class X>
-    X operator||(bool lhs, const simd_vector_bool<X>& rhs)
+    inline X operator||(bool lhs, const simd_vector_bool<X>& rhs)
     {
         return X(lhs) | rhs();
     }
 
     template <class X>
-    X operator!(const simd_vector_bool<X>& rhs)
+    inline X operator!(const simd_vector_bool<X>& rhs)
     {
         return rhs() == 0;
     }
@@ -234,84 +234,84 @@ namespace nxsimd
     inline X& simd_vector<X>::operator+=(const X& rhs)
     {
         (*this)() = (*this)() + rhs;
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator+=(const value_type& rhs)
     {
         (*this)() = (*this)() + X(rhs);
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator-=(const X& rhs)
     {
         (*this)() = (*this)() - rhs;
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator-=(const value_type& rhs)
     {
         (*this)() = (*this)() - X(rhs);
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator*=(const X& rhs)
     {
         (*this)() = (*this)() * rhs;
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator*=(const value_type& rhs)
     {
         (*this)() = (*this)() * X(rhs);
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator/=(const X& rhs)
     {
         (*this)() = (*this)() / rhs;
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator/=(const value_type& rhs)
     {
         (*this)() = (*this)() / X(rhs);
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator&=(const X& rhs)
     {
         (*this)() = (*this)() & rhs;
-        return (*this);
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator|=(const X& rhs)
     {
         (*this)() = (*this)() | rhs;
-        return (*this);
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator^=(const X& rhs)
     {
         (*this)() = (*this)() ^ rhs;
-        return *this;
+        return (*this)();
     }
 
     template <class X>
     inline X& simd_vector<X>::operator++()
     {
         (*this)() += value_type(1);
-        return (*this);
+        return (*this)();
     }
 
     template <class X>
@@ -326,7 +326,7 @@ namespace nxsimd
     inline X& simd_vector<X>::operator--()
     {
         (*this)() -= value_type(1);
-        return (*this);
+        return (*this)();
     }
 
     template <class X>
@@ -349,6 +349,74 @@ namespace nxsimd
         return *static_cast<const X*>(this);
     }
 
+    template <class X>
+    inline X operator+(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    {
+        return lhs() + X(rhs);
+    }
+
+    template <class X>
+    inline X operator+(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    {
+        return X(lhs) + rhs();
+    }
+
+    template <class X>
+    inline X operator-(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    {
+        return lhs() - X(rhs);
+    }
+
+    template <class X>
+    inline X operator-(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    {
+        return X(lhs) - rhs();
+    }
+
+    template <class X>
+    inline X operator*(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    {
+        return lhs() * X(rhs);
+    }
+
+    template <class X>
+    inline X operator*(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    {
+        return X(lhs) * rhs();
+    }
+
+    template <class X>
+    inline X operator/(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    {
+        return lhs() / X(rhs);
+    }
+
+    template <class X>
+    inline X operator/(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    {
+        return X(lhs) / rhs();
+    }
+
+    template <class X>
+    inline typename simd_vector_traits<X>::vector_bool 
+    operator>(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
+    {
+        return rhs() < lhs();
+    }
+
+    template <class X>
+    inline typename simd_vector_traits<X>::vector_bool
+    operator>=(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
+    {
+        return rhs() <= lhs();
+    }
+
+    template <class X>
+    inline typename simd_vector_traits<X>::vector_bool
+    operator!(const simd_vector<X>& rhs)
+    {
+        return rhs() == X(0);
+    }
 }
 
 #endif

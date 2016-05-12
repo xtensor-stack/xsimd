@@ -10,9 +10,6 @@
 
 #include "nx_platform_config.hpp"
 
-namespace nxsimd
-{
-
 // Include the appropriate header file for intrinsic functions
 #if SSE_INSTR_SET > 7                  // AVX2 and later
     #ifdef __GNUC__
@@ -61,6 +58,5 @@ namespace nxsimd
 
 
 // TODO: add ALTIVEC instruction setET > 7
-}
 
 #endif

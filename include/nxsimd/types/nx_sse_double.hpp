@@ -19,7 +19,7 @@ namespace nxsimd
     public:
 
         vector2db();
-        vector2db(bool b);
+        explicit vector2db(bool b);
         vector2db(bool b0, bool b1);
         vector2db(const __m128d& rhs);
         vector2db& operator=(const __m128d& rhs);
@@ -54,7 +54,7 @@ namespace nxsimd
     public:
 
         vector2d();
-        vector2d(double d);
+        explicit vector2d(double d);
         vector2d(double d0, double d1);
         vector2d(const __m128d& rhs);
         vector2d& operator=(const __m128d& rhs);
@@ -306,12 +306,12 @@ namespace nxsimd
         return _mm_andnot_pd(sign_mask, rhs);
     }
     
-    inline vector4d fma(const vector2d& x, const vector2d& y, const vector2d& z)
+    inline vector2d fma(const vector2d& x, const vector2d& y, const vector2d& z)
     {
 #ifdef __FMA__
         return _mm_fmadd_pd(x, y, z);
 #else
-        return x * y + z;
+        return (x * y) + z;
 #endif
     }
 
