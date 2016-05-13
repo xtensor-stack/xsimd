@@ -228,7 +228,7 @@ namespace nxsimd
 
     inline vector4d operator-(const vector4d& rhs)
     {
-        return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi32(0x80000000)));
+        return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000)));
     }
 
     inline vector4d operator+(const vector4d& lhs, const vector4d& rhs)
