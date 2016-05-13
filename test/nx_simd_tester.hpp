@@ -94,7 +94,7 @@ namespace nxsimd
         hadd_res = value_type(0);
         for(size_t i = 0; i < N; ++i)
         {
-            lhs[i] = value_type(i) / 4 + value_type(2.7) * std::sqrt(value_type(i + 0.25));
+            lhs[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             rhs[i] = value_type(10.2) / (i+2) + value_type(0.25);
             minus_res[i] = -lhs[i];
             add_vv_res[i] = lhs[i] + rhs[i];
