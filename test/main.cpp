@@ -53,9 +53,9 @@ int main(int argc, char* argv[])
 {
     using test_list_type = std::map<std::string, bool (*)()>;
     test_list_type test_list;
-    //test_list["sse float basic"] = test_sse_float_basic;
-    //test_list["sse double basic"] = test_sse_double_basic;
-    //test_list["avx float basic"] = test_avx_float_basic;
+    test_list["sse float basic"] = test_sse_float_basic;
+    test_list["sse double basic"] = test_sse_double_basic;
+    test_list["avx float basic"] = test_avx_float_basic;
     test_list["avx double basic"] = test_avx_double_basic;
 
     int nb_failed = 0;
@@ -66,6 +66,8 @@ int main(int argc, char* argv[])
         std::cout << (res ? "OK" : "FAILED") << std::endl;
         if(!res) ++nb_failed;
     }
+
+    std::cout << std::endl;
 
     int nb_passed = test_list.size() - nb_failed;
     std::cout << "Nb tests passed : " <<  nb_passed << std::endl;

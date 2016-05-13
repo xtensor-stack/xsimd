@@ -94,8 +94,8 @@ namespace nxsimd
         hadd_res = value_type(0);
         for(size_t i = 0; i < N; ++i)
         {
-            lhs[i] = value_type(i) / 3 + value_type(3.2) * std::sqrt(value_type(i + 0.16));
-            rhs[i] = value_type(9.1) / (i+2) + value_type(0.7);
+            lhs[i] = value_type(i) / 4 + value_type(2.7) * std::sqrt(value_type(i + 0.25));
+            rhs[i] = value_type(10.2) / (i+2) + value_type(0.25);
             minus_res[i] = -lhs[i];
             add_vv_res[i] = lhs[i] + rhs[i];
             add_vs_res[i] = lhs[i] + s;
@@ -113,7 +113,7 @@ namespace nxsimd
             //or_res[i] = lhs[i] | rhs[i];
             //xor_res[i] = lhs[i] ^ rhs[i];
             //not_res[i] = ~lhs[i];
-            lnot_res[i] = !lhs[i];
+            //lnot_res[i] = !lhs[i];
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);
