@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 project(nxsimd)
 
+include(CheckCXXCompilerFlag)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
@@ -62,5 +64,5 @@ set(NXSIMD_TESTS
 )
 
 add_executable(${NXSIMD_TARGET} ${NXSIMD_TESTS} ${NXSIMD_HEADERS})
-set_property(TARGET ${NXSIMD_TARGET} PROPERTY CXX_STANDARD 11)
+#set_property(TARGET ${NXSIMD_TARGET} PROPERTY CXX_STANDARD 11)
 
