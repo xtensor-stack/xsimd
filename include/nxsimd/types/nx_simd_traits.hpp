@@ -8,7 +8,7 @@
 #ifndef NX_SIMD_TRAITS_HPP
 #define NX_SIMD_TRAITS_HPP
 
-#include "config/nx_simd_include.hpp"
+#include "../config/nx_simd_include.hpp"
 #if defined(NX_USE_AVX)
 #include "nx_avx_float.hpp"
 #include "nx_avx_double.hpp"

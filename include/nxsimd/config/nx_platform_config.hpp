@@ -8,9 +8,10 @@
 #ifndef NX_PLATFORM_CONFIG_HPP
 #define NX_PLATFORM_CONFIG_HPP
 
-// ************************************************************************* //
-// ***********                 SSE instruction set               *********** //
-// ************************************************************************* //
+
+/*************************
+ * SSE instruction set
+ *************************/
 
 #if (defined(_M_AMD64) || defined(_M_X64) || defined(__amd64)) && ! defined(__x86_64__)
     #define __x86_64__ 1
@@ -43,9 +44,9 @@
 #endif // SSE_INSTR_SET
 
 
-// ************************************************************************* //
-// *******        Platform checks for aligned malloc functions       ******* //
-// ************************************************************************* //
+/**************************************************
+ * Platform checks for aligned malloc functions
+ **************************************************/
 
 // GNU world
 
@@ -109,6 +110,15 @@
     #define NX_MALLOC_ALREADY_ALIGNED 0
 #endif
 
+#if defined(NX_USE_SSE) || defined(NX_USE_AVX)
+    #define NX_USE_SSE_OR_AVX
+#endif
+
+
+/************************************
+ * Stack allocation and alignment
+ ************************************/
+
 #ifndef NX_ALLOCA
     #if defined(__linux__)
         #define NX_ALLOCA alloca
@@ -117,8 +127,24 @@
     #endif
 #endif
 
-#ifndef NX_STACK_ALLOCATION_LIMIT
-    #define NX_STACK_ALLOCATION_LIMIT 20000
+#if (defined __GNUC__)
+    #define NX_STACK_ALIGN(N) __attribute__((aligned(N)))
+#elif (defined _MSC_VER)
+    #define NX_STACK_ALIGN(N) __declspec(align(N))
+#else
+    #error Equivalent of __attribute__((aligned(N))) unknown
+#endif
+
+
+/****************************************
+ * Number of floating point registers
+ ****************************************/
+
+#ifdef __x86_64__
+    #define NX_NB_FP_REGISTERS 16
+#else
+    #define NX_NB_FP_REGISTERS 8
+
 #endif
 
 #endif

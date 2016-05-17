@@ -47,6 +47,7 @@ set(NXSIMD_TARGET simd_test)
 
 set(NXSIMD_HEADERS
     include/nxsimd/config/nx_platform_config.hpp
+    include/nxsimd/config/nx_simd_config.hpp
     include/nxsimd/config/nx_simd_include.hpp
     include/nxsimd/memory/nx_aligned_allocator.hpp
     include/nxsimd/memory/nx_aligned_stack_buffer.hpp
