@@ -5,8 +5,8 @@
 // BSD-style license that can be found in the LICENSE file.
 //
 
-#ifndef NX_SIMD_CONFIG_HPP
-#define NX_SIMD_CONFIG_HPP
+#ifndef NX_SIMD_INCLUDE_HPP
+#define NX_SIMD_INCLUDE_HPP
 
 #include "nx_platform_config.hpp"
 

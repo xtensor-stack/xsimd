@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include "nxsimd/config/nx_simd_config.hpp"
+#include "nxsimd/config/nx_simd_include.hpp"
 #include "nxsimd/memory/nx_aligned_allocator.hpp"
 #include "nxsimd/types/nx_sse_double.hpp"
 #include "nxsimd/types/nx_sse_float.hpp"
