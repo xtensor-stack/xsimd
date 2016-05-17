@@ -19,16 +19,16 @@ namespace nxsimd
     public:
 
         vector4db();
-        vector4db(bool b);
+        explicit vector4db(bool b);
         vector4db(bool b0, bool b1, bool b2, bool b3);
-        vector4db(const __m256& rhs);
-        vector4db& operator=(const __m256& rhs);
+        vector4db(const __m256d& rhs);
+        vector4db& operator=(const __m256d& rhs);
 
-        operator __256() const;
+        operator __m256d() const;
 
     private:
 
-        __m256 m_value;
+        __m256d m_value;
     };
 
     vector4db operator&(const vector4db& lhs, const vector4db& rhs);
@@ -44,7 +44,7 @@ namespace nxsimd
     template <>
     struct simd_vector_traits<vector4d>
     {
-        using value_type = float;
+        using value_type = double;
         using vector_bool = vector4db;
     };
 
@@ -54,12 +54,12 @@ namespace nxsimd
     public:
 
         vector4d();
-        vector4d(double d);
+        explicit vector4d(double d);
         vector4d(double d0, double d1, double d2, double d3);
-        vector4d(const __m128& rhs);
-        vector4d& operator=(const __m128& rhs);
+        vector4d(const __m256d& rhs);
+        vector4d& operator=(const __m256d& rhs);
 
-        operator __m128() const;
+        operator __m256d() const;
 
         vector4d& load_aligned(const double* src);
         vector4d& load_unaligned(const double* src);
@@ -69,7 +69,7 @@ namespace nxsimd
 
     private:
 
-        __m128 m_value;
+        __m256d m_value;
     };
 
     vector4d operator-(const vector4d& rhs);
@@ -111,7 +111,7 @@ namespace nxsimd
     {
     }
 
-    inline vector4db(bool b)
+    inline vector4db::vector4db(bool b)
         : m_value(_mm256_castsi256_pd(_mm256_set1_epi32(-(int)b)))
     {
     }
@@ -123,18 +123,18 @@ namespace nxsimd
     {
     }
 
-    inline vector4db::vector4db(const __m256& rhs)
+    inline vector4db::vector4db(const __m256d& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector4db& vector4db::operator=(const __m256& rhs)
+    inline vector4db& vector4db::operator=(const __m256d& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector4db::operator __256() const
+    inline vector4db::operator __m256d() const
     {
         return *this;
     }
@@ -188,18 +188,18 @@ namespace nxsimd
     {
     }
     
-    inline vector4d::vector4d(const __m128& rhs)
+    inline vector4d::vector4d(const __m256d& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector4d& vector4d::operator=(const __m128& rhs)
+    inline vector4d& vector4d::operator=(const __m256d& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector4d::operator __m128() const
+    inline vector4d::operator __m256d() const
     {
         return m_value;
     }
@@ -228,7 +228,7 @@ namespace nxsimd
 
     inline vector4d operator-(const vector4d& rhs)
     {
-        return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi32(0x80000000)));
+        return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000)));
     }
 
     inline vector4d operator+(const vector4d& lhs, const vector4d& rhs)
@@ -253,7 +253,7 @@ namespace nxsimd
     
     inline vector4db operator==(const vector4d& lhs, const vector4d& rhs)
     {
-        return _mm256_cmp_pd(lhs, rhs _CMP_EQ_OQ);
+        return _mm256_cmp_pd(lhs, rhs, _CMP_EQ_OQ);
     }
 
     inline vector4db operator!=(const vector4d& lhs, const vector4d& rhs)
@@ -263,7 +263,7 @@ namespace nxsimd
 
     inline vector4db operator<(const vector4d& lhs, const vector4d& rhs)
     {
-        return _mm256_cmp(lhs, rhs, _CMP_LT_OQ);
+        return _mm256_cmp_pd(lhs, rhs, _CMP_LT_OQ);
     }
 
     inline vector4db operator<=(const vector4d& lhs, const vector4d& rhs)

@@ -8,6 +8,7 @@
 #ifndef NX_ALIGNED_ALLOCATOR_HPP
 #define NX_ALIGNED_ALLOCATOR_HPP
 
+#include <cstddef>
 #include "../config/nx_platform_config.hpp"
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
@@ -69,13 +70,13 @@ namespace nxsimd
         void destroy(U* p);
     };
 
-    template <class T1, class Align1, class T2, class Align2>
+    template <class T1, size_t Align1, class T2, size_t Align2>
     bool operator==(const aligned_allocator<T1, Align1>& lhs,
                     const aligned_allocator<T2, Align2>& rhs) noexcept;
 
-    template <class T1, class Align1, class T2, class Align2>
-    bool operator!=(const aligned_allocator<T1, Aligned1>& lhs,
-                    const aligned_allocator<T2, Aligned2>& rhs) noexcept;
+    template <class T1, size_t Align1, class T2, size_t Align2>
+    bool operator!=(const aligned_allocator<T1, Align1>& lhs,
+                    const aligned_allocator<T2, Align2>& rhs) noexcept;
 
 
     void* aligned_malloc(size_t size, size_t alignment);
@@ -89,42 +90,42 @@ namespace nxsimd
      * aligned_allocator implementation
      **************************************/
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline aligned_allocator<T, A>::aligned_allocator() noexcept
     {
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline aligned_allocator<T, A>::aligned_allocator(const aligned_allocator&) noexcept
     {
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     template <class U>
     inline aligned_allocator<T, A>::aligned_allocator(const aligned_allocator<U, A>&) noexcept
     {
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline aligned_allocator<T, A>::~aligned_allocator()
     {
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::address(reference r) noexcept -> pointer
     {
         return &r;
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::address(const_reference r) const noexcept -> const_pointer
     {
         return &r;
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::allocate(size_type n,
             typename std::allocator<void>::const_pointer hint) -> pointer
@@ -135,41 +136,41 @@ namespace nxsimd
         return res;
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline void aligned_allocator<T, A>::deallocate(pointer p, size_type)
     {
         aligned_free(p);
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::size_max() const noexcept -> size_type
     {
         return size_type(-1) / sizeof(T);
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     template <class U, class... Args>
     inline void aligned_allocator<T, A>::construct(U* p, Args&&... args)
     {
         new ((void*)p) U(std::forward<Args>(args)...);
     }
 
-    template <class T, class A>
+    template <class T, size_t A>
     template <class U>
     inline void aligned_allocator<T, A>::destroy(U* p)
     {
         p->~U();
     }
 
-    template <class T1, class A1, class T2, class A2>
+    template <class T1, size_t A1, class T2, size_t A2>
     inline bool operator==(const aligned_allocator<T1, A1>& lhs,
                            const aligned_allocator<T2, A2>& rhs) noexcept
     {
         return lhs.alignment == rhs.alignment;
     }
 
-    template <class T1, class A1, class T2, class A2>
+    template <class T1, size_t A1, class T2, size_t A2>
     inline bool operator!=(const aligned_allocator<T1, A1>& lhs,
                            const aligned_allocator<T2, A2>& rhs) noexcept
     {
