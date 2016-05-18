@@ -8,10 +8,41 @@
 #ifndef NX_SIMD_HPP
 #define NX_SIMD_HPP
 
+#include "memory/nx_aligned_allocator.hpp"
+#include "config/nx_simd_config.hpp"
 #include "types/nx_simd_traits.hpp"
 
 namespace nxsimd
 {
+
+    // Allocator alignment
+
+    struct aligned_mode {};
+    struct unaligned_mode {};
+
+    namespace detail
+    {
+        template <class A>
+        struct get_allocator_alignment_impl
+        {
+#if NX_MALLOC_ALREADY_ALIGNED
+            using type = aligned_mode;
+#else
+            using type = unaligned_mode;
+#endif
+        };
+
+#ifdef NX_USE_SSE_OR_AVX
+        template <class T>
+        struct get_allocator_alignment_impl<aligned_allocator<T, NX_DEFAULT_ALIGNMENT>>
+        {
+            using type = aligned_mode;
+        };
+#endif
+    }
+
+    template <class A>
+    using get_allocator_alignment = typename detail::get_allocator_alignment_impl<A>::type;
 
 
     // Data transfer instructions
@@ -38,9 +69,6 @@ namespace nxsimd
     void store_unaligned(T* dst, const simd_type<T>& src);
 
     // Load / store generic functions
-
-    struct aligned_mode {}
-    struct unaligned_mode {}
 
     template <class T>
     simd_type<T> load_simd(const T* src, aligned_mode);
@@ -130,7 +158,7 @@ namespace nxsimd
                 return *src;
             }
 
-            inline static void load_aligned(const T* src, V& dst)
+            inline static void load_aligned(const T* src, T& dst)
             {
                 dst = *src;
             }
@@ -140,17 +168,17 @@ namespace nxsimd
                 return *src;
             }
 
-            inline static void load_unaligned(const T* src, V& dst)
+            inline static void load_unaligned(const T* src, T& dst)
             {
                 dst = *src;
             }
 
-            inline static void store_aligned(T* dst, const V& src)
+            inline static void store_aligned(T* dst, const T& src)
             {
                 *dst = src;
             }
 
-            inline static void store_unaligned(T* dst, const V& src)
+            inline static void store_unaligned(T* dst, const T& src)
             {
                 *dst = src;
             }
