@@ -321,7 +321,7 @@ namespace nxsimd
         return _mm256_sqrt_pd(rhs);
     }
 
-    double hadd(const vector4d& rhs)
+    inline double hadd(const vector4d& rhs)
     {
         // rhs = (x0, x1, x2, x3)
         // tmp = (x2, x3, x0, x1)
