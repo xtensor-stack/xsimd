@@ -10,6 +10,7 @@
 
 #include <cstddef>
 #include "../config/nx_platform_config.hpp"
+#include <algorithm>
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
     #include <malloc.h>
