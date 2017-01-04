@@ -1,69 +1,70 @@
+############################################################################
+# Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     #
+#                                                                          #
+# Distributed under the terms of the BSD 3-Clause License.                 #
+#                                                                          #
+# The full license is in the file LICENSE, distributed with this software. #
+############################################################################
+
 cmake_minimum_required(VERSION 3.1)
-project(nxsimd)
+project(xsimd)
 
-include(CheckCXXCompilerFlag)
+set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+# Versionning
+# ===========
 
-string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
-
-    if (HAS_CPP14_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-    elseif (HAS_CPP11_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    else()
-        message(FATAL_ERROR "Unsupported compiler -- nxsimd requires C++11 support!")
+file(STRINGS "${XSIMD_INCLUDE_DIR}/xsimd/xsimd_config.hpp" xsimd_version_defines
+     REGEX "#define XSIMD_VERSION_(MAJOR|MINOR|PATCH)")
+foreach(ver ${xsimd_version_defines})
+    if(ver MATCHES "#define XSIMD_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
+        set(XSIMD_VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
     endif()
+endforeach()
+set(${PROJECT_NAME}_VERSION 
+    ${XSIMD_VERSION_MAJOR}.${XSIMD_VERSION_MINOR}.${XSIMD_VERSION_PATCH})
+message(STATUS "xsimd v${${PROJECT_NAME}_VERSION}")
 
-    # Enable link time optimization and set the default symbol
-    # visibility to hidden (very important to obtain small binaries)
-    if (NOT ${U_CMAKE_BUILD_TYPE} MATCHES DEBUG)
-        # Default symbol visibility
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 
-        # Check for Link Time Optimization support
-        # (GCC/Clang)
-        CHECK_CXX_COMPILER_FLAG("-flto" HAS_LTO_FLAG)
-        if (HAS_LTO_FLAG)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
-        endif()
+# Build
+# =====
 
-        # Intel equivalent to LTO is called IPO
-        if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-            CHECK_CXX_COMPILER_FLAG("-ipo" HAS_IPO_FLAG)
-            if (HAS_IPO_FLAG)
-                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ipo")
-            endif()
-        endif()
-    endif()
-endif()
-
-include_directories(include)
-set(NXSIMD_TARGET simd_test)
-
-set(NXSIMD_HEADERS
-    include/nxsimd/config/nx_platform_config.hpp
-    include/nxsimd/config/nx_simd_config.hpp
-    include/nxsimd/config/nx_simd_include.hpp
-    include/nxsimd/memory/nx_aligned_allocator.hpp
-    include/nxsimd/memory/nx_aligned_stack_buffer.hpp
-    include/nxsimd/types/nx_avx_double.hpp
-    include/nxsimd/types/nx_avx_float.hpp
-    include/nxsimd/types/nx_simd_base.hpp
-    include/nxsimd/types/nx_simd_traits.hpp
-    include/nxsimd/types/nx_sse_double.hpp
-    include/nxsimd/types/nx_sse_float.hpp
-    include/nxsimd/nx_simd.hpp
+set(XSIMD_HEADERS
+    ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/config/xplatform_config.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/memory/xaligned_allocator.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/memory/xaligned_stack_buffer.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xavx_double.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xavx_float.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsse_double.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsse_float.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_traits.hpp
 )
 
-set(NXSIMD_TESTS
-    test/main.cpp
-)
+add_subdirectory(test)
 
-add_executable(${NXSIMD_TARGET} ${NXSIMD_TESTS} ${NXSIMD_HEADERS})
-#set_property(TARGET ${NXSIMD_TARGET} PROPERTY CXX_STANDARD 11)
+# Installation
+# ============
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(FILES ${XSIMD_HEADERS}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xsimd)
+
+# GNUInstallDirs "DATADIR" wrong here; CMake search path wants "share".
+set(XSIMD_CMAKECONFIG_INSTALL_DIR "share/cmake/${PROJECT_NAME}" CACHE STRING "install path for xsimdConfig.cmake")
+
+configure_package_config_file(${PROJECT_NAME}Config.cmake.in
+                              "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+                              INSTALL_DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+                                 VERSION ${${PROJECT_NAME}_VERSION}
+                                 COMPATIBILITY AnyNewerVersion)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
 

@@ -1,0 +1,7 @@
+name: test-xsimd
+channels:
+    - conda-forge
+    - defaults
+dependencies:
+    - cmake
+    - gtest

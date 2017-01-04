@@ -6,11 +6,10 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef XSIMD_CONFIG_HPP
+#define XSIMD_CONFIG_HPP
 
-int main(int argc, char* argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
-
+#define XSIMD_VERSION_MAJOR 2
+#define XSIMD_VERSION_MINOR 0
+#define XSIMD_VERSION_PATCH dev0
+#endif

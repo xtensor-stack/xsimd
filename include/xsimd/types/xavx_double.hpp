@@ -1,16 +1,17 @@
-//
-// Copyright (c) 2016 Johan Mabille
-//
-// All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-//
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
 
-#ifndef NX_AVX_DOUBLE_HPP
-#define NX_AVX_DOUBLE_HPP
+#ifndef XAVX_DOUBLE_HPP
+#define XAVX_DOUBLE_HPP
 
-#include "nx_simd_base.hpp"
+#include "xsimd_base.hpp"
 
-namespace nxsimd
+namespace xsimd
 {
 
     class vector4db : public simd_vector_bool<vector4db>

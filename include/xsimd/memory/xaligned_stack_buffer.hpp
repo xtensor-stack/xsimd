@@ -1,17 +1,18 @@
-//
-// Copyright (c) 2016 Johan Mabille
-//
-// All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-//
-//
-#ifndef NX_ALIGNED_STACK_BUFFER_HPP
-#define NX_ALIGNED_STACK_BUFFER_HPP
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
+
+#ifndef XALIGNED_STACK_BUFFER_HPP
+#define XALIGNED_STACK_BUFFER_HPP
 
 #include <type_traits>
-#include "nx_aligned_allocator.hpp"
+#include "xaligned_allocator.hpp"
 
-namespace nxsimd
+namespace xsimd
 {
 
     template <class T, size_t Align>
@@ -63,7 +64,7 @@ namespace nxsimd
         inline void* aligned_alloc_stack(size_t size, size_t alignment)
         {
             return reinterpret_cast<void*>(
-                reinterpret_cast<size_t>(NX_ALLOCA(size + alignment)) &
+                reinterpret_cast<size_t>(XALLOCA(size + alignment)) &
                 ~(size_t(alignment - 1))) + alignment;
         }
     }
@@ -72,11 +73,11 @@ namespace nxsimd
     inline aligned_stack_buffer<T, A>::aligned_stack_buffer(size_type n)
         : m_size(n)
     {
-#ifdef NX_ALLOCA
-        if(sizeof(T) * n <= NX_STACK_ALLOCATION_LIMIT)
+#ifdef XALLOCA
+        if(sizeof(T) * n <= XSTACK_ALLOCATION_LIMIT)
         {
             m_ptr = reinterpret_cast<pointer>(
-                    (reinterpret_cast<size_t>(NX_ALLOCA(n + A)) &
+                    (reinterpret_cast<size_t>(XALLOCA(n + A)) &
                     ~(size_t(A - 1))) + A);
             m_heap_allocation = false;
         }

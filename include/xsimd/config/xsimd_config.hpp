@@ -6,11 +6,28 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef XSIMD_CONFIG_HPP
+#define XSIMD_CONFIG_HPP
 
-int main(int argc, char* argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#include "xplatform_config.hpp"
+
+#ifdef XUSE_AVX
+    #define XDEFAULT_ALIGNMENT 32
+#else
+    #define XDEFAULT_ALIGNMENT 16
+#endif
+
+#ifndef XDEFAULT_ALLOCATOR
+    #ifdef XUSE_SSE_OR_AVX
+        #define XDEFAULT_ALLOCATOR(T) nxsimd::aligned_allocator<T, XDEFAULT_ALIGNMENT>
+    #else
+        #define XDEFAULT_ALLOCATOR(T) std::allocator<T>
+    #endif
+#endif
+
+#ifndef XSTACK_ALLOCATION_LIMIT
+    #define XSTACK_ALLOCATION_LIMIT 20000
+#endif
+
+#endif
 

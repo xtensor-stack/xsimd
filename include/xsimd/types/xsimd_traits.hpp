@@ -1,23 +1,24 @@
-//
-// Copyright (c) 2016 Johan Mabille
-//
-// All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-//
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
 
-#ifndef NX_SIMD_TRAITS_HPP
-#define NX_SIMD_TRAITS_HPP
+#ifndef XSIMD_TRAITS_HPP
+#define XSIMD_TRAITS_HPP
 
-#include "../config/nx_simd_include.hpp"
-#if defined(NX_USE_AVX)
-#include "nx_avx_float.hpp"
-#include "nx_avx_double.hpp"
-#elif defined(NX_USE_SSE)
-#include "nx_sse_float.hpp"
-#include "nx_sse_double.hpp"
+#include "../config/xsimd_include.hpp"
+#if defined(XUSE_AVX)
+#include "xavx_float.hpp"
+#include "xavx_double.hpp"
+#elif defined(XUSE_SSE)
+#include "xsse_float.hpp"
+#include "xsse_double.hpp"
 #endif
 
-namespace nxsimd
+namespace xsimd
 {
 
     template <class T>
@@ -40,7 +41,7 @@ namespace nxsimd
     template <class T>
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
-#ifdef NX_USE_AVX
+#ifdef XUSE_AVX
 
     template <>
     struct simd_traits<float>
@@ -70,7 +71,7 @@ namespace nxsimd
         static constexpr size_t size = simd_traits<type>::size;
     };
 
-#elif defined(NX_USE_SSE)
+#elif defined(XUSE_SSE)
 
     template <>
     struct simd_traits<float>

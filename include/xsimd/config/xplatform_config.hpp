@@ -1,13 +1,13 @@
-//
-// Copyright (c) 2016 Johan Mabille
-//
-// All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-//
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
 
-#ifndef NX_PLATFORM_CONFIG_HPP
-#define NX_PLATFORM_CONFIG_HPP
-
+#ifndef XPLATFORM_CONFIG_HPP
+#define XPLATFORM_CONFIG_HPP
 
 /*************************
  * SSE instruction set
@@ -59,9 +59,9 @@
 // PowerPC or SPARC)
 #if defined(__GLIBC__) && ((__GLIBC__>=2 && __GLIBC_MINOR__ >= 8) || __GLIBC__>2) \
  && defined(__LP64__)
-  #define NX_GLIBC_MALLOC_ALREADY_16ALIGNED 1
+  #define XGLIBC_MALLOC_ALREADY_16ALIGNED 1
 #else
-  #define NX_GLIBC_MALLOC_ALREADY_16ALIGNED 0
+  #define XGLIBC_MALLOC_ALREADY_16ALIGNED 0
 #endif
 
 // FreeBSD world
@@ -71,47 +71,47 @@
 // FreeBSD 7 seems to have 16-byte aligned malloc except on ARM and MIPS architectures
 //   See http://svn.freebsd.org/viewvc/base/stable/7/lib/libc/stdlib/malloc.c?view=markup
 #if defined(__FreeBSD__) && !defined(__arm__) && !defined(__mips__)
-  #define NX_FREEBSD_MALLOC_ALREADY_16ALIGNED 1
+  #define XFREEBSD_MALLOC_ALREADY_16ALIGNED 1
 #else
-  #define NX_FREEBSD_MALLOC_ALREADY_16ALIGNED 0
+  #define XFREEBSD_MALLOC_ALREADY_16ALIGNED 0
 #endif
 
 #if (defined(__APPLE__) \
  || defined(_WIN64) \
- || NX_GLIBC_MALLOC_ALREADY_16ALIGNED \
- || NX_FREEBSD_MALLOC_ALREADY_16ALIGNED)
-  #define NX_MALLOC_ALREADY_16ALIGNED 1
+ || XGLIBC_MALLOC_ALREADY_16ALIGNED \
+ || XFREEBSD_MALLOC_ALREADY_16ALIGNED)
+  #define XMALLOC_ALREADY_16ALIGNED 1
 #else
-  #define NX_MALLOC_ALREADY_16ALIGNED 0
+  #define XMALLOC_ALREADY_16ALIGNED 0
 #endif
 
 #if ((defined __QNXNTO__) || (defined _GNU_SOURCE) || ((defined _XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600))) \
  && (defined _POSIX_ADVISORY_INFO) && (_POSIX_ADVISORY_INFO > 0)
-  #define NX_HAS_POSIX_MEMALIGN 1
+  #define XHAS_POSIX_MEMALIGN 1
 #else
-  #define NX_HAS_POSIX_MEMALIGN 0
+  #define XHAS_POSIX_MEMALIGN 0
 #endif
 
 #if SSE_INSTR_SET > 0
-    #define NX_HAS_MM_MALLOC 1
+    #define XHAS_MM_MALLOC 1
 #else
-    #define NX_HAS_MM_MALLOC 0
+    #define XHAS_MM_MALLOC 0
 #endif
 
 #if ((SSE_INSTR_SET > 6) && !defined(FORBID_AVX))
-    #define NX_USE_AVX
+    #define XUSE_AVX
 #elif ((SSE_INSTR_SET > 0) && !defined(FORBID_SSE))
-    #define NX_USE_SSE
+    #define XUSE_SSE
 #endif
 
-#ifdef NX_USE_SSE
-    #define NX_MALLOC_ALREADY_ALIGNED NX_MALLOC_ALREADY_16ALIGNED
+#ifdef XUSE_SSE
+    #define XMALLOC_ALREADY_ALIGNED XMALLOC_ALREADY_16ALIGNED
 #else
-    #define NX_MALLOC_ALREADY_ALIGNED 0
+    #define XMALLOC_ALREADY_ALIGNED 0
 #endif
 
-#if defined(NX_USE_SSE) || defined(NX_USE_AVX)
-    #define NX_USE_SSE_OR_AVX
+#if defined(XUSE_SSE) || defined(XUSE_AVX)
+    #define XUSE_SSE_OR_AVX
 #endif
 
 
@@ -119,18 +119,18 @@
  * Stack allocation and alignment
  ************************************/
 
-#ifndef NX_ALLOCA
+#ifndef XALLOCA
     #if defined(__linux__)
-        #define NX_ALLOCA alloca
+        #define XALLOCA alloca
     #elif defined(_MSC_VER)
-        #define NX_ALLOCA _alloca
+        #define XALLOCA _alloca
     #endif
 #endif
 
 #if (defined __GNUC__)
-    #define NX_STACK_ALIGN(N) __attribute__((aligned(N)))
+    #define XSTACK_ALIGN(N) __attribute__((aligned(N)))
 #elif (defined _MSC_VER)
-    #define NX_STACK_ALIGN(N) __declspec(align(N))
+    #define XSTACK_ALIGN(N) __declspec(align(N))
 #else
     #error Equivalent of __attribute__((aligned(N))) unknown
 #endif
@@ -141,9 +141,9 @@
  ****************************************/
 
 #ifdef __x86_64__
-    #define NX_NB_FP_REGISTERS 16
+    #define XNB_FP_REGISTERS 16
 #else
-    #define NX_NB_FP_REGISTERS 8
+    #define XNB_FP_REGISTERS 8
 
 #endif
 

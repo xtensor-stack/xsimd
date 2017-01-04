@@ -1,18 +1,19 @@
-//
-// Copyright (c) 2016 Johan Mabille
-//
-// All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-//
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
 
-#ifndef NX_SIMD_HPP
-#define NX_SIMD_HPP
+#ifndef XSIMD_HPP
+#define XSIMD_HPP
 
-#include "memory/nx_aligned_allocator.hpp"
-#include "config/nx_simd_config.hpp"
-#include "types/nx_simd_traits.hpp"
+#include "memory/xaligned_allocator.hpp"
+#include "config/xsimd_config.hpp"
+#include "types/xsimd_traits.hpp"
 
-namespace nxsimd
+namespace xsimd
 {
 
     // Allocator alignment
@@ -25,16 +26,16 @@ namespace nxsimd
         template <class A>
         struct get_allocator_alignment_impl
         {
-#if NX_MALLOC_ALREADY_ALIGNED
+#if XMALLOC_ALREADY_ALIGNED
             using type = aligned_mode;
 #else
             using type = unaligned_mode;
 #endif
         };
 
-#ifdef NX_USE_SSE_OR_AVX
+#ifdef XUSE_SSE_OR_AVX
         template <class T>
-        struct get_allocator_alignment_impl<aligned_allocator<T, NX_DEFAULT_ALIGNMENT>>
+        struct get_allocator_alignment_impl<aligned_allocator<T, XDEFAULT_ALIGNMENT>>
         {
             using type = aligned_mode;
         };
@@ -283,7 +284,7 @@ namespace nxsimd
     {
     }
 
-#if defined(NX_USE_SSE) || defined(NX_USE_AVX)
+#if defined(XUSE_SSE) || defined(XUSE_AVX)
 
     template <>
     inline void prefetch<int>(const int* address)
