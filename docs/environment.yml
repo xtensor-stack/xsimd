@@ -1,0 +1,8 @@
+name: xsimd-docs
+
+channels:
+  - conda-forge
+
+dependencies:
+  - breathe
+  - sphinx >=1.4.1

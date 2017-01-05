@@ -1,29 +1,30 @@
-//
-// Copyright (c) 2016 Johan Mabille
-//
-// All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-//
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
 
-#ifndef NX_ALIGNED_ALLOCATOR_HPP
-#define NX_ALIGNED_ALLOCATOR_HPP
+#ifndef XALIGNED_ALLOCATOR_HPP
+#define XALIGNED_ALLOCATOR_HPP
 
 #include <cstddef>
-#include "../config/nx_platform_config.hpp"
+#include "../config/xplatform_config.hpp"
 #include <algorithm>
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
     #include <malloc.h>
 #elif defined(__GNUC__)
     #include <mm_malloc.h>
-    #if defined(NX_ALLOCA)
+    #if defined(XALLOCA)
         #include <alloca.h>
     #endif
 #else
     #include <stdlib.h>
 #endif
 
-namespace nxsimd
+namespace xsimd
 {
 
     template <class T, size_t Align>
@@ -129,7 +130,7 @@ namespace nxsimd
     template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::allocate(size_type n,
-            typename std::allocator<void>::const_pointer hint) -> pointer
+            typename std::allocator<void>::const_pointer) -> pointer
     {
         pointer res = reinterpret_cast<pointer>(aligned_malloc(sizeof(T)*n, A));
         if(res == nullptr)
@@ -185,7 +186,7 @@ namespace nxsimd
 
     namespace detail
     {
-        inline void* nx_aligned_malloc(size_t size, size_t alignment)
+        inline void* xaligned_malloc(size_t size, size_t alignment)
         {
             void* res = 0;
             void* ptr = malloc(size + alignment);
@@ -199,7 +200,7 @@ namespace nxsimd
             return res;
         }
 
-        inline void nx_aligned_free(void* ptr)
+        inline void xaligned_free(void* ptr)
         {
             if (ptr != 0)
                 free(*(reinterpret_cast<void**>(ptr) - 1));
@@ -208,11 +209,11 @@ namespace nxsimd
     
     inline void* aligned_malloc(size_t size, size_t alignment)
     {
-#if NX_MALLOC_ALREADY_ALIGNED
+#if XMALLOC_ALREADY_ALIGNED
         return malloc(size);
-#elif NX_HAS_MM_MALLOC
+#elif XHAS_MM_MALLOC
         return _mm_malloc(size, alignment);
-#elif NX_HAS_POSIX_MEMALIGN
+#elif XHAS_POSIX_MEMALIGN
         void* res;
         const int failed = posix_memalign(&res, size, alignment);
         if (failed)
@@ -221,22 +222,22 @@ namespace nxsimd
 #elif(defined _MSC_VER)
         return _aligned_malloc(size, alignment);
 #else
-        return detail::nx_aligned_malloc(size, alignment);
+        return detail::xaligned_malloc(size, alignment);
 #endif
     }
 
     inline void aligned_free(void* ptr)
     {
-#if NX_MALLOC_ALREADY_ALIGNED
+#if XMALLOC_ALREADY_ALIGNED
         free(ptr);
-#elif NX_HAS_MM_MALLOC
+#elif XHAS_MM_MALLOC
         _mm_free(ptr);
-#elif NX_HAS_POSIX_MEMALIGN
+#elif XHAS_POSIX_MEMALIGN
         free(ptr);
 #elif defined(_MSC_VER)
         _aligned_free(ptr);
 #else
-        detail::nx_aligned_free(ptr);
+        detail::xaligned_free(ptr);
 #endif
     }
 

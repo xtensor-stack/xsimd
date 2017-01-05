@@ -1,5 +1,13 @@
-#ifndef NX_TEST_UTILS_HPP
-#define NX_TEST_UTILS_HPP
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
+
+#ifndef XTEST_UTILS_HPP
+#define XTEST_UTILS_HPP
 
 #include <limits>
 #include <algorithm>
@@ -10,7 +18,7 @@
 #include <string>
 #include <typeinfo>
 
-namespace nxsimd
+namespace xsimd
 {
 
     template <class T>

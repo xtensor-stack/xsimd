@@ -1,0 +1,91 @@
+language: cpp
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env: COMPILER=gcc GCC=4.9
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: COMPILER=gcc GCC=5
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+      env: COMPILER=clang CLANG=3.6
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+      env: COMPILER=clang CLANG=3.7
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env: COMPILER=clang CLANG=3.8
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+env:
+  global:
+    - MINCONDA_VERSION="latest"
+    - MINCONDA_LINUX="Linux-x86_64"
+    - MINCONDA_OSX="MacOSX-x86_64"
+before_install:
+    - |
+      # Configure build variables
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        if [[ "$COMPILER" == "gcc" ]]; then
+          export CXX=g++-$GCC CC=gcc-$GCC;
+        fi
+        if [[ "$COMPILER" == "clang" ]]; then
+          export CXX=clang++-$CLANG CC=clang-$CLANG;
+        fi
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        export CXX=clang++ CC=clang;
+      fi
+install:
+    # Define the version of miniconda to download
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        MINCONDA_OS=$MINCONDA_LINUX;
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        MINCONDA_OS=$MINCONDA_OSX;
+      fi
+    - wget "http://repo.continuum.io/miniconda/Miniconda3-$MINCONDA_VERSION-$MINCONDA_OS.sh" -O miniconda.sh;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    # Useful for debugging any issues with conda
+    - conda info -a
+    - cd test
+    - conda env create -f ./test-environment.yml
+    - source activate test-xsimd
+    - cd ..
+    - cmake .
+    - make -j2 test_xsimd
+    - cd test
+script:
+    - ./test_xsimd

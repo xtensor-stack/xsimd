@@ -1,10 +1,18 @@
-#ifndef NX_SIMD_COMMON_TEST_HPP
-#define NX_SIMD_COMMON_TEST_HPP
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
 
-#include "nx_simd_tester.hpp"
-#include "nx_test_utils.hpp"
+#ifndef XSIMD_COMMON_TEST_HPP
+#define XSIMD_COMMON_TEST_HPP
 
-namespace nxsimd
+#include "xsimd_tester.hpp"
+#include "xtest_utils.hpp"
+
+namespace xsimd
 {
 
     namespace detail
