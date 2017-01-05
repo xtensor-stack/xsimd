@@ -99,7 +99,7 @@ namespace xsimd
         fma_res.resize(N);
         sqrt_res.resize(N);
 
-        s = 1.4;
+        s = value_type(1.4);
         hadd_res = value_type(0);
         for(size_t i = 0; i < N; ++i)
         {
