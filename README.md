@@ -1,5 +1,8 @@
 # ![xsimd](http://quantstack.net/assets/images/xsimd.svg)
 
+[![Travis](https://travis-ci.org/QuantStack/xsimd.svg?branch=master)](https://travis-ci.org/QuantStack/xsimd)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/unk39xhu0wxmiif7?svg=true)](https://ci.appveyor.com/project/QuantStack/xsimd)
+
 C++ wrappers for SIMD intrinsics
 
 ## Building and Running the Tests
