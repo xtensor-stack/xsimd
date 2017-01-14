@@ -67,7 +67,7 @@ namespace xsimd
         }
 
         template <class T>
-        bool safe_division(const T& lhs, const T& rhs)
+        T safe_division(const T& lhs, const T& rhs)
         {
             if(rhs < static_cast<T>(1) && lhs > rhs * (std::numeric_limits<T>::max)())
             {
