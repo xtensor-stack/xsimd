@@ -7,12 +7,12 @@
 xsimd
 =====
 
-Multi-dimensional arrays with broadcasting and lazy computing.
+C++ wrappers for SIMD intrinsics.
 
 `xsimd` requires a modern C++ compiler supporting C++11. The following C+ compilers are supported:
 
 - On Windows platforms, Visual C++ 2015 Update 2, or more recent
-- On Unix platforms, gcc 4.9 or a recent version of Clang
+- On Unix platforms, gcc 4.9 or recent versions of Clang
 
 Licensing
 ---------

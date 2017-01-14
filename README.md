@@ -2,6 +2,7 @@
 
 [![Travis](https://travis-ci.org/QuantStack/xsimd.svg?branch=master)](https://travis-ci.org/QuantStack/xsimd)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/unk39xhu0wxmiif7?svg=true)](https://ci.appveyor.com/project/QuantStack/xsimd)
+[![Documentation Status](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
 
 C++ wrappers for SIMD intrinsics
 
