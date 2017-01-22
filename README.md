@@ -6,6 +6,10 @@
 
 C++ wrappers for SIMD intrinsics
 
+## Introduction
+
+Find out more about this implementation of C++ wrappers for SIMD intrinsics at the [The C++ Scientist](http://johanmabille.github.io/blog/archives/).
+
 ## Building and Running the Tests
 
 Building the tests requires the [GTest](https://github.com/google/googletest) testing framework and [cmake](https://cmake.org).
