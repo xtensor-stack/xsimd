@@ -9,7 +9,13 @@ Installation
 
 `xsimd` is a header-only library. We provide a package for the conda package manager.
 
-```bash
-conda install -c conda-forge xsimd
-```
+.. code::
 
+    conda install -c conda-forge xsimd
+
+Or you can directly install it from the sources:
+
+.. code::
+
+    cmake -D CMAKE_INSTALL_PREFIX=your_install_prefix
+    make install

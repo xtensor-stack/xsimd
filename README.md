@@ -3,12 +3,28 @@
 [![Travis](https://travis-ci.org/QuantStack/xsimd.svg?branch=master)](https://travis-ci.org/QuantStack/xsimd)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/unk39xhu0wxmiif7?svg=true)](https://ci.appveyor.com/project/QuantStack/xsimd)
 [![Documentation Status](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
+[![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 C++ wrappers for SIMD intrinsics
 
 ## Introduction
 
 Find out more about this implementation of C++ wrappers for SIMD intrinsics at the [The C++ Scientist](http://johanmabille.github.io/blog/archives/).
+
+## Installation
+
+`xsimd` is a header-only library. We provide a package for the conda package manager.
+
+```bash
+conda install -c conda-forge xsimd
+```
+
+Or you can directly install it from the sources:
+
+```bash
+cmake -D CMAKE_INSTALL_PREFIX=your_install_prefix
+make install
+```
 
 ## Building and Running the Tests
 
