@@ -4,15 +4,18 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-xsimd
-=====
+.. image:: http://quantstack.net/assets/images/xsimd.svg
+   :alt: xsimd
 
 C++ wrappers for SIMD intrinsics.
 
-`xsimd` requires a modern C++ compiler supporting C++11. The following C+ compilers are supported:
+Introduction
+------------
+
+`xsimd` requires a modern C++ compiler supporting C++11. The following C++ compilers are supported:
 
 - On Windows platforms, Visual C++ 2015 Update 2, or more recent
-- On Unix platforms, gcc 4.9 or recent versions of Clang
+- On Unix platforms, gcc 4.9 or a recent version of Clang
 
 Licensing
 ---------
@@ -22,9 +25,21 @@ copyright on their contributions.
 
 This software is licensed under the BSD-3-Clause license. See the LICENSE file for details.
 
+
 .. toctree::
-   :maxdepth: 3
+   :caption: INSTALLATION
+   :maxdepth: 2
 
    installation
+
+.. toctree::
+   :caption: USAGE
+   :maxdepth: 2
+
    usage
+
+.. toctree::
+   :caption: API REFERENCE
+   :maxdepth: 2
+   
    api_reference
