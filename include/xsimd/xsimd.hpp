@@ -9,7 +9,7 @@
 #ifndef XSIMD_HPP
 #define XSIMD_HPP
 
-#include "memory/xaligned_allocator.hpp"
+#include "memory/xsimd_aligned_allocator.hpp"
 #include "config/xsimd_config.hpp"
 #include "types/xsimd_traits.hpp"
 

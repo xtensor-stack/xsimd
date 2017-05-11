@@ -9,7 +9,7 @@
 #ifndef XSIMD_INCLUDE_HPP
 #define XSIMD_INCLUDE_HPP
 
-#include "xplatform_config.hpp"
+#include "xsimd_platform_config.hpp"
 
 // Include the appropriate header file for intrinsic functions
 #if SSE_INSTR_SET > 7                  // AVX2 and later

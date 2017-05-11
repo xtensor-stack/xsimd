@@ -10,12 +10,12 @@
 # This module sets the following variables in your project::
 #
 #   xsimd_FOUND - true if xsimd found on the system
-#   xsimd_INCLUDE_DIR - the directory containing xsimd headers
+#   xsimd_INCLUDE_DIRS - the directory containing xsimd headers
 #   xsimd_LIBRARY - empty
 
 @PACKAGE_INIT@
 
 set(PN xsimd)
-set_and_check(${PN}_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
+set_and_check(${PN}_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
 set(${PN}_LIBRARY "")
 check_required_components(${PN})

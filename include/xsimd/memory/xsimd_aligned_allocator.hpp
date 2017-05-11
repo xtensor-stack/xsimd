@@ -6,12 +6,12 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XALIGNED_ALLOCATOR_HPP
-#define XALIGNED_ALLOCATOR_HPP
+#ifndef XSIMD_ALIGNED_ALLOCATOR_HPP
+#define XSIMD_ALIGNED_ALLOCATOR_HPP
 
 #include <cstddef>
-#include "../config/xplatform_config.hpp"
 #include <algorithm>
+#include "../config/xsimd_platform_config.hpp"
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
     #include <malloc.h>

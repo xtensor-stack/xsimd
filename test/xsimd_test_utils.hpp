@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XTEST_UTILS_HPP
-#define XTEST_UTILS_HPP
+#ifndef XSIMD_TEST_UTILS_HPP
+#define XSIMD_TEST_UTILS_HPP
 
 #include <limits>
 #include <algorithm>

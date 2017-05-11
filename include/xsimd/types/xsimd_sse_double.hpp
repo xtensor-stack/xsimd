@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSSE_DOUBLE_HPP
-#define XSSE_DOUBLE_HPP
+#ifndef XSIMD_SSE_DOUBLE_HPP
+#define XSIMD_SSE_DOUBLE_HPP
 
 #include "xsimd_base.hpp"
 

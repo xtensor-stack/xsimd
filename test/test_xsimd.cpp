@@ -13,11 +13,11 @@
 #include "gtest/gtest.h"
 
 #include "xsimd/config/xsimd_include.hpp"
-#include "xsimd/memory/xaligned_allocator.hpp"
-#include "xsimd/types/xsse_double.hpp"
-#include "xsimd/types/xsse_float.hpp"
-#include "xsimd/types/xavx_double.hpp"
-#include "xsimd/types/xavx_float.hpp"
+#include "xsimd/memory/xsimd_aligned_allocator.hpp"
+#include "xsimd/types/xsimd_sse_double.hpp"
+#include "xsimd/types/xsimd_sse_float.hpp"
+#include "xsimd/types/xsimd_avx_double.hpp"
+#include "xsimd/types/xsimd_avx_float.hpp"
 #include "xsimd_common_test.hpp"
 
 namespace xsimd

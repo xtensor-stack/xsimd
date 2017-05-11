@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XPLATFORM_CONFIG_HPP
-#define XPLATFORM_CONFIG_HPP
+#ifndef XSIMD_PLATFORM_CONFIG_HPP
+#define XSIMD_PLATFORM_CONFIG_HPP
 
 /*************************
  * SSE instruction set

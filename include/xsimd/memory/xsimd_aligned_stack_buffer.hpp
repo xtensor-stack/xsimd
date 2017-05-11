@@ -6,11 +6,11 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XALIGNED_STACK_BUFFER_HPP
-#define XALIGNED_STACK_BUFFER_HPP
+#ifndef XSIMD_ALIGNED_STACK_BUFFER_HPP
+#define XSIMD_ALIGNED_STACK_BUFFER_HPP
 
 #include <type_traits>
-#include "xaligned_allocator.hpp"
+#include "xsimd_aligned_allocator.hpp"
 
 namespace xsimd
 {

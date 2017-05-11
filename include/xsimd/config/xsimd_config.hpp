@@ -9,7 +9,7 @@
 #ifndef XSIMD_CONFIG_HPP
 #define XSIMD_CONFIG_HPP
 
-#include "xplatform_config.hpp"
+#include "xsimd_platform_config.hpp"
 
 #ifdef XUSE_AVX
     #define XDEFAULT_ALIGNMENT 32
@@ -19,7 +19,7 @@
 
 #ifndef XDEFAULT_ALLOCATOR
     #ifdef XUSE_SSE_OR_AVX
-        #define XDEFAULT_ALLOCATOR(T) nxsimd::aligned_allocator<T, XDEFAULT_ALIGNMENT>
+        #define XDEFAULT_ALLOCATOR(T) xsimd::aligned_allocator<T, XDEFAULT_ALIGNMENT>
     #else
         #define XDEFAULT_ALLOCATOR(T) std::allocator<T>
     #endif
