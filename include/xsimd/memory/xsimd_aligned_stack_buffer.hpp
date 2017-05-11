@@ -64,7 +64,7 @@ namespace xsimd
         inline void* aligned_alloc_stack(size_t size, size_t alignment)
         {
             return reinterpret_cast<void*>(
-                reinterpret_cast<size_t>(XALLOCA(size + alignment)) &
+                reinterpret_cast<size_t>(XSIMD_ALLOCA(size + alignment)) &
                 ~(size_t(alignment - 1))) + alignment;
         }
     }
@@ -73,11 +73,11 @@ namespace xsimd
     inline aligned_stack_buffer<T, A>::aligned_stack_buffer(size_type n)
         : m_size(n)
     {
-#ifdef XALLOCA
-        if(sizeof(T) * n <= XSTACK_ALLOCATION_LIMIT)
+#ifdef XSIMD_ALLOCA
+        if(sizeof(T) * n <= XSIMD_STACK_ALLOCATION_LIMIT)
         {
             m_ptr = reinterpret_cast<pointer>(
-                    (reinterpret_cast<size_t>(XALLOCA(n + A)) &
+                    (reinterpret_cast<size_t>(XSIMD_ALLOCA(n + A)) &
                     ~(size_t(A - 1))) + A);
             m_heap_allocation = false;
         }
