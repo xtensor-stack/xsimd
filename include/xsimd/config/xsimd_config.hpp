@@ -9,24 +9,28 @@
 #ifndef XSIMD_CONFIG_HPP
 #define XSIMD_CONFIG_HPP
 
-#include "xplatform_config.hpp"
+#include "xsimd_platform_config.hpp"
 
-#ifdef XUSE_AVX
-    #define XDEFAULT_ALIGNMENT 32
+#define XSIMD_VERSION_MAJOR 3
+#define XSIMD_VERSION_MINOR 0
+#define XSIMD_VERSION_PATCH 0
+
+#ifdef XSIMD_USE_AVX
+    #define XSIMD_DEFAULT_ALIGNMENT 32
 #else
-    #define XDEFAULT_ALIGNMENT 16
+    #define XSIMD_DEFAULT_ALIGNMENT 16
 #endif
 
-#ifndef XDEFAULT_ALLOCATOR
-    #ifdef XUSE_SSE_OR_AVX
-        #define XDEFAULT_ALLOCATOR(T) nxsimd::aligned_allocator<T, XDEFAULT_ALIGNMENT>
+#ifndef XSIMD_DEFAULT_ALLOCATOR
+    #ifdef XSIMD_USE_SSE_OR_AVX
+        #define XSIMD_DEFAULT_ALLOCATOR(T) xsimd::aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>
     #else
-        #define XDEFAULT_ALLOCATOR(T) std::allocator<T>
+        #define XSIMD_DEFAULT_ALLOCATOR(T) std::allocator<T>
     #endif
 #endif
 
-#ifndef XSTACK_ALLOCATION_LIMIT
-    #define XSTACK_ALLOCATION_LIMIT 20000
+#ifndef XSIMD_STACK_ALLOCATION_LIMIT
+    #define XSIMD_STACK_ALLOCATION_LIMIT 20000
 #endif
 
 #endif

@@ -10,7 +10,7 @@
 #define XSIMD_COMMON_TEST_HPP
 
 #include "xsimd_tester.hpp"
-#include "xtest_utils.hpp"
+#include "xsimd_test_utils.hpp"
 
 namespace xsimd
 {

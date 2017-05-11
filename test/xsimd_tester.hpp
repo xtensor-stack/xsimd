@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <string>
 
-#include "xsimd/memory/xaligned_allocator.hpp"
+#include "xsimd/memory/xsimd_aligned_allocator.hpp"
 
 namespace xsimd
 {

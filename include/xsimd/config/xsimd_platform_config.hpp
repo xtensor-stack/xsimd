@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XPLATFORM_CONFIG_HPP
-#define XPLATFORM_CONFIG_HPP
+#ifndef XSIMD_PLATFORM_CONFIG_HPP
+#define XSIMD_PLATFORM_CONFIG_HPP
 
 /*************************
  * SSE instruction set
@@ -59,9 +59,9 @@
 // PowerPC or SPARC)
 #if defined(__GLIBC__) && ((__GLIBC__>=2 && __GLIBC_MINOR__ >= 8) || __GLIBC__>2) \
  && defined(__LP64__)
-  #define XGLIBC_MALLOC_ALREADY_16ALIGNED 1
+  #define XSIMD_GLIBC_MALLOC_ALREADY_16ALIGNED 1
 #else
-  #define XGLIBC_MALLOC_ALREADY_16ALIGNED 0
+  #define XSIMD_GLIBC_MALLOC_ALREADY_16ALIGNED 0
 #endif
 
 // FreeBSD world
@@ -71,47 +71,47 @@
 // FreeBSD 7 seems to have 16-byte aligned malloc except on ARM and MIPS architectures
 //   See http://svn.freebsd.org/viewvc/base/stable/7/lib/libc/stdlib/malloc.c?view=markup
 #if defined(__FreeBSD__) && !defined(__arm__) && !defined(__mips__)
-  #define XFREEBSD_MALLOC_ALREADY_16ALIGNED 1
+  #define XSIMD_FREEBSD_MALLOC_ALREADY_16ALIGNED 1
 #else
-  #define XFREEBSD_MALLOC_ALREADY_16ALIGNED 0
+  #define XSIMD_FREEBSD_MALLOC_ALREADY_16ALIGNED 0
 #endif
 
 #if (defined(__APPLE__) \
  || defined(_WIN64) \
- || XGLIBC_MALLOC_ALREADY_16ALIGNED \
- || XFREEBSD_MALLOC_ALREADY_16ALIGNED)
-  #define XMALLOC_ALREADY_16ALIGNED 1
+ || XSIMD_GLIBC_MALLOC_ALREADY_16ALIGNED \
+ || XSIMD_FREEBSD_MALLOC_ALREADY_16ALIGNED)
+  #define XSIMD_MALLOC_ALREADY_16ALIGNED 1
 #else
-  #define XMALLOC_ALREADY_16ALIGNED 0
+  #define XSIMD_MALLOC_ALREADY_16ALIGNED 0
 #endif
 
 #if ((defined __QNXNTO__) || (defined _GNU_SOURCE) || ((defined _XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600))) \
  && (defined _POSIX_ADVISORY_INFO) && (_POSIX_ADVISORY_INFO > 0)
-  #define XHAS_POSIX_MEMALIGN 1
+  #define XSIMD_HAS_POSIX_MEMALIGN 1
 #else
-  #define XHAS_POSIX_MEMALIGN 0
+  #define XSIMD_HAS_POSIX_MEMALIGN 0
 #endif
 
 #if SSE_INSTR_SET > 0
-    #define XHAS_MM_MALLOC 1
+    #define XSIMD_HAS_MM_MALLOC 1
 #else
-    #define XHAS_MM_MALLOC 0
+    #define XSIMD_HAS_MM_MALLOC 0
 #endif
 
-#if ((SSE_INSTR_SET > 6) && !defined(FORBID_AVX))
-    #define XUSE_AVX
-#elif ((SSE_INSTR_SET > 0) && !defined(FORBID_SSE))
-    #define XUSE_SSE
+#if ((SSE_INSTR_SET > 6) && !defined(XSIMD_FORBID_AVX))
+    #define XSIMD_USE_AVX
+#elif ((SSE_INSTR_SET > 0) && !defined(XSIMD_FORBID_SSE))
+    #define XSIMD_USE_SSE
 #endif
 
-#ifdef XUSE_SSE
-    #define XMALLOC_ALREADY_ALIGNED XMALLOC_ALREADY_16ALIGNED
+#ifdef XSIMD_USE_SSE
+    #define XSIMD_MALLOC_ALREADY_ALIGNED XSIMD_MALLOC_ALREADY_16ALIGNED
 #else
-    #define XMALLOC_ALREADY_ALIGNED 0
+    #define XSIMD_MALLOC_ALREADY_ALIGNED 0
 #endif
 
-#if defined(XUSE_SSE) || defined(XUSE_AVX)
-    #define XUSE_SSE_OR_AVX
+#if defined(XSIMD_USE_SSE) || defined(XSIMD_USE_AVX)
+    #define XSIMD_USE_SSE_OR_AVX
 #endif
 
 
@@ -119,18 +119,18 @@
  * Stack allocation and alignment
  ************************************/
 
-#ifndef XALLOCA
+#ifndef XSIMD_ALLOCA
     #if defined(__linux__)
-        #define XALLOCA alloca
+        #define XSIMD_ALLOCA alloca
     #elif defined(_MSC_VER)
-        #define XALLOCA _alloca
+        #define XSIMD_ALLOCA _alloca
     #endif
 #endif
 
 #if (defined __GNUC__)
-    #define XSTACK_ALIGN(N) __attribute__((aligned(N)))
+    #define XSIMD_STACK_ALIGN(N) __attribute__((aligned(N)))
 #elif (defined _MSC_VER)
-    #define XSTACK_ALIGN(N) __declspec(align(N))
+    #define XSIMD_STACK_ALIGN(N) __declspec(align(N))
 #else
     #error Equivalent of __attribute__((aligned(N))) unknown
 #endif
@@ -141,9 +141,9 @@
  ****************************************/
 
 #ifdef __x86_64__
-    #define XNB_FP_REGISTERS 16
+    #define XSIMD_NB_FP_REGISTERS 16
 #else
-    #define XNB_FP_REGISTERS 8
+    #define XSIMD_NB_FP_REGISTERS 8
 
 #endif
 

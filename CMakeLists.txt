@@ -14,7 +14,7 @@ set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Versionning
 # ===========
 
-file(STRINGS "${XSIMD_INCLUDE_DIR}/xsimd/xsimd_config.hpp" xsimd_version_defines
+file(STRINGS "${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp" xsimd_version_defines
      REGEX "#define XSIMD_VERSION_(MAJOR|MINOR|PATCH)")
 foreach(ver ${xsimd_version_defines})
     if(ver MATCHES "#define XSIMD_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
@@ -33,25 +33,15 @@ OPTION(BUILD_TESTS "xsimd test suite" ON)
 
 set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/xsimd_config.hpp
-)
-
-set(XSIMD_CONFIG_HEADERS
-    ${XSIMD_INCLUDE_DIR}/xsimd/config/xplatform_config.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_platform_config.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
-)
-
-set(XSIMD_MEMORY_HEADERS
-    ${XSIMD_INCLUDE_DIR}/xsimd/memory/xaligned_allocator.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/memory/xaligned_stack_buffer.hpp
-)
-
-set(XSIMD_TYPES_HEADERS
-    ${XSIMD_INCLUDE_DIR}/xsimd/types/xavx_double.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/types/xavx_float.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsse_double.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsse_float.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_stack_buffer.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_double.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_float.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_double.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_traits.hpp
 )
@@ -66,15 +56,8 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-install(FILES ${XSIMD_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xsimd)
-install(FILES ${XSIMD_CONFIG_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xsimd/config)
-install(FILES ${XSIMD_MEMORY_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xsimd/memory)
-install(FILES ${XSIMD_TYPES_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xsimd/types)
-
+install(DIRECTORY ${XSIMD_INCLUDE_DIR}/xsimd
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # GNUInstallDirs "DATADIR" wrong here; CMake search path wants "share".
 set(XSIMD_CMAKECONFIG_INSTALL_DIR "share/cmake/${PROJECT_NAME}" CACHE STRING "install path for xsimdConfig.cmake")

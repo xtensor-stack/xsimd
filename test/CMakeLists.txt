@@ -67,7 +67,7 @@ set(XSIMD_TESTS
     test_xsimd.cpp
     xsimd_tester.hpp
     xsimd_common_test.hpp
-    xtest_utils.hpp
+    xsimd_test_utils.hpp
 )
 
 set(XSIMD_TARGET test_xsimd)

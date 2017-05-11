@@ -10,10 +10,10 @@
 #define XSIMD_TRAITS_HPP
 
 #include "../config/xsimd_include.hpp"
-#if defined(XUSE_AVX)
+#if defined(XSIMD_USE_AVX)
 #include "xavx_float.hpp"
 #include "xavx_double.hpp"
-#elif defined(XUSE_SSE)
+#elif defined(XSIMD_USE_SSE)
 #include "xsse_float.hpp"
 #include "xsse_double.hpp"
 #endif
@@ -41,7 +41,7 @@ namespace xsimd
     template <class T>
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
-#ifdef XUSE_AVX
+#ifdef XSIMD_USE_AVX
 
     template <>
     struct simd_traits<float>
@@ -71,7 +71,7 @@ namespace xsimd
         static constexpr size_t size = simd_traits<type>::size;
     };
 
-#elif defined(XUSE_SSE)
+#elif defined(XSIMD_USE_SSE)
 
     template <>
     struct simd_traits<float>

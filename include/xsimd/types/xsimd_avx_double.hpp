@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XAVX_DOUBLE_HPP
-#define XAVX_DOUBLE_HPP
+#ifndef XSIMD_AVX_DOUBLE_HPP
+#define XSIMD_AVX_DOUBLE_HPP
 
 #include "xsimd_base.hpp"
 

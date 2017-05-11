@@ -6,18 +6,18 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XALIGNED_ALLOCATOR_HPP
-#define XALIGNED_ALLOCATOR_HPP
+#ifndef XSIMD_ALIGNED_ALLOCATOR_HPP
+#define XSIMD_ALIGNED_ALLOCATOR_HPP
 
 #include <cstddef>
-#include "../config/xplatform_config.hpp"
 #include <algorithm>
+#include "../config/xsimd_platform_config.hpp"
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
     #include <malloc.h>
 #elif defined(__GNUC__)
     #include <mm_malloc.h>
-    #if defined(XALLOCA)
+    #if defined(XSIMD_ALLOCA)
         #include <alloca.h>
     #endif
 #else
@@ -209,11 +209,11 @@ namespace xsimd
     
     inline void* aligned_malloc(size_t size, size_t alignment)
     {
-#if XMALLOC_ALREADY_ALIGNED
+#if XSIMD_MALLOC_ALREADY_ALIGNED
         return malloc(size);
-#elif XHAS_MM_MALLOC
+#elif XSIMD_HAS_MM_MALLOC
         return _mm_malloc(size, alignment);
-#elif XHAS_POSIX_MEMALIGN
+#elif XSIMD_HAS_POSIX_MEMALIGN
         void* res;
         const int failed = posix_memalign(&res, size, alignment);
         if (failed)
@@ -228,11 +228,11 @@ namespace xsimd
 
     inline void aligned_free(void* ptr)
     {
-#if XMALLOC_ALREADY_ALIGNED
+#if XSIMD_MALLOC_ALREADY_ALIGNED
         free(ptr);
-#elif XHAS_MM_MALLOC
+#elif XSIMD_HAS_MM_MALLOC
         _mm_free(ptr);
-#elif XHAS_POSIX_MEMALIGN
+#elif XSIMD_HAS_POSIX_MEMALIGN
         free(ptr);
 #elif defined(_MSC_VER)
         _aligned_free(ptr);
