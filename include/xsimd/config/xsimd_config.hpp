@@ -11,6 +11,10 @@
 
 #include "xsimd_platform_config.hpp"
 
+#define XSIMD_VERSION_MAJOR 3
+#define XSIMD_VERSION_MINOR 0
+#define XSIMD_VERSION_PATCH 0
+
 #ifdef XUSE_AVX
     #define XDEFAULT_ALIGNMENT 32
 #else

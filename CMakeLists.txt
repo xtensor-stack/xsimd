@@ -14,7 +14,7 @@ set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Versionning
 # ===========
 
-file(STRINGS "${XSIMD_INCLUDE_DIR}/xsimd/xsimd_config.hpp" xsimd_version_defines
+file(STRINGS "${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp" xsimd_version_defines
      REGEX "#define XSIMD_VERSION_(MAJOR|MINOR|PATCH)")
 foreach(ver ${xsimd_version_defines})
     if(ver MATCHES "#define XSIMD_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
@@ -33,7 +33,6 @@ OPTION(BUILD_TESTS "xsimd test suite" ON)
 
 set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/xsimd_config.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_platform_config.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
