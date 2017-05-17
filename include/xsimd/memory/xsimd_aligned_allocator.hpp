@@ -199,9 +199,7 @@ namespace xsimd
     
     inline void* aligned_malloc(size_t size, size_t alignment)
     {
-#if XSIMD_MALLOC_ALREADY_ALIGNED
-        return malloc(size);
-#elif XSIMD_HAS_MM_MALLOC
+#if XSIMD_HAS_MM_MALLOC
         return _mm_malloc(size, alignment);
 #elif XSIMD_HAS_POSIX_MEMALIGN
         void* res;
@@ -218,9 +216,7 @@ namespace xsimd
 
     inline void aligned_free(void* ptr)
     {
-#if XSIMD_MALLOC_ALREADY_ALIGNED
-        free(ptr);
-#elif XSIMD_HAS_MM_MALLOC
+#if XSIMD_HAS_MM_MALLOC
         _mm_free(ptr);
 #elif XSIMD_HAS_POSIX_MEMALIGN
         free(ptr);
