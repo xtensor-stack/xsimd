@@ -77,7 +77,7 @@
     #define XSIMD_X86_INSTR_SET XSIMD_X86_SSE3_VERSION
 #endif
 
-#if !defined(XSIMD_X86_INSTR_SET) && (defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))
+#if !defined(XSIMD_X86_INSTR_SET) && (defined(__SSE2__) || defined(__x86_64__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))
     #define XSIMD_X86_INSTR_SET XSIMD_X86_SSE2_VERSION
 #endif
 
@@ -207,7 +207,7 @@
 #endif
 
 // Temporary backward compatibility
-#if ((XSIMD_X86_INSTR_SET > XSIMD_X86_AVX_VERSION) && !defined(XSIMD_FORBID_AVX))
+#if ((XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION) && !defined(XSIMD_FORBID_AVX))
     #define XSIMD_USE_AVX
 #elif (defined(XSIMD_X86_INSTR_SET_AVAILABLE) && !defined(XSIMD_FORBID_SSE))
     #define XSIMD_USE_SSE
