@@ -11,18 +11,8 @@
 
 #include <cstddef>
 #include <algorithm>
-#include "../config/xsimd_platform_config.hpp"
+#include "../config/xsimd_align.hpp"
 
-#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
-    #include <malloc.h>
-#elif defined(__GNUC__)
-    #include <mm_malloc.h>
-    #if defined(XSIMD_ALLOCA)
-        #include <alloca.h>
-    #endif
-#else
-    #include <stdlib.h>
-#endif
 
 namespace xsimd
 {

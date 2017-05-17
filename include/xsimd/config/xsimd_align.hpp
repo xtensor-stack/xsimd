@@ -6,43 +6,10 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSIMD_PLATFORM_CONFIG_HPP
-#define XSIMD_PLATFORM_CONFIG_HPP
+#ifndef XSIMD_ALIGN_HPP
+#define XSIMD_ALIGN_HPP
 
-/*************************
- * SSE instruction set
- *************************/
-
-#if (defined(_M_AMD64) || defined(_M_X64) || defined(__amd64)) && ! defined(__x86_64__)
-    #define __x86_64__ 1
-#endif
-
-// Find sse instruction set from compiler macros if SSE_INSTR_SET not defined
-// Note: Not all compilers define these macros automatically
-#ifndef SSE_INSTR_SET
-    #if defined ( __AVX2__ )
-        #define SSE_INSTR_SET 8
-    #elif defined ( __AVX__ )
-        #define SSE_INSTR_SET 7
-    #elif defined ( __SSE4_2__ )
-        #define SSE_INSTR_SET 6
-    #elif defined ( __SSE4_1__ )
-        #define SSE_INSTR_SET 5
-    #elif defined ( __SSSE3__ )
-        #define SSE_INSTR_SET 4
-    #elif defined ( __SSE3__ )
-        #define SSE_INSTR_SET 3
-    #elif defined ( __SSE2__ ) || defined ( __x86_64__ )
-        #define SSE_INSTR_SET 2
-    #elif defined ( __SSE__ )
-        #define SSE_INSTR_SET 1
-    #elif defined ( _M_IX86_FP )  // Defined in MS compiler on 32bits system. 1: SSE, 2: SSE2
-        #define SSE_INSTR_SET _M_IX86_FP
-    #else
-        #define SSE_INSTR_SET 0
-    #endif // instruction set defines
-#endif // SSE_INSTR_SET
-
+#include "xsimd_instruction_set.hpp"
 
 /**************************************************
  * Platform checks for aligned malloc functions
@@ -92,16 +59,10 @@
   #define XSIMD_HAS_POSIX_MEMALIGN 0
 #endif
 
-#if SSE_INSTR_SET > 0
+#if defined(XSIMD_X86_INSTR_SET_AVAILABLE)
     #define XSIMD_HAS_MM_MALLOC 1
 #else
     #define XSIMD_HAS_MM_MALLOC 0
-#endif
-
-#if ((SSE_INSTR_SET > 6) && !defined(XSIMD_FORBID_AVX))
-    #define XSIMD_USE_AVX
-#elif ((SSE_INSTR_SET > 0) && !defined(XSIMD_FORBID_SSE))
-    #define XSIMD_USE_SSE
 #endif
 
 #ifdef XSIMD_USE_SSE
@@ -109,11 +70,6 @@
 #else
     #define XSIMD_MALLOC_ALREADY_ALIGNED 0
 #endif
-
-#if defined(XSIMD_USE_SSE) || defined(XSIMD_USE_AVX)
-    #define XSIMD_USE_SSE_OR_AVX
-#endif
-
 
 /************************************
  * Stack allocation and alignment
@@ -127,6 +83,7 @@
     #endif
 #endif
 
+// TODO : remove this, use alignas specifier
 #if (defined __GNUC__)
     #define XSIMD_STACK_ALIGN(N) __attribute__((aligned(N)))
 #elif (defined _MSC_VER)
@@ -135,16 +92,19 @@
     #error Equivalent of __attribute__((aligned(N))) unknown
 #endif
 
+/***********
+ * headers *
+ ***********/
 
-/****************************************
- * Number of floating point registers
- ****************************************/
-
-#ifdef __x86_64__
-    #define XSIMD_NB_FP_REGISTERS 16
+#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
+    #include <malloc.h>
+#elif defined(__GNUC__)
+    #include <mm_malloc.h>
+    #if defined(XSIMD_ALLOCA)
+        #include <alloca.h>
+    #endif
 #else
-    #define XSIMD_NB_FP_REGISTERS 8
-
+    #include <stdlib.h>
 #endif
 
 #endif
