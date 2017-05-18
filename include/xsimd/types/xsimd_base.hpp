@@ -9,12 +9,22 @@
 #ifndef XSIMD_BASE_HPP
 #define XSIMD_BASE_HPP
 
+#include <cstddef>
+
 namespace xsimd
 {
+    template <class T, std::size_t N>
+    class batch_bool;
 
-    //Boolean simd CRTP base class
+    template <class T, std::size_t N>
+    class batch;
+
+    /*******************
+     * simd_batch_bool *
+     *******************/
+
     template <class X>
-    class simd_vector_bool
+    class simd_batch_bool
     {
 
     public:
@@ -28,50 +38,51 @@ namespace xsimd
 
     protected:
 
-        simd_vector_bool() = default;
-        ~simd_vector_bool() = default;
+        simd_batch_bool() = default;
+        ~simd_batch_bool() = default;
 
-        simd_vector_bool(const simd_vector_bool&) = default;
-        simd_vector_bool& operator=(const simd_vector_bool&) = default;
+        simd_batch_bool(const simd_batch_bool&) = default;
+        simd_batch_bool& operator=(const simd_batch_bool&) = default;
 
-        simd_vector_bool(simd_vector_bool&&) = default;
-        simd_vector_bool& operator=(simd_vector_bool&&) = default;
+        simd_batch_bool(simd_batch_bool&&) = default;
+        simd_batch_bool& operator=(simd_batch_bool&&) = default;
     };
 
     template <class X>
-    X operator&&(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs);
+    X operator&&(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>& rhs);
 
     template <class X>
-    X operator&&(const simd_vector_bool<X>& lhs, bool rhs);
+    X operator&&(const simd_batch_bool<X>& lhs, bool rhs);
 
     template <class X>
-    X operator&&(bool lhs, const simd_vector_bool<X>& rhs);
+    X operator&&(bool lhs, const simd_batch_bool<X>& rhs);
 
     template <class X>
-    X operator||(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs);
+    X operator||(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>& rhs);
 
     template <class X>
-    X operator||(const simd_vector_bool<X>& lhs, bool rhs);
+    X operator||(const simd_batch_bool<X>& lhs, bool rhs);
 
     template <class X>
-    X operator||(bool lhs, const simd_vector_bool<X>& rhs);
+    X operator||(bool lhs, const simd_batch_bool<X>& rhs);
 
     template <class X>
-    X operator!(const simd_vector_bool<X>& rhs);
+    X operator!(const simd_batch_bool<X>& rhs);
 
+    /**************
+     * simd_batch *
+     **************/
 
     template <class X>
-    struct simd_vector_traits;
+    struct simd_batch_traits;
 
-
-    // Numeric simd CRTP class
     template <class X>
-    class simd_vector
+    class simd_batch
     {
 
     public:
 
-        using value_type = typename simd_vector_traits<X>::value_type;
+        using value_type = typename simd_batch_traits<X>::value_type;
 
         X& operator+=(const X& rhs);
         X& operator+=(const value_type& rhs);
@@ -100,223 +111,223 @@ namespace xsimd
 
     protected:
 
-        simd_vector() = default;
-        ~simd_vector() = default;
+        simd_batch() = default;
+        ~simd_batch() = default;
 
-        simd_vector(const simd_vector&) = default;
-        simd_vector& operator=(const simd_vector&) = default;
+        simd_batch(const simd_batch&) = default;
+        simd_batch& operator=(const simd_batch&) = default;
 
-        simd_vector(simd_vector&&) = default;
-        simd_vector& operator=(simd_vector&&) = default;
+        simd_batch(simd_batch&&) = default;
+        simd_batch& operator=(simd_batch&&) = default;
     };
 
     template <class X>
-    X operator+(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs);
+    X operator+(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
 
     template <class X>
-    X operator+(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs);
+    X operator+(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs);
 
     template <class X>
-    X operator-(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs);
+    X operator-(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
 
     template <class X>
-    X operator-(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs);
+    X operator-(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs);
 
     template <class X>
-    X operator*(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs);
+    X operator*(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
 
     template <class X>
-    X operator*(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs);
+    X operator*(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs);
 
     template <class X>
-    X operator/(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs);
+    X operator/(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
 
     template <class X>
-    X operator/(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs);
+    X operator/(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs);
 
     template <class X>
-    typename simd_vector_traits<X>::vector_bool 
-    operator>(const simd_vector<X>& lhs, const simd_vector<X>& rhs);
+    typename simd_batch_traits<X>::batch_bool_type 
+    operator>(const simd_batch<X>& lhs, const simd_batch<X>& rhs);
 
     template <class X>
-    typename simd_vector_traits<X>::vector_bool
-    operator>=(const simd_vector<X>& lhs, const simd_vector<X>& rhs);
+    typename simd_batch_traits<X>::batch_bool_type
+    operator>=(const simd_batch<X>& lhs, const simd_batch<X>& rhs);
 
     template <class X>
-    typename simd_vector_traits<X>::vector_bool
-    operator!(const simd_vector<X>& rhs);
+    typename simd_batch_traits<X>::batch_bool_type
+    operator!(const simd_batch<X>& rhs);
 
 
-    /*************************************
-     * simd_vector_bool implementation
-     *************************************/
+    /**********************************
+     * simd_batch_bool implementation *
+     **********************************/
 
     template <class X>
-    inline X& simd_vector_bool<X>::operator&=(const X& rhs)
+    inline X& simd_batch_bool<X>::operator&=(const X& rhs)
     {
         (*this)() = (*this)() & rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector_bool<X>::operator|=(const X& rhs)
+    inline X& simd_batch_bool<X>::operator|=(const X& rhs)
     {
         (*this)() = (*this)() | rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector_bool<X>::operator^=(const X& rhs)
+    inline X& simd_batch_bool<X>::operator^=(const X& rhs)
     {
         (*this)() = (*this)() ^ rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector_bool<X>::operator()()
+    inline X& simd_batch_bool<X>::operator()()
     {
         return *static_cast<X*>(this);
     }
 
     template <class X>
-    const X& simd_vector_bool<X>::operator()() const
+    const X& simd_batch_bool<X>::operator()() const
     {
         return *static_cast<const X*>(this);
     }
 
     template <class X>
-    inline X operator&&(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)
+    inline X operator&&(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>& rhs)
     {
         return lhs() & rhs();
     }
 
     template <class X>
-    inline X operator&&(const simd_vector_bool<X>& lhs, bool rhs)
+    inline X operator&&(const simd_batch_bool<X>& lhs, bool rhs)
     {
         return lhs() & X(rhs);
     }
 
     template <class X>
-    inline X operator&&(bool lhs, const simd_vector_bool<X>& rhs)
+    inline X operator&&(bool lhs, const simd_batch_bool<X>& rhs)
     {
         return X(lhs) & rhs();
     }
 
     template <class X>
-    inline X operator||(const simd_vector_bool<X>& lhs, const simd_vector_bool<X>& rhs)
+    inline X operator||(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>& rhs)
     {
         return lhs() | rhs();
     }
 
     template <class X>
-    inline X operator||(const simd_vector_bool<X>& lhs, bool rhs)
+    inline X operator||(const simd_batch_bool<X>& lhs, bool rhs)
     {
         return lhs() | X(rhs);
     }
 
     template <class X>
-    inline X operator||(bool lhs, const simd_vector_bool<X>& rhs)
+    inline X operator||(bool lhs, const simd_batch_bool<X>& rhs)
     {
         return X(lhs) | rhs();
     }
 
     template <class X>
-    inline X operator!(const simd_vector_bool<X>& rhs)
+    inline X operator!(const simd_batch_bool<X>& rhs)
     {
         return rhs() == 0;
     }
 
 
-    /*************************************
-     * simd_vector_base implementation
-     *************************************/
+    /*****************************
+     * simd_batch implementation *
+     *****************************/
  
     template <class X>
-    inline X& simd_vector<X>::operator+=(const X& rhs)
+    inline X& simd_batch<X>::operator+=(const X& rhs)
     {
         (*this)() = (*this)() + rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator+=(const value_type& rhs)
+    inline X& simd_batch<X>::operator+=(const value_type& rhs)
     {
         (*this)() = (*this)() + X(rhs);
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator-=(const X& rhs)
+    inline X& simd_batch<X>::operator-=(const X& rhs)
     {
         (*this)() = (*this)() - rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator-=(const value_type& rhs)
+    inline X& simd_batch<X>::operator-=(const value_type& rhs)
     {
         (*this)() = (*this)() - X(rhs);
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator*=(const X& rhs)
+    inline X& simd_batch<X>::operator*=(const X& rhs)
     {
         (*this)() = (*this)() * rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator*=(const value_type& rhs)
+    inline X& simd_batch<X>::operator*=(const value_type& rhs)
     {
         (*this)() = (*this)() * X(rhs);
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator/=(const X& rhs)
+    inline X& simd_batch<X>::operator/=(const X& rhs)
     {
         (*this)() = (*this)() / rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator/=(const value_type& rhs)
+    inline X& simd_batch<X>::operator/=(const value_type& rhs)
     {
         (*this)() = (*this)() / X(rhs);
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator&=(const X& rhs)
+    inline X& simd_batch<X>::operator&=(const X& rhs)
     {
         (*this)() = (*this)() & rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator|=(const X& rhs)
+    inline X& simd_batch<X>::operator|=(const X& rhs)
     {
         (*this)() = (*this)() | rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator^=(const X& rhs)
+    inline X& simd_batch<X>::operator^=(const X& rhs)
     {
         (*this)() = (*this)() ^ rhs;
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator++()
+    inline X& simd_batch<X>::operator++()
     {
         (*this)() += value_type(1);
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator++(int)
+    inline X& simd_batch<X>::operator++(int)
     {
         X tmp = (*this)();
         (*this)() += value_type(1);
@@ -324,14 +335,14 @@ namespace xsimd
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator--()
+    inline X& simd_batch<X>::operator--()
     {
         (*this)() -= value_type(1);
         return (*this)();
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator--(int)
+    inline X& simd_batch<X>::operator--(int)
     {
         X tmp = (*this)();
         (*this)() -= value_type(1);
@@ -339,82 +350,82 @@ namespace xsimd
     }
 
     template <class X>
-    inline X& simd_vector<X>::operator()()
+    inline X& simd_batch<X>::operator()()
     {
         return *static_cast<X*>(this);
     }
 
     template <class X>
-    inline const X& simd_vector<X>::operator()() const
+    inline const X& simd_batch<X>::operator()() const
     {
         return *static_cast<const X*>(this);
     }
 
     template <class X>
-    inline X operator+(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    inline X operator+(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
         return lhs() + X(rhs);
     }
 
     template <class X>
-    inline X operator+(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    inline X operator+(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs)
     {
         return X(lhs) + rhs();
     }
 
     template <class X>
-    inline X operator-(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    inline X operator-(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
         return lhs() - X(rhs);
     }
 
     template <class X>
-    inline X operator-(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    inline X operator-(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs)
     {
         return X(lhs) - rhs();
     }
 
     template <class X>
-    inline X operator*(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    inline X operator*(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
         return lhs() * X(rhs);
     }
 
     template <class X>
-    inline X operator*(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    inline X operator*(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs)
     {
         return X(lhs) * rhs();
     }
 
     template <class X>
-    inline X operator/(const simd_vector<X>& lhs, const typename simd_vector_traits<X>::value_type& rhs)
+    inline X operator/(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
         return lhs() / X(rhs);
     }
 
     template <class X>
-    inline X operator/(const typename simd_vector<X>::value_type& lhs, const simd_vector<X>& rhs)
+    inline X operator/(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs)
     {
         return X(lhs) / rhs();
     }
 
     template <class X>
-    inline typename simd_vector_traits<X>::vector_bool 
-    operator>(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
+    inline typename simd_batch_traits<X>::batch_bool_type
+    operator>(const simd_batch<X>& lhs, const simd_batch<X>& rhs)
     {
         return rhs() < lhs();
     }
 
     template <class X>
-    inline typename simd_vector_traits<X>::vector_bool
-    operator>=(const simd_vector<X>& lhs, const simd_vector<X>& rhs)
+    inline typename simd_batch_traits<X>::batch_bool_type
+    operator>=(const simd_batch<X>& lhs, const simd_batch<X>& rhs)
     {
         return rhs() <= lhs();
     }
 
     template <class X>
-    inline typename simd_vector_traits<X>::vector_bool
-    operator!(const simd_vector<X>& rhs)
+    inline typename simd_batch_traits<X>::batch_bool_type
+    operator!(const simd_batch<X>& rhs)
     {
         return rhs() == X(0);
     }

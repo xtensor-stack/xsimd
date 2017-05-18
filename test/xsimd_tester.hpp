@@ -23,7 +23,7 @@ namespace xsimd
     struct simd_basic_tester
     {
         using vector_type = V;
-        using value_type = typename simd_vector_traits<vector_type>::value_type;
+        using value_type = typename simd_batch_traits<vector_type>::value_type;
         using res_type = std::vector<value_type, aligned_allocator<value_type, A>>;
 
         constexpr static const size_t size = N;

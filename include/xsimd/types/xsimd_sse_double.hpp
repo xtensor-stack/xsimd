@@ -14,16 +14,21 @@
 namespace xsimd
 {
 
-    class vector2db : public simd_vector_bool<vector2db>
+    /*************************
+     * batch_bool<double, 2> *
+     *************************/
+
+    template <>
+    class batch_bool<double, 2> : public simd_batch_bool<batch_bool<double, 2>>
     {
 
     public:
 
-        vector2db();
-        explicit vector2db(bool b);
-        vector2db(bool b0, bool b1);
-        vector2db(const __m128d& rhs);
-        vector2db& operator=(const __m128d& rhs);
+        batch_bool();
+        explicit batch_bool(bool b);
+        batch_bool(bool b0, bool b1);
+        batch_bool(const __m128d& rhs);
+        batch_bool& operator=(const __m128d& rhs);
 
         operator __m128d() const;
 
@@ -32,38 +37,42 @@ namespace xsimd
         __m128d m_value;
     };
 
-    vector2db operator&(const vector2db& lhs, const vector2db& rhs);
-    vector2db operator|(const vector2db& lhs, const vector2db& rhs);
-    vector2db operator^(const vector2db& lhs, const vector2db& rhs);
-    vector2db operator~(const vector2db& rhs);
+    batch_bool<double, 2> operator&(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
+    batch_bool<double, 2> operator|(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
+    batch_bool<double, 2> operator^(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
+    batch_bool<double, 2> operator~(const batch_bool<double, 2>& rhs);
 
-    vector2db operator==(const vector2db& lhs, const vector2db& rhs);
-    vector2db operator!=(const vector2db& lhs, const vector2db& rhs);
+    batch_bool<double, 2> operator==(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
+    batch_bool<double, 2> operator!=(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
 
-    class vector2d;
+    /********************
+     * batch<double, 2> *
+     ********************/
 
     template <>
-    struct simd_vector_traits<vector2d>
+    struct simd_batch_traits<batch<double, 2>>
     {
         using value_type = double;
-        using vector_bool = vector2db;
+        static constexpr std::size_t size = 2;
+        using batch_bool_type = batch_bool<double, 2>;
     };
 
-    class vector2d : public simd_vector<vector2d>
+    template <>
+    class batch<double, 2> : public simd_batch<batch<double, 2>>
     {
 
     public:
 
-        vector2d();
-        explicit vector2d(double d);
-        vector2d(double d0, double d1);
-        vector2d(const __m128d& rhs);
-        vector2d& operator=(const __m128d& rhs);
+        batch();
+        explicit batch(double d);
+        batch(double d0, double d1);
+        batch(const __m128d& rhs);
+        batch& operator=(const __m128d& rhs);
 
         operator __m128d() const;
 
-        vector2d& load_aligned(const double* src);
-        vector2d& load_unaligned(const double* src);
+        batch& load_aligned(const double* src);
+        batch& load_unaligned(const double* src);
 
         void store_aligned(double* dst) const;
         void store_unaligned(double* dst) const;
@@ -73,241 +82,238 @@ namespace xsimd
         __m128d m_value;
     };
 
-    vector2d operator-(const vector2d& rhs);
-    vector2d operator+(const vector2d& lhs, const vector2d& rhs);
-    vector2d operator-(const vector2d& lhs, const vector2d& rhs);
-    vector2d operator*(const vector2d& lhs, const vector2d& rhs);
-    vector2d operator/(const vector2d& lhs, const vector2d& rhs);
+    batch<double, 2> operator-(const batch<double, 2>& rhs);
+    batch<double, 2> operator+(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch<double, 2> operator-(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch<double, 2> operator*(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch<double, 2> operator/(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     
-    vector2db operator==(const vector2d& lhs, const vector2d& rhs);
-    vector2db operator!=(const vector2d& lhs, const vector2d& rhs);
-    vector2db operator<(const vector2d& lhs, const vector2d& rhs);
-    vector2db operator<=(const vector2d& lhs, const vector2d& rhs);
+    batch_bool<double, 2> operator==(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch_bool<double, 2> operator!=(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch_bool<double, 2> operator<(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch_bool<double, 2> operator<=(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
 
-    vector2d operator&(const vector2d& lhs, const vector2d& rhs);
-    vector2d operator|(const vector2d& lhs, const vector2d& rhs);
-    vector2d operator^(const vector2d& lhs, const vector2d& rhs);
-    vector2d operator~(const vector2d& rhs);
+    batch<double, 2> operator&(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch<double, 2> operator|(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch<double, 2> operator^(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch<double, 2> operator~(const batch<double, 2>& rhs);
 
-    vector2d min(const vector2d& lhs, const vector2d& rhs);
-    vector2d max(const vector2d& lhs, const vector2d& rhs);
+    batch<double, 2> min(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
+    batch<double, 2> max(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
 
-    vector2d abs(const vector2d& rhs);
+    batch<double, 2> abs(const batch<double, 2>& rhs);
+    batch<double, 2> fma(const batch<double, 2>& x, const batch<double, 2>& y, const batch<double, 2>& z);
+    batch<double, 2> sqrt(const batch<double, 2>& rhs);
 
-    vector2d fma(const vector2d& x, const vector2d& y, const vector2d& z);
+    double hadd(const batch<double, 2>& rhs);
+    batch<double, 2> haddp(const batch<double, 2>* row);
 
-    vector2d sqrt(const vector2d& rhs);
+    batch<double, 2> select(const batch_bool<double, 2>& cond, const batch<double, 2>& a, const batch<double, 2>& b);
 
-    double hadd(const vector2d& rhs);
-    vector2d haddp(const vector2d* row);
+    /****************************************
+     * batch_bool<double, 2> implementation *
+     ****************************************/
 
-    vector2d select(const vector2db& cond, const vector2d& a, const vector2d& b);
-
-
-    /******************************
-     * vector2db implementation
-     ******************************/
-
-    inline vector2db::vector2db()
+    inline batch_bool<double, 2>::batch_bool()
     {
     }
 
-    inline vector2db::vector2db(bool b)
+    inline batch_bool<double, 2>::batch_bool(bool b)
         : m_value(_mm_castsi128_pd(_mm_set1_epi32(-(int)b)))
     {
     }
 
-    inline vector2db::vector2db(bool b0, bool b1)
+    inline batch_bool<double, 2>::batch_bool(bool b0, bool b1)
         : m_value(_mm_castsi128_pd(_mm_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1)))
     {
     }
 
-    inline vector2db::vector2db(const __m128d& rhs)
+    inline batch_bool<double, 2>::batch_bool(const __m128d& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector2db& vector2db::operator=(const __m128d& rhs)
+    inline batch_bool<double, 2>& batch_bool<double, 2>::operator=(const __m128d& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector2db::operator __m128d() const
+    inline batch_bool<double, 2>::operator __m128d() const
     {
         return m_value;
     }
 
-    inline vector2db operator&(const vector2db& lhs, const vector2db& rhs)
+    inline batch_bool<double, 2> operator&(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
     {
         return _mm_and_pd(lhs, rhs);
     }
 
-    inline vector2db operator|(const vector2db& lhs, const vector2db& rhs)
+    inline batch_bool<double, 2> operator|(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
     {
         return _mm_or_pd(lhs, rhs);
     }
 
-    inline vector2db operator^(const vector2db& lhs, const vector2db& rhs)
+    inline batch_bool<double, 2> operator^(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
     {
         return _mm_xor_pd(lhs, rhs);
     }
 
-    inline vector2db operator~(const vector2db& rhs)
+    inline batch_bool<double, 2> operator~(const batch_bool<double, 2>& rhs)
     {
         return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
     }
 
-    inline vector2db operator==(const vector2db& lhs, const vector2db& rhs)
+    inline batch_bool<double, 2> operator==(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
     {
         return _mm_cmpeq_pd(lhs, rhs);
     }
 
-    inline vector2db operator!=(const vector2db& lhs, const vector2db& rhs)
+    inline batch_bool<double, 2> operator!=(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
     {
         return _mm_cmpneq_pd(lhs, rhs);
     }
 
 
-    /*****************************
-     * vector2d implementation
-     *****************************/
+    /***********************************
+     * batch<double, 2> implementation *
+     ***********************************/
 
-    inline vector2d::vector2d()
+    inline batch<double, 2>::batch()
     {
     }
 
-    inline vector2d::vector2d(double d)
+    inline batch<double, 2>::batch(double d)
         : m_value(_mm_set1_pd(d))
     {
     }
 
-    inline vector2d::vector2d(double d0, double d1)
+    inline batch<double, 2>::batch(double d0, double d1)
         : m_value(_mm_setr_pd(d0, d1))
     {
     }
 
-    inline vector2d::vector2d(const __m128d& rhs)
+    inline batch<double, 2>::batch(const __m128d& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector2d& vector2d::operator=(const __m128d& rhs)
+    inline batch<double, 2>& batch<double, 2>::operator=(const __m128d& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector2d::operator __m128d() const
+    inline batch<double, 2>::operator __m128d() const
     {
         return m_value;
     }
 
-    inline vector2d& vector2d::load_aligned(const double* src)
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const double* src)
     {
         m_value = _mm_load_pd(src);
         return *this;
     }
 
-    inline vector2d& vector2d::load_unaligned(const double* src)
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const double* src)
     {
         m_value = _mm_loadu_pd(src);
         return *this;
     }
 
-    inline void vector2d::store_aligned(double* dst) const
+    inline void batch<double, 2>::store_aligned(double* dst) const
     {
         _mm_store_pd(dst, m_value);
     }
 
-    inline void vector2d::store_unaligned(double* dst) const
+    inline void batch<double, 2>::store_unaligned(double* dst) const
     {
         _mm_storeu_pd(dst, m_value);
     }
 
-    inline vector2d operator-(const vector2d& rhs)
+    inline batch<double, 2> operator-(const batch<double, 2>& rhs)
     {
         return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_setr_epi32(0, 0x80000000,
                                                                0, 0x80000000)));
     }
 
-    inline vector2d operator+(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> operator+(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_add_pd(lhs, rhs);
     }
 
-    inline vector2d operator-(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> operator-(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_sub_pd(lhs, rhs);
     }
 
-    inline vector2d operator*(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> operator*(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_mul_pd(lhs, rhs);
     }
 
-    inline vector2d operator/(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> operator/(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_div_pd(lhs, rhs);
     }
     
-    inline vector2db operator==(const vector2d& lhs, const vector2d& rhs)
+    inline batch_bool<double, 2> operator==(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_cmpeq_pd(lhs, rhs);
     }
 
-    inline vector2db operator!=(const vector2d& lhs, const vector2d& rhs)
+    inline batch_bool<double, 2> operator!=(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_cmpneq_pd(lhs, rhs);
     }
 
-    inline vector2db operator<(const vector2d& lhs, const vector2d& rhs)
+    inline batch_bool<double, 2> operator<(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_cmplt_pd(lhs, rhs);
     }
 
-    inline vector2db operator<=(const vector2d& lhs, const vector2d& rhs)
+    inline batch_bool<double, 2> operator<=(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_cmple_pd(lhs, rhs);
     }
 
-    inline vector2d operator&(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> operator&(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_and_pd(lhs, rhs);
     }
 
-    inline vector2d operator|(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> operator|(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_or_pd(lhs, rhs);
     }
 
-    inline vector2d operator^(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> operator^(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_xor_pd(lhs, rhs);
     }
 
-    inline vector2d operator~(const vector2d& rhs)
+    inline batch<double, 2> operator~(const batch<double, 2>& rhs)
     {
         return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
     }
 
-    inline vector2d min(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> min(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_min_pd(lhs, rhs);
     }
 
-    inline vector2d max(const vector2d& lhs, const vector2d& rhs)
+    inline batch<double, 2> max(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_max_pd(lhs, rhs);
     }
 
-    inline vector2d abs(const vector2d& rhs)
+    inline batch<double, 2> abs(const batch<double, 2>& rhs)
     {
         __m128d sign_mask = _mm_set1_pd(-0.); // -0. = 1 << 63
         return _mm_andnot_pd(sign_mask, rhs);
     }
     
-    inline vector2d fma(const vector2d& x, const vector2d& y, const vector2d& z)
+    inline batch<double, 2> fma(const batch<double, 2>& x, const batch<double, 2>& y, const batch<double, 2>& z)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
         return _mm_fmadd_pd(x, y, z);
@@ -316,12 +322,12 @@ namespace xsimd
 #endif
     }
 
-    inline vector2d sqrt(const vector2d& rhs)
+    inline batch<double, 2> sqrt(const batch<double, 2>& rhs)
     {
         return _mm_sqrt_pd(rhs);
     }
 
-    inline double hadd(const vector2d& rhs)
+    inline double hadd(const batch<double, 2>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
         __m128d tmp0 = _mm_hadd_pd(rhs, rhs);
@@ -331,7 +337,7 @@ namespace xsimd
         return _mm_cvtsd_f64(tmp0);
     }
 
-    inline vector2d haddp(const vector2d* row)
+    inline batch<double, 2> haddp(const batch<double, 2>* row)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
         return _mm_hadd_pd(row[0], row[1]);
@@ -341,7 +347,7 @@ namespace xsimd
 #endif
     }
 
-    inline vector2d select(const vector2db& cond, const vector2d& a, const vector2d& b)
+    inline batch<double, 2> select(const batch_bool<double, 2>& cond, const batch<double, 2>& a, const batch<double, 2>& b)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
         return _mm_blendv_pd(b, a, cond);
