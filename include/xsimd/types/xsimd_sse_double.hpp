@@ -309,7 +309,7 @@ namespace xsimd
     
     inline vector2d fma(const vector2d& x, const vector2d& y, const vector2d& z)
     {
-#ifdef __FMA__
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
         return _mm_fmadd_pd(x, y, z);
 #else
         return (x * y) + z;
@@ -323,7 +323,7 @@ namespace xsimd
 
     inline double hadd(const vector2d& rhs)
     {
-#if SSE_INSTR_SET >= 3  // SSE3
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
         __m128d tmp0 = _mm_hadd_pd(rhs, rhs);
 #else
         __m128d tmp0 = _mm_add_sd(rhs, _mm_unpackhi_pd(rhs, rhs));
@@ -333,7 +333,7 @@ namespace xsimd
 
     inline vector2d haddp(const vector2d* row)
     {
-#if SSE_INSTR_SET >= 3  // SSE3
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
         return _mm_hadd_pd(row[0], row[1]);
 #else
         return _mm_add_pd(_mm_unpacklo_pd(row[0], row[1]),
@@ -343,7 +343,7 @@ namespace xsimd
 
     inline vector2d select(const vector2db& cond, const vector2d& a, const vector2d& b)
     {
-#if SSE_INSTR_SET >= 5  // SSE 4.1
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
         return _mm_blendv_pd(b, a, cond);
 #else
         return _mm_or_pd(_mm_and_pd(cond, a), _mm_andnot_pd(cond, b));

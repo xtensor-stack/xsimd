@@ -9,7 +9,8 @@
 #ifndef XSIMD_CONFIG_HPP
 #define XSIMD_CONFIG_HPP
 
-#include "xsimd_platform_config.hpp"
+#include "xsimd_instruction_set.hpp"
+#include "xsimd_align.hpp"
 
 #define XSIMD_VERSION_MAJOR 3
 #define XSIMD_VERSION_MINOR 0

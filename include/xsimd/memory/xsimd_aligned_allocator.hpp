@@ -11,18 +11,8 @@
 
 #include <cstddef>
 #include <algorithm>
-#include "../config/xsimd_platform_config.hpp"
+#include "../config/xsimd_align.hpp"
 
-#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
-    #include <malloc.h>
-#elif defined(__GNUC__)
-    #include <mm_malloc.h>
-    #if defined(XSIMD_ALLOCA)
-        #include <alloca.h>
-    #endif
-#else
-    #include <stdlib.h>
-#endif
 
 namespace xsimd
 {
@@ -209,9 +199,7 @@ namespace xsimd
     
     inline void* aligned_malloc(size_t size, size_t alignment)
     {
-#if XSIMD_MALLOC_ALREADY_ALIGNED
-        return malloc(size);
-#elif XSIMD_HAS_MM_MALLOC
+#if XSIMD_HAS_MM_MALLOC
         return _mm_malloc(size, alignment);
 #elif XSIMD_HAS_POSIX_MEMALIGN
         void* res;
@@ -228,9 +216,7 @@ namespace xsimd
 
     inline void aligned_free(void* ptr)
     {
-#if XSIMD_MALLOC_ALREADY_ALIGNED
-        free(ptr);
-#elif XSIMD_HAS_MM_MALLOC
+#if XSIMD_HAS_MM_MALLOC
         _mm_free(ptr);
 #elif XSIMD_HAS_POSIX_MEMALIGN
         free(ptr);

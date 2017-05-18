@@ -313,7 +313,7 @@ namespace xsimd
 
     inline vector8f fma(const vector8f& x, const vector8f& y, const vector8f& z)
     {
-#ifdef __FMA__
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
         return _mm256_fmadd_ps(x, y, z);
 #else
         return x * y + z;

@@ -33,9 +33,10 @@ OPTION(BUILD_TESTS "xsimd test suite" ON)
 
 set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_platform_config.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_align.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_instruction_set.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_stack_buffer.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_double.hpp
