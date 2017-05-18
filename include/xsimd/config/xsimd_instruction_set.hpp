@@ -209,7 +209,7 @@
 // Temporary backward compatibility
 #if ((XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION) && !defined(XSIMD_FORBID_AVX))
     #define XSIMD_USE_AVX
-#elif (defined(XSIMD_X86_INSTR_SET_AVAILABLE) && !defined(XSIMD_FORBID_SSE))
+#elif ((XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION) && !defined(XSIMD_FORBID_SSE))
     #define XSIMD_USE_SSE
 #endif
 
