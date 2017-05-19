@@ -10,12 +10,22 @@
 #define XSIMD_TRAITS_HPP
 
 #include "../config/xsimd_include.hpp"
-#if defined(XSIMD_USE_AVX)
-#include "xavx_float.hpp"
-#include "xavx_double.hpp"
-#elif defined(XSIMD_USE_SSE)
-#include "xsse_float.hpp"
-#include "xsse_double.hpp"
+
+#undef XSIMD_BATCH_FLOAT_SIZE
+#undef XSIMD_BATCH_DOUBLE_SIZE
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#include "xsimd_sse_float.hpp"
+#include "xsimd_sse_double.hpp"
+#define XSIMD_BATCH_FLOAT_SIZE 4
+#define XSIMD_BATCH_DOUBLE_SIZE 2
+#endif
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#include "xsimd_avx_float.hpp"
+#include "xsimd_avx_double.hpp"
+#define XSIMD_BATCH_FLOAT_SIZE 8
+#define XSIMD_BATCH_DOUBLE_SIZE 4
 #endif
 
 namespace xsimd
@@ -41,17 +51,17 @@ namespace xsimd
     template <class T>
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
-#ifdef XSIMD_USE_AVX
+#ifdef XSIMD_BATCH_DOUBLE_SIZE
 
     template <>
     struct simd_traits<float>
     {
-        using type = vector8f;
-        static constexpr size_t size = 8;
+        using type = batch<float, XSIMD_BATCH_FLOAT_SIZE>;
+        static constexpr size_t size = type::size;
     };
 
     template <>
-    struct revert_simd_traits<vector8f>
+    struct revert_simd_traits<batch<float, XSIMD_BATCH_FLOAT_SIZE>>
     {
         using type = float;
         static constexpr size_t size = simd_traits<type>::size;
@@ -60,42 +70,12 @@ namespace xsimd
     template <>
     struct simd_traits<double>
     {
-        using type = vector4d;
-        static constexpr size_t size = 4;
+        using type = batch<double, XSIMD_BATCH_DOUBLE_SIZE>;
+        static constexpr size_t size = type::size;
     };
 
     template <>
-    struct revert_simd_traits<vector4d>
-    {
-        using type = double;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-
-#elif defined(XSIMD_USE_SSE)
-
-    template <>
-    struct simd_traits<float>
-    {
-        using type = vector4f;
-        static constexpr size_t size = 4;
-    };
-
-    template <>
-    struct revert_simd_traits<vector4f>
-    {
-        using type = float;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-
-    template <>
-    struct simd_traits<double>
-    {
-        using type = vector2d;
-        static constexpr size_t size = 2;
-    };
-
-    template <>
-    struct revert_simd_traits<vector2d>
+    struct revert_simd_traits<batch<double, XSIMD_BATCH_DOUBLE_SIZE>>
     {
         using type = double;
         static constexpr size_t size = simd_traits<type>::size;

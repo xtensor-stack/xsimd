@@ -206,15 +206,15 @@
     #define XSIMD_INSTR_SET_AVAILABLE
 #endif
 
-// Temporary backward compatibility
-#if ((XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION) && !defined(XSIMD_FORBID_AVX))
-    #define XSIMD_USE_AVX
-#elif (defined(XSIMD_X86_INSTR_SET_AVAILABLE) && !defined(XSIMD_FORBID_SSE))
-    #define XSIMD_USE_SSE
-#endif
+/**********************
+ * USER CONFIGURATION *
+ **********************/
 
-#if defined(XSIMD_USE_SSE) || defined(XSIMD_USE_AVX)
-    #define XSIMD_USE_SSE_OR_AVX
+#ifdef XSIMD_FORCE_X86_INSTR_SET
+    #define XSIMD_X86_INSTR_SET XSIMD_FORCE_X86_INSTR_SET
+    #define XSIMD_X86_INSTR_SET_AVAILABLE
+    #define XSIMD_INSTR_SET XSIMD_X86_INSTR_SET
+    #define XSIMD_INSTR_SET_AVAILABLE
 #endif
 
 #endif

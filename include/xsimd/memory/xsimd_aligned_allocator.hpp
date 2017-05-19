@@ -13,6 +13,16 @@
 #include <algorithm>
 #include "../config/xsimd_align.hpp"
 
+#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
+    #include <malloc.h>
+#elif defined(__GNUC__)
+    #include <mm_malloc.h>
+    #if defined(XSIMD_ALLOCA)
+        #include <alloca.h>
+    #endif
+#else
+    #include <stdlib.h>
+#endif
 
 namespace xsimd
 {
@@ -78,9 +88,9 @@ namespace xsimd
     size_t get_alignment_offset(const T* p, size_t size, size_t block_size);
 
 
-    /**************************************
-     * aligned_allocator implementation
-     **************************************/
+    /************************************
+     * aligned_allocator implementation *
+     ************************************/
 
     template <class T, size_t A>
     inline aligned_allocator<T, A>::aligned_allocator() noexcept
@@ -170,9 +180,9 @@ namespace xsimd
     }
 
 
-    /******************************************
-     * aligned malloc / free implementation
-     ******************************************/
+    /****************************************
+     * aligned malloc / free implementation *
+     ****************************************/
 
     namespace detail
     {

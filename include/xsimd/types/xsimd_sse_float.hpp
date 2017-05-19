@@ -14,16 +14,21 @@
 namespace xsimd
 {
 
-    class vector4fb : public simd_vector_bool<vector4fb>
+    /************************
+     * batch_bool<float, 4> *
+     ************************/
+
+    template <>
+    class batch_bool<float, 4> : public simd_batch_bool<batch_bool<float, 4>>
     {
 
     public:
 
-        vector4fb();
-        explicit vector4fb(bool b);
-        vector4fb(bool b0, bool b1, bool b2, bool b3);
-        vector4fb(const __m128& rhs);
-        vector4fb& operator=(const __m128& rhs);
+        batch_bool();
+        explicit batch_bool(bool b);
+        batch_bool(bool b0, bool b1, bool b2, bool b3);
+        batch_bool(const __m128& rhs);
+        batch_bool& operator=(const __m128& rhs);
 
         operator __m128() const;
 
@@ -32,38 +37,42 @@ namespace xsimd
         __m128 m_value;
     };
 
-    vector4fb operator&(const vector4fb& lhs, const vector4fb& rhs);
-    vector4fb operator|(const vector4fb& lhs, const vector4fb& rhs);
-    vector4fb operator^(const vector4fb& lhs, const vector4fb& rhs);
-    vector4fb operator~(const vector4fb& rhs);
+    batch_bool<float, 4> operator&(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
+    batch_bool<float, 4> operator|(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
+    batch_bool<float, 4> operator^(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
+    batch_bool<float, 4> operator~(const batch_bool<float, 4>& rhs);
 
-    vector4fb operator==(const vector4fb& lhs, const vector4fb& rhs);
-    vector4fb operator!=(const vector4fb& lhs, const vector4fb& rhs);
+    batch_bool<float, 4> operator==(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
+    batch_bool<float, 4> operator!=(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
 
-    class vector4f;
+    /*******************
+     * batch<float, 4> *
+     *******************/
 
     template <>
-    struct simd_vector_traits<vector4f>
+    struct simd_batch_traits<batch<float, 4>>
     {
         using value_type = float;
-        using vector_bool = vector4fb;
+        static constexpr std::size_t size = 4;
+        using batch_bool_type = batch_bool<float, 4>;
     };
 
-    class vector4f : public simd_vector<vector4f>
+    template <>
+    class batch<float, 4> : public simd_batch<batch<float, 4>>
     {
 
     public:
 
-        vector4f();
-        explicit vector4f(float f);
-        vector4f(float f0, float f1, float f2, float f3);
-        vector4f(const __m128& rhs);
-        vector4f& operator=(const __m128& rhs);
+        batch();
+        explicit batch(float f);
+        batch(float f0, float f1, float f2, float f3);
+        batch(const __m128& rhs);
+        batch& operator=(const __m128& rhs);
 
         operator __m128() const;
 
-        vector4f& load_aligned(const float* src);
-        vector4f& load_unaligned(const float* src);
+        batch& load_aligned(const float* src);
+        batch& load_unaligned(const float* src);
 
         void store_aligned(float* dst) const;
         void store_unaligned(float* dst) const;
@@ -73,240 +82,236 @@ namespace xsimd
         __m128 m_value;
     };
 
-    vector4f operator-(const vector4f& rhs);
-    vector4f operator+(const vector4f& lhs, const vector4f& rhs);
-    vector4f operator-(const vector4f& lhs, const vector4f& rhs);
-    vector4f operator*(const vector4f& lhs, const vector4f& rhs);
-    vector4f operator/(const vector4f& lhs, const vector4f& rhs);
+    batch<float, 4> operator-(const batch<float, 4>& rhs);
+    batch<float, 4> operator+(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> operator-(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> operator*(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> operator/(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     
-    vector4fb operator==(const vector4f& lhs, const vector4f& rhs);
-    vector4fb operator!=(const vector4f& lhs, const vector4f& rhs);
-    vector4fb operator<(const vector4f& lhs, const vector4f& rhs);
-    vector4fb operator<=(const vector4f& lhs, const vector4f& rhs);
+    batch_bool<float, 4> operator==(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch_bool<float, 4> operator!=(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch_bool<float, 4> operator<(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch_bool<float, 4> operator<=(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
 
-    vector4f operator&(const vector4f& lhs, const vector4f& rhs);
-    vector4f operator|(const vector4f& lhs, const vector4f& rhs);
-    vector4f operator^(const vector4f& lhs, const vector4f& rhs);
-    vector4f operator~(const vector4f& rhs);
+    batch<float, 4> operator&(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> operator|(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> operator^(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> operator~(const batch<float, 4>& rhs);
 
-    vector4f min(const vector4f& lhs, const vector4f& rhs);
-    vector4f max(const vector4f& lhs, const vector4f& rhs);
+    batch<float, 4> min(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> max(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
 
-    vector4f abs(const vector4f& rhs);
+    batch<float, 4> abs(const batch<float, 4>& rhs);
+    batch<float, 4> fma(const batch<float, 4>& x, const batch<float, 4>& y, const batch<float, 4>& z);
+    batch<float, 4> sqrt(const batch<float, 4>& rhs);
 
-    vector4f fma(const vector4f& x, const vector4f& y, const vector4f& z);
+    float hadd(const batch<float, 4>& rhs);
+    batch<float, 4> haddp(const batch<float, 4>* row);
 
-    vector4f sqrt(const vector4f& rhs);
+    batch<float, 4> select(const batch_bool<float, 4>& cond, const batch<float, 4>& a, const batch<float, 4>& b);
 
-    float hadd(const vector4f& rhs);
-    vector4f haddp(const vector4f* row);
+    /***************************************
+     * batch_bool<float, 4> implementation *
+     ***************************************/
 
-    vector4f select(const vector4fb& cond, const vector4f& a, const vector4f& b);
-
-
-    /******************************
-     * vector4fb implementation
-     ******************************/
-
-    inline vector4fb::vector4fb()
+    inline batch_bool<float, 4>::batch_bool()
     {
     }
 
-    inline vector4fb::vector4fb(bool b)
+    inline batch_bool<float, 4>::batch_bool(bool b)
         : m_value(_mm_castsi128_ps(_mm_set1_epi32(-(int)b)))
     {
     }
 
-    inline vector4fb::vector4fb(bool b0, bool b1, bool b2, bool b3)
+    inline batch_bool<float, 4>::batch_bool(bool b0, bool b1, bool b2, bool b3)
         : m_value(_mm_castsi128_ps(_mm_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3)))
     {
     }
 
-    inline vector4fb::vector4fb(const __m128& rhs)
+    inline batch_bool<float, 4>::batch_bool(const __m128& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector4fb& vector4fb::operator=(const __m128& rhs)
+    inline batch_bool<float, 4>& batch_bool<float, 4>::operator=(const __m128& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector4fb::operator __m128() const
+    inline batch_bool<float, 4>::operator __m128() const
     {
         return m_value;
     }
 
-    inline vector4fb operator&(const vector4fb& lhs, const vector4fb& rhs)
+    inline batch_bool<float, 4> operator&(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
     {
         return _mm_and_ps(lhs, rhs);
     }
 
-    inline vector4fb operator|(const vector4fb& lhs, const vector4fb& rhs)
+    inline batch_bool<float, 4> operator|(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
     {
         return _mm_or_ps(lhs, rhs);
     }
 
-    inline vector4fb operator^(const vector4fb& lhs, const vector4fb& rhs)
+    inline batch_bool<float, 4> operator^(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
     {
         return _mm_xor_ps(lhs, rhs);
     }
 
-    inline vector4fb operator~(const vector4fb& rhs)
+    inline batch_bool<float, 4> operator~(const batch_bool<float, 4>& rhs)
     {
         return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(-1)));
     }
 
-    inline vector4fb operator==(const vector4fb& lhs, const vector4fb& rhs)
+    inline batch_bool<float, 4> operator==(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
     {
         return _mm_cmpeq_ps(lhs, rhs);
     }
 
-    inline vector4fb operator!=(const vector4fb& lhs, const vector4fb& rhs)
+    inline batch_bool<float, 4> operator!=(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
     {
         return _mm_cmpneq_ps(lhs, rhs);
     }
 
+    /**********************************
+     * batch<float, 4> implementation *
+     **********************************/
 
-    /*****************************
-     * vector4f implementation
-     *****************************/
-
-    inline vector4f::vector4f()
+    inline batch<float, 4>::batch()
     {
     }
 
-    inline vector4f::vector4f(float f)
+    inline batch<float, 4>::batch(float f)
         : m_value(_mm_set1_ps(f))
     {
     }
     
-    inline vector4f::vector4f(float f0, float f1, float f2, float f3)
+    inline batch<float, 4>::batch(float f0, float f1, float f2, float f3)
         : m_value(_mm_setr_ps(f0, f1, f2, f3))
     {
     }
 
-    inline vector4f::vector4f(const __m128& rhs)
+    inline batch<float, 4>::batch(const __m128& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector4f& vector4f::operator=(const __m128& rhs)
+    inline batch<float, 4>& batch<float, 4>::operator=(const __m128& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector4f::operator __m128() const
+    inline batch<float, 4>::operator __m128() const
     {
         return m_value;
     }
 
-    inline vector4f& vector4f::load_aligned(const float* src)
+    inline batch<float, 4>& batch<float, 4>::load_aligned(const float* src)
     {
         m_value = _mm_load_ps(src);
         return *this;
     }
 
-    inline vector4f& vector4f::load_unaligned(const float* src)
+    inline batch<float, 4>& batch<float, 4>::load_unaligned(const float* src)
     {
         m_value = _mm_loadu_ps(src);
         return *this;
     }
 
-    inline void vector4f::store_aligned(float* dst) const
+    inline void batch<float, 4>::store_aligned(float* dst) const
     {
         _mm_store_ps(dst, m_value);
     }
 
-    inline void vector4f::store_unaligned(float* dst) const
+    inline void batch<float, 4>::store_unaligned(float* dst) const
     {
         _mm_storeu_ps(dst, m_value);
     }
 
-    inline vector4f operator-(const vector4f& rhs)
+    inline batch<float, 4> operator-(const batch<float, 4>& rhs)
     {
         return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(0x80000000)));
     }
 
-    inline vector4f operator+(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> operator+(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_add_ps(lhs, rhs);
     }
 
-    inline vector4f operator-(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> operator-(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_sub_ps(lhs, rhs);
     }
     
-    inline vector4f operator*(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> operator*(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_mul_ps(lhs, rhs);
     }
 
-    inline vector4f operator/(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> operator/(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_div_ps(lhs, rhs);
     }
     
-    inline vector4fb operator==(const vector4f& lhs, const vector4f& rhs)
+    inline batch_bool<float, 4> operator==(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_cmpeq_ps(lhs, rhs);
     }
 
-    inline vector4fb operator!=(const vector4f& lhs, const vector4f& rhs)
+    inline batch_bool<float, 4> operator!=(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_cmpneq_ps(lhs, rhs);
     }
 
-    inline vector4fb operator<(const vector4f& lhs, const vector4f& rhs)
+    inline batch_bool<float, 4> operator<(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_cmplt_ps(lhs, rhs);
     }
 
-    inline vector4fb operator<=(const vector4f& lhs, const vector4f& rhs)
+    inline batch_bool<float, 4> operator<=(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_cmple_ps(lhs, rhs);
     }
 
-    inline vector4f operator&(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> operator&(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_and_ps(lhs, rhs);
     }
 
-    inline vector4f operator|(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> operator|(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_or_ps(lhs, rhs);
     }
 
-    inline vector4f operator^(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> operator^(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_xor_ps(lhs, rhs);
     }
 
-    inline vector4f operator~(const vector4f& rhs)
+    inline batch<float, 4> operator~(const batch<float, 4>& rhs)
     {
         return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(-1)));
     }
 
-    inline vector4f min(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> min(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_min_ps(lhs, rhs);
     }
 
-    inline vector4f max(const vector4f& lhs, const vector4f& rhs)
+    inline batch<float, 4> max(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_max_ps(lhs, rhs);
     }
 
-    inline vector4f abs(const vector4f& rhs)
+    inline batch<float, 4> abs(const batch<float, 4>& rhs)
     {
         __m128 sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
         return _mm_andnot_ps(sign_mask, rhs);
     }
 
-    inline vector4f fma(const vector4f& x, const vector4f& y, const vector4f& z)
+    inline batch<float, 4> fma(const batch<float, 4>& x, const batch<float, 4>& y, const batch<float, 4>& z)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
         return _mm_fmadd_ps(x, y, z);
@@ -315,12 +320,12 @@ namespace xsimd
 #endif
     }
 
-    inline vector4f sqrt(const vector4f& rhs)
+    inline batch<float, 4> sqrt(const batch<float, 4>& rhs)
     {
         return _mm_sqrt_ps(rhs);
     }
 
-    inline float hadd(const vector4f& rhs)
+    inline float hadd(const batch<float, 4>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
         __m128 tmp0 = _mm_hadd_ps(rhs, rhs);
@@ -332,7 +337,7 @@ namespace xsimd
         return _mm_cvtss_f32(tmp1);
     }
     
-    inline vector4f haddp(const vector4f* row)
+    inline batch<float, 4> haddp(const batch<float, 4>* row)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
         return _mm_hadd_ps(_mm_hadd_ps(row[0], row[1]),
@@ -350,7 +355,7 @@ namespace xsimd
 #endif
     }
 
-    inline vector4f select(const vector4fb& cond, const vector4f& a, const vector4f& b)
+    inline batch<float, 4> select(const batch_bool<float, 4>& cond, const batch<float, 4>& a, const batch<float, 4>& b)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
         return _mm_blendv_ps(b, a, cond);

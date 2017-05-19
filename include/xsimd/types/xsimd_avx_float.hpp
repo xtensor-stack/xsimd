@@ -14,17 +14,22 @@
 namespace xsimd
 {
 
-    class vector8fb : public simd_vector_bool<vector8fb>
+    /************************
+     * batch_bool<float, 8> *
+     ************************/
+
+    template <>
+    class batch_bool<float, 8> : public simd_batch_bool<batch_bool<float, 8>>
     {
 
     public:
 
-        vector8fb();
-        explicit vector8fb(bool b);
-        vector8fb(bool b0, bool b1, bool b2, bool b3,
+        batch_bool();
+        explicit batch_bool(bool b);
+        batch_bool(bool b0, bool b1, bool b2, bool b3,
                   bool b4, bool b5, bool b6, bool b7);
-        vector8fb(const __m256& rhs);
-        vector8fb& operator=(const __m256& rhs);
+        batch_bool(const __m256& rhs);
+        batch_bool& operator=(const __m256& rhs);
 
         operator __m256() const;
 
@@ -33,39 +38,43 @@ namespace xsimd
         __m256 m_value;
     };
 
-    vector8fb operator&(const vector8fb& lhs, const vector8fb& rhs);
-    vector8fb operator|(const vector8fb& lhs, const vector8fb& rhs);
-    vector8fb operator^(const vector8fb& lhs, const vector8fb& rhs);
-    vector8fb operator~(const vector8fb& rhs);
+    batch_bool<float, 8> operator&(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
+    batch_bool<float, 8> operator|(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
+    batch_bool<float, 8> operator^(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
+    batch_bool<float, 8> operator~(const batch_bool<float, 8>& rhs);
 
-    vector8fb operator==(const vector8fb& lhs, const vector8fb& rhs);
-    vector8fb operator!=(const vector8fb& lhs, const vector8fb& rhs);
+    batch_bool<float, 8> operator==(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
+    batch_bool<float, 8> operator!=(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
 
-    class vector8f;
+    /*******************
+     * batch<float, 8> *
+     *******************/
 
     template <>
-    struct simd_vector_traits<vector8f>
+    struct simd_batch_traits<batch<float, 8>>
     {
         using value_type = float;
-        using vector_bool = vector8fb;
+        static constexpr std::size_t size = 8;
+        using batch_bool_type = batch_bool<float, 8>;
     };
 
-    class vector8f : public simd_vector<vector8f>
+    template <>
+    class batch<float, 8> : public simd_batch<batch<float, 8>>
     {
 
     public:
 
-        vector8f();
-        explicit vector8f(float f);
-        vector8f(float f0, float f1, float f2, float f3,
-                 float f4, float f5, float f6, float f7);
-        vector8f(const __m256& rhs);
-        vector8f& operator=(const __m256& rhs);
+        batch();
+        explicit batch(float f);
+        batch(float f0, float f1, float f2, float f3,
+              float f4, float f5, float f6, float f7);
+        batch(const __m256& rhs);
+        batch& operator=(const __m256& rhs);
 
         operator __m256() const;
 
-        vector8f& load_aligned(const float* src);
-        vector8f& load_unaligned(const float* src);
+        batch& load_aligned(const float* src);
+        batch& load_unaligned(const float* src);
 
         void store_aligned(float* dst) const;
         void store_unaligned(float* dst) const;
@@ -75,243 +84,240 @@ namespace xsimd
         __m256 m_value;
     };
 
-    vector8f operator-(const vector8f& rhs);
-    vector8f operator+(const vector8f& lhs, const vector8f& rhs);
-    vector8f operator-(const vector8f& lhs, const vector8f& rhs);
-    vector8f operator*(const vector8f& lhs, const vector8f& rhs);
-    vector8f operator/(const vector8f& lhs, const vector8f& rhs);
+    batch<float, 8> operator-(const batch<float, 8>& rhs);
+    batch<float, 8> operator+(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch<float, 8> operator-(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch<float, 8> operator*(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch<float, 8> operator/(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     
-    vector8fb operator==(const vector8f& lhs, const vector8f& rhs);
-    vector8fb operator!=(const vector8f& lhs, const vector8f& rhs);
-    vector8fb operator<(const vector8f& lhs, const vector8f& rhs);
-    vector8fb operator<=(const vector8f& lhs, const vector8f& rhs);
+    batch_bool<float, 8> operator==(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch_bool<float, 8> operator!=(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch_bool<float, 8> operator<(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch_bool<float, 8> operator<=(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
 
-    vector8f operator&(const vector8f& lhs, const vector8f& rhs);
-    vector8f operator|(const vector8f& lhs, const vector8f& rhs);
-    vector8f operator^(const vector8f& lhs, const vector8f& rhs);
-    vector8f operator~(const vector8f& rhs);
+    batch<float, 8> operator&(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch<float, 8> operator|(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch<float, 8> operator^(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch<float, 8> operator~(const batch<float, 8>& rhs);
 
-    vector8f min(const vector8f& lhs, const vector8f& rhs);
-    vector8f max(const vector8f& lhs, const vector8f& rhs);
+    batch<float, 8> min(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
+    batch<float, 8> max(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
 
-    vector8f abs(const vector8f& rhs);
+    batch<float, 8> abs(const batch<float, 8>& rhs);
+    batch<float, 8> fma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
+    batch<float, 8> sqrt(const batch<float, 8>& rhs);
 
-    vector8f fma(const vector8f& x, const vector8f& y, const vector8f& z);
+    float hadd(const batch<float, 8>& rhs);
+    batch<float, 8> haddp(const batch<float, 8>* row);
 
-    vector8f sqrt(const vector8f& rhs);
+    batch<float, 8> select(const batch_bool<float, 8>& cond, const batch<float, 8>& a, const batch<float, 8>& b);
 
-    float hadd(const vector8f& rhs);
-    vector8f haddp(const vector8f* row);
+    /***************************************
+     * batch_bool<float, 8> implementation *
+     ***************************************/
 
-    vector8f select(const vector8fb& cond, const vector8f& a, const vector8f& b);
-
-
-    /******************************
-     * vector8fb implementation
-     ******************************/
-
-    inline vector8fb::vector8fb()
+    inline batch_bool<float, 8>::batch_bool()
     {
     }
 
-    inline vector8fb::vector8fb(bool b)
+    inline batch_bool<float, 8>::batch_bool(bool b)
         : m_value(_mm256_castsi256_ps(_mm256_set1_epi32(-(int)b)))
     {
     }
 
-    inline vector8fb::vector8fb(bool b0, bool b1, bool b2, bool b3,
-                                bool b4, bool b5, bool b6, bool b7)
+    inline batch_bool<float, 8>::batch_bool(bool b0, bool b1, bool b2, bool b3,
+                                            bool b4, bool b5, bool b6, bool b7)
             : m_value(_mm256_castsi256_ps(
                   _mm256_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3,
                                     -(int)b4, -(int)b5, -(int)b6, -(int)b7)))
     {
     }
 
-    inline vector8fb::vector8fb(const __m256& rhs)
+    inline batch_bool<float, 8>::batch_bool(const __m256& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector8fb& vector8fb::operator=(const __m256& rhs)
+    inline batch_bool<float, 8>& batch_bool<float, 8>::operator=(const __m256& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector8fb::operator __m256() const
+    inline batch_bool<float, 8>::operator __m256() const
     {
         return m_value;
     }
 
-    inline vector8fb operator&(const vector8fb& lhs, const vector8fb& rhs)
+    inline batch_bool<float, 8> operator&(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
         return _mm256_and_ps(lhs, rhs);
     }
 
-    inline vector8fb operator|(const vector8fb& lhs, const vector8fb& rhs)
+    inline batch_bool<float, 8> operator|(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
         return _mm256_or_ps(lhs, rhs);
     }
 
-    inline vector8fb operator^(const vector8fb& lhs, const vector8fb& rhs)
+    inline batch_bool<float, 8> operator^(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
         return _mm256_xor_ps(lhs, rhs);
     }
 
-    inline vector8fb operator~(const vector8fb& rhs)
+    inline batch_bool<float, 8> operator~(const batch_bool<float, 8>& rhs)
     {
         return _mm256_xor_ps(rhs, _mm256_castsi256_ps(_mm256_set1_epi32(-1)));
     }
 
-    inline vector8fb operator==(const vector8fb& lhs, const vector8fb& rhs)
+    inline batch_bool<float, 8> operator==(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_EQ_OQ);
     }
 
-    inline vector8fb operator!=(const vector8fb& lhs, const vector8fb& rhs)
+    inline batch_bool<float, 8> operator!=(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_NEQ_OQ);
     }
 
+    /**********************************
+     * batch<float, 8> implementation *
+     **********************************/
 
-    /*****************************
-     * vector8f implementation
-     *****************************/
-
-    inline vector8f::vector8f()
+    inline batch<float, 8>::batch()
     {
     }
 
-    inline vector8f::vector8f(float f)
+    inline batch<float, 8>::batch(float f)
         : m_value(_mm256_set1_ps(f))
     {
     }
-    inline vector8f::vector8f(float f0, float f1, float f2, float f3,
-                              float f4, float f5, float f6, float f7)
+
+    inline batch<float, 8>::batch(float f0, float f1, float f2, float f3,
+                                  float f4, float f5, float f6, float f7)
         : m_value(_mm256_setr_ps(f0, f1, f2, f3, f4, f5, f6, f7))
     {
     }
 
-    inline vector8f::vector8f(const __m256& rhs)
+    inline batch<float, 8>::batch(const __m256& rhs)
         : m_value(rhs)
     {
     }
 
-    inline vector8f& vector8f::operator=(const __m256& rhs)
+    inline batch<float, 8>& batch<float, 8>::operator=(const __m256& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline vector8f::operator __m256() const
+    inline batch<float, 8>::operator __m256() const
     {
         return m_value;
     }
 
-    inline vector8f& vector8f::load_aligned(const float* src)
+    inline batch<float, 8>& batch<float, 8>::load_aligned(const float* src)
     {
         m_value = _mm256_load_ps(src);
         return *this;
     }
 
-    inline vector8f& vector8f::load_unaligned(const float* src)
+    inline batch<float, 8>& batch<float, 8>::load_unaligned(const float* src)
     {
         m_value = _mm256_loadu_ps(src);
         return *this;
     }
 
-    inline void vector8f::store_aligned(float* dst) const
+    inline void batch<float, 8>::store_aligned(float* dst) const
     {
         _mm256_store_ps(dst, m_value);
     }
 
-    inline void vector8f::store_unaligned(float* dst) const
+    inline void batch<float, 8>::store_unaligned(float* dst) const
     {
         _mm256_store_ps(dst, m_value);
     }
 
-    inline vector8f operator-(const vector8f& rhs)
+    inline batch<float, 8> operator-(const batch<float, 8>& rhs)
     {
         return _mm256_xor_ps(rhs, _mm256_castsi256_ps(_mm256_set1_epi32(0x80000000)));
     }
 
-    inline vector8f operator+(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> operator+(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_add_ps(lhs, rhs);
     }
 
-    inline vector8f operator-(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> operator-(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_sub_ps(lhs, rhs);
     }
 
-    inline vector8f operator*(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> operator*(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_mul_ps(lhs, rhs);
     }
 
-    inline vector8f operator/(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> operator/(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_div_ps(lhs, rhs);
     }
     
-    inline vector8fb operator==(const vector8f& lhs, const vector8f& rhs)
+    inline batch_bool<float, 8> operator==(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_EQ_OQ);
     }
 
-    inline vector8fb operator!=(const vector8f& lhs, const vector8f& rhs)
+    inline batch_bool<float, 8> operator!=(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_NEQ_OQ);
     }
 
-    inline vector8fb operator<(const vector8f& lhs, const vector8f& rhs)
+    inline batch_bool<float, 8> operator<(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_LT_OQ);
     }
 
-    inline vector8fb operator<=(const vector8f& lhs, const vector8f& rhs)
+    inline batch_bool<float, 8> operator<=(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_LE_OQ);
     }
 
-    inline vector8f operator&(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> operator&(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_and_ps(lhs, rhs);
     }
 
-    inline vector8f operator|(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> operator|(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_or_ps(lhs, rhs);
     }
     
-    inline vector8f operator^(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> operator^(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_xor_ps(lhs, rhs);
     }
     
-    inline vector8f operator~(const vector8f& rhs)
+    inline batch<float, 8> operator~(const batch<float, 8>& rhs)
     {
         return _mm256_xor_ps(rhs, _mm256_castsi256_ps(_mm256_set1_epi32(-1)));
     }
 
-    inline vector8f min(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> min(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_min_ps(lhs, rhs);
     }
 
-    inline vector8f max(const vector8f& lhs, const vector8f& rhs)
+    inline batch<float, 8> max(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_max_ps(lhs, rhs);
     }
 
-    inline vector8f abs(const vector8f& rhs)
+    inline batch<float, 8> abs(const batch<float, 8>& rhs)
     {
         __m256 sign_mask = _mm256_set1_ps(-0.f); // -0.f = 1 << 31
         return _mm256_andnot_ps(sign_mask, rhs);
     }
 
-    inline vector8f fma(const vector8f& x, const vector8f& y, const vector8f& z)
+    inline batch<float, 8> fma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
         return _mm256_fmadd_ps(x, y, z);
@@ -320,12 +326,12 @@ namespace xsimd
 #endif
     }
 
-    inline vector8f sqrt(const vector8f& rhs)
+    inline batch<float, 8> sqrt(const batch<float, 8>& rhs)
     {
         return _mm256_sqrt_ps(rhs);
     }
 
-    inline float hadd(const vector8f& rhs)
+    inline float hadd(const batch<float, 8>& rhs)
     {
         // Warning about _mm256_hadd_ps:
         // _mm256_hadd_ps(a,b) gives
@@ -343,7 +349,7 @@ namespace xsimd
         return _mm_cvtss_f32(_mm256_extractf128_ps(tmp, 0));
     }
 
-    inline vector8f haddp(const vector8f* row)
+    inline batch<float, 8> haddp(const batch<float, 8>* row)
     {
         // row = (a,b,c,d,e,f,g,h)
         // tmp0 = (a0+a1, a2+a3, b0+b1, b2+b3, a4+a5, a6+a7, b4+b5, b6+b7)
@@ -369,7 +375,7 @@ namespace xsimd
         return _mm256_add_ps(tmp0, tmp1);
     }
 
-    inline vector8f select(const vector8fb& cond, const vector8f& a, const vector8f& b)
+    inline batch<float, 8> select(const batch_bool<float, 8>& cond, const batch<float, 8>& a, const batch<float, 8>& b)
     {
         return _mm256_blendv_ps(b, a, cond);
     }

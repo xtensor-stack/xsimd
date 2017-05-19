@@ -55,9 +55,9 @@ namespace xsimd
     };
 
 
-    /*****************************************
-     * aligned_stack_buffer implementation
-     *****************************************/
+    /***************************************
+     * aligned_stack_buffer implementation *
+     ***************************************/
 
     namespace detail
     {
