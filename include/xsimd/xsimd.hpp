@@ -26,14 +26,10 @@ namespace xsimd
         template <class A>
         struct get_allocator_alignment_impl
         {
-#if XSIMD_MALLOC_ALREADY_ALIGNED
-            using type = aligned_mode;
-#else
             using type = unaligned_mode;
-#endif
         };
 
-#ifdef XSIMD_USE_SSE_OR_AVX
+#ifdef XSIMD_X86_INSTR_SET_AVAILABLE
         template <class T>
         struct get_allocator_alignment_impl<aligned_allocator<T, XDEFAULT_ALIGNMENT>>
         {
@@ -284,7 +280,7 @@ namespace xsimd
     {
     }
 
-#if defined(XSIMD_USE_SSE) || defined(XSIMD_USE_AVX)
+#if defined(XSIMD_X86_INSTR_SET_AVAILABLE)
 
     template <>
     inline void prefetch<int>(const int* address)
