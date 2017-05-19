@@ -14,10 +14,17 @@
 
 #include "xsimd/config/xsimd_include.hpp"
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 #include "xsimd/types/xsimd_sse_double.hpp"
 #include "xsimd/types/xsimd_sse_float.hpp"
+#endif
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 #include "xsimd/types/xsimd_avx_double.hpp"
 #include "xsimd/types/xsimd_avx_float.hpp"
+#endif
+
 #include "xsimd_common_test.hpp"
 
 namespace xsimd
@@ -30,6 +37,7 @@ namespace xsimd
     }
 }
 
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 TEST(xsimd, sse_float_basic)
 {
     std::ofstream out("log/sse_float_basic.log", std::ios_base::out);
@@ -43,7 +51,9 @@ TEST(xsimd, sse_double_basic)
     bool res = xsimd::test_simd<xsimd::batch<double, 2>, 2, 16>(out, "sse double");
     EXPECT_TRUE(res);
 }
+#endif
 
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TEST(xsimd, avx_float_basic)
 {
     std::ofstream out("log/avx_float_basic.log", std::ios_base::out);
@@ -57,4 +67,5 @@ TEST(xsimd, avx_double_basic)
     bool res = xsimd::test_simd<xsimd::batch<double, 4>, 4, 32>(out, "avx double");
     EXPECT_TRUE(res);
 }
+#endif
 

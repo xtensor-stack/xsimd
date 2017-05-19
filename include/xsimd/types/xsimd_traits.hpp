@@ -14,8 +14,6 @@
 #undef XSIMD_BATCH_FLOAT_SIZE
 #undef XSIMD_BATCH_DOUBLE_SIZE
 
-#ifdef XSIMD_X86_INSTR_SET_AVAILABLE
-
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 #include "xsimd_sse_float.hpp"
 #include "xsimd_sse_double.hpp"
@@ -28,8 +26,6 @@
 #include "xsimd_avx_double.hpp"
 #define XSIMD_BATCH_FLOAT_SIZE 8
 #define XSIMD_BATCH_DOUBLE_SIZE 4
-#endif
-
 #endif
 
 namespace xsimd
