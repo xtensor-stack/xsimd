@@ -11,12 +11,15 @@
 
 #include "../config/xsimd_include.hpp"
 
+#undef XSIMD_BATCH_INT_SIZE
 #undef XSIMD_BATCH_FLOAT_SIZE
 #undef XSIMD_BATCH_DOUBLE_SIZE
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#include "xsimd_sse_int.hpp"
 #include "xsimd_sse_float.hpp"
 #include "xsimd_sse_double.hpp"
+#define XSIMD_BATCH_INT_SIZE 4
 #define XSIMD_BATCH_FLOAT_SIZE 4
 #define XSIMD_BATCH_DOUBLE_SIZE 2
 #endif
@@ -52,6 +55,20 @@ namespace xsimd
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
 #ifdef XSIMD_BATCH_DOUBLE_SIZE
+
+    template <>
+    struct simd_traits<int>
+    {
+        using type = batch<int, XSIMD_BATCH_INT_SIZE>;
+        static constexpr size_t size = type::size;
+    };
+
+    template <>
+    struct revert_simd_traits<batch<int, XSIMD_BATCH_INT_SIZE>>
+    {
+        using type = int;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
 
     template <>
     struct simd_traits<float>

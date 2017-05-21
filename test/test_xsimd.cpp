@@ -18,6 +18,7 @@
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 #include "xsimd/types/xsimd_sse_double.hpp"
 #include "xsimd/types/xsimd_sse_float.hpp"
+#include "xsimd/types/xsimd_sse_int.hpp"
 #endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
@@ -35,9 +36,23 @@ namespace xsimd
         simd_basic_tester<V, N, A> tester(name);
         return test_simd_common(out, tester);
     }
+
+    template <class V, size_t N, size_t A>
+    bool test_simd_int(std::ostream& out, const std::string& name)
+    {
+        simd_basic_int_tester<V, N, A> tester(name);
+        return test_simd_common_int(out, tester);
+    }
 }
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+TEST(xsimd, sse_int_basic)
+{
+    std::ofstream out("log/sse_int_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<xsimd::batch<int, 4>, 4, 16>(out, "sse int");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, sse_float_basic)
 {
     std::ofstream out("log/sse_float_basic.log", std::ios_base::out);
@@ -68,4 +83,3 @@ TEST(xsimd, avx_double_basic)
     EXPECT_TRUE(res);
 }
 #endif
-
