@@ -104,9 +104,13 @@ namespace xsimd
     batch<float, 8> max(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
 
     batch<float, 8> abs(const batch<float, 8>& rhs);
-    batch<float, 8> fma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
     batch<float, 8> sqrt(const batch<float, 8>& rhs);
 
+    batch<float, 8> fma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
+    batch<float, 8> fms(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
+    batch<float, 8> fnma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
+    batch<float, 8> fnms(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
+    
     float hadd(const batch<float, 8>& rhs);
     batch<float, 8> haddp(const batch<float, 8>* row);
 
@@ -317,18 +321,53 @@ namespace xsimd
         return _mm256_andnot_ps(sign_mask, rhs);
     }
 
+    inline batch<float, 8> sqrt(const batch<float, 8>& rhs)
+    {
+        return _mm256_sqrt_ps(rhs);
+    }
+
     inline batch<float, 8> fma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
         return _mm256_fmadd_ps(x, y, z);
+#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
+        return _mm256_macc_ps(x, y, z);
 #else
         return x * y + z;
 #endif
     }
 
-    inline batch<float, 8> sqrt(const batch<float, 8>& rhs)
+    inline batch<float, 8> fms(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z)
     {
-        return _mm256_sqrt_ps(rhs);
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
+        return _mm256_fmsub_ps(x, y, z);
+#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
+        return _mm256_msub_ps(x, y, z);
+#else
+        return x * y - z;
+#endif
+    }
+
+    inline batch<float, 8> fnma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
+        return _mm256_fnmadd_ps(x, y, z);
+#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
+        return _mm256_nmacc_ps(x, y, z);
+#else
+        return -x * y + z;
+#endif
+    }
+
+    inline batch<float, 8> fnms(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
+        return _mm256_fnmsub_ps(x, y, z);
+#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
+        return _mm256_nmsub_ps(x, y, z);
+#else
+        return -x * y - z;
+#endif
     }
 
     inline float hadd(const batch<float, 8>& rhs)

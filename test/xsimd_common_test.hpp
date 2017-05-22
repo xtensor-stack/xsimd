@@ -224,16 +224,34 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.abs_res, out);
         success = success && tmp_success;
 
+        out << "sqrt(simd)               : ";
+        vres = sqrt(lhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.sqrt_res, out);
+        success = success && tmp_success;
+
         out << "fma(simd, simd, simd)    : ";
         vres = fma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fma_res, out);
         success = success && tmp_success;
 
-        out << "sqrt(simd)               : ";
-        vres = sqrt(lhs);
+        out << "fms(simd, simd, simd)    : ";
+        vres = fms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sqrt_res, out);
+        tmp_success = check_almost_equal(res, tester.fms_res, out);
+        success = success && tmp_success;
+
+        out << "fnma(simd, simd, simd)    : ";
+        vres = fnma(lhs, rhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.fnma_res, out);
+        success = success && tmp_success;
+
+        out << "fnms(simd, simd, simd)    : ";
+        vres = fnms(lhs, rhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.fnms_res, out);
         success = success && tmp_success;
 
         out << "hadd(simd)               : ";
@@ -406,15 +424,33 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.abs_res, out);
         success = success && tmp_success;
 
+        out << "hadd(simd)               : ";
+        value_type sres = hadd(lhs);
+        tmp_success = check_almost_equal(sres, tester.hadd_res, out);
+        success = success && tmp_success;
+
         out << "fma(simd, simd, simd)    : ";
         vres = fma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fma_res, out);
         success = success && tmp_success;
 
-        out << "hadd(simd)               : ";
-        value_type sres = hadd(lhs);
-        tmp_success = check_almost_equal(sres, tester.hadd_res, out);
+        out << "fms(simd, simd, simd)    : ";
+        vres = fms(lhs, rhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.fms_res, out);
+        success = success && tmp_success;
+
+        out << "fnma(simd, simd, simd)    : ";
+        vres = fnma(lhs, rhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.fnma_res, out);
+        success = success && tmp_success;
+
+        out << "fnms(simd, simd, simd)    : ";
+        vres = fnms(lhs, rhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.fnms_res, out);
         success = success && tmp_success;
 
         return success;

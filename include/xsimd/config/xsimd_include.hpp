@@ -36,17 +36,23 @@
     #include <xmmintrin.h>             // SSE
 #endif // XSIMD_X86_INSTR_SET
 
-// AMD  instruction sets
+// AMD instruction sets
 #if XSIMD_X86_AMD_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
-    #ifdef __GNUC__
-        #include <x86intrin.h>         // AMD XOP (Gnu)
+    #ifdef _MSC_VER
+        #include <intrin.h>
     #else
-        #include <ammintrin.h>         // AMD XOP (Microsoft)
-    #endif //  __GNUC__
+        #include <x86intrin.h>
+        #if XSIMD_X86_AMD_INSTR_SET >= XSIMD_X86_AMD_XOP_VERSION
+            #include <xopintrin.h>
+        #else
+            #include <fma4intrin.h>
+        #endif
+    #endif //  _MSC_VER
 #elif XSIMD_X86_AMD_INSTR_SET == XSIMD_X86_AMD_SSE4A_VERSION
     #include <ammintrin.h>
 #endif // XSIMD_X86_AMD_INSTR_SET
 
-// TODO: add ALTIVEC instruction setET > 7
+// TODO: add ALTIVEC instruction set
 
 #endif
+
