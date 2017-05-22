@@ -63,8 +63,8 @@ namespace xsimd
     public:
 
         batch();
-        explicit batch(int f);
-        batch(int f0, int f1, int f2, int f3);
+        explicit batch(int i);
+        batch(int i0, int i1, int i2, int i3);
         batch(const __m128i& rhs);
         batch& operator=(const __m128i& rhs);
 
@@ -180,13 +180,13 @@ namespace xsimd
     {
     }
 
-    inline batch<int, 4>::batch(int f)
-        : m_value(_mm_set1_epi32(f))
+    inline batch<int, 4>::batch(int i)
+        : m_value(_mm_set1_epi32(i))
     {
     }
 
-    inline batch<int, 4>::batch(int f0, int f1, int f2, int f3)
-        : m_value(_mm_setr_epi32(f0, f1, f2, f3))
+    inline batch<int, 4>::batch(int i0, int i1, int i2, int i3)
+        : m_value(_mm_setr_epi32(i0, i1, i2, i3))
     {
     }
 
@@ -341,15 +341,15 @@ namespace xsimd
     inline int hadd(const batch<int, 4>& rhs)
     {
 #if  XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
-        __m128i sum1 = _mm_hadd_epi32(rhs, rhs);
-        __m128i sum2 = _mm_hadd_epi32(sum1, sum1);
-        return _mm_cvtsi128_si32(sum2);
+        __m128i tmp1 = _mm_hadd_epi32(rhs, rhs);
+        __m128i tmp2 = _mm_hadd_epi32(tmp1, tmp1);
+        return _mm_cvtsi128_si32(tmp2);
 #else
-        __m128i sum1 = _mm_shuffle_epi32(rhs, 0x0E);
-        __m128i sum2 = _mm_add_epi32(rhs, sum1);
-        __m128i sum3 = _mm_shuffle_epi32(sum2, 0x01);
-        __m128i sum4 = _mm_add_epi32(sum2, sum3);
-        return _mm_cvtsi128_si32(sum4);
+        __m128i tmp1 = _mm_shuffle_epi32(rhs, 0x0E);
+        __m128i tmp2 = _mm_add_epi32(rhs, tmp1);
+        __m128i tmp3 = _mm_shuffle_epi32(tmp2, 0x01);
+        __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
+        return _mm_cvtsi128_si32(tmp4);
 #endif
     }
 

@@ -31,6 +31,11 @@
 #define XSIMD_BATCH_DOUBLE_SIZE 4
 #endif
 
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+#include "xsimd_avx_int.hpp"
+#define XSIMD_BACH_INT_SIZE 8
+#endif
+
 namespace xsimd
 {
 
