@@ -24,9 +24,6 @@
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 #include "xsimd/types/xsimd_avx_double.hpp"
 #include "xsimd/types/xsimd_avx_float.hpp"
-#endif
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
 #include "xsimd/types/xsimd_avx_int.hpp"
 #endif
 
@@ -86,9 +83,7 @@ TEST(xsimd, avx_double_basic)
     bool res = xsimd::test_simd<xsimd::batch<double, 4>, 4, 32>(out, "avx double");
     EXPECT_TRUE(res);
 }
-#endif
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
 TEST(xsimd, avx_int_basic)
 {
     std::ofstream out("log/sse_avx_basic.log", std::ios_base::out);
