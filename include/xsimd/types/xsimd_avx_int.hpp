@@ -101,7 +101,11 @@ namespace xsimd
     batch<int, 8> max(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
 
     batch<int, 8> abs(const batch<int, 8>& rhs);
+
     batch<int, 8> fma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
+    batch<int, 8> fms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
+    batch<int, 8> fnma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
+    batch<int, 8> fnms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
 
     int hadd(const batch<int, 8>& rhs);
     //batch<int, 4> haddp(const batch<int, 4>* row);
@@ -310,6 +314,21 @@ namespace xsimd
     inline batch<int, 8> fma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
     {
         return x * y + z;
+    }
+
+    inline batch<int, 8> fms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
+    {
+        return x * y - z;
+    }
+    
+    inline batch<int, 8> fnma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
+    {
+        return -x * y + z;
+    }
+
+    inline batch<int, 8> fnms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
+    {
+        return -x * y - z;
     }
 
     inline int hadd(const batch<int, 8>& rhs)

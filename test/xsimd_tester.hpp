@@ -56,6 +56,9 @@ namespace xsimd
         res_type max_res;
         res_type abs_res;
         res_type fma_res;
+        res_type fms_res;
+        res_type fnma_res;
+        res_type fnms_res;
         res_type sqrt_res;
         value_type hadd_res;
         
@@ -97,6 +100,9 @@ namespace xsimd
         max_res.resize(N);
         abs_res.resize(N);
         fma_res.resize(N);
+        fms_res.resize(N);
+        fnma_res.resize(N);
+        fnms_res.resize(N);
         sqrt_res.resize(N);
 
         s = value_type(1.4);
@@ -126,11 +132,14 @@ namespace xsimd
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA4_VERSION
             fma_res[i] = fma(lhs[i], rhs[i], rhs[i]);
 #else
             fma_res[i] = lhs[i] * rhs[i] + rhs[i];
 #endif
+            fms_res[i] = lhs[i] * rhs[i] - rhs[i];
+            fnma_res[i] = - lhs[i] * rhs[i] + rhs[i];
+            fnms_res[i] = - lhs[i] * rhs[i] - rhs[i];
             sqrt_res[i] = sqrt(lhs[i]);
             hadd_res += lhs[i];
         }
@@ -170,6 +179,9 @@ namespace xsimd
         res_type max_res;
         res_type abs_res;
         res_type fma_res;
+        res_type fms_res;
+        res_type fnma_res;
+        res_type fnms_res;
         value_type hadd_res;
 
         simd_basic_int_tester(const std::string& name);
@@ -205,6 +217,9 @@ namespace xsimd
         max_res.resize(N);
         abs_res.resize(N);
         fma_res.resize(N);
+        fms_res.resize(N);
+        fnma_res.resize(N);
+        fnms_res.resize(N);
 
         s = value_type(1.4);
         hadd_res = value_type(0);
@@ -231,6 +246,9 @@ namespace xsimd
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);
             fma_res[i] = lhs[i] * rhs[i] + rhs[i];
+            fms_res[i] = lhs[i] * rhs[i] - rhs[i];
+            fnma_res[i] = - lhs[i] * rhs[i] + rhs[i];
+            fnms_res[i] = - lhs[i] * rhs[i] - rhs[i];
             hadd_res += lhs[i];
         }
     }
