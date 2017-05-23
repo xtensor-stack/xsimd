@@ -25,15 +25,12 @@
 #endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#include "xsimd_avx_int.hpp"
 #include "xsimd_avx_float.hpp"
 #include "xsimd_avx_double.hpp"
+#define XSIMD_BACH_INT_SIZE 8
 #define XSIMD_BATCH_FLOAT_SIZE 8
 #define XSIMD_BATCH_DOUBLE_SIZE 4
-#endif
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-#include "xsimd_avx_int.hpp"
-#define XSIMD_BACH_INT_SIZE 8
 #endif
 
 namespace xsimd
