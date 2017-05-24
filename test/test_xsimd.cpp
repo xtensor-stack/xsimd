@@ -32,6 +32,13 @@ namespace xsimd
         simd_int_basic_tester<T, N, A> tester(name);
         return test_simd_int_basic(out, tester);
     }
+
+    template <size_t N, size_t A>
+    bool test_simd_convert(std::ostream& out, const std::string& name)
+    {
+        simd_convert_tester<N, A> tester(name);
+        return test_simd_conversion(out, tester);
+    }
 }
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
@@ -53,6 +60,13 @@ TEST(xsimd, sse_int_basic)
 {
     std::ofstream out("log/sse_int_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<int, 4, 16>(out, "sse int");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_conversion)
+{
+    std::ofstream out("log/sse_conversion.log", std::ios_base::out);
+    bool res = xsimd::test_simd_convert<2, 16>(out, "sse conversion");
     EXPECT_TRUE(res);
 }
 #endif
@@ -78,4 +92,12 @@ TEST(xsimd, avx_int_basic)
     bool res = xsimd::test_simd_int<int, 8, 32>(out, "avx int");
     EXPECT_TRUE(res);
 }
+
+TEST(xsimd, avx_conversion)
+{
+    std::ofstream out("log/avx_conversion.log", std::ios_base::out);
+    bool res = xsimd::test_simd_convert<4, 32>(out, "avx conversion");
+    EXPECT_TRUE(res);
+}
 #endif
+

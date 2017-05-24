@@ -39,9 +39,11 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_instruction_set.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_stack_buffer.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int.hpp
