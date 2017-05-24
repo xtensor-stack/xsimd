@@ -47,6 +47,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_traits.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_types_include.hpp
 )
 
 if(BUILD_TESTS)
