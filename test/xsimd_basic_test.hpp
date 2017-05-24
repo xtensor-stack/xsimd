@@ -29,6 +29,7 @@ namespace xsimd
         res_type lhs;
         res_type rhs;
 
+        value_type extract_res;
         res_type minus_res;
         res_type add_vv_res;
         res_type add_vs_res;
@@ -106,6 +107,7 @@ namespace xsimd
         {
             lhs[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             rhs[i] = value_type(10.2) / (i+2) + value_type(0.25);
+            extract_res = lhs[1];
             minus_res[i] = -lhs[i];
             add_vv_res[i] = lhs[i] + rhs[i];
             add_vs_res[i] = lhs[i] + s;
@@ -154,6 +156,7 @@ namespace xsimd
         res_type lhs;
         res_type rhs;
 
+        value_type extract_res;
         res_type minus_res;
         res_type add_vv_res;
         res_type add_vs_res;
@@ -221,6 +224,7 @@ namespace xsimd
         {
             lhs[i] = value_type(i) * 10;
             rhs[i] = value_type(4) + value_type(i);
+            extract_res = lhs[1];
             minus_res[i] = -lhs[i];
             add_vv_res[i] = lhs[i] + rhs[i];
             add_vs_res[i] = lhs[i] + s;
@@ -273,6 +277,12 @@ namespace xsimd
         out << dash << name_shift << '-' << shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
+
+        out << "operator[]               : ";
+        detail::load_vec(lhs, tester.lhs);
+        value_type es = lhs[1];
+        tmp_success = check_almost_equal(es, tester.extract_res, out);
+        success = success && tmp_success;
 
         out << "load/store aligned       : ";
         detail::load_vec(lhs, tester.lhs);
@@ -435,6 +445,18 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.max_res, out);
         success = success && tmp_success;
 
+        out << "fmin(simd, simd)         : ";
+        vres = fmin(lhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.min_res, out);
+        success = success && tmp_success;
+
+        out << "fmax(simd, simd)         : ";
+        vres = fmax(lhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.max_res, out);
+        success = success && tmp_success;
+
         out << "abs(simd)                : ";
         vres = abs(lhs);
         detail::store_vec(vres, res);
@@ -459,13 +481,13 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.fms_res, out);
         success = success && tmp_success;
 
-        out << "fnma(simd, simd, simd)    : ";
+        out << "fnma(simd, simd, simd)   : ";
         vres = fnma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fnma_res, out);
         success = success && tmp_success;
 
-        out << "fnms(simd, simd, simd)    : ";
+        out << "fnms(simd, simd, simd)   : ";
         vres = fnms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fnms_res, out);
@@ -505,6 +527,12 @@ namespace xsimd
         out << dash << name_shift << '-' << shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
+
+        out << "operator[]               : ";
+        detail::load_vec(lhs, tester.lhs);
+        value_type es = lhs[1];
+        tmp_success = check_almost_equal(es, tester.extract_res, out);
+        success = success && tmp_success;
 
         out << "load/store aligned       : ";
         detail::load_vec(lhs, tester.lhs);
@@ -658,13 +686,13 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.fms_res, out);
         success = success && tmp_success;
 
-        out << "fnma(simd, simd, simd)    : ";
+        out << "fnma(simd, simd, simd)   : ";
         vres = fnma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fnma_res, out);
         success = success && tmp_success;
 
-        out << "fnms(simd, simd, simd)    : ";
+        out << "fnms(simd, simd, simd)   : ";
         vres = fnms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fnms_res, out);

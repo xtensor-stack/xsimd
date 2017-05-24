@@ -77,6 +77,8 @@ namespace xsimd
         void store_aligned(double* dst) const;
         void store_unaligned(double* dst) const;
 
+        double operator[](std::size_t index) const;
+
     private:
 
         __m256d m_value;
@@ -100,6 +102,8 @@ namespace xsimd
 
     batch<double, 4> min(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch<double, 4> max(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
+    batch<double, 4> fmin(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
+    batch<double, 4> fmax(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
 
     batch<double, 4> abs(const batch<double, 4>& rhs);
     batch<double, 4> sqrt(const batch<double, 4>& rhs);
@@ -236,6 +240,13 @@ namespace xsimd
         _mm256_storeu_pd(dst, m_value);
     }
 
+    inline double batch<double, 4>::operator[](std::size_t index) const
+    {
+        alignas(32) double x[4];
+        store_aligned(x);
+        return x[index & 3];
+    }
+
     inline batch<double, 4> operator-(const batch<double, 4>& rhs)
     {
         return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000)));
@@ -309,6 +320,16 @@ namespace xsimd
     inline batch<double, 4> max(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
     {
         return _mm256_max_pd(lhs, rhs);
+    }
+
+    inline batch<double, 4> fmin(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
+    {
+        return min(lhs, rhs);
+    }
+
+    inline batch<double, 4> fmax(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
+    {
+        return max(lhs, rhs);
     }
 
     inline batch<double, 4> abs(const batch<double, 4>& rhs)
