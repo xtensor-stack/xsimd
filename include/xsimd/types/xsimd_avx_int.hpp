@@ -76,6 +76,8 @@ namespace xsimd
         void store_aligned(int* dst) const;
         void store_unaligned(int* dst) const;
 
+        int operator[](std::size_t index) const;
+
     private:
 
         __m256i m_value;
@@ -271,6 +273,13 @@ namespace xsimd
     inline void batch<int, 8>::store_unaligned(int* dst) const
     {
         _mm256_storeu_si256((__m256i*)dst, m_value);
+    }
+
+    inline int batch<int, 8>::operator[](std::size_t index) const
+    {
+        alignas(32) int x[8];
+        store_aligned(x);
+        return x[index & 7];
     }
 
     inline batch<int, 8> operator-(const batch<int, 8>& rhs)

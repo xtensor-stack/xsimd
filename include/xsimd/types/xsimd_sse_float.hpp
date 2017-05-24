@@ -77,6 +77,8 @@ namespace xsimd
         void store_aligned(float* dst) const;
         void store_unaligned(float* dst) const;
 
+        float operator[](std::size_t index) const;
+
     private:
 
         __m128 m_value;
@@ -100,6 +102,8 @@ namespace xsimd
 
     batch<float, 4> min(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch<float, 4> max(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> fmin(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
+    batch<float, 4> fmax(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
 
     batch<float, 4> abs(const batch<float, 4>& rhs);
     batch<float, 4> sqrt(const batch<float, 4>& rhs);
@@ -234,6 +238,13 @@ namespace xsimd
         _mm_storeu_ps(dst, m_value);
     }
 
+    inline float batch<float, 4>::operator[](std::size_t index) const
+    {
+        alignas(16) float x[4];
+        store_aligned(x);
+        return x[index & 3];
+    }
+
     inline batch<float, 4> operator-(const batch<float, 4>& rhs)
     {
         return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(0x80000000)));
@@ -307,6 +318,16 @@ namespace xsimd
     inline batch<float, 4> max(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_max_ps(lhs, rhs);
+    }
+
+    inline batch<float, 4> fmin(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
+    {
+        return min(lhs, rhs);
+    }
+
+    inline batch<float, 4> fmax(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
+    {
+        return max(lhs, rhs);
     }
 
     inline batch<float, 4> abs(const batch<float, 4>& rhs)
