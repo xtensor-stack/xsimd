@@ -12,20 +12,8 @@
 
 #include "gtest/gtest.h"
 
-#include "xsimd/config/xsimd_include.hpp"
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-#include "xsimd/types/xsimd_sse_double.hpp"
-#include "xsimd/types/xsimd_sse_float.hpp"
-#include "xsimd/types/xsimd_sse_int.hpp"
-#endif
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-#include "xsimd/types/xsimd_avx_double.hpp"
-#include "xsimd/types/xsimd_avx_float.hpp"
-#include "xsimd/types/xsimd_avx_int.hpp"
-#endif
+#include "xsimd/types/xsimd_types_include.hpp"
 
 #include "xsimd_common_test.hpp"
 
