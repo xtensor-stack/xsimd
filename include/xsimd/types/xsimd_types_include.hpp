@@ -15,12 +15,14 @@
 #include "xsimd_sse_int.hpp"
 #include "xsimd_sse_float.hpp"
 #include "xsimd_sse_double.hpp"
+#include "xsimd_sse_conversion.hpp"
 #endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 #include "xsimd_avx_int.hpp"
 #include "xsimd_avx_float.hpp"
 #include "xsimd_avx_double.hpp"
+#include "xsimd_avx_conversion.hpp"
 #endif
 
 #endif

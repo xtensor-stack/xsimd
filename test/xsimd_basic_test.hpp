@@ -246,6 +246,7 @@ namespace xsimd
             hadd_res += lhs[i];
         }
     }
+
     template <class T>
     bool test_simd_basic(std::ostream& out, T& tester)
     {
@@ -667,6 +668,111 @@ namespace xsimd
         vres = fnms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fnms_res, out);
+        success = success && tmp_success;
+
+        return success;
+    }
+
+    template <std::size_t N, std::size_t A>
+    struct simd_convert_tester
+    {
+        using int_batch = batch<int, N*2>;
+        using float_batch = batch<float, N*2>;
+        using double_batch = batch<double, N>;
+
+        using int_vector = std::vector<int, aligned_allocator<int, A>>;
+        using float_vector = std::vector<float, aligned_allocator<float, A>>;
+
+        int_batch ipos;
+        int_batch ineg;
+        float_batch fpos;
+        float_batch fneg;
+        double_batch dpos;
+        double_batch dneg;
+
+        int_vector fposres;
+        int_vector fnegres;
+        int_vector dposres;
+        int_vector dnegres;
+        float_vector iposres;
+        float_vector inegres;
+
+        std::string name;
+
+        simd_convert_tester(const std::string& name);
+    };
+
+    template <std::size_t N, std::size_t A>
+    inline simd_convert_tester<N, A>::simd_convert_tester(const std::string& n)
+        : name(n), ipos(2), ineg(-3), fpos(float(7.4)), fneg(float(-6.2)), dpos(double(5.4)), dneg(double(-1.2)),
+          fposres(2*N, 7), fnegres(2*N, -6), dposres(2*N, 5), dnegres(2*N, -1), iposres(2*N, float(2)), inegres(2*N, float(-3))
+    {
+        for(std::size_t i = 0; i < N; ++i)
+        {
+            dposres[2*i + 1] = 0;
+            dnegres[2*i + 1] = -1;
+        }
+    }
+
+    template <class T>
+    inline bool test_simd_conversion(std::ostream& out, T& tester)
+    {
+        using int_batch = typename T::int_batch;
+        using float_batch = typename T::float_batch;
+        using int_vector = typename T::int_vector;
+        using float_vector = typename T::float_vector;
+
+        int_batch fbres;
+        float_batch ibres;
+        int_vector fvres(int_batch::size);
+        float_vector ivres(float_batch::size);
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl << std::endl;
+
+        out << "positive float -> int  : ";
+        fbres = to_int(tester.fpos);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(fvres, tester.fposres, out);
+        success = success && tmp_success;
+
+        out << "negative float -> int  : ";
+        fbres = to_int(tester.fneg);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(fvres, tester.fnegres, out);
+        success = success && tmp_success;
+
+        out << "positive double -> int : ";
+        fbres = to_int(tester.dpos);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(fvres, tester.dposres, out);
+        success = success && tmp_success;
+
+        out << "negative double -> int : ";
+        fbres = to_int(tester.dneg);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(fvres, tester.dnegres, out);
+        success = success && tmp_success;
+
+        out << "positive int -> float  : ";
+        ibres = to_float(tester.ipos);
+        detail::store_vec(ibres, ivres);
+        tmp_success = check_almost_equal(ivres, tester.iposres, out);
+        success = success && tmp_success;
+
+        out << "negative int -> float  : ";
+        ibres = to_float(tester.ineg);
+        detail::store_vec(ibres, ivres);
+        tmp_success = check_almost_equal(ivres, tester.inegres, out);
         success = success && tmp_success;
 
         return success;
