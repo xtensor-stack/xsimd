@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSIMD_COMMON_TEST_HPP
-#define XSIMD_COMMON_TEST_HPP
+#ifndef XSIMD_BASIC_TEST_HPP
+#define XSIMD_BASIC_TEST_HPP
 
 #include "xsimd_tester.hpp"
 #include "xsimd_test_utils.hpp"

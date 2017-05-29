@@ -37,6 +37,9 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_instruction_set.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_sign.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_numerical_constant.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_rounding.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_stack_buffer.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_conversion.hpp

@@ -1,0 +1,216 @@
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
+
+#ifndef XSIMD_ROUNDING_HPP
+#define XSIMD_ROUNDING_HPP
+
+#include <cmath>
+#include "xsimd_fp_sign.hpp"
+#include "xsimd_numerical_constant.hpp"
+
+namespace xsimd
+{
+
+    template <class T, std::size_t N>
+    batch<T, N> ceil(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> floor(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> trunc(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> round(const batch<T, N>& x);
+
+    // Contrary to their std counterpart, these functions
+    // are assume that the rounding mode is FE_TONEAREST
+    
+    template <class T, std::size_t N>
+    batch<T, N> nearbyint(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> rint(const batch<T, N>& x);
+
+    /**********************
+     * SSE implementation *
+     **********************/
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
+
+    template <>
+    inline batch<float, 4> ceil(const batch<float, 4>& x)
+    {
+        return _mm_ceil_ps(x);
+    }
+
+    template <>
+    inline batch<double, 2> ceil(const batch<double, 2>& x)
+    {
+        return _mm_ceil_pd(x);
+    }
+
+    template <>
+    inline batch<float, 4> floor(const batch<float, 4>& x)
+    {
+        return _mm_floor_ps(x);
+    }
+
+    template <>
+    inline batch<double, 2> floor(const batch<double, 2>& x)
+    {
+        return _mm_floor_pd(x);
+    }
+
+    template <>
+    inline batch<float, 4> trunc(const batch<float, 4>& x)
+    {
+        return _mm_round_ps(x, _MM_FROUND_TO_ZERO);
+    }
+
+    template <>
+    inline batch<double, 2> trunc(const batch<double, 2>& x)
+    {
+        return _mm_round_pd(x, _MM_FROUND_TO_ZERO);
+    }
+
+    template <>
+    inline batch<float, 4> nearbyint(const batch<float, 4>& x)
+    {
+        return _mm_round_ps(x, _MM_FROUND_TO_NEAREST_INT);
+    }
+
+    template<>
+    inline batch<double, 2> nearbyint(const batch<double, 2>& x)
+    {
+        return _mm_round_pd(x, _MM_FROUND_TO_NEAREST_INT);
+    }
+
+#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+
+    template <class T, std::size_t N>
+    inline batch<T, N> ceil(const batch<T, N>& x)
+    {
+        using btype = batch<T, N>;
+        btype tx = trunc(x);
+        return select(tx < x, tx + btype(1), tx);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> floor(const batch<T, N>& x)
+    {
+        using btype = batch<T, N>;
+        btype tx = trunc(x);
+        return select(tx > x, tx - btype(1), tx);
+    }
+
+    template <>
+    inline batch<float, 4> trunc(const batch<float, 4>& x)
+    {
+        using btype = batch<float, 4>;
+        return select(abs(x) < maxflint<btype>(), to_float(to_int(x)), x);
+    }
+
+    template <>
+    inline batch<double, 2> trunc(const batch<double, 2>& x)
+    {
+        return batch<double, 2>(std::trunc(x[0]), std::trunc(x[1]));
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> nearbyint(const batch<T, N>& x)
+    {
+        using btype = batch<T, N>;
+        btype s = bitofsign(x);
+        btype v = x | s;
+        btype t2n = twotonmb<btype>();
+        btype d0 = v + t2n;
+        return s | select(v < t2n, d0 - t2n, v);
+    }
+
+#endif
+
+    /**********************
+     * AVX implementation *
+     **********************/
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+    
+    template <>
+    inline batch<float, 8> ceil(const batch<float, 8>& x)
+    {
+        return _mm256_round_ps(x, _MM_FROUND_CEIL);
+    }
+
+    template <>
+    inline batch<double, 4> ceil(const batch<double, 4>& x)
+    {
+        return _mm256_round_pd(x, _MM_FROUND_CEIL);
+    }
+
+    template <>
+    inline batch<float, 8> floor(const batch<float, 8>& x)
+    {
+        return _mm256_round_ps(x, _MM_FROUND_FLOOR);
+    }
+
+    template<>
+    inline batch<double, 4> floor(const batch<double, 4>& x)
+    {
+        return _mm256_round_pd(x, _MM_FROUND_FLOOR);
+    }
+
+    template <>
+    inline batch<float, 8> trunc<float, 8>(const batch<float, 8>& x)
+    {
+        return _mm256_round_ps(x, _MM_FROUND_TO_ZERO);
+    }
+
+    template <>
+    inline batch<double, 4> trunc<double, 4>(const batch<double, 4>& x)
+    {
+        return _mm256_round_pd(x, _MM_FROUND_TO_ZERO);
+    }
+
+    template <>
+    inline batch<float, 8> nearbyint(const batch<float, 8>& x)
+    {
+        return _mm256_round_ps(x, _MM_FROUND_TO_NEAREST_INT);
+    }
+
+    template<>
+    inline batch<double, 4> nearbyint(const batch<double, 4>& x)
+    {
+            return _mm256_round_pd(x, _MM_FROUND_TO_NEAREST_INT);
+    }
+
+#endif
+
+    /**************************
+     * Generic implementation *
+     **************************/
+
+    template <class T, std::size_t N>
+    inline batch<T, N> round(const batch<T, N>& x)
+    {
+        using btype = batch<T, N>;
+        btype v = abs(x);
+        btype c = ceil(v);
+        btype cp = select(c - btype(0.5) > v, c - btype(1), c);
+        return select(v > maxflint<btype>(), x, copysign(cp, x));
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> rint(const batch<T, N>& x)
+    {
+        return nearbyint(x);
+    }
+}
+
+#endif
+

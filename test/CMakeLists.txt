@@ -65,8 +65,10 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(XSIMD_TESTS
     main.cpp
-    test_xsimd.cpp
     xsimd_basic_test.hpp
+    xsimd_basic_test.cpp
+    xsimd_rounding_test.hpp
+    xsimd_rounding_test.cpp
     xsimd_tester.hpp
     xsimd_test_utils.hpp
 )
