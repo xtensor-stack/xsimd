@@ -151,7 +151,7 @@ namespace xsimd
 
     inline batch_bool<double, 4>::operator __m256d() const
     {
-        return *this;
+        return m_value;
     }
 
     inline batch_bool<double, 4> operator&(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs)
