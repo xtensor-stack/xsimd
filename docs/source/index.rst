@@ -4,7 +4,7 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-.. image:: http://quantstack.net/assets/images/xsimd.svg
+.. image:: xsimd.svg
    :alt: xsimd
 
 C++ wrappers for SIMD intrinsics.
