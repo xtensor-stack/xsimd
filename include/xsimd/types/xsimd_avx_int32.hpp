@@ -6,20 +6,21 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSIMD_AVX_INT_HPP
-#define XSIMD_AVX_INT_HPP
+#ifndef XSIMD_AVX_INT32_HPP
+#define XSIMD_AVX_INT32_HPP
 
+#include <cstdint>
 #include "xsimd_base.hpp"
 
 namespace xsimd
 {
 
-    /**********************
-     * batch_bool<int, 8> *
-     **********************/
+    /**************************
+     * batch_bool<int32_t, 8> *
+     **************************/
 
     template <>
-    class batch_bool<int, 8> : public simd_batch_bool<batch_bool<int, 8>>
+    class batch_bool<int32_t, 8> : public simd_batch_bool<batch_bool<int32_t, 8>>
     {
 
     public:
@@ -37,89 +38,89 @@ namespace xsimd
         __m256i m_value;
     };
 
-    batch_bool<int, 8> operator&(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs);
-    batch_bool<int, 8> operator|(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs);
-    batch_bool<int, 8> operator^(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs);
-    batch_bool<int, 8> operator~(const batch_bool<int, 8>& rhs);
+    batch_bool<int32_t, 8> operator&(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
+    batch_bool<int32_t, 8> operator|(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
+    batch_bool<int32_t, 8> operator^(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
+    batch_bool<int32_t, 8> operator~(const batch_bool<int32_t, 8>& rhs);
 
-    batch_bool<int, 8> operator==(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs);
-    batch_bool<int, 8> operator!=(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs);
+    batch_bool<int32_t, 8> operator==(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
+    batch_bool<int32_t, 8> operator!=(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
 
-    /*****************
-     * batch<int, 8> *
-     *****************/
+    /*********************
+     * batch<int32_t, 8> *
+     *********************/
 
     template <>
-    struct simd_batch_traits<batch<int, 8>>
+    struct simd_batch_traits<batch<int32_t, 8>>
     {
-        using value_type = int;
+        using value_type = int32_t;
         static constexpr std::size_t size = 8;
     };
 
     template <>
-    class batch<int, 8> : public simd_batch<batch<int, 8>>
+    class batch<int32_t, 8> : public simd_batch<batch<int32_t, 8>>
     {
 
     public:
 
         batch();
-        explicit batch(int i);
-        batch(int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7);
+        explicit batch(int32_t i);
+        batch(int32_t i0, int32_t i1, int32_t i2, int32_t i3, int32_t i4, int32_t i5, int32_t i6, int32_t i7);
         batch(const __m256i& rhs);
         batch& operator=(const __m256i& rhs);
 
         operator __m256i() const;
 
-        batch& load_aligned(const int* src);
-        batch& load_unaligned(const int* src);
+        batch& load_aligned(const int32_t* src);
+        batch& load_unaligned(const int32_t* src);
 
-        void store_aligned(int* dst) const;
-        void store_unaligned(int* dst) const;
+        void store_aligned(int32_t* dst) const;
+        void store_unaligned(int32_t* dst) const;
 
-        int operator[](std::size_t index) const;
+        int32_t operator[](std::size_t index) const;
 
     private:
 
         __m256i m_value;
     };
 
-    batch<int, 8> operator-(const batch<int, 8>& rhs);
-    batch<int, 8> operator+(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch<int, 8> operator-(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch<int, 8> operator*(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch<int, 8> operator/(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
+    batch<int32_t, 8> operator-(const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator+(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator-(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator*(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator/(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
 
-    batch_bool<int, 8> operator==(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch_bool<int, 8> operator!=(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch_bool<int, 8> operator<(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch_bool<int, 8> operator<=(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
+    batch_bool<int32_t, 8> operator==(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch_bool<int32_t, 8> operator!=(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch_bool<int32_t, 8> operator<(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch_bool<int32_t, 8> operator<=(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
 
-    batch<int, 8> operator&(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch<int, 8> operator|(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch<int, 8> operator^(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch<int, 8> operator~(const batch<int, 8>& rhs);
+    batch<int32_t, 8> operator&(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator|(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator^(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator~(const batch<int32_t, 8>& rhs);
 
-    batch<int, 8> min(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
-    batch<int, 8> max(const batch<int, 8>& lhs, const batch<int, 8>& rhs);
+    batch<int32_t, 8> min(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> max(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
 
-    batch<int, 8> abs(const batch<int, 8>& rhs);
+    batch<int32_t, 8> abs(const batch<int32_t, 8>& rhs);
 
-    batch<int, 8> fma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
-    batch<int, 8> fms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
-    batch<int, 8> fnma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
-    batch<int, 8> fnms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z);
+    batch<int32_t, 8> fma(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z);
+    batch<int32_t, 8> fms(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z);
+    batch<int32_t, 8> fnma(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z);
+    batch<int32_t, 8> fnms(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z);
 
-    int hadd(const batch<int, 8>& rhs);
-    //batch<int, 4> haddp(const batch<int, 4>* row);
+    int32_t hadd(const batch<int32_t, 8>& rhs);
+    //batch<int32_t, 4> haddp(const batch<int32_t, 4>* row);
 
-    batch<int, 8> select(const batch_bool<int, 8>& cond, const batch<int, 8>& a, const batch<int, 8>& b);
+    batch<int32_t, 8> select(const batch_bool<int32_t, 8>& cond, const batch<int32_t, 8>& a, const batch<int32_t, 8>& b);
 
-    batch<int, 8> operator<<(const batch<int, 8>& lhs, int rhs);
-    batch<int, 8> operator>>(const batch<int, 8>& lhs, int rhs);
+    batch<int32_t, 8> operator<<(const batch<int32_t, 8>& lhs, int32_t rhs);
+    batch<int32_t, 8> operator>>(const batch<int32_t, 8>& lhs, int32_t rhs);
 
-    /*************************************
-     * batch_bool<int, 8> implementation *
-     *************************************/
+    /*****************************************
+     * batch_bool<int32_t, 8> implementation *
+     *****************************************/
 
 #if XSIMD_X86_INSTR_SET < XSIMD_X86_AVX2_VERSION
 
@@ -139,37 +140,37 @@ namespace xsimd
     XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
 
-    inline batch_bool<int, 8>::batch_bool()
+    inline batch_bool<int32_t, 8>::batch_bool()
     {
     }
 
-    inline batch_bool<int, 8>::batch_bool(bool b)
-        : m_value(_mm256_set1_epi32(-(int)b))
+    inline batch_bool<int32_t, 8>::batch_bool(bool b)
+        : m_value(_mm256_set1_epi32(-(int32_t)b))
     {
     }
 
-    inline batch_bool<int, 8>::batch_bool(bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7)
-        : m_value(_mm256_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3, -(int)b4, -(int)b5, -(int)b6, -(int)b7))
+    inline batch_bool<int32_t, 8>::batch_bool(bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7)
+        : m_value(_mm256_setr_epi32(-(int32_t)b0, -(int32_t)b1, -(int32_t)b2, -(int32_t)b3, -(int32_t)b4, -(int32_t)b5, -(int32_t)b6, -(int32_t)b7))
     {
     }
 
-    inline batch_bool<int, 8>::batch_bool(const __m256i& rhs)
+    inline batch_bool<int32_t, 8>::batch_bool(const __m256i& rhs)
         : m_value(rhs)
     {
     }
 
-    inline batch_bool<int, 8>& batch_bool<int, 8>::operator=(const __m256i& rhs)
+    inline batch_bool<int32_t, 8>& batch_bool<int32_t, 8>::operator=(const __m256i& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline batch_bool<int, 8>::operator __m256i() const
+    inline batch_bool<int32_t, 8>::operator __m256i() const
     {
         return m_value;
     }
 
-    inline batch_bool<int, 8> operator&(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator&(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_and_si256(lhs, rhs);
@@ -178,7 +179,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<int, 8> operator|(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator|(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_or_si256(lhs, rhs);
@@ -187,7 +188,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<int, 8> operator^(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator^(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_xor_si256(lhs, rhs);
@@ -196,7 +197,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<int, 8> operator~(const batch_bool<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator~(const batch_bool<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
@@ -208,7 +209,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<int, 8> operator==(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator==(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_cmpeq_epi32(lhs, rhs);
@@ -217,75 +218,75 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<int, 8> operator!=(const batch_bool<int, 8>& lhs, const batch_bool<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator!=(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
     {
         return ~(lhs == rhs);
     }
 
-    /********************************
-     * batch<int, 8> implementation *
-     ********************************/
+    /************************************
+     * batch<int32_t, 8> implementation *
+     ************************************/
 
-    inline batch<int, 8>::batch()
+    inline batch<int32_t, 8>::batch()
     {
     }
 
-    inline batch<int, 8>::batch(int i)
+    inline batch<int32_t, 8>::batch(int32_t i)
         : m_value(_mm256_set1_epi32(i))
     {
     }
 
-    inline batch<int, 8>::batch(int i0, int i1, int i2, int i3, int i4, int i5, int i6, int i7)
+    inline batch<int32_t, 8>::batch(int32_t i0, int32_t i1, int32_t i2, int32_t i3, int32_t i4, int32_t i5, int32_t i6, int32_t i7)
         : m_value(_mm256_setr_epi32(i0, i1, i2, i3, i4, i5, i6, i7))
     {
     }
 
-    inline batch<int, 8>::batch(const __m256i& rhs)
+    inline batch<int32_t, 8>::batch(const __m256i& rhs)
         : m_value(rhs)
     {
     }
 
-    inline batch<int, 8>& batch<int, 8>::operator=(const __m256i& rhs)
+    inline batch<int32_t, 8>& batch<int32_t, 8>::operator=(const __m256i& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
-    inline batch<int, 8>::operator __m256i() const
+    inline batch<int32_t, 8>::operator __m256i() const
     {
         return m_value;
     }
 
-    inline batch<int, 8>& batch<int, 8>::load_aligned(const int* src)
+    inline batch<int32_t, 8>& batch<int32_t, 8>::load_aligned(const int32_t* src)
     {
         m_value = _mm256_load_si256((__m256i const*)src);
         return *this;
     }
 
-    inline batch<int, 8>& batch<int, 8>::load_unaligned(const int* src)
+    inline batch<int32_t, 8>& batch<int32_t, 8>::load_unaligned(const int32_t* src)
     {
         m_value = _mm256_loadu_si256((__m256i const*)src);
         return *this;
     }
 
-    inline void batch<int, 8>::store_aligned(int* dst) const
+    inline void batch<int32_t, 8>::store_aligned(int32_t* dst) const
     {
         _mm256_store_si256((__m256i*)dst, m_value);
     }
 
-    inline void batch<int, 8>::store_unaligned(int* dst) const
+    inline void batch<int32_t, 8>::store_unaligned(int32_t* dst) const
     {
         _mm256_storeu_si256((__m256i*)dst, m_value);
     }
 
-    inline int batch<int, 8>::operator[](std::size_t index) const
+    inline int32_t batch<int32_t, 8>::operator[](std::size_t index) const
     {
-        alignas(32) int x[8];
+        alignas(32) int32_t x[8];
         store_aligned(x);
         return x[index & 7];
     }
 
-    inline batch<int, 8> operator-(const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator-(const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_sub_epi32(_mm256_setzero_si256(), rhs);
@@ -297,7 +298,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator+(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator+(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_add_epi32(lhs, rhs);
@@ -306,7 +307,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator-(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator-(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_sub_epi32(lhs, rhs);
@@ -315,7 +316,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator*(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator*(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_mullo_epi32(lhs, rhs);
@@ -324,11 +325,11 @@ namespace xsimd
 #endif
     }
 
-    /*inline batch<int, 4> operator/(const batch<int, 4>& lhs, const batch<int, 4>& rhs)
+    /*inline batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
     {
     }*/
 
-    inline batch_bool<int, 8> operator==(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator==(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_cmpeq_epi32(lhs, rhs);
@@ -337,12 +338,12 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<int, 8> operator!=(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator!=(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
         return ~(lhs == rhs);
     }
 
-    inline batch_bool<int, 8> operator<(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator<(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_cmpgt_epi32(rhs, lhs);
@@ -351,12 +352,12 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<int, 8> operator<=(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch_bool<int32_t, 8> operator<=(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
         return ~(rhs < lhs);
     }
 
-    inline batch<int, 8> operator&(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator&(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_and_si256(lhs, rhs);
@@ -365,7 +366,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator|(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator|(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_or_si256(lhs, rhs);
@@ -374,7 +375,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator^(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator^(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_xor_si256(lhs, rhs);
@@ -383,7 +384,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator~(const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> operator~(const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
@@ -395,7 +396,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> min(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> min(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_min_epi32(lhs, rhs);
@@ -404,7 +405,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> max(const batch<int, 8>& lhs, const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> max(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_max_epi32(lhs, rhs);
@@ -413,7 +414,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> abs(const batch<int, 8>& rhs)
+    inline batch<int32_t, 8> abs(const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_sign_epi32(rhs, rhs);
@@ -425,28 +426,28 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> fma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
+    inline batch<int32_t, 8> fma(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z)
     {
         return x * y + z;
     }
 
-    inline batch<int, 8> fms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
+    inline batch<int32_t, 8> fms(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z)
     {
         return x * y - z;
     }
     
-    inline batch<int, 8> fnma(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
+    inline batch<int32_t, 8> fnma(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z)
     {
         return -x * y + z;
     }
 
-    inline batch<int, 8> fnms(const batch<int, 8>& x, const batch<int, 8>& y, const batch<int, 8>& z)
+    inline batch<int32_t, 8> fnms(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z)
     {
         return -x * y - z;
     }
 
 
-    inline int hadd(const batch<int, 8>& rhs)
+    inline int32_t hadd(const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         __m256i tmp1 = _mm256_hadd_epi32(rhs, rhs);
@@ -463,9 +464,9 @@ namespace xsimd
 #endif
     }
 
-    //inline batch<int, 4> haddp(const batch<int, 4>* row);
+    //inline batch<int32_t, 4> haddp(const batch<int32_t, 4>* row);
 
-    inline batch<int, 8> select(const batch_bool<int, 8>& cond, const batch<int, 8>& a, const batch<int, 8>& b)
+    inline batch<int32_t, 8> select(const batch_bool<int32_t, 8>& cond, const batch<int32_t, 8>& a, const batch<int32_t, 8>& b)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_blendv_epi8(b, a, cond);
@@ -479,7 +480,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator<<(const batch<int, 8>& lhs, int rhs)
+    inline batch<int32_t, 8> operator<<(const batch<int32_t, 8>& lhs, int32_t rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_slli_epi32(lhs, rhs);
@@ -491,7 +492,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch<int, 8> operator>>(const batch<int, 8>& lhs, int rhs)
+    inline batch<int32_t, 8> operator>>(const batch<int32_t, 8>& lhs, int32_t rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_srli_epi32(lhs, rhs);
