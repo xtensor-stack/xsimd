@@ -15,6 +15,10 @@
 namespace xsimd
 {
 
+    /****************
+     * basic tester *
+     ****************/
+
     template <class T, std::size_t N, std::size_t A>
     struct simd_basic_tester : simd_tester<T, N, A>
     {
@@ -250,6 +254,10 @@ namespace xsimd
             hadd_res += lhs[i];
         }
     }
+
+    /***************
+     * basic tests *
+     ***************/
 
     template <class T>
     bool test_simd_basic(std::ostream& out, T& tester)
@@ -701,6 +709,10 @@ namespace xsimd
         return success;
     }
 
+    /*********************
+     * conversion tester *
+     *********************/
+
     template <std::size_t N, std::size_t A>
     struct simd_convert_tester
     {
@@ -741,6 +753,10 @@ namespace xsimd
             dnegres[2*i + 1] = -1;
         }
     }
+
+    /*******************
+     * conversion test *
+     *******************/
 
     template <class T>
     inline bool test_simd_conversion(std::ostream& out, T& tester)
@@ -805,6 +821,147 @@ namespace xsimd
 
         return success;
     }
+
+    /***************
+     * cast tester *
+     ***************/
+
+    template <std::size_t N, std::size_t A>
+    struct simd_cast_tester
+    {
+        using int_batch = batch<int, N * 2>;
+        using float_batch = batch<float, N * 2>;
+        using double_batch = batch<double, N>;
+
+        using int_vector = std::vector<int, aligned_allocator<int, A>>;
+        using float_vector = std::vector<float, aligned_allocator<float, A>>;
+        using double_vector = std::vector<double, aligned_allocator<double, A>>;
+
+        int_batch i_input;
+        float_batch f_input;
+        double_batch d_input;
+
+        int_vector ftoi_res;
+        int_vector dtoi_res;
+        float_vector itof_res;
+        float_vector dtof_res;
+        double_vector itod_res;
+        double_vector ftod_res;
+
+        std::string name;
+
+        simd_cast_tester(const std::string& n);
+    };
+
+    namespace detail
+    {
+        union bitcast
+        {
+            float f[2];
+            int i[2];
+            double d;
+        };
+    }
+
+    template <std::size_t N, std::size_t A>
+    inline simd_cast_tester<N, A>::simd_cast_tester(const std::string& n)
+        : name(n), i_input(2), f_input(3.), d_input(2.5e17), ftoi_res(2 * N), dtoi_res(2 * N),
+          itof_res(2 * N), dtof_res(2 * N), itod_res(N), ftod_res(N)
+    {
+        detail::bitcast b1;
+        b1.i[0] = i_input[0];
+        b1.i[1] = i_input[1];
+        std::fill(itof_res.begin(), itof_res.end(), b1.f[0]);
+        std::fill(itod_res.begin(), itod_res.end(), b1.d);
+
+        detail::bitcast b2;
+        b2.f[0] = f_input[0];
+        b2.f[1] = f_input[1];
+        std::fill(ftoi_res.begin(), ftoi_res.end(), b2.i[0]);
+        std::fill(ftod_res.begin(), ftod_res.end(), b2.d);
+
+        detail::bitcast b3;
+        b3.d = d_input[0];
+        std::fill(dtoi_res.begin(), dtoi_res.end(), b3.i[0]);
+        for (size_t i = 0; i < N; ++i)
+        {
+            dtof_res[2 * i] = b3.f[0];
+            dtof_res[2 * i + 1] = b3.f[1];
+        }
+    }
+
+    /*************
+     * cast test *
+     *************/
+
+    template <class T>
+    inline bool test_simd_cast(std::ostream& out, T& tester)
+    {
+        using int_batch = typename T::int_batch;
+        using float_batch = typename T::float_batch;
+        using double_batch = typename T::double_batch;
+        using int_vector = typename T::int_vector;
+        using float_vector = typename T::float_vector;
+        using double_vector = typename T::double_vector;
+
+        int_batch ibres;
+        float_batch fbres;
+        double_batch dbres;
+        int_vector ivres(int_batch::size);
+        float_vector fvres(float_batch::size);
+        double_vector dvres(double_batch::size);
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl << std::endl;
+
+        out << "cast int    -> float  : ";
+        fbres = bitwise_cast<float_batch>(tester.i_input);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(fvres, tester.itof_res, out);
+        success = success && tmp_success;
+
+        out << "cast int    -> double : ";
+        dbres = bitwise_cast<double_batch>(tester.i_input);
+        detail::store_vec(dbres, dvres);
+        tmp_success = check_almost_equal(dvres, tester.itod_res, out);
+        success = success && tmp_success;
+
+        out << "cast float  -> int    : ";
+        ibres = bitwise_cast<int_batch>(tester.f_input);
+        detail::store_vec(ibres, ivres);
+        tmp_success = check_almost_equal(ivres, tester.ftoi_res, out);
+        success = success && tmp_success;
+
+        out << "cast float  -> double : ";
+        dbres = bitwise_cast<double_batch>(tester.f_input);
+        detail::store_vec(dbres, dvres);
+        tmp_success = check_almost_equal(dvres, tester.ftod_res, out);
+        success = success && tmp_success;
+
+        out << "cast double -> int    : ";
+        ibres = bitwise_cast<int_batch>(tester.d_input);
+        detail::store_vec(ibres, ivres);
+        tmp_success = check_almost_equal(ivres, tester.dtoi_res, out);
+        success = success && tmp_success;
+
+        out << "cast double -> float  : ";
+        fbres = bitwise_cast<float_batch>(tester.d_input);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(fvres, tester.dtof_res, out);
+        success = success && tmp_success;
+
+        return success;
+    }
+
 }
 
 #endif
