@@ -114,6 +114,9 @@ namespace xsimd
 
     batch<int, 4> select(const batch_bool<int, 4>& cond, const batch<int, 4>& a, const batch<int, 4>& b);
 
+    batch<int, 4> operator<<(const batch<int, 4>& lhs, int rhs);
+    batch<int, 4> operator>>(const batch<int, 4>& lhs, int rhs);
+
     /*************************************
      * batch_bool<int, 4> implementation *
      *************************************/
@@ -390,6 +393,16 @@ namespace xsimd
 #else
         return _mm_or_si128(_mm_and_si128(cond, a), _mm_andnot_si128(s, b));
 #endif
+    }
+
+    inline batch<int, 4> operator<<(const batch<int, 4>& lhs, int rhs)
+    {
+        return _mm_slli_epi32(lhs, rhs);
+    }
+
+    inline batch<int, 4> operator>>(const batch<int, 4>& lhs, int rhs)
+    {
+        return _mm_srli_epi32(lhs, rhs);
     }
 
 }

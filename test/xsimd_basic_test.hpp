@@ -157,6 +157,7 @@ namespace xsimd
         std::string name;
 
         value_type s;
+        value_type sh_nb;
         res_type lhs;
         res_type rhs;
 
@@ -184,6 +185,8 @@ namespace xsimd
         res_type fnma_res;
         res_type fnms_res;
         value_type hadd_res;
+        res_type sl_res;
+        res_type sr_res;
 
         simd_int_basic_tester(const std::string& name);
     };
@@ -221,8 +224,11 @@ namespace xsimd
         fms_res.resize(N);
         fnma_res.resize(N);
         fnms_res.resize(N);
+        sl_res.resize(N);
+        sr_res.resize(N);
 
         s = value_type(1.4);
+        sh_nb = 3;
         hadd_res = value_type(0);
         for (size_t i = 0; i < N; ++i)
         {
@@ -252,6 +258,8 @@ namespace xsimd
             fnma_res[i] = - lhs[i] * rhs[i] + rhs[i];
             fnms_res[i] = - lhs[i] * rhs[i] - rhs[i];
             hadd_res += lhs[i];
+            sl_res[i] = lhs[i] << sh_nb;
+            sr_res[i] = lhs[i] >> sh_nb;
         }
     }
 
@@ -704,6 +712,18 @@ namespace xsimd
         vres = fnms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fnms_res, out);
+        success = success && tmp_success;
+
+        out << "shift left(simd, int)    : ";
+        vres = lhs << tester.sh_nb;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.sl_res, out);
+        success = success && tmp_success;
+
+        out << "shift right(simd, int)   : ";
+        vres = lhs >> tester.sh_nb;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.sr_res, out);
         success = success && tmp_success;
 
         return success;

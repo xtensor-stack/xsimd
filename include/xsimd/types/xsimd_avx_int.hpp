@@ -114,6 +114,9 @@ namespace xsimd
 
     batch<int, 8> select(const batch_bool<int, 8>& cond, const batch<int, 8>& a, const batch<int, 8>& b);
 
+    batch<int, 8> operator<<(const batch<int, 8>& lhs, int rhs);
+    batch<int, 8> operator>>(const batch<int, 8>& lhs, int rhs);
+
     /*************************************
      * batch_bool<int, 8> implementation *
      *************************************/
@@ -472,6 +475,30 @@ namespace xsimd
         XSIMD_SPLIT_AVX(b);
         __m128i res_low = _mm_blendv_epi8(b_low, a_low, cond_low);
         __m128i res_high = _mm_blendv_epi8(b_high, a_high, cond_high);
+        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+#endif
+    }
+
+    inline batch<int, 8> operator<<(const batch<int, 8>& lhs, int rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_slli_epi32(lhs, rhs);
+#else
+        XSIMD_SPLIT_AVX(lhs);
+        __m128i res_low = _mm_slli_epi32(lhs_low, rhs);
+        __m128i res_high = _mm_slli_epi32(lhs_high, rhs);
+        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+#endif
+    }
+
+    inline batch<int, 8> operator>>(const batch<int, 8>& lhs, int rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_srli_epi32(lhs, rhs);
+#else
+        XSIMD_SPLIT_AVX(lhs);
+        __m128i res_low = _mm_srli_epi32(lhs_low, rhs);
+        __m128i res_high = _mm_srli_epi32(lhs_high, rhs);
         XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
     }
