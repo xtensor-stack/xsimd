@@ -55,6 +55,7 @@ namespace xsimd
     {
         using value_type = int32_t;
         static constexpr std::size_t size = 8;
+        using batch_bool_type = batch_bool<int32_t, 8>;
     };
 
     template <>
@@ -111,7 +112,6 @@ namespace xsimd
     batch<int32_t, 8> fnms(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z);
 
     int32_t hadd(const batch<int32_t, 8>& rhs);
-    //batch<int32_t, 4> haddp(const batch<int32_t, 4>* row);
 
     batch<int32_t, 8> select(const batch_bool<int32_t, 8>& cond, const batch<int32_t, 8>& a, const batch<int32_t, 8>& b);
 
@@ -124,19 +124,19 @@ namespace xsimd
 
 #if XSIMD_X86_INSTR_SET < XSIMD_X86_AVX2_VERSION
 
-#define XSIMD_SPLIT_AVX(name)\
-    __m128i name##_low = _mm256_castsi256_si128(name);\
-    __m128i name##_high = _mm256_extractf128_si256(name, 1)
+#define XSIMD_SPLIT_AVX(avx_name)\
+    __m128i avx_name##_low = _mm256_castsi256_si128(avx_name);\
+    __m128i avx_name##_high = _mm256_extractf128_si256(avx_name, 1)
 
 #define XSIMD_RETURN_MERGED_SSE(res_low, res_high)\
     __m256i result = _mm256_castsi128_si256(res_low);\
     return _mm256_insertf128_si256(result, res_high, 1)
 
-#define XSIMD_APPLY_SSE_FUNCTION(func, lhs, rhs)\
-    XSIMD_SPLIT_AVX(lhs);\
-    XSIMD_SPLIT_AVX(rhs);\
-    __m128i res_low = func(lhs_low, rhs_low);\
-    __m128i res_high = func(lhs_high, rhs_high);\
+#define XSIMD_APPLY_SSE_FUNCTION(func, avx_lhs, avx_rhs)\
+    XSIMD_SPLIT_AVX(avx_lhs);\
+    XSIMD_SPLIT_AVX(avx_rhs);\
+    __m128i res_low = func(avx_lhs##_low, avx_rhs##_low);\
+    __m128i res_high = func(avx_lhs##_high, avx_rhs##_high);\
     XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
 
@@ -325,10 +325,6 @@ namespace xsimd
 #endif
     }
 
-    /*inline batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-    }*/
-
     inline batch_bool<int32_t, 8> operator==(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
@@ -348,7 +344,7 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_cmpgt_epi32(rhs, lhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_cmpeq_epi32, lhs, rhs);
+        XSIMD_APPLY_SSE_FUNCTION(_mm_cmpgt_epi32, rhs, lhs);
 #endif
     }
 
@@ -446,7 +442,6 @@ namespace xsimd
         return -x * y - z;
     }
 
-
     inline int32_t hadd(const batch<int32_t, 8>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
@@ -463,8 +458,6 @@ namespace xsimd
         return _mm_cvtsi128_si32(tmp3);
 #endif
     }
-
-    //inline batch<int32_t, 4> haddp(const batch<int32_t, 4>* row);
 
     inline batch<int32_t, 8> select(const batch_bool<int32_t, 8>& cond, const batch<int32_t, 8>& a, const batch<int32_t, 8>& b)
     {

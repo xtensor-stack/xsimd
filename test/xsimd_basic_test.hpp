@@ -157,7 +157,7 @@ namespace xsimd
         std::string name;
 
         value_type s;
-        value_type sh_nb;
+        int32_t sh_nb;
         res_type lhs;
         res_type rhs;
 
@@ -736,26 +736,33 @@ namespace xsimd
     template <std::size_t N, std::size_t A>
     struct simd_convert_tester
     {
-        using int_batch = batch<int, N*2>;
+        using int32_batch = batch<int32_t, N*2>;
+        using int64_batch = batch<int64_t, N>;
         using float_batch = batch<float, N*2>;
         using double_batch = batch<double, N>;
 
-        using int_vector = std::vector<int, aligned_allocator<int, A>>;
+        using int32_vector = std::vector<int32_t, aligned_allocator<int32_t, A>>;
+        using int64_vector = std::vector<int64_t, aligned_allocator<int64_t, A>>;
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
+        using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
-        int_batch ipos;
-        int_batch ineg;
+        int32_batch i32pos;
+        int32_batch i32neg;
+        int64_batch i64pos;
+        int64_batch i64neg;
         float_batch fpos;
         float_batch fneg;
         double_batch dpos;
         double_batch dneg;
 
-        int_vector fposres;
-        int_vector fnegres;
-        int_vector dposres;
-        int_vector dnegres;
-        float_vector iposres;
-        float_vector inegres;
+        int32_vector fposres;
+        int32_vector fnegres;
+        int64_vector dposres;
+        int64_vector dnegres;
+        float_vector i32posres;
+        float_vector i32negres;
+        double_vector i64posres;
+        double_vector i64negres;
 
         std::string name;
 
@@ -764,14 +771,12 @@ namespace xsimd
 
     template <std::size_t N, std::size_t A>
     inline simd_convert_tester<N, A>::simd_convert_tester(const std::string& n)
-        : name(n), ipos(2), ineg(-3), fpos(float(7.4)), fneg(float(-6.2)), dpos(double(5.4)), dneg(double(-1.2)),
-          fposres(2*N, 7), fnegres(2*N, -6), dposres(2*N, 5), dnegres(2*N, -1), iposres(2*N, float(2)), inegres(2*N, float(-3))
+        : name(n), i32pos(2), i32neg(-3), i64pos(2), i64neg(-3),
+          fpos(float(7.4)), fneg(float(-6.2)), dpos(double(5.4)), dneg(double(-1.2)),
+          fposres(2*N, 7), fnegres(2*N, -6), dposres(N, 5), dnegres(N, -1),
+          i32posres(2*N, float(2)), i32negres(2*N, float(-3)),
+          i64posres(N, double(2)), i64negres(N, double(-3))
     {
-        for(std::size_t i = 0; i < N; ++i)
-        {
-            dposres[2*i + 1] = 0;
-            dnegres[2*i + 1] = -1;
-        }
     }
 
     /*******************
@@ -781,15 +786,23 @@ namespace xsimd
     template <class T>
     inline bool test_simd_conversion(std::ostream& out, T& tester)
     {
-        using int_batch = typename T::int_batch;
+        using int32_batch = typename T::int32_batch;
+        using int64_batch = typename T::int64_batch;
         using float_batch = typename T::float_batch;
-        using int_vector = typename T::int_vector;
+        using double_batch = typename T::double_batch;
+        using int32_vector = typename T::int32_vector;
+        using int64_vector = typename T::int64_vector;
         using float_vector = typename T::float_vector;
+        using double_vector = typename T::double_vector;
 
-        int_batch fbres;
-        float_batch ibres;
-        int_vector fvres(int_batch::size);
-        float_vector ivres(float_batch::size);
+        int32_batch fbres;
+        int64_batch dbres;
+        float_batch i32bres;
+        double_batch i64bres;
+        int32_vector fvres(int32_batch::size);
+        int64_vector dvres(int64_batch::size);
+        float_vector i32vres(float_batch::size);
+        double_vector i64vres(double_batch::size);
 
         bool success = true;
         bool tmp_success = true;
@@ -803,40 +816,52 @@ namespace xsimd
         out << space << name << space << std::endl;
         out << dash << name_shift << dash << std::endl << std::endl;
 
-        out << "positive float -> int  : ";
+        out << "positive float  -> int32  : ";
         fbres = to_int(tester.fpos);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(fvres, tester.fposres, out);
         success = success && tmp_success;
 
-        out << "negative float -> int  : ";
+        out << "negative float  -> int32  : ";
         fbres = to_int(tester.fneg);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(fvres, tester.fnegres, out);
         success = success && tmp_success;
 
-        out << "positive double -> int : ";
-        fbres = to_int(tester.dpos);
-        detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.dposres, out);
+        out << "positive double -> int64  : ";
+        dbres = to_int(tester.dpos);
+        detail::store_vec(dbres, dvres);
+        tmp_success = check_almost_equal(dvres, tester.dposres, out);
         success = success && tmp_success;
 
-        out << "negative double -> int : ";
-        fbres = to_int(tester.dneg);
-        detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.dnegres, out);
+        out << "negative double -> int64  : ";
+        dbres = to_int(tester.dneg);
+        detail::store_vec(dbres, dvres);
+        tmp_success = check_almost_equal(dvres, tester.dnegres, out);
         success = success && tmp_success;
 
-        out << "positive int -> float  : ";
-        ibres = to_float(tester.ipos);
-        detail::store_vec(ibres, ivres);
-        tmp_success = check_almost_equal(ivres, tester.iposres, out);
+        out << "positive int32  -> float  : ";
+        i32bres = to_float(tester.i32pos);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(i32vres, tester.i32posres, out);
         success = success && tmp_success;
 
-        out << "negative int -> float  : ";
-        ibres = to_float(tester.ineg);
-        detail::store_vec(ibres, ivres);
-        tmp_success = check_almost_equal(ivres, tester.inegres, out);
+        out << "negative int32  -> float  : ";
+        i32bres = to_float(tester.i32neg);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(i32vres, tester.i32negres, out);
+        success = success && tmp_success;
+
+        out << "positive int64  -> double : ";
+        i64bres = to_float(tester.i64pos);
+        detail::store_vec(i64bres, i64vres);
+        tmp_success = check_almost_equal(i64vres, tester.i64posres, out);
+        success = success && tmp_success;
+
+        out << "negative int64  -> double : ";
+        i64bres = to_float(tester.i64neg);
+        detail::store_vec(i64bres, i64vres);
+        tmp_success = check_almost_equal(i64vres, tester.i64negres, out);
         success = success && tmp_success;
 
         return success;
@@ -849,23 +874,30 @@ namespace xsimd
     template <std::size_t N, std::size_t A>
     struct simd_cast_tester
     {
-        using int_batch = batch<int, N * 2>;
+        using int32_batch = batch<int32_t, N * 2>;
+        using int64_batch = batch<int64_t, N>;
         using float_batch = batch<float, N * 2>;
         using double_batch = batch<double, N>;
 
-        using int_vector = std::vector<int, aligned_allocator<int, A>>;
+        using int32_vector = std::vector<int32_t, aligned_allocator<int32_t, A>>;
+        using int64_vector = std::vector<int64_t, aligned_allocator<int64_t, A>>;
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
-        int_batch i_input;
+        int32_batch i32_input;
+        int64_batch i64_input;
         float_batch f_input;
         double_batch d_input;
 
-        int_vector ftoi_res;
-        int_vector dtoi_res;
-        float_vector itof_res;
+        int32_vector ftoi32_res;
+        int32_vector dtoi32_res;
+        int64_vector ftoi64_res;
+        int64_vector dtoi64_res;
+        float_vector i32tof_res;
+        float_vector i64tof_res;
         float_vector dtof_res;
-        double_vector itod_res;
+        double_vector i32tod_res;
+        double_vector i64tod_res;
         double_vector ftod_res;
 
         std::string name;
@@ -877,36 +909,50 @@ namespace xsimd
     {
         union bitcast
         {
-            float f[2];
-            int i[2];
-            double d;
+            float   f[2];
+            int32_t i32[2];
+            int64_t i64;
+            double  d;
         };
     }
 
     template <std::size_t N, std::size_t A>
     inline simd_cast_tester<N, A>::simd_cast_tester(const std::string& n)
-        : name(n), i_input(2), f_input(3.), d_input(2.5e17), ftoi_res(2 * N), dtoi_res(2 * N),
-          itof_res(2 * N), dtof_res(2 * N), itod_res(N), ftod_res(N)
+        : name(n), i32_input(2), i64_input(2), f_input(3.), d_input(2.5e17),
+          ftoi32_res(2 * N), dtoi32_res(2 * N), ftoi64_res(N), dtoi64_res(N),
+          i32tof_res(2 * N), i64tof_res(2 * N), dtof_res(2 * N),
+          i32tod_res(N), i64tod_res(N), ftod_res(N)
     {
         detail::bitcast b1;
-        b1.i[0] = i_input[0];
-        b1.i[1] = i_input[1];
-        std::fill(itof_res.begin(), itof_res.end(), b1.f[0]);
-        std::fill(itod_res.begin(), itod_res.end(), b1.d);
+        b1.i32[0] = i32_input[0];
+        b1.i32[1] = i32_input[1];
+        std::fill(i32tof_res.begin(), i32tof_res.end(), b1.f[0]);
+        std::fill(i32tod_res.begin(), i32tod_res.end(), b1.d);
 
         detail::bitcast b2;
-        b2.f[0] = f_input[0];
-        b2.f[1] = f_input[1];
-        std::fill(ftoi_res.begin(), ftoi_res.end(), b2.i[0]);
-        std::fill(ftod_res.begin(), ftod_res.end(), b2.d);
-
-        detail::bitcast b3;
-        b3.d = d_input[0];
-        std::fill(dtoi_res.begin(), dtoi_res.end(), b3.i[0]);
+        b2.i64 = i64_input[0];
+        std::fill(i64tod_res.begin(), i64tod_res.end(), b1.d);
         for (size_t i = 0; i < N; ++i)
         {
-            dtof_res[2 * i] = b3.f[0];
-            dtof_res[2 * i + 1] = b3.f[1];
+            i64tof_res[2 * i] = b2.f[0];
+            i64tof_res[2 * i + 1] = b2.f[1];
+        }
+
+        detail::bitcast b3;
+        b3.f[0] = f_input[0];
+        b3.f[1] = f_input[1];
+        std::fill(ftoi32_res.begin(), ftoi32_res.end(), b3.i32[0]);
+        std::fill(ftoi64_res.begin(), ftoi64_res.end(), b3.i64);
+        std::fill(ftod_res.begin(), ftod_res.end(), b3.d);
+
+        detail::bitcast b4;
+        b4.d = d_input[0];
+        std::fill(dtoi32_res.begin(), dtoi32_res.end(), b4.i32[0]);
+        std::fill(dtoi64_res.begin(), dtoi64_res.end(), b4.i64);
+        for (size_t i = 0; i < N; ++i)
+        {
+            dtof_res[2 * i] = b4.f[0];
+            dtof_res[2 * i + 1] = b4.f[1];
         }
     }
 
@@ -917,17 +963,21 @@ namespace xsimd
     template <class T>
     inline bool test_simd_cast(std::ostream& out, T& tester)
     {
-        using int_batch = typename T::int_batch;
+        using int32_batch = typename T::int32_batch;
+        using int64_batch = typename T::int64_batch;
         using float_batch = typename T::float_batch;
         using double_batch = typename T::double_batch;
-        using int_vector = typename T::int_vector;
+        using int32_vector = typename T::int32_vector;
+        using int64_vector = typename T::int64_vector;
         using float_vector = typename T::float_vector;
         using double_vector = typename T::double_vector;
 
-        int_batch ibres;
+        int32_batch i32bres;
+        int64_batch i64bres;
         float_batch fbres;
         double_batch dbres;
-        int_vector ivres(int_batch::size);
+        int32_vector i32vres(int32_batch::size);
+        int64_vector i64vres(int64_batch::size);
         float_vector fvres(float_batch::size);
         double_vector dvres(double_batch::size);
 
@@ -943,22 +993,40 @@ namespace xsimd
         out << space << name << space << std::endl;
         out << dash << name_shift << dash << std::endl << std::endl;
 
-        out << "cast int    -> float  : ";
-        fbres = bitwise_cast<float_batch>(tester.i_input);
+        out << "cast int32  -> float  : ";
+        fbres = bitwise_cast<float_batch>(tester.i32_input);
         detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.itof_res, out);
+        tmp_success = check_almost_equal(fvres, tester.i32tof_res, out);
         success = success && tmp_success;
 
-        out << "cast int    -> double : ";
-        dbres = bitwise_cast<double_batch>(tester.i_input);
+        out << "cast int32  -> double : ";
+        dbres = bitwise_cast<double_batch>(tester.i32_input);
         detail::store_vec(dbres, dvres);
-        tmp_success = check_almost_equal(dvres, tester.itod_res, out);
+        tmp_success = check_almost_equal(dvres, tester.i32tod_res, out);
         success = success && tmp_success;
 
-        out << "cast float  -> int    : ";
-        ibres = bitwise_cast<int_batch>(tester.f_input);
-        detail::store_vec(ibres, ivres);
-        tmp_success = check_almost_equal(ivres, tester.ftoi_res, out);
+        out << "cast int64  -> float  : ";
+        fbres = bitwise_cast<float_batch>(tester.i64_input);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(fvres, tester.i64tof_res, out);
+        success = success && tmp_success;
+
+        out << "cast int64  -> double : ";
+        dbres = bitwise_cast<double_batch>(tester.i64_input);
+        detail::store_vec(dbres, dvres);
+        tmp_success = check_almost_equal(dvres, tester.i64tod_res, out);
+        success = success && tmp_success;
+
+        out << "cast float  -> int32  : ";
+        i32bres = bitwise_cast<int32_batch>(tester.f_input);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(i32vres, tester.ftoi32_res, out);
+        success = success && tmp_success;
+
+        out << "cast float  -> int64  : ";
+        i64bres = bitwise_cast<int64_batch>(tester.f_input);
+        detail::store_vec(i64bres, i64vres);
+        tmp_success = check_almost_equal(i64vres, tester.ftoi64_res, out);
         success = success && tmp_success;
 
         out << "cast float  -> double : ";
@@ -967,10 +1035,16 @@ namespace xsimd
         tmp_success = check_almost_equal(dvres, tester.ftod_res, out);
         success = success && tmp_success;
 
-        out << "cast double -> int    : ";
-        ibres = bitwise_cast<int_batch>(tester.d_input);
-        detail::store_vec(ibres, ivres);
-        tmp_success = check_almost_equal(ivres, tester.dtoi_res, out);
+        out << "cast double -> int32  : ";
+        i32bres = bitwise_cast<int32_batch>(tester.d_input);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(i32vres, tester.dtoi32_res, out);
+        success = success && tmp_success;
+        
+        out << "cast double -> int64  : ";
+        i64bres = bitwise_cast<int64_batch>(tester.d_input);
+        detail::store_vec(i64bres, i64vres);
+        tmp_success = check_almost_equal(i64vres, tester.dtoi64_res, out);
         success = success && tmp_success;
 
         out << "cast double -> float  : ";

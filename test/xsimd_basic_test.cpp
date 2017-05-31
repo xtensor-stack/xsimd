@@ -63,10 +63,17 @@ TEST(xsimd, sse_double_basic)
     EXPECT_TRUE(res);
 }
 
-TEST(xsimd, sse_int_basic)
+TEST(xsimd, sse_int32_basic)
 {
-    std::ofstream out("log/sse_int_basic.log", std::ios_base::out);
-    bool res = xsimd::test_simd_int<int, 4, 16>(out, "sse int");
+    std::ofstream out("log/sse_int32_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int32_t, 4, 16>(out, "sse int32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_int64_basic)
+{
+    std::ofstream out("log/sse_int64_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int64_t, 2, 16>(out, "sse int64");
     EXPECT_TRUE(res);
 }
 
@@ -100,10 +107,17 @@ TEST(xsimd, avx_double_basic)
     EXPECT_TRUE(res);
 }
 
-TEST(xsimd, avx_int_basic)
+TEST(xsimd, avx_int32_basic)
 {
-    std::ofstream out("log/sse_avx_basic.log", std::ios_base::out);
-    bool res = xsimd::test_simd_int<int, 8, 32>(out, "avx int");
+    std::ofstream out("log/avx_int32_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int32_t, 8, 32>(out, "avx int32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_int64_basic)
+{
+    std::ofstream out("log/avx_int64_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int64_t, 4, 32>(out, "avx int64");
     EXPECT_TRUE(res);
 }
 

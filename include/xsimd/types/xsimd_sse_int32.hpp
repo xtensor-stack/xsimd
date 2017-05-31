@@ -55,6 +55,7 @@ namespace xsimd
     {
         using value_type = int32_t;
         static constexpr std::size_t size = 4;
+        using batch_bool_type = batch_bool<int32_t, 4>;
     };
 
     template <>
@@ -111,7 +112,6 @@ namespace xsimd
     batch<int32_t, 4> fnms(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z);
 
     int32_t hadd(const batch<int32_t, 4>& rhs);
-    //batch<int32_t, 4> haddp(const batch<int32_t, 4>* row);
 
     batch<int32_t, 4> select(const batch_bool<int32_t, 4>& cond, const batch<int32_t, 4>& a, const batch<int32_t, 4>& b);
 
@@ -275,10 +275,6 @@ namespace xsimd
 #endif
     }
 
-    /*inline batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-    }*/
-
     inline batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
     {
         return _mm_cmpeq_epi32(lhs, rhs);
@@ -325,7 +321,7 @@ namespace xsimd
         return _mm_min_epi32(lhs, rhs);
 #else
         __m128i greater = _mm_cmpgt_epi32(lhs, rhs);
-        return selectb(greater, rhs, lhs);
+        return select(greater, rhs, lhs);
 #endif
     }
 
@@ -335,7 +331,7 @@ namespace xsimd
         return _mm_max_epi32(lhs, rhs);
 #else
         __m128i greater = _mm_cmpgt_epi32(lhs, rhs);
-        return selectb(greater, lhs, rhs);
+        return select(greater, lhs, rhs);
 #endif
     }
 
@@ -384,8 +380,6 @@ namespace xsimd
         return _mm_cvtsi128_si32(tmp4);
 #endif
     }
-
-    //inline batch<int32_t, 4> haddp(const batch<int32_t, 4>* row);
 
     inline batch<int32_t, 4> select(const batch_bool<int32_t, 4>& cond, const batch<int32_t, 4>& a, const batch<int32_t, 4>& b)
     {
