@@ -36,6 +36,28 @@ namespace xsimd
     template <class T>
     using as_integer_t = typename as_integer<T>::type;
 
+    /***********************
+     * as_unsigned_integer *
+     ***********************/
+
+    template <class T>
+    struct as_unsigned_integer;
+
+    template <>
+    struct as_unsigned_integer<float>
+    {
+        using type = uint32_t;
+    };
+
+    template <>
+    struct as_unsigned_integer<double>
+    {
+        using type = uint64_t;
+    };
+
+    template <class T>
+    using as_unsigned_integer_t = typename as_unsigned_integer<T>::type;
+
     /***********
      * as_float *
      ************/
@@ -57,6 +79,47 @@ namespace xsimd
 
     template <class T>
     using as_float_t = typename as_float<T>::type;
+
+    /********************
+     * primitive caster *
+     ********************/
+
+    namespace detail
+    {
+        template <class UI, class I, class F>
+        union generic_caster
+        {
+            UI ui;
+            I i;
+            F f;
+
+            constexpr generic_caster(UI t) : ui(t) {}
+            constexpr generic_caster(I t) : i(t) {}
+            constexpr generic_caster(F t) : f(t) {}
+        };
+
+        using caster32_t = generic_caster<uint32_t, int32_t, float>;
+        using caster64_t = generic_caster<uint64_t, int64_t, double>;
+
+        template <class T>
+        struct caster;
+
+        template <>
+        struct caster<float>
+        {
+            using type = caster32_t;
+        };
+
+        template <>
+        struct caster<double>
+        {
+            using type = caster64_t;
+        };
+
+        template <class T>
+        using caster_t = typename caster<T>::type;
+    }
+
 }
 
 #endif

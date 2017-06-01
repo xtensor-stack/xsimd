@@ -45,6 +45,18 @@ namespace xsimd
         {
             vec.store_aligned(&res[0]);
         }
+
+        template <class V, class S>
+        void load_vec(V& vec, const S& src, size_t i)
+        {
+            vec.load_aligned(&src[i]);
+        }
+
+        template <class V, class R>
+        void store_vec(V& vec, R& res, size_t i)
+        {
+            vec.store_aligned(&res[i]);
+        }
     }
 }
 
