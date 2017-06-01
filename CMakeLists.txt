@@ -37,6 +37,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_instruction_set.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_manipulation.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_sign.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_numerical_constant.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_rounding.hpp
@@ -45,14 +46,17 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_float.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int32.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int64.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_float.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int32.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int64.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_traits.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_types_include.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
 )
 
 if(BUILD_TESTS)
