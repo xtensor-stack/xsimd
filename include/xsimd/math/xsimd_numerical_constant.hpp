@@ -17,7 +17,13 @@ namespace xsimd
     constexpr T maxflint() noexcept;
 
     template <class T>
+    constexpr int32_t maxexponent() noexcept;
+
+    template <class T>
     constexpr T minuszero() noexcept;
+
+    template <class T>
+    constexpr int32_t nmb() noexcept;
 
     template <class T>
     constexpr T twotonmb() noexcept;
@@ -44,6 +50,22 @@ namespace xsimd
         return 9007199254740992.0;
     }
 
+    /******************************
+     * maxexponent implementation *
+     ******************************/
+
+    template<>
+    constexpr int32_t maxexponent<float>() noexcept
+    {
+        return 127;
+    }
+
+    template <>
+    constexpr int32_t maxexponent<double>() noexcept
+    {
+        return 1023;
+    }
+
     /****************************
      * minuszero implementation *
      ****************************/
@@ -64,6 +86,22 @@ namespace xsimd
     constexpr double minuszero<double>() noexcept
     {
         return -0.0;
+    }
+
+    /**********************
+     * nmb implementation *
+     **********************/
+
+    template <>
+    constexpr int32_t nmb<float>() noexcept
+    {
+        return 23;
+    }
+
+    template <>
+    constexpr int32_t nmb<double>() noexcept
+    {
+        return 52;
     }
 
     /***************************

@@ -67,6 +67,8 @@ set(XSIMD_TESTS
     main.cpp
     xsimd_basic_test.hpp
     xsimd_basic_test.cpp
+    xsimd_fp_manipulation_test.hpp
+    xsimd_fp_manipulation_test.cpp
     xsimd_rounding_test.hpp
     xsimd_rounding_test.cpp
     xsimd_tester.hpp

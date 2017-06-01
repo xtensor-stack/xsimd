@@ -27,5 +27,7 @@
 #include "xsimd_avx_conversion.hpp"
 #endif
 
+#include "xsimd_utils.hpp"
+
 #endif
 
