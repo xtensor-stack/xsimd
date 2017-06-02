@@ -14,6 +14,9 @@
 namespace xsimd
 {
 
+    template <class T, size_t N>
+    class batch;
+
     /**************
      * as_integer *
      **************/
@@ -31,6 +34,12 @@ namespace xsimd
     struct as_integer<double>
     {
         using type = int64_t;
+    };
+
+    template <class T, std::size_t N>
+    struct as_integer<batch<T, N>>
+    {
+        using type = batch<typename as_integer<T>::type, N>;
     };
 
     template <class T>
@@ -55,6 +64,12 @@ namespace xsimd
         using type = uint64_t;
     };
 
+    template <class T, std::size_t N>
+    struct as_unsigned_integer<batch<T, N>>
+    {
+        using type = batch<typename as_unsigned_integer<T>::type, N>;
+    };
+
     template <class T>
     using as_unsigned_integer_t = typename as_unsigned_integer<T>::type;
 
@@ -75,6 +90,12 @@ namespace xsimd
     struct as_float<int64_t>
     {
         using type = double;
+    };
+
+    template <class T, std::size_t N>
+    struct as_float<batch<T, N>>
+    {
+        using type = batch<typename as_float<T>::type, N>;
     };
 
     template <class T>

@@ -25,8 +25,8 @@ namespace xsimd
     inline batch<T, N> ldexp(const batch<T, N>& x, const batch<as_integer_t<T>, N>& e)
     {
         using btype = batch<T, N>;
-        using itype = batch<as_integer_t<T>, N>;
-        itype ik = e + itype(maxexponent<T>());
+        using itype = as_integer_t<btype>;
+        itype ik = e + maxexponent<T>();
         ik = ik << nmb<T>();
         return x * bitwise_cast<btype>(ik);
     }
