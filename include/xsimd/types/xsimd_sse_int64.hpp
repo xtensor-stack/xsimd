@@ -46,6 +46,9 @@ namespace xsimd
     batch_bool<int64_t, 2> operator==(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator!=(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
 
+    bool all(const batch_bool<int64_t, 2>& rhs);
+    bool any(const batch_bool<int64_t, 2>& rhs);
+
     /*********************
      * batch<int64_t, 2> *
      *********************/
@@ -200,6 +203,20 @@ namespace xsimd
     inline batch_bool<int64_t, 2> operator!=(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
     {
         return ~(lhs == rhs);
+    }
+
+    inline bool all(const batch_bool<int64_t, 2>& rhs)
+    {
+        return _mm_movemask_epi8(rhs) == 0xFFFF;
+    }
+
+    inline bool any(const batch_bool<int64_t, 2>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
+        return !_mm_testz_si128(rhs, rhs);
+#else
+        return _mm_movemask_epi8(rhs) != 0;
+#endif
     }
 
     /************************************

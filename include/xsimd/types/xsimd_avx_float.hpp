@@ -46,6 +46,9 @@ namespace xsimd
     batch_bool<float, 8> operator==(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
     batch_bool<float, 8> operator!=(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
 
+    bool all(const batch_bool<float, 8>& rhs);
+    bool any(const batch_bool<float, 8>& rhs);
+
     /*******************
      * batch<float, 8> *
      *******************/
@@ -185,6 +188,16 @@ namespace xsimd
     inline batch_bool<float, 8> operator!=(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_NEQ_OQ);
+    }
+
+    inline bool all(const batch_bool<float, 8>& rhs)
+    {
+        return _mm256_testc_ps(rhs, batch_bool<float, 8>(true)) != 0;
+    }
+
+    inline bool any(const batch_bool<float, 8>& rhs)
+    {
+        return !_mm256_testz_ps(rhs, rhs);
     }
 
     /**********************************
