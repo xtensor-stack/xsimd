@@ -39,7 +39,10 @@ namespace xsimd
     constexpr T log10_2lo() noexcept;
 
     template <class T>
-    constexpr int32_t maxexponent() noexcept;
+    constexpr T logeps() noexcept;
+
+    template <class T>
+    constexpr as_integer_t<T> maxexponent() noexcept;
 
     template <class T>
     constexpr T maxflint() noexcept;
@@ -247,9 +250,37 @@ namespace xsimd
         return detail::caster64_t(uint64_t(0x3ed3509f79fef312U)).f;
     }
 
+    /*************************
+     * logeps implementation *
+     *************************/
+
+    template <class T>
+    constexpr T logeps() noexcept
+    {
+        return T(logeps<typename T::value_type>());
+    }
+
+    template <>
+    constexpr float logeps<float>() noexcept
+    {
+        return detail::caster32_t(0xc17f1402U).f;
+    }
+
+    template <>
+    constexpr double logeps<double>() noexcept
+    {
+        return detail::caster64_t(uint64_t(0xc04205966f2b4f12U)).f;
+    }
+
     /******************************
      * maxexponent implementation *
      ******************************/
+
+    template <class T>
+    constexpr as_integer_t<T> maxexponent() noexcept
+    {
+        return as_integer_t<T>(maxexponent<typename T::value_type>());
+    }
 
     template<>
     constexpr int32_t maxexponent<float>() noexcept
@@ -258,7 +289,7 @@ namespace xsimd
     }
 
     template <>
-    constexpr int32_t maxexponent<double>() noexcept
+    constexpr int64_t maxexponent<double>() noexcept
     {
         return 1023;
     }
@@ -442,6 +473,12 @@ namespace xsimd
     /**********************
      * nmb implementation *
      **********************/
+
+    template <class T>
+    constexpr int32_t nmb() noexcept
+    {
+        return nmb<typename T::value_type>();
+    }
 
     template <>
     constexpr int32_t nmb<float>() noexcept
