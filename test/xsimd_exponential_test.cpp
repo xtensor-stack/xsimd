@@ -14,6 +14,7 @@
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
 #include "xsimd/types/xsimd_types_include.hpp"
 #include "xsimd/math/xsimd_exponential.hpp"
+#include "xsimd/math/xsimd_logarithm.hpp"
 #include "xsimd_exponential_test.hpp"
 
 namespace xsimd

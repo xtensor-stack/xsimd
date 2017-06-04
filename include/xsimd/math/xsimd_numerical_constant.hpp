@@ -66,10 +66,19 @@ namespace xsimd
     constexpr T minlog10() noexcept;
 
     template <class T>
+    constexpr T minusinfinity() noexcept;
+
+    template <class T>
     constexpr T minuszero() noexcept;
 
     template <class T>
+    constexpr T nan() noexcept;
+
+    template <class T>
     constexpr int32_t nmb() noexcept;
+
+    template <class T>
+    constexpr T smallestposval() noexcept;
 
     template <class T>
     constexpr T twotonmb() noexcept;
@@ -448,6 +457,28 @@ namespace xsimd
         return -308.2547155599167;
     }
 
+    /********************************
+     * minusinfinity implementation *
+     ********************************/
+
+    template <class T>
+    constexpr T minusinfinity() noexcept
+    {
+        return T(minusinfinity<typename T::value_type>());
+    }
+
+    template <>
+    constexpr float minusinfinity<float>() noexcept
+    {
+        return -infinity<float>();
+    }
+
+    template <>
+    constexpr double minusinfinity<double>() noexcept
+    {
+        return -infinity<double>();
+    }
+
     /****************************
      * minuszero implementation *
      ****************************/
@@ -471,6 +502,28 @@ namespace xsimd
     }
 
     /**********************
+     * nan implementation *
+     **********************/
+
+    template <class T>
+    constexpr T nan() noexcept
+    {
+        return T(nan<typename T::value_type>());
+    }
+
+    template <>
+    constexpr float nan<float>() noexcept
+    {
+        return detail::caster32_t(0xFFFFFFFFU).f;
+    }
+
+    template <>
+    constexpr double nan<double>() noexcept
+    {
+        return detail::caster64_t(uint64_t(0xFFFFFFFFFFFFFFFFU)).f;
+    }
+
+    /**********************
      * nmb implementation *
      **********************/
 
@@ -490,6 +543,28 @@ namespace xsimd
     constexpr int32_t nmb<double>() noexcept
     {
         return 52;
+    }
+
+    /*********************************
+     * smallestposval implementation *
+     *********************************/
+
+    template <class T>
+    constexpr T smallestposval() noexcept
+    {
+        return T(smallestposval<typename T::value_type>());
+    }
+
+    template <>
+    constexpr float smallestposval<float>() noexcept
+    {
+        return 1.1754944e-38f;
+    }
+
+    template <>
+    constexpr double smallestposval<double>() noexcept
+    {
+        return 2.225073858507201e-308;
     }
 
     /***************************
