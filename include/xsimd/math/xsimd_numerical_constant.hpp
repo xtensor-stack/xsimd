@@ -14,11 +14,21 @@
 
 namespace xsimd
 {
+
+    template <class T>
+    constexpr T allbits() noexcept;
+
     template <class T>
     constexpr T infinity() noexcept;
 
     template <class T>
     constexpr T invlog_2() noexcept;
+
+    template <class T>
+    constexpr T invlog_2hi() noexcept;
+
+    template <class T>
+    constexpr T invlog_2lo() noexcept;
 
     template <class T>
     constexpr T invlog10_2() noexcept;
@@ -83,6 +93,38 @@ namespace xsimd
     template <class T>
     constexpr T twotonmb() noexcept;
 
+    /**************************
+     * allbits implementation *
+     **************************/
+
+    namespace detail
+    {
+        template <class T, bool = std::is_integral<T>::value>
+        struct allbits_impl
+        {
+            static constexpr T get_value() noexcept
+            {
+                return T(~0);
+            }
+        };
+
+        template <class T>
+        struct allbits_impl<T, false>
+        {
+            static constexpr T get_value() noexcept
+            {
+                return nan<T>();
+            }
+        };
+        
+    }
+
+    template <class T>
+    constexpr T allbits() noexcept
+    {
+        return T(detail::allbits_impl<typename T::value_type>::get_value());
+    }
+
     /***************************
      * infinity implementation *
      ***************************/
@@ -125,6 +167,50 @@ namespace xsimd
     constexpr double invlog_2<double>() noexcept
     {
         return double(1.442695040888963407359924681001892137426645954152986);
+    }
+
+    /*****************************
+     * invlog_2hi implementation *
+     *****************************/
+
+    template <class T>
+    constexpr T invlog_2hi() noexcept
+    {
+        return T(invlog_2hi<typename T::value_type>());
+    }
+
+    template <>
+    constexpr float invlog_2hi<float>() noexcept
+    {
+        return detail::caster32_t(0x3fb8b000U).f;
+    }
+
+    template <>
+    constexpr double invlog_2hi<double>() noexcept
+    {
+        return detail::caster64_t(uint64_t(0x3ff7154765200000U)).f;
+    }
+
+    /*****************************
+     * invlog_2lo implementation *
+     *****************************/
+
+    template <class T>
+    constexpr T invlog_2lo() noexcept
+    {
+        return T(invlog_2lo<typename T::value_type>());
+    }
+
+    template <>
+    constexpr float invlog_2lo<float>() noexcept
+    {
+        return detail::caster32_t(0xb9389ad4U).f;
+    }
+
+    template <>
+    constexpr double invlog_2lo<double>() noexcept
+    {
+        return detail::caster64_t(uint64_t(0x3de705fc2eefa200U)).f;
     }
 
     /*****************************
