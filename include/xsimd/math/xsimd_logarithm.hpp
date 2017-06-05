@@ -429,6 +429,98 @@ namespace xsimd
         return detail::log10_kernel<b_type, T>::compute(x);
     }
 
+    /************************
+     * log1p implementation *
+     ************************/
+
+    namespace detail
+    {
+        template <class B, class T = typename B::value_type>
+        struct log1p_kernel;
+
+        template <class B>
+        struct log1p_kernel<B, float>
+        {
+            static inline B compute(const B& a)
+            {
+                using i_type = as_integer_t<B>;
+                const B uf = a + B(1.);
+                auto isnez = (uf != B(0.));
+                i_type iu = bitwise_cast<i_type>(uf);
+                iu += 0x3f800000 - 0x3f3504f3;
+                i_type k = (iu >> 23) - 0x7f;
+                iu = (iu & i_type(0x007fffff)) + 0x3f3504f3;
+                B f = --(bitwise_cast<B>(iu));
+                B s = f / (B(2.) + f);
+                B z = s * s;
+                B w = z * z;
+                B t1 = w * horner<B, 0x3eccce13, 0x3e789e26>(w);
+                B t2 = z * horner<B, 0x3f2aaaaa, 0x3e91e9ee>(w);
+                B R = t2 + t1;
+                B hfsq = B(0.5) * f * f;
+                B dk = to_float(k);
+                /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
+                B c = select(bool_cast(k >= i_type(2)), B(1.) - (uf - a), a - (uf - B(1.))) / uf;
+                B r = fma(dk, log_2hi<B>(), fma(s, (hfsq + R), dk * log_2lo<B>() + c) - hfsq + f);
+#ifndef XSIMD_NO_INFINITIES
+                B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
+#else
+                B zz = select(isnez, r, minusinfinity<B>());
+#endif
+                return select(!(uf >= B(0.)), nan<B>(), zz);
+            }
+        };
+
+        template <class B>
+        struct log1p_kernel<B, double>
+        {
+            static inline B compute(const B& a)
+            {
+                using i_type = as_integer_t<B>;
+                const B uf = a + B(1.);
+                auto isnez = (uf != B(0.));
+                i_type hu = bitwise_cast<i_type>(uf) >> 32;
+                hu += 0x3ff00000 - 0x3fe6a09e;
+                i_type k = (hu >> 20) - 0x3ff;
+                /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
+                B c = select(bool_cast(k >= i_type(2)), B(1.) - (uf - a), a - (uf - B(1.))) / uf;
+                hu = (hu & i_type(0x000fffff)) + 0x3fe6a09e;
+                B f = bitwise_cast<B>((hu << 32) | (i_type(0xffffffff) & bitwise_cast<i_type>(uf)));
+                f = --f;
+                B hfsq = B(0.5) * f * f;
+                B s = f / (B(2.) + f);
+                B z = s * s;
+                B w = z * z;
+                B t1 = w * horner<B,
+                    0x3fd999999997fa04ll,
+                    0x3fcc71c51d8e78afll,
+                    0x3fc39a09d078c69fll
+                >(w);
+                B t2 = z * horner<B,
+                    0x3fe5555555555593ll,
+                    0x3fd2492494229359ll,
+                    0x3fc7466496cb03dell,
+                    0x3fc2f112df3e5244ll
+                >(w);
+                B R = t2 + t1;
+                B dk = to_float(k);
+                B r = fma(dk, log_2hi<B>(), fma(s, hfsq + R, dk * log_2lo<B>() + c) - hfsq + f);
+#ifndef XSIMD_NO_INFINITIES
+                B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
+#else
+                B zz = select(isnez, r, minusinfinity<B>());
+#endif
+                return select(!(uf >= B(0.)), nan<B>(), zz);
+            }
+        };
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> log1p(const batch<T, N>& x)
+    {
+        using b_type = batch<T, N>;
+        return detail::log1p_kernel<b_type, T>::compute(x);
+    }
 }
 
 #endif
