@@ -33,6 +33,7 @@ namespace xsimd
         res_type log_input;
         res_type log_res;
         res_type log2_res;
+        res_type log10_res;
 
         simd_exponential_tester(const std::string& n);
     };
@@ -49,6 +50,7 @@ namespace xsimd
         log_input.resize(nb_input);
         log_res.resize(nb_input);
         log2_res.resize(nb_input);
+        log10_res.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
             exp_input[i] = value_type(-1.5) + i * value_type(3) / nb_input;
@@ -58,6 +60,7 @@ namespace xsimd
             log_input[i] = value_type(0.001 + i * 100 / nb_input);
             log_res[i] = std::log(log_input[i]);
             log2_res[i] = std::log2(log_input[i]);
+            log10_res[i] = std::log10(log_input[i]);
         }
     }
 
@@ -136,6 +139,16 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.log2_res, out);
+        success = success && tmp_success;
+
+        out << "log10 : ";
+        for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
+        {
+            detail::load_vec(log_input, tester.log_input, i);
+            vres = log10(log_input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.log10_res, out);
         success = success && tmp_success;
 
         return success;

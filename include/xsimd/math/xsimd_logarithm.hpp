@@ -274,6 +274,161 @@ namespace xsimd
         return detail::log2_kernel<b_type, T>::compute(x);
     }
 
+    /************************
+     * log10 implementation *
+     ************************/
+
+    namespace detail
+    {
+        template <class B, class T = typename B::value_type>
+        struct log10_kernel;
+
+        template <class B>
+        struct log10_kernel<B, float>
+        {
+            /* origin: FreeBSD /usr/src/lib/msun/src/e_log10f.c */
+            /*
+             * ====================================================
+             * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+             *
+             * Developed at SunPro, a Sun Microsystems, Inc. business.
+             * Permission to use, copy, modify, and distribute this
+             * software is freely granted, provided that this notice
+             * is preserved.
+             * ====================================================
+             */
+            static inline B compute(const B& a)
+            {
+                const B
+                    ivln10hi(4.3432617188e-01f),
+                    ivln10lo(-3.1689971365e-05f),
+                    log10_2hi(3.0102920532e-01f),
+                    log10_2lo(7.9034151668e-07f);
+                using i_type = as_integer_t<B>;
+                B x = a;
+                i_type k(0);
+                auto isnez = (a != B(0.));
+#ifndef XSIMD_NO_DENORMALS
+                auto test = (a < smallestposval<B>()) && isnez;
+                if (any(test))
+                {
+                    k = select(bool_cast(test), k - i_type(25), k);
+                    x = select(test, x * B(33554432ul), x);
+                }
+#endif
+                i_type ix = bitwise_cast<i_type>(x);
+                ix += 0x3f800000 - 0x3f3504f3;
+                k += (ix >> 23) - 0x7f;
+                ix = (ix & i_type(0x007fffff)) + 0x3f3504f3;
+                x = bitwise_cast<B>(ix);
+                B f = --x;
+                B s = f / (B(2.) + f);
+                B z = s * s;
+                B w = z * z;
+                B t1 = w * horner<B, 0x3eccce13, 0x3e789e26>(w);
+                B t2 = z * horner<B, 0x3f2aaaaa, 0x3e91e9ee>(w);
+                B R = t2 + t1;
+                B dk = to_float(k);
+                B hfsq = B(0.5) * f * f;
+                B hibits = f - hfsq;
+                hibits &= bitwise_cast<B>(i_type(0xfffff000));
+                B lobits = fma(s, hfsq + R, f - hibits - hfsq);
+                B r = fma(dk, log10_2hi,
+                    fma(hibits, ivln10hi,
+                        fma(lobits, ivln10hi,
+                            fma(lobits + hibits, ivln10lo, dk * log10_2lo))));
+#ifndef XSIMD_NO_INFINITIES
+                B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
+#else
+                B zz = select(isnez, r, minusinfinity<B>());
+#endif
+                return select(!(a >= B(0.)), nan<B>(), zz);
+            }
+        };
+
+        template <class B>
+        struct log10_kernel<B, double>
+        {
+            /* origin: FreeBSD /usr/src/lib/msun/src/e_log10f.c */
+            /*
+             * ====================================================
+             * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+             *
+             * Developed at SunPro, a Sun Microsystems, Inc. business.
+             * Permission to use, copy, modify, and distribute this
+             * software is freely granted, provided that this notice
+             * is preserved.
+             * ====================================================
+             */
+            static inline B compute(const B& a)
+            {
+                const B
+                    ivln10hi(4.34294481878168880939e-01),
+                    ivln10lo(2.50829467116452752298e-11),
+                    log10_2hi(3.01029995663611771306e-01),
+                    log10_2lo(3.69423907715893078616e-13);
+                using i_type = as_integer_t<B>;
+                B x = a;
+                i_type hx = bitwise_cast<i_type>(x) >> 32;
+                i_type k(0);
+                auto isnez = (a != B(0.));
+#ifndef XSIMD_NO_DENORMALS
+                auto test = (a < smallestposval<B>()) && isnez;
+                if (any(test))
+                {
+                    k = select(bool_cast(test), k - i_type(54), k);
+                    x = select(test, x * B(18014398509481984ull), x);
+                }
+#endif
+                hx += 0x3ff00000 - 0x3fe6a09e;
+                k += (hx >> 20) - 0x3ff;
+                hx = (hx & i_type(0x000fffff)) + 0x3fe6a09e;
+                x = bitwise_cast<B>(hx << 32 | (i_type(0xffffffff) & bitwise_cast<i_type>(x)));
+                B f = --x;
+                B dk = to_float(k);
+                B s = f / (B(2.) + f);
+                B z = s * s;
+                B w = z * z;
+                B t1 = w * horner<B,
+                    0x3fd999999997fa04ll,
+                    0x3fcc71c51d8e78afll,
+                    0x3fc39a09d078c69fll
+                >(w);
+                B t2 = z * horner<B,
+                    0x3fe5555555555593ll,
+                    0x3fd2492494229359ll,
+                    0x3fc7466496cb03dell,
+                    0x3fc2f112df3e5244ll
+                >(w);
+                B R = t2 + t1;
+                B hfsq = B(0.5) * f * f;
+                B hi = f - hfsq;
+                hi = hi & bitwise_cast<B>(allbits<i_type>() << 32);
+                B lo = f - hi - hfsq + s * (hfsq + R);
+                B val_hi = hi * ivln10hi;
+                B y = dk * log10_2hi;
+                B val_lo = dk * log10_2lo + (lo + hi) * ivln10lo + lo * ivln10hi;
+                B w1 = y + val_hi;
+                val_lo += (y - w1) + val_hi;
+                val_hi = w1;
+                B r = val_lo + val_hi;
+#ifndef XSIMD_NO_INFINITIES
+                B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
+#else
+                B z = select(isnez, r, minusinfinity<B>());
+#endif
+                return select(!(a >= B(0.)), nan<B>(), zz);
+            }
+        };
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> log10(const batch<T, N>& x)
+    {
+        using b_type = batch<T, N>;
+        return detail::log10_kernel<b_type, T>::compute(x);
+    }
+
 }
 
 #endif
