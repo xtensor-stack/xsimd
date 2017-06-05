@@ -21,6 +21,15 @@ namespace xsimd
      * Generic implementation *
      **************************/
 
+     /* origin: boost/simd/arch/common/simd/function/ldexp.hpp */
+     /*
+      * ====================================================
+      * copyright 2016 NumScale SAS
+      *
+      * Distributed under the Boost Software License, Version 1.0.
+      * (See copy at http://boost.org/LICENSE_1_0.txt)
+      * ====================================================
+      */
     template <class T, std::size_t N>
     inline batch<T, N> ldexp(const batch<T, N>& x, const batch<as_integer_t<T>, N>& e)
     {
