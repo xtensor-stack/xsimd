@@ -38,6 +38,15 @@ namespace xsimd
         template <class B, class Tag>
         struct exp_kernel<B, Tag, float>
         {
+            /* origin: boost/simd/arch/common/detail/simd/expo_base.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 using reducer_t = exp_reduction<B, Tag>;
@@ -53,6 +62,15 @@ namespace xsimd
         template <class B, class Tag>
         struct exp_kernel<B, Tag, double>
         {
+            /* origin: boost/simd/arch/common/detail/simd/expo_base.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 using reducer_t = exp_reduction<B, Tag>;
@@ -97,6 +115,15 @@ namespace xsimd
         template <class B>
         struct expm1_kernel<B, float>
         {
+            /* origin: boost/simd/arch/common/detail/generic/expm1_kernel.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 B k = nearbyint(invlog_2<B>() * a);
@@ -123,6 +150,15 @@ namespace xsimd
         template <class B>
         struct expm1_kernel<B, double>
         {
+            /* origin: boost/simd/arch/common/detail/generic/expm1_kernel.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 B k = nearbyint(invlog_2<B>() * a);

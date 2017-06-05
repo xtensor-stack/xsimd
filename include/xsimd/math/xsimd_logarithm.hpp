@@ -37,6 +37,15 @@ namespace xsimd
         template <class B>
         struct log_kernel<B, float>
         {
+            /* origin: boost/simd/arch/common/simd/function/log.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 using i_type = as_integer_t<B>;
@@ -78,6 +87,15 @@ namespace xsimd
         template <class B>
         struct log_kernel<B, double>
         {
+            /* origin: boost/simd/arch/common/simd/function/log.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 using i_type = as_integer_t<B>;
@@ -441,6 +459,15 @@ namespace xsimd
         template <class B>
         struct log1p_kernel<B, float>
         {
+            /* origin: boost/simd/arch/common/simd/function/log1p.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 using i_type = as_integer_t<B>;
@@ -474,6 +501,15 @@ namespace xsimd
         template <class B>
         struct log1p_kernel<B, double>
         {
+            /* origin: boost/simd/arch/common/simd/function/log1p.hpp */
+            /*
+             * ====================================================
+             * copyright 2016 NumScale SAS
+             *
+             * Distributed under the Boost Software License, Version 1.0.
+             * (See copy at http://boost.org/LICENSE_1_0.txt)
+             * ====================================================
+             */
             static inline B compute(const B& a)
             {
                 using i_type = as_integer_t<B>;

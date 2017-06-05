@@ -78,6 +78,16 @@ namespace xsimd
         template <class B, class Tag, class T = typename B::value_type>
         struct exp_reduction;
 
+        /* origin: boost/simd/arch/common/detail/generic/f_expo_reduction.hpp */
+        /*
+         * ====================================================
+         * copyright 2016 NumScale SAS
+         *
+         * Distributed under the Boost Software License, Version 1.0.
+         * (See copy at http://boost.org/LICENSE_1_0.txt)
+         * ====================================================
+         */
+
         template <class B>
         struct exp_reduction<B, exp_tag, float> : exp_reduction_base<B, exp_tag>
         {
@@ -148,6 +158,16 @@ namespace xsimd
                 return k;
             }
         };
+
+        /* origin: boost/simd/arch/common/detail/generic/d_expo_reduction.hpp */
+        /*
+         * ====================================================
+         * copyright 2016 NumScale SAS
+         *
+         * Distributed under the Boost Software License, Version 1.0.
+         * (See copy at http://boost.org/LICENSE_1_0.txt)
+         * ====================================================
+         */
 
         template <class B>
         struct exp_reduction<B, exp_tag, double> : exp_reduction_base<B, exp_tag>
