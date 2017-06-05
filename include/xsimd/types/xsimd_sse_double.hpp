@@ -45,6 +45,9 @@ namespace xsimd
     batch_bool<double, 2> operator==(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
     batch_bool<double, 2> operator!=(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
 
+    bool all(const batch_bool<double, 2>& rhs);
+    bool any(const batch_bool<double, 2>& rhs);
+
     /********************
      * batch<double, 2> *
      ********************/
@@ -182,6 +185,15 @@ namespace xsimd
         return _mm_cmpneq_pd(lhs, rhs);
     }
 
+    inline bool all(const batch_bool<double, 2>& rhs)
+    {
+        return _mm_movemask_pd(rhs) == 3;
+    }
+
+    inline bool any(const batch_bool<double, 2>& rhs)
+    {
+        return _mm_movemask_pd(rhs) != 0;
+    }
 
     /***********************************
      * batch<double, 2> implementation *

@@ -235,7 +235,7 @@ namespace xsimd
     template <class X>
     inline X operator!(const simd_batch_bool<X>& rhs)
     {
-        return rhs() == 0;
+        return rhs() == X(false);
     }
 
 

@@ -42,6 +42,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_manipulation.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_sign.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_horner.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_logarithm.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_numerical_constant.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_rounding.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp

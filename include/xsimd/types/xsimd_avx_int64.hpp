@@ -46,6 +46,9 @@ namespace xsimd
     batch_bool<int64_t, 4> operator==(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
     batch_bool<int64_t, 4> operator!=(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
 
+    bool all(const batch_bool<int64_t, 4>& rhs);
+    bool any(const batch_bool<int64_t, 4>& rhs);
+
     /*********************
      * batch<int64_t, 4> *
      *********************/
@@ -221,6 +224,16 @@ namespace xsimd
     inline batch_bool<int64_t, 4> operator!=(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
     {
         return ~(lhs == rhs);
+    }
+
+    inline bool all(const batch_bool<int64_t, 4>& rhs)
+    {
+        return _mm256_testc_si256(rhs, batch_bool<int64_t, 4>(true)) != 0;
+    }
+
+    inline bool any(const batch_bool<int64_t, 4>& rhs)
+    {
+        return !_mm256_testz_si256(rhs, rhs);
     }
 
     /************************************

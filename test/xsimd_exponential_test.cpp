@@ -14,6 +14,7 @@
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
 #include "xsimd/types/xsimd_types_include.hpp"
 #include "xsimd/math/xsimd_exponential.hpp"
+#include "xsimd/math/xsimd_logarithm.hpp"
 #include "xsimd_exponential_test.hpp"
 
 namespace xsimd
@@ -36,7 +37,7 @@ TEST(xsimd, sse_float_exponential)
 
 TEST(xsimd, sse_double_exponential)
 {
-    std::ofstream out("log/sse_double_fp_manipulation.log", std::ios_base::out);
+    std::ofstream out("log/sse_double_exponential.log", std::ios_base::out);
     bool res = xsimd::test_exponential<double, 2, 16>(out, "sse double");
     EXPECT_TRUE(res);
 }
@@ -52,7 +53,7 @@ TEST(xsimd, avx_float_exponential)
 
 TEST(xsimd, avx_double_exponential)
 {
-    std::ofstream out("log/avx_double_fp_manipulation.log", std::ios_base::out);
+    std::ofstream out("log/avx_double_exponential.log", std::ios_base::out);
     bool res = xsimd::test_exponential<double, 4, 32>(out, "avx double");
     EXPECT_TRUE(res);
 }

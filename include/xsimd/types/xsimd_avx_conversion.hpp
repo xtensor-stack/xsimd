@@ -27,9 +27,18 @@ namespace xsimd
     batch<float, 8> to_float(const batch<int32_t, 8>& x);
     batch<double, 4> to_float(const batch<int64_t, 4>& x);
 
-    /******************
-     * cast functions *
-     ******************/
+    /**************************
+     * boolean cast functions *
+     **************************/
+
+    batch_bool<int32_t, 8> bool_cast(const batch_bool<float, 8>& x);
+    batch_bool<int64_t, 4> bool_cast(const batch_bool<double, 4>& x);
+    batch_bool<float, 8> bool_cast(const batch_bool<int32_t, 8>& x);
+    batch_bool<double, 4> bool_cast(const batch_bool<int64_t, 4>& x);
+
+    /**************************
+     * bitwise cast functions *
+     **************************/
 
     template <class B>
     B bitwise_cast(const batch<float, 8>& x);
@@ -79,9 +88,33 @@ namespace xsimd
                                 static_cast<double>(x[3]));
     }
 
-    /*********************************
-     * cast functions implementation *
-     *********************************/
+    /**************************
+     * boolean cast functions *
+     **************************/
+
+    inline batch_bool<int32_t, 8> bool_cast(const batch_bool<float, 8>& x)
+    {
+        return _mm256_castps_si256(x);
+    }
+
+    inline batch_bool<int64_t, 4> bool_cast(const batch_bool<double, 4>& x)
+    {
+        return _mm256_castpd_si256(x);
+    }
+
+    inline batch_bool<float, 8> bool_cast(const batch_bool<int32_t, 8>& x)
+    {
+        return _mm256_castsi256_ps(x);
+    }
+
+    inline batch_bool<double, 4> bool_cast(const batch_bool<int64_t, 4>& x)
+    {
+        return _mm256_castsi256_pd(x);
+    }
+
+    /*****************************************
+     * bitwise cast functions implementation *
+     *****************************************/
 
     template <>
     inline batch<double, 4> bitwise_cast(const batch<float, 8>& x)

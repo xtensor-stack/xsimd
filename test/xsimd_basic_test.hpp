@@ -32,6 +32,7 @@ namespace xsimd
         value_type s;
         res_type lhs;
         res_type rhs;
+        res_type mix_lhs_rhs;
 
         value_type extract_res;
         res_type minus_res;
@@ -78,6 +79,7 @@ namespace xsimd
 
         lhs.resize(N);
         rhs.resize(N);
+        mix_lhs_rhs.resize(N);
         minus_res.resize(N);
         add_vv_res.resize(N);
         add_vs_res.resize(N);
@@ -144,6 +146,11 @@ namespace xsimd
             sqrt_res[i] = sqrt(lhs[i]);
             hadd_res += lhs[i];
         }
+        for (size_t i = 0; i < N / 2; ++i)
+        {
+            mix_lhs_rhs[2 * i] = lhs[2*i];
+            mix_lhs_rhs[2 * i + 1] = rhs[2 * i + 1];
+        }
     }
 
     template <class T, std::size_t N, std::size_t A>
@@ -160,6 +167,7 @@ namespace xsimd
         int32_t sh_nb;
         res_type lhs;
         res_type rhs;
+        res_type mix_lhs_rhs;
 
         value_type extract_res;
         res_type minus_res;
@@ -202,6 +210,7 @@ namespace xsimd
 
         lhs.resize(N);
         rhs.resize(N);
+        mix_lhs_rhs.resize(N);
         minus_res.resize(N);
         add_vv_res.resize(N);
         add_vs_res.resize(N);
@@ -261,6 +270,12 @@ namespace xsimd
             sl_res[i] = lhs[i] << sh_nb;
             sr_res[i] = lhs[i] >> sh_nb;
         }
+
+        for (size_t i = 0; i < N / 2; ++i)
+        {
+            mix_lhs_rhs[2 * i] = lhs[2 * i];
+            mix_lhs_rhs[2 * i + 1] = rhs[2 * i + 1];
+        }
     }
 
     /***************
@@ -277,6 +292,7 @@ namespace xsimd
 
         vector_type lhs;
         vector_type rhs;
+        vector_type mix_lhs_rhs;
         vector_type vres;
         res_type res(tester_type::size);
         value_type s = tester.s;
@@ -314,6 +330,7 @@ namespace xsimd
 
         detail::load_vec(lhs, tester.lhs);
         detail::load_vec(rhs, tester.rhs);
+        detail::load_vec(mix_lhs_rhs, tester.mix_lhs_rhs);
 
         out << "unary operator-          : ";
         vres = -lhs;
@@ -514,6 +531,22 @@ namespace xsimd
         tmp_success = check_almost_equal(sres, tester.hadd_res, out);
         success = success && tmp_success;
 
+        out << "any                      : ";
+        auto any_check_false = (lhs != lhs);
+        bool any_res_false = any(any_check_false);
+        auto any_check_true = (lhs == mix_lhs_rhs);
+        bool any_res_true = any(any_check_true);
+        tmp_success = !any_res_false && any_res_true;
+        success = success && tmp_success;
+
+        out << "all                      : ";
+        auto all_check_false = (lhs == mix_lhs_rhs);
+        bool all_res_false = all(all_check_false);
+        auto all_check_true = (lhs == lhs);
+        bool all_res_true = all(all_check_true);
+        tmp_success = !all_res_false && all_res_true;
+        success = success && tmp_success;
+
         return success;
     }
 
@@ -527,6 +560,7 @@ namespace xsimd
 
         vector_type lhs;
         vector_type rhs;
+        vector_type mix_lhs_rhs;
         vector_type vres;
         res_type res(tester_type::size);
         value_type s = tester.s;
@@ -564,6 +598,7 @@ namespace xsimd
 
         detail::load_vec(lhs, tester.lhs);
         detail::load_vec(rhs, tester.rhs);
+        detail::load_vec(mix_lhs_rhs, tester.mix_lhs_rhs);
 
         out << "unary operator-          : ";
         vres = -lhs;
@@ -724,6 +759,22 @@ namespace xsimd
         vres = lhs >> tester.sh_nb;
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.sr_res, out);
+        success = success && tmp_success;
+
+        out << "any                      : ";
+        auto any_check_false = (lhs != lhs);
+        bool any_res_false = any(any_check_false);
+        auto any_check_true = (lhs == mix_lhs_rhs);
+        bool any_res_true = any(any_check_true);
+        tmp_success = !any_res_false && any_res_true;
+        success = success && tmp_success;
+
+        out << "all                      : ";
+        auto all_check_false = (lhs == mix_lhs_rhs);
+        bool all_res_false = all(all_check_false);
+        auto all_check_true = (lhs == lhs);
+        bool all_res_true = all(all_check_true);
+        tmp_success = !all_res_false && all_res_true;
         success = success && tmp_success;
 
         return success;

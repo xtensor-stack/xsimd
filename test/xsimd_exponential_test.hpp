@@ -25,11 +25,16 @@ namespace xsimd
 
         std::string name;
 
-
-        res_type input_exp;
+        res_type exp_input;
         res_type exp_res;
         res_type exp2_res;
         res_type expm1_res;
+        
+        res_type log_input;
+        res_type log_res;
+        res_type log2_res;
+        res_type log10_res;
+        res_type log1p_res;
 
         simd_exponential_tester(const std::string& n);
     };
@@ -39,17 +44,26 @@ namespace xsimd
         : name(n)
     {
         size_t nb_input = N * 10000;
-        input_exp.resize(nb_input);
+        exp_input.resize(nb_input);
         exp_res.resize(nb_input);
         exp2_res.resize(nb_input);
         expm1_res.resize(nb_input);
-
+        log_input.resize(nb_input);
+        log_res.resize(nb_input);
+        log2_res.resize(nb_input);
+        log10_res.resize(nb_input);
+        log1p_res.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
-            input_exp[i] = value_type(-1.5) + i * value_type(3) / nb_input;
-            exp_res[i] = std::exp(input_exp[i]);
-            exp2_res[i] = std::exp2(input_exp[i]);
-            expm1_res[i] = std::expm1(input_exp[i]);
+            exp_input[i] = value_type(-1.5) + i * value_type(3) / nb_input;
+            exp_res[i] = std::exp(exp_input[i]);
+            exp2_res[i] = std::exp2(exp_input[i]);
+            expm1_res[i] = std::expm1(exp_input[i]);
+            log_input[i] = value_type(0.001 + i * 100 / nb_input);
+            log_res[i] = std::log(log_input[i]);
+            log2_res[i] = std::log2(log_input[i]);
+            log10_res[i] = std::log10(log_input[i]);
+            log1p_res[i] = std::log1p(log_input[i]);
         }
     }
 
@@ -61,9 +75,10 @@ namespace xsimd
         using value_type = typename tester_type::value_type;
         using res_type = typename tester_type::res_type;
 
-        vector_type input_exp;
+        vector_type exp_input;
+        vector_type log_input;
         vector_type vres;
-        res_type res(tester.input_exp.size());
+        res_type res(tester.exp_input.size());
 
         bool success = true;
         bool tmp_success = true;
@@ -80,33 +95,73 @@ namespace xsimd
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
         out << "exp   : ";
-        for (size_t i = 0; i < tester.input_exp.size(); i += tester.size)
+        for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
         {
-            detail::load_vec(input_exp, tester.input_exp, i);
-            vres = exp(input_exp);
+            detail::load_vec(exp_input, tester.exp_input, i);
+            vres = exp(exp_input);
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.exp_res, out);
         success = success && tmp_success;
 
         out << "exp2  : ";
-        for (size_t i = 0; i < tester.input_exp.size(); i += tester.size)
+        for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
         {
-            detail::load_vec(input_exp, tester.input_exp, i);
-            vres = exp2(input_exp);
+            detail::load_vec(exp_input, tester.exp_input, i);
+            vres = exp2(exp_input);
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.exp2_res, out);
         success = success && tmp_success;
 
         out << "expm1 : ";
-        for (size_t i = 0; i < tester.input_exp.size(); i += tester.size)
+        for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
         {
-            detail::load_vec(input_exp, tester.input_exp, i);
-            vres = expm1(input_exp);
+            detail::load_vec(exp_input, tester.exp_input, i);
+            vres = expm1(exp_input);
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.expm1_res, out);
+        success = success && tmp_success;
+
+        out << "log   : ";
+        for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
+        {
+            detail::load_vec(log_input, tester.log_input, i);
+            vres = log(log_input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.log_res, out);
+        success = success && tmp_success;
+
+        out << "log2  : ";
+        for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
+        {
+            detail::load_vec(log_input, tester.log_input, i);
+            vres = log2(log_input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.log2_res, out);
+        success = success && tmp_success;
+
+        out << "log10 : ";
+        for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
+        {
+            detail::load_vec(log_input, tester.log_input, i);
+            vres = log10(log_input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.log10_res, out);
+        success = success && tmp_success;
+
+        out << "log1p : ";
+        for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
+        {
+            detail::load_vec(log_input, tester.log_input, i);
+            vres = log1p(log_input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.log1p_res, out);
         success = success && tmp_success;
 
         return success;
