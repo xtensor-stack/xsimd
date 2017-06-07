@@ -6,10 +6,13 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef XSIMD_MATH_HPP
+#define XSIMD_MATH_HPP
 
-int main(int argc, char* argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#include "xsimd_rounding.hpp"
+#include "xsimd_fp_manipulation.hpp"
+#include "xsimd_exponential.hpp"
+#include "xsimd_logarithm.hpp"
+#include "xsimd_trigonometric.hpp"
+
+#endif
