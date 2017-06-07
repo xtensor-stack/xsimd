@@ -79,6 +79,19 @@ namespace xsimd
             const B z1 = select(swap_bit != B(0.), se, ce);
             return z1 ^ sign_bit;
         }
+
+        template <class B>
+        inline B tan_impl(const B& a)
+        {
+            const B x = abs(a);
+            B xr = nan<B>();
+            const B n = trigo_reducer<B>::reduce(x, xr);
+            auto tmp = select(n >= B(2.), B(1.), B(0.));
+            auto swap_bit = fma(B(-2.), tmp, n);
+            auto test = (swap_bit == B(0.));
+            const B y = trigo_evaluation<B>::tan_eval(xr, test);
+            return y ^ bitofsign(a);
+        }
     }
 
     template <class T, std::size_t N>
@@ -91,6 +104,12 @@ namespace xsimd
     inline batch<T, N> cos(const batch<T, N>& x)
     {
         return detail::cos_impl(x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> tan(const batch<T, N>& x)
+    {
+        return detail::tan_impl(x);
     }
 }
 
