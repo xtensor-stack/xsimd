@@ -20,6 +20,9 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> copysign(const batch<T, N>& x1, const batch<T, N>& x2);
 
+    template <class T, std::size_t N>
+    batch<T, N> signnz(const batch<T, N>& x);
+
     /**************************
      * fp_sign implementation *
      **************************/
@@ -36,7 +39,13 @@ namespace xsimd
     {
         return abs(x1) | bitofsign(x2);
     }
-    
+ 
+    template <class T, std::size_t N>
+    inline batch<T, N> signnz(const batch<T, N>& x)
+    {
+        using batch_type = batch<T, N>;
+        return batch_type(1) | (signmask<batch_type>() & x);
+    }
 }
 
 #endif

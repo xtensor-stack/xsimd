@@ -10,6 +10,7 @@
 #define XSIMD_TRIGONOMETRIC_HPP
 
 #include "xsimd_fp_sign.hpp"
+#include "xsimd_invtrigo.hpp"
 #include "xsimd_trigo_reduction.hpp"
 
 namespace xsimd
@@ -34,7 +35,7 @@ namespace xsimd
     batch<T, N> atan(const batch<T, N>& x);
 
     template <class T, std::size_t N>
-    batch<T, N> atan2(const batch<T, N>& x);
+    batch<T, N> atan2(const batch<T, N>& y, const batch<T, N>& x);
 
     namespace detail
     {
@@ -110,6 +111,30 @@ namespace xsimd
     inline batch<T, N> tan(const batch<T, N>& x)
     {
         return detail::tan_impl(x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> asin(const batch<T, N>& x)
+    {
+        return detail::invtrigo_kernel<batch<T, N>>::asin(x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> acos(const batch<T, N>& x)
+    {
+        return detail::invtrigo_kernel<batch<T, N>>::acos(x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> atan(const batch<T, N>& x)
+    {
+        return detail::invtrigo_kernel<batch<T, N>>::atan(x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> atan2(const batch<T, N>& y, const batch<T, N>& x)
+    {
+        return detail::invtrigo_kernel<batch<T, N>>::atan2(y, x);
     }
 }
 

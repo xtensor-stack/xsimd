@@ -29,6 +29,13 @@ namespace xsimd
         res_type sin_res;
         res_type cos_res;
         res_type tan_res;
+        res_type ainput;
+        res_type asin_res;
+        res_type acos_res;
+        res_type atan_input;
+        res_type atan_res;
+        value_type atan2_lhs;
+        res_type atan2_res;
 
         simd_trigonometric_tester(const std::string& n);
     };
@@ -42,6 +49,13 @@ namespace xsimd
         sin_res.resize(nb_input);
         cos_res.resize(nb_input);
         tan_res.resize(nb_input);
+        ainput.resize(nb_input);
+        asin_res.resize(nb_input);
+        acos_res.resize(nb_input);
+        atan_input.resize(nb_input);
+        atan_res.resize(nb_input);
+        atan2_lhs = 1.5;
+        atan2_res.resize(nb_input);
 
         for (size_t i = 0; i < nb_input; ++i)
         {
@@ -49,6 +63,12 @@ namespace xsimd
             sin_res[i] = std::sin(input[i]);
             cos_res[i] = std::cos(input[i]);
             tan_res[i] = std::tan(input[i]);
+            ainput[i] = value_type(-1.) + value_type(2.) * i / nb_input;
+            asin_res[i] = std::asin(ainput[i]);
+            acos_res[i] = std::acos(ainput[i]);
+            atan_input[i] = value_type(-10.) + i * value_type(20.) / nb_input;
+            atan_res[i] = std::atan(atan_input[i]);
+            atan2_res[i] = std::atan2(atan2_lhs, atan_input[i]);
         }
     }
 
@@ -108,6 +128,44 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.tan_res, out);
         success = success && tmp_success;
 
+        out << "asin  : ";
+        for (size_t i = 0; i < tester.ainput.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.ainput, i);
+            vres = asin(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.asin_res, out);
+
+        out << "acos  : ";
+        for (size_t i = 0; i < tester.ainput.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.ainput, i);
+            vres = acos(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.acos_res, out);
+
+        out << "atan  : ";
+        for (size_t i = 0; i < tester.atan_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.atan_input, i);
+            vres = atan(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.atan_res, out);
+
+        out << "atan2 : ";
+        vector_type atan2_lhs(tester.atan2_lhs);
+        for (size_t i = 0; i < tester.atan_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.atan_input, i);
+            vres = atan2(atan2_lhs, input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.atan2_res, out);
+
+        success = success && tmp_success;
         return success;
     }
 }
