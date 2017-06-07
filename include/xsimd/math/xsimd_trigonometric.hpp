@@ -124,6 +124,12 @@ namespace xsimd
     {
         return detail::invtrigo_kernel<batch<T, N>>::acos(x);
     }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> atan(const batch<T, N>& x)
+    {
+        return detail::invtrigo_kernel<batch<T, N>>::atan(x);
+    }
 }
 
 #endif

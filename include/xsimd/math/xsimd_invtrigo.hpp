@@ -61,6 +61,41 @@ namespace xsimd
                 x = select(a < B(-0.5), pi<B>() - x, x);
                 return select(x_larger_05, x, pio2<B>() - x);
             }
+
+            static inline B atan(const B& a)
+            {
+                const B absa = abs(a);
+                const B x = kernel_atan(absa, B(1.) / absa);
+                return x ^ bitofsign(a);
+            }
+
+            static inline B acot(const B& a)
+            {
+                const B absa = abs(a);
+                const B x = kernel_atan(B(1.) / absa, absa);
+                return x ^ bitofsign(a);
+            }
+
+            static inline B kernel_atan(const B& x, const B& recx)
+            {
+                const auto flag1 = x < tan3pio8<B>();
+                const auto flag2 = (x >= B(detail::caster32_t(0x3ed413cd).f)) && flag1;
+                B yy = select(flag1, B(0.), pio2<B>());
+                yy = select(flag2, pio4<B>(), yy);
+                B xx = select(flag1, x, -recx);
+                xx = select(flag2, (x - B(1.)) / (x + B(1.)), xx);
+                const B z = xx * xx;
+                B z1 = horner<B,
+                    0xbeaaaa2aul,
+                    0x3e4c925ful,
+                    0xbe0e1b85ul,
+                    0x3da4f0d1ul
+                >(z);
+                z1 = fma(xx, z1 * z, xx);
+                z1 = select(flag2, z1 + pio_4lo<B>(), z1);
+                z1 = select(!flag1, z1 + pio_2lo<B>(), z1);
+                return yy + z1;
+            }
         };
 
         /* origin: boost/simd/arch/common/detail/simd/d_invtrig.hpp */
@@ -131,6 +166,49 @@ namespace xsimd
                 x = select(x_larger_05, x + x, x);
                 x = select(a < B(-0.5), pi<B>() - x, x);
                 return select(x_larger_05, x, pio2<B>() - x);
+            }
+
+            static inline B atan(const B& a)
+            {
+                const B absa = abs(a);
+                const B x = kernel_atan(absa, B(1.) / absa);
+                return x ^ bitofsign(a);
+            }
+
+            static inline B acot(const B& a)
+            {
+                const B absa = abs(a);
+                const B x = kernel_atan(B(1.) / absa, absa);
+                return x ^ bitofsign(a);
+            }
+
+            static inline B kernel_atan(const B& x, const B& recx)
+            {
+                const auto flag1 = x < tan3pio8<B>();
+                const auto flag2 = (x >= tanpio8<B>()) && flag1;
+                B yy = select(flag1, B(0.), pio2<B>());
+                yy = select(flag2, pio4<B>(), yy);
+                B xx = select(flag1, x, -recx);
+                xx = select(flag2, (x - B(1.)) / (x + B(1.)), xx);
+                B z = xx * xx;
+                z *= horner<B,
+                    0xc0503669fd28ec8ell,
+                    0xc05eb8bf2d05ba25ll,
+                    0xc052c08c36880273ll,
+                    0xc03028545b6b807all,
+                    0xbfec007fa1f72594ll
+                >(z) /
+                    horner1<B,
+                    0x4068519efbbd62ecll,
+                    0x407e563f13b049eall,
+                    0x407b0e18d2e2be3bll,
+                    0x4064a0dd43b8fa25ll,
+                    0x4038dbc45b14603cll
+                    >(z);
+                z = fma(xx, z, xx);
+                z = select(flag2, z + pio_4lo<B>(), z);
+                z = z + select(flag1, B(0.), pio_2lo<B>());
+                return yy + z;
             }
         };
     }

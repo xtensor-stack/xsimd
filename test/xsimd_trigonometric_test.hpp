@@ -32,6 +32,8 @@ namespace xsimd
         res_type ainput;
         res_type asin_res;
         res_type acos_res;
+        res_type atan_input;
+        res_type atan_res;
 
         simd_trigonometric_tester(const std::string& n);
     };
@@ -48,6 +50,8 @@ namespace xsimd
         ainput.resize(nb_input);
         asin_res.resize(nb_input);
         acos_res.resize(nb_input);
+        atan_input.resize(nb_input);
+        atan_res.resize(nb_input);
 
         for (size_t i = 0; i < nb_input; ++i)
         {
@@ -58,6 +62,8 @@ namespace xsimd
             ainput[i] = value_type(-1.) + value_type(2.) * i / nb_input;
             asin_res[i] = std::asin(ainput[i]);
             acos_res[i] = std::acos(ainput[i]);
+            atan_input[i] = value_type(-10.) + i * value_type(20.) / nb_input;
+            atan_res[i] = std::atan(atan_input[i]);
         }
     }
 
@@ -134,6 +140,15 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.acos_res, out);
+
+        out << "atan  : ";
+        for (size_t i = 0; i < tester.atan_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.atan_input, i);
+            vres = atan(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.atan_res, out);
 
         success = success && tmp_success;
         return success;
