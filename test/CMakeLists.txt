@@ -75,6 +75,8 @@ set(XSIMD_TESTS
     xsimd_rounding_test.cpp
     xsimd_tester.hpp
     xsimd_test_utils.hpp
+    xsimd_trigonometric_test.hpp
+    xsimd_trigonometric_test.cpp
 )
 
 set(XSIMD_TARGET test_xsimd)

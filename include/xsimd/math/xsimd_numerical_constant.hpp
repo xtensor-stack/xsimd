@@ -17,29 +17,29 @@ namespace xsimd
 
 #define XSIMD_DEFINE_CONSTANT(NAME, SINGLE, DOUBLE)\
     template <class T>\
-    constexpr T NAME##() noexcept {\
-        return T(NAME##<typename T::value_type>());\
+    constexpr T NAME() noexcept {\
+        return T(NAME<typename T::value_type>());\
     }\
     template <>\
-    constexpr float NAME##<float>() noexcept {\
+    constexpr float NAME<float>() noexcept {\
         return SINGLE;\
     }\
     template <>\
-    constexpr double NAME##<double>() noexcept {\
+    constexpr double NAME<double>() noexcept {\
         return DOUBLE;\
     }
 
 #define XSIMD_DEFINE_CONSTANT_HEX(NAME, SINGLE, DOUBLE)\
     template <class T>\
-    constexpr T NAME##() noexcept {\
-        return T(NAME##<typename T::value_type>());\
+    constexpr T NAME() noexcept {\
+        return T(NAME<typename T::value_type>());\
     }\
     template <>\
-    constexpr float NAME##<float>() noexcept {\
+    constexpr float NAME<float>() noexcept {\
         return detail::caster32_t(SINGLE).f;\
     }\
     template <>\
-    constexpr double NAME##<double>() noexcept {\
+    constexpr double NAME<double>() noexcept {\
         return detail::caster64_t(uint64_t(DOUBLE)).f;\
     }
 
@@ -67,9 +67,13 @@ XSIMD_DEFINE_CONSTANT(minuszero, -0.0f, -0.0)
 XSIMD_DEFINE_CONSTANT_HEX(nan, 0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF)
 XSIMD_DEFINE_CONSTANT_HEX(pio2, 0x3fc90fdb, 0x3ff921fb54442d18)
 XSIMD_DEFINE_CONSTANT_HEX(pio2_1, 0x3fc90f80, 0x3ff921fb54400000)
+XSIMD_DEFINE_CONSTANT_HEX(pio2_1t, 0x37354443, 0x3dd0b4611a626331)
 XSIMD_DEFINE_CONSTANT_HEX(pio2_2, 0x37354400, 0x3dd0b4611a600000)
+XSIMD_DEFINE_CONSTANT_HEX(pio2_2t, 0x2e85a308, 0x3ba3198a2e037073)
 XSIMD_DEFINE_CONSTANT_HEX(pio2_3, 0x2e85a300, 0x3ba3198a2e000000)
+XSIMD_DEFINE_CONSTANT_HEX(pio2_3t, 0x248d3132, 0x397b839a252049c1)
 XSIMD_DEFINE_CONSTANT_HEX(pio4, 0x3f490fdb, 0x3fe921fb54442d18)
+XSIMD_DEFINE_CONSTANT_HEX(signmask, 0x80000000, 0x8000000000000000)
 XSIMD_DEFINE_CONSTANT(smallestposval, 1.1754944e-38f, 2.225073858507201e-308)
 XSIMD_DEFINE_CONSTANT_HEX(twentypi, 0x427b53d1, 0x404f6a7a2955385e)
 XSIMD_DEFINE_CONSTANT_HEX(twoopi, 0x3f22f983, 0x3fe45f306dc9c883)

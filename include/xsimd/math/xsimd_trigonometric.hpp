@@ -1,0 +1,75 @@
+/***************************************************************************
+* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
+****************************************************************************/
+
+#ifndef XSIMD_TRIGONOMETRIC_HPP
+#define XSIMD_TRIGONOMETRIC_HPP
+
+#include "xsimd_fp_sign.hpp"
+#include "xsimd_trigo_reduction.hpp"
+
+namespace xsimd
+{
+
+    template <class T, std::size_t N>
+    batch<T, N> sin(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> cos(const batch<T, N>& x);
+
+    template<class T, std::size_t N>
+    batch<T, N> tan(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> asin(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> acos(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> atan(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch<T, N> atan2(const batch<T, N>& x);
+
+    namespace detail
+    {
+        /* origin: boost/simd/arch/common/detail/simd/trig_base.hpp */
+        /*
+         * ====================================================
+         * copyright 2016 NumScale SAS
+         *
+         * Distributed under the Boost Software License, Version 1.0.
+         * (See copy at http://boost.org/LICENSE_1_0.txt)
+         * ====================================================
+         */
+
+        template <class B>
+        inline B sin_impl(const B& a)
+        {
+            const B x = abs(a);
+            B xr = nan<B>();
+            const B n = trigo_reducer<B>::reduce(x, xr);
+            auto tmp = select(n >= B(2.), B(1.), B(0.));
+            auto swap_bit = fma(B(-2.), tmp, n);
+            auto sign_bit = bitofsign(a) ^ select(tmp != B(0.), signmask<B>(), B(0.));
+            const B z = xr * xr;
+            const B se = trigo_evaluation<B>::sin_eval(z, xr);
+            const B ce = trigo_evaluation<B>::cos_eval(z);
+            const B z1 = select(swap_bit == B(0.), se, ce);
+            return z1 ^ sign_bit;
+        }
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> sin(const batch<T, N>& x)
+    {
+        return detail::sin_impl(x);
+    }
+}
+
+#endif
