@@ -18,7 +18,7 @@ namespace xsimd
     namespace detail
     {
         template <class B, class T = typename B::value_type>
-        struct invtrigo_kernel;
+        struct invtrigo_kernel_impl;
 
         /* origin: boost/simd/arch/common/detail/simd/f_invtrig.hpp */
         /*
@@ -30,7 +30,7 @@ namespace xsimd
          * ====================================================
          */
         template <class B>
-        struct invtrigo_kernel<B, float>
+        struct invtrigo_kernel_impl<B, float>
         {
             static inline B asin(const B& a)
             {
@@ -49,31 +49,6 @@ namespace xsimd
                 z1 = fma(z1, z * x, x);
                 z = select(x_larger_05, pio2<B>() - (z1 + z1), z1);
                 return z ^ sign;
-            }
-
-            static inline B acos(const B& a)
-            {
-                B x = abs(a);
-                auto x_larger_05 = x > B(0.5);
-                x = select(x_larger_05, sqrt(fma(B(-0.5), x, B(0.5))), a);
-                x = asin(x);
-                x = select(x_larger_05, x + x, x);
-                x = select(a < B(-0.5), pi<B>() - x, x);
-                return select(x_larger_05, x, pio2<B>() - x);
-            }
-
-            static inline B atan(const B& a)
-            {
-                const B absa = abs(a);
-                const B x = kernel_atan(absa, B(1.) / absa);
-                return x ^ bitofsign(a);
-            }
-
-            static inline B acot(const B& a)
-            {
-                const B absa = abs(a);
-                const B x = kernel_atan(B(1.) / absa, absa);
-                return x ^ bitofsign(a);
             }
 
             static inline B kernel_atan(const B& x, const B& recx)
@@ -108,7 +83,7 @@ namespace xsimd
          * ====================================================
          */
         template <class B>
-        struct invtrigo_kernel<B, double>
+        struct invtrigo_kernel_impl<B, double>
         {
             static inline B asin(const B& a)
             {
@@ -157,31 +132,6 @@ namespace xsimd
                     ) ^ bitofsign(a));
             }
 
-            static inline B acos(const B& a)
-            {
-                B x = abs(a);
-                auto x_larger_05 = x > B(0.5);
-                x = select(x_larger_05, sqrt(fma(B(-0.5), x, B(0.5))), a);
-                x = asin(x);
-                x = select(x_larger_05, x + x, x);
-                x = select(a < B(-0.5), pi<B>() - x, x);
-                return select(x_larger_05, x, pio2<B>() - x);
-            }
-
-            static inline B atan(const B& a)
-            {
-                const B absa = abs(a);
-                const B x = kernel_atan(absa, B(1.) / absa);
-                return x ^ bitofsign(a);
-            }
-
-            static inline B acot(const B& a)
-            {
-                const B absa = abs(a);
-                const B x = kernel_atan(B(1.) / absa, absa);
-                return x ^ bitofsign(a);
-            }
-
             static inline B kernel_atan(const B& x, const B& recx)
             {
                 const auto flag1 = x < tan3pio8<B>();
@@ -209,6 +159,52 @@ namespace xsimd
                 z = select(flag2, z + pio_4lo<B>(), z);
                 z = z + select(flag1, B(0.), pio_2lo<B>());
                 return yy + z;
+            }
+        };
+
+        template <class B>
+        struct invtrigo_kernel
+        {
+            static inline B asin(const B& a)
+            {
+                return invtrigo_kernel_impl<B>::asin(a);
+            }
+
+            static inline B acos(const B& a)
+            {
+                B x = abs(a);
+                auto x_larger_05 = x > B(0.5);
+                x = select(x_larger_05, sqrt(fma(B(-0.5), x, B(0.5))), a);
+                x = asin(x);
+                x = select(x_larger_05, x + x, x);
+                x = select(a < B(-0.5), pi<B>() - x, x);
+                return select(x_larger_05, x, pio2<B>() - x);
+            }
+
+            static inline B atan(const B& a)
+            {
+                const B absa = abs(a);
+                const B x = kernel_atan(absa, B(1.) / absa);
+                return x ^ bitofsign(a);
+            }
+
+            static inline B acot(const B& a)
+            {
+                const B absa = abs(a);
+                const B x = kernel_atan(B(1.) / absa, absa);
+                return x ^ bitofsign(a);
+            }
+
+            static inline B atan2(const B& y, const B& x)
+            {
+                const B q = abs(y / x);
+                const B z = kernel_atan(q, B(1.) / q);
+                return select(x > B(0.), z, pi<B>() - z) * signnz(y);
+            }
+
+            static inline B kernel_atan(const B& x, const B& recx)
+            {
+                return invtrigo_kernel_impl<B>::kernel_atan(x, recx);
             }
         };
     }

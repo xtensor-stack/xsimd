@@ -35,7 +35,7 @@ namespace xsimd
     batch<T, N> atan(const batch<T, N>& x);
 
     template <class T, std::size_t N>
-    batch<T, N> atan2(const batch<T, N>& x);
+    batch<T, N> atan2(const batch<T, N>& y, const batch<T, N>& x);
 
     namespace detail
     {
@@ -129,6 +129,12 @@ namespace xsimd
     inline batch<T, N> atan(const batch<T, N>& x)
     {
         return detail::invtrigo_kernel<batch<T, N>>::atan(x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> atan2(const batch<T, N>& y, const batch<T, N>& x)
+    {
+        return detail::invtrigo_kernel<batch<T, N>>::atan2(y, x);
     }
 }
 
