@@ -27,6 +27,7 @@ namespace xsimd
 
         res_type input;
         res_type sin_res;
+        res_type cos_res;
 
         simd_trigonometric_tester(const std::string& n);
     };
@@ -36,14 +37,15 @@ namespace xsimd
         : name(n)
     {
         size_t nb_input = N * 10000;
-        //size_t nb_input = N * 10;
         input.resize(nb_input);
         sin_res.resize(nb_input);
+        cos_res.resize(nb_input);
 
         for (size_t i = 0; i < nb_input; ++i)
         {
             input[i] = value_type(0.) + i * value_type(80.) / nb_input;
             sin_res[i] = std::sin(input[i]);
+            cos_res[i] = std::cos(input[i]);
         }
     }
 
@@ -81,6 +83,16 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.sin_res, out);
+        success = success && tmp_success;
+
+        out << "cos   : ";
+        for (size_t i = 0; i < tester.input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.input, i);
+            vres = cos(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.cos_res, out);
         success = success && tmp_success;
 
         return success;
