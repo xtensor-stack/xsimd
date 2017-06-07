@@ -50,6 +50,17 @@ namespace xsimd
                 z = select(x_larger_05, pio2<B>() - (z1 + z1), z1);
                 return z ^ sign;
             }
+
+            static inline B acos(const B& a)
+            {
+                B x = abs(a);
+                auto x_larger_05 = x > B(0.5);
+                x = select(x_larger_05, sqrt(fma(B(-0.5), x, B(0.5))), a);
+                x = asin(x);
+                x = select(x_larger_05, x + x, x);
+                x = select(a < B(-0.5), pi<B>() - x, x);
+                return select(x_larger_05, x, pio2<B>() - x);
+            }
         };
 
         /* origin: boost/simd/arch/common/detail/simd/d_invtrig.hpp */
@@ -109,6 +120,17 @@ namespace xsimd
                     select(small_cond, x,
                         select(x > ct1, zz1, zz2)
                     ) ^ bitofsign(a));
+            }
+
+            static inline B acos(const B& a)
+            {
+                B x = abs(a);
+                auto x_larger_05 = x > B(0.5);
+                x = select(x_larger_05, sqrt(fma(B(-0.5), x, B(0.5))), a);
+                x = asin(x);
+                x = select(x_larger_05, x + x, x);
+                x = select(a < B(-0.5), pi<B>() - x, x);
+                return select(x_larger_05, x, pio2<B>() - x);
             }
         };
     }

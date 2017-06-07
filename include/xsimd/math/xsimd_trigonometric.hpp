@@ -118,6 +118,12 @@ namespace xsimd
     {
         return detail::invtrigo_kernel<batch<T, N>>::asin(x);
     }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> acos(const batch<T, N>& x)
+    {
+        return detail::invtrigo_kernel<batch<T, N>>::acos(x);
+    }
 }
 
 #endif
