@@ -391,6 +391,32 @@ namespace xsimd
         b_type l1pz = log1p(z);
         return select(test, l1pz + log_2<b_type>(), l1pz);
     }
+
+    /************************
+     * atanh implementation *
+     ************************/
+
+     /* origin: boost/simd/arch/common/simd/function/acosh.hpp */
+     /*
+      * ====================================================
+      * copyright 2016 NumScale SAS
+      *
+      * Distributed under the Boost Software License, Version 1.0.
+      * (See copy at http://boost.org/LICENSE_1_0.txt)
+      * ====================================================
+      */
+
+    template <class T, std::size_t N>
+    inline batch<T, N> atanh(const batch<T, N>& a)
+    {
+        using b_type = batch<T, N>;
+        b_type x = abs(a);
+        b_type t = x + x;
+        b_type z = b_type(1.) - x;
+        auto test = x < b_type(0.5);
+        b_type tmp = select(test, x, t) / z;
+        return bitofsign(a) ^ (b_type(0.5) * log1p(select(test, fma(t, tmp, t), tmp)));
+    }
 }
 
 #endif
