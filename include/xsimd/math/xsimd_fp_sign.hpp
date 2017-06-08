@@ -9,6 +9,7 @@
 #ifndef XSIMD_FP_SIGN_HPP
 #define XSIMD_FP_SIGN_HPP
 
+#include <type_traits>
 #include "xsimd_numerical_constant.hpp"
 
 namespace xsimd
@@ -40,11 +41,31 @@ namespace xsimd
         return abs(x1) | bitofsign(x2);
     }
  
+    namespace detail
+    {
+        template <class B, bool cond = std::is_floating_point<typename B::value_type>::value>
+        struct signnz_impl
+        {
+            static inline B compute(const B& x)
+            {
+                using value_type = typename B::value_type;
+                return (x >> (sizeof(value_type) * 8 - 1)) | B(1.);
+            }
+        };
+
+        template <class B>
+        struct signnz_impl<B, true>
+        {
+            static inline B compute(const B& x)
+            {
+                return B(1.) | (signmask<B>() & x);
+            }
+        };
+    }
     template <class T, std::size_t N>
     inline batch<T, N> signnz(const batch<T, N>& x)
     {
-        using batch_type = batch<T, N>;
-        return batch_type(1) | (signmask<batch_type>() & x);
+        return detail::signnz_impl<batch<T, N>>::compute(x);
     }
 }
 

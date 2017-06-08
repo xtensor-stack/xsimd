@@ -9,10 +9,11 @@
 #ifndef XSIMD_MATH_HPP
 #define XSIMD_MATH_HPP
 
-#include "xsimd_rounding.hpp"
-#include "xsimd_fp_manipulation.hpp"
 #include "xsimd_exponential.hpp"
+#include "xsimd_fp_manipulation.hpp"
+#include "xsimd_hyperbolic.hpp"
 #include "xsimd_logarithm.hpp"
+#include "xsimd_rounding.hpp"
 #include "xsimd_trigonometric.hpp"
 
 #endif

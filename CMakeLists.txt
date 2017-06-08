@@ -42,6 +42,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_manipulation.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_sign.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_horner.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_hyperbolic.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_invtrigo.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_logarithm.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_math.hpp
