@@ -12,6 +12,8 @@
 #include <type_traits>
 #include "xsimd_exponential.hpp"
 #include "xsimd_fp_sign.hpp"
+#include "xsimd_logarithm.hpp"
+#include "xsimd_power.hpp"
 
 namespace xsimd
 {
@@ -294,6 +296,77 @@ namespace xsimd
         b_type r = fma(b_type(-2.), one / (one + exp(x + x)), one);
         return select(test, z, r) ^ bts;
     }
+
+    /***********************
+     * sinh implementation *
+     ***********************/
+
+    namespace detail
+    {
+        /* origin: boost/simd/arch/common/simd/function/asinh.hpp */
+        /*
+         * ====================================================
+         * copyright 2016 NumScale SAS
+         *
+         * Distributed under the Boost Software License, Version 1.0.
+         * (See copy at http://boost.org/LICENSE_1_0.txt)
+         * ====================================================
+         */
+        
+        template <class B, class T = typename B::value_type>
+        struct asinh_kernel;
+
+        template <class B>
+        struct asinh_kernel<B, float>
+        {
+            static inline B compute(const B& a)
+            {
+                B x = abs(a);
+                auto lthalf = x < B(0.5);
+                B x2 = x * x;
+                B bts = bitofsign(a);
+                B z(0.);
+                if (any(lthalf))
+                {
+                    z = horner<B,
+                        0x3f800000,
+                        0xbe2aa9ad,
+                        0x3d9949b1,
+                        0xbd2ee581,
+                        0x3ca4d6e6
+                    >(x2) * x;
+                    if (all(lthalf))
+                        return z ^ bts;
+                }
+                B tmp = select(x > oneosqrteps<B>(), x, average(x, hypot(B(1.), x)));
+                return select(lthalf, z, log(tmp) + log_2<B>()) ^ bts;         
+            }
+        };
+
+        template <class B>
+        struct asinh_kernel<B, double>
+        {
+            static inline B compute(const B& a)
+            {
+                B x = abs(a);
+                auto test = x > oneosqrteps<B>();
+                B z = select(test, x - B(1.), x + x * x / (B(1.) + hypot(B(1.), x)));
+#ifndef XSIMD_NO_INFINITIES
+                z = select(x == infinity<B>(), x, z);
+#endif
+                B l1pz = log1p(z);
+                z = select(test, l1pz + log_2<B>(), l1pz);
+                return bitofsign(a) ^ z;
+            }
+        };
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> asinh(const batch<T, N>& x)
+    {
+        return detail::asinh_kernel<batch<T, N>>::compute(x);
+    }
+
 }
 
 #endif
