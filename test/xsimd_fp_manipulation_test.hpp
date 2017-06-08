@@ -29,6 +29,8 @@ namespace xsimd
         res_type input;
         int exponent;
         res_type ldexp_res;
+        res_type inf_res;
+        res_type finite_res;
 
         simd_fpmanip_tester(const std::string& n);
     };
@@ -39,11 +41,15 @@ namespace xsimd
     {
         input.resize(N);
         ldexp_res.resize(N);
+        inf_res.resize(N);
+        finite_res.resize(N);
         exponent = 5;
         for (size_t i = 0; i < N; ++i)
         {
             input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             ldexp_res[i] = std::ldexp(input[i], exponent);
+            inf_res[i] = T(0.);
+            finite_res[i] = T(1.);
         }
     }
 
@@ -58,7 +64,6 @@ namespace xsimd
         using res_type = typename tester_type::res_type;
 
         vector_type input;
-        detail::load_vec(input, tester.input);
         ivector_type exponent = ivector_type(tester.exponent);
         vector_type vres;
         res_type res(tester_type::size);
@@ -76,10 +81,35 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "ldexp : ";
+        out << "ldexp    : ";
+        detail::load_vec(input, tester.input);
         vres = ldexp(input, exponent);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.ldexp_res, out);
+        success = success && tmp_success;
+
+        out << "isfinite : ";
+        input = vector_type(12.);
+        vres = select(isfinite(input), vector_type(1.), vector_type(0.));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.finite_res, out);
+        success = success && tmp_success;
+        input = infinity<vector_type>();
+        vres = select(isfinite(input), vector_type(1.), vector_type(0.));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.inf_res, out);
+        success = success && tmp_success;
+
+        out << "isinf    : ";
+        input = vector_type(12.);
+        vres = select(isinf(input), vector_type(0.), vector_type(1.));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.finite_res, out);
+        success = success && tmp_success;
+        input = infinity<vector_type>();
+        vres = select(isinf(input), vector_type(0.), vector_type(1.));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.inf_res, out);
         success = success && tmp_success;
 
         return success;
