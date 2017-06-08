@@ -28,6 +28,7 @@ namespace xsimd
         res_type input;
         res_type sinh_res;
         res_type cosh_res;
+        res_type tanh_res;
 
         simd_hyperbolic_tester(const std::string& n);
     };
@@ -40,12 +41,14 @@ namespace xsimd
         input.resize(nb_input);
         sinh_res.resize(nb_input);
         cosh_res.resize(nb_input);
+        tanh_res.resize(nb_input);
 
         for (size_t i = 0; i < nb_input; ++i)
         {
             input[i] = value_type(-1.5) + i * value_type(3) / nb_input;
             sinh_res[i] = std::sinh(input[i]);
             cosh_res[i] = std::cosh(input[i]);
+            tanh_res[i] = std::tanh(input[i]);
         }
     }
 
@@ -93,6 +96,16 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.cosh_res, out);
+        success = success && tmp_success;
+
+        out << "tanh  : ";
+        for (size_t i = 0; i < tester.input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.input, i);
+            vres = tanh(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.tanh_res, out);
         success = success && tmp_success;
 
         return success;

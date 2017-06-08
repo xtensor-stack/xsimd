@@ -190,6 +190,110 @@ namespace xsimd
         b_type tmp1 = b_type(0.5) * tmp;
         return select(test1, tmp1 * tmp, average(tmp, b_type(1.) / tmp));
     }
+
+    /***********************
+     * tanh implementation *
+     ***********************/
+
+    namespace detail
+    {
+        /* origin: boost/simd/arch/common/detail/generic/tanh_kernel.hpp */
+        /*
+         * ====================================================
+         * copyright 2016 NumScale SAS
+         *
+         * Distributed under the Boost Software License, Version 1.0.
+         * (See copy at http://boost.org/LICENSE_1_0.txt)
+         * ====================================================
+         */
+        template <class B, class T = typename B::value_type>
+        struct tanh_kernel;
+
+        template <class B>
+        struct tanh_kernel<B, float>
+        {
+            static inline B tanh(const B& x)
+            {
+                B sqrx = x * x;
+                return fma(horner<B,
+                    0xbeaaaa99, //    -3.33332819422E-1F
+                    0x3e088393, //    +1.33314422036E-1F
+                    0xbd5c1e2d, //    -5.37397155531E-2F
+                    0x3ca9134e, //    +2.06390887954E-2F
+                    0xbbbaf0ea  //    -5.70498872745E-3F
+                >(sqrx) * sqrx, x, x);
+            }
+
+            static inline B cotanh(const B& x)
+            {
+                return B(1.) / tanh(x);
+            }
+        };
+
+        template <class B>
+        struct tanh_kernel<B, double>
+        {
+            static inline B tanh(const B& x)
+            {
+                B sqrx = x * x;
+                return fma(sqrx * p(sqrx) / q(sqrx), x, x);
+            }
+            
+            static inline B cotanh(const B& x)
+            {
+                B sqrx = x * x;
+                B qval = q(sqrx);
+                return qval / (x * fma(p(sqrx), sqrx, qval));
+            }
+
+            static inline B p(const B& x)
+            {
+                return horner<B,
+                    0xc0993ac030580563,// -1.61468768441708447952E3
+                    0xc058d26a0e26682d,// -9.92877231001918586564E1,
+                    0xbfeedc5baafd6f4b // -9.64399179425052238628E-1
+                >(x);
+            }
+
+            static inline B q(const B& x)
+            {
+                return horner1<B,
+                    0x40b2ec102442040c,   //  4.84406305325125486048E3
+                    0x40a176fa0e5535fa,   //  2.23548839060100448583E3,
+                    0x405c33f28a581B86   //  1.12811678491632931402E2,
+                >(x);
+            }
+        };
+    }
+
+    /* origin: boost/simd/arch/common/simd/function/tanh.hpp */
+    /*
+     * ====================================================
+     * copyright 2016 NumScale SAS
+     *
+     * Distributed under the Boost Software License, Version 1.0.
+     * (See copy at http://boost.org/LICENSE_1_0.txt)
+     * ====================================================
+     */
+
+    template <class T, std::size_t N>
+    inline batch<T, N> tanh(const batch<T, N>& a)
+    {
+        using b_type = batch<T, N>;
+        b_type one(1.);
+        b_type x = abs(a);
+        auto test = x < (b_type(5.) / b_type(8.));
+        b_type bts = bitofsign(a);
+        b_type z = one;
+        if (any(test))
+        {
+            z = detail::tanh_kernel<b_type>::tanh(x);
+            if (all(test))
+                return z ^ bts;
+        }
+        b_type r = fma(b_type(-2.), one / (one + exp(x + x)), one);
+        return select(test, z, r) ^ bts;
+    }
 }
 
 #endif
