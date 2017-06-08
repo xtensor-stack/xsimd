@@ -164,6 +164,32 @@ namespace xsimd
         b_type r = select(test1, tmp1 * tmp, tmp1 - half / tmp);
         return select(lt1, z, r) ^ bts;
     }
+
+    /***********************
+     * cosh implementation *
+     ***********************/
+
+     /* origin: boost/simd/arch/common/simd/function/cosh.hpp */
+     /*
+      * ====================================================
+      * copyright 2016 NumScale SAS
+      *
+      * Distributed under the Boost Software License, Version 1.0.
+      * (See copy at http://boost.org/LICENSE_1_0.txt)
+      * ====================================================
+      */
+
+    template <class T, std::size_t N>
+    inline batch<T, N> cosh(const batch<T, N>& a)
+    {
+        using b_type = batch<T, N>;
+        b_type x = abs(a);
+        auto test1 = x > (maxlog<b_type>() - log_2<b_type>());
+        b_type fac = select(test1, b_type(0.5), b_type(1.));
+        b_type tmp = exp(x * fac);
+        b_type tmp1 = b_type(0.5) * tmp;
+        return select(test1, tmp1 * tmp, average(tmp, b_type(1.) / tmp));
+    }
 }
 
 #endif
