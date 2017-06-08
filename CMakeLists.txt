@@ -42,10 +42,12 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_manipulation.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_sign.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_horner.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_hyperbolic.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_invtrigo.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_logarithm.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_math.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_numerical_constant.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_power.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_rem_pio2.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_rounding.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_trigo_reduction.hpp

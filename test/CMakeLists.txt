@@ -71,6 +71,8 @@ set(XSIMD_TESTS
     xsimd_exponential_test.cpp
     xsimd_fp_manipulation_test.hpp
     xsimd_fp_manipulation_test.cpp
+    xsimd_hyperbolic_test.hpp
+    xsimd_hyperbolic_test.cpp
     xsimd_rounding_test.hpp
     xsimd_rounding_test.cpp
     xsimd_tester.hpp

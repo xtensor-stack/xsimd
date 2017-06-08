@@ -6,15 +6,24 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSIMD_MATH_HPP
-#define XSIMD_MATH_HPP
+#ifndef XSIMD_POWER_HPP
+#define XSIMD_POWER_HPP
 
-#include "xsimd_exponential.hpp"
-#include "xsimd_fp_manipulation.hpp"
-#include "xsimd_hyperbolic.hpp"
-#include "xsimd_logarithm.hpp"
-#include "xsimd_power.hpp"
-#include "xsimd_rounding.hpp"
-#include "xsimd_trigonometric.hpp"
+namespace xsimd
+{
+
+    template <class T, std::size_t N>
+    batch<T, N> hypot(const batch<T, N>& x, const batch<T, N>& y);
+
+    /************************
+     * hypot implementation *
+     ************************/
+
+    template <class T, std::size_t N>
+    inline batch<T, N> hypot(const batch<T, N>& x, const batch<T, N>& y)
+    {
+        return sqrt(fma(x, x, y * y));
+    }
+}
 
 #endif
