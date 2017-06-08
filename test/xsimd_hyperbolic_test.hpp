@@ -30,6 +30,8 @@ namespace xsimd
         res_type cosh_res;
         res_type tanh_res;
         res_type asinh_res;
+        res_type acosh_input;
+        res_type acosh_res;
 
         simd_hyperbolic_tester(const std::string& n);
     };
@@ -44,6 +46,8 @@ namespace xsimd
         cosh_res.resize(nb_input);
         tanh_res.resize(nb_input);
         asinh_res.resize(nb_input);
+        acosh_input.resize(nb_input);
+        acosh_res.resize(nb_input);
 
         for (size_t i = 0; i < nb_input; ++i)
         {
@@ -52,6 +56,8 @@ namespace xsimd
             cosh_res[i] = std::cosh(input[i]);
             tanh_res[i] = std::tanh(input[i]);
             asinh_res[i] = std::asinh(input[i]);
+            acosh_input[i] = value_type(1.) + i * value_type(3) / nb_input;
+            acosh_res[i] = std::acosh(acosh_input[i]);
         }
     }
 
@@ -119,6 +125,16 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.asinh_res, out);
+        success = success && tmp_success;
+
+        out << "acosh : ";
+        for (size_t i = 0; i < tester.acosh_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.acosh_input, i);
+            vres = acosh(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.acosh_res, out);
         success = success && tmp_success;
 
         return success;

@@ -367,6 +367,30 @@ namespace xsimd
         return detail::asinh_kernel<batch<T, N>>::compute(x);
     }
 
+    /************************
+     * acosh implementation *
+     ************************/
+
+     /* origin: boost/simd/arch/common/simd/function/acosh.hpp */
+     /*
+      * ====================================================
+      * copyright 2016 NumScale SAS
+      *
+      * Distributed under the Boost Software License, Version 1.0.
+      * (See copy at http://boost.org/LICENSE_1_0.txt)
+      * ====================================================
+      */
+
+    template<class T, std::size_t N>
+    inline batch<T, N> acosh(const batch<T, N>& a)
+    {
+        using b_type = batch<T, N>;
+        b_type x = a - b_type(1.);
+        auto test = x > oneotwoeps<b_type>();
+        b_type z = select(test, a, x + sqrt(x + x + x * x));
+        b_type l1pz = log1p(z);
+        return select(test, l1pz + log_2<b_type>(), l1pz);
+    }
 }
 
 #endif
