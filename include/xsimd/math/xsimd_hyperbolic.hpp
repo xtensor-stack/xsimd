@@ -339,7 +339,11 @@ namespace xsimd
                         return z ^ bts;
                 }
                 B tmp = select(x > oneosqrteps<B>(), x, average(x, hypot(B(1.), x)));
-                return select(lthalf, z, log(tmp) + log_2<B>()) ^ bts;         
+#ifndef XSIMD_NO_NANS
+                return select(is_nan(a), nan<B>(), select(lthalf, z, log(tmp) + log_2<B>()) ^ bts);
+#else
+                return select(lthalf, z, log(tmp) + log_2<B>()) ^ bts;
+#endif
             }
         };
 

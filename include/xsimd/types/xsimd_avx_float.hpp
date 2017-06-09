@@ -123,6 +123,8 @@ namespace xsimd
 
     batch<float, 8> select(const batch_bool<float, 8>& cond, const batch<float, 8>& a, const batch<float, 8>& b);
 
+    batch_bool<float, 8> is_nan(const batch<float, 8>& x);
+
     /***************************************
      * batch_bool<float, 8> implementation *
      ***************************************/
@@ -453,6 +455,11 @@ namespace xsimd
         return _mm256_blendv_ps(b, a, cond);
     }
 
+    
+    inline batch_bool<float, 8> is_nan(const batch<float, 8>& x)
+    {
+        return _mm256_cmp_ps(x, x, _CMP_UNORD_Q);
+    }
 }
 
 #endif

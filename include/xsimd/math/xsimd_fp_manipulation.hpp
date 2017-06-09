@@ -17,6 +17,12 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> ldexp(const batch<T, N>& x, const batch<as_integer_t<T>, N>& e);
 
+    template <class T, std::size_t N>
+    batch_bool<T, N> isfinite(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch_bool<T, N> isinf(const batch<T, N>& x);
+
     /**************************
      * Generic implementation *
      **************************/
@@ -40,6 +46,17 @@ namespace xsimd
         return x * bitwise_cast<btype>(ik);
     }
 
+    template <class T, std::size_t N>
+    inline batch_bool<T, N> isfinite(const batch<T, N>& x)
+    {
+        return (x - x) == batch<T, N>(0.);
+    }
+
+    template <class T, std::size_t N>
+    inline batch_bool<T, N> isinf(const batch<T, N>& x)
+    {
+        return abs(x) == infinity<batch<T, N>>();
+    }
 }
 
 #endif
