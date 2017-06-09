@@ -41,6 +41,7 @@ namespace xsimd
     batch_bool<double, 2> operator|(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
     batch_bool<double, 2> operator^(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
     batch_bool<double, 2> operator~(const batch_bool<double, 2>& rhs);
+    batch_bool<double, 2> bitwise_andnot(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
 
     batch_bool<double, 2> operator==(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
     batch_bool<double, 2> operator!=(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
@@ -102,6 +103,7 @@ namespace xsimd
     batch<double, 2> operator|(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     batch<double, 2> operator^(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     batch<double, 2> operator~(const batch<double, 2>& rhs);
+    batch<double, 2> bitwise_andnot(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
 
     batch<double, 2> min(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     batch<double, 2> max(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
@@ -175,6 +177,11 @@ namespace xsimd
     inline batch_bool<double, 2> operator~(const batch_bool<double, 2>& rhs)
     {
         return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
+    }
+
+    inline batch_bool<double, 2> bitwise_andnot(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
+    {
+        return _mm_andnot_pd(lhs, rhs);
     }
 
     inline batch_bool<double, 2> operator==(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
@@ -324,6 +331,11 @@ namespace xsimd
     inline batch<double, 2> operator~(const batch<double, 2>& rhs)
     {
         return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
+    }
+
+    inline batch<double, 2> bitwise_andnot(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
+    {
+        return _mm_andnot_pd(lhs, rhs);
     }
 
     inline batch<double, 2> min(const batch<double, 2>& lhs, const batch<double, 2>& rhs)

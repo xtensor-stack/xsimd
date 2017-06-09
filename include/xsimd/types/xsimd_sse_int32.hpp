@@ -42,6 +42,7 @@ namespace xsimd
     batch_bool<int32_t, 4> operator|(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
     batch_bool<int32_t, 4> operator^(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
     batch_bool<int32_t, 4> operator~(const batch_bool<int32_t, 4>& rhs);
+    batch_bool<int32_t, 4> bitwise_andnot(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
 
     batch_bool<int32_t, 4> operator==(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
     batch_bool<int32_t, 4> operator!=(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
@@ -103,6 +104,7 @@ namespace xsimd
     batch<int32_t, 4> operator|(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
     batch<int32_t, 4> operator^(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
     batch<int32_t, 4> operator~(const batch<int32_t, 4>& rhs);
+    batch<int32_t, 4> bitwise_andnot(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
 
     batch<int32_t, 4> min(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
     batch<int32_t, 4> max(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
@@ -173,6 +175,11 @@ namespace xsimd
     inline batch_bool<int32_t, 4> operator~(const batch_bool<int32_t, 4>& rhs)
     {
         return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
+    }
+
+    inline batch_bool<int32_t, 4> bitwise_andnot(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
+    {
+        return _mm_andnot_si128(lhs, rhs);
     }
 
     inline batch_bool<int32_t, 4> operator==(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
@@ -292,6 +299,11 @@ namespace xsimd
 #endif
     }
 
+    inline batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+        return _mm_cvttps_epi32(_mm_div_ps(_mm_cvtepi32_ps(lhs), _mm_cvtepi32_ps(rhs)));
+    }
+
     inline batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
     {
         return _mm_cmpeq_epi32(lhs, rhs);
@@ -330,6 +342,11 @@ namespace xsimd
     inline batch<int32_t, 4> operator~(const batch<int32_t, 4>& rhs)
     {
         return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
+    }
+
+    inline batch<int32_t, 4> bitwise_andnot(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+        return _mm_andnot_si128(lhs, rhs);
     }
 
     inline batch<int32_t, 4> min(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)

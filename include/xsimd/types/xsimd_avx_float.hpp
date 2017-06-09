@@ -42,6 +42,7 @@ namespace xsimd
     batch_bool<float, 8> operator|(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
     batch_bool<float, 8> operator^(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
     batch_bool<float, 8> operator~(const batch_bool<float, 8>& rhs);
+    batch_bool<float, 8> bitwise_andnot(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
 
     batch_bool<float, 8> operator==(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
     batch_bool<float, 8> operator!=(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs);
@@ -104,6 +105,7 @@ namespace xsimd
     batch<float, 8> operator|(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     batch<float, 8> operator^(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     batch<float, 8> operator~(const batch<float, 8>& rhs);
+    batch<float, 8> bitwise_andnot(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
 
     batch<float, 8> min(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     batch<float, 8> max(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
@@ -180,6 +182,11 @@ namespace xsimd
     inline batch_bool<float, 8> operator~(const batch_bool<float, 8>& rhs)
     {
         return _mm256_xor_ps(rhs, _mm256_castsi256_ps(_mm256_set1_epi32(-1)));
+    }
+
+    inline batch_bool<float, 8> bitwise_andnot(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
+    {
+        return _mm256_andnot_ps(lhs, rhs);
     }
 
     inline batch_bool<float, 8> operator==(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
@@ -329,6 +336,11 @@ namespace xsimd
     inline batch<float, 8> operator~(const batch<float, 8>& rhs)
     {
         return _mm256_xor_ps(rhs, _mm256_castsi256_ps(_mm256_set1_epi32(-1)));
+    }
+
+    inline batch<float, 8> bitwise_andnot(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
+    {
+        return _mm256_andnot_ps(lhs, rhs);
     }
 
     inline batch<float, 8> min(const batch<float, 8>& lhs, const batch<float, 8>& rhs)

@@ -41,6 +41,7 @@ namespace xsimd
     batch_bool<float, 4> operator|(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
     batch_bool<float, 4> operator^(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
     batch_bool<float, 4> operator~(const batch_bool<float, 4>& rhs);
+    batch_bool<float, 4> bitwise_andnot(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
 
     batch_bool<float, 4> operator==(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
     batch_bool<float, 4> operator!=(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
@@ -102,6 +103,7 @@ namespace xsimd
     batch<float, 4> operator|(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch<float, 4> operator^(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch<float, 4> operator~(const batch<float, 4>& rhs);
+    batch<float, 4> bitwise_andnot(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
 
     batch<float, 4> min(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch<float, 4> max(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
@@ -175,6 +177,11 @@ namespace xsimd
     inline batch_bool<float, 4> operator~(const batch_bool<float, 4>& rhs)
     {
         return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(-1)));
+    }
+
+    inline batch_bool<float, 4> bitwise_andnot(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
+    {
+        return _mm_andnot_ps(lhs, rhs);
     }
 
     inline batch_bool<float, 4> operator==(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
@@ -323,6 +330,11 @@ namespace xsimd
     inline batch<float, 4> operator~(const batch<float, 4>& rhs)
     {
         return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(-1)));
+    }
+
+    inline batch<float, 4> bitwise_andnot(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
+    {
+        return _mm_andnot_ps(lhs, rhs);
     }
 
     inline batch<float, 4> min(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
