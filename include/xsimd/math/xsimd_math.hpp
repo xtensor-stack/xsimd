@@ -9,6 +9,7 @@
 #ifndef XSIMD_MATH_HPP
 #define XSIMD_MATH_HPP
 
+#include "xsimd_error.hpp"
 #include "xsimd_exponential.hpp"
 #include "xsimd_fp_manipulation.hpp"
 #include "xsimd_hyperbolic.hpp"

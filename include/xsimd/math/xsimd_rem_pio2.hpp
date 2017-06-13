@@ -203,7 +203,7 @@ do {                                                                           \
          *
          */
 
-        int32_t __kernel_rem_pio2(double *x, double *y, int32_t e0, int32_t nx, int32_t prec, const int32_t *ipio2)
+        static int32_t __kernel_rem_pio2(double *x, double *y, int32_t e0, int32_t nx, int32_t prec, const int32_t *ipio2)
         {
             static const int32_t init_jk[] = { 2,3,4,6 }; /* initial value for jk */
             
@@ -378,7 +378,7 @@ do {                                                                           \
         }
 
 
-        std::int32_t __ieee754_rem_pio2(double x, double* y)
+        static std::int32_t __ieee754_rem_pio2(double x, double* y)
         {
             static const std::int32_t two_over_pi[] = {
                 0xA2F983, 0x6E4E44, 0x1529FC, 0x2757D1, 0xF534DD, 0xC0DB62,

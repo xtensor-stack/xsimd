@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSIMD_ERROR_GAMMA_HPP
-#define XSIMD_ERROR_GAMMA_HPP
+#ifndef XSIMD_ERROR_HPP
+#define XSIMD_ERROR_HPP
 
 #include "xsimd_exponential.hpp"
 #include "xsimd_fp_sign.hpp"

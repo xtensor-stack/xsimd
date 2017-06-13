@@ -37,11 +37,12 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_instruction_set.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_error_gamma.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_error.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_exp_reduction.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_exponential.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_manipulation.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_fp_sign.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_gamma.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_horner.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_hyperbolic.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_invtrigo.hpp

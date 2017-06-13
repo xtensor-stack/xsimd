@@ -13,7 +13,8 @@
 
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
 #include "xsimd/types/xsimd_types_include.hpp"
-#include "xsimd/math/xsimd_error_gamma.hpp"
+#include "xsimd/math/xsimd_error.hpp"
+#include "xsimd/math/xsimd_gamma.hpp"
 #include "xsimd_error_gamma_test.hpp"
 
 namespace xsimd

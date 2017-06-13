@@ -49,12 +49,12 @@ namespace xsimd
          * ====================================================
          */
 
-        template <class B>
-        inline B sin_impl(const B& a)
+        template <class B, class Tag = trigo_radian_tag>
+        inline B sin_impl(const B& a, Tag t = Tag())
         {
             const B x = abs(a);
             B xr = nan<B>();
-            const B n = trigo_reducer<B>::reduce(x, xr);
+            const B n = trigo_reducer<B, Tag>::reduce(x, xr);
             auto tmp = select(n >= B(2.), B(1.), B(0.));
             auto swap_bit = fma(B(-2.), tmp, n);
             auto sign_bit = bitofsign(a) ^ select(tmp != B(0.), signmask<B>(), B(0.));

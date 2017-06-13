@@ -28,6 +28,8 @@ namespace xsimd
         res_type input;
         res_type erf_res;
         res_type erfc_res;
+        res_type gamma_input;
+        res_type gamma_res;
 
         simd_error_gamma_tester(const std::string& n);
     };
@@ -40,11 +42,15 @@ namespace xsimd
         input.resize(nb_input);
         erf_res.resize(nb_input);
         erfc_res.resize(nb_input);
+        gamma_input.resize(nb_input);
+        gamma_res.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
             input[i] = value_type(-1.5) + i * value_type(3) / nb_input;
             erf_res[i] = std::erf(input[i]);
             erfc_res[i] = std::erfc(input[i]);
+            gamma_input[i] = value_type(0.5) + i * value_type(3) / nb_input;
+            gamma_res[i] = std::tgamma(gamma_input[i]);
         }
     }
 
@@ -74,7 +80,7 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "erf   : ";
+        out << "erf    : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
@@ -84,7 +90,7 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.erf_res, out);
         success = success && tmp_success;
 
-        out << "erfc  : ";
+        out << "erfc   : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
@@ -92,6 +98,16 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(res, tester.erfc_res, out);
+        success = success && tmp_success;
+
+        out << "tgamma : ";
+        for (size_t i = 0; i < tester.gamma_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.gamma_input, i);
+            vres = tgamma(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.gamma_res, out);
         success = success && tmp_success;
 
         return success;
