@@ -41,6 +41,8 @@ namespace xsimd
     batch_bool<double, 4> operator|(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs);
     batch_bool<double, 4> operator^(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs);
     batch_bool<double, 4> operator~(const batch_bool<double, 4>& rhs);
+    batch_bool<double, 4> operator|(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs);
+    batch_bool<double, 4> bitwise_andnot(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs);
 
     batch_bool<double, 4> operator==(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs);
     batch_bool<double, 4> operator!=(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs);
@@ -102,6 +104,7 @@ namespace xsimd
     batch<double, 4> operator|(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch<double, 4> operator^(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch<double, 4> operator~(const batch<double, 4>& rhs);
+    batch<double, 4> bitwise_andnot(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
 
     batch<double, 4> min(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch<double, 4> max(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
@@ -177,6 +180,11 @@ namespace xsimd
     inline batch_bool<double, 4> operator~(const batch_bool<double, 4>& rhs)
     {
         return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi32(-1)));
+    }
+
+    inline batch_bool<double, 4> bitwise_andnot(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs)
+    {
+        return _mm256_andnot_pd(lhs, rhs);
     }
 
     inline batch_bool<double, 4> operator==(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs)
@@ -325,6 +333,11 @@ namespace xsimd
     inline batch<double, 4> operator~(const batch<double, 4>& rhs)
     {
         return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi32(-1)));
+    }
+
+    inline batch<double, 4> bitwise_andnot(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
+    {
+        return _mm256_andnot_pd(lhs, rhs);
     }
 
     inline batch<double, 4> min(const batch<double, 4>& lhs, const batch<double, 4>& rhs)

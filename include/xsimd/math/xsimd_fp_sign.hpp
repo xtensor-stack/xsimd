@@ -22,6 +22,9 @@ namespace xsimd
     batch<T, N> copysign(const batch<T, N>& x1, const batch<T, N>& x2);
 
     template <class T, std::size_t N>
+    batch<T, N> sign(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
     batch<T, N> signnz(const batch<T, N>& x);
 
     /**************************
@@ -41,8 +44,67 @@ namespace xsimd
         return abs(x1) | bitofsign(x2);
     }
  
+    /***********************
+     * sign implementation *
+     ***********************/
+
     namespace detail
     {
+        /* origin: boost/simd/arch/common/simd/function/sign.hpp */
+        /*
+         * ====================================================
+         * copyright 2016 NumScale SAS
+         *
+         * Distributed under the Boost Software License, Version 1.0.
+         * (See copy at http://boost.org/LICENSE_1_0.txt)
+         * ====================================================
+         */
+
+        template <class B, bool cond = std::is_floating_point<typename B::value_type>::value>
+        struct sign_impl
+        {
+            static inline B compute(const B& a)
+            {
+                return select(a > B(0), B(1), B(0)) - select(a < B(0), B(1), B(0));
+            }
+        };
+
+        template <class B>
+        struct sign_impl<B, true>
+        {
+            static inline B compute(const B& a)
+            {
+                B r = select(a > B(0), B(1), B(0)) - select(a < B(0), B(1), B(0));
+#ifdef XSIMD_NO_NANS
+                return r;
+#else
+                return select(is_nan(a), nan<B>(), r);
+#endif
+            }
+        };
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> sign(const batch<T, N>& x)
+    {
+        return detail::sign_impl<batch<T, N>>::compute(x);
+    }
+
+    /*************************
+     * signnz implementation *
+     *************************/
+
+    namespace detail
+    {
+        /* origin: boost/simd/arch/common/simd/function/signnz.hpp */
+        /*
+         * ====================================================
+         * copyright 2016 NumScale SAS
+         *
+         * Distributed under the Boost Software License, Version 1.0.
+         * (See copy at http://boost.org/LICENSE_1_0.txt)
+         * ====================================================
+         */
         template <class B, bool cond = std::is_floating_point<typename B::value_type>::value>
         struct signnz_impl
         {
@@ -66,6 +128,7 @@ namespace xsimd
             }
         };
     }
+
     template <class T, std::size_t N>
     inline batch<T, N> signnz(const batch<T, N>& x)
     {

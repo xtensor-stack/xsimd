@@ -42,6 +42,7 @@ namespace xsimd
     batch_bool<int64_t, 4> operator|(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
     batch_bool<int64_t, 4> operator^(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
     batch_bool<int64_t, 4> operator~(const batch_bool<int64_t, 4>& rhs);
+    batch_bool<int64_t, 4> bitwise_andnot(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
 
     batch_bool<int64_t, 4> operator==(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
     batch_bool<int64_t, 4> operator!=(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
@@ -103,6 +104,7 @@ namespace xsimd
     batch<int64_t, 4> operator|(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
     batch<int64_t, 4> operator^(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
     batch<int64_t, 4> operator~(const batch<int64_t, 4>& rhs);
+    batch<int64_t, 4> bitwise_andnot(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
 
     batch<int64_t, 4> min(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
     batch<int64_t, 4> max(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
@@ -209,6 +211,15 @@ namespace xsimd
         __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
         __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
         XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+#endif
+    }
+
+    inline batch_bool<int64_t, 4> bitwise_andnot(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_andnot_si256(lhs, rhs);
+#else
+        XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
 #endif
     }
 
@@ -337,6 +348,24 @@ namespace xsimd
         return batch<int64_t, 4>(slhs[0] * srhs[0], slhs[1] * srhs[1], slhs[2] * srhs[2], slhs[3] * srhs[3]);
     }
 
+    inline batch<int64_t, 4> operator/(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
+    {
+        __m256d dlhs = _mm256_setr_pd(static_cast<double>(lhs[0]), static_cast<double>(lhs[1]),
+                                      static_cast<double>(lhs[2]), static_cast<double>(lhs[3]));
+        __m256d drhs = _mm256_setr_pd(static_cast<double>(rhs[0]), static_cast<double>(rhs[1]),
+                                      static_cast<double>(rhs[2]), static_cast<double>(rhs[3]));
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_cvtepi32_epi64(_mm256_cvttpd_epi32(_mm256_div_pd(dlhs, drhs)));
+#else
+        using batch_int = batch<int32_t, 4>;
+        __m128i tmp = _mm256_cvttpd_epi32(_mm256_div_pd(dlhs, drhs));
+        __m128i res_low = _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(0));
+        __m128i res_high = _mm_unpackhi_epi32(tmp, batch_int(tmp) < batch_int(0));
+        __m256i result = _mm256_castsi128_si256(res_low);
+        return _mm256_insertf128_si256(result, res_high, 1);
+#endif
+    }
+
     inline batch_bool<int64_t, 4> operator==(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
@@ -401,6 +430,15 @@ namespace xsimd
         __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
         __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
         XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+#endif
+    }
+
+    inline batch<int64_t, 4> bitwise_andnot(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_andnot_si256(lhs, rhs);
+#else
+        XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
 #endif
     }
 

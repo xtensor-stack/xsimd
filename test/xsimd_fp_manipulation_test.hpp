@@ -20,15 +20,19 @@ namespace xsimd
     {
         using base_type = simd_tester<T, N, A>;
         using vector_type = typename base_type::vector_type;
-        using ivector_type = batch<as_integer_t<T>, N>;
+        using int_type = as_integer_t<T>;
+        using ivector_type = batch<int_type, N>;
         using value_type = typename base_type::value_type;
         using res_type = typename base_type::res_type;
+        using ires_type = std::vector<int_type, aligned_allocator<int_type, A>>;
 
         std::string name;
 
         res_type input;
         int exponent;
         res_type ldexp_res;
+        res_type frexp_res;
+        ires_type exp_frexp_res;
         res_type inf_res;
         res_type finite_res;
 
@@ -41,6 +45,8 @@ namespace xsimd
     {
         input.resize(N);
         ldexp_res.resize(N);
+        frexp_res.resize(N);
+        exp_frexp_res.resize(N);
         inf_res.resize(N);
         finite_res.resize(N);
         exponent = 5;
@@ -48,6 +54,9 @@ namespace xsimd
         {
             input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             ldexp_res[i] = std::ldexp(input[i], exponent);
+            int tmp;
+            frexp_res[i] = std::frexp(input[i], &tmp);
+            exp_frexp_res[i] = static_cast<int_type>(tmp);
             inf_res[i] = T(0.);
             finite_res[i] = T(1.);
         }
@@ -86,6 +95,13 @@ namespace xsimd
         vres = ldexp(input, exponent);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.ldexp_res, out);
+        success = success && tmp_success;
+
+        out << "frexp    : ";
+        detail::load_vec(input, tester.input);
+        vres = frexp(input, exponent);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.frexp_res, out);
         success = success && tmp_success;
 
         out << "isfinite : ";

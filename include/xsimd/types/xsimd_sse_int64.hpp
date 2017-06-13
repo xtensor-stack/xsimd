@@ -42,6 +42,7 @@ namespace xsimd
     batch_bool<int64_t, 2> operator|(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator^(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator~(const batch_bool<int64_t, 2>& rhs);
+    batch_bool<int64_t, 2> bitwise_andnot(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
 
     batch_bool<int64_t, 2> operator==(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator!=(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
@@ -103,6 +104,7 @@ namespace xsimd
     batch<int64_t, 2> operator|(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch<int64_t, 2> operator^(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch<int64_t, 2> operator~(const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> bitwise_andnot(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
 
     batch<int64_t, 2> min(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch<int64_t, 2> max(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
@@ -189,6 +191,11 @@ namespace xsimd
     inline batch_bool<int64_t, 2> operator~(const batch_bool<int64_t, 2>& rhs)
     {
         return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
+    }
+
+    inline batch_bool<int64_t, 2> bitwise_andnot(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
+    {
+        return _mm_andnot_si128(lhs, rhs);
     }
 
     inline batch_bool<int64_t, 2> operator==(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
@@ -303,6 +310,15 @@ namespace xsimd
         lhs.store_aligned(slhs);
         rhs.store_aligned(srhs);
         return batch<int64_t, 2>(slhs[0] * srhs[0], slhs[1] * srhs[1]);
+    }
+
+    inline batch<int64_t, 2> operator/(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
+    {
+        __m128d dlhs = _mm_setr_pd(static_cast<double>(lhs[0]), static_cast<double>(lhs[1]));
+        __m128d drhs = _mm_setr_pd(static_cast<double>(rhs[0]), static_cast<double>(rhs[1]));
+        __m128i tmp = _mm_cvttpd_epi32(_mm_div_pd(dlhs, drhs));
+        using batch_int = batch<int64_t, 2>;
+        return _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(0));
     }
 
     inline batch_bool<int64_t, 2> operator==(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)

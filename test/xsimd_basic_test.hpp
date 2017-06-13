@@ -180,6 +180,9 @@ namespace xsimd
         res_type mul_vv_res;
         res_type mul_vs_res;
         res_type mul_sv_res;
+        res_type div_vv_res;
+        res_type div_vs_res;
+        res_type div_sv_res;
         res_type and_res;
         res_type or_res;
         res_type xor_res;
@@ -221,6 +224,9 @@ namespace xsimd
         mul_vv_res.resize(N);
         mul_vs_res.resize(N);
         mul_sv_res.resize(N);
+        div_vv_res.resize(N);
+        div_vs_res.resize(N);
+        div_sv_res.resize(N);
         and_res.resize(N);
         or_res.resize(N);
         xor_res.resize(N);
@@ -254,6 +260,9 @@ namespace xsimd
             mul_vv_res[i] = lhs[i] * rhs[i];
             mul_vs_res[i] = lhs[i] * s;
             mul_sv_res[i] = s * rhs[i];
+            div_vv_res[i] = lhs[i] / rhs[i];
+            div_vs_res[i] = lhs[i] / s;
+            div_sv_res[i] = s / rhs[i];
             //and_res[i] = lhs[i] & rhs[i];
             //or_res[i] = lhs[i] | rhs[i];
             //xor_res[i] = lhs[i] ^ rhs[i];
@@ -648,6 +657,20 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.mul_vs_res, out);
         success = success && tmp_success;
 
+        out << "operator/=(simd, simd)   : ";
+        vres = lhs;
+        vres /= rhs;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.div_vv_res, out);
+        success = success && tmp_success;
+
+        out << "operator/=(simd, scalar) : ";
+        vres = lhs;
+        vres /= s;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.div_vs_res, out);
+        success = success && tmp_success;
+
         out << "operator+(simd, simd)    : ";
         vres = lhs + rhs;
         detail::store_vec(vres, res);
@@ -700,6 +723,24 @@ namespace xsimd
         vres = s * rhs;
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.mul_sv_res, out);
+        success = success && tmp_success;
+
+        out << "operator/(simd, simd)    : ";
+        vres = lhs / rhs;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.div_vv_res, out);
+        success = success && tmp_success;
+
+        out << "operator/(simd, scalar)  : ";
+        vres = lhs / s;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.div_vs_res, out);
+        success = success && tmp_success;
+
+        out << "operator/(scalar, simd)  : ";
+        vres = s / rhs;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.div_sv_res, out);
         success = success && tmp_success;
 
         out << "min(simd, simd)          : ";

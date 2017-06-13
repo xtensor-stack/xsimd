@@ -85,7 +85,8 @@ XSIMD_DEFINE_CONSTANT_HEX(tanpio8, 0x3ed413cd, 0x3fda827999fcef31)
 XSIMD_DEFINE_CONSTANT_HEX(tan3pio8, 0x401a827a, 0x4003504f333f9de6)
 XSIMD_DEFINE_CONSTANT_HEX(twentypi, 0x427b53d1, 0x404f6a7a2955385e)
 XSIMD_DEFINE_CONSTANT_HEX(twoopi, 0x3f22f983, 0x3fe45f306dc9c883)
-XSIMD_DEFINE_CONSTANT_HEX(twotonmb, 8388608.0f, 4503599627370496.0)
+XSIMD_DEFINE_CONSTANT(twotonmb, 8388608.0f, 4503599627370496.0)
+XSIMD_DEFINE_CONSTANT_HEX(twotonmbo3, 0x3ba14518, 0x3ed428a2f98d7286)
 
 #undef XSIMD_DEFINE_CONSTANT
 #undef XSIMD_DEFINE_CONSTANT_HEX
@@ -94,7 +95,16 @@ XSIMD_DEFINE_CONSTANT_HEX(twotonmb, 8388608.0f, 4503599627370496.0)
     constexpr T allbits() noexcept;
 
     template <class T>
+    constexpr as_integer_t<T> mask1frexp() noexcept;
+
+    template <class T>
+    constexpr as_integer_t<T> mask2frexp() noexcept;
+
+    template <class T>
     constexpr as_integer_t<T> maxexponent() noexcept;
+
+    template <class T>
+    constexpr as_integer_t<T> maxexponentm1() noexcept;
 
     template <class T>
     constexpr int32_t nmb() noexcept;
@@ -121,14 +131,57 @@ XSIMD_DEFINE_CONSTANT_HEX(twotonmb, 8388608.0f, 4503599627370496.0)
             {
                 return nan<T>();
             }
-        };
-        
+        };   
     }
 
     template <class T>
     constexpr T allbits() noexcept
     {
         return T(detail::allbits_impl<typename T::value_type>::get_value());
+    }
+
+    /*****************************
+     * mask1frexp implementation *
+     *****************************/
+
+    template <class T>
+    constexpr as_integer_t<T> mask1frexp() noexcept
+    {
+        return as_integer_t<T>(mask1frexp<typename T::value_type>());
+    }
+
+    template <>
+    constexpr int32_t mask1frexp<float>() noexcept
+    {
+        return 0x7f800000;
+    }
+
+    template<>
+    constexpr int64_t mask1frexp<double>() noexcept
+    {
+        return 0x7ff0000000000000;
+    }
+
+    /*****************************
+     * mask2frexp implementation *
+     *****************************/
+
+    template <class T>
+    constexpr as_integer_t<T> mask2frexp() noexcept
+    {
+        return as_integer_t<T>(mask2frexp<typename T::value_type>());
+    }
+
+    template <>
+    constexpr int32_t mask2frexp<float>() noexcept
+    {
+        return 0x3f000000;
+    }
+
+    template<>
+    constexpr int64_t mask2frexp<double>() noexcept
+    {
+        return 0x3fe0000000000000;
     }
 
     /******************************
@@ -151,6 +204,28 @@ XSIMD_DEFINE_CONSTANT_HEX(twotonmb, 8388608.0f, 4503599627370496.0)
     constexpr int64_t maxexponent<double>() noexcept
     {
         return 1023;
+    }
+
+    /******************************
+     * maxexponent implementation *
+     ******************************/
+
+    template <class T>
+    constexpr as_integer_t<T> maxexponentm1() noexcept
+    {
+        return as_integer_t<T>(maxexponentm1<typename T::value_type>());
+    }
+
+    template<>
+    constexpr int32_t maxexponentm1<float>() noexcept
+    {
+        return 126;
+    }
+
+    template <>
+    constexpr int64_t maxexponentm1<double>() noexcept
+    {
+        return 1022;
     }
 
     /**********************
