@@ -26,6 +26,15 @@ namespace xsimd
     template <class T, std::size_t N>
     batch_bool<T, N> isinf(const batch<T, N>& x);
 
+    template <class T, std::size_t N>
+    batch_bool<T, N> is_flint(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch_bool<T, N> is_odd(const batch<T, N>& x);
+
+    template <class T, std::size_t N>
+    batch_bool<T, N> is_even(const batch<T, N>& x);
+
     /**************************
      * Generic implementation *
      **************************/
@@ -81,6 +90,26 @@ namespace xsimd
     inline batch_bool<T, N> isinf(const batch<T, N>& x)
     {
         return abs(x) == infinity<batch<T, N>>();
+    }
+
+    template <class T, std::size_t N>
+    inline batch_bool<T, N> is_flint(const batch<T, N>& x)
+    {
+        using b_type = batch<T, N>;
+        b_type frac = select(is_nan(x - x), nan<b_type>(), x - trunc(x));
+        return frac == b_type(0.);
+    }
+
+    template <class T, std::size_t N>
+    inline batch_bool<T, N> is_odd(const batch<T, N>& x)
+    {
+        return is_even(x - batch<T, N>(1.));
+    }
+
+    template <class T, std::size_t N>
+    inline batch_bool<T, N> is_even(const batch<T, N>& x)
+    {
+        return is_flint(x * batch<T, N>(0.5));
     }
 }
 

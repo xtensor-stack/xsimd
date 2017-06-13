@@ -9,19 +9,49 @@
 #ifndef XSIMD_POWER_HPP
 #define XSIMD_POWER_HPP
 
+#include "xsimd_exponential.hpp"
 #include "xsimd_fp_manipulation.hpp"
 #include "xsimd_fp_sign.hpp"
 #include "xsimd_horner.hpp"
+#include "xsimd_logarithm.hpp"
 #include "xsimd_numerical_constant.hpp"
 
 namespace xsimd
 {
 
     template <class T, std::size_t N>
+    batch<T, N> pow(const batch<T, N>& x, const batch<T, N>& y);
+
+    template <class T, std::size_t N>
     batch<T, N> cbrt(const batch<T, N>& x);
 
     template <class T, std::size_t N>
     batch<T, N> hypot(const batch<T, N>& x, const batch<T, N>& y);
+
+    /**********************
+     * pow implementation *
+     **********************/
+
+    /* origin: boost/simd/arch/common/simd/function/pow.hpp*/
+    /*
+     * ====================================================
+     * copyright 2016 NumScale SAS
+     *
+     * Distributed under the Boost Software License, Version 1.0.
+     * (See copy at http://boost.org/LICENSE_1_0.txt)
+     * ====================================================
+     */
+
+    template <class T, std::size_t N>
+    inline batch<T, N> pow(const batch<T, N>& x, const batch<T, N>& y)
+    {
+        using b_type = batch<T, N>;
+        auto negx = x < b_type(0.);
+        b_type z = exp(y * log(abs(x)));
+        z = select(is_odd(y) && negx, -z, z);
+        auto invalid = negx && !(is_flint(y) || isinf(y));
+        return select(invalid, nan<b_type>(), z);
+    }
 
     /***********************
      * cbrt implementation *
