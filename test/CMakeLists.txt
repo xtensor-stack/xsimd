@@ -6,6 +6,15 @@
 # The full license is in the file LICENSE, distributed with this software. #
 ############################################################################
 
+cmake_minimum_required(VERSION 3.1)
+
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    project(xsimd-test)
+
+    find_package(xsimd REQUIRED CONFIG)
+    set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIRS})
+endif ()
+
 message(STATUS "Forcing tests build type to Release")
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 
@@ -57,7 +66,38 @@ if(MSVC)
     endforeach()
 endif()
 
-find_package(GTest REQUIRED)
+if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
+    if(DOWNLOAD_GTEST)
+        # Download and unpack googletest at configure time
+        configure_file(downloadGTest.cmake.in googletest-download/CMakeLists.txt)
+    else()
+        # Copy local source of googletest at configure time
+        configure_file(copyGTest.cmake.in googletest-download/CMakeLists.txt)
+    endif()
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+    if(result)
+        message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+    endif()
+    execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                    RESULT_VARIABLE result
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+    if(result)
+        message(FATAL_ERROR "Build step for googletest failed: ${result}")
+    endif()
+
+    # Add googletest directly to our build. This defines
+    # the gtest and gtest_main targets.
+    add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+                     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build)
+
+    set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
+    set(GTEST_BOTH_LIBRARIES  gtest_main gtest)
+else()
+    find_package(GTest REQUIRED)
+endif()
+
 find_package(Threads)
 
 include_directories(${XSIMD_INCLUDE_DIR})

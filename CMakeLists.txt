@@ -29,8 +29,6 @@ message(STATUS "xsimd v${${PROJECT_NAME}_VERSION}")
 # Build
 # =====
 
-OPTION(BUILD_TESTS "xsimd test suite" ON)
-
 set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_align.hpp
@@ -73,6 +71,13 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
 )
 
+OPTION(BUILD_TESTS "xsimd test suite" ON)
+OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
+
+if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
+    set(BUILD_TESTS ON)
+endif()
+
 if(BUILD_TESTS)
     add_subdirectory(test)
 endif()
@@ -92,6 +97,12 @@ set(XSIMD_CMAKECONFIG_INSTALL_DIR "share/cmake/${PROJECT_NAME}" CACHE STRING "in
 configure_package_config_file(${PROJECT_NAME}Config.cmake.in
                               "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
                               INSTALL_DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
+
+# xsimd is header-only and does not depend on the architecture.
+# Remove CMAKE_SIZEOF_VOID_P from xtensorConfigVersion.cmake so that an xtensorConfig.cmake
+# generated for a 64 bit target can be used for 32 bit targets and vice versa.
+set(_XTENSOR_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
+unset(CMAKE_SIZEOF_VOID_P)
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
                                  VERSION ${${PROJECT_NAME}_VERSION}
                                  COMPATIBILITY AnyNewerVersion)
