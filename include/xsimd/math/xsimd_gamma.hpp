@@ -9,6 +9,7 @@
 #ifndef XSIMD_GAMMA_HPP
 #define XSIMD_GAMMA_HPP
 
+#include "xsimd_basic_math.hpp"
 #include "xsimd_exponential.hpp"
 #include "xsimd_horner.hpp"
 #include "xsimd_logarithm.hpp"

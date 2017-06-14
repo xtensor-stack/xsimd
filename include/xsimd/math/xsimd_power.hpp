@@ -9,6 +9,7 @@
 #ifndef XSIMD_POWER_HPP
 #define XSIMD_POWER_HPP
 
+#include "xsimd_basic_math.hpp"
 #include "xsimd_exponential.hpp"
 #include "xsimd_fp_manipulation.hpp"
 #include "xsimd_fp_sign.hpp"

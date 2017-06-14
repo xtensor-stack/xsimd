@@ -6,17 +6,16 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSIMD_FP_MANIPULATION_TEST_HPP
-#define XSIMD_FP_MANIPULATION_TEST_HPP
+#ifndef XSIMD_BASIC_MATH_TEST_HPP
+#define XSIMD_BASIC_MATH_TEST_HPP
 
 #include "xsimd_tester.hpp"
 #include "xsimd_test_utils.hpp"
 
 namespace xsimd
 {
-
     template <class T, std::size_t N, std::size_t A>
-    struct simd_fpmanip_tester : simd_tester<T, N, A>
+    struct simd_basic_math_tester : simd_tester<T, N, A>
     {
         using base_type = simd_tester<T, N, A>;
         using vector_type = typename base_type::vector_type;
@@ -28,36 +27,36 @@ namespace xsimd
 
         std::string name;
 
-        res_type input;
-        int exponent;
-        res_type ldexp_res;
-        res_type frexp_res;
-        ires_type exp_frexp_res;
+        res_type lhs_input;
+        res_type rhs_input;
+        res_type fdim_res;
+        res_type inf_res;
+        res_type finite_res;
 
-        simd_fpmanip_tester(const std::string& n);
+        simd_basic_math_tester(const std::string& n);
     };
 
     template <class T, std::size_t N, std::size_t A>
-    inline simd_fpmanip_tester<T, N, A>::simd_fpmanip_tester(const std::string& n)
+    inline simd_basic_math_tester<T, N, A>::simd_basic_math_tester(const std::string& n)
         : name(n)
     {
-        input.resize(N);
-        ldexp_res.resize(N);
-        frexp_res.resize(N);
-        exp_frexp_res.resize(N);
-        exponent = 5;
+        lhs_input.resize(N);
+        rhs_input.resize(N);
+        fdim_res.resize(N);
+        inf_res.resize(N);
+        finite_res.resize(N);
         for (size_t i = 0; i < N; ++i)
         {
-            input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
-            ldexp_res[i] = std::ldexp(input[i], exponent);
-            int tmp;
-            frexp_res[i] = std::frexp(input[i], &tmp);
-            exp_frexp_res[i] = static_cast<int_type>(tmp);
+            lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
+            rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
+            fdim_res[i] = std::fdim(lhs_input[i], rhs_input[i]);
+            inf_res[i] = T(0.);
+            finite_res[i] = T(1.);
         }
     }
 
     template <class T>
-    bool test_simd_fp_manipulation(std::ostream& out, T& tester)
+    bool test_simd_basic_math(std::ostream& out, T& tester)
     {
         using tester_type = T;
 
@@ -66,8 +65,8 @@ namespace xsimd
         using value_type = typename tester_type::value_type;
         using res_type = typename tester_type::res_type;
 
-        vector_type input;
-        ivector_type exponent = ivector_type(tester.exponent);
+        vector_type lhs;
+        vector_type rhs;
         vector_type vres;
         res_type res(tester_type::size);
         bool success = true;
@@ -84,23 +83,40 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "ldexp    : ";
-        detail::load_vec(input, tester.input);
-        vres = ldexp(input, exponent);
+        out << "fdim     : ";
+        detail::load_vec(lhs, tester.lhs_input);
+        detail::load_vec(rhs, tester.rhs_input);
+        vres = fdim(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.ldexp_res, out);
+        tmp_success = check_almost_equal(res, tester.fdim_res, out);
         success = success && tmp_success;
 
-        out << "frexp    : ";
-        detail::load_vec(input, tester.input);
-        vres = frexp(input, exponent);
+        out << "isfinite : ";
+        lhs = vector_type(12.);
+        vres = select(isfinite(lhs), vector_type(1.), vector_type(0.));
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.frexp_res, out);
+        tmp_success = check_almost_equal(res, tester.finite_res, out);
+        success = success && tmp_success;
+        lhs = infinity<vector_type>();
+        vres = select(isfinite(lhs), vector_type(1.), vector_type(0.));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.inf_res, out);
+        success = success && tmp_success;
+
+        out << "isinf    : ";
+        lhs = vector_type(12.);
+        vres = select(isinf(lhs), vector_type(0.), vector_type(1.));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.finite_res, out);
+        success = success && tmp_success;
+        lhs = infinity<vector_type>();
+        vres = select(isinf(lhs), vector_type(0.), vector_type(1.));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.inf_res, out);
         success = success && tmp_success;
 
         return success;
     }
-
 }
 
 #endif
