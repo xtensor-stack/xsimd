@@ -101,6 +101,22 @@ namespace xsimd
     template <class T>
     using as_float_t = typename as_float<T>::type;
 
+    /**************
+     * as_logical *
+     **************/
+
+    template <class T>
+    struct as_logical;
+
+    template <class T, std::size_t N>
+    struct as_logical<batch<T, N>>
+    {
+        using type = batch_bool<T, N>;
+    };
+
+    template <class T>
+    using as_logical_t = typename as_logical<T>::type;
+
     /********************
      * primitive caster *
      ********************/

@@ -158,7 +158,7 @@ namespace xsimd
             }
         };
 
-        /* origin: boost/simd/arch/common/detail/simd/d_trig_evaluation.hpp */
+        /* origin: boost/simd/arch/common/detail/simd/trig_reduction.hpp */
         /*
          * ====================================================
          * copyright 2016 NumScale SAS
@@ -167,7 +167,11 @@ namespace xsimd
          * (See copy at http://boost.org/LICENSE_1_0.txt)
          * ====================================================
          */
-        template <class B>
+
+        struct trigo_radian_tag {};
+        struct trigo_pi_tag {};
+
+        template <class B, class Tag = trigo_radian_tag>
         struct trigo_reducer
         {
             static inline B reduce(const B& x, B& xr)
@@ -237,6 +241,18 @@ namespace xsimd
                     res.load_aligned(&tmp[0]);
                     return res;
                 }
+            }
+        };
+
+        template <class B>
+        struct trigo_reducer<B, trigo_pi_tag>
+        {
+            static inline B reduce(const B& x, B& xr)
+            {
+                B xi = nearbyint(x * B(2.));
+                B x2 = x - xi * B(0.5);
+                xr = x2 * pi<B>();
+                return quadrant(xi);
             }
         };
 
