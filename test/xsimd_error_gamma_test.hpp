@@ -29,7 +29,11 @@ namespace xsimd
         res_type erf_res;
         res_type erfc_res;
         res_type gamma_input;
-        res_type gamma_res;
+        res_type tgamma_res;
+        res_type lgamma_res;
+        res_type gamma_neg_input;
+        res_type tgamma_neg_res;
+        res_type lgamma_neg_res;
 
         simd_error_gamma_tester(const std::string& n);
     };
@@ -43,14 +47,22 @@ namespace xsimd
         erf_res.resize(nb_input);
         erfc_res.resize(nb_input);
         gamma_input.resize(nb_input);
-        gamma_res.resize(nb_input);
+        tgamma_res.resize(nb_input);
+        lgamma_res.resize(nb_input);
+        gamma_neg_input.resize(nb_input);
+        tgamma_neg_res.resize(nb_input);
+        lgamma_neg_res.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
             input[i] = value_type(-1.5) + i * value_type(3) / nb_input;
             erf_res[i] = std::erf(input[i]);
             erfc_res[i] = std::erfc(input[i]);
             gamma_input[i] = value_type(0.5) + i * value_type(3) / nb_input;
-            gamma_res[i] = std::tgamma(gamma_input[i]);
+            tgamma_res[i] = std::tgamma(gamma_input[i]);
+            lgamma_res[i] = std::lgamma(gamma_input[i]);
+            gamma_neg_input[i] = value_type(-3.99) + i * value_type(0.9) / nb_input;
+            tgamma_neg_res[i] = std::tgamma(gamma_neg_input[i]);
+            lgamma_neg_res[i] = std::lgamma(gamma_neg_input[i]);
         }
     }
 
@@ -80,7 +92,7 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "erf    : ";
+        out << "erf                     : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
@@ -90,7 +102,7 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.erf_res, out);
         success = success && tmp_success;
 
-        out << "erfc   : ";
+        out << "erfc                    : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
@@ -100,16 +112,47 @@ namespace xsimd
         tmp_success = check_almost_equal(res, tester.erfc_res, out);
         success = success && tmp_success;
 
-        out << "tgamma : ";
+        out << "tgamma                  : ";
         for (size_t i = 0; i < tester.gamma_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.gamma_input, i);
             vres = tgamma(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.gamma_res, out);
+        tmp_success = check_almost_equal(res, tester.tgamma_res, out);
         success = success && tmp_success;
 
+        out << "tgamma (negative input) : ";
+        for (size_t i = 0; i < tester.gamma_neg_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.gamma_neg_input, i);
+            vres = tgamma(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.tgamma_neg_res, out);
+        success = success && tmp_success;
+
+#ifndef __APPLE__
+        out << "lgamma                  : ";
+        for (size_t i = 0; i < tester.gamma_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.gamma_input, i);
+            vres = lgamma(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.lgamma_res, out);
+        success = success && tmp_success;
+
+        out << "lgamma (negative input) : ";
+        for (size_t i = 0; i < tester.gamma_neg_input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.gamma_neg_input, i);
+            vres = lgamma(input);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(res, tester.lgamma_neg_res, out);
+        success = success && tmp_success;
+#endif
         return success;
     }
 
