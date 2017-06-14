@@ -10,6 +10,7 @@
 #define XSIMD_BASIC_MATH_HPP
 
 #include "xsimd_numerical_constant.hpp"
+#include "xsimd_rounding.hpp"
 
 namespace xsimd
 {
@@ -18,17 +19,16 @@ namespace xsimd
      ********************/
 
     template <class T, std::size_t N>
-    batch<T, N> fdim(const batch<T, N>& x, const batch<T, N>& y);
-
-    /***********************************
-     * Basic operations implementation *
-     ***********************************/
+    batch<T, N> fmod(const batch<T, N>& x, const batch<T, N>& y);
 
     template <class T, std::size_t N>
-    inline batch<T, N> fdim(const batch<T, N>& x, const batch<T, N>& y)
-    {
-        return fmax(batch<T, N>(0.), x - y);
-    }
+    batch<T, N> remainder(const batch<T, N>& x, const batch<T, N>& y);
+
+    template <class T, std::size_t N>
+    batch<T, N> fdim(const batch<T, N>& x, const batch<T, N>& y);
+
+    template <class T, std::size_t N>
+    batch<T, N> clip(const batch<T, N>& x, const batch<T, N>& lo, const batch<T, N>& hi);
 
     /****************************
      * Classification functions *
@@ -48,6 +48,34 @@ namespace xsimd
 
     template <class T, std::size_t N>
     batch_bool<T, N> is_even(const batch<T, N>& x);
+
+    /***********************************
+     * Basic operations implementation *
+     ***********************************/
+
+    template <class T, std::size_t N>
+    inline batch<T, N> fmod(const batch<T, N>& x, const batch<T, N>& y)
+    {
+        return fnma(trunc(x / y), y, x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> remainder(const batch<T, N>& x, const batch<T, N>& y)
+    {
+        return fnma(nearbyint(x / y), y, x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> fdim(const batch<T, N>& x, const batch<T, N>& y)
+    {
+        return fmax(batch<T, N>(0.), x - y);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> clip(const batch<T, N>& x, const batch<T, N>& lo, const batch<T, N>& hi)
+    {
+        return select(x < lo, lo, select(x > hi, hi, x));
+    }
 
     /*******************************************
      * Classification functions implementation *

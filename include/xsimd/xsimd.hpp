@@ -12,6 +12,7 @@
 #include "memory/xsimd_aligned_allocator.hpp"
 #include "config/xsimd_config.hpp"
 #include "types/xsimd_traits.hpp"
+#include "math/xsimd_math.hpp"
 
 namespace xsimd
 {

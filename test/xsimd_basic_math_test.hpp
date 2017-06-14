@@ -29,7 +29,13 @@ namespace xsimd
 
         res_type lhs_input;
         res_type rhs_input;
+        res_type fmod_res;
+        res_type remainder_res;
         res_type fdim_res;
+        res_type clip_input;
+        value_type clip_lo;
+        value_type clip_hi;
+        res_type clip_res;
         res_type inf_res;
         res_type finite_res;
 
@@ -42,14 +48,25 @@ namespace xsimd
     {
         lhs_input.resize(N);
         rhs_input.resize(N);
+        fmod_res.resize(N);
+        remainder_res.resize(N);
         fdim_res.resize(N);
+        clip_input.resize(N);
+        clip_res.resize(N);
         inf_res.resize(N);
         finite_res.resize(N);
+        clip_lo = 0.5;
+        clip_hi = 1.;
         for (size_t i = 0; i < N; ++i)
         {
             lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
+            fmod_res[i] = std::fmod(lhs_input[i], rhs_input[i]);
+            remainder_res[i] = std::remainder(lhs_input[i], rhs_input[i]);
             fdim_res[i] = std::fdim(lhs_input[i], rhs_input[i]);
+            value_type tmp = i * value_type(0.25);
+            clip_input[i] = tmp;
+            clip_res[i] = tmp < clip_lo ? clip_lo : clip_hi < tmp ? clip_hi : tmp;
             inf_res[i] = T(0.);
             finite_res[i] = T(1.);
         }
@@ -83,12 +100,35 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
+        out << "fmod     : ";
+        detail::load_vec(lhs, tester.lhs_input);
+        detail::load_vec(rhs, tester.rhs_input);
+        vres = fmod(lhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.fmod_res, out);
+        success = success && tmp_success;
+
+        out << "remainder: ";
+        detail::load_vec(lhs, tester.lhs_input);
+        detail::load_vec(rhs, tester.rhs_input);
+        vres = remainder(lhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.remainder_res, out);
+        success = success && tmp_success;
+
         out << "fdim     : ";
         detail::load_vec(lhs, tester.lhs_input);
         detail::load_vec(rhs, tester.rhs_input);
         vres = fdim(lhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.fdim_res, out);
+        success = success && tmp_success;
+
+        out << "clip     : ";
+        detail::load_vec(lhs, tester.clip_input);
+        vres = clip(lhs, vector_type(tester.clip_lo), vector_type(tester.clip_hi));
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(res, tester.clip_res, out);
         success = success && tmp_success;
 
         out << "isfinite : ";
