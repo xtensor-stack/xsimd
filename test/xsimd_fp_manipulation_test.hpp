@@ -33,8 +33,6 @@ namespace xsimd
         res_type ldexp_res;
         res_type frexp_res;
         ires_type exp_frexp_res;
-        res_type inf_res;
-        res_type finite_res;
 
         simd_fpmanip_tester(const std::string& n);
     };
@@ -47,8 +45,6 @@ namespace xsimd
         ldexp_res.resize(N);
         frexp_res.resize(N);
         exp_frexp_res.resize(N);
-        inf_res.resize(N);
-        finite_res.resize(N);
         exponent = 5;
         for (size_t i = 0; i < N; ++i)
         {
@@ -57,8 +53,6 @@ namespace xsimd
             int tmp;
             frexp_res[i] = std::frexp(input[i], &tmp);
             exp_frexp_res[i] = static_cast<int_type>(tmp);
-            inf_res[i] = T(0.);
-            finite_res[i] = T(1.);
         }
     }
 
@@ -102,30 +96,6 @@ namespace xsimd
         vres = frexp(input, exponent);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(res, tester.frexp_res, out);
-        success = success && tmp_success;
-
-        out << "isfinite : ";
-        input = vector_type(12.);
-        vres = select(isfinite(input), vector_type(1.), vector_type(0.));
-        detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.finite_res, out);
-        success = success && tmp_success;
-        input = infinity<vector_type>();
-        vres = select(isfinite(input), vector_type(1.), vector_type(0.));
-        detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.inf_res, out);
-        success = success && tmp_success;
-
-        out << "isinf    : ";
-        input = vector_type(12.);
-        vres = select(isinf(input), vector_type(0.), vector_type(1.));
-        detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.finite_res, out);
-        success = success && tmp_success;
-        input = infinity<vector_type>();
-        vres = select(isinf(input), vector_type(0.), vector_type(1.));
-        detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.inf_res, out);
         success = success && tmp_success;
 
         return success;

@@ -67,6 +67,8 @@ set(XSIMD_TESTS
     main.cpp
     xsimd_basic_test.hpp
     xsimd_basic_test.cpp
+    xsimd_basic_math_test.hpp
+    xsimd_basic_math_test.cpp
     xsimd_error_gamma_test.hpp
     xsimd_error_gamma_test.cpp
     xsimd_exponential_test.hpp

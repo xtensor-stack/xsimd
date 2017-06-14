@@ -37,6 +37,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_instruction_set.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_basic_math.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_error.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_exp_reduction.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_exponential.hpp
