@@ -32,7 +32,7 @@ namespace xsimd
 
 #ifdef XSIMD_X86_INSTR_SET_AVAILABLE
         template <class T>
-        struct get_allocator_alignment_impl<aligned_allocator<T, XDEFAULT_ALIGNMENT>>
+        struct get_allocator_alignment_impl<aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>>
         {
             using type = aligned_mode;
         };
