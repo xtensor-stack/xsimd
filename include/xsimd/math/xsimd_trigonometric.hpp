@@ -50,7 +50,7 @@ namespace xsimd
          */
 
         template <class B, class Tag = trigo_radian_tag>
-        inline B sin_impl(const B& a, Tag t = Tag())
+        inline B sin_impl(const B& a, Tag = Tag())
         {
             const B x = abs(a);
             B xr = nan<B>();
