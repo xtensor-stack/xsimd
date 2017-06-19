@@ -101,7 +101,7 @@ namespace xsimd
     template <class B, class F, class V>
     inline duration_type benchmark_simd(F f, V& lhs, V& res, std::size_t number)
     {
-        std::size_t s = lhs.size() / B::size;
+        std::size_t s = lhs.size();
         duration_type t_res = duration_type::zero();
         for (std::size_t count = 0; count < number; ++count)
         {
@@ -122,7 +122,7 @@ namespace xsimd
     template <class B, class F, class V>
     inline duration_type benchmark_simd(F f, V& lhs, V& rhs, V& res, std::size_t number)
     {
-        std::size_t s = lhs.size() / B::size;
+        std::size_t s = lhs.size();
         duration_type t_res = duration_type::zero();
         for (std::size_t count = 0; count < number; ++count)
         {
