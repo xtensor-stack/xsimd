@@ -27,35 +27,6 @@ namespace xsimd
         return typeid(T).name();
     }
 
-    class vector4f;
-    class vector2d;
-    class vector8f;
-    class vector4d;
-
-    template <>
-    inline std::string value_type_name<vector4f>()
-    {
-        return "vector4f";
-    }
-
-    template <>
-    inline std::string value_type_name<vector2d>()
-    {
-        return "vector2d";
-    }
-
-    template <>
-    inline std::string value_type_name<vector8f>()
-    {
-        return "vector8f";
-    }
-
-    template <>
-    inline std::string value_type_name<vector4d>()
-    {
-        return "vector4d";
-    }
-
     namespace detail
     {
 
