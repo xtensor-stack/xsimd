@@ -66,7 +66,7 @@ namespace xsimd
     inline duration_type benchmark_scalar(F f, V& lhs, V& res, std::size_t number)
     {
         size_t s = lhs.size();
-        duration_type t_res = duration_type::zero();
+        duration_type t_res = duration_type::max();
         for (std::size_t count = 0; count < number; ++count)
         {
             auto start = std::chrono::steady_clock::now();
@@ -75,7 +75,8 @@ namespace xsimd
                 res[i] = f(lhs[i]);
             }
             auto end = std::chrono::steady_clock::now();
-            t_res += end - start;
+            auto tmp = end - start;
+            t_res = tmp < t_res ? tmp : t_res;
         }
         return t_res;
     }
@@ -84,7 +85,7 @@ namespace xsimd
     inline duration_type benchmark_scalar(F f, V& lhs, V& rhs, V& res, std::size_t number)
     {
         size_t s = lhs.size();
-        duration_type t_res = duration_type::zero();
+        duration_type t_res = duration_type::max();
         for (std::size_t count = 0; count < number; ++count)
         {
             auto start = std::chrono::steady_clock::now();
@@ -93,7 +94,8 @@ namespace xsimd
                 res[i] = f(lhs[i], rhs[i]);
             }
             auto end = std::chrono::steady_clock::now();
-            t_res += end - start;
+            auto tmp = end - start;
+            t_res = tmp < t_res ? tmp : t_res;
         }
         return t_res;
     }
@@ -102,7 +104,7 @@ namespace xsimd
     inline duration_type benchmark_simd(F f, V& lhs, V& res, std::size_t number)
     {
         std::size_t s = lhs.size();
-        duration_type t_res = duration_type::zero();
+        duration_type t_res = duration_type::max();
         for (std::size_t count = 0; count < number; ++count)
         {
             auto start = std::chrono::steady_clock::now();
@@ -114,7 +116,8 @@ namespace xsimd
                 bres.store_aligned(&res[i]);
             }
             auto end = std::chrono::steady_clock::now();
-            t_res += end - start;
+            auto tmp = end - start;
+            t_res = tmp < t_res ? tmp : t_res;
         }
         return t_res;
     }
@@ -123,7 +126,7 @@ namespace xsimd
     inline duration_type benchmark_simd(F f, V& lhs, V& rhs, V& res, std::size_t number)
     {
         std::size_t s = lhs.size();
-        duration_type t_res = duration_type::zero();
+        duration_type t_res = duration_type::max();
         for (std::size_t count = 0; count < number; ++count)
         {
             auto start = std::chrono::steady_clock::now();
@@ -136,7 +139,8 @@ namespace xsimd
                 bres.store_aligned(&res[i]);
             }
             auto end = std::chrono::steady_clock::now();
-            t_res += end - start;
+            auto tmp = end - start;
+            t_res = tmp < t_res ? tmp : t_res;
         }
         return t_res;
     }
@@ -179,23 +183,21 @@ namespace xsimd
         duration_type t_double_avx = benchmark_simd<batch<double, 4>>(f, d_lhs, d_res, iter);
 #endif
 
-        float fiter = float(iter);
-        double diter = double(iter);
         out << "=======================" << std::endl;
         out << f.name() << std::endl;
-        out << "scalar float : " << t_float_scalar.count() / fiter << "ms" << std::endl;
+        out << "scalar float : " << t_float_scalar.count() << "ms" << std::endl;
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        out << "sse float    : " << t_float_sse.count() / fiter << "ms" << std::endl;
+        out << "sse float    : " << t_float_sse.count() << "ms" << std::endl;
 #endif
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        out << "avx float    : " << t_float_avx.count() / fiter << "ms" << std::endl;
+        out << "avx float    : " << t_float_avx.count() << "ms" << std::endl;
 #endif
-        out << "scalar double: " << t_double_scalar.count() / diter << "ms" << std::endl;
+        out << "scalar double: " << t_double_scalar.count() << "ms" << std::endl;
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        out << "sse double   : " << t_double_sse.count() / diter << "ms" << std::endl;
+        out << "sse double   : " << t_double_sse.count() << "ms" << std::endl;
 #endif
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        out << "avx double   : " << t_double_avx.count() / diter << "ms" << std::endl;
+        out << "avx double   : " << t_double_avx.count() << "ms" << std::endl;
 #endif
         out << "=======================" << std::endl;
     }
@@ -224,23 +226,21 @@ namespace xsimd
         duration_type t_double_avx = benchmark_simd<batch<double, 4>>(f, d_lhs, d_rhs, d_res, iter);
 #endif
 
-        float fiter = float(iter);
-        double diter = double(iter);
         out << "=======================" << std::endl;
         out << f.name() << std::endl;
-        out << "scalar float : " << t_float_scalar.count() / fiter << "ms" << std::endl;
+        out << "scalar float : " << t_float_scalar.count() << "ms" << std::endl;
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        out << "sse float    : " << t_float_sse.count() / fiter << "ms" << std::endl;
+        out << "sse float    : " << t_float_sse.count() << "ms" << std::endl;
 #endif
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        out << "avx float    : " << t_float_avx.count() / fiter << "ms" << std::endl;
+        out << "avx float    : " << t_float_avx.count() << "ms" << std::endl;
 #endif
-        out << "scalar double: " << t_double_scalar.count() / diter << "ms" << std::endl;
+        out << "scalar double: " << t_double_scalar.count() << "ms" << std::endl;
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        out << "sse double   : " << t_double_sse.count() / diter << "ms" << std::endl;
+        out << "sse double   : " << t_double_sse.count() << "ms" << std::endl;
 #endif
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        out << "avx double   : " << t_double_avx.count() / diter << "ms" << std::endl;
+        out << "avx double   : " << t_double_avx.count() << "ms" << std::endl;
 #endif
         out << "=======================" << std::endl;
     }

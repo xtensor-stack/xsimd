@@ -11,7 +11,7 @@
 
 void benchmark_operation()
 {
-    std::size_t size = 100000;
+    std::size_t size = 10000;
     xsimd::run_benchmark_2op(xsimd::add_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_2op(xsimd::sub_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_2op(xsimd::mul_fn(), std::cout, size, 1000);
