@@ -11,7 +11,8 @@
 
 void benchmark_operation()
 {
-    std::size_t size = 10000;
+    //std::size_t size = 9984;
+    std::size_t size = 20000;
     xsimd::run_benchmark_2op(xsimd::add_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_2op(xsimd::sub_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_2op(xsimd::mul_fn(), std::cout, size, 1000);
@@ -20,7 +21,7 @@ void benchmark_operation()
 
 void benchmark_exp_log()
 {
-    std::size_t size = 10000;
+    std::size_t size = 20000;
     xsimd::run_benchmark_1op(xsimd::exp_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::exp2_fn(), std::cout, size, 100);
     xsimd::run_benchmark_1op(xsimd::expm1_fn(), std::cout, size, 1000);
@@ -32,7 +33,7 @@ void benchmark_exp_log()
 
 void benchmark_trigo()
 {
-    std::size_t size = 10000;
+    std::size_t size = 20000;
     xsimd::run_benchmark_1op(xsimd::sin_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::cos_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::tan_fn(), std::cout, size, 1000);
@@ -43,7 +44,7 @@ void benchmark_trigo()
 
 void benchmark_hyperbolic()
 {
-    std::size_t size = 10000;
+    std::size_t size = 20000;
     xsimd::run_benchmark_1op(xsimd::sinh_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::cosh_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::tanh_fn(), std::cout, size, 1000);
@@ -54,7 +55,7 @@ void benchmark_hyperbolic()
 
 void benchmark_power()
 {
-    std::size_t size = 10000;
+    std::size_t size = 20000;
     xsimd::run_benchmark_2op(xsimd::pow_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::sqrt_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::cbrt_fn(), std::cout, size, 100);
@@ -63,7 +64,7 @@ void benchmark_power()
 
 void benchmark_rounding()
 {
-    std::size_t size = 10000;
+    std::size_t size = 20000;
     xsimd::run_benchmark_1op(xsimd::ceil_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::floor_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_1op(xsimd::trunc_fn(), std::cout, size, 1000);
