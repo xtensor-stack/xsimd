@@ -19,9 +19,6 @@ namespace xsimd
 
     // Allocator alignment
 
-    struct aligned_mode {};
-    struct unaligned_mode {};
-
     namespace detail
     {
         template <class A>

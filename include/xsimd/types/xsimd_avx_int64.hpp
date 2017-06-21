@@ -71,6 +71,9 @@ namespace xsimd
         batch();
         explicit batch(int64_t i);
         batch(int64_t i0, int64_t i1, int64_t i2, int64_t i3);
+        explicit batch(const int64_t* src);
+        batch(const int64_t* src, aligned_mode);
+        batch(const int64_t* src, unaligned_mode);
         batch(const __m256i& rhs);
         batch& operator=(const __m256i& rhs);
 
@@ -262,6 +265,21 @@ namespace xsimd
 
     inline batch<int64_t, 4>::batch(int64_t i0, int64_t i1, int64_t i2, int64_t i3)
         : m_value(_mm256_setr_epi64x(i0, i1, i2, i3))
+    {
+    }
+
+    inline batch<int64_t, 4>::batch(const int64_t* src)
+        : m_value(_mm256_loadu_si256((__m256i const*)src))
+    {
+    }
+
+    inline batch<int64_t, 4>::batch(const int64_t* src, aligned_mode)
+        : m_value(_mm256_load_si256((__m256i const*)src))
+    {
+    }
+
+    inline batch<int64_t, 4>::batch(const int64_t* src, unaligned_mode)
+        : m_value(_mm256_loadu_si256((__m256i const*)src))
     {
     }
 

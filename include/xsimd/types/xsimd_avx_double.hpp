@@ -71,6 +71,9 @@ namespace xsimd
         batch();
         explicit batch(double d);
         batch(double d0, double d1, double d2, double d3);
+        explicit batch(const double* src);
+        batch(const double* src, aligned_mode);
+        batch(const double* src, unaligned_mode);
         batch(const __m256d& rhs);
         batch& operator=(const __m256d& rhs);
 
@@ -225,6 +228,21 @@ namespace xsimd
     {
     }
     
+    inline batch<double, 4>::batch(const double* src)
+        : m_value(_mm256_loadu_pd(src))
+    {
+    }
+
+    inline batch<double, 4>::batch(const double* src, aligned_mode)
+        : m_value(_mm256_load_pd(src))
+    {
+    }
+
+    inline batch<double, 4>::batch(const double* src, unaligned_mode)
+        : m_value(_mm256_loadu_pd(src))
+    {
+    }
+
     inline batch<double, 4>::batch(const __m256d& rhs)
         : m_value(rhs)
     {

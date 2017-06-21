@@ -70,6 +70,9 @@ namespace xsimd
         batch();
         explicit batch(float f);
         batch(float f0, float f1, float f2, float f3);
+        explicit batch(const float* src);
+        batch(const float* src, aligned_mode);
+        batch(const float* src, unaligned_mode);
         batch(const __m128& rhs);
         batch& operator=(const __m128& rhs);
 
@@ -219,6 +222,21 @@ namespace xsimd
     
     inline batch<float, 4>::batch(float f0, float f1, float f2, float f3)
         : m_value(_mm_setr_ps(f0, f1, f2, f3))
+    {
+    }
+
+    inline batch<float, 4>::batch(const float* src)
+        : m_value(_mm_loadu_ps(src))
+    {
+    }
+
+    inline batch<float, 4>::batch(const float* src, aligned_mode)
+        : m_value(_mm_load_ps(src))
+    {
+    }
+
+    inline batch<float, 4>::batch(const float* src, unaligned_mode)
+        : m_value(_mm_loadu_ps(src))
     {
     }
 

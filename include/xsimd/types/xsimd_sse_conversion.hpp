@@ -65,7 +65,7 @@ namespace xsimd
     {
         using batch_int = batch<int64_t, 2>;
         __m128i tmp = _mm_cvttpd_epi32(x);
-        return _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(0));
+        return _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(int64_t(0)));
     }
 
     inline batch<float, 4> to_float(const batch<int32_t, 4>& x)

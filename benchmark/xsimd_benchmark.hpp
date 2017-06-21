@@ -110,8 +110,7 @@ namespace xsimd
             auto start = std::chrono::steady_clock::now();
             for (std::size_t i = 0; i < s; i += B::size)
             {
-                B blhs;
-                blhs.load_aligned(&lhs[i]);
+                B blhs(&lhs[i], aligned_mode());
                 B bres = f(blhs);
                 bres.store_aligned(&res[i]);
             }
@@ -136,11 +135,8 @@ namespace xsimd
                 size_t j = i + B::size;
                 size_t k = j + B::size;
                 size_t l = k + B::size;
-                B blhs, blhs2, blhs3, blhs4;
-                blhs.load_aligned(&lhs[i]);
-                blhs2.load_aligned(&lhs[j]);
-                blhs3.load_aligned(&lhs[k]);
-                blhs4.load_aligned(&lhs[l]);
+                B blhs(&lhs[i], aligned_mode()), blhs2(&lhs[j], aligned_mode()),
+                  blhs3(&lhs[k], aligned_mode()), blhs4(&lhs[l], aligned_mode());
                 B bres = f(blhs);
                 B bres2 = f(blhs2);
                 B bres3 = f(blhs3);
@@ -167,9 +163,7 @@ namespace xsimd
             auto start = std::chrono::steady_clock::now();
             for (std::size_t i = 0; i < s; i += B::size)
             {
-                B blhs, brhs;
-                blhs.load_aligned(&lhs[i]);
-                brhs.load_aligned(&rhs[i]);
+                B blhs(&lhs[i], aligned_mode()), brhs(&rhs[i], aligned_mode());
                 B bres = f(blhs, brhs);
                 bres.store_aligned(&res[i]);
             }
@@ -194,16 +188,10 @@ namespace xsimd
                 size_t j = i + B::size;
                 size_t k = j + B::size;
                 size_t l = k + B::size;
-                B blhs, brhs, blhs2, brhs2;
-                B blhs3, brhs3, blhs4, brhs4;
-                blhs.load_aligned(&lhs[i]);
-                blhs2.load_aligned(&lhs[j]);
-                blhs3.load_aligned(&lhs[k]);
-                blhs4.load_aligned(&lhs[l]);
-                brhs.load_aligned(&rhs[i]);
-                brhs2.load_aligned(&rhs[j]);
-                brhs3.load_aligned(&rhs[k]);
-                brhs4.load_aligned(&rhs[l]);
+                B blhs(&lhs[i], aligned_mode()), brhs(&rhs[i], aligned_mode()),
+                  blhs2(&lhs[j], aligned_mode()), brhs2(&rhs[j], aligned_mode());
+                B blhs3(&lhs[k], aligned_mode()), brhs3(&rhs[k], aligned_mode()),
+                  blhs4(&lhs[l], aligned_mode()), brhs4(&rhs[l], aligned_mode());
                 B bres = f(blhs, brhs);
                 B bres2 = f(blhs2, brhs2);
                 B bres3 = f(blhs3, brhs3);

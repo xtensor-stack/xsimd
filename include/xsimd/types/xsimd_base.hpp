@@ -13,6 +13,9 @@
 
 namespace xsimd
 {
+    struct aligned_mode {};
+    struct unaligned_mode {};
+
     template <class T, std::size_t N>
     class batch_bool;
 
