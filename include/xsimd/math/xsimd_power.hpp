@@ -148,7 +148,7 @@ namespace xsimd
                     0x3fe17e1fc7e59d58ll,
                     0xbfc13c93386fdff6ll
                 >(x);
-                auto flag = e >= i_type(0);
+                auto flag = e >= zero<i_type>();
                 i_type e1 = abs(e);
                 i_type rem = e1;
                 e1 /= i_type(3);

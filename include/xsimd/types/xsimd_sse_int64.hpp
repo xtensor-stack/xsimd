@@ -71,6 +71,9 @@ namespace xsimd
         batch();
         explicit batch(int64_t i);
         batch(int64_t i0, int64_t i1);
+        explicit batch(const int64_t* src);
+        batch(const int64_t* src, aligned_mode);
+        batch(const int64_t* src, unaligned_mode);
         batch(const __m128i& rhs);
         batch& operator=(const __m128i& rhs);
 
@@ -244,6 +247,21 @@ namespace xsimd
     {
     }
 
+    inline batch<int64_t, 2>::batch(const int64_t* src)
+        : m_value(_mm_loadu_si128((__m128i const*)src))
+    {
+    }
+
+    inline batch<int64_t, 2>::batch(const int64_t* src, aligned_mode)
+        : m_value(_mm_load_si128((__m128i const*)src))
+    {
+    }
+
+    inline batch<int64_t, 2>::batch(const int64_t* src, unaligned_mode)
+        : m_value(_mm_loadu_si128((__m128i const*)src))
+    {
+    }
+
     inline batch<int64_t, 2>::batch(const __m128i& rhs)
         : m_value(rhs)
     {
@@ -318,7 +336,7 @@ namespace xsimd
         __m128d drhs = _mm_setr_pd(static_cast<double>(rhs[0]), static_cast<double>(rhs[1]));
         __m128i tmp = _mm_cvttpd_epi32(_mm_div_pd(dlhs, drhs));
         using batch_int = batch<int64_t, 2>;
-        return _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(0));
+        return _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(int64_t(0)));
     }
 
     inline batch_bool<int64_t, 2> operator==(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)

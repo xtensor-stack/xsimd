@@ -65,7 +65,7 @@ namespace xsimd
         {
             static inline B compute(const B& a)
             {
-                return select(a > B(0), B(1), B(0)) - select(a < B(0), B(1), B(0));
+                return select(a > zero<B>(), B(1), zero<B>()) - select(a < zero<B>(), B(1), zero<B>());
             }
         };
 
@@ -74,7 +74,7 @@ namespace xsimd
         {
             static inline B compute(const B& a)
             {
-                B r = select(a > B(0), B(1), B(0)) - select(a < B(0), B(1), B(0));
+                B r = select(a > B(0.), B(1.), B(0.)) - select(a < B(0.), B(1.), B(0.));
 #ifdef XSIMD_NO_NANS
                 return r;
 #else

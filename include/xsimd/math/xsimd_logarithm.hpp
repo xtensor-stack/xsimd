@@ -102,7 +102,7 @@ namespace xsimd
 
                 B x = a;
                 i_type hx = bitwise_cast<i_type>(x) >> 32;
-                i_type k(0);
+                i_type k = zero<i_type>();
                 auto isnez = (a != B(0.));
 #ifndef XSIMD_NO_DENORMALS
                 auto test = (a < smallestposval<B>()) && isnez;
@@ -234,7 +234,7 @@ namespace xsimd
                 using i_type = as_integer_t<B>;
                 B x = a;
                 i_type hx = bitwise_cast<i_type>(x) >> 32;
-                i_type k(0);
+                i_type k = zero<i_type>();
                 auto isnez = (a != B(0.));
 #ifndef XSIMD_NO_DENORMALS
                 auto test = (a < smallestposval<B>()) && isnez;
@@ -388,7 +388,7 @@ namespace xsimd
                 using i_type = as_integer_t<B>;
                 B x = a;
                 i_type hx = bitwise_cast<i_type>(x) >> 32;
-                i_type k(0);
+                i_type k = zero<i_type>();
                 auto isnez = (a != B(0.));
 #ifndef XSIMD_NO_DENORMALS
                 auto test = (a < smallestposval<B>()) && isnez;

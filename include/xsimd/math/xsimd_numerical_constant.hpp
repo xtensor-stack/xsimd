@@ -113,6 +113,9 @@ XSIMD_DEFINE_CONSTANT_HEX(twotonmbo3, 0x3ba14518, 0x3ed428a2f98d7286)
     template <class T>
     constexpr int32_t nmb() noexcept;
 
+    template <class T>
+    constexpr T zero() noexcept;
+
     /**************************
      * allbits implementation *
      **************************/
@@ -254,6 +257,15 @@ XSIMD_DEFINE_CONSTANT_HEX(twotonmbo3, 0x3ba14518, 0x3ed428a2f98d7286)
         return 52;
     }
 
+    /***********************
+     * zero implementation *
+     ***********************/
+
+    template <class T>
+    constexpr T zero() noexcept
+    {
+        return T(typename T::value_type(0));
+    }
 }
 
 #endif

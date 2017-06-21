@@ -61,7 +61,7 @@ namespace xsimd
         i_type r1 = m1f & bitwise_cast<i_type>(arg);
         b_type x = arg & bitwise_cast<b_type>(~m1f);
         exp = (r1 >> nmb<b_type>()) - maxexponentm1<b_type>();
-        exp = select(bool_cast(arg != b_type(0.)), exp, i_type(0));
+        exp = select(bool_cast(arg != b_type(0.)), exp, zero<i_type>());
         return select((arg != b_type(0.)), x | bitwise_cast<b_type>(mask2frexp<b_type>()), b_type(0.));
     }
 
