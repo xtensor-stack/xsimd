@@ -10,6 +10,7 @@
 #define XSIMD_BASE_HPP
 
 #include <cstddef>
+#include <ostream>
 
 namespace xsimd
 {
@@ -161,6 +162,8 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator!(const simd_batch<X>& rhs);
 
+    template <class X>
+    std::ostream& operator<<(std::ostream& out, const simd_batch<X>& rhs);
 
     /**********************************
      * simd_batch_bool implementation *
@@ -432,6 +435,19 @@ namespace xsimd
     operator!(const simd_batch<X>& rhs)
     {
         return rhs() == X(0);
+    }
+
+    template <class X>
+    inline std::ostream& operator<<(std::ostream& out, const simd_batch<X>& rhs)
+    {
+        out << '(';
+        std::size_t s = simd_batch<X>::size;
+        for (std::size_t i = 0; i < s - 1; ++i)
+        {
+            out << rhs()[i] << ", ";
+        }
+        out << rhs()[s - 1] << ')';
+        return out;
     }
 }
 
