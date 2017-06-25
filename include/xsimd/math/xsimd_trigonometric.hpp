@@ -16,24 +16,61 @@
 namespace xsimd
 {
 
+    /**
+     * Computes the sine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the sine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> sin(const batch<T, N>& x);
 
+    /**
+     * Computes the cosine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the cosine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> cos(const batch<T, N>& x);
 
+    /**
+     * Computes the tangent of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the tangent of \c x.
+     */
     template<class T, std::size_t N>
     batch<T, N> tan(const batch<T, N>& x);
 
+    /**
+     * Computes the arc sine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the arc sine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> asin(const batch<T, N>& x);
 
+    /**
+     * Computes the arc cosine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the arc cosine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> acos(const batch<T, N>& x);
 
+    /**
+     * Computes the arc tangent of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the arc tangent of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> atan(const batch<T, N>& x);
 
+    /**
+     * Computes the arc tangent of the batch \c x/y, using the signs of the
+     * arguments to determine the correct quadrant.
+     * @param x batch of floating point values.
+     * @param y batch of floating point values.
+     * @return the arc tangent of \c x/y.
+     */
     template <class T, std::size_t N>
     batch<T, N> atan2(const batch<T, N>& y, const batch<T, N>& x);
 

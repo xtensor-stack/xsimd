@@ -7,7 +7,9 @@
 Mathematical functions
 ======================
 
-:ref:`basic-functions-reference`
+.. toctree::
+
+   basic_functions
 
 +---------------------------------------+----------------------------------------------------+
 | :ref:`abs <abs-function-reference>`   | absolute value                                     |
@@ -39,7 +41,9 @@ Mathematical functions
 | :ref:`clip <clip-function-reference>` | clipping operation                                 |
 +---------------------------------------+----------------------------------------------------+
 
-:ref:`exponential-functions-reference`
+.. toctree::
+
+   exponential_functions
 
 +---------------------------------------+----------------------------------------------------+
 | :ref:`exp <exp-function-reference>`   | natural exponential function                       |
@@ -59,3 +63,54 @@ Mathematical functions
 | :ref:`log1p <log1p-func-ref>`         | natural logarithm of one plus function             |
 +---------------------------------------+----------------------------------------------------+
 
+.. toctree::
+
+   power_functions
+
++---------------------------------------+----------------------------------------------------+
+| :ref:`pow <pow-function-reference>`   | power function                                     |
++---------------------------------------+----------------------------------------------------+
+| :ref:`sqrt <sqrt-function-reference>` | square root function                               |
++---------------------------------------+----------------------------------------------------+
+| :ref:`cbrt <cbrt-function-reference>` | cubic root function                                |
++---------------------------------------+----------------------------------------------------+
+| :ref:`hypot <hypot-func-ref>`         | hypotenuse function                                |
++---------------------------------------+----------------------------------------------------+
+
+.. toctree::
+
+   trigonometric_functions
+
++---------------------------------------+----------------------------------------------------+
+| :ref:`sin <sin-function-reference>`   | sine function                                      |
++---------------------------------------+----------------------------------------------------+
+| :ref:`cos <cos-function-reference>`   | cosine function                                    |
++---------------------------------------+----------------------------------------------------+
+| :ref:`tan <tan-function-reference>`   | tangent function                                   |
++---------------------------------------+----------------------------------------------------+
+| :ref:`asin <asin-function-reference>` | arc sine function                                  |
++---------------------------------------+----------------------------------------------------+
+| :ref:`acos <acos-function-reference>` | arc cosine function                                |
++---------------------------------------+----------------------------------------------------+
+| :ref:`atan <atan-function-reference>` | arc tangent function                               |
++---------------------------------------+----------------------------------------------------+
+| :ref:`atan2 <atan2-func-ref>`         | arc tangent function, determining quadrants        |
++---------------------------------------+----------------------------------------------------+
+
+.. toctree::
+
+   hyperbolic_functions
+
++---------------------------------------+----------------------------------------------------+
+| :ref:`sinh <sinh-function-reference>` | hyperbolic sine function                           |
++---------------------------------------+----------------------------------------------------+
+| :ref:`cosh <cosh-function-reference>` | hyperbolic cosine function                         |
++---------------------------------------+----------------------------------------------------+
+| :ref:`tanh <tanh-function-reference>` | hyperbolic tangent function                        |
++---------------------------------------+----------------------------------------------------+
+| :ref:`asinh <asinh-func-ref>`         | inverse hyperbolic sine function                   |
++---------------------------------------+----------------------------------------------------+
+| :ref:`acosh <acosh-func-ref>`         | inverse hyperbolic cosine function                 |
++---------------------------------------+----------------------------------------------------+
+| :ref:`atanh <atanh-func-ref>`         | inverse hyperbolic tangent function                |
++---------------------------------------+----------------------------------------------------+
