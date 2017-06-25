@@ -481,6 +481,11 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> fabs(const batch<T, N>& x);
 
+    /**
+     * Computes the square root of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the square root of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> sqrt(const batch<T, N>& x);
 

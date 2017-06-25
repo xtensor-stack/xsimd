@@ -20,12 +20,31 @@
 namespace xsimd
 {
 
+    /**
+     * Computes the value of the batch \c x raised to the power
+     * \c y.
+     * @param x batch of floating point values.
+     * @param y batch of floating point values.
+     * @return \c x raised to the power \c y.
+     */
     template <class T, std::size_t N>
     batch<T, N> pow(const batch<T, N>& x, const batch<T, N>& y);
 
+    /**
+     * Computes the cubic root of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the cubic root of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> cbrt(const batch<T, N>& x);
 
+    /**
+     * Computes the square root of the sum of the squares of the batches
+     * \c x, and \c y.
+     * @param x batch of floating point values.
+     * @param y batch of floating point values.
+     * @return the square root of the sum of the squares of \c x and \c y.
+     */
     template <class T, std::size_t N>
     batch<T, N> hypot(const batch<T, N>& x, const batch<T, N>& y);
 
