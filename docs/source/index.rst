@@ -12,10 +12,31 @@ C++ wrappers for SIMD intrinsics.
 Introduction
 ------------
 
-`xsimd` requires a modern C++ compiler supporting C++11. The following C++ compilers are supported:
+`xsimd` is a library meant for SIMD (Single Instruction, Multiple Data) programming. It provides C++ wrappers for SIMD intrinsics and an implementation
+of common mathematical functions based on these wrappers. You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the
+`The C++ Scientist`_. The mathematical functions are a lightweight implementation of `boost.SIMD`_.
 
-- On Windows platforms, Visual C++ 2015 Update 2, or more recent
-- On Unix platforms, gcc 4.9 or a recent version of Clang
+`xsimd` requires a C++14 compliant compiler. The following C++ compilers are supported:
+
++-------------------------+-------------------------------+
+| Compiler                | Version                       |
++=========================+===============================+
+| Microsoft Visual Studio | MSVC 2015 update 2 and above  |
++-------------------------+-------------------------------+
+| g++                     | 4.9 and above                 |
++-------------------------+-------------------------------+
+| clang                   | 3.7 and above                 |
++-------------------------+-------------------------------+
+
+The following SIMD instruction set extensions are supported:
+
++--------------+----------------------------------------------------+
+| Architecture | Instruction set extensions                         |
++==============+====================================================+
+| x86          | SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, FMA3, AVX2 |
++--------------+----------------------------------------------------+
+| x86 AMD      | same as above + SSE4A, FMA4, XOP                   |
++--------------+----------------------------------------------------+
 
 Licensing
 ---------
@@ -36,10 +57,14 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    :caption: USAGE
    :maxdepth: 2
 
-   usage
+   basic_usage
 
 .. toctree::
    :caption: API REFERENCE
    :maxdepth: 2
    
-   api_reference
+   api/batch_index
+
+.. _The C++ Scientist: http://johanmabille.github.io/blog/archives/
+.. _boost.SIMD: https://github.com/NumScale/boost.simd
+

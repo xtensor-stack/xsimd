@@ -4,5 +4,7 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-API reference
-=============
+The batch template
+==================
+
+
