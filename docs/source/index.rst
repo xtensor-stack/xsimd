@@ -64,6 +64,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    :maxdepth: 2
    
    api/batch_index
+   api/math_index
 
 .. _The C++ Scientist: http://johanmabille.github.io/blog/archives/
 .. _boost.SIMD: https://github.com/NumScale/boost.simd

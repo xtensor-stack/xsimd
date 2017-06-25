@@ -429,17 +429,41 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> bitwise_andnot(const batch<T, N>& lhs, const batch<T, N>& rhs);
 
+    /**
+     * Returns the smaller values of the batches \c x and \c y.
+     * @param x a batch of integer or floating point values.
+     * @param y a batch of integer or floating point values.
+     * @return a batch of the smaller values.
+     */
     template <class T, std::size_t N>
-    batch<T, N> min(const batch<T, N>& lhs, const batch<T, N>& rhs);
+    batch<T, N> min(const batch<T, N>& x, const batch<T, N>& y);
 
+    /**
+     * Returns the larger values of the batches \c x and \c y.
+     * @param x a batch of integer or floating point values.
+     * @param y a batch of integer or floating point values.
+     * @return a batch of the larger values.
+     */
     template <class T, std::size_t N>
-    batch<T, N> max(const batch<T, N>& lhs, const batch<T, N>& rhs);
+    batch<T, N> max(const batch<T, N>& x, const batch<T, N>& y);
 
+    /**
+     * Returns the smaller values of the batches \c x and \c y.
+     * @param x a batch of floating point values.
+      * @param y a batch of floating point values.
+     * @return a batch of the smaller values.
+     */
     template <class T, std::size_t N>
-    batch<T, N> fmin(const batch<T, N>& lhs, const batch<T, N>& rhs);
+    batch<T, N> fmin(const batch<T, N>& x, const batch<T, N>& y);
 
+    /**
+     * Returns the larger values of the batches \c x and \c y.
+     * @param x a batch of floating point values.
+     * @param y a batch of floating point values.
+     * @return a batch of the larger values.
+     */
     template <class T, std::size_t N>
-    batch<T, N> fmax(const batch<T, N>& lhs, const batch<T, N>& rhs);
+    batch<T, N> fmax(const batch<T, N>& x, const batch<T, N>& y);
 
     /**
      * Computes the absolute values of each scalar in the batch \c x.
@@ -449,18 +473,54 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> abs(const batch<T, N>& x);
 
+    /**
+    * Computes the absolute values of each scalar in the batch \c x.
+    * @param x batch floating point values.
+    * @return the asbolute values of \c x.
+    */
+    template <class T, std::size_t N>
+    batch<T, N> fabs(const batch<T, N>& x);
+
     template <class T, std::size_t N>
     batch<T, N> sqrt(const batch<T, N>& x);
 
+    /**
+     * Computes <tt>(x*y) + z</tt> in a single instruction when possible.
+     * @param x a batch of integer or floating point values.
+     * @param y a batch of integer or floating point values.
+     * @param z a batch of integer or floating point values.
+     * @return the result of the fused multiply-add operation.
+     */
     template <class T, std::size_t N>
     batch<T, N> fma(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
 
+    /**
+     * Computes <tt>(x*y) - z</tt> in a single instruction when possible.
+     * @param x a batch of integer or floating point values.
+     * @param y a batch of integer or floating point values.
+     * @param z a batch of integer or floating point values.
+     * @return the result of the fused multiply-sub operation.
+     */
     template <class T, std::size_t N>
     batch<T, N> fms(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
 
+    /**
+     * Computes <tt>-(x*y) + z</tt> in a single instruction when possible.
+     * @param x a batch of integer or floating point values.
+     * @param y a batch of integer or floating point values.
+     * @param z a batch of integer or floating point values.
+     * @return the result of the fused negated multiply-add operation.
+     */
     template <class T, std::size_t N>
     batch<T, N> fnma(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
 
+    /**
+     * Computes <tt>-(x*y) - z</tt> in a single instruction when possible.
+     * @param x a batch of integer or floating point values.
+     * @param y a batch of integer or floating point values.
+     * @param z a batch of integer or floating point values.
+     * @return the result of the fused negated multiply-sub operation.
+     */
     template <class T, std::size_t N>
     batch<T, N> fnms(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
 
