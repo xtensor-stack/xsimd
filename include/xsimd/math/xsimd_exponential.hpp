@@ -14,15 +14,35 @@
 
 namespace xsimd
 {
+    /**
+     * Computes the natural exponential of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the natural exponential of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> exp(const batch<T, N>& x);
 
+    /**
+     * Computes the base 2 exponential of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the base 2 exponential of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> exp2(const batch<T, N>& x);
 
+    /**
+     * Computes the base 10 exponential of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the base 10 exponential of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> exp10(const batch<T, N>& x);
 
+    /**
+     * Computes the natural exponential of the batch \c x, minus one.
+     * @param x batch of floating point values.
+     * @return the natural exponential of \c x, minus one.
+     */
     template <class T, std::size_t N>
     batch<T, N> expm1(const batch<T, N>& x);
 

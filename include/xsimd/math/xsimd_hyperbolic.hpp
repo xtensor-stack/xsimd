@@ -21,21 +21,51 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> average(const batch<T, N>& x1, const batch<T, N>& x2);
 
+    /**
+     * Computes the hyperbolic sine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the hyperbolic sine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> sinh(const batch<T, N>& x);
 
+    /**
+     * Computes the hyperbolic cosine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the hyperbolic cosine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> cosh(const batch<T, N>& x);
 
+    /**
+     * Computes the hyperbolic tangent of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the hyperbolic tangent of \c x.
+     */
     template<class T, std::size_t N>
     batch<T, N> tanh(const batch<T, N>& x);
 
+    /**
+     * Computes the inverse hyperbolic sine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the inverse hyperbolic sine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> asinh(const batch<T, N>& x);
 
+    /**
+     * Computes the inverse hyperbolic cosine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the inverse hyperbolic cosine of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> acosh(const batch<T, N>& x);
 
+    /**
+     * Computes the inverse hyperbolic tangent of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the inverse hyperbolic tangent of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> atanh(const batch<T, N>& x);
 

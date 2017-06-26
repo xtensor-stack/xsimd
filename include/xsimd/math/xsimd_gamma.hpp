@@ -17,10 +17,19 @@
 
 namespace xsimd
 {
-
+    /**
+     * Computes the gamma function of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the gamma function of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> tgamma(const batch<T, N>& x);
 
+    /**
+     * Computes the natural logarithm of the gamma function of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the natural logarithm of the gamma function of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> lgamma(const batch<T, N>& x);
 

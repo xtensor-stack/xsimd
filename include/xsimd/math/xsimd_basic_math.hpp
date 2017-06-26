@@ -53,24 +53,60 @@ namespace xsimd
      * Basic operations implementation *
      ***********************************/
 
+    /**
+     * @brief Computes the floating-point remainder of the division operation \c x/y.
+     *
+     * The floating-point remainder of the division operation \c x/y calculated by this
+     * function is exactly the value <tt>x - n*y</tt>, where \c n is \c x/y with its fractional
+     * part truncated. The returned value has the same sign as \c x and is less than \c y in magnitude.
+     * @param x batch of floating point values.
+     * @param y batch of floating point values.
+     * @return the floating-point remainder of the division.
+     */
     template <class T, std::size_t N>
     inline batch<T, N> fmod(const batch<T, N>& x, const batch<T, N>& y)
     {
         return fnma(trunc(x / y), y, x);
     }
 
+    /**
+     * @brief Computes the IEEE remainder of the floating point division operation \c x/y.
+     *
+     * The IEEE floating-point remainder of the division operation \c x/y calculated by this
+     * function is exactly the value <tt>x - n*y</tt>, where the value n is the integral value
+     * nearest the exact value \c x/y. When <tt>|n-x/y| = 0.5</tt>, the value n is chosen to be even.
+     * In contrast to fmod, the returned value is not guaranteed to have the same sign as \c x.
+     * If the returned value is 0, it will have the same sign as \c x.
+     * @param x batch of floating point values.
+     * @param y batch of floating point values.
+     * @return the IEEE remainder remainder of the floating point division.
+     */
     template <class T, std::size_t N>
     inline batch<T, N> remainder(const batch<T, N>& x, const batch<T, N>& y)
     {
         return fnma(nearbyint(x / y), y, x);
     }
 
+    /**
+     * Computes the positive difference between \c x and \c y, that is,
+     * <tt>max(0, x-y)</tt>.
+     * @param x batch of floating point values.
+     * @param y batch of floating point values.
+     * @return the positive difference.
+     */
     template <class T, std::size_t N>
     inline batch<T, N> fdim(const batch<T, N>& x, const batch<T, N>& y)
     {
         return fmax(batch<T, N>(0.), x - y);
     }
 
+    /**
+     * Clips the values of the batch \c x between those of the batches \c lo and \c hi.
+     * @param x batch of floating point values.
+     * @param lo batch of floating point values.
+     * @param hi batch of floating point values.
+     * @return the result of the clipping.
+     */
     template <class T, std::size_t N>
     inline batch<T, N> clip(const batch<T, N>& x, const batch<T, N>& lo, const batch<T, N>& hi)
     {
@@ -81,12 +117,24 @@ namespace xsimd
      * Classification functions implementation *
      *******************************************/
 
+    /**
+     * Determines if the scalars in the given batch \c x have finite values,
+     * i.e. theyr are different from infinite or NaN.
+     * @param x batch of floating point values.
+     * @return a batch of booleans.
+     */
     template <class T, std::size_t N>
     inline batch_bool<T, N> isfinite(const batch<T, N>& x)
     {
         return (x - x) == batch<T, N>(0.);
     }
 
+    /**
+     * Determines if the scalars in the given batch \c x are positive
+     * or negative infinity.
+     * @param x batch of floating point values.
+     * @return a batch of booleans.
+     */
     template <class T, std::size_t N>
     inline batch_bool<T, N> isinf(const batch<T, N>& x)
     {

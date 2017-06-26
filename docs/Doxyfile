@@ -1,6 +1,6 @@
 PROJECT_NAME      = "xsimd"
 XML_OUTPUT        = xml
-INPUT             = ../include
+INPUT             = ../include source/api/xsimd_batch.hpp
 GENERATE_LATEX    = NO
 GENERATE_MAN      = NO
 GENERATE_RTF      = NO
@@ -10,3 +10,4 @@ GENERATE_XML      = YES
 RECURSIVE         = YES
 QUIET             = YES
 JAVADOC_AUTOBRIEF = YES
+WARN_IF_UNDOCUMENTED = NO

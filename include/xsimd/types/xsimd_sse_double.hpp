@@ -114,6 +114,7 @@ namespace xsimd
     batch<double, 2> fmax(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
 
     batch<double, 2> abs(const batch<double, 2>& rhs);
+    batch<double, 2> fabs(const batch<double, 2>& rhs);
     batch<double, 2> sqrt(const batch<double, 2>& rhs);
 
     batch<double, 2> fma(const batch<double, 2>& x, const batch<double, 2>& y, const batch<double, 2>& z);
@@ -380,6 +381,11 @@ namespace xsimd
     {
         __m128d sign_mask = _mm_set1_pd(-0.); // -0. = 1 << 63
         return _mm_andnot_pd(sign_mask, rhs);
+    }
+
+    inline batch<double, 2> fabs(const batch<double, 2>& rhs)
+    {
+        return abs(rhs);
     }
     
     inline batch<double, 2> sqrt(const batch<double, 2>& rhs)
