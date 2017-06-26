@@ -151,3 +151,21 @@ Mathematical functions
 | :ref:`lgamma <lgamma-func-ref>`       | natural logarithm of the gamma function            |
 +---------------------------------------+----------------------------------------------------+
 
+.. toctree::
+
+   nearint_operations
+
++---------------------------------------+----------------------------------------------------+
+| :ref:`ceil <ceil-function-reference>` | nearest integers not less                          |
++---------------------------------------+----------------------------------------------------+
+| :ref:`floor <floor-func-ref>`         | nearest integers not greater                       |
++---------------------------------------+----------------------------------------------------+
+| :ref:`trunc <trunc-func-ref>`         | nearest integers not greater in magnitude          |
++---------------------------------------+----------------------------------------------------+
+| :ref:`round <round-func-ref>`         | nearest integers, rounding away from zero          |
++---------------------------------------+----------------------------------------------------+
+| :ref:`nearbyint <nearbyint-func-ref>` | nearest integers using current rounding mode       |
++---------------------------------------+----------------------------------------------------+
+| :ref:`rint <rint-function-reference>` | nearest integers using current rounding mode       |
++---------------------------------------+----------------------------------------------------+
+

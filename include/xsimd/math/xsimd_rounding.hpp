@@ -15,25 +15,61 @@
 
 namespace xsimd
 {
-
+    /**
+     * Computes the batch of smallest integer values not less than
+     * scalars in \c x.
+     * @param x batch of floating point values.
+     * @return the batch of smallest integer values not less than \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> ceil(const batch<T, N>& x);
 
+    /**
+     * Computes the batch of largest integer values not greater than
+     * scalars in \c x.
+     * @param x batch of floating point values.
+     * @return the batch of largest integer values not greater than \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> floor(const batch<T, N>& x);
 
+    /**
+     * Computes the batch of nearest integer values not greater in magnitude
+     * than scalars in \c x.
+     * @param x batch of floating point values.
+     * @return the batch of nearest integer values not greater in magnitude than \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> trunc(const batch<T, N>& x);
 
+    /**
+     * Computes the batch of nearest integer values to scalars in \c x (in
+     * floating point format), rounding halfway cases away from zero, regardless
+     * of the current rounding mode.
+     * @param x batch of flaoting point values.
+     * @return the batch of nearest integer values. 
+     */
     template <class T, std::size_t N>
     batch<T, N> round(const batch<T, N>& x);
 
     // Contrary to their std counterpart, these functions
     // are assume that the rounding mode is FE_TONEAREST
     
+    /**
+     * Rounds the scalars in \c x to integer values (in floating point format), using
+     * the current rounding mode.
+     * @param x batch of flaoting point values.
+     * @return the batch of nearest integer values.
+     */
     template <class T, std::size_t N>
     batch<T, N> nearbyint(const batch<T, N>& x);
 
+    /**
+     * Rounds the scalars in \c x to integer values (in floating point format), using
+     * the current rounding mode.
+     * @param x batch of flaoting point values.
+     * @return the batch of rounded values.
+     */
     template <class T, std::size_t N>
     batch<T, N> rint(const batch<T, N>& x);
 
