@@ -4,6 +4,28 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
+.. raw:: html
+
+   <style>
+   .rst-content table.docutils {
+       width: 100%;
+       table-layout: fixed;
+   }
+
+   table.docutils .line-block {
+       margin-left: 0;
+       margin-bottom: 0;
+   }
+
+   table.docutils code.literal {
+       color: initial;
+   }
+
+   code.docutils {
+       background: initial;
+   }
+   </style>
+
 Mathematical functions
 ======================
 
@@ -114,3 +136,18 @@ Mathematical functions
 +---------------------------------------+----------------------------------------------------+
 | :ref:`atanh <atanh-func-ref>`         | inverse hyperbolic tangent function                |
 +---------------------------------------+----------------------------------------------------+
+
+.. toctree::
+
+   error_functions
+
++---------------------------------------+----------------------------------------------------+
+| :ref:`erf <erf-function-reference>`   | error function                                     |
++---------------------------------------+----------------------------------------------------+
+| :ref:`erfc <erfc-function-reference>` | complementary error function                       |
++---------------------------------------+----------------------------------------------------+
+| :ref:`tgamma <tgamma-func-ref>`       | gamma function                                     |
++---------------------------------------+----------------------------------------------------+
+| :ref:`lgamma <lgamma-func-ref>`       | natural logarithm of the gamma function            |
++---------------------------------------+----------------------------------------------------+
+

@@ -15,9 +15,19 @@
 
 namespace xsimd
 {
+    /**
+     * Computes the error function of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the error function of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> erf(const batch<T, N>& x);
 
+    /**
+     * Computes the complementary error function of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the error function of \c x.
+     */
     template <class T, std::size_t N>
     batch<T, N> erfc(const batch<T, N>& x);
 
