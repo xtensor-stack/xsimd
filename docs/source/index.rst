@@ -63,6 +63,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    :caption: API REFERENCE
    :maxdepth: 2
    
+   api/instr_macros
    api/batch_index
    api/math_index
 
