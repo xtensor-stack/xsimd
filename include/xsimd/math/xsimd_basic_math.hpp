@@ -117,12 +117,24 @@ namespace xsimd
      * Classification functions implementation *
      *******************************************/
 
+    /**
+     * Determines if the scalars in the given batch \c x have finite values,
+     * i.e. theyr are different from infinite or NaN.
+     * @param x batch of floating point values.
+     * @return a batch of booleans.
+     */
     template <class T, std::size_t N>
     inline batch_bool<T, N> isfinite(const batch<T, N>& x)
     {
         return (x - x) == batch<T, N>(0.);
     }
 
+    /**
+     * Determines if the scalars in the given batch \c x are positive
+     * or negative infinity.
+     * @param x batch of floating point values.
+     * @return a batch of booleans.
+     */
     template <class T, std::size_t N>
     inline batch_bool<T, N> isinf(const batch<T, N>& x)
     {

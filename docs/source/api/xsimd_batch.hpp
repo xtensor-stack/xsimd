@@ -576,6 +576,11 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> select(const batch_bool<T, N>& cond, const batch<T, N>& a, const batch<T, N>& b);
 
+    /**
+     * Determines if the scalars in the given batch \c x are NaN values.
+     * @param x batch of floating point values.
+     * @return a batch of booleans.
+     */
     template <class T, std::size_t N>
     batch_bool<T, 4> is_nan(const batch<T, N>& x);
 }

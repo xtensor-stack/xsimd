@@ -169,3 +169,14 @@ Mathematical functions
 | :ref:`rint <rint-function-reference>` | nearest integers using current rounding mode       |
 +---------------------------------------+----------------------------------------------------+
 
+.. toctree::
+
+   classification_functions
+
++---------------------------------------+----------------------------------------------------+
+| :ref:`isfinite <isfinite-func-ref>`   | Checks for finite values                           |
++---------------------------------------+----------------------------------------------------+
+| :ref:`isinf <isinf-func-ref>`         | Checks for infinite values                         |
++---------------------------------------+----------------------------------------------------+
+| :ref:`isnan <isnan-func-ref>`         | Checks for NaN values                              |
++---------------------------------------+----------------------------------------------------+
