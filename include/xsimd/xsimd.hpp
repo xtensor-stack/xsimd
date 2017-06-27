@@ -42,44 +42,142 @@ namespace xsimd
 
     // Data transfer instructions
     
+    /**
+     * @defgroup data_transfer Data Transfer Instructions
+     */
+
+    /**
+     * @ingroup data_transfer
+     * Returns a batch with all values initialized to \c value.
+     * @param value the scalar used to initialize the batch.
+     * @return the batch wrapping the highest available instruction set. 
+     */
     template <class T>
     simd_type<T> set_simd(const T& value);
 
+    /**
+     * @ingroup data_transfer
+     * Loads the memory array pointed to by \c src into a batch and returns it.
+     * \c src is required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @return the batch wrapping the highest available instruction set. 
+     */
     template <class T>
     simd_type<T> load_aligned(const T* src);
 
+    /**
+     * @ingroup data_transfer
+     * Loads the memory array pointed to by \c src into the batch \c dst.
+     * \c src is required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @param dst the destination batch.
+     */
     template <class T>
     void load_aligned(const T* src, simd_type<T>& dst);
 
+    /**
+     * @ingroup data_transfer
+     * Loads the memory array pointed to by \c src into a batch and returns it.
+     * \c src is not required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @return the batch wrapping the highest available instruction set.
+     */
     template <class T>
     simd_type<T> load_unaligned(const T* src);
 
+    /**
+     * @ingroup data_transfer
+     * Loads the memory array pointed to by \c src into the batch \c dst.
+     * \c src is not required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @param dst the destination batch.
+     */
     template <class T>
     void load_unaligned(const T* src, simd_type<T>& dst);
 
+    /**
+     * @ingroup data_transfer
+     * Stores the batch \c src into  the memory array pointed to by \c dst.
+     * \c dst is required to be aligned.
+     * @param dst the pointer to the memory array.
+     * @param src the batch to store.
+     */
     template <class T>
     void store_aligned(T* dst, const simd_type<T>& src);
 
+    /**
+     * @ingroup data_transfer
+     * Stores the batch \c src into  the memory array pointed to by \c dst.
+     * \c dst is not required to be aligned.
+     * @param dst the pointer to the memory array.
+     * @param src the batch to store.
+     */
     template <class T>
     void store_unaligned(T* dst, const simd_type<T>& src);
 
     // Load / store generic functions
 
+    /**
+     * @defgroup generic_load_store Generic load and store
+     */
+
+     /**
+      * @ingroup generic_load_store
+      * Loads the memory array pointed to by \c src into a batch and returns it.
+      * \c src is required to be aligned.
+      * @param src the pointer to the memory array to load.
+      * @return the batch wrapping the highest available instruction set.
+      */
     template <class T>
     simd_type<T> load_simd(const T* src, aligned_mode);
 
+    /**
+     * @ingroup generic_load_store
+     * Loads the memory array pointed to by \c src into the batch \c dst.
+     * \c src is required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @param dst the destination batch.
+     */
     template <class T>
     void load_simd(const T* src, simd_type<T>& dst, aligned_mode);
 
+    /**
+     * @ingroup generic_load_store
+     * Loads the memory array pointed to by \c src into a batch and returns it.
+     * \c src is not required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @return the batch wrapping the highest available instruction set.
+     */
     template <class T>
     simd_type<T> load_simd(const T* src, unaligned_mode);
 
+    /**
+     * @ingroup generic_load_store
+     * Loads the memory array pointed to by \c src into the batch \c dst.
+     * \c src is not required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @param dst the destination batch.
+     */
     template <class T>
     void load_simd(const T* src, simd_type<T>& dst, unaligned_mode);
 
+    /**
+     * @ingroup generic_load_store
+     * Stores the batch \c src into  the memory array pointed to by \c dst.
+     * \c dst is required to be aligned.
+     * @param dst the pointer to the memory array.
+     * @param src the batch to store.
+     */
     template <class T>
     void store_simd(T* dst, const simd_type<T>& src, aligned_mode);
 
+    /**
+     * @ingroup generic_load_store
+     * Stores the batch \c src into  the memory array pointed to by \c dst.
+     * \c dst is not required to be aligned.
+     * @param dst the pointer to the memory array.
+     * @param src the batch to store.
+     */
     template <class T>
     void store_simd(T* dst, const simd_type<T>& src, unaligned_mode);
     
@@ -179,7 +277,6 @@ namespace xsimd
             }
         };
     }
-
 
     /***********************************************
      * Data transfer instructions implementation

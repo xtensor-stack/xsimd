@@ -65,6 +65,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    
    api/instr_macros
    api/batch_index
+   api/data_transfer
    api/math_index
    api/aligned_allocator
 
