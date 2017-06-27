@@ -13,3 +13,4 @@ Wrapper types
    xsimd_base
    xsimd_batch_bool
    xsimd_batch
+   available_wrappers
