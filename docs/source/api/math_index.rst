@@ -36,7 +36,7 @@ Mathematical functions
 +---------------------------------------+----------------------------------------------------+
 | :ref:`abs <abs-function-reference>`   | absolute value                                     |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`fabs <fabs-function-reference>` | absolute value of                                  |
+| :ref:`fabs <fabs-function-reference>` | absolute value                                     |
 +---------------------------------------+----------------------------------------------------+
 | :ref:`fmod <fmod-function-reference>` | remainder of the floating point division operation |
 +---------------------------------------+----------------------------------------------------+

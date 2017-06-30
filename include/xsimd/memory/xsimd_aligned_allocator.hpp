@@ -27,6 +27,16 @@
 namespace xsimd
 {
 
+    /**
+     * @class aligned_allocator
+     * @brief Allocator for aligned memory
+     *
+     * The aligned_allocator class template is an allocator that
+     * performs memory allocation aligned by the specified value.
+     *
+     * @tparam T type of objects to allocate.
+     * @tparam Align alignment in bytes.
+     */
     template <class T, size_t Align>
     class aligned_allocator
     {
@@ -92,27 +102,44 @@ namespace xsimd
      * aligned_allocator implementation *
      ************************************/
 
+    /**
+     * Default constructor.
+     */
     template <class T, size_t A>
     inline aligned_allocator<T, A>::aligned_allocator() noexcept
     {
     }
 
+    /**
+     * Copy constructor.
+     */
     template <class T, size_t A>
     inline aligned_allocator<T, A>::aligned_allocator(const aligned_allocator&) noexcept
     {
     }
 
+    /**
+     * Extended copy constructor.
+     */
     template <class T, size_t A>
     template <class U>
     inline aligned_allocator<T, A>::aligned_allocator(const aligned_allocator<U, A>&) noexcept
     {
     }
 
+    /**
+     * Destructor.
+     */
     template <class T, size_t A>
     inline aligned_allocator<T, A>::~aligned_allocator()
     {
     }
 
+    /**
+     * Returns the actual address of \c r even in presence of overloaded \c operator&.
+     * @param r the object to acquire address of.
+     * @return the actual address of \c r.
+     */
     template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::address(reference r) noexcept -> pointer
@@ -120,6 +147,11 @@ namespace xsimd
         return &r;
     }
 
+    /**
+     * Returns the actual address of \c r even in presence of overloaded \c operator&.
+     * @param r the object to acquire address of.
+     * @return the actual address of \c r.
+     */
     template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::address(const_reference r) const noexcept -> const_pointer
@@ -127,6 +159,14 @@ namespace xsimd
         return &r;
     }
 
+    /**
+     * Allocates <tt>n * sizeof(T)</tt> bytes of uninitialized memory, aligned by \c A.
+     * The alignment may require some extra memory allocation.
+     * @param n the number of objects to allocate storage for.
+     * @param hint unused parameter provided for standard compliance.
+     * @return a pointer to the first byte of a memory block suitably aligned and sufficient to
+     * hold an array of \c n objects of type \c T.
+     */
     template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::allocate(size_type n,
@@ -138,12 +178,24 @@ namespace xsimd
         return res;
     }
 
+    /**
+     * Deallocates the storage referenced by the pointer p, which must be a pointer obtained by
+     * an earlier call to allocate(). The argument \c n must be equal to the first argument of the call
+     * to allocate() that originally produced \c p; otherwise, the behavior is undefined.
+     * @param p pointer obtained from allocate().
+     * @param n number of objects earlier passed to allocate().
+     */
     template <class T, size_t A>
     inline void aligned_allocator<T, A>::deallocate(pointer p, size_type)
     {
         aligned_free(p);
     }
 
+    /**
+     * Returns the maximum theoretically possible value of \ n, for which the
+     * call allocate(n, 0) could succeed.
+     * @return themaximum supported allocated size.
+     */
     template <class T, size_t A>
     inline auto
     aligned_allocator<T, A>::size_max() const noexcept -> size_type
@@ -151,6 +203,12 @@ namespace xsimd
         return size_type(-1) / sizeof(T);
     }
 
+    /**
+     * Constructs an object of type \ T in allocated uninitialized memory 
+     * pointed to by \ p, using placement-new.
+     * @param p pointer to allocated uninitialized memory.
+     * @param args the constructor arguments to use.
+     */
     template <class T, size_t A>
     template <class U, class... Args>
     inline void aligned_allocator<T, A>::construct(U* p, Args&&... args)
@@ -158,6 +216,10 @@ namespace xsimd
         new ((void*)p) U(std::forward<Args>(args)...);
     }
 
+    /**
+     * Calls the destructor of the object pointed to by \c p.
+     * @param p pointer to the object that is going to be destroyed.
+     */
     template <class T, size_t A>
     template <class U>
     inline void aligned_allocator<T, A>::destroy(U* p)
@@ -165,6 +227,18 @@ namespace xsimd
         p->~U();
     }
 
+    /**
+     * @defgroup allocator_comparison Comparison operators
+     */
+
+    /**
+     * @ingroup allocator_comparison
+     * Compares two aligned memory allocator for equality. Since allocators
+     * are stateless, return \c true iff <tt>A1 == A2</tt>.
+     * @param lhs aligned_allocator to compare.
+     * @param rhs aligned_allocator to compare.
+     * @return true if the allocators have the same alignment.
+     */
     template <class T1, size_t A1, class T2, size_t A2>
     inline bool operator==(const aligned_allocator<T1, A1>& lhs,
                            const aligned_allocator<T2, A2>& rhs) noexcept
@@ -172,6 +246,14 @@ namespace xsimd
         return lhs.alignment == rhs.alignment;
     }
 
+    /**
+    * @ingroup allocator_comparison
+     * Compares two aligned memory allocator for inequality. Since allocators
+     * are stateless, return \c true iff <tt>A1 != A2</tt>.
+     * @param lhs aligned_allocator to compare.
+     * @param rhs aligned_allocator to compare.
+     * @return true if the allocators have different alignments.
+     */
     template <class T1, size_t A1, class T2, size_t A2>
     inline bool operator!=(const aligned_allocator<T1, A1>& lhs,
                            const aligned_allocator<T2, A2>& rhs) noexcept

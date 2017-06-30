@@ -7,6 +7,8 @@
 batch
 =====
 
+.. _xsimd-batch-ref:
+
 .. doxygenclass:: xsimd::batch
    :project: xsimd
    :members:

@@ -9,10 +9,15 @@ C++ wrappers for SIMD intrinsics
 
 ## Introduction
 
-`xsimd` is a library meant for SIMD (Single Instruction, Multiple Data) programming. It provides C++ wrappers for SIMD intrinsics and an implementation
-of common mathematical functions based on these wrappers. You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the
-[The C++ Scientist](http://johanmabille.github.io/blog/archives/). The mathematical functions are a lightweight implementation of
-[boost.SIMD](https://github.com/NumScale/boost.simd).
+SIMD (Single Instruction, Multiple Data) is a feature of microprocessors that has been available for many years. SIMD instructions perform a single operation
+on a batch of values at once, and thus provide a way to significantly accelerate code execution. However, these instructions differ between microprocessor
+vendors and compilers.
+
+`xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of numbers with the same arithmetic
+operators as for single values. It also provides accelerated implementation of common mathematical functions operating on batches.
+
+You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the [The C++ Scientist](http://johanmabille.github.io/blog/archives/).
+The mathematical functions are a lightweight implementation of the algorithms used in [boost.SIMD](https://github.com/NumScale/boost.simd).
 
 `xsimd` requires a C++14 compliant compiler. The following C++ compilers are supported:
 
