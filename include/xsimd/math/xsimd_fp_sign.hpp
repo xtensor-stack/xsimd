@@ -78,7 +78,7 @@ namespace xsimd
 #ifdef XSIMD_NO_NANS
                 return r;
 #else
-                return select(is_nan(a), nan<B>(), r);
+                return select(isnan(a), nan<B>(), r);
 #endif
             }
         };
@@ -121,7 +121,7 @@ namespace xsimd
             static inline B compute(const B& x)
             {
 #ifndef XSIMD_NO_NANS
-                return select(is_nan(x), nan<B>(), B(1.) | (signmask<B>() & x));
+                return select(isnan(x), nan<B>(), B(1.) | (signmask<B>() & x));
 #else
                 return B(1.) | (signmask<B>() & x);
 #endif

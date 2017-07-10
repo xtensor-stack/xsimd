@@ -145,7 +145,7 @@ namespace xsimd
     inline batch_bool<T, N> is_flint(const batch<T, N>& x)
     {
         using b_type = batch<T, N>;
-        b_type frac = select(is_nan(x - x), nan<b_type>(), x - trunc(x));
+        b_type frac = select(isnan(x - x), nan<b_type>(), x - trunc(x));
         return frac == b_type(0.);
     }
 

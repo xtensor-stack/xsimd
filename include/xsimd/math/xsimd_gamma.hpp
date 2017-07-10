@@ -264,7 +264,7 @@ namespace xsimd
         {
             auto nan_result = (a < B(0.) && is_flint(a));
 #ifndef XSIMD_NO_INVALIDS
-            nan_result = is_nan(a) || nan_result;
+            nan_result = isnan(a) || nan_result;
 #endif
             B q = abs(a);
             auto test = (a < B(-33.));

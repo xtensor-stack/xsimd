@@ -370,7 +370,7 @@ namespace xsimd
                 }
                 B tmp = select(x > oneosqrteps<B>(), x, average(x, hypot(B(1.), x)));
 #ifndef XSIMD_NO_NANS
-                return select(is_nan(a), nan<B>(), select(lthalf, z, log(tmp) + log_2<B>()) ^ bts);
+                return select(isnan(a), nan<B>(), select(lthalf, z, log(tmp) + log_2<B>()) ^ bts);
 #else
                 return select(lthalf, z, log(tmp) + log_2<B>()) ^ bts;
 #endif
