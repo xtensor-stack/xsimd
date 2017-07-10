@@ -127,7 +127,7 @@ namespace xsimd
 
     batch<float, 4> select(const batch_bool<float, 4>& cond, const batch<float, 4>& a, const batch<float, 4>& b);
 
-    batch_bool<float, 4> is_nan(const batch<float, 4>& x);
+    batch_bool<float, 4> isnan(const batch<float, 4>& x);
 
     /***************************************
      * batch_bool<float, 4> implementation *
@@ -475,7 +475,7 @@ namespace xsimd
 #endif
     }
 
-    inline batch_bool<float, 4> is_nan(const batch<float, 4>& x)
+    inline batch_bool<float, 4> isnan(const batch<float, 4>& x)
     {
         return _mm_cmpunord_ps(x, x);
     }

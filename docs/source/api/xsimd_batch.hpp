@@ -582,5 +582,5 @@ namespace xsimd
      * @return a batch of booleans.
      */
     template <class T, std::size_t N>
-    batch_bool<T, 4> is_nan(const batch<T, N>& x);
+    batch_bool<T, 4> isnan(const batch<T, N>& x);
 }
