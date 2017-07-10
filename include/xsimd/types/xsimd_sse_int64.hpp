@@ -457,7 +457,7 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
         return _mm_blendv_epi8(b, a, cond);
 #else
-        return _mm_or_si128(_mm_and_si128(cond, a), _mm_andnot_si128(s, b));
+        return _mm_or_si128(_mm_and_si128(cond, a), _mm_andnot_si128(cond, b));
 #endif
     }
 
