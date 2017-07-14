@@ -93,64 +93,64 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "sinh  : ";
+        std::string topic = "sinh  : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = sinh(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.sinh_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sinh_res, out);
         success = success && tmp_success;
 
-        out << "cosh  : ";
+        topic = "cosh  : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = cosh(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.cosh_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.cosh_res, out);
         success = success && tmp_success;
 
-        out << "tanh  : ";
+        topic = "tanh  : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = tanh(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.tanh_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.tanh_res, out);
         success = success && tmp_success;
 
-        out << "asinh : ";
+        topic = "asinh : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = asinh(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.asinh_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.asinh_res, out);
         success = success && tmp_success;
 
-        out << "acosh : ";
+        topic = "acosh : ";
         for (size_t i = 0; i < tester.acosh_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.acosh_input, i);
             vres = acosh(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.acosh_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.acosh_res, out);
         success = success && tmp_success;
 
-        out << "atanh : ";
+        topic = "atanh : ";
         for (size_t i = 0; i < tester.atanh_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.atanh_input, i);
             vres = atanh(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.atanh_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.atanh_res, out);
         success = success && tmp_success;
 
         return success;

@@ -319,228 +319,228 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "operator[]               : ";
+        std::string topic = "operator[]               : ";
         detail::load_vec(lhs, tester.lhs);
         value_type es = lhs[1];
-        tmp_success = check_almost_equal(es, tester.extract_res, out);
+        tmp_success = check_almost_equal(topic, es, tester.extract_res, out);
         success = success && tmp_success;
 
-        out << "load/store aligned       : ";
+        topic = "load/store aligned       : ";
         detail::load_vec(lhs, tester.lhs);
         detail::store_vec(lhs, res);
-        tmp_success = check_almost_equal(res, tester.lhs, out);
+        tmp_success = check_almost_equal(topic, res, tester.lhs, out);
         success = success && tmp_success;
         
-        out << "load/store unaligned     : ";
+        topic = "load/store unaligned     : ";
         lhs.load_unaligned(&tester.lhs[0]);
         lhs.store_unaligned(&res[0]);
-        tmp_success = check_almost_equal(res, tester.lhs, out);
+        tmp_success = check_almost_equal(topic, res, tester.lhs, out);
         success = success && tmp_success;
 
         detail::load_vec(lhs, tester.lhs);
         detail::load_vec(rhs, tester.rhs);
         detail::load_vec(mix_lhs_rhs, tester.mix_lhs_rhs);
 
-        out << "unary operator-          : ";
+        topic = "unary operator-          : ";
         vres = -lhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.minus_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.minus_res, out);
         success = success && tmp_success;
 
-        out << "operator+=(simd, simd)   : ";
+        topic = "operator+=(simd, simd)   : ";
         vres = lhs;
         vres += rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator+=(simd, scalar) : ";
+        topic = "operator+=(simd, scalar) : ";
         vres = lhs;
         vres += s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator-=(simd, simd)   : ";
+        topic = "operator-=(simd, simd)   : ";
         vres = lhs;
         vres -= rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator-=(simd, scalar) : ";
+        topic = "operator-=(simd, scalar) : ";
         vres = lhs;
         vres -= s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator*=(simd, simd)   : ";
+        topic = "operator*=(simd, simd)   : ";
         vres = lhs;
         vres *= rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator*=(simd, scalar) : ";
+        topic = "operator*=(simd, scalar) : ";
         vres = lhs;
         vres *= s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator/=(simd, simd)   : ";
+        topic = "operator/=(simd, simd)   : ";
         vres = lhs;
         vres /= rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator/=(simd, scalar) : ";
+        topic = "operator/=(simd, scalar) : ";
         vres = lhs;
         vres /= s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator+(simd, simd)    : ";
+        topic = "operator+(simd, simd)    : ";
         vres = lhs + rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator+(simd, scalar)  : ";
+        topic = "operator+(simd, scalar)  : ";
         vres = lhs + s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator+(scalar, simd)  : ";
+        topic = "operator+(scalar, simd)  : ";
         vres = s + rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_sv_res, out);
         success = success && tmp_success;
         
-        out << "operator-(simd, simd)    : ";
+        topic = "operator-(simd, simd)    : ";
         vres = lhs - rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator-(simd, scalar)  : ";
+        topic = "operator-(simd, scalar)  : ";
         vres = lhs - s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator-(scalar, simd)  : ";
+        topic = "operator-(scalar, simd)  : ";
         vres = s - rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_sv_res, out);
         success = success && tmp_success;
 
-        out << "operator*(simd, simd)    : ";
+        topic = "operator*(simd, simd)    : ";
         vres = lhs * rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator*(simd, scalar)  : ";
+        topic = "operator*(simd, scalar)  : ";
         vres = lhs * s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator*(scalar, simd)  : ";
+        topic = "operator*(scalar, simd)  : ";
         vres = s * rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_sv_res, out);
         success = success && tmp_success;
 
-        out << "operator/(simd, simd)    : ";
+        topic = "operator/(simd, simd)    : ";
         vres = lhs / rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator/(simd, scalar)  : ";
+        topic = "operator/(simd, scalar)  : ";
         vres = lhs / s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator/(scalar, simd)  : ";
+        topic = "operator/(scalar, simd)  : ";
         vres = s / rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_sv_res, out);
         success = success && tmp_success;
 
-        out << "min(simd, simd)          : ";
+        topic = "min(simd, simd)          : ";
         vres = min(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.min_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.min_res, out);
         success = success && tmp_success;
 
-        out << "max(simd, simd)          : ";
+        topic = "max(simd, simd)          : ";
         vres = max(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.max_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.max_res, out);
         success = success && tmp_success;
 
-        out << "fmin(simd, simd)         : ";
+        topic = "fmin(simd, simd)         : ";
         vres = fmin(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.min_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.min_res, out);
         success = success && tmp_success;
 
-        out << "fmax(simd, simd)         : ";
+        topic = "fmax(simd, simd)         : ";
         vres = fmax(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.max_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.max_res, out);
         success = success && tmp_success;
 
-        out << "abs(simd)                : ";
+        topic = "abs(simd)                : ";
         vres = abs(lhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.abs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.abs_res, out);
         success = success && tmp_success;
 
-        out << "sqrt(simd)               : ";
+        topic = "sqrt(simd)               : ";
         vres = sqrt(lhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sqrt_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sqrt_res, out);
         success = success && tmp_success;
 
-        out << "fma(simd, simd, simd)    : ";
+        topic = "fma(simd, simd, simd)    : ";
         vres = fma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fma_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fma_res, out);
         success = success && tmp_success;
 
-        out << "fms(simd, simd, simd)    : ";
+        topic = "fms(simd, simd, simd)    : ";
         vres = fms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fms_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fms_res, out);
         success = success && tmp_success;
 
-        out << "fnma(simd, simd, simd)   : ";
+        topic = "fnma(simd, simd, simd)   : ";
         vres = fnma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fnma_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fnma_res, out);
         success = success && tmp_success;
 
-        out << "fnms(simd, simd, simd)   : ";
+        topic = "fnms(simd, simd, simd)   : ";
         vres = fnms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fnms_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fnms_res, out);
         success = success && tmp_success;
 
-        out << "hadd(simd)               : ";
+        topic = "hadd(simd)               : ";
         value_type sres = hadd(lhs);
-        tmp_success = check_almost_equal(sres, tester.hadd_res, out);
+        tmp_success = check_almost_equal(topic, sres, tester.hadd_res, out);
         success = success && tmp_success;
 
-        out << "any                      : ";
+        topic = "any                      : ";
         auto any_check_false = (lhs != lhs);
         bool any_res_false = any(any_check_false);
         auto any_check_true = (lhs == mix_lhs_rhs);
@@ -548,7 +548,7 @@ namespace xsimd
         tmp_success = !any_res_false && any_res_true;
         success = success && tmp_success;
 
-        out << "all                      : ";
+        topic = "all                      : ";
         auto all_check_false = (lhs == mix_lhs_rhs);
         bool all_res_false = all(all_check_false);
         auto all_check_true = (lhs == lhs);
@@ -587,222 +587,222 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "operator[]               : ";
+        std::string topic = "operator[]               : ";
         detail::load_vec(lhs, tester.lhs);
         value_type es = lhs[1];
-        tmp_success = check_almost_equal(es, tester.extract_res, out);
+        tmp_success = check_almost_equal(topic, es, tester.extract_res, out);
         success = success && tmp_success;
 
-        out << "load/store aligned       : ";
+        topic = "load/store aligned       : ";
         detail::load_vec(lhs, tester.lhs);
         detail::store_vec(lhs, res);
-        tmp_success = check_almost_equal(res, tester.lhs, out);
+        tmp_success = check_almost_equal(topic, res, tester.lhs, out);
         success = success && tmp_success;
 
-        out << "load/store unaligned     : ";
+        topic = "load/store unaligned     : ";
         lhs.load_unaligned(&tester.lhs[0]);
         lhs.store_unaligned(&res[0]);
-        tmp_success = check_almost_equal(res, tester.lhs, out);
+        tmp_success = check_almost_equal(topic, res, tester.lhs, out);
         success = success && tmp_success;
 
         detail::load_vec(lhs, tester.lhs);
         detail::load_vec(rhs, tester.rhs);
         detail::load_vec(mix_lhs_rhs, tester.mix_lhs_rhs);
 
-        out << "unary operator-          : ";
+        topic = "unary operator-          : ";
         vres = -lhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.minus_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.minus_res, out);
         success = success && tmp_success;
 
-        out << "operator+=(simd, simd)   : ";
+        topic = "operator+=(simd, simd)   : ";
         vres = lhs;
         vres += rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator+=(simd, scalar) : ";
+        topic = "operator+=(simd, scalar) : ";
         vres = lhs;
         vres += s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator-=(simd, simd)   : ";
+        topic = "operator-=(simd, simd)   : ";
         vres = lhs;
         vres -= rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator-=(simd, scalar) : ";
+        topic = "operator-=(simd, scalar) : ";
         vres = lhs;
         vres -= s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator*=(simd, simd)   : ";
+        topic = "operator*=(simd, simd)   : ";
         vres = lhs;
         vres *= rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator*=(simd, scalar) : ";
+        topic = "operator*=(simd, scalar) : ";
         vres = lhs;
         vres *= s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator/=(simd, simd)   : ";
+        topic = "operator/=(simd, simd)   : ";
         vres = lhs;
         vres /= rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator/=(simd, scalar) : ";
+        topic = "operator/=(simd, scalar) : ";
         vres = lhs;
         vres /= s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator+(simd, simd)    : ";
+        topic = "operator+(simd, simd)    : ";
         vres = lhs + rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator+(simd, scalar)  : ";
+        topic = "operator+(simd, scalar)  : ";
         vres = lhs + s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator+(scalar, simd)  : ";
+        topic = "operator+(scalar, simd)  : ";
         vres = s + rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.add_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.add_sv_res, out);
         success = success && tmp_success;
 
-        out << "operator-(simd, simd)    : ";
+        topic = "operator-(simd, simd)    : ";
         vres = lhs - rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator-(simd, scalar)  : ";
+        topic = "operator-(simd, scalar)  : ";
         vres = lhs - s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator-(scalar, simd)  : ";
+        topic = "operator-(scalar, simd)  : ";
         vres = s - rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sub_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sub_sv_res, out);
         success = success && tmp_success;
 
-        out << "operator*(simd, simd)    : ";
+        topic = "operator*(simd, simd)    : ";
         vres = lhs * rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator*(simd, scalar)  : ";
+        topic = "operator*(simd, scalar)  : ";
         vres = lhs * s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator*(scalar, simd)  : ";
+        topic = "operator*(scalar, simd)  : ";
         vres = s * rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.mul_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.mul_sv_res, out);
         success = success && tmp_success;
 
-        out << "operator/(simd, simd)    : ";
+        topic = "operator/(simd, simd)    : ";
         vres = lhs / rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vv_res, out);
         success = success && tmp_success;
 
-        out << "operator/(simd, scalar)  : ";
+        topic = "operator/(simd, scalar)  : ";
         vres = lhs / s;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_vs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_vs_res, out);
         success = success && tmp_success;
 
-        out << "operator/(scalar, simd)  : ";
+        topic = "operator/(scalar, simd)  : ";
         vres = s / rhs;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.div_sv_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.div_sv_res, out);
         success = success && tmp_success;
 
-        out << "min(simd, simd)          : ";
+        topic = "min(simd, simd)          : ";
         vres = min(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.min_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.min_res, out);
         success = success && tmp_success;
 
-        out << "max(simd, simd)          : ";
+        topic = "max(simd, simd)          : ";
         vres = max(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.max_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.max_res, out);
         success = success && tmp_success;
 
-        out << "abs(simd)                : ";
+        topic = "abs(simd)                : ";
         vres = abs(lhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.abs_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.abs_res, out);
         success = success && tmp_success;
 
-        out << "hadd(simd)               : ";
+        topic = "hadd(simd)               : ";
         value_type sres = hadd(lhs);
-        tmp_success = check_almost_equal(sres, tester.hadd_res, out);
+        tmp_success = check_almost_equal(topic, sres, tester.hadd_res, out);
         success = success && tmp_success;
 
-        out << "fma(simd, simd, simd)    : ";
+        topic = "fma(simd, simd, simd)    : ";
         vres = fma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fma_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fma_res, out);
         success = success && tmp_success;
 
-        out << "fms(simd, simd, simd)    : ";
+        topic = "fms(simd, simd, simd)    : ";
         vres = fms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fms_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fms_res, out);
         success = success && tmp_success;
 
-        out << "fnma(simd, simd, simd)   : ";
+        topic = "fnma(simd, simd, simd)   : ";
         vres = fnma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fnma_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fnma_res, out);
         success = success && tmp_success;
 
-        out << "fnms(simd, simd, simd)   : ";
+        topic = "fnms(simd, simd, simd)   : ";
         vres = fnms(lhs, rhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fnms_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fnms_res, out);
         success = success && tmp_success;
 
-        out << "shift left(simd, int)    : ";
+        topic = "shift left(simd, int)    : ";
         vres = lhs << tester.sh_nb;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sl_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sl_res, out);
         success = success && tmp_success;
 
-        out << "shift right(simd, int)   : ";
+        topic = "shift right(simd, int)   : ";
         vres = lhs >> tester.sh_nb;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.sr_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sr_res, out);
         success = success && tmp_success;
 
-        out << "any                      : ";
+        topic = "any                      : ";
         auto any_check_false = (lhs != lhs);
         bool any_res_false = any(any_check_false);
         auto any_check_true = (lhs == mix_lhs_rhs);
@@ -810,7 +810,7 @@ namespace xsimd
         tmp_success = !any_res_false && any_res_true;
         success = success && tmp_success;
 
-        out << "all                      : ";
+        topic = "all                      : ";
         auto all_check_false = (lhs == mix_lhs_rhs);
         bool all_res_false = all(all_check_false);
         auto all_check_true = (lhs == lhs);
@@ -908,52 +908,52 @@ namespace xsimd
         out << space << name << space << std::endl;
         out << dash << name_shift << dash << std::endl << std::endl;
 
-        out << "positive float  -> int32  : ";
+        std::string topic = "positive float  -> int32  : ";
         fbres = to_int(tester.fpos);
         detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.fposres, out);
+        tmp_success = check_almost_equal(topic, fvres, tester.fposres, out);
         success = success && tmp_success;
 
-        out << "negative float  -> int32  : ";
+        topic = "negative float  -> int32  : ";
         fbres = to_int(tester.fneg);
         detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.fnegres, out);
+        tmp_success = check_almost_equal(topic, fvres, tester.fnegres, out);
         success = success && tmp_success;
 
-        out << "positive double -> int64  : ";
+        topic = "positive double -> int64  : ";
         dbres = to_int(tester.dpos);
         detail::store_vec(dbres, dvres);
-        tmp_success = check_almost_equal(dvres, tester.dposres, out);
+        tmp_success = check_almost_equal(topic, dvres, tester.dposres, out);
         success = success && tmp_success;
 
-        out << "negative double -> int64  : ";
+        topic = "negative double -> int64  : ";
         dbres = to_int(tester.dneg);
         detail::store_vec(dbres, dvres);
-        tmp_success = check_almost_equal(dvres, tester.dnegres, out);
+        tmp_success = check_almost_equal(topic, dvres, tester.dnegres, out);
         success = success && tmp_success;
 
-        out << "positive int32  -> float  : ";
+        topic = "positive int32  -> float  : ";
         i32bres = to_float(tester.i32pos);
         detail::store_vec(i32bres, i32vres);
-        tmp_success = check_almost_equal(i32vres, tester.i32posres, out);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32posres, out);
         success = success && tmp_success;
 
-        out << "negative int32  -> float  : ";
+        topic = "negative int32  -> float  : ";
         i32bres = to_float(tester.i32neg);
         detail::store_vec(i32bres, i32vres);
-        tmp_success = check_almost_equal(i32vres, tester.i32negres, out);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32negres, out);
         success = success && tmp_success;
 
-        out << "positive int64  -> double : ";
+        topic = "positive int64  -> double : ";
         i64bres = to_float(tester.i64pos);
         detail::store_vec(i64bres, i64vres);
-        tmp_success = check_almost_equal(i64vres, tester.i64posres, out);
+        tmp_success = check_almost_equal(topic, i64vres, tester.i64posres, out);
         success = success && tmp_success;
 
-        out << "negative int64  -> double : ";
+        topic = "negative int64  -> double : ";
         i64bres = to_float(tester.i64neg);
         detail::store_vec(i64bres, i64vres);
-        tmp_success = check_almost_equal(i64vres, tester.i64negres, out);
+        tmp_success = check_almost_equal(topic, i64vres, tester.i64negres, out);
         success = success && tmp_success;
 
         return success;
@@ -1085,64 +1085,64 @@ namespace xsimd
         out << space << name << space << std::endl;
         out << dash << name_shift << dash << std::endl << std::endl;
 
-        out << "cast int32  -> float  : ";
+        std::string topic = "cast int32  -> float  : ";
         fbres = bitwise_cast<float_batch>(tester.i32_input);
         detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.i32tof_res, out);
+        tmp_success = check_almost_equal(topic, fvres, tester.i32tof_res, out);
         success = success && tmp_success;
 
-        out << "cast int32  -> double : ";
+        topic = "cast int32  -> double : ";
         dbres = bitwise_cast<double_batch>(tester.i32_input);
         detail::store_vec(dbres, dvres);
-        tmp_success = check_almost_equal(dvres, tester.i32tod_res, out);
+        tmp_success = check_almost_equal(topic, dvres, tester.i32tod_res, out);
         success = success && tmp_success;
 
-        out << "cast int64  -> float  : ";
+        topic = "cast int64  -> float  : ";
         fbres = bitwise_cast<float_batch>(tester.i64_input);
         detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.i64tof_res, out);
+        tmp_success = check_almost_equal(topic, fvres, tester.i64tof_res, out);
         success = success && tmp_success;
 
-        out << "cast int64  -> double : ";
+        topic = "cast int64  -> double : ";
         dbres = bitwise_cast<double_batch>(tester.i64_input);
         detail::store_vec(dbres, dvres);
-        tmp_success = check_almost_equal(dvres, tester.i64tod_res, out);
+        tmp_success = check_almost_equal(topic, dvres, tester.i64tod_res, out);
         success = success && tmp_success;
 
-        out << "cast float  -> int32  : ";
+        topic = "cast float  -> int32  : ";
         i32bres = bitwise_cast<int32_batch>(tester.f_input);
         detail::store_vec(i32bres, i32vres);
-        tmp_success = check_almost_equal(i32vres, tester.ftoi32_res, out);
+        tmp_success = check_almost_equal(topic, i32vres, tester.ftoi32_res, out);
         success = success && tmp_success;
 
-        out << "cast float  -> int64  : ";
+        topic = "cast float  -> int64  : ";
         i64bres = bitwise_cast<int64_batch>(tester.f_input);
         detail::store_vec(i64bres, i64vres);
-        tmp_success = check_almost_equal(i64vres, tester.ftoi64_res, out);
+        tmp_success = check_almost_equal(topic, i64vres, tester.ftoi64_res, out);
         success = success && tmp_success;
 
-        out << "cast float  -> double : ";
+        topic = "cast float  -> double : ";
         dbres = bitwise_cast<double_batch>(tester.f_input);
         detail::store_vec(dbres, dvres);
-        tmp_success = check_almost_equal(dvres, tester.ftod_res, out);
+        tmp_success = check_almost_equal(topic, dvres, tester.ftod_res, out);
         success = success && tmp_success;
 
-        out << "cast double -> int32  : ";
+        topic = "cast double -> int32  : ";
         i32bres = bitwise_cast<int32_batch>(tester.d_input);
         detail::store_vec(i32bres, i32vres);
-        tmp_success = check_almost_equal(i32vres, tester.dtoi32_res, out);
+        tmp_success = check_almost_equal(topic, i32vres, tester.dtoi32_res, out);
         success = success && tmp_success;
         
-        out << "cast double -> int64  : ";
+        topic = "cast double -> int64  : ";
         i64bres = bitwise_cast<int64_batch>(tester.d_input);
         detail::store_vec(i64bres, i64vres);
-        tmp_success = check_almost_equal(i64vres, tester.dtoi64_res, out);
+        tmp_success = check_almost_equal(topic, i64vres, tester.dtoi64_res, out);
         success = success && tmp_success;
 
-        out << "cast double -> float  : ";
+        topic = "cast double -> float  : ";
         fbres = bitwise_cast<float_batch>(tester.d_input);
         detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(fvres, tester.dtof_res, out);
+        tmp_success = check_almost_equal(topic, fvres, tester.dtof_res, out);
         success = success && tmp_success;
 
         return success;

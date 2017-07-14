@@ -79,7 +79,7 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "pow     : ";
+        std::string topic = "pow     : ";
         for (size_t i = 0; i < tester.lhs.size(); i += tester.size)
         {
             detail::load_vec(lhs, tester.lhs, i);
@@ -87,10 +87,10 @@ namespace xsimd
             vres = pow(lhs, rhs);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.pow_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.pow_res, out);
         success = success && tmp_success;
 
-        out << "hypot   : ";
+        topic = "hypot   : ";
         for (size_t i = 0; i < tester.lhs.size(); i += tester.size)
         {
             detail::load_vec(lhs, tester.lhs, i);
@@ -98,17 +98,17 @@ namespace xsimd
             vres = hypot(lhs, rhs);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.hypot_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.hypot_res, out);
         success = success && tmp_success;
 
-        out << "cbrt    : ";
+        topic = "cbrt    : ";
         for (size_t i = 0; i < tester.lhs.size(); i += tester.size)
         {
             detail::load_vec(lhs, tester.lhs, i);
             vres = cbrt(lhs);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.cbrt_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.cbrt_res, out);
 
         success = success && tmp_success;
         return success;

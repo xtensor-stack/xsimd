@@ -98,64 +98,64 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "sin   : ";
+        std::string topic = "sin   : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = sin(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.sin_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sin_res, out);
         success = success && tmp_success;
 
-        out << "cos   : ";
+        topic = "cos   : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = cos(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.cos_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.cos_res, out);
         success = success && tmp_success;
 
-        out << "tan   : ";
+        topic = "tan   : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = tan(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.tan_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.tan_res, out);
         success = success && tmp_success;
 
-        out << "asin  : ";
+        topic = "asin  : ";
         for (size_t i = 0; i < tester.ainput.size(); i += tester.size)
         {
             detail::load_vec(input, tester.ainput, i);
             vres = asin(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.asin_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.asin_res, out);
 
-        out << "acos  : ";
+        topic = "acos  : ";
         for (size_t i = 0; i < tester.ainput.size(); i += tester.size)
         {
             detail::load_vec(input, tester.ainput, i);
             vres = acos(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.acos_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.acos_res, out);
 
-        out << "atan  : ";
+        topic = "atan  : ";
         for (size_t i = 0; i < tester.atan_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.atan_input, i);
             vres = atan(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.atan_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.atan_res, out);
 
-        out << "atan2 : ";
+        topic = "atan2 : ";
         vector_type atan2_lhs(tester.atan2_lhs);
         for (size_t i = 0; i < tester.atan_input.size(); i += tester.size)
         {
@@ -163,7 +163,7 @@ namespace xsimd
             vres = atan2(atan2_lhs, input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.atan2_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.atan2_res, out);
 
         success = success && tmp_success;
         return success;
