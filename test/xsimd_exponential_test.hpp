@@ -94,74 +94,74 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "exp   : ";
+        std::string topic = "exp   : ";
         for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
         {
             detail::load_vec(exp_input, tester.exp_input, i);
             vres = exp(exp_input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.exp_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.exp_res, out);
         success = success && tmp_success;
 
-        out << "exp2  : ";
+        topic = "exp2  : ";
         for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
         {
             detail::load_vec(exp_input, tester.exp_input, i);
             vres = exp2(exp_input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.exp2_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.exp2_res, out);
         success = success && tmp_success;
 
-        out << "expm1 : ";
+        topic = "expm1 : ";
         for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
         {
             detail::load_vec(exp_input, tester.exp_input, i);
             vres = expm1(exp_input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.expm1_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.expm1_res, out);
         success = success && tmp_success;
 
-        out << "log   : ";
+        topic = "log   : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
         {
             detail::load_vec(log_input, tester.log_input, i);
             vres = log(log_input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.log_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.log_res, out);
         success = success && tmp_success;
 
-        out << "log2  : ";
+        topic = "log2  : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
         {
             detail::load_vec(log_input, tester.log_input, i);
             vres = log2(log_input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.log2_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.log2_res, out);
         success = success && tmp_success;
 
-        out << "log10 : ";
+        topic = "log10 : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
         {
             detail::load_vec(log_input, tester.log_input, i);
             vres = log10(log_input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.log10_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.log10_res, out);
         success = success && tmp_success;
 
-        out << "log1p : ";
+        topic = "log1p : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
         {
             detail::load_vec(log_input, tester.log_input, i);
             vres = log1p(log_input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.log1p_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.log1p_res, out);
         success = success && tmp_success;
 
         return success;

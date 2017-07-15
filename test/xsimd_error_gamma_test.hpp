@@ -92,65 +92,65 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "erf                     : ";
+        std::string topic = "erf                     : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = erf(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.erf_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.erf_res, out);
         success = success && tmp_success;
 
-        out << "erfc                    : ";
+        topic = "erfc                    : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.input, i);
             vres = erfc(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.erfc_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.erfc_res, out);
         success = success && tmp_success;
 
-        out << "tgamma                  : ";
+        topic = "tgamma                  : ";
         for (size_t i = 0; i < tester.gamma_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.gamma_input, i);
             vres = tgamma(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.tgamma_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.tgamma_res, out);
         success = success && tmp_success;
 
-        out << "tgamma (negative input) : ";
+        topic = "tgamma (negative input) : ";
         for (size_t i = 0; i < tester.gamma_neg_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.gamma_neg_input, i);
             vres = tgamma(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.tgamma_neg_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.tgamma_neg_res, out);
         success = success && tmp_success;
 
 #ifndef __APPLE__
-        out << "lgamma                  : ";
+        topic = "lgamma                  : ";
         for (size_t i = 0; i < tester.gamma_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.gamma_input, i);
             vres = lgamma(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.lgamma_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.lgamma_res, out);
         success = success && tmp_success;
 
-        out << "lgamma (negative input) : ";
+        topic = "lgamma (negative input) : ";
         for (size_t i = 0; i < tester.gamma_neg_input.size(); i += tester.size)
         {
             detail::load_vec(input, tester.gamma_neg_input, i);
             vres = lgamma(input);
             detail::store_vec(vres, res, i);
         }
-        tmp_success = check_almost_equal(res, tester.lgamma_neg_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.lgamma_neg_res, out);
         success = success && tmp_success;
 #endif
         return success;

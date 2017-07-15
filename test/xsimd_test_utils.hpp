@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <iostream>
 #include <ostream>
 #include <iomanip>
 #include <string>
@@ -85,20 +86,21 @@ namespace xsimd
     }
 
     template <class T, class A>
-    bool vector_comparison(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
+    int vector_comparison(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
     {
         if(lhs.size() != rhs.size())
         {
-            return false;
+            return -1;
         }
+        int nb_diff = 0;
         for(auto lhs_iter = lhs.begin(), rhs_iter = rhs.begin(); lhs_iter != lhs.end(); ++lhs_iter, ++rhs_iter)
         {
             if(!scalar_comparison(*lhs_iter, *rhs_iter))
             {
-                return false;
+                ++nb_diff;
             }
         }
-        return true;
+        return nb_diff;
     }
 
     template <class T, class A>
@@ -114,8 +116,9 @@ namespace xsimd
     }
 
     template <class T>
-    inline bool check_almost_equal(const T& res, const T& ref, std::ostream& out)
+    inline bool check_almost_equal(const std::string& topic, const T& res, const T& ref, std::ostream& out)
     {
+        out << topic;
         out << std::setprecision(20);
         if(scalar_comparison(res, ref))
         {
@@ -131,20 +134,41 @@ namespace xsimd
         }
     }
 
+#define PRINT_COUT
+
     template <class T, class A>
-    inline bool check_almost_equal(const std::vector<T, A>& res, const std::vector<T, A>& ref, std::ostream& out)
+    inline bool check_almost_equal(const std::string& topic, const std::vector<T, A>& res, const std::vector<T, A>& ref, std::ostream& out)
     {
+        out << topic;
         out << std::setprecision(20);
-        if(vector_comparison(res, ref))
+        int comp = vector_comparison(res, ref);
+        if(comp == 0)
         {
             out << "OK" << std::endl;
             return true;
         }
+        else if (comp == -1)
+        {
+            out << "BAD" << std::endl;
+            out << "Expected size : " << ref.size() << std::endl;
+            out << "Actual size   : " << res.size() << std::endl;
+#ifdef PRINT_COUT
+            std::cout << topic << "BAD" << std::endl;
+            std::cout << "Expected size : " << ref.size() << std::endl;
+            std::cout << "Actual size   : " << res.size() << std::endl;
+#endif
+            return false;
+        }
         else
         {
             out << "BAD" << std::endl;
-            out << "Expected : " << std::endl << ref;
+            out << "Expected : " << std::endl << ref << std::endl;;
             out << "Got      : " << std::endl << res << std::endl;
+            out << "Nb diff  : " << comp << std::endl;
+#ifdef PRINT_COUT
+            std::cout << topic << "BAD" << std::endl;
+            std::cout << "Nb diff  : " << comp << std::endl;
+#endif
             return false;
         }
     }
@@ -152,4 +176,3 @@ namespace xsimd
 }
 
 #endif
-

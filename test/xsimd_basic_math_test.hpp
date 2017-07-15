@@ -100,59 +100,59 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "fmod     : ";
+        std::string topic = "fmod     : ";
         detail::load_vec(lhs, tester.lhs_input);
         detail::load_vec(rhs, tester.rhs_input);
         vres = fmod(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fmod_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fmod_res, out);
         success = success && tmp_success;
 
-        out << "remainder: ";
+        topic = "remainder: ";
         detail::load_vec(lhs, tester.lhs_input);
         detail::load_vec(rhs, tester.rhs_input);
         vres = remainder(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.remainder_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.remainder_res, out);
         success = success && tmp_success;
 
-        out << "fdim     : ";
+        topic = "fdim     : ";
         detail::load_vec(lhs, tester.lhs_input);
         detail::load_vec(rhs, tester.rhs_input);
         vres = fdim(lhs, rhs);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.fdim_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.fdim_res, out);
         success = success && tmp_success;
 
-        out << "clip     : ";
+        topic = "clip     : ";
         detail::load_vec(lhs, tester.clip_input);
         vres = clip(lhs, vector_type(tester.clip_lo), vector_type(tester.clip_hi));
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.clip_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.clip_res, out);
         success = success && tmp_success;
 
-        out << "isfinite : ";
+        topic = "isfinite : ";
         lhs = vector_type(12.);
         vres = select(isfinite(lhs), vector_type(1.), vector_type(0.));
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.finite_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.finite_res, out);
         success = success && tmp_success;
         lhs = infinity<vector_type>();
         vres = select(isfinite(lhs), vector_type(1.), vector_type(0.));
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.inf_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.inf_res, out);
         success = success && tmp_success;
 
-        out << "isinf    : ";
+        topic = "isinf    : ";
         lhs = vector_type(12.);
         vres = select(isinf(lhs), vector_type(0.), vector_type(1.));
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.finite_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.finite_res, out);
         success = success && tmp_success;
         lhs = infinity<vector_type>();
         vres = select(isinf(lhs), vector_type(0.), vector_type(1.));
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.inf_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.inf_res, out);
         success = success && tmp_success;
 
         return success;

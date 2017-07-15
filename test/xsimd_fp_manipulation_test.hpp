@@ -84,18 +84,18 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "ldexp    : ";
+        std::string topic = "ldexp    : ";
         detail::load_vec(input, tester.input);
         vres = ldexp(input, exponent);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.ldexp_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.ldexp_res, out);
         success = success && tmp_success;
 
-        out << "frexp    : ";
+        topic = "frexp    : ";
         detail::load_vec(input, tester.input);
         vres = frexp(input, exponent);
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(res, tester.frexp_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.frexp_res, out);
         success = success && tmp_success;
 
         return success;

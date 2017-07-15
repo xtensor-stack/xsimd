@@ -92,52 +92,52 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
 
-        out << "ceil      : ";
+        std::string topic = "ceil      : ";
         for (size_t i = 0; i < res.size(); ++i)
         {
             res[i] = ceil(vector_type(tester.input[i]))[0];
         }
-        tmp_success = check_almost_equal(res, tester.ceil_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.ceil_res, out);
         success = success = success && tmp_success;
 
-        out << "floor     : ";
+        topic = "floor     : ";
         for (size_t i = 0; i < res.size(); ++i)
         {
             res[i] = floor(vector_type(tester.input[i]))[0];
         }
-        tmp_success = check_almost_equal(res, tester.floor_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.floor_res, out);
         success = success = success && tmp_success;
 
-        out << "trunc     : ";
+        topic = "trunc     : ";
         for (size_t i = 0; i < res.size(); ++i)
         {
             res[i] = trunc(vector_type(tester.input[i]))[0];
         }
-        tmp_success = check_almost_equal(res, tester.trunc_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.trunc_res, out);
         success = success = success && tmp_success;
 
-        out << "round     : ";
+        topic = "round     : ";
         for (size_t i = 0; i < res.size(); ++i)
         {
             res[i] = round(vector_type(tester.input[i]))[0];
         }
-        tmp_success = check_almost_equal(res, tester.round_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.round_res, out);
         success = success = success && tmp_success;
 
-        out << "nearbyint : ";
+        topic = "nearbyint : ";
         for (size_t i = 0; i < res.size(); ++i)
         {
             res[i] = nearbyint(vector_type(tester.input[i]))[0];
         }
-        tmp_success = check_almost_equal(res, tester.nearbyint_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.nearbyint_res, out);
         success = success = success && tmp_success;
 
-        out << "rint      : ";
+        topic = "rint      : ";
         for (size_t i = 0; i < res.size(); ++i)
         {
             res[i] = rint(vector_type(tester.input[i]))[0];
         }
-        tmp_success = check_almost_equal(res, tester.rint_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.rint_res, out);
         success = success = success && tmp_success;
 
         return success;
