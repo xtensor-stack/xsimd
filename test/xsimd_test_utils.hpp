@@ -161,13 +161,14 @@ namespace xsimd
         }
         else
         {
+            double pct = double(comp) / (double(res.size()));
             out << "BAD" << std::endl;
             out << "Expected : " << std::endl << ref << std::endl;;
             out << "Got      : " << std::endl << res << std::endl;
-            out << "Nb diff  : " << comp << std::endl;
+            out << "Nb diff  : " << comp << '(' << pct << "%)" << std::endl;
 #ifdef PRINT_COUT
             std::cout << topic << "BAD" << std::endl;
-            std::cout << "Nb diff  : " << comp << std::endl;
+            std::cout << "Nb diff  : " << comp << '(' << pct << "%)" << std::endl;
 #endif
             return false;
         }
