@@ -9,8 +9,8 @@
 #ifndef XSIMD_FP_MANIPULATION_TEST_HPP
 #define XSIMD_FP_MANIPULATION_TEST_HPP
 
-#include "xsimd_tester.hpp"
 #include "xsimd_test_utils.hpp"
+#include "xsimd_tester.hpp"
 
 namespace xsimd
 {
@@ -82,7 +82,8 @@ namespace xsimd
 
         out << dash << name_shift << '-' << shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
-        out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
+        out << dash << name_shift << '-' << shift << dash << std::endl
+            << std::endl;
 
         std::string topic = "ldexp    : ";
         detail::load_vec(input, tester.input);
@@ -100,7 +101,6 @@ namespace xsimd
 
         return success;
     }
-
 }
 
 #endif

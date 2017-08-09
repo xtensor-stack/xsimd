@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <map>
 
 #include "gtest/gtest.h"
@@ -135,4 +135,3 @@ TEST(xsimd, avx_cast)
     EXPECT_TRUE(res);
 }
 #endif
-

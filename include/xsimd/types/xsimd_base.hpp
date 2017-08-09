@@ -18,13 +18,17 @@ namespace xsimd
      * @struct aligned_mode
      * @brief tag for load and store of aligned memory.
      */
-    struct aligned_mode {};
+    struct aligned_mode
+    {
+    };
 
     /**
      * @struct unaligned_mode
      * @brief tag for load and store of unaligned memory.
      */
-    struct unaligned_mode {};
+    struct unaligned_mode
+    {
+    };
 
     template <class T, std::size_t N>
     class batch_bool;
@@ -52,7 +56,6 @@ namespace xsimd
     template <class X>
     class simd_batch_bool
     {
-
     public:
 
         X& operator&=(const X& rhs);
@@ -117,7 +120,6 @@ namespace xsimd
     template <class X>
     class simd_batch
     {
-
     public:
 
         using value_type = typename simd_batch_traits<X>::value_type;
@@ -185,7 +187,7 @@ namespace xsimd
     X operator/(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs);
 
     template <class X>
-    typename simd_batch_traits<X>::batch_bool_type 
+    typename simd_batch_traits<X>::batch_bool_type
     operator>(const simd_batch<X>& lhs, const simd_batch<X>& rhs);
 
     template <class X>
@@ -386,7 +388,7 @@ namespace xsimd
     /*****************************
      * simd_batch implementation *
      *****************************/
- 
+
     /**
      * @name Arithmetic computed assignment
      */
@@ -813,4 +815,3 @@ namespace xsimd
 }
 
 #endif
-

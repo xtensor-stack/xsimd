@@ -109,8 +109,6 @@ namespace xsimd
     };
 
 #endif
-
 }
 
 #endif
-

@@ -6,7 +6,7 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-// Simplified version of boost.predef 
+// Simplified version of boost.predef
 
 #ifndef XSIMD_INSTRUCTION_SET_HPP
 #define XSIMD_INSTRUCTION_SET_HPP
@@ -18,13 +18,13 @@
 // major number can be in [0, 99]
 // minor number can be in [0, 99]
 // patch number can be in [0, 999999]
-#define XSIMD_VERSION_NUMBER(major, minor, patch)\
-    ( (((major)%100)*10000000) + (((minor)%100)*100000) + ((patch)%100000) )
+#define XSIMD_VERSION_NUMBER(major, minor, patch) \
+    ((((major) % 100) * 10000000) + (((minor) % 100) * 100000) + ((patch) % 100000))
 
-#define XSIMD_VERSION_NUMBER_NOT_AVAILABLE\
+#define XSIMD_VERSION_NUMBER_NOT_AVAILABLE \
     XSIMD_VERSION_NUMBER(0, 0, 0)
 
-#define XSIMD_VERSION_NUMBER_AVAILABLE\
+#define XSIMD_VERSION_NUMBER_AVAILABLE \
     XSIMD_VERSION_NUMBER(0, 0, 1)
 
 /***********************
@@ -218,4 +218,3 @@
 #endif
 
 #endif
-

@@ -21,13 +21,12 @@ namespace xsimd
     template <>
     class batch_bool<float, 8> : public simd_batch_bool<batch_bool<float, 8>>
     {
-
     public:
 
         batch_bool();
         explicit batch_bool(bool b);
         batch_bool(bool b0, bool b1, bool b2, bool b3,
-                  bool b4, bool b5, bool b6, bool b7);
+                   bool b4, bool b5, bool b6, bool b7);
         batch_bool(const __m256& rhs);
         batch_bool& operator=(const __m256& rhs);
 
@@ -65,7 +64,6 @@ namespace xsimd
     template <>
     class batch<float, 8> : public simd_batch<batch<float, 8>>
     {
-
     public:
 
         batch();
@@ -98,7 +96,7 @@ namespace xsimd
     batch<float, 8> operator-(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     batch<float, 8> operator*(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     batch<float, 8> operator/(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
-    
+
     batch_bool<float, 8> operator==(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     batch_bool<float, 8> operator!=(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
     batch_bool<float, 8> operator<(const batch<float, 8>& lhs, const batch<float, 8>& rhs);
@@ -123,7 +121,7 @@ namespace xsimd
     batch<float, 8> fms(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
     batch<float, 8> fnma(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
     batch<float, 8> fnms(const batch<float, 8>& x, const batch<float, 8>& y, const batch<float, 8>& z);
-    
+
     float hadd(const batch<float, 8>& rhs);
     batch<float, 8> haddp(const batch<float, 8>* row);
 
@@ -146,9 +144,9 @@ namespace xsimd
 
     inline batch_bool<float, 8>::batch_bool(bool b0, bool b1, bool b2, bool b3,
                                             bool b4, bool b5, bool b6, bool b7)
-            : m_value(_mm256_castsi256_ps(
-                  _mm256_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3,
-                                    -(int)b4, -(int)b5, -(int)b6, -(int)b7)))
+        : m_value(_mm256_castsi256_ps(
+              _mm256_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3,
+                                -(int)b4, -(int)b5, -(int)b6, -(int)b7)))
     {
     }
 
@@ -245,8 +243,8 @@ namespace xsimd
     inline batch<float, 8>::batch(const float* src, unaligned_mode)
         : m_value(_mm256_loadu_ps(src))
     {
-
     }
+
     inline batch<float, 8>::batch(const __m256& rhs)
         : m_value(rhs)
     {
@@ -316,7 +314,7 @@ namespace xsimd
     {
         return _mm256_div_ps(lhs, rhs);
     }
-    
+
     inline batch_bool<float, 8> operator==(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_cmp_ps(lhs, rhs, _CMP_EQ_OQ);
@@ -346,12 +344,12 @@ namespace xsimd
     {
         return _mm256_or_ps(lhs, rhs);
     }
-    
+
     inline batch<float, 8> operator^(const batch<float, 8>& lhs, const batch<float, 8>& rhs)
     {
         return _mm256_xor_ps(lhs, rhs);
     }
-    
+
     inline batch<float, 8> operator~(const batch<float, 8>& rhs)
     {
         return _mm256_xor_ps(rhs, _mm256_castsi256_ps(_mm256_set1_epi32(-1)));
@@ -384,7 +382,7 @@ namespace xsimd
 
     inline batch<float, 8> abs(const batch<float, 8>& rhs)
     {
-        __m256 sign_mask = _mm256_set1_ps(-0.f); // -0.f = 1 << 31
+        __m256 sign_mask = _mm256_set1_ps(-0.f);  // -0.f = 1 << 31
         return _mm256_andnot_ps(sign_mask, rhs);
     }
 
@@ -498,4 +496,3 @@ namespace xsimd
 }
 
 #endif
-

@@ -40,12 +40,11 @@ namespace xsimd
                 B z = select(x_larger_05, B(0.5) * (B(1.) - x), x * x);
                 x = select(x_larger_05, sqrt(z), x);
                 B z1 = horner<B,
-                    0x3e2aaae4,
-                    0x3d9980f6,
-                    0x3d3a3ec7,
-                    0x3cc617e3,
-                    0x3d2cb352
-                >(z);
+                              0x3e2aaae4,
+                              0x3d9980f6,
+                              0x3d3a3ec7,
+                              0x3cc617e3,
+                              0x3d2cb352>(z);
                 z1 = fma(z1, z * x, x);
                 z = select(x_larger_05, pio2<B>() - (z1 + z1), z1);
                 return z ^ sign;
@@ -61,11 +60,10 @@ namespace xsimd
                 xx = select(flag2, (x - B(1.)) / (x + B(1.)), xx);
                 const B z = xx * xx;
                 B z1 = horner<B,
-                    0xbeaaaa2aul,
-                    0x3e4c925ful,
-                    0xbe0e1b85ul,
-                    0x3da4f0d1ul
-                >(z);
+                              0xbeaaaa2aul,
+                              0x3e4c925ful,
+                              0xbe0e1b85ul,
+                              0x3da4f0d1ul>(z);
                 z1 = fma(xx, z1 * z, xx);
                 z1 = select(flag2, z1 + pio_4lo<B>(), z1);
                 z1 = select(!flag1, z1 + pio_2lo<B>(), z1);
@@ -92,18 +90,16 @@ namespace xsimd
                 B ct1 = B(detail::caster64_t(int64_t(0x3fe4000000000000)).f);
                 B zz1 = B(1.) - x;
                 B vp = zz1 * horner<B,
-                    0x403c896240f3081dll,
-                    0xc03991aaac01ab68ll,
-                    0x401bdff5baf33e6all,
-                    0xbfe2079259f9290fll,
-                    0x3f684fc3988e9f08ll
-                >(zz1) /
+                                    0x403c896240f3081dll,
+                                    0xc03991aaac01ab68ll,
+                                    0x401bdff5baf33e6all,
+                                    0xbfe2079259f9290fll,
+                                    0x3f684fc3988e9f08ll>(zz1) /
                     horner1<B,
-                    0x40756709b0b644bell,
-                    0xc077fe08959063eell,
-                    0x40626219af6a7f42ll,
-                    0xc035f2a2b6bf5d8cll
-                    >(zz1);
+                            0x40756709b0b644bell,
+                            0xc077fe08959063eell,
+                            0x40626219af6a7f42ll,
+                            0xc035f2a2b6bf5d8cll>(zz1);
                 zz1 = sqrt(zz1 + zz1);
                 B z = pio4<B>() - zz1;
                 zz1 = fms(zz1, vp, pio_2lo<B>());
@@ -111,25 +107,23 @@ namespace xsimd
                 zz1 = z + pio4<B>();
                 B zz2 = a * a;
                 z = zz2 * horner<B,
-                    0xc020656c06ceafd5ll,
-                    0x40339007da779259ll,
-                    0xc0304331de27907bll,
-                    0x4015c74b178a2dd9ll,
-                    0xbfe34341333e5c16ll,
-                    0x3f716b9b0bd48ad3ll
-                >(zz2) /
+                                 0xc020656c06ceafd5ll,
+                                 0x40339007da779259ll,
+                                 0xc0304331de27907bll,
+                                 0x4015c74b178a2dd9ll,
+                                 0xbfe34341333e5c16ll,
+                                 0x3f716b9b0bd48ad3ll>(zz2) /
                     horner1<B,
-                    0xc04898220a3607acll,
-                    0x4061705684ffbf9dll,
-                    0xc06265bb6d3576d7ll,
-                    0x40519fc025fe9054ll,
-                    0xc02d7b590b5e0eabll
-                    >(zz2);
+                            0xc04898220a3607acll,
+                            0x4061705684ffbf9dll,
+                            0xc06265bb6d3576d7ll,
+                            0x40519fc025fe9054ll,
+                            0xc02d7b590b5e0eabll>(zz2);
                 zz2 = fma(x, z, x);
                 return select(x > B(1.), nan<B>(),
-                    select(small_cond, x,
-                        select(x > ct1, zz1, zz2)
-                    ) ^ bitofsign(a));
+                              select(small_cond, x,
+                                     select(x > ct1, zz1, zz2)) ^
+                                  bitofsign(a));
             }
 
             static inline B kernel_atan(const B& x, const B& recx)
@@ -142,19 +136,17 @@ namespace xsimd
                 xx = select(flag2, (x - B(1.)) / (x + B(1.)), xx);
                 B z = xx * xx;
                 z *= horner<B,
-                    0xc0503669fd28ec8ell,
-                    0xc05eb8bf2d05ba25ll,
-                    0xc052c08c36880273ll,
-                    0xc03028545b6b807all,
-                    0xbfec007fa1f72594ll
-                >(z) /
+                            0xc0503669fd28ec8ell,
+                            0xc05eb8bf2d05ba25ll,
+                            0xc052c08c36880273ll,
+                            0xc03028545b6b807all,
+                            0xbfec007fa1f72594ll>(z) /
                     horner1<B,
-                    0x4068519efbbd62ecll,
-                    0x407e563f13b049eall,
-                    0x407b0e18d2e2be3bll,
-                    0x4064a0dd43b8fa25ll,
-                    0x4038dbc45b14603cll
-                    >(z);
+                            0x4068519efbbd62ecll,
+                            0x407e563f13b049eall,
+                            0x407b0e18d2e2be3bll,
+                            0x4064a0dd43b8fa25ll,
+                            0x4038dbc45b14603cll>(z);
                 z = fma(xx, z, xx);
                 z = select(flag2, z + pio_4lo<B>(), z);
                 z = z + select(flag1, B(0.), pio_2lo<B>());

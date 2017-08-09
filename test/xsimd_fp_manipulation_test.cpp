@@ -6,14 +6,14 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include "gtest/gtest.h"
 
+#include "xsimd/math/xsimd_fp_manipulation.hpp"
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
 #include "xsimd/types/xsimd_types_include.hpp"
-#include "xsimd/math/xsimd_fp_manipulation.hpp"
 #include "xsimd_fp_manipulation_test.hpp"
 
 namespace xsimd

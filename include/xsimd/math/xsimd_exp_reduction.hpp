@@ -15,9 +15,15 @@
 
 namespace xsimd
 {
-    struct exp_tag {};
-    struct exp2_tag {};
-    struct exp10_tag {};
+    struct exp_tag
+    {
+    };
+    struct exp2_tag
+    {
+    };
+    struct exp10_tag
+    {
+    };
 
     namespace detail
     {
@@ -94,12 +100,12 @@ namespace xsimd
             static inline B approx(const B& x)
             {
                 B y = horner<B,
-                    0x3f000000, //  5.0000000e-01
-                    0x3e2aa9a5, //  1.6666277e-01
-                    0x3d2aa957, //  4.1665401e-02
-                    0x3c098d8b, //  8.3955629e-03
-                    0x3ab778cf  //  1.3997796e-03
-                >(x);
+                             0x3f000000,  //  5.0000000e-01
+                             0x3e2aa9a5,  //  1.6666277e-01
+                             0x3d2aa957,  //  4.1665401e-02
+                             0x3c098d8b,  //  8.3955629e-03
+                             0x3ab778cf  //  1.3997796e-03
+                             >(x);
                 return ++fma(y, x * x, x);
             }
 
@@ -118,12 +124,12 @@ namespace xsimd
             static inline B approx(const B& x)
             {
                 B y = horner<B,
-                    0x3e75fdf1,  //    2.4022652e-01
-                    0x3d6356eb,  //    5.5502813e-02
-                    0x3c1d9422,  //    9.6178371e-03
-                    0x3ab01218,  //    1.3433127e-03
-                    0x3922c8c4   //    1.5524315e-04
-                >(x);
+                             0x3e75fdf1,  //    2.4022652e-01
+                             0x3d6356eb,  //    5.5502813e-02
+                             0x3c1d9422,  //    9.6178371e-03
+                             0x3ab01218,  //    1.3433127e-03
+                             0x3922c8c4  //    1.5524315e-04
+                             >(x);
                 return ++fma(y, x * x, x * log_2<B>());
             }
 
@@ -141,13 +147,14 @@ namespace xsimd
             static inline B approx(const B& x)
             {
                 return ++(horner<B,
-                    0x40135d8e, //    2.3025851e+00
-                    0x4029a926, //    2.6509490e+00
-                    0x400237da, //    2.0346589e+00
-                    0x3f95eb4c, //    1.1712432e+00
-                    0x3f0aacef, //    5.4170126e-01
-                    0x3e54dff1  //    2.0788552e-01
-                >(x) * x);
+                                 0x40135d8e,  //    2.3025851e+00
+                                 0x4029a926,  //    2.6509490e+00
+                                 0x400237da,  //    2.0346589e+00
+                                 0x3f95eb4c,  //    1.1712432e+00
+                                 0x3f0aacef,  //    5.4170126e-01
+                                 0x3e54dff1  //    2.0788552e-01
+                                 >(x) *
+                          x);
             }
 
             static inline B reduce(const B& a, B& x)
@@ -176,12 +183,13 @@ namespace xsimd
             {
                 B t = x * x;
                 return fnma(t,
-                    horner<B,
-                    0x3fc555555555553eull,
-                    0xbf66c16c16bebd93ull,
-                    0x3f11566aaf25de2cull,
-                    0xbebbbd41c5d26bf1ull,
-                    0x3e66376972bea4d0ull>(t), x);
+                            horner<B,
+                                   0x3fc555555555553eull,
+                                   0xbf66c16c16bebd93ull,
+                                   0x3f11566aaf25de2cull,
+                                   0xbebbbd41c5d26bf1ull,
+                                   0x3e66376972bea4d0ull>(t),
+                            x);
             }
 
             static inline B reduce(const B& a, B& hi, B& lo, B& x)
@@ -206,13 +214,13 @@ namespace xsimd
             {
                 B t = x * x;
                 return fnma(t,
-                    horner<B,
-                    0x3fc555555555553eull,
-                    0xbf66c16c16bebd93ull,
-                    0x3f11566aaf25de2cull,
-                    0xbebbbd41c5d26bf1ull,
-                    0x3e66376972bea4d0ull
-                    >(t), x);
+                            horner<B,
+                                   0x3fc555555555553eull,
+                                   0xbf66c16c16bebd93ull,
+                                   0x3f11566aaf25de2cull,
+                                   0xbebbbd41c5d26bf1ull,
+                                   0x3e66376972bea4d0ull>(t),
+                            x);
             }
 
             static inline B reduce(const B& a, B&, B&, B& x)
@@ -224,7 +232,7 @@ namespace xsimd
 
             static inline B finalize(const B& x, const B& c, const B&, const B&)
             {
-                return B(1.) + x +  x * c / (B(2.) - c);
+                return B(1.) + x + x * c / (B(2.) - c);
             }
         };
 
@@ -235,16 +243,15 @@ namespace xsimd
             {
                 B xx = x * x;
                 B px = x * horner<B,
-                    0x40a2b4798e134a01ull,
-                    0x40796b7a050349e4ull,
-                    0x40277d9474c55934ull,
-                    0x3fa4fd75f3062dd4ull
-                >(xx);
+                                  0x40a2b4798e134a01ull,
+                                  0x40796b7a050349e4ull,
+                                  0x40277d9474c55934ull,
+                                  0x3fa4fd75f3062dd4ull>(xx);
                 B x2 = px / (horner1<B,
-                    0x40a03f37650df6e2ull,
-                    0x4093e05eefd67782ull,
-                    0x405545fdce51ca08ull
-                >(xx) - px);
+                                     0x40a03f37650df6e2ull,
+                                     0x4093e05eefd67782ull,
+                                     0x405545fdce51ca08ull>(xx) -
+                             px);
                 return ++(x2 + x2);
             }
 

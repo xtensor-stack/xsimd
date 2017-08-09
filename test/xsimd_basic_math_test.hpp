@@ -9,8 +9,8 @@
 #ifndef XSIMD_BASIC_MATH_TEST_HPP
 #define XSIMD_BASIC_MATH_TEST_HPP
 
-#include "xsimd_tester.hpp"
 #include "xsimd_test_utils.hpp"
+#include "xsimd_tester.hpp"
 
 namespace xsimd
 {
@@ -98,7 +98,8 @@ namespace xsimd
 
         out << dash << name_shift << '-' << shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
-        out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
+        out << dash << name_shift << '-' << shift << dash << std::endl
+            << std::endl;
 
         std::string topic = "fmod     : ";
         detail::load_vec(lhs, tester.lhs_input);

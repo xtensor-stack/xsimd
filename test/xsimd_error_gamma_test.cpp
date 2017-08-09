@@ -6,15 +6,15 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include "gtest/gtest.h"
 
-#include "xsimd/memory/xsimd_aligned_allocator.hpp"
-#include "xsimd/types/xsimd_types_include.hpp"
 #include "xsimd/math/xsimd_error.hpp"
 #include "xsimd/math/xsimd_gamma.hpp"
+#include "xsimd/memory/xsimd_aligned_allocator.hpp"
+#include "xsimd/types/xsimd_types_include.hpp"
 #include "xsimd_error_gamma_test.hpp"
 
 namespace xsimd

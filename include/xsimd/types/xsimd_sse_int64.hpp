@@ -10,6 +10,7 @@
 #define XSIMD_SSE_INT64_HPP
 
 #include <cstdint>
+
 #include "xsimd_base.hpp"
 
 namespace xsimd
@@ -22,7 +23,6 @@ namespace xsimd
     template <>
     class batch_bool<int64_t, 2> : public simd_batch_bool<batch_bool<int64_t, 2>>
     {
-
     public:
 
         batch_bool();
@@ -65,7 +65,6 @@ namespace xsimd
     template <>
     class batch<int64_t, 2> : public simd_batch<batch<int64_t, 2>>
     {
-
     public:
 
         batch();
@@ -97,7 +96,7 @@ namespace xsimd
     batch<int64_t, 2> operator-(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch<int64_t, 2> operator*(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch<int64_t, 2> operator/(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
-    
+
     batch_bool<int64_t, 2> operator==(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator!=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
@@ -442,8 +441,7 @@ namespace xsimd
 #if defined(__x86_64__)
         return _mm_cvtsi128_si64(tmp2);
 #else
-        union
-        {
+        union {
             int64_t i;
             __m128i m;
         } u;
@@ -470,7 +468,6 @@ namespace xsimd
     {
         return _mm_srli_epi64(lhs, rhs);
     }
-
 }
 
 #endif

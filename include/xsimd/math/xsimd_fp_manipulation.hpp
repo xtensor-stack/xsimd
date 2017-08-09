@@ -24,8 +24,8 @@ namespace xsimd
      * Floating point manipulation functions implementation *
      ********************************************************/
 
-     /* origin: boost/simd/arch/common/simd/function/ldexp.hpp */
-     /*
+    /* origin: boost/simd/arch/common/simd/function/ldexp.hpp */
+    /*
       * ====================================================
       * copyright 2016 NumScale SAS
       *
@@ -64,7 +64,6 @@ namespace xsimd
         exp = select(bool_cast(arg != b_type(0.)), exp, zero<i_type>());
         return select((arg != b_type(0.)), x | bitwise_cast<b_type>(mask2frexp<b_type>()), b_type(0.));
     }
-
 }
 
 #endif

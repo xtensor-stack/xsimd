@@ -10,6 +10,7 @@
 #define XSIMD_HYPERBOLIC_HPP
 
 #include <type_traits>
+
 #include "xsimd_exponential.hpp"
 #include "xsimd_fp_sign.hpp"
 #include "xsimd_logarithm.hpp"
@@ -42,7 +43,7 @@ namespace xsimd
      * @param x batch of floating point values.
      * @return the hyperbolic tangent of \c x.
      */
-    template<class T, std::size_t N>
+    template <class T, std::size_t N>
     batch<T, N> tanh(const batch<T, N>& x);
 
     /**
@@ -136,11 +137,12 @@ namespace xsimd
             {
                 B sqrx = x * x;
                 return horner<B,
-                    0x3f800000, // 1.0f
-                    0x3e2aaacc, // 1.66667160211E-1f
-                    0x3c087bbe, // 8.33028376239E-3f
-                    0x39559e2f  // 2.03721912945E-4f
-                >(sqrx) * x;
+                              0x3f800000,  // 1.0f
+                              0x3e2aaacc,  // 1.66667160211E-1f
+                              0x3c087bbe,  // 8.33028376239E-3f
+                              0x39559e2f  // 2.03721912945E-4f
+                              >(sqrx) *
+                    x;
             }
         };
 
@@ -151,16 +153,18 @@ namespace xsimd
             {
                 B sqrx = x * x;
                 return fma(x, (horner<B,
-                    0xc115782bdbf6ab05ull, //  -3.51754964808151394800E5
-                    0xc0c694b8c71d6182ull, //  -1.15614435765005216044E4,
-                    0xc064773a398ff4feull, //  -1.63725857525983828727E2,
-                    0xbfe9435fe8bb3cd6ull  //  -7.89474443963537015605E-1
-                >(sqrx) /
-                    horner1<B,
-                    0xc1401a20e4f90044ull, //  -2.11052978884890840399E6
-                    0x40e1a7ba7ed72245ull, //   3.61578279834431989373E4,
-                    0xc0715b6096e96484ull //  -2.77711081420602794433E2,
-                    >(sqrx)) * sqrx, x);
+                                      0xc115782bdbf6ab05ull,  //  -3.51754964808151394800E5
+                                      0xc0c694b8c71d6182ull,  //  -1.15614435765005216044E4,
+                                      0xc064773a398ff4feull,  //  -1.63725857525983828727E2,
+                                      0xbfe9435fe8bb3cd6ull  //  -7.89474443963537015605E-1
+                                      >(sqrx) /
+                               horner1<B,
+                                       0xc1401a20e4f90044ull,  //  -2.11052978884890840399E6
+                                       0x40e1a7ba7ed72245ull,  //   3.61578279834431989373E4,
+                                       0xc0715b6096e96484ull  //  -2.77711081420602794433E2,
+                                       >(sqrx)) *
+                               sqrx,
+                           x);
             }
         };
     }
@@ -201,8 +205,8 @@ namespace xsimd
      * cosh implementation *
      ***********************/
 
-     /* origin: boost/simd/arch/common/simd/function/cosh.hpp */
-     /*
+    /* origin: boost/simd/arch/common/simd/function/cosh.hpp */
+    /*
       * ====================================================
       * copyright 2016 NumScale SAS
       *
@@ -248,12 +252,14 @@ namespace xsimd
             {
                 B sqrx = x * x;
                 return fma(horner<B,
-                    0xbeaaaa99, //    -3.33332819422E-1F
-                    0x3e088393, //    +1.33314422036E-1F
-                    0xbd5c1e2d, //    -5.37397155531E-2F
-                    0x3ca9134e, //    +2.06390887954E-2F
-                    0xbbbaf0ea  //    -5.70498872745E-3F
-                >(sqrx) * sqrx, x, x);
+                                  0xbeaaaa99,  //    -3.33332819422E-1F
+                                  0x3e088393,  //    +1.33314422036E-1F
+                                  0xbd5c1e2d,  //    -5.37397155531E-2F
+                                  0x3ca9134e,  //    +2.06390887954E-2F
+                                  0xbbbaf0ea  //    -5.70498872745E-3F
+                                  >(sqrx) *
+                               sqrx,
+                           x, x);
             }
 
             static inline B cotanh(const B& x)
@@ -270,7 +276,7 @@ namespace xsimd
                 B sqrx = x * x;
                 return fma(sqrx * p(sqrx) / q(sqrx), x, x);
             }
-            
+
             static inline B cotanh(const B& x)
             {
                 B sqrx = x * x;
@@ -281,19 +287,19 @@ namespace xsimd
             static inline B p(const B& x)
             {
                 return horner<B,
-                    0xc0993ac030580563,// -1.61468768441708447952E3
-                    0xc058d26a0e26682d,// -9.92877231001918586564E1,
-                    0xbfeedc5baafd6f4b // -9.64399179425052238628E-1
-                >(x);
+                              0xc0993ac030580563,  // -1.61468768441708447952E3
+                              0xc058d26a0e26682d,  // -9.92877231001918586564E1,
+                              0xbfeedc5baafd6f4b  // -9.64399179425052238628E-1
+                              >(x);
             }
 
             static inline B q(const B& x)
             {
                 return horner1<B,
-                    0x40b2ec102442040c,   //  4.84406305325125486048E3
-                    0x40a176fa0e5535fa,   //  2.23548839060100448583E3,
-                    0x405c33f28a581B86   //  1.12811678491632931402E2,
-                >(x);
+                               0x40b2ec102442040c,  //  4.84406305325125486048E3
+                               0x40a176fa0e5535fa,  //  2.23548839060100448583E3,
+                               0x405c33f28a581B86  //  1.12811678491632931402E2,
+                               >(x);
             }
         };
     }
@@ -342,7 +348,7 @@ namespace xsimd
          * (See copy at http://boost.org/LICENSE_1_0.txt)
          * ====================================================
          */
-        
+
         template <class B, class T = typename B::value_type>
         struct asinh_kernel;
 
@@ -359,12 +365,12 @@ namespace xsimd
                 if (any(lthalf))
                 {
                     z = horner<B,
-                        0x3f800000,
-                        0xbe2aa9ad,
-                        0x3d9949b1,
-                        0xbd2ee581,
-                        0x3ca4d6e6
-                    >(x2) * x;
+                               0x3f800000,
+                               0xbe2aa9ad,
+                               0x3d9949b1,
+                               0xbd2ee581,
+                               0x3ca4d6e6>(x2) *
+                        x;
                     if (all(lthalf))
                         return z ^ bts;
                 }
@@ -405,17 +411,17 @@ namespace xsimd
      * acosh implementation *
      ************************/
 
-     /* origin: boost/simd/arch/common/simd/function/acosh.hpp */
-     /*
-      * ====================================================
-      * copyright 2016 NumScale SAS
-      *
-      * Distributed under the Boost Software License, Version 1.0.
-      * (See copy at http://boost.org/LICENSE_1_0.txt)
-      * ====================================================
-      */
+    /* origin: boost/simd/arch/common/simd/function/acosh.hpp */
+    /*
+     * ====================================================
+     * copyright 2016 NumScale SAS
+     *
+     * Distributed under the Boost Software License, Version 1.0.
+     * (See copy at http://boost.org/LICENSE_1_0.txt)
+     * ====================================================
+     */
 
-    template<class T, std::size_t N>
+    template <class T, std::size_t N>
     inline batch<T, N> acosh(const batch<T, N>& a)
     {
         using b_type = batch<T, N>;
@@ -430,15 +436,15 @@ namespace xsimd
      * atanh implementation *
      ************************/
 
-     /* origin: boost/simd/arch/common/simd/function/acosh.hpp */
-     /*
-      * ====================================================
-      * copyright 2016 NumScale SAS
-      *
-      * Distributed under the Boost Software License, Version 1.0.
-      * (See copy at http://boost.org/LICENSE_1_0.txt)
-      * ====================================================
-      */
+    /* origin: boost/simd/arch/common/simd/function/acosh.hpp */
+    /*
+     * ====================================================
+     * copyright 2016 NumScale SAS
+     *
+     * Distributed under the Boost Software License, Version 1.0.
+     * (See copy at http://boost.org/LICENSE_1_0.txt)
+     * ====================================================
+     */
 
     template <class T, std::size_t N>
     inline batch<T, N> atanh(const batch<T, N>& a)

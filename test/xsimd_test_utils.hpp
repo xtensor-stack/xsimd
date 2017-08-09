@@ -9,15 +9,15 @@
 #ifndef XSIMD_TEST_UTILS_HPP
 #define XSIMD_TEST_UTILS_HPP
 
-#include <limits>
 #include <algorithm>
 #include <cmath>
-#include <vector>
-#include <iostream>
-#include <ostream>
 #include <iomanip>
+#include <iostream>
+#include <limits>
+#include <ostream>
 #include <string>
 #include <typeinfo>
+#include <vector>
 
 namespace xsimd
 {
@@ -41,13 +41,13 @@ namespace xsimd
         template <class T>
         T safe_division(const T& lhs, const T& rhs)
         {
-            if(rhs < static_cast<T>(1) && lhs > rhs * (std::numeric_limits<T>::max)())
+            if (rhs < static_cast<T>(1) && lhs > rhs * (std::numeric_limits<T>::max)())
             {
                 return (std::numeric_limits<T>::max)();
             }
-            if(lhs == static_cast<T>(0) ||
-               rhs > static_cast<T>(1) &&
-               lhs < rhs * (std::numeric_limits<T>::min)())
+            if (lhs == static_cast<T>(0) ||
+                rhs > static_cast<T>(1) &&
+                    lhs < rhs * (std::numeric_limits<T>::min)())
             {
                 return static_cast<T>(0);
             }
@@ -75,7 +75,7 @@ namespace xsimd
         T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
         T absolute_zero_prox = 2048 * std::numeric_limits<T>::epsilon();
 
-        if(max(abs(lhs), abs(rhs)) < T(1e-3))
+        if (max(abs(lhs), abs(rhs)) < T(1e-3))
         {
             return detail::check_is_small(lhs - rhs, absolute_zero_prox);
         }
@@ -88,14 +88,14 @@ namespace xsimd
     template <class T, class A>
     int vector_comparison(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
     {
-        if(lhs.size() != rhs.size())
+        if (lhs.size() != rhs.size())
         {
             return -1;
         }
         int nb_diff = 0;
-        for(auto lhs_iter = lhs.begin(), rhs_iter = rhs.begin(); lhs_iter != lhs.end(); ++lhs_iter, ++rhs_iter)
+        for (auto lhs_iter = lhs.begin(), rhs_iter = rhs.begin(); lhs_iter != lhs.end(); ++lhs_iter, ++rhs_iter)
         {
-            if(!scalar_comparison(*lhs_iter, *rhs_iter))
+            if (!scalar_comparison(*lhs_iter, *rhs_iter))
             {
                 ++nb_diff;
             }
@@ -107,7 +107,7 @@ namespace xsimd
     inline std::ostream& operator<<(std::ostream& os, const std::vector<T, A>& v)
     {
         os << '[';
-        for(size_t i = 0; i < v.size() - 1; ++i)
+        for (size_t i = 0; i < v.size() - 1; ++i)
         {
             os << v[i] << ',';
         }
@@ -120,7 +120,7 @@ namespace xsimd
     {
         out << topic;
         out << std::setprecision(20);
-        if(scalar_comparison(res, ref))
+        if (scalar_comparison(res, ref))
         {
             out << "OK" << std::endl;
             return true;
@@ -128,8 +128,10 @@ namespace xsimd
         else
         {
             out << "BAD" << std::endl;
-            out << "Expected : " << std::endl << ref << std::endl;
-            out << "Got      : " << std::endl << res << std::endl;
+            out << "Expected : " << std::endl
+                << ref << std::endl;
+            out << "Got      : " << std::endl
+                << res << std::endl;
             return false;
         }
     }
@@ -142,7 +144,7 @@ namespace xsimd
         out << topic;
         out << std::setprecision(20);
         int comp = vector_comparison(res, ref);
-        if(comp == 0)
+        if (comp == 0)
         {
             out << "OK" << std::endl;
             return true;
@@ -163,8 +165,11 @@ namespace xsimd
         {
             double pct = double(comp) / (double(res.size()));
             out << "BAD" << std::endl;
-            out << "Expected : " << std::endl << ref << std::endl;;
-            out << "Got      : " << std::endl << res << std::endl;
+            out << "Expected : " << std::endl
+                << ref << std::endl;
+            ;
+            out << "Got      : " << std::endl
+                << res << std::endl;
             out << "Nb diff  : " << comp << '(' << pct << "%)" << std::endl;
 #ifdef PRINT_COUT
             std::cout << topic << "BAD" << std::endl;
@@ -173,7 +178,6 @@ namespace xsimd
             return false;
         }
     }
-
 }
 
 #endif

@@ -10,6 +10,7 @@
 #define XSIMD_ROUNDING_HPP
 
 #include <cmath>
+
 #include "xsimd_fp_sign.hpp"
 #include "xsimd_numerical_constant.hpp"
 
@@ -54,7 +55,7 @@ namespace xsimd
 
     // Contrary to their std counterpart, these functions
     // are assume that the rounding mode is FE_TONEAREST
-    
+
     /**
      * Rounds the scalars in \c x to integer values (in floating point format), using
      * the current rounding mode.
@@ -121,7 +122,7 @@ namespace xsimd
         return _mm_round_ps(x, _MM_FROUND_TO_NEAREST_INT);
     }
 
-    template<>
+    template <>
     inline batch<double, 2> nearbyint(const batch<double, 2>& x)
     {
         return _mm_round_pd(x, _MM_FROUND_TO_NEAREST_INT);
@@ -176,7 +177,7 @@ namespace xsimd
      **********************/
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-    
+
     template <>
     inline batch<float, 8> ceil(const batch<float, 8>& x)
     {
@@ -195,7 +196,7 @@ namespace xsimd
         return _mm256_round_ps(x, _MM_FROUND_FLOOR);
     }
 
-    template<>
+    template <>
     inline batch<double, 4> floor(const batch<double, 4>& x)
     {
         return _mm256_round_pd(x, _MM_FROUND_FLOOR);
@@ -219,10 +220,10 @@ namespace xsimd
         return _mm256_round_ps(x, _MM_FROUND_TO_NEAREST_INT);
     }
 
-    template<>
+    template <>
     inline batch<double, 4> nearbyint(const batch<double, 4>& x)
     {
-            return _mm256_round_pd(x, _MM_FROUND_TO_NEAREST_INT);
+        return _mm256_round_pd(x, _MM_FROUND_TO_NEAREST_INT);
     }
 
 #endif
@@ -249,4 +250,3 @@ namespace xsimd
 }
 
 #endif
-

@@ -11,9 +11,11 @@
 
 #include <array>
 #include <limits>
-#include "xsimd_rounding.hpp"
+
 #include "xsimd_horner.hpp"
 #include "xsimd_rem_pio2.hpp"
+#include "xsimd_rounding.hpp"
+
 
 namespace xsimd
 {
@@ -41,34 +43,31 @@ namespace xsimd
             static inline B cos_eval(const B& z)
             {
                 B y = horner<B,
-                    0x3d2aaaa5,
-                    0xbab60619,
-                    0x37ccf5ce
-                >(z);
+                             0x3d2aaaa5,
+                             0xbab60619,
+                             0x37ccf5ce>(z);
                 return B(1.) + fma(z, B(-0.5), y * z * z);
             }
 
             static inline B sin_eval(const B& z, const B& x)
             {
                 B y = horner<B,
-                    0xbe2aaaa2,
-                    0x3c08839d,
-                    0xb94ca1f9
-                >(z);
+                             0xbe2aaaa2,
+                             0x3c08839d,
+                             0xb94ca1f9>(z);
                 return fma(y * z, x, x);
             }
 
             static inline B base_tancot_eval(const B& z)
             {
                 B zz = z * z;
-                B y = horner < B,
-                    0x3eaaaa6f,
-                    0x3e0896dd,
-                    0x3d5ac5c9,
-                    0x3cc821b5,
-                    0x3b4c779c,
-                    0x3c19c53b
-                >(zz);
+                B y = horner<B,
+                             0x3eaaaa6f,
+                             0x3e0896dd,
+                             0x3d5ac5c9,
+                             0x3cc821b5,
+                             0x3b4c779c,
+                             0x3c19c53b>(zz);
                 return fma(y, zz * z, z);
             }
 
@@ -102,27 +101,25 @@ namespace xsimd
             static inline B cos_eval(const B& z)
             {
                 B y = horner<B,
-                    0x3fe0000000000000ll,
-                    0xbfa5555555555551ll,
-                    0x3f56c16c16c15d47ll,
-                    0xbefa01a019ddbcd9ll,
-                    0x3e927e4f8e06d9a5ll,
-                    0xbe21eea7c1e514d4ll,
-                    0x3da8ff831ad9b219ll
-                >(z);
+                             0x3fe0000000000000ll,
+                             0xbfa5555555555551ll,
+                             0x3f56c16c16c15d47ll,
+                             0xbefa01a019ddbcd9ll,
+                             0x3e927e4f8e06d9a5ll,
+                             0xbe21eea7c1e514d4ll,
+                             0x3da8ff831ad9b219ll>(z);
                 return B(1.) - y * z;
             }
 
             static inline B sin_eval(const B& z, const B& x)
             {
                 B y = horner<B,
-                    0xbfc5555555555548ll,
-                    0x3f8111111110f7d0ll,
-                    0xbf2a01a019bfdf03ll,
-                    0x3ec71de3567d4896ll,
-                    0xbe5ae5e5a9291691ll,
-                    0x3de5d8fd1fcf0ec1ll
-                >(z);
+                             0xbfc5555555555548ll,
+                             0x3f8111111110f7d0ll,
+                             0xbf2a01a019bfdf03ll,
+                             0x3ec71de3567d4896ll,
+                             0xbe5ae5e5a9291691ll,
+                             0x3de5d8fd1fcf0ec1ll>(z);
                 return fma(y * z, x, x);
             }
 
@@ -130,16 +127,14 @@ namespace xsimd
             {
                 B zz = z * z;
                 B num = horner<B,
-                    0xc1711fead3299176ll,
-                    0x413199eca5fc9dddll,
-                    0xc0c992d8d24f3f38ll
-                >(zz);
+                               0xc1711fead3299176ll,
+                               0x413199eca5fc9dddll,
+                               0xc0c992d8d24f3f38ll>(zz);
                 B den = horner1<B,
-                    0xc189afe03cbe5a31ll,
-                    0x4177d98fc2ead8efll,
-                    0xc13427bc582abc96ll,
-                    0x40cab8a5eeb36572ll
-                >(zz);
+                                0xc189afe03cbe5a31ll,
+                                0x4177d98fc2ead8efll,
+                                0xc13427bc582abc96ll,
+                                0x40cab8a5eeb36572ll>(zz);
                 return fma(z, (zz * (num / den)), z);
             }
 
@@ -168,8 +163,12 @@ namespace xsimd
          * ====================================================
          */
 
-        struct trigo_radian_tag {};
-        struct trigo_pi_tag {};
+        struct trigo_radian_tag
+        {
+        };
+        struct trigo_pi_tag
+        {
+        };
 
         template <class B, class Tag = trigo_radian_tag>
         struct trigo_reducer
@@ -290,7 +289,6 @@ namespace xsimd
     {
         return detail::quadrant_impl<batch<T, N>, T>::compute(x);
     }
-
 }
 
 #endif

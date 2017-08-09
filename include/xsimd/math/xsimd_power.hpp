@@ -111,12 +111,11 @@ namespace xsimd
                 i_type e;
                 B x = frexp(z, e);
                 x = horner<B,
-                    0x3ece0609,
-                    0x3f91eb77,
-                    0xbf745265,
-                    0x3f0bf0fe,
-                    0xbe09e49a
-                >(x);
+                           0x3ece0609,
+                           0x3f91eb77,
+                           0xbf745265,
+                           0x3f0bf0fe,
+                           0xbe09e49a>(x);
                 auto flag = e >= i_type(0);
                 i_type e1 = abs(e);
                 i_type rem = e1;
@@ -128,7 +127,7 @@ namespace xsimd
                 B fact = select(bool_cast(rem == i_type(1)), cbrt2, B(1.));
                 fact = select(bool_cast(rem == i_type(2)), cbrt4, fact);
                 x = ldexp(x * fact, e);
-                x -= (x - z / (x * x)) * B(1.f/3.f);
+                x -= (x - z / (x * x)) * B(1.f / 3.f);
 #ifndef XSIMD_NO_DENORMALS
                 x = (x | bitofsign(a)) * f;
 #else
@@ -161,12 +160,11 @@ namespace xsimd
                 i_type e;
                 B x = frexp(z, e);
                 x = horner<B,
-                    0x3fd9c0c12122a4fell,
-                    0x3ff23d6ee505873all,
-                    0xbfee8a4ca3ba37b8ll,
-                    0x3fe17e1fc7e59d58ll,
-                    0xbfc13c93386fdff6ll
-                >(x);
+                           0x3fd9c0c12122a4fell,
+                           0x3ff23d6ee505873all,
+                           0xbfee8a4ca3ba37b8ll,
+                           0x3fe17e1fc7e59d58ll,
+                           0xbfc13c93386fdff6ll>(x);
                 auto flag = e >= zero<i_type>();
                 i_type e1 = abs(e);
                 i_type rem = e1;
@@ -178,8 +176,8 @@ namespace xsimd
                 B fact = select(bool_cast(rem == i_type(1)), cbrt2, B(1.));
                 fact = select(bool_cast(rem == i_type(2)), cbrt4, fact);
                 x = ldexp(x * fact, e);
-                x -= (x - z / (x * x)) * B(1./3.);
-                x -= (x - z / (x * x)) * B(1./3.);
+                x -= (x - z / (x * x)) * B(1. / 3.);
+                x -= (x - z / (x * x)) * B(1. / 3.);
 #ifndef XSIMD_NO_DENORMALS
                 x = (x | bitofsign(a)) * f;
 #else

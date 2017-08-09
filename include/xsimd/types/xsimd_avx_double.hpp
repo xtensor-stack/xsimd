@@ -21,7 +21,6 @@ namespace xsimd
     template <>
     class batch_bool<double, 4> : public simd_batch_bool<batch_bool<double, 4>>
     {
-
     public:
 
         batch_bool();
@@ -65,7 +64,6 @@ namespace xsimd
     template <>
     class batch<double, 4> : public simd_batch<batch<double, 4>>
     {
-
     public:
 
         batch();
@@ -97,7 +95,7 @@ namespace xsimd
     batch<double, 4> operator-(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch<double, 4> operator*(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch<double, 4> operator/(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    
+
     batch_bool<double, 4> operator==(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch_bool<double, 4> operator!=(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
     batch_bool<double, 4> operator<(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
@@ -145,8 +143,8 @@ namespace xsimd
 
     inline batch_bool<double, 4>::batch_bool(bool b0, bool b1, bool b2, bool b3)
         : m_value(_mm256_castsi256_pd(
-                  _mm256_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1,
-                                    -(int)b2, -(int)b2, -(int)b3, -(int)b3)))
+              _mm256_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1,
+                                -(int)b2, -(int)b2, -(int)b3, -(int)b3)))
     {
     }
 
@@ -228,7 +226,7 @@ namespace xsimd
         : m_value(_mm256_setr_pd(d0, d1, d2, d3))
     {
     }
-    
+
     inline batch<double, 4>::batch(const double* src)
         : m_value(_mm256_loadu_pd(src))
     {
@@ -313,7 +311,7 @@ namespace xsimd
     {
         return _mm256_div_pd(lhs, rhs);
     }
-    
+
     inline batch_bool<double, 4> operator==(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
     {
         return _mm256_cmp_pd(lhs, rhs, _CMP_EQ_OQ);
@@ -381,7 +379,7 @@ namespace xsimd
 
     inline batch<double, 4> abs(const batch<double, 4>& rhs)
     {
-        __m256d sign_mask = _mm256_set1_pd(-0.); // -0. = 1 << 63
+        __m256d sign_mask = _mm256_set1_pd(-0.);  // -0. = 1 << 63
         return _mm256_andnot_pd(sign_mask, rhs);
     }
 

@@ -9,8 +9,8 @@
 #ifndef XSIMD_SSE_CONVERSION_HPP
 #define XSIMD_SSE_CONVERSION_HPP
 
-#include "xsimd_sse_float.hpp"
 #include "xsimd_sse_double.hpp"
+#include "xsimd_sse_float.hpp"
 #include "xsimd_sse_int32.hpp"
 #include "xsimd_sse_int64.hpp"
 
@@ -165,8 +165,6 @@ namespace xsimd
     {
         return _mm_castsi128_pd(x);
     }
-
 }
 
 #endif
-

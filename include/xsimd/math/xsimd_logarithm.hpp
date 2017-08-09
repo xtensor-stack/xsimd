@@ -145,16 +145,14 @@ namespace xsimd
                 B w = z * z;
 
                 B t1 = w * horner<B,
-                    0x3fd999999997fa04ll,
-                    0x3fcc71c51d8e78afll,
-                    0x3fc39a09d078c69fll
-                >(w);
+                                  0x3fd999999997fa04ll,
+                                  0x3fcc71c51d8e78afll,
+                                  0x3fc39a09d078c69fll>(w);
                 B t2 = z * horner<B,
-                    0x3fe5555555555593ll,
-                    0x3fd2492494229359ll,
-                    0x3fc7466496cb03dell,
-                    0x3fc2f112df3e5244ll
-                >(w);
+                                  0x3fe5555555555593ll,
+                                  0x3fd2492494229359ll,
+                                  0x3fc7466496cb03dell,
+                                  0x3fc2f112df3e5244ll>(w);
                 B R = t2 + t1;
                 B r = fma(dk, log_2hi<B>(), fma(s, (hfsq + R), dk * log_2lo<B>()) - hfsq + f);
 #ifndef XSIMD_NO_INFINITIES
@@ -273,16 +271,14 @@ namespace xsimd
                 B z = s * s;
                 B w = z * z;
                 B t1 = w * horner<B,
-                    0x3fd999999997fa04ll,
-                    0x3fcc71c51d8e78afll,
-                    0x3fc39a09d078c69fll
-                >(w);
+                                  0x3fd999999997fa04ll,
+                                  0x3fcc71c51d8e78afll,
+                                  0x3fc39a09d078c69fll>(w);
                 B t2 = z * horner<B,
-                    0x3fe5555555555593ll,
-                    0x3fd2492494229359ll,
-                    0x3fc7466496cb03dell,
-                    0x3fc2f112df3e5244ll
-                >(w);
+                                  0x3fe5555555555593ll,
+                                  0x3fd2492494229359ll,
+                                  0x3fc7466496cb03dell,
+                                  0x3fc2f112df3e5244ll>(w);
                 B R = t2 + t1;
                 B hfsq = B(0.5) * f * f;
                 B hi = f - hfsq;
@@ -372,9 +368,9 @@ namespace xsimd
                 hibits &= bitwise_cast<B>(i_type(0xfffff000));
                 B lobits = fma(s, hfsq + R, f - hibits - hfsq);
                 B r = fma(dk, log10_2hi,
-                    fma(hibits, ivln10hi,
-                        fma(lobits, ivln10hi,
-                            fma(lobits + hibits, ivln10lo, dk * log10_2lo))));
+                          fma(hibits, ivln10hi,
+                              fma(lobits, ivln10hi,
+                                  fma(lobits + hibits, ivln10lo, dk * log10_2lo))));
 #ifndef XSIMD_NO_INFINITIES
                 B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
 #else
@@ -428,16 +424,14 @@ namespace xsimd
                 B z = s * s;
                 B w = z * z;
                 B t1 = w * horner<B,
-                    0x3fd999999997fa04ll,
-                    0x3fcc71c51d8e78afll,
-                    0x3fc39a09d078c69fll
-                >(w);
+                                  0x3fd999999997fa04ll,
+                                  0x3fcc71c51d8e78afll,
+                                  0x3fc39a09d078c69fll>(w);
                 B t2 = z * horner<B,
-                    0x3fe5555555555593ll,
-                    0x3fd2492494229359ll,
-                    0x3fc7466496cb03dell,
-                    0x3fc2f112df3e5244ll
-                >(w);
+                                  0x3fe5555555555593ll,
+                                  0x3fd2492494229359ll,
+                                  0x3fc7466496cb03dell,
+                                  0x3fc2f112df3e5244ll>(w);
                 B R = t2 + t1;
                 B hfsq = B(0.5) * f * f;
                 B hi = f - hfsq;
@@ -548,16 +542,14 @@ namespace xsimd
                 B z = s * s;
                 B w = z * z;
                 B t1 = w * horner<B,
-                    0x3fd999999997fa04ll,
-                    0x3fcc71c51d8e78afll,
-                    0x3fc39a09d078c69fll
-                >(w);
+                                  0x3fd999999997fa04ll,
+                                  0x3fcc71c51d8e78afll,
+                                  0x3fc39a09d078c69fll>(w);
                 B t2 = z * horner<B,
-                    0x3fe5555555555593ll,
-                    0x3fd2492494229359ll,
-                    0x3fc7466496cb03dell,
-                    0x3fc2f112df3e5244ll
-                >(w);
+                                  0x3fe5555555555593ll,
+                                  0x3fd2492494229359ll,
+                                  0x3fc7466496cb03dell,
+                                  0x3fc2f112df3e5244ll>(w);
                 B R = t2 + t1;
                 B dk = to_float(k);
                 B r = fma(dk, log_2hi<B>(), fma(s, hfsq + R, dk * log_2lo<B>() + c) - hfsq + f);

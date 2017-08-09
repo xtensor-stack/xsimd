@@ -10,6 +10,7 @@
 #define XSIMD_SSE_INT32_HPP
 
 #include <cstdint>
+
 #include "xsimd_base.hpp"
 
 namespace xsimd
@@ -22,7 +23,6 @@ namespace xsimd
     template <>
     class batch_bool<int32_t, 4> : public simd_batch_bool<batch_bool<int32_t, 4>>
     {
-
     public:
 
         batch_bool();
@@ -65,7 +65,6 @@ namespace xsimd
     template <>
     class batch<int32_t, 4> : public simd_batch<batch<int32_t, 4>>
     {
-
     public:
 
         batch();
@@ -97,7 +96,7 @@ namespace xsimd
     batch<int32_t, 4> operator-(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
     batch<int32_t, 4> operator*(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
     batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    
+
     batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
     batch_bool<int32_t, 4> operator!=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
     batch_bool<int32_t, 4> operator<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
@@ -231,12 +230,12 @@ namespace xsimd
         : m_value(_mm_loadu_si128((__m128i const*)src))
     {
     }
-    
+
     inline batch<int32_t, 4>::batch(const int32_t* src, aligned_mode)
         : m_value(_mm_load_si128((__m128i const*)src))
     {
     }
-    
+
     inline batch<int32_t, 4>::batch(const int32_t* src, unaligned_mode)
         : m_value(_mm_loadu_si128((__m128i const*)src))
     {
@@ -420,7 +419,7 @@ namespace xsimd
 
     inline int32_t hadd(const batch<int32_t, 4>& rhs)
     {
-#if  XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
         __m128i tmp1 = _mm_hadd_epi32(rhs, rhs);
         __m128i tmp2 = _mm_hadd_epi32(tmp1, tmp1);
         return _mm_cvtsi128_si32(tmp2);
@@ -451,7 +450,6 @@ namespace xsimd
     {
         return _mm_srli_epi32(lhs, rhs);
     }
-
 }
 
 #endif

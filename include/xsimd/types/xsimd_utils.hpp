@@ -124,15 +124,17 @@ namespace xsimd
     namespace detail
     {
         template <class UI, class I, class F>
-        union generic_caster
-        {
+        union generic_caster {
             UI ui;
             I i;
             F f;
 
-            constexpr generic_caster(UI t) : ui(t) {}
-            constexpr generic_caster(I t) : i(t) {}
-            constexpr generic_caster(F t) : f(t) {}
+            constexpr generic_caster(UI t)
+                : ui(t) {}
+            constexpr generic_caster(I t)
+                : i(t) {}
+            constexpr generic_caster(F t)
+                : f(t) {}
         };
 
         using caster32_t = generic_caster<uint32_t, int32_t, float>;
@@ -156,7 +158,6 @@ namespace xsimd
         template <class T>
         using caster_t = typename caster<T>::type;
     }
-
 }
 
 #endif

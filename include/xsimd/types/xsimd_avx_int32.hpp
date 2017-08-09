@@ -10,6 +10,7 @@
 #define XSIMD_AVX_INT32_HPP
 
 #include <cstdint>
+
 #include "xsimd_base.hpp"
 
 namespace xsimd
@@ -22,7 +23,6 @@ namespace xsimd
     template <>
     class batch_bool<int32_t, 8> : public simd_batch_bool<batch_bool<int32_t, 8>>
     {
-
     public:
 
         batch_bool();
@@ -65,7 +65,6 @@ namespace xsimd
     template <>
     class batch<int32_t, 8> : public simd_batch<batch<int32_t, 8>>
     {
-
     public:
 
         batch();
@@ -132,19 +131,19 @@ namespace xsimd
 
 #if XSIMD_X86_INSTR_SET < XSIMD_X86_AVX2_VERSION
 
-#define XSIMD_SPLIT_AVX(avx_name)\
-    __m128i avx_name##_low = _mm256_castsi256_si128(avx_name);\
+#define XSIMD_SPLIT_AVX(avx_name)                              \
+    __m128i avx_name##_low = _mm256_castsi256_si128(avx_name); \
     __m128i avx_name##_high = _mm256_extractf128_si256(avx_name, 1)
 
-#define XSIMD_RETURN_MERGED_SSE(res_low, res_high)\
-    __m256i result = _mm256_castsi128_si256(res_low);\
+#define XSIMD_RETURN_MERGED_SSE(res_low, res_high)    \
+    __m256i result = _mm256_castsi128_si256(res_low); \
     return _mm256_insertf128_si256(result, res_high, 1)
 
-#define XSIMD_APPLY_SSE_FUNCTION(func, avx_lhs, avx_rhs)\
-    XSIMD_SPLIT_AVX(avx_lhs);\
-    XSIMD_SPLIT_AVX(avx_rhs);\
-    __m128i res_low = func(avx_lhs##_low, avx_rhs##_low);\
-    __m128i res_high = func(avx_lhs##_high, avx_rhs##_high);\
+#define XSIMD_APPLY_SSE_FUNCTION(func, avx_lhs, avx_rhs)     \
+    XSIMD_SPLIT_AVX(avx_lhs);                                \
+    XSIMD_SPLIT_AVX(avx_rhs);                                \
+    __m128i res_low = func(avx_lhs##_low, avx_rhs##_low);    \
+    __m128i res_high = func(avx_lhs##_high, avx_rhs##_high); \
     XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
 
@@ -487,7 +486,7 @@ namespace xsimd
     {
         return x * y - z;
     }
-    
+
     inline batch<int32_t, 8> fnma(const batch<int32_t, 8>& x, const batch<int32_t, 8>& y, const batch<int32_t, 8>& z)
     {
         return -x * y + z;
@@ -552,7 +551,6 @@ namespace xsimd
         XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
     }
-
 }
 
 #undef XSIMD_APPLY_SSE_FUNCTION
@@ -560,4 +558,3 @@ namespace xsimd
 #undef XSIMD_SPLIT_AVX
 
 #endif
-

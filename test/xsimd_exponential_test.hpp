@@ -9,8 +9,8 @@
 #ifndef XSIMD_EXPONENTIAL_TEST_HPP
 #define XSIMD_EXPONENTIAL_TEST_HPP
 
-#include "xsimd_tester.hpp"
 #include "xsimd_test_utils.hpp"
+#include "xsimd_tester.hpp"
 
 namespace xsimd
 {
@@ -29,7 +29,7 @@ namespace xsimd
         res_type exp_res;
         res_type exp2_res;
         res_type expm1_res;
-        
+
         res_type log_input;
         res_type log_res;
         res_type log2_res;
@@ -92,7 +92,8 @@ namespace xsimd
 
         out << dash << name_shift << '-' << shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
-        out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
+        out << dash << name_shift << '-' << shift << dash << std::endl
+            << std::endl;
 
         std::string topic = "exp   : ";
         for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)

@@ -79,10 +79,7 @@ install:
     - conda update -q conda
     # Useful for debugging any issues with conda
     - conda info -a
-    - cd test
-    - conda env create -f ./test-environment.yml
-    - source activate test-xsimd
-    - cd ..
+    - conda install gtest cmake -c conda-forge
     - cmake .
     - make -j2 test_xsimd
     - cd test

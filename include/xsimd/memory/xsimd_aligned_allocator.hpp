@@ -9,19 +9,20 @@
 #ifndef XSIMD_ALIGNED_ALLOCATOR_HPP
 #define XSIMD_ALIGNED_ALLOCATOR_HPP
 
-#include <cstddef>
 #include <algorithm>
+#include <cstddef>
+
 #include "../config/xsimd_align.hpp"
 
 #if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
-    #include <malloc.h>
+#include <malloc.h>
 #elif defined(__GNUC__)
-    #include <mm_malloc.h>
-    #if defined(XSIMD_ALLOCA)
-        #include <alloca.h>
-    #endif
+#include <mm_malloc.h>
+#if defined(XSIMD_ALLOCA)
+#include <alloca.h>
+#endif
 #else
-    #include <stdlib.h>
+#include <stdlib.h>
 #endif
 
 namespace xsimd
@@ -40,7 +41,6 @@ namespace xsimd
     template <class T, size_t Align>
     class aligned_allocator
     {
-
     public:
 
         using value_type = T;
@@ -172,8 +172,8 @@ namespace xsimd
     aligned_allocator<T, A>::allocate(size_type n,
             typename std::allocator<void>::const_pointer) -> pointer
     {
-        pointer res = reinterpret_cast<pointer>(aligned_malloc(sizeof(T)*n, A));
-        if(res == nullptr)
+        pointer res = reinterpret_cast<pointer>(aligned_malloc(sizeof(T) * n, A));
+        if (res == nullptr)
             throw std::bad_alloc();
         return res;
     }
@@ -288,7 +288,7 @@ namespace xsimd
                 free(*(reinterpret_cast<void**>(ptr) - 1));
         }
     }
-    
+
     inline void* aligned_malloc(size_t size, size_t alignment)
     {
 #if XSIMD_HAS_MM_MALLOC
@@ -299,7 +299,7 @@ namespace xsimd
         if (failed)
             res = 0;
         return res;
-#elif(defined _MSC_VER)
+#elif (defined _MSC_VER)
         return _aligned_malloc(size, alignment);
 #else
         return detail::xaligned_malloc(size, alignment);
@@ -348,4 +348,3 @@ namespace xsimd
 }
 
 #endif
-

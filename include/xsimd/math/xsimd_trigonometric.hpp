@@ -37,7 +37,7 @@ namespace xsimd
      * @param x batch of floating point values.
      * @return the tangent of \c x.
      */
-    template<class T, std::size_t N>
+    template <class T, std::size_t N>
     batch<T, N> tan(const batch<T, N>& x);
 
     /**

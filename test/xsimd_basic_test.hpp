@@ -9,8 +9,8 @@
 #ifndef XSIMD_BASIC_TEST_HPP
 #define XSIMD_BASIC_TEST_HPP
 
-#include "xsimd_tester.hpp"
 #include "xsimd_test_utils.hpp"
+#include "xsimd_tester.hpp"
 
 namespace xsimd
 {
@@ -62,7 +62,7 @@ namespace xsimd
         res_type fnms_res;
         res_type sqrt_res;
         value_type hadd_res;
-        
+
         simd_basic_tester(const std::string& name);
     };
 
@@ -109,10 +109,10 @@ namespace xsimd
 
         s = value_type(1.4);
         hadd_res = value_type(0);
-        for(size_t i = 0; i < N; ++i)
+        for (size_t i = 0; i < N; ++i)
         {
             lhs[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
-            rhs[i] = value_type(10.2) / (i+2) + value_type(0.25);
+            rhs[i] = value_type(10.2) / (i + 2) + value_type(0.25);
             extract_res = lhs[1];
             minus_res[i] = -lhs[i];
             add_vv_res[i] = lhs[i] + rhs[i];
@@ -141,14 +141,14 @@ namespace xsimd
             fma_res[i] = lhs[i] * rhs[i] + rhs[i];
 #endif
             fms_res[i] = lhs[i] * rhs[i] - rhs[i];
-            fnma_res[i] = - lhs[i] * rhs[i] + rhs[i];
-            fnms_res[i] = - lhs[i] * rhs[i] - rhs[i];
+            fnma_res[i] = -lhs[i] * rhs[i] + rhs[i];
+            fnms_res[i] = -lhs[i] * rhs[i] - rhs[i];
             sqrt_res[i] = sqrt(lhs[i]);
             hadd_res += lhs[i];
         }
         for (size_t i = 0; i < N / 2; ++i)
         {
-            mix_lhs_rhs[2 * i] = lhs[2*i];
+            mix_lhs_rhs[2 * i] = lhs[2 * i];
             mix_lhs_rhs[2 * i + 1] = rhs[2 * i + 1];
         }
     }
@@ -273,8 +273,8 @@ namespace xsimd
             abs_res[i] = abs(lhs[i]);
             fma_res[i] = lhs[i] * rhs[i] + rhs[i];
             fms_res[i] = lhs[i] * rhs[i] - rhs[i];
-            fnma_res[i] = - lhs[i] * rhs[i] + rhs[i];
-            fnms_res[i] = - lhs[i] * rhs[i] - rhs[i];
+            fnma_res[i] = -lhs[i] * rhs[i] + rhs[i];
+            fnms_res[i] = -lhs[i] * rhs[i] - rhs[i];
             hadd_res += lhs[i];
             sl_res[i] = lhs[i] << sh_nb;
             sr_res[i] = lhs[i] >> sh_nb;
@@ -317,7 +317,8 @@ namespace xsimd
 
         out << dash << name_shift << '-' << shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
-        out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
+        out << dash << name_shift << '-' << shift << dash << std::endl
+            << std::endl;
 
         std::string topic = "operator[]               : ";
         detail::load_vec(lhs, tester.lhs);
@@ -330,7 +331,7 @@ namespace xsimd
         detail::store_vec(lhs, res);
         tmp_success = check_almost_equal(topic, res, tester.lhs, out);
         success = success && tmp_success;
-        
+
         topic = "load/store unaligned     : ";
         lhs.load_unaligned(&tester.lhs[0]);
         lhs.store_unaligned(&res[0]);
@@ -420,7 +421,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.add_sv_res, out);
         success = success && tmp_success;
-        
+
         topic = "operator-(simd, simd)    : ";
         vres = lhs - rhs;
         detail::store_vec(vres, res);
@@ -585,7 +586,8 @@ namespace xsimd
 
         out << dash << name_shift << '-' << shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
-        out << dash << name_shift << '-' << shift << dash << std::endl << std::endl;
+        out << dash << name_shift << '-' << shift << dash << std::endl
+            << std::endl;
 
         std::string topic = "operator[]               : ";
         detail::load_vec(lhs, tester.lhs);
@@ -828,9 +830,9 @@ namespace xsimd
     template <std::size_t N, std::size_t A>
     struct simd_convert_tester
     {
-        using int32_batch = batch<int32_t, N*2>;
+        using int32_batch = batch<int32_t, N * 2>;
         using int64_batch = batch<int64_t, N>;
-        using float_batch = batch<float, N*2>;
+        using float_batch = batch<float, N * 2>;
         using double_batch = batch<double, N>;
 
         using int32_vector = std::vector<int32_t, aligned_allocator<int32_t, A>>;
@@ -865,8 +867,8 @@ namespace xsimd
     inline simd_convert_tester<N, A>::simd_convert_tester(const std::string& n)
         : name(n), i32pos(2), i32neg(-3), i64pos(2), i64neg(-3),
           fpos(float(7.4)), fneg(float(-6.2)), dpos(double(5.4)), dneg(double(-1.2)),
-          fposres(2*N, 7), fnegres(2*N, -6), dposres(N, 5), dnegres(N, -1),
-          i32posres(2*N, float(2)), i32negres(2*N, float(-3)),
+          fposres(2 * N, 7), fnegres(2 * N, -6), dposres(N, 5), dnegres(N, -1),
+          i32posres(2 * N, float(2)), i32negres(2 * N, float(-3)),
           i64posres(N, double(2)), i64negres(N, double(-3))
     {
     }
@@ -906,7 +908,8 @@ namespace xsimd
 
         out << dash << name_shift << dash << std::endl;
         out << space << name << space << std::endl;
-        out << dash << name_shift << dash << std::endl << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
 
         std::string topic = "positive float  -> int32  : ";
         fbres = to_int(tester.fpos);
@@ -999,12 +1002,11 @@ namespace xsimd
 
     namespace detail
     {
-        union bitcast
-        {
-            float   f[2];
+        union bitcast {
+            float f[2];
             int32_t i32[2];
             int64_t i64;
-            double  d;
+            double d;
         };
     }
 
@@ -1083,7 +1085,8 @@ namespace xsimd
 
         out << dash << name_shift << dash << std::endl;
         out << space << name << space << std::endl;
-        out << dash << name_shift << dash << std::endl << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
 
         std::string topic = "cast int32  -> float  : ";
         fbres = bitwise_cast<float_batch>(tester.i32_input);
@@ -1132,7 +1135,7 @@ namespace xsimd
         detail::store_vec(i32bres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.dtoi32_res, out);
         success = success && tmp_success;
-        
+
         topic = "cast double -> int64  : ";
         i64bres = bitwise_cast<int64_batch>(tester.d_input);
         detail::store_vec(i64bres, i64vres);
@@ -1147,8 +1150,6 @@ namespace xsimd
 
         return success;
     }
-
 }
 
 #endif
-

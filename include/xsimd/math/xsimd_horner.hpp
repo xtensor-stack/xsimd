@@ -28,15 +28,15 @@ namespace xsimd
      * horner *
      **********/
 
-     /* origin: boost/simdfunction/horn.hpp*/
-     /*
-      * ====================================================
-      * copyright 2016 NumScale SAS
-      *
-      * Distributed under the Boost Software License, Version 1.0.
-      * (See copy at http://boost.org/LICENSE_1_0.txt)
-      * ====================================================
-      */
+    /* origin: boost/simdfunction/horn.hpp*/
+    /*
+     * ====================================================
+     * copyright 2016 NumScale SAS
+     *
+     * Distributed under the Boost Software License, Version 1.0.
+     * (See copy at http://boost.org/LICENSE_1_0.txt)
+     * ====================================================
+     */
 
     template <class T>
     inline T horner(const T&) noexcept
@@ -60,15 +60,15 @@ namespace xsimd
      * horner1 *
      ***********/
 
-     /* origin: boost/simdfunction/horn1.hpp*/
-     /*
-      * ====================================================
-      * copyright 2016 NumScale SAS
-      *
-      * Distributed under the Boost Software License, Version 1.0.
-      * (See copy at http://boost.org/LICENSE_1_0.txt)
-      * ====================================================
-      */
+    /* origin: boost/simdfunction/horn1.hpp*/
+    /*
+     * ====================================================
+     * copyright 2016 NumScale SAS
+     *
+     * Distributed under the Boost Software License, Version 1.0.
+     * (See copy at http://boost.org/LICENSE_1_0.txt)
+     * ====================================================
+     */
 
     template <class T>
     inline T horner1(const T&) noexcept

@@ -21,7 +21,6 @@ namespace xsimd
     template <>
     class batch_bool<double, 2> : public simd_batch_bool<batch_bool<double, 2>>
     {
-
     public:
 
         batch_bool();
@@ -64,7 +63,6 @@ namespace xsimd
     template <>
     class batch<double, 2> : public simd_batch<batch<double, 2>>
     {
-
     public:
 
         batch();
@@ -96,7 +94,7 @@ namespace xsimd
     batch<double, 2> operator-(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     batch<double, 2> operator*(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     batch<double, 2> operator/(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
-    
+
     batch_bool<double, 2> operator==(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     batch_bool<double, 2> operator!=(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
     batch_bool<double, 2> operator<(const batch<double, 2>& lhs, const batch<double, 2>& rhs);
@@ -230,7 +228,7 @@ namespace xsimd
         : m_value(_mm_loadu_pd(src))
     {
     }
-    
+
     inline batch<double, 2>::batch(const double* src, aligned_mode)
         : m_value(_mm_load_pd(src))
     {
@@ -311,7 +309,7 @@ namespace xsimd
     {
         return _mm_div_pd(lhs, rhs);
     }
-    
+
     inline batch_bool<double, 2> operator==(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return _mm_cmpeq_pd(lhs, rhs);
@@ -379,7 +377,7 @@ namespace xsimd
 
     inline batch<double, 2> abs(const batch<double, 2>& rhs)
     {
-        __m128d sign_mask = _mm_set1_pd(-0.); // -0. = 1 << 63
+        __m128d sign_mask = _mm_set1_pd(-0.);  // -0. = 1 << 63
         return _mm_andnot_pd(sign_mask, rhs);
     }
 
@@ -387,7 +385,7 @@ namespace xsimd
     {
         return abs(rhs);
     }
-    
+
     inline batch<double, 2> sqrt(const batch<double, 2>& rhs)
     {
         return _mm_sqrt_pd(rhs);
@@ -473,4 +471,3 @@ namespace xsimd
 }
 
 #endif
-

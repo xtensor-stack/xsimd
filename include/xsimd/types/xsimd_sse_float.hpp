@@ -21,7 +21,6 @@ namespace xsimd
     template <>
     class batch_bool<float, 4> : public simd_batch_bool<batch_bool<float, 4>>
     {
-
     public:
 
         batch_bool();
@@ -64,7 +63,6 @@ namespace xsimd
     template <>
     class batch<float, 4> : public simd_batch<batch<float, 4>>
     {
-
     public:
 
         batch();
@@ -96,7 +94,7 @@ namespace xsimd
     batch<float, 4> operator-(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch<float, 4> operator*(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch<float, 4> operator/(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
-    
+
     batch_bool<float, 4> operator==(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch_bool<float, 4> operator!=(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
     batch_bool<float, 4> operator<(const batch<float, 4>& lhs, const batch<float, 4>& rhs);
@@ -220,7 +218,7 @@ namespace xsimd
         : m_value(_mm_set1_ps(f))
     {
     }
-    
+
     inline batch<float, 4>::batch(float f0, float f1, float f2, float f3)
         : m_value(_mm_setr_ps(f0, f1, f2, f3))
     {
@@ -300,7 +298,7 @@ namespace xsimd
     {
         return _mm_sub_ps(lhs, rhs);
     }
-    
+
     inline batch<float, 4> operator*(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_mul_ps(lhs, rhs);
@@ -310,7 +308,7 @@ namespace xsimd
     {
         return _mm_div_ps(lhs, rhs);
     }
-    
+
     inline batch_bool<float, 4> operator==(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
         return _mm_cmpeq_ps(lhs, rhs);
@@ -378,7 +376,7 @@ namespace xsimd
 
     inline batch<float, 4> abs(const batch<float, 4>& rhs)
     {
-        __m128 sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+        __m128 sign_mask = _mm_set1_ps(-0.f);  // -0.f = 1 << 31
         return _mm_andnot_ps(sign_mask, rhs);
     }
 
@@ -447,7 +445,7 @@ namespace xsimd
 #endif
         return _mm_cvtss_f32(tmp1);
     }
-    
+
     inline batch<float, 4> haddp(const batch<float, 4>* row)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
@@ -482,4 +480,3 @@ namespace xsimd
 }
 
 #endif
-

@@ -160,7 +160,6 @@ namespace xsimd
     {
         return is_flint(x * batch<T, N>(0.5));
     }
-
 }
 
 #endif

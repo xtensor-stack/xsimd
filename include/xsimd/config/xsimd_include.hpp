@@ -55,4 +55,3 @@
 // TODO: add ALTIVEC instruction set
 
 #endif
-

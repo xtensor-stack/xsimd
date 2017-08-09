@@ -9,11 +9,11 @@
 #ifndef XSIMD_TESTER_HPP
 #define XSIMD_TESTER_HPP
 
-#include <cstddef>
-#include <vector>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <string>
+#include <vector>
 
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
 
@@ -61,4 +61,3 @@ namespace xsimd
 }
 
 #endif
-

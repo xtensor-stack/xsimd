@@ -9,8 +9,8 @@
 #ifndef XSIMD_AVX_CONVERSION_HPP
 #define XSIMD_AVX_CONVERSION_HPP
 
-#include "xsimd_avx_float.hpp"
 #include "xsimd_avx_double.hpp"
+#include "xsimd_avx_float.hpp"
 #include "xsimd_avx_int32.hpp"
 #include "xsimd_avx_int64.hpp"
 
@@ -51,7 +51,7 @@ namespace xsimd
 
     template <class B>
     B bitwise_cast(const batch<int64_t, 4>& x);
-        
+
     /***************************************
      * conversion functions implementation *
      ***************************************/
@@ -175,8 +175,6 @@ namespace xsimd
     {
         return _mm256_castsi256_pd(x);
     }
-
 }
 
 #endif
-

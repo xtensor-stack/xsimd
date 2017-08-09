@@ -6,9 +6,9 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <cmath>
 
 namespace xsimd
 {
@@ -25,17 +25,15 @@ namespace xsimd
          * ====================================================
          */
 #if defined(_MSC_VER)
-#define ONCE0                                                                  \
-__pragma( warning(push) )                                                      \
-__pragma( warning(disable:4127) )                                              \
-while( 0 )                                                                     \
-__pragma( warning(pop) )                                                       \
-/**/
+#define ONCE0                                       \
+    __pragma(warning(push))                         \
+        __pragma(warning(disable : 4127)) while (0) \
+            __pragma(warning(pop)) /**/
 #else
-#define ONCE0 while( 0 )
+#define ONCE0 while (0)
 #endif
 
-        /*
+/*
          * ====================================================
          * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
          *
@@ -46,9 +44,9 @@ __pragma( warning(pop) )                                                       \
          * ====================================================
          */
 
-#if defined(i386) || defined(i486) || \
-	defined(intel) || defined(x86) || defined(i86pc) || \
-	defined(__alpha) || defined(__osf__)
+#if defined(i386) || defined(i486) ||                   \
+    defined(intel) || defined(x86) || defined(i86pc) || \
+    defined(__alpha) || defined(__osf__)
 #define __LITTLE_ENDIAN
 #endif
 
@@ -60,43 +58,55 @@ __pragma( warning(pop) )                                                       \
 #define HIGH_WORD_IDX 0
 #endif
 
-#define GET_HIGH_WORD(i,d)                                                     \
-do {                                                                           \
-  double f = (d);                                                                  \
-  std::memcpy(&(i), reinterpret_cast<char*>(&f) +                              \
-              HIGH_WORD_IDX, sizeof(std::uint32_t));                           \
-} ONCE0                                                                        \
+#define GET_HIGH_WORD(i, d)                             \
+    do                                                  \
+    {                                                   \
+        double f = (d);                                 \
+        std::memcpy(&(i), reinterpret_cast<char*>(&f) + \
+                        HIGH_WORD_IDX,                  \
+                    sizeof(std::uint32_t));             \
+    }                                                   \
+    ONCE0                                               \
 /**/
 
-#define GET_LOW_WORD(i,d)                                                      \
-do {                                                                           \
-  double f = (d);                                                                  \
-  std::memcpy(&(i), reinterpret_cast<char*>(&f) +                              \
-              LOW_WORD_IDX, sizeof(std::uint32_t));                            \
-} ONCE0                                                                        \
+#define GET_LOW_WORD(i, d)                              \
+    do                                                  \
+    {                                                   \
+        double f = (d);                                 \
+        std::memcpy(&(i), reinterpret_cast<char*>(&f) + \
+                        LOW_WORD_IDX,                   \
+                    sizeof(std::uint32_t));             \
+    }                                                   \
+    ONCE0                                               \
 /**/
 
-#define SET_HIGH_WORD(d,v)                                                     \
-do {                                                                           \
-  double f = (d);                                                                  \
-  std::uint32_t value = (v);                                                   \
-  std::memcpy(reinterpret_cast<char*>(&f) +                                    \
-              HIGH_WORD_IDX, &value, sizeof(std::uint32_t));                   \
-  (d) = f;                                                                     \
-} ONCE0                                                                        \
+#define SET_HIGH_WORD(d, v)                         \
+    do                                              \
+    {                                               \
+        double f = (d);                             \
+        std::uint32_t value = (v);                  \
+        std::memcpy(reinterpret_cast<char*>(&f) +   \
+                        HIGH_WORD_IDX,              \
+                    &value, sizeof(std::uint32_t)); \
+        (d) = f;                                    \
+    }                                               \
+    ONCE0                                           \
 /**/
 
-#define SET_LOW_WORD(d,v)                                                      \
-do {                                                                           \
-  double f = (d);                                                                  \
-  std::uint32_t value = (v);                                                   \
-  std::memcpy(reinterpret_cast<char*>(&f) +                                    \
-              LOW_WORD_IDX, &value, sizeof(std::uint32_t));                    \
-  (d) = f;                                                                     \
-} ONCE0                                                                        \
-/**/
-        
-         /*
+#define SET_LOW_WORD(d, v)                          \
+    do                                              \
+    {                                               \
+        double f = (d);                             \
+        std::uint32_t value = (v);                  \
+        std::memcpy(reinterpret_cast<char*>(&f) +   \
+                        LOW_WORD_IDX,               \
+                    &value, sizeof(std::uint32_t)); \
+        (d) = f;                                    \
+    }                                               \
+    ONCE0                                           \
+        /**/
+
+        /*
          * __kernel_rem_pio2(x,y,e0,nx,prec,ipio2)
          * double x[],y[]; int e0,nx,prec; int ipio2[];
          *
@@ -203,10 +213,10 @@ do {                                                                           \
          *
          */
 
-        static int32_t __kernel_rem_pio2(double *x, double *y, int32_t e0, int32_t nx, int32_t prec, const int32_t *ipio2)
+        static int32_t __kernel_rem_pio2(double* x, double* y, int32_t e0, int32_t nx, int32_t prec, const int32_t* ipio2)
         {
-            static const int32_t init_jk[] = { 2,3,4,6 }; /* initial value for jk */
-            
+            static const int32_t init_jk[] = {2, 3, 4, 6}; /* initial value for jk */
+
             static const double PIo2[] = {
                 1.57079625129699707031e+00, /* 0x3FF921FB, 0x40000000 */
                 7.54978941586159635335e-08, /* 0x3E74442D, 0x00000000 */
@@ -218,7 +228,7 @@ do {                                                                           \
                 2.16741683877804819444e-51, /* 0x3569F31D, 0x00000000 */
             };
 
-            static const double 
+            static const double
                 zero = 0.0,
                 one = 1.0,
                 two24 = 1.67772160000000000000e+07, /* 0x41700000, 0x00000000 */
@@ -233,77 +243,108 @@ do {                                                                           \
 
             /* determine jx,jv,q0, note that 3>q0 */
             jx = nx - 1;
-            jv = (e0 - 3) / 24; if (jv<0) jv = 0;
+            jv = (e0 - 3) / 24;
+            if (jv < 0)
+                jv = 0;
             q0 = e0 - 24 * (jv + 1);
 
             /* set up f[0] to f[jx+jk] where f[jx+jk] = ipio2[jv+jk] */
-            j = jv - jx; m = jx + jk;
-            for (i = 0; i <= m; i++, j++) f[i] = (j<0) ? zero : (double)ipio2[j];
+            j = jv - jx;
+            m = jx + jk;
+            for (i = 0; i <= m; i++, j++)
+                f[i] = (j < 0) ? zero : (double)ipio2[j];
 
             /* compute q[0],q[1],...q[jk] */
-            for (i = 0; i <= jk; i++) {
-                for (j = 0, fw = 0.0; j <= jx; j++) fw += x[j] * f[jx + i - j]; q[i] = fw;
+            for (i = 0; i <= jk; i++)
+            {
+                for (j = 0, fw = 0.0; j <= jx; j++)
+                    fw += x[j] * f[jx + i - j];
+                q[i] = fw;
             }
 
             jz = jk;
 
         recompute:
             /* distill q[] into iq[] reversingly */
-            for (i = 0, j = jz, z = q[jz]; j>0; i++, j--) {
-                fw = (double)((int32_t)(twon24* z));
-                iq[i] = (int)(z - two24*fw);
+            for (i = 0, j = jz, z = q[jz]; j > 0; i++, j--)
+            {
+                fw = (double)((int32_t)(twon24 * z));
+                iq[i] = (int)(z - two24 * fw);
                 z = q[j - 1] + fw;
             }
 
             /* compute n */
-            z = std::scalbn(z, q0);		/* actual value of z */
-            z -= 8.0*std::floor(z*0.125);		/* trim off integer >= 8 */
+            z = std::scalbn(z, q0); /* actual value of z */
+            z -= 8.0 * std::floor(z * 0.125); /* trim off integer >= 8 */
             n = (int32_t)z;
             z -= (double)n;
             ih = 0;
-            if (q0>0) {	/* need iq[jz-1] to determine n */
-                i = (iq[jz - 1] >> (24 - q0)); n += i;
+            if (q0 > 0)
+            { /* need iq[jz-1] to determine n */
+                i = (iq[jz - 1] >> (24 - q0));
+                n += i;
                 iq[jz - 1] -= i << (24 - q0);
                 ih = iq[jz - 1] >> (23 - q0);
             }
-            else if (q0 == 0) ih = iq[jz - 1] >> 23;
-            else if (z >= 0.5) ih = 2;
+            else if (q0 == 0)
+                ih = iq[jz - 1] >> 23;
+            else if (z >= 0.5)
+                ih = 2;
 
-            if (ih>0) {	/* q > 0.5 */
-                n += 1; carry = 0;
-                for (i = 0; i<jz; i++) {	/* compute 1-q */
+            if (ih > 0)
+            { /* q > 0.5 */
+                n += 1;
+                carry = 0;
+                for (i = 0; i < jz; i++)
+                { /* compute 1-q */
                     j = iq[i];
-                    if (carry == 0) {
-                        if (j != 0) {
-                            carry = 1; iq[i] = 0x1000000 - j;
+                    if (carry == 0)
+                    {
+                        if (j != 0)
+                        {
+                            carry = 1;
+                            iq[i] = 0x1000000 - j;
                         }
                     }
-                    else  iq[i] = 0xffffff - j;
+                    else
+                        iq[i] = 0xffffff - j;
                 }
-                if (q0>0) {		/* rare case: chance is 1 in 12 */
-                    switch (q0) {
+                if (q0 > 0)
+                { /* rare case: chance is 1 in 12 */
+                    switch (q0)
+                    {
                     case 1:
-                        iq[jz - 1] &= 0x7fffff; break;
+                        iq[jz - 1] &= 0x7fffff;
+                        break;
                     case 2:
-                        iq[jz - 1] &= 0x3fffff; break;
+                        iq[jz - 1] &= 0x3fffff;
+                        break;
                     }
                 }
-                if (ih == 2) {
+                if (ih == 2)
+                {
                     z = one - z;
-                    if (carry != 0) z -= std::scalbn(one, q0);
+                    if (carry != 0)
+                        z -= std::scalbn(one, q0);
                 }
             }
 
             /* check if recomputation is needed */
-            if (z == zero) {
+            if (z == zero)
+            {
                 j = 0;
-                for (i = jz - 1; i >= jk; i--) j |= iq[i];
-                if (j == 0) { /* need recomputation */
-                    for (k = 1; iq[jk - k] == 0; k++);   /* k = no. of terms needed */
+                for (i = jz - 1; i >= jk; i--)
+                    j |= iq[i];
+                if (j == 0)
+                { /* need recomputation */
+                    for (k = 1; iq[jk - k] == 0; k++)
+                        ; /* k = no. of terms needed */
 
-                    for (i = jz + 1; i <= jz + k; i++) {   /* add q[jz+1] to q[jz+k] */
+                    for (i = jz + 1; i <= jz + k; i++)
+                    { /* add q[jz+1] to q[jz+k] */
                         f[jx + i] = (double)ipio2[jv + i];
-                        for (j = 0, fw = 0.0; j <= jx; j++) fw += x[j] * f[jx + i - j];
+                        for (j = 0, fw = 0.0; j <= jx; j++)
+                            fw += x[j] * f[jx + i - j];
                         q[i] = fw;
                     }
                     jz += k;
@@ -312,66 +353,93 @@ do {                                                                           \
             }
 
             /* chop off zero terms */
-            if (z == 0.0) {
-                jz -= 1; q0 -= 24;
-                while (iq[jz] == 0) { jz--; q0 -= 24; }
+            if (z == 0.0)
+            {
+                jz -= 1;
+                q0 -= 24;
+                while (iq[jz] == 0)
+                {
+                    jz--;
+                    q0 -= 24;
+                }
             }
-            else { /* break z into 24-bit if necessary */
+            else
+            { /* break z into 24-bit if necessary */
                 z = std::scalbn(z, -q0);
-                if (z >= two24) {
-                    fw = (double)((int32_t)(twon24*z));
-                    iq[jz] = (int32_t)(z - two24*fw);
-                    jz += 1; q0 += 24;
+                if (z >= two24)
+                {
+                    fw = (double)((int32_t)(twon24 * z));
+                    iq[jz] = (int32_t)(z - two24 * fw);
+                    jz += 1;
+                    q0 += 24;
                     iq[jz] = (int32_t)fw;
                 }
-                else iq[jz] = (int32_t)z;
+                else
+                    iq[jz] = (int32_t)z;
             }
 
             /* convert integer "bit" chunk to floating-point value */
             fw = scalbn(one, q0);
-            for (i = jz; i >= 0; i--) {
-                q[i] = fw*(double)iq[i]; fw *= twon24;
+            for (i = jz; i >= 0; i--)
+            {
+                q[i] = fw * (double)iq[i];
+                fw *= twon24;
             }
 
             /* compute PIo2[0,...,jp]*q[jz,...,0] */
-            for (i = jz; i >= 0; i--) {
-                for (fw = 0.0, k = 0; k <= jp&&k <= jz - i; k++) fw += PIo2[k] * q[i + k];
+            for (i = jz; i >= 0; i--)
+            {
+                for (fw = 0.0, k = 0; k <= jp && k <= jz - i; k++)
+                    fw += PIo2[k] * q[i + k];
                 fq[jz - i] = fw;
             }
 
             /* compress fq[] into y[] */
-            switch (prec) {
+            switch (prec)
+            {
             case 0:
                 fw = 0.0;
-                for (i = jz; i >= 0; i--) fw += fq[i];
+                for (i = jz; i >= 0; i--)
+                    fw += fq[i];
                 y[0] = (ih == 0) ? fw : -fw;
                 break;
             case 1:
             case 2:
                 fw = 0.0;
-                for (i = jz; i >= 0; i--) fw += fq[i];
+                for (i = jz; i >= 0; i--)
+                    fw += fq[i];
                 y[0] = (ih == 0) ? fw : -fw;
                 fw = fq[0] - fw;
-                for (i = 1; i <= jz; i++) fw += fq[i];
+                for (i = 1; i <= jz; i++)
+                    fw += fq[i];
                 y[1] = (ih == 0) ? fw : -fw;
                 break;
-            case 3:	/* painful */
-                for (i = jz; i>0; i--) {
+            case 3: /* painful */
+                for (i = jz; i > 0; i--)
+                {
                     fw = fq[i - 1] + fq[i];
                     fq[i] += fq[i - 1] - fw;
                     fq[i - 1] = fw;
                 }
-                for (i = jz; i>1; i--) {
+                for (i = jz; i > 1; i--)
+                {
                     fw = fq[i - 1] + fq[i];
                     fq[i] += fq[i - 1] - fw;
                     fq[i - 1] = fw;
                 }
-                for (fw = 0.0, i = jz; i >= 2; i--) fw += fq[i];
-                if (ih == 0) {
-                    y[0] = fq[0]; y[1] = fq[1]; y[2] = fw;
+                for (fw = 0.0, i = jz; i >= 2; i--)
+                    fw += fq[i];
+                if (ih == 0)
+                {
+                    y[0] = fq[0];
+                    y[1] = fq[1];
+                    y[2] = fw;
                 }
-                else {
-                    y[0] = -fq[0]; y[1] = -fq[1]; y[2] = -fw;
+                else
+                {
+                    y[0] = -fq[0];
+                    y[1] = -fq[1];
+                    y[2] = -fw;
                 }
             }
             return n & 7;
@@ -430,33 +498,42 @@ do {                                                                           \
             std::int32_t e0, i, j, nx, n, ix, hx;
             std::uint32_t low;
 
-            GET_HIGH_WORD(hx, x);        /* high word of x */
+            GET_HIGH_WORD(hx, x); /* high word of x */
             ix = hx & 0x7fffffff;
-            if (ix <= 0x3fe921fb)   /* |x| ~<= pi/4 , no need for reduction */
+            if (ix <= 0x3fe921fb) /* |x| ~<= pi/4 , no need for reduction */
             {
-                y[0] = x; y[1] = 0; return 0;
+                y[0] = x;
+                y[1] = 0;
+                return 0;
             }
-            if (ix<0x4002d97c) {  /* |x| < 3pi/4, special case with n=+-1 */
-                if (hx>0) {
+            if (ix < 0x4002d97c)
+            { /* |x| < 3pi/4, special case with n=+-1 */
+                if (hx > 0)
+                {
                     z = x - pio2_1;
-                    if (ix != 0x3ff921fb) {     /* 33+53 bit pi is good enough */
+                    if (ix != 0x3ff921fb)
+                    { /* 33+53 bit pi is good enough */
                         y[0] = z - pio2_1t;
                         y[1] = (z - y[0]) - pio2_1t;
                     }
-                    else {        /* near pi/2, use 33+33+53 bit pi */
+                    else
+                    { /* near pi/2, use 33+33+53 bit pi */
                         z -= pio2_2;
                         y[0] = z - pio2_2t;
                         y[1] = (z - y[0]) - pio2_2t;
                     }
                     return 1;
                 }
-                else {    /* negative x */
+                else
+                { /* negative x */
                     z = x + pio2_1;
-                    if (ix != 0x3ff921fb) {     /* 33+53 bit pi is good enough */
+                    if (ix != 0x3ff921fb)
+                    { /* 33+53 bit pi is good enough */
                         y[0] = z + pio2_1t;
                         y[1] = (z - y[0]) + pio2_1t;
                     }
-                    else {        /* near pi/2, use 33+33+53 bit pi */
+                    else
+                    { /* near pi/2, use 33+33+53 bit pi */
                         z += pio2_2;
                         y[0] = z + pio2_2t;
                         y[1] = (z - y[0]) + pio2_2t;
@@ -465,62 +542,82 @@ do {                                                                           \
                     return -1;
                 }
             }
-            if (ix <= 0x413921fb) { /* |x| ~<= 2^19*(pi/2), medium_ size */
+            if (ix <= 0x413921fb)
+            { /* |x| ~<= 2^19*(pi/2), medium_ size */
                 t = std::fabs(x);
-                n = (std::int32_t) (t*invpio2 + half);
+                n = (std::int32_t)(t * invpio2 + half);
                 fn = (double)n;
-                r = t - fn*pio2_1;
-                w = fn*pio2_1t;    /* 1st round good to 85 bit */
-                if ((n<32) && (n>0) && (ix != npio2_hw[n - 1])) {
-                    y[0] = r - w;    /* quick check no cancellation */
+                r = t - fn * pio2_1;
+                w = fn * pio2_1t; /* 1st round good to 85 bit */
+                if ((n < 32) && (n > 0) && (ix != npio2_hw[n - 1]))
+                {
+                    y[0] = r - w; /* quick check no cancellation */
                 }
-                else {
+                else
+                {
                     std::uint32_t high;
                     j = ix >> 20;
                     y[0] = r - w;
                     GET_HIGH_WORD(high, y[0]);
                     i = j - ((high >> 20) & 0x7ff);
-                    if (i>16) {  /* 2nd iteration needed, good to 118 */
+                    if (i > 16)
+                    { /* 2nd iteration needed, good to 118 */
                         t = r;
-                        w = fn*pio2_2;
+                        w = fn * pio2_2;
                         r = t - w;
-                        w = fn*pio2_2t - ((t - r) - w);
+                        w = fn * pio2_2t - ((t - r) - w);
                         y[0] = r - w;
                         GET_HIGH_WORD(high, y[0]);
                         i = j - ((high >> 20) & 0x7ff);
-                        if (i>49) {    /* 3rd iteration need, 151 bits acc */
-                            t = r;    /* will cover all possible cases */
-                            w = fn*pio2_3;
+                        if (i > 49)
+                        { /* 3rd iteration need, 151 bits acc */
+                            t = r; /* will cover all possible cases */
+                            w = fn * pio2_3;
                             r = t - w;
-                            w = fn*pio2_3t - ((t - r) - w);
+                            w = fn * pio2_3t - ((t - r) - w);
                             y[0] = r - w;
                         }
                     }
                 }
                 y[1] = (r - y[0]) - w;
-                if (hx<0) { y[0] = -y[0]; y[1] = -y[1]; return -n; }
-                else     return n;
+                if (hx < 0)
+                {
+                    y[0] = -y[0];
+                    y[1] = -y[1];
+                    return -n;
+                }
+                else
+                    return n;
             }
             /*
             * all other (large) arguments
             */
-            if (ix >= 0x7ff00000) {        /* x is inf or NaN */
-                y[0] = y[1] = x - x; return 0;
+            if (ix >= 0x7ff00000)
+            { /* x is inf or NaN */
+                y[0] = y[1] = x - x;
+                return 0;
             }
             /* set z = scalbn(|x|,ilogb(x)-23) */
             GET_LOW_WORD(low, x);
             SET_LOW_WORD(z, low);
-            e0 = (ix >> 20) - 1046;    /* e0 = ilogb(z)-23; */
+            e0 = (ix >> 20) - 1046; /* e0 = ilogb(z)-23; */
             SET_HIGH_WORD(z, ix - ((std::int32_t)(e0 << 20)));
-            for (i = 0; i<2; i++) {
+            for (i = 0; i < 2; i++)
+            {
                 tx[i] = (double)((std::int32_t)(z));
-                z = (z - tx[i])*two24;
+                z = (z - tx[i]) * two24;
             }
             tx[2] = z;
             nx = 3;
-            while (tx[nx - 1] == zero) nx--;    /* skip zero term */
+            while (tx[nx - 1] == zero)
+                nx--; /* skip zero term */
             n = __kernel_rem_pio2(tx, y, e0, nx, 2, two_over_pi);
-            if (hx<0) { y[0] = -y[0]; y[1] = -y[1]; return -n; }
+            if (hx < 0)
+            {
+                y[0] = -y[0];
+                y[1] = -y[1];
+                return -n;
+            }
             return n;
         }
     }
@@ -531,5 +628,4 @@ do {                                                                           \
 #undef GET_HIGH_WORD
 #undef HIGH_WORD_IDX
 #undef LOW_WORD_IDX
-
 }

@@ -10,6 +10,7 @@
 #define XSIMD_AVX_INT64_HPP
 
 #include <cstdint>
+
 #include "xsimd_base.hpp"
 
 namespace xsimd
@@ -22,7 +23,6 @@ namespace xsimd
     template <>
     class batch_bool<int64_t, 4> : public simd_batch_bool<batch_bool<int64_t, 4>>
     {
-
     public:
 
         batch_bool();
@@ -132,19 +132,19 @@ namespace xsimd
 
 #if XSIMD_X86_INSTR_SET < XSIMD_X86_AVX2_VERSION
 
-#define XSIMD_SPLIT_AVX(name)\
-    __m128i name##_low = _mm256_castsi256_si128(name);\
+#define XSIMD_SPLIT_AVX(name)                          \
+    __m128i name##_low = _mm256_castsi256_si128(name); \
     __m128i name##_high = _mm256_extractf128_si256(name, 1)
 
-#define XSIMD_RETURN_MERGED_SSE(res_low, res_high)\
-    __m256i result = _mm256_castsi128_si256(res_low);\
+#define XSIMD_RETURN_MERGED_SSE(res_low, res_high)    \
+    __m256i result = _mm256_castsi128_si256(res_low); \
     return _mm256_insertf128_si256(result, res_high, 1)
 
-#define XSIMD_APPLY_SSE_FUNCTION(func, avx_lhs, avx_rhs)\
-    XSIMD_SPLIT_AVX(avx_lhs);\
-    XSIMD_SPLIT_AVX(avx_rhs);\
-    __m128i res_low = func(avx_lhs##_low, avx_rhs##_low);\
-    __m128i res_high = func(avx_lhs##_high, avx_rhs##_high);\
+#define XSIMD_APPLY_SSE_FUNCTION(func, avx_lhs, avx_rhs)     \
+    XSIMD_SPLIT_AVX(avx_lhs);                                \
+    XSIMD_SPLIT_AVX(avx_rhs);                                \
+    __m128i res_low = func(avx_lhs##_low, avx_rhs##_low);    \
+    __m128i res_high = func(avx_lhs##_high, avx_rhs##_high); \
     XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
 
@@ -475,7 +475,7 @@ namespace xsimd
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         __m256i sign = _mm256_cmpgt_epi64(_mm256_setzero_si256(), rhs);
-        __m256i inv  = _mm256_xor_si256(rhs, sign);
+        __m256i inv = _mm256_xor_si256(rhs, sign);
         return _mm256_sub_epi64(inv, sign);
 #else
         XSIMD_SPLIT_AVX(rhs);
@@ -498,7 +498,7 @@ namespace xsimd
     {
         return x * y - z;
     }
-    
+
     inline batch<int64_t, 4> fnma(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z)
     {
         return -x * y + z;
@@ -528,8 +528,7 @@ namespace xsimd
 #if defined(__x86_64__)
         return _mm_cvtsi128_si64(res);
 #else
-        union
-        {
+        union {
             int64_t i;
             __m128i m;
         } u;
@@ -575,7 +574,6 @@ namespace xsimd
         XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
     }
-
 }
 
 #undef XSIMD_APPLY_SSE_FUNCTION
@@ -583,4 +581,3 @@ namespace xsimd
 #undef XSIMD_SPLIT_AVX
 
 #endif
-

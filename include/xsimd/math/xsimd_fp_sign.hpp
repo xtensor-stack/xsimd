@@ -10,6 +10,7 @@
 #define XSIMD_FP_SIGN_HPP
 
 #include <type_traits>
+
 #include "xsimd_numerical_constant.hpp"
 
 namespace xsimd
@@ -43,7 +44,7 @@ namespace xsimd
     {
         return abs(x1) | bitofsign(x2);
     }
- 
+
     /***********************
      * sign implementation *
      ***********************/
@@ -137,4 +138,3 @@ namespace xsimd
 }
 
 #endif
-

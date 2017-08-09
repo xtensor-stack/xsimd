@@ -152,10 +152,10 @@ namespace xsimd
                 B hx = x * B(0.5);
                 B hxs = x * hx;
                 B r = horner<B,
-                    0X3F800000UL, // 1
-                    0XBD08887FUL, // -3.3333298E-02
-                    0X3ACF6DB4UL  // 1.582554
-                >(hxs);
+                             0X3F800000UL,  // 1
+                             0XBD08887FUL,  // -3.3333298E-02
+                             0X3ACF6DB4UL  // 1.582554
+                             >(hxs);
                 B t = fnma(r, hx, B(3.));
                 B e = hxs * ((r - t) / (B(6.) - x * t));
                 e = fms(x, e, hxs);
@@ -187,13 +187,12 @@ namespace xsimd
                 B x = hi - lo;
                 B hxs = x * x * B(0.5);
                 B r = horner<B,
-                    0X3FF0000000000000ULL,
-                    0XBFA11111111110F4ULL,
-                    0X3F5A01A019FE5585ULL,
-                    0XBF14CE199EAADBB7ULL,
-                    0X3ED0CFCA86E65239ULL,
-                    0XBE8AFDB76E09C32DULL
-                >(hxs);
+                             0X3FF0000000000000ULL,
+                             0XBFA11111111110F4ULL,
+                             0X3F5A01A019FE5585ULL,
+                             0XBF14CE199EAADBB7ULL,
+                             0X3ED0CFCA86E65239ULL,
+                             0XBE8AFDB76E09C32DULL>(hxs);
                 B t = B(3.) - r * B(0.5) * x;
                 B e = hxs * ((r - t) / (B(6) - x * t));
                 B c = (hi - x) - lo;
@@ -219,7 +218,6 @@ namespace xsimd
                              infinity<b_type>(),
                              detail::expm1_kernel<b_type, T>::compute(x)));
     }
-
 }
 
 #endif
