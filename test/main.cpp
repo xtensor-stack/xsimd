@@ -6,10 +6,53 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
+
 #include "gtest/gtest.h"
+#include "xsimd/config/xsimd_instruction_set.hpp"
+
+using info_map_type = std::map<int, std::string>;
+
+info_map_type init_instruction_map()
+{
+    info_map_type res;
+    res[XSIMD_X86_SSE_VERSION] = "Intel SSE";
+    res[XSIMD_X86_SSE2_VERSION] = "Intel SSE2"; 
+    res[XSIMD_X86_SSE3_VERSION] = "Intel SSE3";
+    res[XSIMD_X86_SSSE3_VERSION] = "Intel SSSE3";
+    res[XSIMD_X86_SSE4_1_VERSION] = "Intel SSE4.1";
+    res[XSIMD_X86_SSE4_2_VERSION] = "Intel SSE4.2";
+    res[XSIMD_X86_AVX_VERSION] = "Intel AVX";
+    res[XSIMD_X86_FMA3_VERSION] = "Intel FMA3";
+    res[XSIMD_X86_AVX2_VERSION] = "Intel AVX2";
+    res[XSIMD_X86_MIC_VERSION] = "Intel MIC";
+    res[XSIMD_X86_AMD_SSE4A_VERSION] = "AMD SSE4A";
+    res[XSIMD_X86_AMD_FMA4_VERSION] = "AMD FMA4";
+    res[XSIMD_X86_AMD_XOP_VERSION] = "AMD XOP";
+    res[XSIMD_PPC_VMX_VERSION] = "PowerPC VM";
+    res[XSIMD_PPC_VSX_VERSION] = "PowerPC VSX";
+    res[XSIMD_PPC_QPX_VERSION] = "PowerPC QPX";
+    res[XSIMD_ARM_NEON_VERSION] = "ARM Neon";
+    res[XSIMD_VERSION_NUMBER_NOT_AVAILABLE] = "No SIMD available";
+    return res;
+}
+
+std::string get_instruction_set_name()
+{
+    static info_map_type info_map(init_instruction_map());
+    return info_map[XSIMD_INSTR_SET];
+}
 
 int main(int argc, char* argv[])
 {
+    std::ofstream out("log/xsimd_info.log", std::ios_base::out);
+    std::string instruction_set = get_instruction_set_name();
+    out << "Instruction set: " << instruction_set << std::endl;
+    std::cout << "Instruction set: " << instruction_set << std::endl;
+
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
