@@ -9,10 +9,10 @@
 #ifndef XSIMD_HPP
 #define XSIMD_HPP
 
-#include "memory/xsimd_aligned_allocator.hpp"
 #include "config/xsimd_config.hpp"
-#include "types/xsimd_traits.hpp"
 #include "math/xsimd_math.hpp"
+#include "memory/xsimd_aligned_allocator.hpp"
+#include "types/xsimd_traits.hpp"
 
 namespace xsimd
 {
@@ -41,7 +41,7 @@ namespace xsimd
 
 
     // Data transfer instructions
-    
+
     /**
      * @defgroup data_transfer Data Transfer Instructions
      */
@@ -121,13 +121,13 @@ namespace xsimd
      * @defgroup generic_load_store Generic load and store
      */
 
-     /**
-      * @ingroup generic_load_store
-      * Loads the memory array pointed to by \c src into a batch and returns it.
-      * \c src is required to be aligned.
-      * @param src the pointer to the memory array to load.
-      * @return the batch wrapping the highest available instruction set.
-      */
+    /**
+     * @ingroup generic_load_store
+     * Loads the memory array pointed to by \c src into a batch and returns it.
+     * \c src is required to be aligned.
+     * @param src the pointer to the memory array to load.
+     * @return the batch wrapping the highest available instruction set.
+     */
     template <class T>
     simd_type<T> load_simd(const T* src, aligned_mode);
 
@@ -180,9 +180,9 @@ namespace xsimd
      */
     template <class T>
     void store_simd(T* dst, const simd_type<T>& src, unaligned_mode);
-    
+
     // Prefetch
-    
+
     template <class T>
     void prefetch(const T* address);
 
@@ -202,7 +202,7 @@ namespace xsimd
             {
                 return V(value);
             }
-        
+
             inline static V load_aligned(const T* src)
             {
                 V res;
@@ -281,7 +281,7 @@ namespace xsimd
     /***********************************************
      * Data transfer instructions implementation
      ***********************************************/
-    
+
     template <class T>
     inline simd_type<T> set_simd(const T& value)
     {
@@ -364,12 +364,12 @@ namespace xsimd
     {
         store_unaligned(dst, src);
     }
-    
+
 
     /*****************************
      * Prefetch implementation
      *****************************/
-    
+
     template <class T>
     inline void prefetch(const T* address)
     {
@@ -396,8 +396,6 @@ namespace xsimd
     }
 
 #endif
-
 }
 
 #endif
-
