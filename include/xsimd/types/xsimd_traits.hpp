@@ -34,6 +34,7 @@ namespace xsimd
     struct simd_traits
     {
         using type = T;
+        using bool_type = bool;
         static constexpr size_t size = 1;
     };
 
@@ -48,6 +49,9 @@ namespace xsimd
     using simd_type = typename simd_traits<T>::type;
 
     template <class T>
+    using simd_bool_type = typename simd_traits<T>::bool_type;
+
+    template <class T>
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
 #ifdef XSIMD_BATCH_DOUBLE_SIZE
@@ -56,6 +60,7 @@ namespace xsimd
     struct simd_traits<int32_t>
     {
         using type = batch<int32_t, XSIMD_BATCH_INT32_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
         static constexpr size_t size = type::size;
     };
 
@@ -70,6 +75,7 @@ namespace xsimd
     struct simd_traits<int64_t>
     {
         using type = batch<int64_t, XSIMD_BATCH_INT64_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
         static constexpr size_t size = type::size;
     };
 
@@ -84,6 +90,7 @@ namespace xsimd
     struct simd_traits<float>
     {
         using type = batch<float, XSIMD_BATCH_FLOAT_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
         static constexpr size_t size = type::size;
     };
 
@@ -98,6 +105,7 @@ namespace xsimd
     struct simd_traits<double>
     {
         using type = batch<double, XSIMD_BATCH_DOUBLE_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
         static constexpr size_t size = type::size;
     };
 
