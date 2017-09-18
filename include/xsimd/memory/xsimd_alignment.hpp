@@ -58,17 +58,20 @@ namespace xsimd
     namespace detail
     {
         template <class T>
-        using void_t = void;
+        struct void_t
+        {
+            using type = void;
+        };
     }
 
-    template <class C, class = detail::void_t<void>>
+    template <class C, class = void>
     struct container_alignment
     {
         using type = unaligned_mode;
     };
 
     template <class C>
-    struct container_alignment<C, detail::void_t<typename C::allocator_type>>
+    struct container_alignment<C, typename detail::void_t<typename C::allocator_type>::type>
     {
         using type = allocator_alignment_t<typename C::allocator_type>;
     };
