@@ -54,6 +54,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/math/xsimd_trigonometric.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_stack_buffer.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_alignment.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_float.hpp

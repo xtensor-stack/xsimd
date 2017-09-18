@@ -9,39 +9,18 @@
 #ifndef XSIMD_HPP
 #define XSIMD_HPP
 
+#include "memory/xsimd_alignment.hpp"
 #include "config/xsimd_config.hpp"
-#include "math/xsimd_math.hpp"
-#include "memory/xsimd_aligned_allocator.hpp"
 #include "types/xsimd_traits.hpp"
+#include "math/xsimd_math.hpp"
 
 namespace xsimd
 {
 
-    // Allocator alignment
-
-    namespace detail
-    {
-        template <class A>
-        struct get_allocator_alignment_impl
-        {
-            using type = unaligned_mode;
-        };
-
-#ifdef XSIMD_X86_INSTR_SET_AVAILABLE
-        template <class T>
-        struct get_allocator_alignment_impl<aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>>
-        {
-            using type = aligned_mode;
-        };
-#endif
-    }
-
-    template <class A>
-    using get_allocator_alignment = typename detail::get_allocator_alignment_impl<A>::type;
-
-
-    // Data transfer instructions
-
+    /******************************
+     * Data transfer instructions *
+     ******************************/
+    
     /**
      * @defgroup data_transfer Data Transfer Instructions
      */
@@ -121,13 +100,13 @@ namespace xsimd
      * @defgroup generic_load_store Generic load and store
      */
 
-    /**
-     * @ingroup generic_load_store
-     * Loads the memory array pointed to by \c src into a batch and returns it.
-     * \c src is required to be aligned.
-     * @param src the pointer to the memory array to load.
-     * @return the batch wrapping the highest available instruction set.
-     */
+     /**
+      * @ingroup generic_load_store
+      * Loads the memory array pointed to by \c src into a batch and returns it.
+      * \c src is required to be aligned.
+      * @param src the pointer to the memory array to load.
+      * @return the batch wrapping the highest available instruction set.
+      */
     template <class T>
     simd_type<T> load_simd(const T* src, aligned_mode);
 
@@ -180,9 +159,9 @@ namespace xsimd
      */
     template <class T>
     void store_simd(T* dst, const simd_type<T>& src, unaligned_mode);
-
+    
     // Prefetch
-
+    
     template <class T>
     void prefetch(const T* address);
 
@@ -396,6 +375,8 @@ namespace xsimd
     }
 
 #endif
+
 }
 
 #endif
+

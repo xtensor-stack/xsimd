@@ -12,23 +12,10 @@
 #include <cstddef>
 #include <ostream>
 
+#include "../memory/xsimd_alignment.hpp"
+
 namespace xsimd
 {
-    /**
-     * @struct aligned_mode
-     * @brief tag for load and store of aligned memory.
-     */
-    struct aligned_mode
-    {
-    };
-
-    /**
-     * @struct unaligned_mode
-     * @brief tag for load and store of unaligned memory.
-     */
-    struct unaligned_mode
-    {
-    };
 
     template <class T, std::size_t N>
     class batch_bool;
