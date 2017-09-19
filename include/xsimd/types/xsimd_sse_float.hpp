@@ -79,8 +79,26 @@ namespace xsimd
         batch& load_aligned(const float* src);
         batch& load_unaligned(const float* src);
 
+        batch& load_aligned(const double* src);
+        batch& load_unaligned(const double* src);
+
+        batch& load_aligned(const int32_t* src);
+        batch& load_unaligned(const int32_t* src);
+
+        batch& load_aligned(const int64_t* src);
+        batch& load_unaligned(const int64_t* src);
+
         void store_aligned(float* dst) const;
         void store_unaligned(float* dst) const;
+
+        void store_aligned(double* dst) const;
+        void store_unaligned(double* dst) const;
+        
+        void store_aligned(int32_t* dst) const;
+        void store_unaligned(int32_t* dst) const;
+        
+        void store_aligned(int64_t* dst) const;
+        void store_unaligned(int64_t* dst) const;
 
         float operator[](std::size_t index) const;
 
@@ -267,6 +285,50 @@ namespace xsimd
         return *this;
     }
 
+    inline batch<float, 4>& batch<float, 4>::load_aligned(const double* src)
+    {
+        __m128 tmp1 = _mm_cvtpd_ps(_mm_load_pd(src));
+        __m128 tmp2 = _mm_cvtpd_ps(_mm_load_pd(src+2));
+        m_value = _mm_shuffle_ps(tmp1, tmp2, _MM_SHUFFLE(1, 0, 1, 0));
+        return *this;
+    }
+
+    inline batch<float, 4>& batch<float, 4>::load_unaligned(const double* src)
+    {
+        __m128 tmp1 = _mm_cvtpd_ps(_mm_loadu_pd(src));
+        __m128 tmp2 = _mm_cvtpd_ps(_mm_loadu_pd(src + 2));
+        m_value = _mm_shuffle_ps(tmp1, tmp2, _MM_SHUFFLE(1, 0, 1, 0));
+        return *this;
+    }
+
+    inline batch<float, 4>& batch<float, 4>::load_aligned(const int32_t* src)
+    {
+        m_value = _mm_cvtepi32_ps(_mm_load_si128((__m128i const*)src));
+        return *this;
+    }
+
+    inline batch<float, 4>& batch<float, 4>::load_unaligned(const int32_t* src)
+    {
+        m_value = _mm_cvtepi32_ps(_mm_loadu_si128((__m128i const*)src));
+        return *this;
+    }
+
+    inline batch<float, 4>& batch<float, 4>::load_aligned(const int64_t* src)
+    {
+        alignas(16) float tmp[4];
+        tmp[0] = float(src[0]);
+        tmp[1] = float(src[1]);
+        tmp[2] = float(src[2]);
+        tmp[3] = float(src[3]);
+        m_value = _mm_load_ps(tmp);
+        return *this;
+    }
+
+    inline batch<float, 4>& batch<float, 4>::load_unaligned(const int64_t* src)
+    {
+        return load_aligned(src);
+    }
+
     inline void batch<float, 4>::store_aligned(float* dst) const
     {
         _mm_store_ps(dst, m_value);
@@ -275,6 +337,49 @@ namespace xsimd
     inline void batch<float, 4>::store_unaligned(float* dst) const
     {
         _mm_storeu_ps(dst, m_value);
+    }
+
+    inline void batch<float, 4>::store_aligned(double* dst) const
+    {
+        __m128d tmp1 = _mm_cvtps_pd(m_value);
+        __m128 ftmp = _mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 3, 2));
+        __m128d tmp2 = _mm_cvtps_pd(ftmp);
+        _mm_store_pd(dst, tmp1);
+        _mm_store_pd(dst + 2, tmp2);
+    }
+
+    inline void batch<float, 4>::store_unaligned(double* dst) const
+    {
+        __m128d tmp1 = _mm_cvtps_pd(m_value);
+        __m128 ftmp = _mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 3, 2));
+        __m128d tmp2 = _mm_cvtps_pd(ftmp);
+        _mm_storeu_pd(dst, tmp1);
+        _mm_storeu_pd(dst + 2, tmp2);
+    }
+
+    inline void batch<float, 4>::store_aligned(int32_t* dst) const
+    {
+        __m128i tmp = _mm_cvtps_epi32(m_value);
+        _mm_store_si128((__m128i*)dst, tmp);
+    }
+
+    inline void batch<float, 4>::store_unaligned(int32_t* dst) const
+    {
+        __m128i tmp = _mm_cvtps_epi32(m_value);
+        _mm_storeu_si128((__m128i*)dst, tmp);
+    }
+
+    inline void batch<float, 4>::store_aligned(int64_t* dst) const
+    {
+        dst[0] = _mm_cvtss_si64(m_value);
+        dst[1] = _mm_cvtss_si64(_mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 1, 1)));
+        dst[2] = _mm_cvtss_si64(_mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 1, 2)));
+        dst[3] = _mm_cvtss_si64(_mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 1, 3)));
+    }
+
+    inline void batch<float, 4>::store_unaligned(int64_t* dst) const
+    {
+        store_aligned(dst);
     }
 
     inline float batch<float, 4>::operator[](std::size_t index) const
