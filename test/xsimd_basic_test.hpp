@@ -1297,6 +1297,24 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
+        topic = "load int32  -> int64  : ";
+        detail::load_vec(i64bres, tester.i32_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load float  -> int64  : ";
+        detail::load_vec(i64bres, tester.f_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load double -> int64  : ";
+        detail::load_vec(i64bres, tester.d_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
         return success;
     }
 
@@ -1396,6 +1414,24 @@ namespace xsimd
         detail::load_vec(i32bres, tester.i32_vec);
         detail::store_vec(i32bres, dvres);
         tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> float  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres,fvres2);
+        tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> int32  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, i32vres2);
+        tmp_success = check_almost_equal(topic, i32vres2, tester.i32_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> double : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
         return success;
