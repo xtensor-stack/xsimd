@@ -162,4 +162,17 @@ TEST(xsimd, avx_cast)
     bool res = xsimd::test_simd_cast<4, 32>(out, "avx cast");
     EXPECT_TRUE(res);
 }
+TEST(xsimd, avx_load)
+{
+    std::ofstream out("log/avx_load.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load<4, 32>(out, "avx load");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_store)
+{
+    std::ofstream out("log/avx_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_store<4, 32>(out, "avx store");
+    EXPECT_TRUE(res);
+}
 #endif
