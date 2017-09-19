@@ -1261,6 +1261,24 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
+        topic = "load int32  -> double : ";
+        detail::load_vec(dbres, tester.i32_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load int64  -> double : ";
+        detail::load_vec(dbres, tester.i64_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load float  -> double : ";
+        detail::load_vec(dbres, tester.f_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
         return success;
     }
 
@@ -1324,6 +1342,24 @@ namespace xsimd
         detail::load_vec(fbres, tester.f_vec);
         detail::store_vec(fbres, dvres);
         tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
+        success = tmp_success && success;
+
+        topic = "store double -> int32  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, i32vres2);
+        tmp_success = check_almost_equal(topic, i32vres2, tester.i32_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> int64  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> float  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, fvres2);
+        tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
         success = tmp_success && success;
 
         return success;

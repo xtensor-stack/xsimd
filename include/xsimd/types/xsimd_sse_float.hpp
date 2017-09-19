@@ -371,10 +371,12 @@ namespace xsimd
 
     inline void batch<float, 4>::store_aligned(int64_t* dst) const
     {
-        dst[0] = _mm_cvtss_si64(m_value);
-        dst[1] = _mm_cvtss_si64(_mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 1, 1)));
-        dst[2] = _mm_cvtss_si64(_mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 1, 2)));
-        dst[3] = _mm_cvtss_si64(_mm_shuffle_ps(m_value, m_value, _MM_SHUFFLE(3, 2, 1, 3)));
+        alignas(16) float tmp[4];
+        _mm_store_ps(tmp, m_value);
+        dst[0] = static_cast<int64_t>(tmp[0]);
+        dst[1] = static_cast<int64_t>(tmp[1]);
+        dst[2] = static_cast<int64_t>(tmp[2]);
+        dst[3] = static_cast<int64_t>(tmp[3]);
     }
 
     inline void batch<float, 4>::store_unaligned(int64_t* dst) const
