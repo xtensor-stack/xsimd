@@ -9,6 +9,7 @@
 #ifndef XSIMD_BASIC_TEST_HPP
 #define XSIMD_BASIC_TEST_HPP
 
+#include <numeric>
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
 
@@ -1147,6 +1148,291 @@ namespace xsimd
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(topic, fvres, tester.dtof_res, out);
         success = success && tmp_success;
+
+        return success;
+    }
+
+    /*********************
+     * load_store tester *
+     *********************/
+
+    template <std::size_t N, std::size_t A>
+    struct simd_load_store_tester
+    {
+        using int32_batch = batch<int32_t, N * 2>;
+        using int64_batch = batch<int64_t, N>;
+        using float_batch = batch<float, N * 2>;
+        using double_batch = batch<double, N>;
+
+        using int32_vector = std::vector<int32_t, aligned_allocator<int32_t, A>>;
+        using int64_vector = std::vector<int64_t, aligned_allocator<int64_t, A>>;
+        using float_vector = std::vector<float, aligned_allocator<float, A>>;
+        using double_vector = std::vector<double, aligned_allocator<double, A>>;
+
+        int32_vector i32_vec;
+        int64_vector i64_vec;
+        float_vector f_vec;
+        double_vector d_vec;
+
+        int32_vector i32_vec2;
+        int64_vector i64_vec2;
+        float_vector f_vec2;
+        double_vector d_vec2;
+
+        std::string name;
+
+        simd_load_store_tester(const std::string& n);
+    };
+
+    template <std::size_t N, std::size_t A>
+    inline simd_load_store_tester<N, A>::simd_load_store_tester(const std::string& n)
+        : name(n), i32_vec(2 * N), i64_vec(2 * N), f_vec(2 * N), d_vec(2 * N),
+          i32_vec2(N), i64_vec2(N), f_vec2(N), d_vec2(N)
+    {
+        std::iota(i32_vec.begin(), i32_vec.end(), int32_t(1));
+        std::iota(i64_vec.begin(), i64_vec.end(), int64_t(1));
+        std::iota(f_vec.begin(), f_vec.end(), float(1));
+        std::iota(d_vec.begin(), d_vec.end(), double(1));
+        std::iota(i32_vec2.begin(), i32_vec2.end(), int32_t(1));
+        std::iota(i64_vec2.begin(), i64_vec2.end(), int64_t(1));
+        std::iota(f_vec2.begin(), f_vec2.end(), float(1));
+        std::iota(d_vec2.begin(), d_vec2.end(), double(1));
+    }
+
+    /*************
+     * load test *
+     *************/
+
+    template <class T>
+    inline bool test_simd_load(std::ostream& out, T& tester)
+    {
+        using int32_batch = typename T::int32_batch;
+        using int64_batch = typename T::int64_batch;
+        using float_batch = typename T::float_batch;
+        using double_batch = typename T::double_batch;
+        using int32_vector = typename T::int32_vector;
+        using int64_vector = typename T::int64_vector;
+        using float_vector = typename T::float_vector;
+        using double_vector = typename T::double_vector;
+
+        int32_batch i32bres;
+        int64_batch i64bres;
+        float_batch fbres;
+        double_batch dbres;
+
+        int32_vector i32vres(float_batch::size);
+        int64_vector i64vres(float_batch::size);
+        float_vector fvres(float_batch::size);
+        double_vector dvres(float_batch::size);
+
+        int32_vector i32vres2(double_batch::size);
+        int64_vector i64vres2(double_batch::size);
+        float_vector fvres2(double_batch::size);
+        double_vector dvres2(double_batch::size);
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
+
+        std::string topic = "load int32  -> float  : ";
+        detail::load_vec(fbres, tester.i32_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load int64  -> float  : ";
+        detail::load_vec(fbres, tester.i64_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load double -> float  : ";
+        detail::load_vec(fbres, tester.d_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load int32  -> double : ";
+        detail::load_vec(dbres, tester.i32_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load int64  -> double : ";
+        detail::load_vec(dbres, tester.i64_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load float  -> double : ";
+        detail::load_vec(dbres, tester.f_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load int64  -> int32  : ";
+        detail::load_vec(i32bres, tester.i64_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load float  -> int32  : ";
+        detail::load_vec(i32bres, tester.f_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load double -> int32  : ";
+        detail::load_vec(i32bres, tester.d_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load int32  -> int64  : ";
+        detail::load_vec(i64bres, tester.i32_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load float  -> int64  : ";
+        detail::load_vec(i64bres, tester.f_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load double -> int64  : ";
+        detail::load_vec(i64bres, tester.d_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        return success;
+    }
+
+    /**************
+     * store test *
+     **************/
+
+    template <class T>
+    inline bool test_simd_store(std::ostream& out, T& tester)
+    {
+        using int32_batch = typename T::int32_batch;
+        using int64_batch = typename T::int64_batch;
+        using float_batch = typename T::float_batch;
+        using double_batch = typename T::double_batch;
+        using int32_vector = typename T::int32_vector;
+        using int64_vector = typename T::int64_vector;
+        using float_vector = typename T::float_vector;
+        using double_vector = typename T::double_vector;
+
+        int32_batch i32bres;
+        int64_batch i64bres;
+        float_batch fbres;
+        double_batch dbres;
+
+        int32_vector i32vres(float_batch::size);
+        int64_vector i64vres(float_batch::size);
+        float_vector fvres(float_batch::size);
+        double_vector dvres(float_batch::size);
+
+        int32_vector i32vres2(double_batch::size);
+        int64_vector i64vres2(double_batch::size);
+        float_vector fvres2(double_batch::size);
+        double_vector dvres2(double_batch::size);
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
+
+        std::string topic = "store float  -> int32  : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> int64  : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, i64vres);
+        tmp_success = check_almost_equal(topic, i64vres, tester.i64_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> double : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, dvres);
+        tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
+        success = tmp_success && success;
+
+        topic = "store double -> int32  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, i32vres2);
+        tmp_success = check_almost_equal(topic, i32vres2, tester.i32_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> int64  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> float  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, fvres2);
+        tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> float  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> int64  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, i64vres);
+        tmp_success = check_almost_equal(topic, i64vres, tester.i64_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> double : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, dvres);
+        tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> float  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres,fvres2);
+        tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> int32  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, i32vres2);
+        tmp_success = check_almost_equal(topic, i32vres2, tester.i32_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> double : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
 
         return success;
     }

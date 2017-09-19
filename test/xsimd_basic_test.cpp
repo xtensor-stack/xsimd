@@ -46,6 +46,20 @@ namespace xsimd
         simd_cast_tester<N, A> tester(name);
         return test_simd_cast(out, tester);
     }
+
+    template <size_t N, size_t A>
+    bool test_simd_load(std::ostream& out, const std::string& name)
+    {
+        simd_load_store_tester<N, A> tester(name);
+        return test_simd_load(out, tester);
+    }
+
+    template <size_t N, size_t A>
+    bool test_simd_store(std::ostream& out, const std::string& name)
+    {
+        simd_load_store_tester<N, A> tester(name);
+        return test_simd_store(out, tester);
+    }
 }
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
@@ -90,6 +104,20 @@ TEST(xsimd, sse_cast)
     bool res = xsimd::test_simd_cast<2, 16>(out, "sse cast");
     EXPECT_TRUE(res);
 }
+
+TEST(xsimd, sse_load)
+{
+    std::ofstream out("log/sse_load.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load<2, 16>(out, "sse load");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_store)
+{
+    std::ofstream out("log/sse_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_store<2, 16>(out, "sse store");
+    EXPECT_TRUE(res);
+}
 #endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
@@ -132,6 +160,19 @@ TEST(xsimd, avx_cast)
 {
     std::ofstream out("log/avx_cast.log", std::ios_base::out);
     bool res = xsimd::test_simd_cast<4, 32>(out, "avx cast");
+    EXPECT_TRUE(res);
+}
+TEST(xsimd, avx_load)
+{
+    std::ofstream out("log/avx_load.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load<4, 32>(out, "avx load");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_store)
+{
+    std::ofstream out("log/avx_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_store<4, 32>(out, "avx store");
     EXPECT_TRUE(res);
 }
 #endif

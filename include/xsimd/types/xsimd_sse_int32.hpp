@@ -81,8 +81,26 @@ namespace xsimd
         batch& load_aligned(const int32_t* src);
         batch& load_unaligned(const int32_t* src);
 
+        batch& load_aligned(const int64_t* src);
+        batch& load_unaligned(const int64_t* src);
+
+        batch& load_aligned(const float* src);
+        batch& load_unaligned(const float* src);
+
+        batch& load_aligned(const double* src);
+        batch& load_unaligned(const double* src);
+
         void store_aligned(int32_t* dst) const;
         void store_unaligned(int32_t* dst) const;
+
+        void store_aligned(int64_t* dst) const;
+        void store_unaligned(int64_t* dst) const;
+
+        void store_aligned(float* dst) const;
+        void store_unaligned(float* dst) const;
+
+        void store_aligned(double* dst) const;
+        void store_unaligned(double* dst) const;
 
         int32_t operator[](std::size_t index) const;
 
@@ -269,6 +287,49 @@ namespace xsimd
         return *this;
     }
 
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const int64_t* src)
+    {
+        alignas(16) int32_t tmp[4];
+        tmp[0] = static_cast<int32_t>(src[0]);
+        tmp[1] = static_cast<int32_t>(src[1]);
+        tmp[2] = static_cast<int32_t>(src[2]);
+        tmp[3] = static_cast<int32_t>(src[3]);
+        return load_aligned(tmp);
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_unaligned(const int64_t* src)
+    {
+        return load_aligned(src);
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const float* src)
+    {
+        m_value = _mm_cvtps_epi32(_mm_load_ps(src));
+        return *this;
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_unaligned(const float* src)
+    {
+        m_value = _mm_cvtps_epi32(_mm_loadu_ps(src));
+        return *this;
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const double* src)
+    {
+        __m128i tmp1 = _mm_cvtpd_epi32(_mm_load_pd(src));
+        __m128i tmp2 = _mm_cvtpd_epi32(_mm_load_pd(src + 2));
+        m_value = _mm_unpacklo_epi64(tmp1, tmp2);
+        return *this;
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_unaligned(const double* src)
+    {
+        __m128i tmp1 = _mm_cvtpd_epi32(_mm_loadu_pd(src));
+        __m128i tmp2 = _mm_cvtpd_epi32(_mm_loadu_pd(src + 2));
+        m_value = _mm_unpacklo_epi64(tmp1, tmp2);
+        return *this;
+    }
+
     inline void batch<int32_t, 4>::store_aligned(int32_t* dst) const
     {
         _mm_store_si128((__m128i*)dst, m_value);
@@ -277,6 +338,47 @@ namespace xsimd
     inline void batch<int32_t, 4>::store_unaligned(int32_t* dst) const
     {
         _mm_storeu_si128((__m128i*)dst, m_value);
+    }
+
+    inline void batch<int32_t, 4>::store_aligned(int64_t* dst) const
+    {
+        alignas(16) int32_t tmp[4];
+        store_aligned(tmp);
+        dst[0] = int64_t(tmp[0]);
+        dst[1] = int64_t(tmp[1]);
+        dst[2] = int64_t(tmp[2]);
+        dst[3] = int64_t(tmp[3]);
+    }
+
+    inline void batch<int32_t, 4>::store_unaligned(int64_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<int32_t, 4>::store_aligned(float* dst) const
+    {
+        _mm_store_ps(dst, _mm_cvtepi32_ps(m_value));
+    }
+
+    inline void batch<int32_t, 4>::store_unaligned(float* dst) const
+    {
+        _mm_storeu_ps(dst, _mm_cvtepi32_ps(m_value));
+    }
+
+    inline void batch<int32_t, 4>::store_aligned(double* dst) const
+    {
+        __m128d tmp1 = _mm_cvtepi32_pd(m_value);
+        __m128d tmp2 = _mm_cvtepi32_pd(_mm_unpackhi_epi64(m_value, m_value));
+        _mm_store_pd(dst, tmp1);
+        _mm_store_pd(dst + 2, tmp2);
+    }
+
+    inline void batch<int32_t, 4>::store_unaligned(double* dst) const
+    {
+        __m128d tmp1 = _mm_cvtepi32_pd(m_value);
+        __m128d tmp2 = _mm_cvtepi32_pd(_mm_unpackhi_epi64(m_value, m_value));
+        _mm_storeu_pd(dst, tmp1);
+        _mm_storeu_pd(dst + 2, tmp2);
     }
 
     inline int32_t batch<int32_t, 4>::operator[](std::size_t index) const
