@@ -1279,6 +1279,24 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
+        topic = "load int64  -> int32  : ";
+        detail::load_vec(i32bres, tester.i64_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load float  -> int32  : ";
+        detail::load_vec(i32bres, tester.f_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load double -> int32  : ";
+        detail::load_vec(i32bres, tester.d_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
         return success;
     }
 
@@ -1360,6 +1378,24 @@ namespace xsimd
         detail::load_vec(dbres, tester.d_vec);
         detail::store_vec(dbres, fvres2);
         tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> float  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> int64  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, i64vres);
+        tmp_success = check_almost_equal(topic, i64vres, tester.i64_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> double : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, dvres);
+        tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
         success = tmp_success && success;
 
         return success;

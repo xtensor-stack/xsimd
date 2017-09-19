@@ -359,14 +359,12 @@ namespace xsimd
 
     inline void batch<float, 4>::store_aligned(int32_t* dst) const
     {
-        __m128i tmp = _mm_cvtps_epi32(m_value);
-        _mm_store_si128((__m128i*)dst, tmp);
+        _mm_store_si128((__m128i*)dst, _mm_cvtps_epi32(m_value));
     }
 
     inline void batch<float, 4>::store_unaligned(int32_t* dst) const
     {
-        __m128i tmp = _mm_cvtps_epi32(m_value);
-        _mm_storeu_si128((__m128i*)dst, tmp);
+        _mm_storeu_si128((__m128i*)dst, _mm_cvtps_epi32(m_value));
     }
 
     inline void batch<float, 4>::store_aligned(int64_t* dst) const
