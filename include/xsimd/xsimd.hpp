@@ -31,8 +31,8 @@ namespace xsimd
      * @param value the scalar used to initialize the batch.
      * @return the batch wrapping the highest available instruction set. 
      */
-    template <class T>
-    simd_type<T> set_simd(const T& value);
+    template <class T1, class T2 = T1>
+    simd_type<T2> set_simd(const T1& value);
 
     /**
      * @ingroup data_transfer
@@ -41,8 +41,8 @@ namespace xsimd
      * @param src the pointer to the memory array to load.
      * @return the batch wrapping the highest available instruction set. 
      */
-    template <class T>
-    simd_type<T> load_aligned(const T* src);
+    template <class T1, class T2 = T1>
+    simd_type<T2> load_aligned(const T1* src);
 
     /**
      * @ingroup data_transfer
@@ -51,8 +51,8 @@ namespace xsimd
      * @param src the pointer to the memory array to load.
      * @param dst the destination batch.
      */
-    template <class T>
-    void load_aligned(const T* src, simd_type<T>& dst);
+    template <class T1, class T2 = T1>
+    void load_aligned(const T1* src, simd_type<T2>& dst);
 
     /**
      * @ingroup data_transfer
@@ -61,8 +61,8 @@ namespace xsimd
      * @param src the pointer to the memory array to load.
      * @return the batch wrapping the highest available instruction set.
      */
-    template <class T>
-    simd_type<T> load_unaligned(const T* src);
+    template <class T1, class T2 = T1>
+    simd_type<T2> load_unaligned(const T1* src);
 
     /**
      * @ingroup data_transfer
@@ -71,8 +71,8 @@ namespace xsimd
      * @param src the pointer to the memory array to load.
      * @param dst the destination batch.
      */
-    template <class T>
-    void load_unaligned(const T* src, simd_type<T>& dst);
+    template <class T1, class T2 = T1>
+    void load_unaligned(const T1* src, simd_type<T2>& dst);
 
     /**
      * @ingroup data_transfer
@@ -81,8 +81,8 @@ namespace xsimd
      * @param dst the pointer to the memory array.
      * @param src the batch to store.
      */
-    template <class T>
-    void store_aligned(T* dst, const simd_type<T>& src);
+    template <class T1, class T2 = T1>
+    void store_aligned(T1* dst, const simd_type<T2>& src);
 
     /**
      * @ingroup data_transfer
@@ -91,8 +91,8 @@ namespace xsimd
      * @param dst the pointer to the memory array.
      * @param src the batch to store.
      */
-    template <class T>
-    void store_unaligned(T* dst, const simd_type<T>& src);
+    template <class T1, class T2 = T1>
+    void store_unaligned(T1* dst, const simd_type<T2>& src);
 
     // Load / store generic functions
 
@@ -107,8 +107,8 @@ namespace xsimd
       * @param src the pointer to the memory array to load.
       * @return the batch wrapping the highest available instruction set.
       */
-    template <class T>
-    simd_type<T> load_simd(const T* src, aligned_mode);
+    template <class T1, class T2 = T1>
+    simd_type<T2> load_simd(const T1* src, aligned_mode);
 
     /**
      * @ingroup generic_load_store
@@ -117,8 +117,8 @@ namespace xsimd
      * @param src the pointer to the memory array to load.
      * @param dst the destination batch.
      */
-    template <class T>
-    void load_simd(const T* src, simd_type<T>& dst, aligned_mode);
+    template <class T1, class T2 = T1>
+    void load_simd(const T1* src, simd_type<T2>& dst, aligned_mode);
 
     /**
      * @ingroup generic_load_store
@@ -127,8 +127,8 @@ namespace xsimd
      * @param src the pointer to the memory array to load.
      * @return the batch wrapping the highest available instruction set.
      */
-    template <class T>
-    simd_type<T> load_simd(const T* src, unaligned_mode);
+    template <class T1, class T2 = T1>
+    simd_type<T2> load_simd(const T1* src, unaligned_mode);
 
     /**
      * @ingroup generic_load_store
@@ -137,8 +137,8 @@ namespace xsimd
      * @param src the pointer to the memory array to load.
      * @param dst the destination batch.
      */
-    template <class T>
-    void load_simd(const T* src, simd_type<T>& dst, unaligned_mode);
+    template <class T1, class T2 = T1>
+    void load_simd(const T1* src, simd_type<T2>& dst, unaligned_mode);
 
     /**
      * @ingroup generic_load_store
@@ -147,8 +147,8 @@ namespace xsimd
      * @param dst the pointer to the memory array.
      * @param src the batch to store.
      */
-    template <class T>
-    void store_simd(T* dst, const simd_type<T>& src, aligned_mode);
+    template <class T1, class T2 = T1>
+    void store_simd(T1* dst, const simd_type<T2>& src, aligned_mode);
 
     /**
      * @ingroup generic_load_store
@@ -157,8 +157,8 @@ namespace xsimd
      * @param dst the pointer to the memory array.
      * @param src the batch to store.
      */
-    template <class T>
-    void store_simd(T* dst, const simd_type<T>& src, unaligned_mode);
+    template <class T1, class T2 = T1>
+    void store_simd(T1* dst, const simd_type<T2>& src, unaligned_mode);
     
     // Prefetch
     
@@ -179,7 +179,8 @@ namespace xsimd
         {
             inline static V set_simd(const T& value)
             {
-                return V(value);
+                using value_type = typename V::value_type;
+                return V(value_type(value));
             }
 
             inline static V load_aligned(const T* src)
@@ -261,46 +262,46 @@ namespace xsimd
      * Data transfer instructions implementation
      ***********************************************/
 
-    template <class T>
-    inline simd_type<T> set_simd(const T& value)
+    template <class T1, class T2>
+    inline simd_type<T2> set_simd(const T1& value)
     {
-        return detail::simd_function_invoker<T, simd_type<T>>::set_simd(value);
+        return detail::simd_function_invoker<T1, simd_type<T2>>::set_simd(value);
     }
 
-    template <class T>
-    inline simd_type<T> load_aligned(const T* src)
+    template <class T1, class T2>
+    inline simd_type<T2> load_aligned(const T1* src)
     {
-        return detail::simd_function_invoker<T, simd_type<T>>::load_aligned(src);
+        return detail::simd_function_invoker<T1, simd_type<T2>>::load_aligned(src);
     }
 
-    template <class T>
-    inline void load_aligned(const T* src, simd_type<T>& dst)
+    template <class T1, class T2>
+    inline void load_aligned(const T1* src, simd_type<T2>& dst)
     {
-        detail::simd_function_invoker<T, simd_type<T>>::load_aligned(src, dst);
+        detail::simd_function_invoker<T1, simd_type<T2>>::load_aligned(src, dst);
     }
 
-    template <class T>
-    inline simd_type<T> load_unaligned(const T* src)
+    template <class T1, class T2>
+    inline simd_type<T2> load_unaligned(const T1* src)
     {
-        return detail::simd_function_invoker<T, simd_type<T>>::load_unaligned(src);
+        return detail::simd_function_invoker<T1, simd_type<T2>>::load_unaligned(src);
     }
 
-    template <class T>
-    inline void load_unaligned(const T* src, simd_type<T>& dst)
+    template <class T1, class T2>
+    inline void load_unaligned(const T1* src, simd_type<T2>& dst)
     {
-        detail::simd_function_invoker<T, simd_type<T>>::load_unaligned(src, dst);
+        detail::simd_function_invoker<T1, simd_type<T2>>::load_unaligned(src, dst);
     }
 
-    template <class T>
-    inline void store_aligned(T* dst, const simd_type<T>& src)
+    template <class T1, class T2>
+    inline void store_aligned(T1* dst, const simd_type<T2>& src)
     {
-        detail::simd_function_invoker<T, simd_type<T>>::store_aligned(dst, src);
+        detail::simd_function_invoker<T1, simd_type<T2>>::store_aligned(dst, src);
     }
 
-    template <class T>
-    inline void store_unaligned(T* dst, const simd_type<T>& src)
+    template <class T1, class T2>
+    inline void store_unaligned(T1* dst, const simd_type<T2>& src)
     {
-        detail::simd_function_invoker<T, simd_type<T>>::store_unaligned(dst, src);
+        detail::simd_function_invoker<T1, simd_type<T2>>::store_unaligned(dst, src);
     }
 
 
@@ -308,40 +309,40 @@ namespace xsimd
      * Load / store generic functions implementation
      ***************************************************/
 
-    template <class T>
-    inline simd_type<T> load_simd(const T* src, aligned_mode)
+    template <class T1, class T2>
+    inline simd_type<T2> load_simd(const T1* src, aligned_mode)
     {
-        return load_aligned(src);
+        return load_aligned<T1, T2>(src);
     }
 
-    template <class T>
-    inline void load_simd(const T* src, simd_type<T>& dst, aligned_mode)
+    template <class T1, class T2>
+    inline void load_simd(const T1* src, simd_type<T2>& dst, aligned_mode)
     {
-        load_aligned(src, dst);
+        load_aligned<T1, T2>(src, dst);
     }
 
-    template <class T>
-    inline simd_type<T> load_simd(const T* src, unaligned_mode)
+    template <class T1, class T2>
+    inline simd_type<T2> load_simd(const T1* src, unaligned_mode)
     {
-        return load_unaligned(src);
+        return load_unaligned<T1, T2>(src);
     }
 
-    template <class T>
-    inline void load_simd(const T* src, simd_type<T>& dst, unaligned_mode)
+    template <class T1, class T2>
+    inline void load_simd(const T1* src, simd_type<T2>& dst, unaligned_mode)
     {
-        load_unaligned(src, dst);
+        load_unaligned<T1, T2>(src, dst);
     }
 
-    template <class T>
-    inline void store_simd(T* dst, const simd_type<T>& src, aligned_mode)
+    template <class T1, class T2>
+    inline void store_simd(T1* dst, const simd_type<T2>& src, aligned_mode)
     {
-        store_aligned(dst, src);
+        store_aligned<T1, T2>(dst, src);
     }
 
-    template <class T>
-    inline void store_simd(T* dst, const simd_type<T>& src, unaligned_mode)
+    template <class T1, class T2>
+    inline void store_simd(T1* dst, const simd_type<T2>& src, unaligned_mode)
     {
-        store_unaligned(dst, src);
+        store_unaligned<T1, T2>(dst, src);
     }
 
 
