@@ -6,6 +6,7 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#include <cstddef>
 #include <vector>
 #include <numeric>
 
@@ -23,10 +24,12 @@ namespace xsimd
         std::vector<int32_t, aligned_allocator<int32_t, 32>> ires;
 
         interface_tester();
+
+        static const std::size_t SIZE = simd_traits<float>::size;
     };
 
     interface_tester::interface_tester()
-        : fvec(8), ivec(8), fres(8), ires(8)
+        : fvec(SIZE), ivec(SIZE), fres(SIZE), ires(SIZE)
     {
         std::iota(fvec.begin(), fvec.end(), 1.f);
         std::iota(ivec.begin(), ivec.end(), 1);
