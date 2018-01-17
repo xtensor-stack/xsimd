@@ -95,7 +95,6 @@ endif()
 
 find_package(Threads)
 
-include_directories(${XSIMD_INCLUDE_DIR})
 include_directories(${GTEST_INCLUDE_DIRS})
 
 set(XSIMD_TESTS
@@ -126,6 +125,6 @@ set(XSIMD_TESTS
 
 set(XSIMD_TARGET test_xsimd)
 add_executable(${XSIMD_TARGET} EXCLUDE_FROM_ALL ${XSIMD_TESTS} ${XSIMD_HEADERS})
-target_link_libraries(${XSIMD_TARGET} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${XSIMD_TARGET} xsimd ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 add_custom_target(xtest COMMAND test_xsimd DEPENDS ${XSIMD_TARGET})
