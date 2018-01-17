@@ -71,6 +71,10 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
 )
 
+add_library(xsimd INTERFACE)
+target_include_directories(xsimd INTERFACE $<BUILD_INTERFACE:${XSIMD_INCLUDE_DIR}>
+                                           $<INSTALL_INTERFACE:include>)
+
 OPTION(BUILD_TESTS "xsimd test suite" ON)
 OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 
@@ -88,6 +92,13 @@ endif()
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+
+install(TARGETS xsimd
+        EXPORT ${PROJECT_NAME}-targets)
+
+# Makes the project importable from the build directory
+export(EXPORT ${PROJECT_NAME}-targets
+       FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
 
 install(DIRECTORY ${XSIMD_INCLUDE_DIR}/xsimd
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
@@ -109,5 +120,8 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Conf
                                  COMPATIBILITY AnyNewerVersion)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
+install(EXPORT ${PROJECT_NAME}-targets
+        FILE ${PROJECT_NAME}Targets.cmake
         DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
 
