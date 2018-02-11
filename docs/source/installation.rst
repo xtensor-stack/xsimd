@@ -7,15 +7,53 @@
 Installation
 ============
 
-`xsimd` is a header-only library. We provide a package for the conda package manager.
+Although ``xsimd`` is a header-only library, we provide standardized means to install it, with package managers or with cmake.
+
+Besides the xsimd headers, all these methods place the ``cmake`` project configuration file in the right location so that third-party projects can use cmake's ``find_package`` to locate xsimd headers.
+
+.. image:: conda.svg
+
+Using the conda package
+-----------------------
+
+A package for xsimd is available on the conda package manager.
 
 .. code::
 
-    conda install -c conda-forge xsimd
+    conda install -c conda-forge xsimd 
 
-Or you can directly install it from the sources:
+.. image:: spack.svg
+
+Using the Spack package
+-----------------------
+
+A package for xsimd is available on the Spack package manager.
 
 .. code::
 
-    cmake -D CMAKE_INSTALL_PREFIX=your_install_prefix
+    spack install xsimd
+    spack load xsimd
+
+.. image:: cmake.svg
+
+From source with cmake
+----------------------
+
+You can also install ``xsimd`` from source with cmake. On Unix platforms, from the source directory:
+
+.. code::
+
+    mkdir build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/path/to/prefix ..
     make install
+
+On Windows platforms, from the source directory:
+
+.. code::
+
+    mkdir build
+    cd build
+    cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=/path/to/prefix ..
+    nmake
+    nmake install
