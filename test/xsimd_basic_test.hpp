@@ -482,7 +482,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.min_res, out);
         success = success && tmp_success;
-
+   
         topic = "max(simd, simd)          : ";
         vres = max(lhs, rhs);
         detail::store_vec(vres, res);
@@ -841,6 +841,8 @@ namespace xsimd
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
+        std::string name;
+
         int32_batch i32pos;
         int32_batch i32neg;
         int64_batch i64pos;
@@ -858,8 +860,6 @@ namespace xsimd
         float_vector i32negres;
         double_vector i64posres;
         double_vector i64negres;
-
-        std::string name;
 
         simd_convert_tester(const std::string& name);
     };
@@ -980,6 +980,8 @@ namespace xsimd
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
+        std::string name;
+
         int32_batch i32_input;
         int64_batch i64_input;
         float_batch f_input;
@@ -995,8 +997,6 @@ namespace xsimd
         double_vector i32tod_res;
         double_vector i64tod_res;
         double_vector ftod_res;
-
-        std::string name;
 
         simd_cast_tester(const std::string& n);
     };
@@ -1169,6 +1169,8 @@ namespace xsimd
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
+        std::string name;
+
         int32_vector i32_vec;
         int64_vector i64_vec;
         float_vector f_vec;
@@ -1178,8 +1180,6 @@ namespace xsimd
         int64_vector i64_vec2;
         float_vector f_vec2;
         double_vector d_vec2;
-
-        std::string name;
 
         simd_load_store_tester(const std::string& n);
     };

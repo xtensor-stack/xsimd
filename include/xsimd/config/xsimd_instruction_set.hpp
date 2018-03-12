@@ -165,6 +165,9 @@
 
 #if !defined(XSIMD_ARM_INSTR_SET) && (defined(__ARM_NEON__) || defined(__aarch64__) || defined(_M_ARM))
     #define XSIMD_ARM_INSTR_SET XSIMD_ARM_NEON_VERSION
+    #if defined(__aarch64__)
+        #define XSIMD_ARM_64 1
+    #endif
 #endif
 
 #if !defined(XSIMD_ARM_INSTR_SET)

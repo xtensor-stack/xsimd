@@ -27,6 +27,15 @@
 #include "xsimd_avx_int64.hpp"
 #endif
 
+#if defined(XSIMD_ARM_INSTR_SET)
+#include "xsimd_neon_conversion.hpp"
+#include "xsimd_neon_double.hpp"
+#include "xsimd_neon_float.hpp"
+#include "xsimd_neon_int64.hpp"
+#include "xsimd_neon_int32.hpp"
+#include "xsimd_neon_bool.hpp"
+#endif
+
 #include "xsimd_utils.hpp"
 
 #endif

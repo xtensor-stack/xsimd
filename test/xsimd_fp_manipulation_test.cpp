@@ -57,3 +57,19 @@ TEST(xsimd, avx_double_fp_manipulation)
     EXPECT_TRUE(res);
 }
 #endif
+
+#if XSIMD_ARM_INSTR_SET
+TEST(xsimd, neon_float_fp_manipulation)
+{
+    std::ofstream out("log/neon_float_fp_manipulation.log", std::ios_base::out);
+    bool res = xsimd::test_fp_manipulation<float, 4, 32>(out, "neon float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_double_fp_manipulation)
+{
+    std::ofstream out("log/neon_double_fp_manipulation.log", std::ios_base::out);
+    bool res = xsimd::test_fp_manipulation<double, 2, 32>(out, "neon double");
+    EXPECT_TRUE(res);
+}
+#endif

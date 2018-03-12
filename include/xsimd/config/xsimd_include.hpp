@@ -52,6 +52,10 @@
     #include <ammintrin.h>
 #endif // XSIMD_X86_AMD_INSTR_SET
 
+#if defined(XSIMD_ARM_INSTR_SET)
+    #include <arm_neon.h>
+#endif
+
 // TODO: add ALTIVEC instruction set
 
 #endif

@@ -176,3 +176,60 @@ TEST(xsimd, avx_store)
     EXPECT_TRUE(res);
 }
 #endif
+
+#if defined(XSIMD_ARM_INSTR_SET)
+TEST(xsimd, neon_float_basic)
+{
+    std::ofstream out("log/neon_float_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd<float, 4, 16>(out, "avx float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_double_basic)
+{
+    std::ofstream out("log/neon_double_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd<double, 2, 32>(out, "neon double");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_int32_basic)
+{
+    std::ofstream out("log/neon_int32_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int32_t, 4, 32>(out, "neon int32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_int64_basic)
+{
+    std::ofstream out("log/neon_int64_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int64_t, 2, 32>(out, "neon int64");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_conversion)
+{
+    std::ofstream out("log/neon_conversion.log", std::ios_base::out);
+    bool res = xsimd::test_simd_convert<2, 16>(out, "neon conversion");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_cast)
+{
+    std::ofstream out("log/neon_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_cast<2, 16>(out, "neon cast");
+    EXPECT_TRUE(res);
+}
+TEST(xsimd, neon_load)
+{
+    std::ofstream out("log/neon_load.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load<2, 16>(out, "neon load");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_store)
+{
+    std::ofstream out("log/neon_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_store<2, 16>(out, "neon store");
+    EXPECT_TRUE(res);
+}
+#endif

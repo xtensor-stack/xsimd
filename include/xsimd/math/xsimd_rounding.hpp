@@ -128,7 +128,7 @@ namespace xsimd
         return _mm_round_pd(x, _MM_FROUND_TO_NEAREST_INT);
     }
 
-#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION || (XSIMD_ARM_INSTR_SET && !XSIMD_ARM_64)
 
     template <class T, std::size_t N>
     inline batch<T, N> ceil(const batch<T, N>& x)
@@ -226,6 +226,56 @@ namespace xsimd
         return _mm256_round_pd(x, _MM_FROUND_TO_NEAREST_INT);
     }
 
+#endif
+
+#if defined(XSIMD_ARM_INSTR_SET) && XSIMD_ARM_64
+    template <>
+    inline batch<float, 4> ceil(const batch<float, 4>& x)
+    {
+        return vrndpq_f32(x);
+    }
+
+    template <>
+    inline batch<double, 2> ceil(const batch<double, 2>& x)
+    {
+        return vrndpq_f64(x);
+    }
+
+    template <>
+    inline batch<float, 4> floor(const batch<float, 4>& x)
+    {
+        return vrndmq_f32(x);
+    }
+
+    template <>
+    inline batch<double, 2> floor(const batch<double, 2>& x)
+    {
+        return vrndmq_f64(x);
+    }
+
+    template <>
+    inline batch<float, 4> trunc(const batch<float, 4>& x)
+    {
+        return vrndq_f32(x);
+    }
+
+    template <>
+    inline batch<double, 2> trunc(const batch<double, 2>& x)
+    {
+        return vrndq_f64(x);
+    }
+
+    template <>
+    inline batch<float, 4> nearbyint(const batch<float, 4>& x)
+    {
+        return vrndxq_f32(x);
+    }
+
+    template <>
+    inline batch<double, 2> nearbyint(const batch<double, 2>& x)
+    {
+        return vrndxq_f64(x);
+    }
 #endif
 
     /**************************

@@ -57,3 +57,20 @@ TEST(xsimd, avx_double_trigonometric)
     EXPECT_TRUE(res);
 }
 #endif
+
+#if defined(XSIMD_ARM_INSTR_SET)
+TEST(xsimd, neon_float_trigonometric)
+{
+    std::ofstream out("log/neon_float_trigonometric.log", std::ios_base::out);
+    bool res = xsimd::test_trigonometric<float, 4, 16>(out, "neon float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_double_trigonometric)
+{
+    std::ofstream out("log/neon_double_trigonometric.log", std::ios_base::out);
+    bool res = xsimd::test_trigonometric<double, 2, 32>(out, "neon double");
+    EXPECT_TRUE(res);
+}
+#endif
+

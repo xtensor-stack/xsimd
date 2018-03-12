@@ -42,36 +42,36 @@ void benchmark_trigo()
     xsimd::run_benchmark_1op(xsimd::atan_fn(), std::cout, size, 1000, xsimd::init_method::arctrigo);
 }
 
-void benchmark_hyperbolic()
-{
-    std::size_t size = 20000;
-    xsimd::run_benchmark_1op(xsimd::sinh_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::cosh_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::tanh_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::asinh_fn(), std::cout, size, 100);
-    xsimd::run_benchmark_1op(xsimd::acosh_fn(), std::cout, size, 100);
-    xsimd::run_benchmark_1op(xsimd::atanh_fn(), std::cout, size, 100);
-}
+// void benchmark_hyperbolic()
+// {
+//     std::size_t size = 20000;
+//     xsimd::run_benchmark_1op(xsimd::sinh_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::cosh_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::tanh_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::asinh_fn(), std::cout, size, 100);
+//     xsimd::run_benchmark_1op(xsimd::acosh_fn(), std::cout, size, 100);
+//     xsimd::run_benchmark_1op(xsimd::atanh_fn(), std::cout, size, 100);
+// }
 
-void benchmark_power()
-{
-    std::size_t size = 20000;
-    xsimd::run_benchmark_2op(xsimd::pow_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::sqrt_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::cbrt_fn(), std::cout, size, 100);
-    xsimd::run_benchmark_2op(xsimd::hypot_fn(), std::cout, size, 1000);
-}
+// void benchmark_power()
+// {
+//     std::size_t size = 20000;
+//     xsimd::run_benchmark_2op(xsimd::pow_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::sqrt_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::cbrt_fn(), std::cout, size, 100);
+//     xsimd::run_benchmark_2op(xsimd::hypot_fn(), std::cout, size, 1000);
+// }
 
-void benchmark_rounding()
-{
-    std::size_t size = 20000;
-    xsimd::run_benchmark_1op(xsimd::ceil_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::floor_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::trunc_fn(), std::cout, size, 1000);
-    xsimd::run_benchmark_1op(xsimd::round_fn(), std::cout, size, 100);
-    xsimd::run_benchmark_1op(xsimd::nearbyint_fn(), std::cout, size, 100);
-    xsimd::run_benchmark_1op(xsimd::rint_fn(), std::cout, size, 100);
-}
+// void benchmark_rounding()
+// {
+//     std::size_t size = 20000;
+//     xsimd::run_benchmark_1op(xsimd::ceil_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::floor_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::trunc_fn(), std::cout, size, 1000);
+//     xsimd::run_benchmark_1op(xsimd::round_fn(), std::cout, size, 100);
+//     xsimd::run_benchmark_1op(xsimd::nearbyint_fn(), std::cout, size, 100);
+//     xsimd::run_benchmark_1op(xsimd::rint_fn(), std::cout, size, 100);
+// }
 
 int main(int argc, char* argv[])
 {
@@ -79,11 +79,11 @@ int main(int argc, char* argv[])
     {
         std::map<std::string, void(*)()> fn_map;
         fn_map["op"] = benchmark_operation;
-        fn_map["exp"] = benchmark_exp_log;
-        fn_map["trigo"] = benchmark_trigo;
-        fn_map["hyperbolic"] = benchmark_hyperbolic;
-        fn_map["power"] = benchmark_power;
-        fn_map["rounding"] = benchmark_rounding;
+        // fn_map["exp"] = benchmark_exp_log;
+        // fn_map["trigo"] = benchmark_trigo;
+        // fn_map["hyperbolic"] = benchmark_hyperbolic;
+        // fn_map["power"] = benchmark_power;
+        // fn_map["rounding"] = benchmark_rounding;
 
         if (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h")
         {
@@ -108,9 +108,9 @@ int main(int argc, char* argv[])
         benchmark_operation();
         benchmark_exp_log();
         benchmark_trigo();
-        benchmark_hyperbolic();
-        benchmark_power();
-        benchmark_rounding();
+        // benchmark_hyperbolic();
+        // benchmark_power();
+        // benchmark_rounding();
     }
     return 0;
 }
