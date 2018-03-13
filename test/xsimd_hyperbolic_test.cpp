@@ -58,14 +58,15 @@ TEST(xsimd, avx_double_hyperbolic)
 }
 #endif
 
-#if XSIMD_NEON_INSTR_SET
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
 TEST(xsimd, neon_float_hyperbolic)
 {
     std::ofstream out("log/neon_float_hyperbolic.log", std::ios_base::out);
     bool res = xsimd::test_hyperbolic<float, 4, 32>(out, "neon float");
     EXPECT_TRUE(res);
 }
-
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
 TEST(xsimd, neon_double_hyperbolic)
 {
     std::ofstream out("log/neon_double_hyperbolic.log", std::ios_base::out);

@@ -52,7 +52,7 @@
     #include <ammintrin.h>
 #endif // XSIMD_X86_AMD_INSTR_SET
 
-#if defined(XSIMD_ARM_INSTR_SET)
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
     #include <arm_neon.h>
 #endif
 

@@ -131,7 +131,7 @@ namespace xsimd
 
     inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const double* d)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         float32x2_t tmp_l = vcvtx_f32_f64(float64x2_t{d[0], d[1]});
         float32x2_t tmp_h = vcvtx_f32_f64(float64x2_t{d[2], d[3]});
         m_value = vcvtq_s32_f32(vcombine_f32(tmp_l, tmp_h));
@@ -303,7 +303,7 @@ namespace xsimd
 
     inline int32_t hadd(const batch<int32_t, 4>& rhs)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vaddvq_s32(rhs);
     #else
         int32x2_t tmp = vpadd_s32(vget_low_s32(rhs), vget_high_s32(rhs));
@@ -314,7 +314,7 @@ namespace xsimd
 
     inline batch<int32_t, 4> haddp(const batch<int32_t, 4>* row)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         int32x4_t tmp1 = vpaddq_s32(row[0], row[1]);
         int32x4_t tmp2 = vpaddq_s32(row[2], row[3]);
         return vpaddq_s32(tmp1, tmp2);
@@ -338,12 +338,12 @@ namespace xsimd
     #endif
     }
 
-    inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs)
+    inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const int& rhs)
     {
         return vshlq_n_s32(lhs, rhs);
     }
 
-    inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs)
+    inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const int& rhs)
     {
         return vshrq_n_s32(lhs, rhs);
     }

@@ -177,7 +177,7 @@ namespace xsimd
 
     inline batch<float, 4>& batch<float, 4>::load_aligned(const double* d)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         float32x2_t tmp_l = vcvt_f32_f64(vld1q_f64(&d[0]));
         float32x2_t tmp_h = vcvt_f32_f64(vld1q_f64(&d[2]));
         m_value = vcombine_f32(tmp_l, tmp_h);
@@ -211,7 +211,7 @@ namespace xsimd
 
     inline batch<float, 4>& batch<float, 4>::load_aligned(const int64_t* d)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         float32x2_t tmp_l = vcvt_f32_f64(vcvtq_f64_s64(vld1q_s64(&d[0])));
         float32x2_t tmp_h = vcvt_f32_f64(vcvtq_f64_s64(vld1q_s64(&d[2])));
         m_value = vcombine_f32(tmp_l, tmp_h);
@@ -233,7 +233,7 @@ namespace xsimd
 
     inline void batch<float, 4>::store_aligned(double* dst) const
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         float64x2_t tmp_l = vcvt_f64_f32(vget_low_f32(m_value));
         float64x2_t tmp_h = vcvt_f64_f32(vget_high_f32(m_value));
         vst1q_f64(&(dst[0]), tmp_l);
@@ -263,7 +263,7 @@ namespace xsimd
 
     inline void batch<float, 4>::store_aligned(int64_t* dst) const
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         int64x2_t tmp_l = vcvtq_s64_f64(vcvt_f64_f32(vget_low_f32(m_value)));
         int64x2_t tmp_h = vcvtq_s64_f64(vcvt_f64_f32(vget_high_f32(m_value)));
         vst1q_s64(&(dst[0]), tmp_l);
@@ -313,7 +313,7 @@ namespace xsimd
 
     inline batch<float, 4> operator/(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
-    #if XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vdivq_f32(lhs, rhs);
     #else
         // from stackoverflow & https://projectne10.github.io/Ne10/doc/NE10__divc_8neon_8c_source.html
@@ -363,7 +363,7 @@ namespace xsimd
 
     inline batch<float, 4> sqrt(const batch<float, 4>& lhs)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vsqrtq_f32(lhs);
     #else
         batch<float, 4> sqrt_reciprocal = vrsqrteq_f32(lhs);
@@ -389,7 +389,6 @@ namespace xsimd
     inline batch<float, 4> fms(const batch<float, 4>& x, const batch<float, 4>& y, const batch<float, 4>& z)
     {
     #ifdef __ARM_FEATURE_FMA
-        // return vfmsq_f32(z, x, y);
         return vfmaq_f32(-z, x, y);
     #else
         return x * y - z;
@@ -408,7 +407,7 @@ namespace xsimd
 
     inline float hadd(const batch<float, 4>& rhs)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vaddvq_f32(rhs);
     #else
         float32x2_t tmp = vpadd_f32(vget_low_f32(rhs), vget_high_f32(rhs));
@@ -419,7 +418,7 @@ namespace xsimd
 
     inline batch<float, 4> haddp(const batch<float, 4>* row)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         float32x4_t tmp1 = vpaddq_f32(row[0], row[1]);
         float32x4_t tmp2 = vpaddq_f32(row[2], row[3]);
         return vpaddq_f32(tmp1, tmp2);
@@ -485,25 +484,30 @@ namespace xsimd
 
     inline batch<float, 4> operator&(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
-        return reinterpret_cast<float32x4_t>(vandq_u32(reinterpret_cast<uint32x4_t>(static_cast<float32x4_t>(lhs)),
-                                                       reinterpret_cast<uint32x4_t>(static_cast<float32x4_t>(rhs))));
+        return vreinterpretq_f32_u32(vandq_u32(vreinterpretq_u32_f32(lhs),
+                                               vreinterpretq_u32_f32(rhs)));
     }
 
     inline batch<float, 4> operator|(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
-        return reinterpret_cast<float32x4_t>(vorrq_u32(reinterpret_cast<uint32x4_t>(static_cast<float32x4_t>(lhs)),
-                                                       reinterpret_cast<uint32x4_t>(static_cast<float32x4_t>(rhs))));
+        return vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(lhs),
+                                               vreinterpretq_u32_f32(rhs)));
     }
 
     inline batch<float, 4> operator^(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
     {
-        return reinterpret_cast<float32x4_t>(veorq_u32(reinterpret_cast<uint32x4_t>(static_cast<float32x4_t>(lhs)),
-                                                       reinterpret_cast<uint32x4_t>(static_cast<float32x4_t>(rhs))));
+        return vreinterpretq_f32_u32(veorq_u32(vreinterpretq_u32_f32(lhs),
+                                               vreinterpretq_u32_f32(rhs)));
     }
 
     inline batch<float, 4> operator~(const batch<float, 4>& rhs)
     {
-        return reinterpret_cast<float32x4_t>(vmvnq_u32(reinterpret_cast<uint32x4_t>(static_cast<float32x4_t>(rhs))));
+        return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(rhs)));
+    }
+
+    inline batch<float, 4> bitwise_andnot(const batch<float, 4>& lhs, const batch<float, 4>& rhs)
+    {
+        return vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(lhs), vreinterpretq_u32_f32(rhs)));
     }
 }
 

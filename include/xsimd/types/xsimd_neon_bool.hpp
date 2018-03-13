@@ -138,8 +138,7 @@ namespace xsimd
     template <class T>
     inline batch_bool<T, 4> bitwise_andnot(const batch_bool<T, 4>& lhs, const batch_bool<T, 4>& rhs)
     {
-        // TODO verify?
-        return vandq_u32(lhs, vmvnq_u32(rhs));
+        return vbicq_u32(lhs, rhs);
     }
 
     template <class T>
@@ -289,8 +288,8 @@ namespace xsimd
     template <class T>
     inline batch_bool<T, 2> bitwise_andnot(const batch_bool<T, 2>& lhs, const batch_bool<T, 2>& rhs)
     {
-        // TODO verify?
-        return vandq_u64(lhs, ~rhs);
+        // According to Eigen
+        return vbicq_u64(lhs, rhs);
     }
 
     template <class T>
@@ -315,14 +314,22 @@ namespace xsimd
     inline bool all(const batch_bool<T, 2>& rhs)
     {
         uint64x1_t tmp = vand_u64(vget_low_u64(rhs), vget_high_u64(rhs));
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return tmp[0] != 0;
+    #else
+        return static_cast<uint64_t>(tmp) != 0;
+    #endif
     }
 
     template <class T>
     inline bool any(const batch_bool<T, 2>& rhs)
     {
         uint64x1_t tmp = vorr_u64(vget_low_u64(rhs), vget_high_u64(rhs));
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return bool(tmp[0]);
+    #else
+        return bool(static_cast<uint64_t>(tmp));
+    #endif
     }
 
 }

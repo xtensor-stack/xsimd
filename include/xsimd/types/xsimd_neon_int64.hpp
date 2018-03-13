@@ -72,6 +72,28 @@ namespace xsimd
         simd_type m_value;
     };
 
+    batch<int64_t, 2> operator-(const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator+(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator-(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator*(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator/(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+
+    batch_bool<int64_t, 2> operator==(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch_bool<int64_t, 2> operator!=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch_bool<int64_t, 2> operator<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch_bool<int64_t, 2> operator<=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+
+    batch<int64_t, 2> operator&(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator|(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator^(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator~(const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> bitwise_andnot(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+
+    batch<int64_t, 2> min(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> max(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+
+    batch<int64_t, 2> abs(const batch<int64_t, 2>& rhs);
+
     /**
      * Implementation of batch
      */
@@ -118,7 +140,12 @@ namespace xsimd
 
     inline batch<int64_t, 2>& batch<int64_t, 2>::load_aligned(const float* d)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         m_value = vcvtq_s64_f64(vcvt_f64_f32(vld1_f32(d)));
+    #else
+        m_value = int64x2_t{static_cast<int64_t>(d[0]),
+                            static_cast<int64_t>(d[1])};
+    #endif
         return *this;
     }
 
@@ -129,7 +156,12 @@ namespace xsimd
 
     inline batch<int64_t, 2>& batch<int64_t, 2>::load_aligned(const double* d)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         m_value = vcvtq_s64_f64(vld1q_f64(d));
+    #else
+        m_value = int64x2_t{static_cast<int64_t>(d[0]),
+                            static_cast<int64_t>(d[1])};
+    #endif
         return *this;
     }
 
@@ -162,7 +194,7 @@ namespace xsimd
 
     inline void batch<int64_t, 2>::store_aligned(float* dst) const
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         vst1_f32(dst, vcvt_f32_f64(vcvtq_f64_s64(m_value)));
     #else
         dst[0] = static_cast<float>(m_value[0]);
@@ -177,7 +209,12 @@ namespace xsimd
 
     inline void batch<int64_t, 2>::store_aligned(double* dst) const
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         vst1q_f64(dst, vcvtq_f64_s64(m_value));
+    #else
+        dst[0] = static_cast<double>(m_value[0]);
+        dst[1] = static_cast<double>(m_value[1]);
+    #endif
     }
 
     inline void batch<int64_t, 2>::store_unaligned(double* dst) const
@@ -218,7 +255,11 @@ namespace xsimd
 
     inline batch<int64_t, 2> operator-(const batch<int64_t, 2>& lhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vnegq_s64(lhs);
+    #else
+        return batch<int64_t, 2>(-lhs[0], -lhs[1]);
+    #endif
     }
 
     inline batch<int64_t, 2> operator+(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
@@ -238,7 +279,11 @@ namespace xsimd
 
     inline batch<int64_t, 2> operator/(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vcvtq_s64_f64(vcvtq_f64_s64(lhs) / vcvtq_f64_s64(rhs));
+    #else
+        return {lhs[0] / rhs[0], lhs[1] / rhs[1]};
+    #endif
     }
 
     inline batch<int64_t, 2> min(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
@@ -255,7 +300,11 @@ namespace xsimd
 
     inline batch<int64_t, 2> abs(const batch<int64_t, 2>& lhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vabsq_s64(lhs);
+    #else
+        return batch<int64_t, 2>(std::abs(lhs[0]), std::abs(lhs[1]));
+    #endif
     }
 
     inline batch<int64_t, 2> fma(const batch<int64_t, 2>& x, const batch<int64_t, 2>& y, const batch<int64_t, 2>& z)
@@ -280,37 +329,39 @@ namespace xsimd
 
     inline int64_t hadd(const batch<int64_t, 2>& rhs)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vaddvq_s64(rhs);
     #else
-        int64x2_t tmp = vpaddq_s64(rhs, rhs);
-        return vget_lane_s64(tmp, 0);
+        return rhs[0] + rhs[1];
     #endif
     }
 
     inline batch<int64_t, 2> haddp(const batch<int64_t, 2>* row)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vpaddq_s64(row[0], row[1]);
+    #else
+        return batch<int64_t, 2>(row[0][0] + row[0][1], row[1][0] + row[1][1]);
+    #endif
     }
 
     inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int64_t rhs)
     {
-        return vshlq_n_s64(lhs, rhs);
+        return vshlq_n_s64(lhs, static_cast<int>(rhs));
     }
 
     inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int64_t rhs)
     {
-        return vshrq_n_s64(lhs, rhs);
-    }
-
-    inline batch_bool<int64_t, 2> isnan(const batch<int64_t, 2>& x)
-    {
-        return !vceqq_s64(x, x);
+        return vshrq_n_s64(lhs, static_cast<int>(rhs));
     }
 
     inline batch_bool<int64_t, 2> operator==(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vceqq_s64(lhs, rhs);
+    #else
+        return batch_bool<int64_t, 2>(lhs[0] == rhs[0], lhs[1] == rhs[1]);
+    #endif
     }
 
     inline batch_bool<int64_t, 2> operator!=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
@@ -320,22 +371,38 @@ namespace xsimd
 
     inline batch_bool<int64_t, 2> operator<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vcltq_s64(lhs, rhs);
+    #else
+        return batch_bool<int64_t, 2>(lhs[0] < rhs[0], lhs[1] < rhs[1]);
+    #endif
     }
 
     inline batch_bool<int64_t, 2> operator<=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vcleq_s64(lhs, rhs);
+    #else
+        return batch_bool<int64_t, 2>(lhs[0] <= rhs[0], lhs[1] <= rhs[1]);
+    #endif
     }
 
     inline batch_bool<int64_t, 2> operator>(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vcgtq_s64(lhs, rhs);
+    #else
+        return batch_bool<int64_t, 2>(lhs[0] > rhs[0], lhs[1] > rhs[1]);
+    #endif
     }
 
     inline batch_bool<int64_t, 2> operator>=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vcgeq_s64(lhs, rhs);
+    #else
+        return batch_bool<int64_t, 2>(lhs[0] >= rhs[0], lhs[1] >= rhs[1]);
+    #endif
     }
 
     inline batch<int64_t, 2> select(const batch_bool<int64_t, 2>& cond, const batch<int64_t, 2>& a, const batch<int64_t, 2>& b)

@@ -162,12 +162,12 @@ namespace xsimd
 
     inline void batch<double, 2>::store_aligned(float* dst) const
     {
-        #ifdef XSIMD_ARM_64
-            vst1_f32(dst, vcvt_f32_f64(m_value));
-        #else
-            dst[0] = static_cast<float>(m_value[0]);
-            dst[1] = static_cast<float>(m_value[1]);
-        #endif
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        vst1_f32(dst, vcvt_f32_f64(m_value));
+    #else
+        dst[0] = static_cast<float>(m_value[0]);
+        dst[1] = static_cast<float>(m_value[1]);
+    #endif
     }
 
     inline void batch<double, 2>::store_unaligned(float* dst) const
@@ -187,12 +187,12 @@ namespace xsimd
 
     inline void batch<double, 2>::store_aligned(int32_t* dst) const
     {
-        #ifdef XSIMD_ARM_64
-            vst1_s32(dst, vcvt_s32_f32(vcvt_f32_f64(m_value)));
-        #else
-            dst[0] = static_cast<int32_t>(m_value[0]);
-            dst[1] = static_cast<int32_t>(m_value[1]);
-        #endif
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        vst1_s32(dst, vcvt_s32_f32(vcvt_f32_f64(m_value)));
+    #else
+        dst[0] = static_cast<int32_t>(m_value[0]);
+        dst[1] = static_cast<int32_t>(m_value[1]);
+    #endif
     }
 
     inline void batch<double, 2>::store_unaligned(int32_t* dst) const
@@ -242,7 +242,7 @@ namespace xsimd
 
     inline batch<double, 2> operator/(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
-    #if XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vdivq_f64(lhs, rhs);
     #else
         // from stackoverflow & https://projectne10.github.io/Ne10/doc/NE10__divc_8neon_8c_source.html
@@ -292,7 +292,7 @@ namespace xsimd
 
     inline batch<double, 2> sqrt(const batch<double, 2>& lhs)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vsqrtq_f64(lhs);
     #else
         float64x2_t sqrt_reciprocal = vrsqrteq_f64(lhs);
@@ -325,11 +325,11 @@ namespace xsimd
 
     inline double hadd(const batch<double, 2>& rhs)
     {
-    #ifdef XSIMD_ARM_64
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vaddvq_f64(rhs);
     #else
         float64x2_t tmp = vpaddq_f64(rhs, rhs);
-        return vget_lane_f64(tmp, 0);
+        return vgetq_lane_f64(tmp, 0);
     #endif
     }
 

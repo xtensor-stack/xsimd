@@ -19,15 +19,22 @@ message(STATUS "Forcing tests build type to Release")
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 
 include(CheckCXXCompilerFlag)
+find_package(Threads)
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder")
+    if (CROSS_COMPILE_ARM)
+        set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
+        set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+        set(CMAKE_THREAD_LIBS_INIT)
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder")
     CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
 
     if (HAS_CPP11_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
     else()
         message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
     endif()
@@ -70,8 +77,6 @@ if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
 else()
     find_package(GTest REQUIRED)
 endif()
-
-find_package(Threads)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 

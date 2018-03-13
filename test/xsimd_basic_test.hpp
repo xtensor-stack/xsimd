@@ -482,7 +482,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.min_res, out);
         success = success && tmp_success;
-   
+
         topic = "max(simd, simd)          : ";
         vres = max(lhs, rhs);
         detail::store_vec(vres, res);
@@ -841,8 +841,6 @@ namespace xsimd
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
-        std::string name;
-
         int32_batch i32pos;
         int32_batch i32neg;
         int64_batch i64pos;
@@ -860,6 +858,8 @@ namespace xsimd
         float_vector i32negres;
         double_vector i64posres;
         double_vector i64negres;
+
+        std::string name;
 
         simd_convert_tester(const std::string& name);
     };

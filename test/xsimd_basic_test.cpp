@@ -177,21 +177,20 @@ TEST(xsimd, avx_store)
 }
 #endif
 
-#if defined(XSIMD_ARM_INSTR_SET)
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
 TEST(xsimd, neon_float_basic)
 {
     std::ofstream out("log/neon_float_basic.log", std::ios_base::out);
-    bool res = xsimd::test_simd<float, 4, 16>(out, "avx float");
+    bool res = xsimd::test_simd<float, 4, 16>(out, "neon float");
     EXPECT_TRUE(res);
 }
-
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
 TEST(xsimd, neon_double_basic)
 {
     std::ofstream out("log/neon_double_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd<double, 2, 32>(out, "neon double");
     EXPECT_TRUE(res);
 }
-
 TEST(xsimd, neon_int32_basic)
 {
     std::ofstream out("log/neon_int32_basic.log", std::ios_base::out);
@@ -219,6 +218,7 @@ TEST(xsimd, neon_cast)
     bool res = xsimd::test_simd_cast<2, 16>(out, "neon cast");
     EXPECT_TRUE(res);
 }
+
 TEST(xsimd, neon_load)
 {
     std::ofstream out("log/neon_load.log", std::ios_base::out);
@@ -232,4 +232,5 @@ TEST(xsimd, neon_store)
     bool res = xsimd::test_simd_store<2, 16>(out, "neon store");
     EXPECT_TRUE(res);
 }
+#endif
 #endif
