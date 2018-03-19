@@ -142,6 +142,8 @@ namespace xsimd
 
     batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int32_t rhs);
     batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int32_t rhs);
+    batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
 
     /********************
      * helper functions *
@@ -566,6 +568,22 @@ namespace xsimd
     inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int32_t rhs)
     {
         return _mm_srli_epi64(lhs, rhs);
+    }
+
+    inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
+    {
+        return batch<int64_t, 2>{
+            lhs[0] << rhs[0],
+            lhs[1] << rhs[1]
+            };
+    }
+
+    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
+    {
+        return batch<int64_t, 2>{
+            lhs[0] >> rhs[0],
+            lhs[1] >> rhs[1]
+            };
     }
 }
 
