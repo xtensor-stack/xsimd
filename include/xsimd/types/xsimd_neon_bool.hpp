@@ -352,22 +352,14 @@ namespace xsimd
     inline bool all(const batch_bool<T, 2>& rhs)
     {
         uint64x1_t tmp = vand_u64(vget_low_u64(rhs), vget_high_u64(rhs));
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_32_NEON_VERSION
-        return tmp[0] != 0;
-    #else
-        return static_cast<uint64_t>(tmp) != 0;
-    #endif
+        return vget_lane_u64(tmp, 0) != 0;
     }
 
     template <class T>
     inline bool any(const batch_bool<T, 2>& rhs)
     {
         uint64x1_t tmp = vorr_u64(vget_low_u64(rhs), vget_high_u64(rhs));
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_32_NEON_VERSION
-        return bool(tmp[0]);
-    #else
-        return bool(static_cast<uint64_t>(tmp));
-    #endif
+        return bool(vget_lane_u64(tmp, 0));
     }
 
 }

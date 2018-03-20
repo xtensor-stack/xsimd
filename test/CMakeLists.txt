@@ -31,25 +31,27 @@ OPTION(CROSS_COMPILE_ARM "cross compile for ARM targets" OFF)
 # Note: to compile on ARM (or cross compile), you may need to add the following:
 # -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
 set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
+set(ARM_ARCH_DIRECTORY "arm-linux-gnueabi" CACHE STRING "ARM arch header dir")
+set(ARM_GCC_VER "4.7.3" CACHE STRING "ARM GCC header dir")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     if (CROSS_COMPILE_ARM)
-        # We're cross-compiling with clang++, this is all pretty specific and just for testing
+        # We're cross-compiling with clang++ on Travis, this is all pretty specific and just for testing
         set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
         set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
         set(CMAKE_THREAD_LIBS_INIT)
 
-        include_directories(/usr/arm-linux-gnueabi/include/c++/4.7.3/arm-linux-gnueabi/)
-        include_directories(/usr/arm-linux-gnueabi/include/c++/4.7.3/)
-    endif()
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder")
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
-
-    if (HAS_CPP11_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/${ARM_ARCH_DIRECTORY}/)
+        include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/)
+        include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
     else()
-        message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
+        CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
+        if (HAS_CPP11_FLAG)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder -std=c++11")
+        else()
+            message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
+        endif()
     endif()
 endif()
 
