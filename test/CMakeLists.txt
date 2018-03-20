@@ -34,13 +34,13 @@ set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     if (CROSS_COMPILE_ARM)
-        # We're cross-compiling with clang++
-        set(CMAKE_CXX_COMPILER /usr/bin/clang++)
+        # We're cross-compiling with clang++, this is all pretty specific and just for testing
         set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
         set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
         set(CMAKE_THREAD_LIBS_INIT)
-        include_directories(/usr/arm-linux-gnueabi/include/c++/5/arm-linux-gnueabi/)
-        include_directories(/usr/arm-linux-gnueabi/include/)
+
+        include_directories(/usr/arm-linux-gnueabi/include/c++/4.7.3/arm-linux-gnueabi/)
+        include_directories(/usr/arm-linux-gnueabi/include/c++/4.7.3/)
     endif()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder")
@@ -126,7 +126,7 @@ add_executable(${XSIMD_TARGET} EXCLUDE_FROM_ALL ${XSIMD_TESTS} ${XSIMD_HEADERS})
 target_link_libraries(${XSIMD_TARGET} xsimd ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if (CROSS_COMPILE_ARM)
-    add_custom_target(xtest COMMAND qemu -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS ${XSIMD_TARGET})
+    add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS ${XSIMD_TARGET})
 else()
     add_custom_target(xtest COMMAND test_xsimd DEPENDS ${XSIMD_TARGET})
 endif()

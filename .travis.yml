@@ -43,6 +43,20 @@ matrix:
           packages:
             - clang-3.8
       env: COMPILER=clang CLANG=3.8
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.9
+          packages:
+            - clang-3.9
+            - g++-arm-linux-gnueabi
+            - g++-multilib
+            - gcc-multilib
+            - qemu
+            - qemu-system-arm
+      env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1
     - os: osx
       osx_image: xcode8
       compiler: clang
@@ -80,8 +94,16 @@ install:
     # Useful for debugging any issues with conda
     - conda info -a
     - conda install gtest cmake -c conda-forge
-    - cmake .
+    - if [[ "$CROSS_COMPILE" == 1 ]]; then
+        cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi";
+      else
+        cmake . ;
+      fi
     - make -j2 test_xsimd
     - cd test
 script:
-    - ./test_xsimd
+    - if [[ "$CROSS_COMPILE" == 1 ]]; then
+        qemu-arm -L /usr/arm-linux-gnueabi/ ./test_xsimd;
+      else
+        ./test_xsimd;
+      fi
