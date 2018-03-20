@@ -338,11 +338,6 @@ namespace xsimd
         return vpaddq_f64(row[0], row[1]);
     }
 
-    inline batch_bool<double, 2> isnan(const batch<double, 2>& x)
-    {
-        return !vceqq_f64(x, x);
-    }
-
     inline batch_bool<double, 2> operator==(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return vceqq_f64(lhs, rhs);
@@ -351,6 +346,11 @@ namespace xsimd
     inline batch_bool<double, 2> operator!=(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    inline batch_bool<double, 2> isnan(const batch<double, 2>& x)
+    {
+        return !(x == x);
     }
 
     inline batch_bool<double, 2> operator<(const batch<double, 2>& lhs, const batch<double, 2>& rhs)

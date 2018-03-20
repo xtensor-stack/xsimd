@@ -19,22 +19,35 @@ message(STATUS "Forcing tests build type to Release")
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 
 include(CheckCXXCompilerFlag)
-find_package(Threads)
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
+################
+# ARM SETTINGS #
+################
+
+OPTION(CROSS_COMPILE_ARM "cross compile for ARM targets" OFF)
+
+# Note: to compile on ARM (or cross compile), you may need to add the following:
+# -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
+set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     if (CROSS_COMPILE_ARM)
+        # We're cross-compiling with clang++
+        set(CMAKE_CXX_COMPILER /usr/bin/clang++)
         set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
         set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
         set(CMAKE_THREAD_LIBS_INIT)
+        include_directories(/usr/arm-linux-gnueabi/include/c++/5/arm-linux-gnueabi/)
+        include_directories(/usr/arm-linux-gnueabi/include/)
     endif()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder")
     CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
 
     if (HAS_CPP11_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     else()
         message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
     endif()
@@ -78,6 +91,8 @@ else()
     find_package(GTest REQUIRED)
 endif()
 
+find_package(Threads)
+
 include_directories(${GTEST_INCLUDE_DIRS})
 
 set(XSIMD_TESTS
@@ -110,4 +125,8 @@ set(XSIMD_TARGET test_xsimd)
 add_executable(${XSIMD_TARGET} EXCLUDE_FROM_ALL ${XSIMD_TESTS} ${XSIMD_HEADERS})
 target_link_libraries(${XSIMD_TARGET} xsimd ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-add_custom_target(xtest COMMAND test_xsimd DEPENDS ${XSIMD_TARGET})
+if (CROSS_COMPILE_ARM)
+    add_custom_target(xtest COMMAND qemu -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS ${XSIMD_TARGET})
+else()
+    add_custom_target(xtest COMMAND test_xsimd DEPENDS ${XSIMD_TARGET})
+endif()

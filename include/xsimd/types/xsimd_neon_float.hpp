@@ -369,7 +369,7 @@ namespace xsimd
         batch<float, 4> sqrt_reciprocal = vrsqrteq_f32(lhs);
         // one iter
         // sqrt_reciprocal = sqrt_reciprocal * vrsqrtsq_f32(lhs * sqrt_reciprocal, sqrt_reciprocal);
-        batch<float, 4> sqrt_approx = lhs * sqrt_reciprocal * vrsqrtsq_f32(lhs * sqrt_reciprocal, sqrt_reciprocal);
+        batch<float, 4> sqrt_approx = lhs * sqrt_reciprocal * batch<float, 4>(vrsqrtsq_f32(lhs * sqrt_reciprocal, sqrt_reciprocal));
         batch<float, 4> zero(0.f);
         return select(lhs == zero, zero, sqrt_approx);
     #endif
@@ -444,7 +444,7 @@ namespace xsimd
 
     inline batch_bool<float, 4> isnan(const batch<float, 4>& x)
     {
-        return !vceqq_f32(x, x);
+        return !(x == x);
     }
 
     inline batch_bool<float, 4> operator==(const batch<float, 4>& lhs, const batch<float, 4>& rhs)

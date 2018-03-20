@@ -11,6 +11,44 @@
 
 #include "xsimd_base.hpp"
 
+#define EXPAND(...) __VA_ARGS__
+
+#define CASE(i, op)              \
+    case i: return op(lhs, i);   \
+
+#define REPEAT_32(op, addx)      \
+    CASE( 1 + addx, EXPAND(op)); \
+    CASE( 2 + addx, EXPAND(op)); \
+    CASE( 3 + addx, EXPAND(op)); \
+    CASE( 4 + addx, EXPAND(op)); \
+    CASE( 5 + addx, EXPAND(op)); \
+    CASE( 6 + addx, EXPAND(op)); \
+    CASE( 7 + addx, EXPAND(op)); \
+    CASE( 8 + addx, EXPAND(op)); \
+    CASE( 9 + addx, EXPAND(op)); \
+    CASE(10 + addx, EXPAND(op)); \
+    CASE(11 + addx, EXPAND(op)); \
+    CASE(12 + addx, EXPAND(op)); \
+    CASE(13 + addx, EXPAND(op)); \
+    CASE(14 + addx, EXPAND(op)); \
+    CASE(15 + addx, EXPAND(op)); \
+    CASE(16 + addx, EXPAND(op)); \
+    CASE(17 + addx, EXPAND(op)); \
+    CASE(18 + addx, EXPAND(op)); \
+    CASE(19 + addx, EXPAND(op)); \
+    CASE(20 + addx, EXPAND(op)); \
+    CASE(21 + addx, EXPAND(op)); \
+    CASE(22 + addx, EXPAND(op)); \
+    CASE(23 + addx, EXPAND(op)); \
+    CASE(24 + addx, EXPAND(op)); \
+    CASE(25 + addx, EXPAND(op)); \
+    CASE(26 + addx, EXPAND(op)); \
+    CASE(27 + addx, EXPAND(op)); \
+    CASE(28 + addx, EXPAND(op)); \
+    CASE(29 + addx, EXPAND(op)); \
+    CASE(30 + addx, EXPAND(op)); \
+    CASE(31 + addx, EXPAND(op)); \
+
 namespace xsimd
 {
     template <class T>
@@ -314,7 +352,7 @@ namespace xsimd
     inline bool all(const batch_bool<T, 2>& rhs)
     {
         uint64x1_t tmp = vand_u64(vget_low_u64(rhs), vget_high_u64(rhs));
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_32_NEON_VERSION
         return tmp[0] != 0;
     #else
         return static_cast<uint64_t>(tmp) != 0;
@@ -325,7 +363,7 @@ namespace xsimd
     inline bool any(const batch_bool<T, 2>& rhs)
     {
         uint64x1_t tmp = vorr_u64(vget_low_u64(rhs), vget_high_u64(rhs));
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_32_NEON_VERSION
         return bool(tmp[0]);
     #else
         return bool(static_cast<uint64_t>(tmp));

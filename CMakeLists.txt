@@ -77,21 +77,12 @@ target_include_directories(xsimd INTERFACE $<BUILD_INTERFACE:${XSIMD_INCLUDE_DIR
 
 OPTION(BUILD_TESTS "xsimd test suite" ON)
 OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
-OPTION(CROSS_COMPILE_ARM "cross compile for ARM targets" OFF)
-
-# Note: to compile on ARM (or cross compile), you may need to add the following:
-# -mfpu=neon (and for CC -mfloat-abi=softfp --specs=nosys.specs)
-set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
 
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     set(BUILD_TESTS ON)
 endif()
 
 if(BUILD_TESTS)
-    if(CROSS_COMPILE_ARM)
-        set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-        set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-    endif()
     add_subdirectory(test)
     add_subdirectory(benchmark)
 endif()

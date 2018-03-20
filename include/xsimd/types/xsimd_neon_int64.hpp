@@ -345,14 +345,56 @@ namespace xsimd
     #endif
     }
 
+    namespace detail
+    {
+        inline batch<int64_t, 2> shift_left(const batch<int64_t, 2>& lhs, const int n)
+        {
+            switch(n)
+            {
+                case 0: return lhs;
+                REPEAT_32(vshlq_n_s64, 0);
+                REPEAT_32(vshlq_n_s64, 31);
+                case 63: return vshlq_n_s64(lhs, 63); break;
+                default: break;
+            }
+            return batch<int64_t, 2>(int64_t(0));
+        }
+
+        inline batch<int64_t, 2> shift_right(const batch<int64_t, 2>& lhs, const int n)
+        {
+            switch(n)
+            {
+                case 0: return lhs;
+                REPEAT_32(vshrq_n_s64, 0);
+                REPEAT_32(vshrq_n_s64, 31);
+                case 63: return vshrq_n_s64(lhs, 63); break;
+                default: break;
+            }
+            return batch<int64_t, 2>(int64_t(0));
+        }
+    }
+
     inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int64_t rhs)
     {
-        return vshlq_n_s64(lhs, static_cast<int>(rhs));
+        return detail::shift_left(lhs, static_cast<int>(rhs));
     }
 
     inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int64_t rhs)
     {
-        return vshrq_n_s64(lhs, static_cast<int>(rhs));
+        return detail::shift_right(lhs, static_cast<int>(rhs));
+    }
+
+    inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
+    {
+        return vshlq_s64(lhs, rhs);
+    }
+
+    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
+    {
+        return int64x2_t{
+            lhs[0] >> rhs[0],
+            lhs[1] >> rhs[1]
+        };
     }
 
     inline batch_bool<int64_t, 2> operator==(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)

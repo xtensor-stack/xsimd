@@ -157,7 +157,7 @@ namespace xsimd
         success = success && tmp_success;
 
         return success;
-    }
+}
 }
 
 #endif

@@ -9,6 +9,8 @@
 #ifndef XSIMD_NEON_INT32_HPP
 #define XSIMD_NEON_INT32_HPP
 
+#include <utility>
+
 #include "xsimd_base.hpp"
 #include "xsimd_neon_bool.hpp"
 
@@ -338,14 +340,54 @@ namespace xsimd
     #endif
     }
 
-    inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const int& rhs)
+    namespace detail
     {
-        return vshlq_n_s32(lhs, rhs);
+        inline batch<int32_t, 4> shift_left(const batch<int32_t, 4>& lhs, const int n)
+        {
+            switch(n)
+            {
+                case 0: return lhs;
+                REPEAT_32(vshlq_n_s32, 0);
+                default: break;
+            }
+            return batch<int32_t, 4>(0);
+        }
+
+        inline batch<int32_t, 4> shift_right(const batch<int32_t, 4>& lhs, const int n)
+        {
+            switch(n)
+            {
+                case 0: return lhs;
+                REPEAT_32(vshrq_n_s32, 0);
+                default: break;
+            }
+            return batch<int32_t, 4>(0);
+        }
+    }
+
+    inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const int rhs)
+    {
+        return detail::shift_left(lhs, rhs);
     }
 
     inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const int& rhs)
     {
-        return vshrq_n_s32(lhs, rhs);
+        return detail::shift_right(lhs, rhs);
+    }
+
+    inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+        return vshlq_s32(lhs, rhs);
+    }
+
+    inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+        return int32x4_t{
+            lhs[0] >> rhs[0],
+            lhs[1] >> rhs[1],
+            lhs[2] >> rhs[2],
+            lhs[3] >> rhs[3]
+        };
     }
 
     inline batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
