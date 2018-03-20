@@ -56,7 +56,21 @@ matrix:
             - gcc-multilib
             - qemu
             - qemu-system-arm
-      env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1
+      env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1 ARM_ARCH=armv8-a
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.9
+          packages:
+            - clang-3.9
+            - g++-arm-linux-gnueabi
+            - g++-multilib
+            - gcc-multilib
+            - qemu
+            - qemu-system-arm
+      env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1 ARM_ARCH=arm64
     - os: osx
       osx_image: xcode8
       compiler: clang
@@ -95,7 +109,7 @@ install:
     - conda info -a
     - conda install gtest cmake -c conda-forge
     - if [[ "$CROSS_COMPILE" == 1 ]]; then
-        cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi";
+        cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DTARGET_ARCH="$ARM_ARCH -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi";
       else
         cmake . ;
       fi
