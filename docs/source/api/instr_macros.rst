@@ -106,17 +106,19 @@ XSIMD_PPC_INSTR_AVAILABLE is defined.
 ARM architecture
 ----------------
 
-If one of the following symbols is detected, XSIMD_ARM_INSTR_SET is set to the corresponding version and
+If one of the following condition is detected, XSIMD_ARM_INSTR_SET is set to the corresponding version and
 XSIMD_ARM_INSTR_AVAILABLE is defined.
 
 +-------------------+-----------------------------+
 | Symbol            | Version                     |
 +===================+=============================+
-| __ARM_NEON__      | XSIMD_ARM_NEON_VERSION      |
+| __ARM_ARCH == 7   | XSIMD_ARM7_NEON_VERSION     |
 +-------------------+-----------------------------+
-| __aarch64__       | XSIMD_ARM_NEON_VERSION      |
+| __ARM_ARCH == 8   | XSIMD_ARM8_32_NEON_VERSION  |
+| && ! __aarch64__  |                             |
 +-------------------+-----------------------------+
-| _M_ARM            | XSIMD_ARM_NEON_VERSION      |
+| __ARM_ARCH == 8   | XSIMD_ARM8_64_NEON_VERSION  |
+| && __aarch64__    |                             |
 +-------------------+-----------------------------+
 
 Generic instruction set

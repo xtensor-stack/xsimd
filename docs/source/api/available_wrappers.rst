@@ -54,7 +54,7 @@ Depending on the value of XSIMD_X86_INSTR_SET, the following wrappers are availa
 
 - XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 
-In addition to the wrappers defined above, the following wrappers are available
+In addition to the wrappers defined above, the following wrappers are available:
 
 +-------------------+------------------------+
 | batch             | batch_bool             |
@@ -68,3 +68,29 @@ In addition to the wrappers defined above, the following wrappers are available
 | batch<int64_t, 4> | batch_bool<int64_t, 4> |
 +-------------------+------------------------+
 
+ARM architecture
+----------------
+
+Depending on the value of XSIMD_ARM_INSTR_SET, the following wrappers are available:
+
+- XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+
++-------------------+------------------------+
+| batch             | batch_bool             |
++-------------------+------------------------+
+| batch<float, 4>   | batch_bool<float, 4>   |
++-------------------+------------------------+
+| batch<int32_t, 4> | batch_bool<int32_t, 4> |
++-------------------+------------------------+
+| batch<int64_t, 2> | batch_bool<int64_t, 2> |
++-------------------+------------------------+
+
+- XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+
+In addition to the wrappers defined above, the following wrapper is available:
+
++-------------------+------------------------+
+| batch             | batch_bool             |
++-------------------+------------------------+
+| batch<double, 2>  | batch_bool<double, 2>  |
++-------------------+------------------------+
