@@ -19,6 +19,14 @@ namespace xsimd
      *************************/
 
     template <>
+    struct simd_batch_traits<batch_bool<double, 4>>
+    {
+        using value_type = bool;
+        static constexpr std::size_t size = 4;
+        using batch_type = batch<double, 4>;
+    };
+
+    template <>
     class batch_bool<double, 4> : public simd_batch_bool<batch_bool<double, 4>>
     {
     public:

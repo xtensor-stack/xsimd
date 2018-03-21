@@ -374,14 +374,14 @@ namespace xsimd
         }
     }
 
-    inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int64_t rhs)
+    inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int32_t rhs)
     {
-        return detail::shift_left(lhs, static_cast<int>(rhs));
+        return detail::shift_left(lhs, rhs);
     }
 
-    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int64_t rhs)
+    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int32_t rhs)
     {
-        return detail::shift_right(lhs, static_cast<int>(rhs));
+        return detail::shift_right(lhs, rhs);
     }
 
     inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
