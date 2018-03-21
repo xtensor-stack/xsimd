@@ -52,6 +52,14 @@
 namespace xsimd
 {
     template <class T>
+    struct simd_batch_traits<batch_bool<T, 4>>
+    {
+        using value_type = bool;
+        static constexpr std::size_t size = 4;
+        using batch_type = batch<T, 4>;
+    };
+
+    template <class T>
     class batch_bool<T, 4> : public simd_batch_bool<batch_bool<T, 4>>
     {
     public:
@@ -210,6 +218,14 @@ namespace xsimd
         uint32x2_t tmp = vorr_u32(vget_low_u32(rhs), vget_high_u32(rhs));
         return vget_lane_u32(vpmax_u32(tmp, tmp), 0);
     }
+
+    template <class T>
+    struct simd_batch_traits<batch_bool<T, 2>>
+    {
+        using value_type = bool;
+        static constexpr std::size_t size = 2;
+        using batch_type = batch<T, 2>;
+    };
 
     template <class T>
     class batch_bool<T, 2> : public simd_batch_bool<batch_bool<T, 2>>

@@ -302,6 +302,12 @@ namespace xsimd
         using value_type = typename tester_type::value_type;
         using res_type = typename tester_type::res_type;
 
+        using vector_bool_type = typename simd_batch_traits<vector_type>::batch_bool_type;
+        using bool_traits = simd_batch_traits<vector_bool_type>;
+
+        static_assert(std::is_same<typename bool_traits::batch_type, vector_type>::value, "vector_bool type mismatch");
+        static_assert(bool_traits::size == vector_type::size, "vector bool size mismatch");
+
         vector_type lhs;
         vector_type rhs;
         vector_type mix_lhs_rhs;
@@ -566,13 +572,13 @@ namespace xsimd
     template <class I, std::size_t N, class S>
     bool test_simd_int_shift(const batch<I, N>& /*empty*/, S& stream)
     {
-        std::size_t size = sizeof(I) * 8;
+        int32_t size = static_cast<int32_t>(sizeof(I) * 8);
         bool success = true;
 
         batch<I, N> lhs, res;
         lhs = batch<I, N>(I(1));
 
-        for (std::size_t i = 0; i < size; ++i)
+        for (int32_t i = 0; i < size; ++i)
         {
             res = lhs << i;
             I expected = I(1) << i;
@@ -582,9 +588,9 @@ namespace xsimd
             }
         }
         lhs = batch<I, N>(std::numeric_limits<I>::max());
-        for (std::size_t i = 0; i < size; ++i)
+        for (int32_t i = 0; i < size; ++i)
         {
-            res = lhs >> i;
+            res = lhs >> I(i);
             I expected = std::numeric_limits<I>::max() >> i;
             for (std::size_t j = 0; j < N; ++j)
             {
@@ -605,6 +611,12 @@ namespace xsimd
         using vector_type = typename tester_type::vector_type;
         using value_type = typename tester_type::value_type;
         using res_type = typename tester_type::res_type;
+
+        using vector_bool_type = typename simd_batch_traits<vector_type>::batch_bool_type;
+        using bool_traits = simd_batch_traits<vector_bool_type>;
+
+        static_assert(std::is_same<typename bool_traits::batch_type, vector_type>::value, "vector_bool type mismatch");
+        static_assert(bool_traits::size == vector_type::size, "vector bool size mismatch");
 
         vector_type lhs;
         vector_type rhs;
