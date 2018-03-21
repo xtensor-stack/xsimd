@@ -40,7 +40,7 @@ namespace xsimd
         using type = unaligned_mode;
     };
 
-#ifdef XSIMD_X86_INSTR_SET_AVAILABLE
+#if defined(XSIMD_X86_INSTR_SET_AVAILABLE) || defined(XSIMD_ARM_INSTR_SET_AVAILABLE)
     template <class T>
     struct allocator_alignment<aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>>
     {

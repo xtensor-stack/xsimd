@@ -10,6 +10,8 @@
 #define XSIMD_BASIC_TEST_HPP
 
 #include <numeric>
+#include <limits>
+
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
 
@@ -561,6 +563,41 @@ namespace xsimd
         return success;
     }
 
+    template <class I, std::size_t N, class S>
+    bool test_simd_int_shift(const batch<I, N>& /*empty*/, S& stream)
+    {
+        std::size_t size = sizeof(I) * 8;
+        bool success = true;
+
+        batch<I, N> lhs, res;
+        lhs = batch<I, N>(I(1));
+
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            res = lhs << i;
+            I expected = I(1) << i;
+            for (std::size_t j = 0; j < N; ++j)
+            {
+                success = success && (res[j] == expected);
+            }
+        }
+        lhs = batch<I, N>(std::numeric_limits<I>::max());
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            res = lhs >> i;
+            I expected = std::numeric_limits<I>::max() >> i;
+            for (std::size_t j = 0; j < N; ++j)
+            {
+                success = success && (res[j] == expected);
+            }
+        }
+        if (!success)
+        {
+            stream << "Failed test simd int shift!" << std::endl;
+        }
+        return success;
+    }
+
     template <class T>
     bool test_simd_int_basic(std::ostream& out, T& tester)
     {
@@ -821,6 +858,8 @@ namespace xsimd
         tmp_success = !all_res_false && all_res_true;
         success = success && tmp_success;
 
+        success = success && test_simd_int_shift(vector_type(value_type(0)), out);
+
         return success;
     }
 
@@ -841,6 +880,8 @@ namespace xsimd
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
+        std::string name;
+
         int32_batch i32pos;
         int32_batch i32neg;
         int64_batch i64pos;
@@ -858,8 +899,6 @@ namespace xsimd
         float_vector i32negres;
         double_vector i64posres;
         double_vector i64negres;
-
-        std::string name;
 
         simd_convert_tester(const std::string& name);
     };
@@ -980,6 +1019,8 @@ namespace xsimd
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
+        std::string name;
+
         int32_batch i32_input;
         int64_batch i64_input;
         float_batch f_input;
@@ -995,8 +1036,6 @@ namespace xsimd
         double_vector i32tod_res;
         double_vector i64tod_res;
         double_vector ftod_res;
-
-        std::string name;
 
         simd_cast_tester(const std::string& n);
     };
@@ -1169,6 +1208,8 @@ namespace xsimd
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
+        std::string name;
+
         int32_vector i32_vec;
         int64_vector i64_vec;
         float_vector f_vec;
@@ -1178,8 +1219,6 @@ namespace xsimd
         int64_vector i64_vec2;
         float_vector f_vec2;
         double_vector d_vec2;
-
-        std::string name;
 
         simd_load_store_tester(const std::string& n);
     };

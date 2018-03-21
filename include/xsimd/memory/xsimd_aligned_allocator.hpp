@@ -10,6 +10,7 @@
 #define XSIMD_ALIGNED_ALLOCATOR_HPP
 
 #include <algorithm>
+#include <memory>
 #include <cstddef>
 #include <stdlib.h>
 

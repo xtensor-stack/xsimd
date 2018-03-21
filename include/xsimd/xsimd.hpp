@@ -351,14 +351,20 @@ namespace xsimd
      *****************************/
 
     template <class T>
-    inline void prefetch(const T* address)
+    inline void prefetch(const T* /*address*/)
     {
     }
 
 #if defined(XSIMD_X86_INSTR_SET_AVAILABLE)
 
     template <>
-    inline void prefetch<int>(const int* address)
+    inline void prefetch<int32_t>(const int32_t* address)
+    {
+        _mm_prefetch(reinterpret_cast<const char*>(address), _MM_HINT_T0);
+    }
+
+    template <>
+    inline void prefetch<int64_t>(const int64_t* address)
     {
         _mm_prefetch(reinterpret_cast<const char*>(address), _MM_HINT_T0);
     }

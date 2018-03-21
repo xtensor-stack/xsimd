@@ -158,13 +158,26 @@
  * ARM INSTRUCTION SET *
  ***********************/
 
-#define XSIMD_ARM_NEON_VERSION XSIMD_VERSION_NUMBER(1, 0, 0)
-
 #undef XSIMD_ARM_INSTR_SET
 #undef XSIMD_ARM_INSTR_SET_AVAILABLE
 
-#if !defined(XSIMD_ARM_INSTR_SET) && (defined(__ARM_NEON__) || defined(__aarch64__) || defined(_M_ARM))
-    #define XSIMD_ARM_INSTR_SET XSIMD_ARM_NEON_VERSION
+#define XSIMD_ARM7_NEON_VERSION XSIMD_VERSION_NUMBER(7, 0, 0)
+#define XSIMD_ARM8_32_NEON_VERSION XSIMD_VERSION_NUMBER(8, 0, 0)
+#define XSIMD_ARM8_64_NEON_VERSION XSIMD_VERSION_NUMBER(8, 1, 0)
+
+// TODO __ARM_FEATURE_FMA
+#if !defined(XSIMD_ARM_INSTR_SET) && (defined(__ARM_NEON))
+    #if __ARM_ARCH >= 8
+        #if defined(__aarch64__)
+            #define XSIMD_ARM_INSTR_SET XSIMD_ARM8_64_NEON_VERSION
+        #else
+            #define XSIMD_ARM_INSTR_SET XSIMD_ARM8_32_NEON_VERSION
+        #endif
+    #elif __ARM_ARCH >= 7
+        #define XSIMD_ARM_INSTR_SET XSIMD_ARM7_NEON_VERSION
+    #else
+        static_assert("NEON instruction set not supported.", false);
+    #endif
 #endif
 
 #if !defined(XSIMD_ARM_INSTR_SET)

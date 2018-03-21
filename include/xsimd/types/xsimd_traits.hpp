@@ -25,6 +25,14 @@
 #define XSIMD_BATCH_INT64_SIZE 2
 #define XSIMD_BATCH_FLOAT_SIZE 4
 #define XSIMD_BATCH_DOUBLE_SIZE 2
+#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+#define XSIMD_BATCH_INT32_SIZE 4
+#define XSIMD_BATCH_INT64_SIZE 2
+#define XSIMD_BATCH_FLOAT_SIZE 4
+#endif
+
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+#define XSIMD_BATCH_DOUBLE_SIZE 2
 #endif
 
 namespace xsimd
@@ -54,8 +62,7 @@ namespace xsimd
     template <class T>
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
-#ifdef XSIMD_BATCH_DOUBLE_SIZE
-
+#ifdef XSIMD_BATCH_FLOAT_SIZE
     template <>
     struct simd_traits<int32_t>
     {
@@ -100,7 +107,8 @@ namespace xsimd
         using type = float;
         static constexpr size_t size = simd_traits<type>::size;
     };
-
+#endif
+#ifdef XSIMD_BATCH_DOUBLE_SIZE
     template <>
     struct simd_traits<double>
     {
@@ -115,8 +123,8 @@ namespace xsimd
         using type = double;
         static constexpr size_t size = simd_traits<type>::size;
     };
-
 #endif
+
 }
 
 #endif

@@ -58,3 +58,20 @@ TEST(xsimd, avx_double_error_gamma)
     EXPECT_TRUE(res);
 }
 #endif
+
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+TEST(xsimd, neon_float_error_gamma)
+{
+    std::ofstream out("log/neon_float_error_gamma.log", std::ios_base::out);
+    bool res = xsimd::test_error_gamma<float, 4, 16>(out, "neon float");
+    EXPECT_TRUE(res);
+}
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+TEST(xsimd, neon_double_error_gamma)
+{
+    std::ofstream out("log/neon_double_exponential.log", std::ios_base::out);
+    bool res = xsimd::test_error_gamma<double, 2, 32>(out, "neon double");
+    EXPECT_TRUE(res);
+}
+#endif

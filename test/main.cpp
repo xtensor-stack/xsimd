@@ -35,7 +35,9 @@ info_map_type init_instruction_map()
     res[XSIMD_PPC_VMX_VERSION] = "PowerPC VM";
     res[XSIMD_PPC_VSX_VERSION] = "PowerPC VSX";
     res[XSIMD_PPC_QPX_VERSION] = "PowerPC QPX";
-    res[XSIMD_ARM_NEON_VERSION] = "ARM Neon";
+    res[XSIMD_ARM7_NEON_VERSION] = "ARMv7 Neon";
+    res[XSIMD_ARM8_32_NEON_VERSION] = "ARMv8 32bit Neon";
+    res[XSIMD_ARM8_64_NEON_VERSION] = "ARMv8 64bit Neon";
     res[XSIMD_VERSION_NUMBER_NOT_AVAILABLE] = "No SIMD available";
     return res;
 }
