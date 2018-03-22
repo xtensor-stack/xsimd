@@ -188,6 +188,9 @@ namespace xsimd
     template <class X>
     std::ostream& operator<<(std::ostream& out, const simd_batch<X>& rhs);
 
+    template <class X>
+    std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs);
+
     /**********************************
      * simd_batch_bool implementation *
      **********************************/
@@ -791,6 +794,19 @@ namespace xsimd
     inline std::ostream& operator<<(std::ostream& out, const simd_batch<X>& rhs)
     {
         out << '(';
+        std::size_t s = simd_batch<X>::size;
+        for (std::size_t i = 0; i < s - 1; ++i)
+        {
+            out << rhs()[i] << ", ";
+        }
+        out << rhs()[s - 1] << ')';
+        return out;
+    }
+
+    template <class X>
+    inline std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs)
+    {
+        out << std::boolalpha << '(';
         std::size_t s = simd_batch<X>::size;
         for (std::size_t i = 0; i < s - 1; ++i)
         {
