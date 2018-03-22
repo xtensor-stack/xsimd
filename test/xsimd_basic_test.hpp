@@ -56,6 +56,8 @@ namespace xsimd
         res_type xor_res;
         res_type not_res;
         res_type lnot_res;
+        res_type land_res;
+        res_type lor_res;
         res_type min_res;
         res_type max_res;
         res_type abs_res;
@@ -101,6 +103,8 @@ namespace xsimd
         xor_res.resize(N);
         not_res.resize(N);
         lnot_res.resize(N);
+        land_res.resize(N);
+        lor_res.resize(N);
         min_res.resize(N);
         max_res.resize(N);
         abs_res.resize(N);
@@ -135,6 +139,8 @@ namespace xsimd
             //xor_res[i] = lhs[i] ^ rhs[i];
             //not_res[i] = ~lhs[i];
             //lnot_res[i] = !lhs[i];
+            //land_res[i] = lhs[i] && rhs[i];
+            //lor_res[i] = lhs[i] || rhs[i];
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);
@@ -191,6 +197,8 @@ namespace xsimd
         res_type xor_res;
         res_type not_res;
         res_type lnot_res;
+        res_type land_res;
+        res_type lor_res;
         res_type min_res;
         res_type max_res;
         res_type abs_res;
@@ -235,6 +243,8 @@ namespace xsimd
         xor_res.resize(N);
         not_res.resize(N);
         lnot_res.resize(N);
+        land_res.resize(N);
+        lor_res.resize(N);
         min_res.resize(N);
         max_res.resize(N);
         abs_res.resize(N);
@@ -271,6 +281,8 @@ namespace xsimd
             //xor_res[i] = lhs[i] ^ rhs[i];
             //not_res[i] = ~lhs[i];
             //lnot_res[i] = !lhs[i];
+            //land_res[i] = lhs[i] && rhs[i];
+            //lor_res[i] = lhs[i] || rhs[i];
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);

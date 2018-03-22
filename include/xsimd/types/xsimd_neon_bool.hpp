@@ -57,6 +57,7 @@ namespace xsimd
         using value_type = bool;
         static constexpr std::size_t size = 4;
         using batch_type = batch<T, 4>;
+        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
     };
 
     template <class T>
