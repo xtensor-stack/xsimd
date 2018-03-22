@@ -188,6 +188,16 @@ namespace xsimd
     template <class X>
     std::ostream& operator<<(std::ostream& out, const simd_batch<X>& rhs);
 
+    /***************************
+     * generic batch operators *
+     ***************************/
+
+    template <class T, std::size_t N>
+    batch<T, N> operator&&(const batch<T, N>& lhs, const batch<T, N>& rhs);
+
+    template <class T, std::size_t N>
+    batch<T, N> operator||(const batch<T, N>& lhs, const batch<T, N>& rhs);
+
     /**********************************
      * simd_batch_bool implementation *
      **********************************/
@@ -798,6 +808,44 @@ namespace xsimd
         }
         out << rhs()[s - 1] << ')';
         return out;
+    }
+
+    /******************************************
+     * generic batch operators implementation *
+     ******************************************/
+
+    template <class T, std::size_t N>
+    inline batch<T, N> operator&&(const batch<T, N>& lhs, const batch<T, N>& rhs)
+    {
+        using traits = simd_batch_traits<batch<T, N>>;
+        constexpr std::size_t align = traits::align;
+        alignas(align) T tmp_lhs[N];
+        alignas(align) T tmp_rhs[N];
+        alignas(align) T tmp_res[N];
+        lhs.store_aligned(tmp_lhs);
+        rhs.store_aligned(tmp_rhs);
+        for (std::size_t i = 0; i < traits::size; ++i)
+        {
+            tmp_res[i] = tmp_lhs[i] && tmp_rhs[i];
+        }
+        return batch<T, N>(tmp_res, aligned_mode());
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> operator||(const batch<T, N>& lhs, const batch<T, N>& rhs)
+    {
+        using traits = simd_batch_traits<batch<T, N>>;
+        constexpr std::size_t align = traits::align;
+        alignas(align) T tmp_lhs[N];
+        alignas(align) T tmp_rhs[N];
+        alignas(align) T tmp_res[N];
+        lhs.store_aligned(tmp_lhs);
+        rhs.store_aligned(tmp_rhs);
+        for (std::size_t i = 0; i < traits::size; ++i)
+        {
+            tmp_res[i] = tmp_lhs[i] || tmp_rhs[i];
+        }
+        return batch<T, N>(tmp_res, aligned_mode());
     }
 }
 
