@@ -381,16 +381,6 @@ namespace xsimd
         return vshlq_s32(lhs, rhs);
     }
 
-    inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return int32x4_t{
-            lhs[0] >> rhs[0],
-            lhs[1] >> rhs[1],
-            lhs[2] >> rhs[2],
-            lhs[3] >> rhs[3]
-        };
-    }
-
     inline batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
     {
         return vceqq_s32(lhs, rhs);

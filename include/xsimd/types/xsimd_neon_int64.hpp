@@ -390,14 +390,6 @@ namespace xsimd
         return vshlq_s64(lhs, rhs);
     }
 
-    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
-    {
-        return int64x2_t{
-            lhs[0] >> rhs[0],
-            lhs[1] >> rhs[1]
-        };
-    }
-
     inline batch_bool<int64_t, 2> operator==(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
     #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION

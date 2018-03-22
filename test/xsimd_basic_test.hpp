@@ -613,6 +613,13 @@ namespace xsimd
         {
             stream << "Failed test simd int shift!" << std::endl;
         }
+
+        {
+            // Compilation check
+            batch<I, N> sh(1);
+            res = lhs << sh;
+            res = lhs >> sh;
+        }
         return success;
     }
 

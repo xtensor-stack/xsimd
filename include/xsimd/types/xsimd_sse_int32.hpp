@@ -152,8 +152,6 @@ namespace xsimd
 
     batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
     batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs);
-    batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
 
     /*****************************************
      * batch_bool<int32_t, 4> implementation *
@@ -563,26 +561,6 @@ namespace xsimd
     inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs)
     {
         return _mm_srli_epi32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return batch<int32_t, 4>{
-            lhs[0] << rhs[0],
-            lhs[1] << rhs[1],
-            lhs[2] << rhs[2],
-            lhs[3] << rhs[3]
-            };
-    }
-
-    inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return batch<int32_t, 4>{
-            lhs[0] >> rhs[0],
-            lhs[1] >> rhs[1],
-            lhs[2] >> rhs[2],
-            lhs[3] >> rhs[3]
-            };
     }
 }
 

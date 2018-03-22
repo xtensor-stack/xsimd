@@ -153,8 +153,6 @@ namespace xsimd
 
     batch<int64_t, 4> operator<<(const batch<int64_t, 4>& lhs, int32_t rhs);
     batch<int64_t, 4> operator>>(const batch<int64_t, 4>& lhs, int32_t rhs);
-    batch<int64_t, 4> operator<<(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator>>(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
 
     /*****************************************
      * batch_bool<int64_t, 4> implementation *
@@ -703,26 +701,6 @@ namespace xsimd
         __m128i res_high = _mm_srli_epi64(lhs_high, rhs);
         XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
-    }
-
-    inline batch<int64_t, 4> operator<<(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        return batch<int64_t, 4>{
-            lhs[0] << rhs[0],
-            lhs[1] << rhs[1],
-            lhs[2] << rhs[2],
-            lhs[3] << rhs[3]
-            };
-    }
-
-    inline batch<int64_t, 4> operator>>(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        return batch<int64_t, 4>{
-            lhs[0] >> rhs[0],
-            lhs[1] >> rhs[1],
-            lhs[2] >> rhs[2],
-            lhs[3] >> rhs[3]
-            };
     }
 }
 
