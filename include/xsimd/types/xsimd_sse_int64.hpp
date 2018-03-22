@@ -127,6 +127,8 @@ namespace xsimd
     batch_bool<int64_t, 2> operator!=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch_bool<int64_t, 2> operator<=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch_bool<int64_t, 2> operator>(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
+    batch_bool<int64_t, 2> operator>=(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
 
     batch<int64_t, 2> operator&(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
     batch<int64_t, 2> operator|(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);

@@ -157,10 +157,10 @@ namespace xsimd
         return s ^ select(v < t2n, d0 - t2n, v);
     }
 
-    template <>
-    inline batch<float, 4> trunc(const batch<float, 4>& x)
+    template <class T, std::size_t N>
+    inline batch<T, N> trunc(const batch<T, N>& x)
     {
-        using btype = batch<float, 4>;
+        using btype = batch<T, N>;
         return select(abs(x) < maxflint<btype>(), to_float(to_int(x)), x);
     }
 
