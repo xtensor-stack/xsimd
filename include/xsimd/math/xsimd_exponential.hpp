@@ -11,6 +11,7 @@
 
 #include "xsimd_exp_reduction.hpp"
 #include "xsimd_fp_manipulation.hpp"
+#include <iostream>
 
 namespace xsimd
 {

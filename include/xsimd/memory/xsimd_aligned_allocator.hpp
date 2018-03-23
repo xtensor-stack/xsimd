@@ -171,7 +171,7 @@ namespace xsimd
     aligned_allocator<T, A>::allocate(size_type n,
             typename std::allocator<void>::const_pointer) -> pointer
     {
-        pointer res = reinterpret_cast<pointer>(aligned_malloc(sizeof(T) * n, A));
+        pointer res = reinterpret_cast<pointer>(__builtin_assume_aligned(aligned_malloc(sizeof(T) * n, A), XSIMD_DEFAULT_ALIGNMENT));
         if (res == nullptr)
             throw std::bad_alloc();
         return res;

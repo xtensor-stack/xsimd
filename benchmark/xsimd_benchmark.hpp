@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "../include/xsimd/types/xsimd_shim.hpp"
 #include "xsimd/xsimd.hpp"
 
 namespace xsimd
@@ -63,7 +64,7 @@ namespace xsimd
     };
 
     template <class F, class V>
-    duration_type benchmark_scalar(F f, V& lhs, V& res, std::size_t number)
+    duration_type benchmark_scalar(const F& f, V& lhs, V& res, std::size_t number)
     {
         size_t s = lhs.size();
         duration_type t_res = duration_type::max();
@@ -82,7 +83,7 @@ namespace xsimd
     }
 
     template <class F, class V>
-    duration_type benchmark_scalar(F f, V& lhs, V& rhs, V& res, std::size_t number)
+    duration_type benchmark_scalar(const F& f, V& lhs, V& rhs, V& res, std::size_t number)
     {
         size_t s = lhs.size();
         duration_type t_res = duration_type::max();
@@ -101,7 +102,7 @@ namespace xsimd
     }
 
     template <class B, class F, class V>
-    duration_type benchmark_simd(F f, V& lhs, V& res, std::size_t number)
+    duration_type benchmark_simd(const F& f, V& lhs, V& res, std::size_t number)
     {
         std::size_t s = lhs.size();
         duration_type t_res = duration_type::max();
@@ -122,7 +123,7 @@ namespace xsimd
     }
 
     template <class B, class F, class V>
-    duration_type benchmark_simd_unrolled(F f, V& lhs, V& res, std::size_t number)
+    duration_type benchmark_simd_unrolled(const F& f, V& lhs, V& res, std::size_t number)
     {
         std::size_t s = lhs.size();
         std::size_t inc = 4 * B::size;
@@ -239,12 +240,10 @@ namespace xsimd
         duration_type t_double_sse = benchmark_simd<batch<double, 2>>(f, d_lhs, d_res, iter);
         duration_type t_double_sse_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_lhs, d_res, iter);
 #endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
         duration_type t_float_avx = benchmark_simd<batch<float, 8>>(f, f_lhs, f_res, iter);
         duration_type t_float_avx_u = benchmark_simd_unrolled<batch<float, 8>>(f, f_lhs, f_res, iter);
         duration_type t_double_avx = benchmark_simd<batch<double, 4>>(f, d_lhs, d_res, iter);
         duration_type t_double_avx_u = benchmark_simd_unrolled<batch<double, 4>>(f, d_lhs, d_res, iter);
-#endif
 #if defined(XSIMD_ARM_INSTR_SET)
         duration_type t_float_neon = benchmark_simd<batch<float, 4>>(f, f_lhs, f_res, iter);
         duration_type t_float_neon_u = benchmark_simd_unrolled<batch<float, 4>>(f, f_lhs, f_res, iter);
@@ -259,10 +258,8 @@ namespace xsimd
         out << "sse float      : " << t_float_sse.count() << "ms" << std::endl;
         out << "sse float unr  : " << t_float_sse_u.count() << "ms" << std::endl;
 #endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
         out << "avx float      : " << t_float_avx.count() << "ms" << std::endl;
         out << "avx float unr  : " << t_float_avx_u.count() << "ms" << std::endl;
-#endif
 #if defined(XSIMD_ARM_INSTR_SET)
         out << "neon float     : " << t_float_neon.count() << "ms" << std::endl;
         out << "neon float unr : " << t_float_neon_u.count() << "ms" << std::endl;
@@ -272,10 +269,8 @@ namespace xsimd
         out << "sse double     : " << t_double_sse.count() << "ms" << std::endl;
         out << "sse double unr : " << t_double_sse_u.count() << "ms" << std::endl;
 #endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
         out << "avx double     : " << t_double_avx.count() << "ms" << std::endl;
         out << "avx double unr : " << t_double_avx_u.count() << "ms" << std::endl;
-#endif
 #if defined(XSIMD_ARM_INSTR_SET)
         out << "neon double    : " << t_double_neon.count() << "ms" << std::endl;
         out << "neon double unr: " << t_double_neon_u.count() << "ms" << std::endl;
@@ -292,80 +287,87 @@ namespace xsimd
         init_benchmark(f_lhs, f_rhs, f_res, size);
         init_benchmark(d_lhs, d_rhs, d_res, size);
 
-        duration_type t_float_scalar = benchmark_scalar(f, f_lhs, f_rhs, f_res, iter);
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        duration_type t_float_sse = benchmark_simd<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
-        duration_type t_float_sse_u = benchmark_simd_unrolled<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        duration_type t_float_avx = benchmark_simd<batch<float, 8>>(f, f_lhs, f_rhs, f_res, iter);
-        duration_type t_float_avx_u = benchmark_simd_unrolled<batch<float, 8>>(f, f_lhs, f_rhs, f_res, iter);
-#endif
+        // duration_type t_float_scalar = benchmark_scalar(f, f_lhs, f_rhs, f_res, iter);
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+//         duration_type t_float_sse = benchmark_simd<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
+//         duration_type t_float_sse_u = benchmark_simd_unrolled<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
+// #endif
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+//         duration_type t_float_avx = benchmark_simd<batch<float, 8>>(f, f_lhs, f_rhs, f_res, iter);
+//         duration_type t_float_avx_u = benchmark_simd_unrolled<batch<float, 8>>(f, f_lhs, f_rhs, f_res, iter);
+// #endif
         duration_type t_double_scalar = benchmark_scalar(f, d_lhs, d_rhs, d_res, iter);
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        duration_type t_double_sse = benchmark_simd<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
-        duration_type t_double_sse_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        duration_type t_double_avx = benchmark_simd<batch<double, 4>>(f, d_lhs, d_rhs, d_res, iter);
-        duration_type t_double_avx_u = benchmark_simd_unrolled<batch<double, 4>>(f, d_lhs, d_rhs, d_res, iter);
-#endif
-#if defined(XSIMD_ARM_INSTR_SET)
-        duration_type t_float_neon = benchmark_simd<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
-        duration_type t_float_neon_u = benchmark_simd_unrolled<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
-        duration_type t_double_neon = benchmark_simd<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
-        duration_type t_double_neon_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
-#endif
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+//         duration_type t_double_sse = benchmark_simd<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
+//         duration_type t_double_sse_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
+// #endif
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+//         duration_type t_double_avx = benchmark_simd<batch<double, 4>>(f, d_lhs, d_rhs, d_res, iter);
+//         duration_type t_double_avx_u = benchmark_simd_unrolled<batch<double, 4>>(f, d_lhs, d_rhs, d_res, iter);
+// #endif
+// #if defined(XSIMD_ARM_INSTR_SET)
+//         duration_type t_float_neon = benchmark_simd<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
+//         duration_type t_float_neon_u = benchmark_simd_unrolled<batch<float, 4>>(f, f_lhs, f_rhs, f_res, iter);
+//         duration_type t_double_neon = benchmark_simd<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
+//         duration_type t_double_neon_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
+// #endif
+
+        duration_type t_shim = benchmark_simd<batch<double, 8>>(f, d_lhs, d_rhs, d_res, iter);
+        duration_type t_shim_u = benchmark_simd_unrolled<batch<double, 8>>(f, d_lhs, d_rhs, d_res, iter);
+
 
         out << "============================" << std::endl;
         out << f.name() << std::endl;
-        out << "scalar float   : " << t_float_scalar.count() << "ms" << std::endl;
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        out << "sse float      : " << t_float_sse.count() << "ms" << std::endl;
-        out << "sse float unr  : " << t_float_sse_u.count() << "ms" << std::endl;
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        out << "avx float      : " << t_float_avx.count() << "ms" << std::endl;
-        out << "avx float unr  : " << t_float_avx_u.count() << "ms" << std::endl;
-#endif
-#if defined(XSIMD_ARM_INSTR_SET)
-        out << "neon float     : " << t_float_neon.count() << "ms" << std::endl;
-        out << "neon float unr : " << t_float_neon_u.count() << "ms" << std::endl;
-#endif
+//         out << "scalar float   : " << t_float_scalar.count() << "ms" << std::endl;
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+//         out << "sse float      : " << t_float_sse.count() << "ms" << std::endl;
+//         out << "sse float unr  : " << t_float_sse_u.count() << "ms" << std::endl;
+// #endif
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+//         out << "avx float      : " << t_float_avx.count() << "ms" << std::endl;
+//         out << "avx float unr  : " << t_float_avx_u.count() << "ms" << std::endl;
+// #endif
+// #if defined(XSIMD_ARM_INSTR_SET)
+//         out << "neon float     : " << t_float_neon.count() << "ms" << std::endl;
+//         out << "neon float unr : " << t_float_neon_u.count() << "ms" << std::endl;
+// #endif
         out << "scalar double  : " << t_double_scalar.count() << "ms" << std::endl;
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        out << "sse double     : " << t_double_sse.count() << "ms" << std::endl;
-        out << "sse double unr : " << t_double_sse_u.count() << "ms" << std::endl;
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-        out << "avx double     : " << t_double_avx.count() << "ms" << std::endl;
-        out << "avx double unr : " << t_double_avx_u.count() << "ms" << std::endl;
-#endif
-#if defined(XSIMD_ARM_INSTR_SET)
-        out << "neon double    : " << t_double_neon.count() << "ms" << std::endl;
-        out << "neon double unr: " << t_double_neon_u.count() << "ms" << std::endl;
-#endif
-        out << "============================" << std::endl;
+        out << "shim double    : " << t_shim.count() << "ms" << std::endl;
+        out << "shim double unr: " << t_shim_u.count() << "ms" << std::endl;
+
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+//         out << "sse double     : " << t_double_sse.count() << "ms" << std::endl;
+//         out << "sse double unr : " << t_double_sse_u.count() << "ms" << std::endl;
+// #endif
+// #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+//         out << "avx double     : " << t_double_avx.count() << "ms" << std::endl;
+//         out << "avx double unr : " << t_double_avx_u.count() << "ms" << std::endl;
+// #endif
+// #if defined(XSIMD_ARM_INSTR_SET)
+//         out << "neon double    : " << t_double_neon.count() << "ms" << std::endl;
+//         out << "neon double unr: " << t_double_neon_u.count() << "ms" << std::endl;
+// #endif
+//         out << "============================" << std::endl;
     }
 
 #define DEFINE_OP_FUNCTOR_2OP(OP, NAME)\
     struct NAME##_fn {\
         template <class T>\
-        inline T operator()(const T& lhs, const T& rhs) const { return lhs OP rhs; }\
+        __attribute__((always_inline)) constexpr T operator()(T lhs, T rhs) const { return lhs OP rhs; }\
         inline std::string name() const { return #NAME; }\
     }
 
 #define DEFINE_FUNCTOR_1OP(FN)\
     struct FN##_fn {\
         template <class T>\
-        inline T operator()(const T& x) const { using std::FN; using xsimd::FN; return FN(x); }\
+        __attribute__((always_inline)) constexpr T operator()(T x) const { using std::FN; using xsimd::FN; return FN(x); }\
         inline std::string name() const { return #FN; }\
     }
 
 #define DEFINE_FUNCTOR_2OP(FN)\
     struct FN##_fn{\
         template <class T>\
-        inline T operator()(const T&lhs, const T& rhs) const { using std::FN; using xsimd::FN; return FN(lhs, rhs); }\
+        __attribute__((always_inline)) constexpr T operator()(T lhs, T rhs) const { using std::FN; using xsimd::FN; return FN(lhs, rhs); }\
         inline std::string name() const { return #FN; }\
     }
 

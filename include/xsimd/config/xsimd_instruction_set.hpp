@@ -176,7 +176,7 @@
     #elif __ARM_ARCH >= 7
         #define XSIMD_ARM_INSTR_SET XSIMD_ARM7_NEON_VERSION
     #else
-        static_assert("NEON instruction set not supported.", false);
+        static_assert(false, "NEON instruction set not supported.");
     #endif
 #endif
 

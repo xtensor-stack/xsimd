@@ -12,6 +12,7 @@
 #include "xsimd_horner.hpp"
 #include "xsimd_numerical_constant.hpp"
 #include "xsimd_rounding.hpp"
+#include <iostream>
 
 namespace xsimd
 {

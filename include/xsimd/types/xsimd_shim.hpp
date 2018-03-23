@@ -10,13 +10,14 @@
 #define XSIMD_SHIM_HPP
 
 #include <cmath>
+#include <iostream>
 
 #include "xsimd_base.hpp"
 
 namespace xsimd
 {
 
-    namespace detail 
+    namespace detail
     {
         template <class T>
         struct get_int_type
@@ -88,7 +89,7 @@ namespace xsimd
 
     private:
 
-        type m_value;
+        type m_storage;
     };
 
     template <class T, std::size_t N>
@@ -137,28 +138,28 @@ namespace xsimd
         batch(T src);
         batch(const batch<T, N>& src);
         batch(const storage_type& src);
-        // template <class... Args>
-        // batch(Args... args);
-        explicit batch(const T* src);
-        batch(const T* src, aligned_mode);
-        batch(const T* src, unaligned_mode);
+
+        explicit batch(T* src);
+        batch(T* src, aligned_mode);
+        batch(T* src, unaligned_mode);
         batch& operator=(const storage_type& rhs);
         batch& operator=(const T& rhs);
 
         operator storage_type() const;
 
-        batch& load_aligned(const double* src);
-        batch& load_unaligned(const double* src);
+        batch& load_aligned(T* src);
+        batch& load_unaligned(T* src);
 
-        void store_aligned(double* dst) const;
-        void store_unaligned(double* dst) const;
+        void store_aligned(T* dst) const;
+        void store_unaligned(T* dst) const;
 
         T& operator[](std::size_t index);
         const T& operator[](std::size_t index) const;
 
     private:
 
-        storage_type m_value;
+        alignas(32) storage_type m_storage;
+        value_type* m_value = (value_type*) __builtin_assume_aligned(&m_storage[0], 32);
     };
 
     template <class T, std::size_t N>
@@ -171,7 +172,7 @@ namespace xsimd
     batch<T, N> operator*(const batch<T, N>& lhs, const batch<T, N>& rhs);
     template <class T, std::size_t N>
     batch<T, N> operator/(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    
+
     template <class T, std::size_t N>
     batch_bool<T, N> operator==(const batch<T, N>& lhs, const batch<T, N>& rhs);
     template <class T, std::size_t N>
@@ -191,6 +192,10 @@ namespace xsimd
     batch<T, N> operator~(const batch<T, N>& rhs);
     template <class T, std::size_t N>
     batch<T, N> bitwise_andnot(const batch<T, N>& lhs, const batch<T, N>& rhs);
+    template <class T, std::size_t N>
+    batch<T, N> operator<<(const batch<T, N>& rhs, const int n);
+    template <class T, std::size_t N>
+    batch<T, N> operator>>(const batch<T, N>& rhs, const int n);
 
     template <class T, std::size_t N>
     batch<T, N> min(const batch<T, N>& lhs, const batch<T, N>& rhs);
@@ -238,26 +243,26 @@ namespace xsimd
     template <class T, std::size_t N>
     template <class... Args>
     inline batch_bool<T, N>::batch_bool(Args... b)
-        : m_value{b...}
+        : m_storage{b...}
     {
     }
 
     // template <class T, std::size_t N>
     // inline batch_bool<T, N>::batch_bool(const T& rhs)
-    //     : m_value(rhs)
+    //     : m_storage(rhs)
     // {
     // }
 
     // template <class T, std::size_t N>
     // inline batch_bool<T, N>& batch_bool<T, N>::operator=(const T& rhs)
     // {
-    //     m_value = rhs;
+    //     m_storage = rhs;
     //     return *this;
     // }
 
 #define OP_MACRO(op)                                                                     \
     batch<T, N> tmp;                                                                     \
-    for (std::size_t i = 0; i < N; ++i)                                                  \
+    for (int i = 0; i < N; ++i)                                                  \
     {                                                                                    \
         tmp[i] = lhs[i] op rhs[i];                                                       \
     }                                                                                    \
@@ -265,7 +270,7 @@ namespace xsimd
 
 #define UNARY_OP_MACRO(op)                                                               \
     batch<T, N> tmp;                                                                     \
-    for (std::size_t i = 0; i < N; ++i)                                                  \
+    for (int i = 0; i < N; ++i)                                                  \
     {                                                                                    \
         tmp[i] = op rhs[i];                                                              \
     }                                                                                    \
@@ -311,19 +316,19 @@ namespace xsimd
     template <class T, std::size_t N>
     inline batch_bool<T, N>::operator type() const
     {
-        return m_value;
+        return m_storage;
     }
 
     template <class T, std::size_t N>
     inline typename batch_bool<T, N>::b_type& batch_bool<T, N>::operator[](std::size_t index)
     {
-        return m_value[index];
+        return m_storage[index];
     }
 
     template <class T, std::size_t N>
     inline const typename batch_bool<T, N>::b_type& batch_bool<T, N>::operator[](std::size_t index) const
     {
-        return m_value[index];
+        return m_storage[index];
     }
 
     template <class T, std::size_t N>
@@ -347,7 +352,14 @@ namespace xsimd
     template <class T, std::size_t N>
     inline batch_bool<T, N> operator~(const batch_bool<T, N>& rhs)
     {
-        return static_cast<double>(~static_cast<uint64_t>(double(rhs)));
+        using int_t = typename detail::get_int_type<T>::unsigned_type;
+        batch_bool<T, N> tmp;
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            int_t it = ~(*reinterpret_cast<const int_t*>(&rhs[i]));
+            tmp[i] = *reinterpret_cast<T*>(&it);
+        }
+        return tmp;
     }
 
     template <class T, std::size_t N>
@@ -376,6 +388,7 @@ namespace xsimd
         {
             result = result && (bool(rhs[i]));
         }
+        return result;
     }
 
     template <class T, std::size_t N>
@@ -391,10 +404,10 @@ namespace xsimd
         return false;
     }
 
-    /***********************************
-     template <class T, std::size_t N>
-     * batch<T, N> implementation *
-     ***********************************/
+    /*************************************
+     * template <class T, std::size_t N> *
+     * batch<T, N> implementation        *
+     *************************************/
 
     template <class T, std::size_t N>
     inline batch<T, N>::batch()
@@ -404,80 +417,100 @@ namespace xsimd
     template <class T, std::size_t N>
     inline batch<T, N>::batch(T rhs)
     {
-        std::fill(m_value.begin(), m_value.end(), rhs);
+        std::fill(m_storage.begin(), m_storage.end(), rhs);
+        m_value = &m_storage[0];
     }
 
-    // template <class T, std::size_t N>
-    // template <class... Args>
-    // inline batch<T, N>::batch(Args... args)
-    //     : m_value({args...})
-    // {
-    // }
-
     template <class T, std::size_t N>
-    inline batch<T, N>::batch(const T* src)
+    inline batch<T, N>::batch(T* src)
+        : m_value(src)
     {
-        std::copy(src, src + N, m_value.begin());
+        // std::copy(src, src + N, m_storage.begin());
     }
-    
+
     template <class T, std::size_t N>
-    inline batch<T, N>::batch(const T* src, aligned_mode)
-        : batch(src)
+    inline batch<T, N>::batch(T* src, aligned_mode)
+        : m_value((T*) __builtin_assume_aligned(src, 32))
     {
     }
 
     template <class T, std::size_t N>
-    inline batch<T, N>::batch(const T* src, unaligned_mode)
+    inline batch<T, N>::batch(T* src, unaligned_mode)
         : batch(src)
     {
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>::batch(const storage_type& d)
-        : m_value({d})
+        : m_storage({d}), m_value(&m_storage[0])
     {
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>::batch(const batch<T, N>& lhs)
-        : m_value(lhs.m_value)
+        : batch(lhs.m_storage)
     {
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>& batch<T, N>::operator=(const T& rhs)
     {
-        std::fill(m_value.begin(), m_value.end(), rhs);
+        std::fill(m_storage.begin(), m_storage.end(), rhs);
+        m_value = &m_storage[0];
         return *this;
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>::operator storage_type() const
     {
-        return m_value;
+        if (&m_storage[0] != m_value)
+        {
+            std::copy(m_value, m_value + N, m_storage);
+        }
+        return m_storage;
     }
 
     template <class T, std::size_t N>
-    inline batch<T, N>& batch<T, N>::load_aligned(const double* src)
+    __attribute__((always_inline)) inline batch<T, N>& batch<T, N>::load_aligned(T* src)
     {
-        std::copy(src, src + N, m_value.begin());
+
+        m_value = (T*) __builtin_assume_aligned(src, 32);;
+        // std::copy(src, src + N, m_storage.begin());
         return *this;
     }
 
     template <class T, std::size_t N>
-    inline batch<T, N>& batch<T, N>::load_unaligned(const double* src)
+    inline batch<T, N>& batch<T, N>::load_unaligned(T* src)
     {
-        return load_aligned(src);
+        m_value = src;
+        return *this;
     }
 
     template <class T, std::size_t N>
-    inline void batch<T, N>::store_aligned(double* dst) const
+    __attribute__((always_inline)) inline void store_aligned_impl(T* __restrict__ dst, const T* __restrict__ src)
     {
-        std::copy(m_value.begin(), m_value.end(), dst);
+        T* dst_a = (T*) __builtin_assume_aligned(dst, 32);
+        const T* src_a = (const T*) __builtin_assume_aligned(src, 32);
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            dst_a[i] = src_a[i];
+        }
     }
 
     template <class T, std::size_t N>
-    inline void batch<T, N>::store_unaligned(double* dst) const
+    __attribute__((always_inline)) inline void batch<T, N>::store_aligned(T* dst) const
+    {
+        store_aligned_impl<T, N>(dst, m_value);
+        // auto dst_a = (T*) __builtin_assume_aligned(dst, 32);
+        // for (std::size_t i = 0; i < N; ++i)
+        // {
+        //     dst[i] = m_value[i];
+        // }
+        // std::copy(m_value, m_value + N, dst);
+    }
+
+    template <class T, std::size_t N>
+    inline void batch<T, N>::store_unaligned(T* dst) const
     {
         store_aligned(dst);
     }
@@ -501,9 +534,15 @@ namespace xsimd
     }
 
     template <class T, std::size_t N>
-    inline batch<T, N> operator+(const batch<T, N>& lhs, const batch<T, N>& rhs)
+    __attribute__((always_inline)) batch<T, N> operator+(const batch<T, N>& lhs, const batch<T, N>& rhs)
     {
-        OP_MACRO(+);
+        batch<T, N> tmp;
+        for (int i = 0; i < N; ++i)
+        {
+            tmp[i] = lhs[i] + rhs[i];
+        }
+        return tmp;
+        // OP_MACRO(+);
     }
 
     template <class T, std::size_t N>
@@ -523,7 +562,7 @@ namespace xsimd
     {
         OP_MACRO(/);
     }
-    
+
     template <class T, std::size_t N>
     inline batch_bool<T, N> operator==(const batch<T, N>& lhs, const batch<T, N>& rhs)
     {
@@ -578,18 +617,6 @@ namespace xsimd
         BITWISE_OP_MACRO(^);
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> operator~(const batch<T, N>& rhs)
-    {
-        return static_cast<double>(~static_cast<uint64_t>(double(rhs)));
-    }
-
-    template <class T, std::size_t N>
-    inline batch<T, N> bitwise_andnot(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        return static_cast<double>(static_cast<uint64_t>(double(lhs)) & (~static_cast<uint64_t>(double(rhs))));
-    }
-
 #define EXPR_MACRO(expr)                                                                 \
     batch<T, N> tmp;                                                                     \
     for (std::size_t i = 0; i < N; ++i)                                                  \
@@ -597,6 +624,31 @@ namespace xsimd
         tmp[i] = expr;                                                                   \
     }                                                                                    \
     return tmp;                                                                          \
+
+    template <class T, std::size_t N>
+    inline batch<T, N> operator~(const batch<T, N>& rhs)
+    {
+        using int_t = typename detail::get_int_type<T>::unsigned_type;
+        EXPR_MACRO(*reinterpret_cast<const T*>(~(*reinterpret_cast<const int_t*>(&rhs[i]))))
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> bitwise_andnot(const batch<T, N>& lhs, const batch<T, N>& rhs)
+    {
+        return lhs & (~rhs);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> operator<<(const batch<T, N>& lhs, const int n)
+    {
+        EXPR_MACRO(lhs[i] << n);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> operator>>(const batch<T, N>& lhs, const int n)
+    {
+        EXPR_MACRO(lhs[i] >> n);
+    }
 
     template <class T, std::size_t N>
     inline batch<T, N> min(const batch<T, N>& lhs, const batch<T, N>& rhs)
@@ -627,7 +679,7 @@ namespace xsimd
     {
         EXPR_MACRO(std::abs(rhs[i]));
     }
-    
+
     template <class T, std::size_t N>
     inline batch<T, N> sqrt(const batch<T, N>& rhs)
     {
@@ -728,22 +780,62 @@ namespace xsimd
         return result;
     }
 
+    namespace detail
+    {
+        template <class T>
+        struct get_opposite
+        {
+            using type = typename get_float_type<T>::type;
+        };
+
+        template <>
+        struct get_opposite<double>
+        {
+            using type = int64_t;
+        };
+
+        template <>
+        struct get_opposite<float>
+        {
+            using type = int32_t;
+        };
+
+        template <class T>
+        using get_opposite_t = typename get_opposite<T>::type;
+
+        template <class F, class T, std::size_t N>
+        struct batch_caster
+        {
+            batch<T, N> bitwise(const batch<F, N>& x)
+            {
+                return batch<T, N>(const_cast<T*>(reinterpret_cast<const T*>(&x[0])));
+            }
+        };
+    }
+
+    template <class T, class F, std::size_t N>
+    T bitwise_cast(const batch<F, N>& x)
+    {
+        return detail::batch_caster<F, typename simd_batch_traits<T>::value_type, N>().bitwise(x);
+    }
+
     // template <class T, std::size_t N>
     // batch<T, N> trunc(const batch<T, N>& x)
     // {
     //     EXPR_MACRO(std::trunc(x[i]));
     // }
 
-    // *
-    //  * Rounds the scalars in \c x to integer values (in floating point format), using
-    //  * the current rounding mode.
-    //  * @param x batch of flaoting point values.
-    //  * @return the batch of nearest integer values.
-     
-    // template <class T, std::size_t N>
-    // batch<T, N> nearbyint(const batch<T, N>& x);
+    template <class T, std::size_t N>
+    batch<T, N> nearbyint(const batch<T, N>& x)
+    {
+        EXPR_MACRO(std::nearbyint(x[i]));
+    }
 
-
+    template <class T, std::size_t N>
+    batch<T, N> floor(const batch<T, N>& x)
+    {
+        EXPR_MACRO(std::floor(x[i]));
+    }
 }
 
 #endif
