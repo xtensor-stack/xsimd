@@ -33,6 +33,7 @@ Architecture | Instruction set extensions
 -------------|-----------------------------------------------------
 x86          | SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, FMA3, AVX2
 x86 AMD      | same as above + SSE4A, FMA4, XOP
+ARM          | ARMv7, ARMv8
 
 ## Installation
 
