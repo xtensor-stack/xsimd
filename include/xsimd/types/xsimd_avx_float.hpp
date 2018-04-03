@@ -358,7 +358,7 @@ namespace xsimd
 
     inline void batch<float, 8>::store_unaligned(float* dst) const
     {
-        _mm256_store_ps(dst, m_value);
+        _mm256_storeu_ps(dst, m_value);
     }
 
     inline void batch<float, 8>::store_aligned(double* dst) const
