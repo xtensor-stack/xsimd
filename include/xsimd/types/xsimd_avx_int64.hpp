@@ -648,9 +648,10 @@ namespace xsimd
 #else
         XSIMD_SPLIT_AVX(rhs);
         __m128i tmp1 = _mm_shuffle_epi32(rhs_low, 0x0E);
-        __m128i tmp2 = _mm_shuffle_epi32(rhs_high, 0x0E);
-        __m128i tmp3 = _mm_add_epi64(tmp2, rhs_high);
-        __m128i res = _mm_add_epi64(tmp2, tmp3);
+        __m128i tmp2 = _mm_add_epi64(tmp1, rhs_low);
+        __m128i tmp3 = _mm_shuffle_epi32(rhs_high, 0x0E);
+        __m128i tmp4 = _mm_add_epi64(tmp3, rhs_high);
+        __m128i res = _mm_add_epi64(tmp2, tmp4);
 #endif
 #if defined(__x86_64__)
         return _mm_cvtsi128_si64(res);
