@@ -50,6 +50,12 @@ cmake -D CMAKE_INSTALL_PREFIX=your_install_prefix
 make install
 ```
 
+## Documentation
+
+To get started with using `xsimd`, check out the full documentation
+
+http://xsimd.readthedocs.io/
+
 ## Usage
 
 ### Explicit use of an instruction set extension
