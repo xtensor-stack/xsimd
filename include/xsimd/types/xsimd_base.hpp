@@ -207,6 +207,39 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> operator>>(const batch<T, N>& lhs, const batch<T, N>& rhs);
 
+    /**************************
+     * bitwise cast functions *
+     **************************/
+
+    // Provides a reinterpret_case from batch<T_in, N_in> to batch<T_out, N_out>
+    template <class B_in, class B_out>
+    struct bitwise_cast_impl;
+
+    // Shorthand for defining an intrinsic-based bitwise_cast implementation
+    #define XSIMD_BITWISE_CAST_INTRINSIC(T_IN, N_IN, T_OUT, N_OUT, INTRINSIC)  \
+        template <>                                                            \
+        struct bitwise_cast_impl<batch<T_IN, N_IN>, batch<T_OUT, N_OUT>>       \
+        {                                                                      \
+            static inline batch<T_OUT, N_OUT> run(const batch<T_IN, N_IN>& x)  \
+            {                                                                  \
+                return INTRINSIC(x);                                           \
+            }                                                                  \
+        };
+
+
+    // Backwards-compatible interface to bitwise_cast_impl
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<float, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<double, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<int32_t, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<int64_t, N>& x);
+
     /**********************************
      * simd_batch_bool implementation *
      **********************************/
@@ -859,6 +892,34 @@ namespace xsimd
     inline batch<T, N> operator>>(const batch<T, N>& lhs, const batch<T, N>& rhs)
     {
         GENERIC_OPERATOR_IMPLEMENTATION(>>);
+    }
+
+    /*****************************************
+     * bitwise cast functions implementation *
+     *****************************************/
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<float, N>& x)
+    {
+        return bitwise_cast_impl<batch<float, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<double, N>& x)
+    {
+        return bitwise_cast_impl<batch<double, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<int32_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<int32_t, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<int64_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<int64_t, N>, B>::run(x);
     }
 }
 

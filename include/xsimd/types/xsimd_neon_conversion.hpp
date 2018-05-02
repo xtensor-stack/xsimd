@@ -44,24 +44,6 @@ namespace xsimd
     batch_bool<double, 2> bool_cast(const batch_bool<int64_t, 2>& x);
 #endif
 
-    /**************************
-     * bitwise cast functions *
-     **************************/
-
-    template <class B>
-    B bitwise_cast(const batch<float, 4>& x);
-
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-    template <class B>
-    B bitwise_cast(const batch<double, 2>& x);
-#endif
-
-    template <class B>
-    B bitwise_cast(const batch<int32_t, 4>& x);
-
-    template <class B>
-    B bitwise_cast(const batch<int64_t, 2>& x);
-
     /***************************************
      * conversion functions implementation *
      ***************************************/
@@ -118,67 +100,46 @@ namespace xsimd
      * bitwise cast functions implementation *
      *****************************************/
 
-    template <>
-    inline batch<int32_t, 4> bitwise_cast(const batch<float, 4>& x)
-    {
-        return vreinterpretq_s32_f32(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
+                                 int32_t, 4,
+                                 vreinterpretq_s32_f32)
 
-    template <>
-    inline batch<int64_t, 2> bitwise_cast(const batch<float, 4>& x)
-    {
-        return vreinterpretq_s64_f32(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
+                                 int64_t, 2,
+                                 vreinterpretq_s64_f32)
 
-    template <>
-    inline batch<float, 4> bitwise_cast(const batch<int32_t, 4>& x)
-    {
-        return vreinterpretq_f32_s32(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4,
+                                 float, 4,
+                                 vreinterpretq_f32_s32)
 
-
-    template <>
-    inline batch<float, 4> bitwise_cast(const batch<int64_t, 2>& x)
-    {
-        return vreinterpretq_f32_s64(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2,
+                                 float, 4,
+                                 vreinterpretq_f32_s64)
 
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-    template <>
-    inline batch<float, 4> bitwise_cast(const batch<double, 2>& x)
-    {
-        return vreinterpretq_f32_f64(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
+                                 float, 4,
+                                 vreinterpretq_f32_f64)
 
-    template <>
-    inline batch<int32_t, 4> bitwise_cast(const batch<double, 2>& x)
-    {
-        return vreinterpretq_s32_f64(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
+                                 int32_t, 4,
+                                 vreinterpretq_s32_f64)
 
-    template <>
-    inline batch<int64_t, 2> bitwise_cast(const batch<double, 2>& x)
-    {
-        return vreinterpretq_s64_f64(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
+                                 int64_t, 2,
+                                 vreinterpretq_s64_f64)
 
-    template <>
-    inline batch<double, 2> bitwise_cast(const batch<int32_t, 4>& x)
-    {
-        return vreinterpretq_f64_s32(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4,
+                                 double, 2,
+                                 vreinterpretq_f64_s32)
 
-    template <>
-    inline batch<double, 2> bitwise_cast(const batch<int64_t, 2>& x)
-    {
-        return vreinterpretq_f64_s64(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2,
+                                 double, 2,
+                                 vreinterpretq_f64_s64)
 
-    template <>
-    inline batch<double, 2> bitwise_cast(const batch<float, 4>& x)
-    {
-        return vreinterpretq_f64_f32(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
+                                 double, 2,
+                                 vreinterpretq_f64_f32)
 #endif
 
 }

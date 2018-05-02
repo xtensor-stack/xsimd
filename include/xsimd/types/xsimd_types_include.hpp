@@ -11,6 +11,9 @@
 
 #include "../config/xsimd_include.hpp"
 
+// Must be declared first (if used), as it defines the "general case"
+#include "xsimd_fallback.hpp"
+
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 #include "xsimd_sse_conversion.hpp"
 #include "xsimd_sse_double.hpp"
