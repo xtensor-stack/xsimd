@@ -78,6 +78,8 @@ namespace xsimd
 
         operator simd_type() const;
 
+        bool operator[](std::size_t index) const;
+
     private:
 
         simd_type m_value;
@@ -207,6 +209,12 @@ namespace xsimd
     }
 
     template <class T>
+    inline bool batch_bool<T, 4>::operator[](std::size_t index) const
+    {
+        return static_cast<bool>(m_value[index]);
+    }
+
+    template <class T>
     inline bool all(const batch_bool<T, 4>& rhs)
     {
         uint32x2_t tmp = vand_u32(vget_low_u32(rhs), vget_high_u32(rhs));
@@ -246,6 +254,8 @@ namespace xsimd
         batch_bool& operator=(const simd_type& rhs);
 
         operator simd_type() const;
+
+        bool operator[](std::size_t index) const;
 
     private:
 
@@ -364,6 +374,12 @@ namespace xsimd
     inline batch_bool<T, 2>::operator uint64x2_t() const
     {
         return m_value;
+    }
+
+    template <class T>
+    inline bool batch_bool<T, 2>::operator[](std::size_t index) const
+    {
+        return static_cast<bool>(m_value[index]);
     }
 
     template <class T>

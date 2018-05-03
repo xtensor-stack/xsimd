@@ -91,6 +91,9 @@ namespace xsimd
     template <class X>
     X operator!(const simd_batch_bool<X>& rhs);
 
+    template <class X>
+    std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs);
+
     /**************
      * simd_batch *
      **************/
@@ -422,6 +425,26 @@ namespace xsimd
     inline X operator!(const simd_batch_bool<X>& rhs)
     {
         return rhs() == X(false);
+    }
+
+    /**
+     * Insert the batch \c rhs into the stream \c out.
+     * @tparam X the actual type of batch.
+     * @param out the output stream.
+     * @param rhs the batch to output.
+     * @return the output stream.
+     */
+    template <class X>
+    inline std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs)
+    {
+        out << '(';
+        std::size_t s = simd_batch_bool<X>::size;
+        for (std::size_t i = 0; i < s - 1; ++i)
+        {
+            out << (rhs()[i] ? 'T' : 'F') << ", ";
+        }
+        out << (rhs()[s - 1] ? 'T' : 'F') << ')';
+        return out;
     }
 
     /*****************************
