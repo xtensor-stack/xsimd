@@ -253,10 +253,12 @@ namespace xsimd
         duration_type t_double_neon = benchmark_simd<batch<double, 2>>(f, d_lhs, d_res, iter);
         duration_type t_double_neon_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_lhs, d_res, iter);
 #endif
+#if defined(XSIMD_ENABLE_FALLBACK)
         duration_type t_float_fallback = benchmark_simd<batch<float, 7>>(f, f_lhs, f_res, iter);
         duration_type t_float_fallback_u = benchmark_simd_unrolled<batch<float, 7>>(f, f_lhs, f_res, iter);
         duration_type t_double_fallback = benchmark_simd<batch<double, 3>>(f, d_lhs, d_res, iter);
         duration_type t_double_fallback_u = benchmark_simd_unrolled<batch<double, 3>>(f, d_lhs, d_res, iter);
+#endif
 
         out << "============================" << std::endl;
         out << f.name() << std::endl;
@@ -273,8 +275,10 @@ namespace xsimd
         out << "neon float     : " << t_float_neon.count() << "ms" << std::endl;
         out << "neon float unr : " << t_float_neon_u.count() << "ms" << std::endl;
 #endif
+#if defined(XSIMD_ENABLE_FALLBACK)
         out << "flbk float     : " << t_float_fallback.count() << "ms" << std::endl;
         out << "flbk float unr : " << t_float_fallback_u.count() << "ms" << std::endl;
+#endif
         out << "scalar double  : " << t_double_scalar.count() << "ms" << std::endl;
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
         out << "sse double     : " << t_double_sse.count() << "ms" << std::endl;
@@ -288,8 +292,10 @@ namespace xsimd
         out << "neon double    : " << t_double_neon.count() << "ms" << std::endl;
         out << "neon double unr: " << t_double_neon_u.count() << "ms" << std::endl;
 #endif
+#if defined(XSIMD_ENABLE_FALLBACK)
         out << "flbk double    : " << t_double_fallback.count() << "ms" << std::endl;
         out << "flbk double unr: " << t_double_fallback_u.count() << "ms" << std::endl;
+#endif
         out << "============================" << std::endl;
     }
 
@@ -326,10 +332,12 @@ namespace xsimd
         duration_type t_double_neon = benchmark_simd<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
         duration_type t_double_neon_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_lhs, d_rhs, d_res, iter);
 #endif
+#if defined(XSIMD_ENABLE_FALLBACK)
         duration_type t_float_fallback = benchmark_simd<batch<float, 7>>(f, f_lhs, f_rhs, f_res, iter);
         duration_type t_float_fallback_u = benchmark_simd_unrolled<batch<float, 7>>(f, f_lhs, f_rhs, f_res, iter);
         duration_type t_double_fallback = benchmark_simd<batch<double, 3>>(f, d_lhs, d_rhs, d_res, iter);
         duration_type t_double_fallback_u = benchmark_simd_unrolled<batch<double, 3>>(f, d_lhs, d_rhs, d_res, iter);
+#endif
 
         out << "============================" << std::endl;
         out << f.name() << std::endl;
@@ -346,8 +354,10 @@ namespace xsimd
         out << "neon float     : " << t_float_neon.count() << "ms" << std::endl;
         out << "neon float unr : " << t_float_neon_u.count() << "ms" << std::endl;
 #endif
+#if defined(XSIMD_ENABLE_FALLBACK)
         out << "flbk float     : " << t_float_fallback.count() << "ms" << std::endl;
         out << "flbk float unr : " << t_float_fallback_u.count() << "ms" << std::endl;
+#endif
         out << "scalar double  : " << t_double_scalar.count() << "ms" << std::endl;
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
         out << "sse double     : " << t_double_sse.count() << "ms" << std::endl;
@@ -361,8 +371,10 @@ namespace xsimd
         out << "neon double    : " << t_double_neon.count() << "ms" << std::endl;
         out << "neon double unr: " << t_double_neon_u.count() << "ms" << std::endl;
 #endif
+#if defined(XSIMD_ENABLE_FALLBACK)
         out << "flbk double    : " << t_double_fallback.count() << "ms" << std::endl;
         out << "flbk double unr: " << t_double_fallback_u.count() << "ms" << std::endl;
+#endif
         out << "============================" << std::endl;
     }
 

@@ -317,10 +317,11 @@ namespace xsimd
     }
 #endif
 
-    /**************************
-     * Generic implementation *
-     **************************/
+    /***************************
+     * Fallback implementation *
+     ***************************/
 
+#if defined(XSIMD_ENABLE_FALLBACK)
     template <class T, std::size_t N>
     inline batch<T, N> ceil(const batch<T, N>& x)
     {
@@ -344,6 +345,7 @@ namespace xsimd
     {
         XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::nearbyint, x)
     }
+#endif
 
     /**************************
      * Generic implementation *

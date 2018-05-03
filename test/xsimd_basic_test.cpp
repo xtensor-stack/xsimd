@@ -237,6 +237,7 @@ TEST(xsimd, neon_store)
 #endif
 #endif
 
+#if defined(XSIMD_ENABLE_FALLBACK)
 TEST(xsimd, fallback_float_basic)
 {
     std::ofstream out("log/fallback_float_basic.log", std::ios_base::out);
@@ -292,3 +293,4 @@ TEST(xsimd, fallback_store)
     bool res = xsimd::test_simd_store<3, 32>(out, "fallback store");
     EXPECT_TRUE(res);
 }
+#endif

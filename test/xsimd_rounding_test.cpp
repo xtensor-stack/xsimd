@@ -75,6 +75,7 @@ TEST(xsimd, neon_double_rounding)
 }
 #endif
 
+#if defined(XSIMD_ENABLE_FALLBACK)
 TEST(xsimd, fallback_float_rounding)
 {
     std::ofstream out("log/fallback_float_rounding.log", std::ios_base::out);
@@ -88,3 +89,4 @@ TEST(xsimd, fallback_double_rounding)
     bool res = xsimd::test_rounding<double, 3, 32>(out, "fallback double");
     EXPECT_TRUE(res);
 }
+#endif

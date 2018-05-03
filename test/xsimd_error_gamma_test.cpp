@@ -76,6 +76,7 @@ TEST(xsimd, neon_double_error_gamma)
 }
 #endif
 
+#if defined(XSIMD_ENABLE_FALLBACK)
 TEST(xsimd, fallback_float_error_gamma)
 {
     std::ofstream out("log/fallback_float_error_gamma.log", std::ios_base::out);
@@ -89,3 +90,4 @@ TEST(xsimd, fallback_double_error_gamma)
     bool res = xsimd::test_error_gamma<double, 3, 32>(out, "fallback double");
     EXPECT_TRUE(res);
 }
+#endif

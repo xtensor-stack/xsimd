@@ -75,6 +75,7 @@ TEST(xsimd, neon_double_power)
 }
 #endif
 
+#if defined(XSIMD_ENABLE_FALLBACK)
 TEST(xsimd, fallback_float_power)
 {
     std::ofstream out("log/fallback_float_power.log", std::ios_base::out);
@@ -88,3 +89,4 @@ TEST(xsimd, fallback_double_power)
     bool res = xsimd::test_power<double, 3, 32>(out, "fallback double");
     EXPECT_TRUE(res);
 }
+#endif
