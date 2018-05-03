@@ -118,17 +118,40 @@ namespace xsimd
 
         operator std::array<T, N>() const;
 
-        batch& load_aligned(const T* src);
-        batch& load_unaligned(const T* src);
+        batch& load_aligned(const float* src);
+        batch& load_unaligned(const float* src);
 
-        void store_aligned(T* dst) const;
-        void store_unaligned(T* dst) const;
+        batch& load_aligned(const double* src);
+        batch& load_unaligned(const double* src);
+
+        batch& load_aligned(const int32_t* src);
+        batch& load_unaligned(const int32_t* src);
+
+        batch& load_aligned(const int64_t* src);
+        batch& load_unaligned(const int64_t* src);
+
+        void store_aligned(float* dst) const;
+        void store_unaligned(float* dst) const;
+
+        void store_aligned(double* dst) const;
+        void store_unaligned(double* dst) const;
+
+        void store_aligned(int32_t* dst) const;
+        void store_unaligned(int32_t* dst) const;
+
+        void store_aligned(int64_t* dst) const;
+        void store_unaligned(int64_t* dst) const;
 
         const T& operator[](std::size_t index) const;
         T& operator[](std::size_t index);
 
 
     private:
+
+        template<typename U>
+        batch& load_unaligned_impl(const U* src);
+        template<typename U>
+        void store_unaligned_impl(U* src) const;
 
         std::array<T, N> m_value;
     };
@@ -579,30 +602,99 @@ namespace xsimd
     }
 
     template <typename T, std::size_t N>
-    inline batch<T, N>& batch<T, N>::load_aligned(const T* src)
+    inline batch<T, N>& batch<T, N>::load_aligned(const float* src)
     {
-        return this->load_unaligned(src);
+        return this->load_unaligned_impl(src);
     }
 
     template <typename T, std::size_t N>
-    inline batch<T, N>& batch<T, N>::load_unaligned(const T* src)
+    inline batch<T, N>& batch<T, N>::load_unaligned(const float* src)
     {
-        m_value = detail::array_from_pointer<T, N>(src);
-        return *this;
+        return this->load_unaligned_impl(src);
     }
 
     template <typename T, std::size_t N>
-    inline void batch<T, N>::store_aligned(T* dst) const
+    inline batch<T, N>& batch<T, N>::load_aligned(const double* src)
     {
-        this->store_unaligned(dst);
+        return this->load_unaligned_impl(src);
     }
 
     template <typename T, std::size_t N>
-    inline void batch<T, N>::store_unaligned(T* dst) const
+    inline batch<T, N>& batch<T, N>::load_unaligned(const double* src)
     {
-        for(std::size_t i = 0; i < N; ++i) {
-            dst[i] = m_value[i];
-        }
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_aligned(const int32_t* src)
+    {
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_unaligned(const int32_t* src)
+    {
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_aligned(const int64_t* src)
+    {
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_unaligned(const int64_t* src)
+    {
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_aligned(float* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_unaligned(float* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_aligned(double* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_unaligned(double* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_aligned(int32_t* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_unaligned(int32_t* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_aligned(int64_t* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_unaligned(int64_t* dst) const
+    {
+        this->store_unaligned_impl(dst);
     }
 
     template <typename T, std::size_t N>
@@ -615,6 +707,25 @@ namespace xsimd
     inline T& batch<T, N>::operator[](std::size_t index)
     {
         return m_value[index];
+    }
+
+    template <typename T, std::size_t N>
+    template <typename U>
+    inline batch<T, N>& batch<T, N>::load_unaligned_impl(const U* src)
+    {
+        for(std::size_t i = 0; i < N; ++i) {
+            m_value[i] = static_cast<T>(src[i]);
+        }
+        return *this;
+    }
+
+    template <typename T, std::size_t N>
+    template <typename U>
+    inline void batch<T, N>::store_unaligned_impl(U* dst) const
+    {
+        for(std::size_t i = 0; i < N; ++i) {
+            dst[i] = static_cast<U>(m_value[i]);
+        }
     }
 
     template <typename T, std::size_t N>
