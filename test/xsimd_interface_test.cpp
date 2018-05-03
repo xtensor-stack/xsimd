@@ -18,10 +18,10 @@ namespace xsimd
 {
     struct interface_tester
     {
-        std::vector<float, aligned_allocator<float, 32>> fvec;
-        std::vector<int32_t, aligned_allocator<int32_t, 32>> ivec;
-        std::vector<float, aligned_allocator<float, 32>> fres;
-        std::vector<int32_t, aligned_allocator<int32_t, 32>> ires;
+        std::vector<float, aligned_allocator<float, 64>> fvec;
+        std::vector<int32_t, aligned_allocator<int32_t, 64>> ivec;
+        std::vector<float, aligned_allocator<float, 64>> fres;
+        std::vector<int32_t, aligned_allocator<int32_t, 64>> ires;
 
         interface_tester();
 

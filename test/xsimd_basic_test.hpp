@@ -304,6 +304,100 @@ namespace xsimd
         }
     }
 
+    template <class T>
+    struct get_bool;
+
+    template <class T>
+    struct get_bool<batch_bool<T, 2>>
+    {
+        using type = batch_bool<T, 2>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(0, 1);
+        type ihalf = type(1, 0);
+        type interspersed = type(0, 1);
+    };
+
+    template <class T, std::size_t N>
+    struct get_bool<batch_bool<T, N>>
+    {
+        // Expect this to be the fallback
+        using type = batch_bool<T, 10>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(0, 0, 0, 0, 0, 1, 1, 1, 1, 1);
+        type ihalf = type(1, 1, 1, 1, 1, 0, 0, 0, 0, 0);
+        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+    };
+
+    template <class T>
+    struct get_bool<batch_bool<T, 4>>
+    {
+        using type = batch_bool<T, 4>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(0, 0, 1, 1);
+        type ihalf = type(1, 1, 0, 0);
+        type interspersed = type(0, 1, 0, 1);
+    };
+
+    template <class T>
+    struct get_bool<batch_bool<T, 8>>
+    {
+        using type = batch_bool<T, 8>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(0, 0, 0, 0, 1, 1, 1, 1);
+        type ihalf = type(1, 1, 1, 1, 0, 0, 0, 0);
+        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1);
+    };
+
+    template <class T>
+    struct get_bool<batch_bool<T, 16>>
+    {
+        using type = batch_bool<T, 16>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1);
+        type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+    };
+
+    template <class I, class S>
+    bool test_simd_bool(const batch<I, 7>& /* empty */, S& /*stream*/)
+    {
+        return true;
+    }
+
+    template <class I, class S>
+    bool test_simd_bool(const batch<I, 3>& /* empty */, S& /*stream*/)
+    {
+        return true;
+    }
+
+    template <class I, std::size_t N, class S>
+    bool test_simd_bool(const batch<I, N>& /*empty*/, S& /*stream*/)
+    {
+        bool success = true;
+        // auto bool_g = get_bool<typename simd_batch_traits<batch<I, N>>::batch_bool_type>{};
+        // success = success && all(bool_g.half != bool_g.ihalf);
+        // if (!success)
+        //     stream  << "test_simd_bool != failed.";
+        // success = success && all(bool_g.half == !bool_g.ihalf);
+        // if (!success)
+        //     stream  << "test_simd_bool ! failed.";
+        // success = success && all(bool_g.half == ~bool_g.ihalf);
+        // if (!success)
+        //     stream  << "test_simd_bool ~ failed.";
+        // success = success && all((bool_g.half | bool_g.ihalf) == bool_g.all_true);
+        // if (!success)
+        //     stream  << "test_simd_bool | failed.";
+        // success = success && all((bool_g.half & bool_g.ihalf) == bool_g.all_false);
+        // if (!success)
+        //     stream  << "test_simd_bool & failed.";
+        return success;
+    }
+
     /***************
      * basic tests *
      ***************/
@@ -586,7 +680,7 @@ namespace xsimd
         bool all_res_true = all(all_check_true);
         tmp_success = !all_res_false && all_res_true;
         success = success && tmp_success;
-
+        success = success && test_simd_bool(vector_type(0.), out);
         return success;
     }
 
@@ -899,7 +993,7 @@ namespace xsimd
         success = success && tmp_success;
 
         success = success && test_simd_int_shift(vector_type(value_type(0)), out);
-
+        success = success && test_simd_bool(vector_type(value_type(0)), out);
         return success;
     }
 

@@ -53,8 +53,24 @@ TEST(xsimd, avx_float_error_gamma)
 
 TEST(xsimd, avx_double_error_gamma)
 {
-    std::ofstream out("log/avx_double_exponential.log", std::ios_base::out);
+    std::ofstream out("log/sse_float_error_gamma.log", std::ios_base::out);
     bool res = xsimd::test_error_gamma<double, 4, 32>(out, "avx double");
+    EXPECT_TRUE(res);
+}
+#endif
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+TEST(xsimd, avx512_float_error_gamma)
+{
+    std::ofstream out("log/avx512_float_error_gamma.log", std::ios_base::out);
+    bool res = xsimd::test_error_gamma<float, 16, 64>(out, "avx512 float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_double_error_gamma)
+{
+    std::ofstream out("log/avx512_double_error_gamma.log", std::ios_base::out);
+    bool res = xsimd::test_error_gamma<double, 8, 64>(out, "avx512 double");
     EXPECT_TRUE(res);
 }
 #endif
@@ -70,7 +86,7 @@ TEST(xsimd, neon_float_error_gamma)
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
 TEST(xsimd, neon_double_error_gamma)
 {
-    std::ofstream out("log/neon_double_exponential.log", std::ios_base::out);
+    std::ofstream out("log/neon_double_error_gamma.log", std::ios_base::out);
     bool res = xsimd::test_error_gamma<double, 2, 32>(out, "neon double");
     EXPECT_TRUE(res);
 }
@@ -86,7 +102,7 @@ TEST(xsimd, fallback_float_error_gamma)
 
 TEST(xsimd, fallback_double_error_gamma)
 {
-    std::ofstream out("log/fallback_double_exponential.log", std::ios_base::out);
+    std::ofstream out("log/fallback_double_error_gamma.log", std::ios_base::out);
     bool res = xsimd::test_error_gamma<double, 3, 32>(out, "fallback double");
     EXPECT_TRUE(res);
 }

@@ -177,6 +177,63 @@ TEST(xsimd, avx_store)
 }
 #endif
 
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+TEST(xsimd, avx512_float_basic)
+{
+    std::ofstream out("log/avx512_float_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd<float, 16, 64>(out, "avx512 float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_double_basic)
+{
+    std::ofstream out("log/avx512_double_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd<double, 8, 64>(out, "avx512 double");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_int32_basic)
+{
+    std::ofstream out("log/avx512_int32_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int32_t, 16, 64>(out, "avx512 int32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_int64_basic)
+{
+    std::ofstream out("log/avx512_int64_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int64_t, 8, 64>(out, "avx512 int64");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_conversion)
+{
+    std::ofstream out("log/avx512_conversion.log", std::ios_base::out);
+    bool res = xsimd::test_simd_convert<8, 64>(out, "avx512 conversion");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_cast)
+{
+    std::ofstream out("log/avx512_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_cast<8, 64>(out, "avx512 cast");
+    EXPECT_TRUE(res);
+}
+TEST(xsimd, avx512_load)
+{
+    std::ofstream out("log/avx512_load.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load<8, 64>(out, "avx512 load");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_store)
+{
+    std::ofstream out("log/avx512_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_store<8, 64>(out, "avx512 store");
+    EXPECT_TRUE(res);
+}
+#endif
+
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
 TEST(xsimd, neon_float_basic)
 {
@@ -236,6 +293,7 @@ TEST(xsimd, neon_store)
 }
 #endif
 #endif
+
 
 #if defined(XSIMD_ENABLE_FALLBACK)
 TEST(xsimd, fallback_float_basic)
