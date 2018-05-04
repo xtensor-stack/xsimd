@@ -34,6 +34,13 @@ Logical operators
    :project: xsimd
    :content-only:
 
+Reducers
+--------
+
+.. doxygengroup:: batch_reducers
+   :project: xsimd
+   :content-only:
+
 Miscellaneous
 -------------
 
