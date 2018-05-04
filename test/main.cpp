@@ -19,6 +19,7 @@ using info_map_type = std::map<int, std::string>;
 info_map_type init_instruction_map()
 {
     info_map_type res;
+#ifdef XSIMD_X86_INSTR_SET_AVAILABLE
     res[XSIMD_X86_SSE_VERSION] = "Intel SSE";
     res[XSIMD_X86_SSE2_VERSION] = "Intel SSE2"; 
     res[XSIMD_X86_SSE3_VERSION] = "Intel SSE3";
@@ -32,13 +33,16 @@ info_map_type init_instruction_map()
     res[XSIMD_X86_AMD_SSE4A_VERSION] = "AMD SSE4A";
     res[XSIMD_X86_AMD_FMA4_VERSION] = "AMD FMA4";
     res[XSIMD_X86_AMD_XOP_VERSION] = "AMD XOP";
+#elif defined(XSIMD_PPC_INSTR_SET_AVAILABLE) 
     res[XSIMD_PPC_VMX_VERSION] = "PowerPC VM";
     res[XSIMD_PPC_VSX_VERSION] = "PowerPC VSX";
     res[XSIMD_PPC_QPX_VERSION] = "PowerPC QPX";
+#else
     res[XSIMD_ARM7_NEON_VERSION] = "ARMv7 Neon";
     res[XSIMD_ARM8_32_NEON_VERSION] = "ARMv8 32bit Neon";
     res[XSIMD_ARM8_64_NEON_VERSION] = "ARMv8 64bit Neon";
     res[XSIMD_VERSION_NUMBER_NOT_AVAILABLE] = "No SIMD available";
+#endif
     return res;
 }
 
