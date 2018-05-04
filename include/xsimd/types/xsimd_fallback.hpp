@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "xsimd_base.hpp"
+#include "xsimd_utils.hpp"
 
 namespace xsimd
 {
@@ -47,9 +48,12 @@ namespace xsimd
         batch_bool();
         explicit batch_bool(bool b);
 
-        // NOTE: Other batch_bool types have a constructor which takes N bools,
-        //       but C++ does not seem to provide a way to do this which is
-        //       both generic over N and compatible with the other batch_bools.
+        // Constructor from N boolean parameters
+        template <
+            typename... Args,
+            typename Enable = detail::is_array_initializer_t<bool, N, Args...>
+        >
+        batch_bool(Args... exactly_N_bools);
 
         batch_bool(const std::array<bool, N>& rhs);
         batch_bool& operator=(const std::array<bool, N>& rhs);
@@ -106,9 +110,12 @@ namespace xsimd
         batch();
         explicit batch(T f);
 
-        // NOTE: Other batch types have a constructor which takes N scalars, but
-        //       C++ does not seem to provide a way to do this which is both
-        //       generic over N and compatible with the other batch types.
+        // Constructor from N scalar parameters
+        template <
+            typename... Args,
+            typename Enable = typename detail::is_array_initializer<T, N, Args...>::type
+        >
+        batch(Args... exactly_N_scalars);
 
         explicit batch(const T* src);
         batch(const T* src, aligned_mode);
@@ -255,142 +262,12 @@ namespace xsimd
     template <std::size_t N>
     batch_bool<double, N> bool_cast(const batch_bool<int64_t, N>& x);
 
-    /**************************************
-     * Ugly shared implementation details *
-     **************************************/
+    /**************************
+     * Boilerplate generators *
+     **************************/
 
-    namespace detail
-    {
-        // Boilerplate to get index_sequence in c++11
-        // TODO: This should probably be moved to xtl
-        template <typename T>
-        struct identity { using type = T; };
-
-        #ifdef __cpp_lib_integer_sequence
-            using std::integer_sequence;
-            using std::index_sequence;
-            using std::make_index_sequence;
-            using std::index_sequence_for;
-        #else
-            template <typename T, T... Is>
-            struct integer_sequence {
-            using value_type = T;
-            static constexpr std::size_t size() noexcept { return sizeof...(Is); }
-            };
-
-            template <std::size_t... Is>
-            using index_sequence = integer_sequence<std::size_t, Is...>;
-
-            template <typename Lhs, typename Rhs>
-            struct make_index_sequence_concat;
-
-            template <std::size_t... Lhs, std::size_t... Rhs>
-            struct make_index_sequence_concat<index_sequence<Lhs...>,
-                                            index_sequence<Rhs...>>
-              : identity<index_sequence<Lhs..., (sizeof...(Lhs) + Rhs)...>> {};
-
-            template <std::size_t N>
-            struct make_index_sequence_impl;
-
-            template <std::size_t N>
-            using make_index_sequence = typename make_index_sequence_impl<N>::type;
-
-            template <std::size_t N>
-            struct make_index_sequence_impl
-              : make_index_sequence_concat<make_index_sequence<N / 2>,
-                                           make_index_sequence<N - (N / 2)>> {};
-
-            template <>
-            struct make_index_sequence_impl<0> : identity<index_sequence<>> {};
-
-            template <>
-            struct make_index_sequence_impl<1> : identity<index_sequence<0>> {};
-
-            template <typename... Ts>
-            using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
-        #endif
-
-        // Tools for reinterpreting stuff as an unsigned integer
-        template <typename T>
-        struct as_unsigned;
-
-        template <>
-        struct as_unsigned<float> {
-            using type = uint32_t;
-        };
-
-        template <>
-        struct as_unsigned<double> {
-            using type = uint64_t;
-        };
-
-        template <>
-        struct as_unsigned<int32_t> {
-            using type = uint32_t;
-        };
-
-        template <>
-        struct as_unsigned<int64_t> {
-            using type = uint64_t;
-        };
-
-        template <typename T>
-        union unsigned_convertor {
-            T data;
-            typename as_unsigned<T>::type bits;
-        };
-
-        template <typename T>
-        struct to_unsigned {
-            using output = typename as_unsigned<T>::type;
-
-            static output run(const T& input) {
-                unsigned_convertor<T> convertor;
-                convertor.data = input;
-                return convertor.bits;
-            }
-        };
-
-        template <typename T>
-        struct from_unsigned {
-            static T run(const typename as_unsigned<T>::type& input) {
-                unsigned_convertor<T> convertor;
-                convertor.bits = input;
-                return convertor.data;
-            }
-        };
-
-        // std::array constructor from scalar value ("broadcast")
-        template <typename T, std::size_t N>
-        constexpr std::array<T, N>
-        array_from_scalar(const T& scalar) {
-            return array_from_scalar_impl(scalar, make_index_sequence<N>());
-        }
-
-        template <typename T, std::size_t... Is>
-        constexpr std::array<T, sizeof...(Is)>
-        array_from_scalar_impl(const T& scalar, index_sequence<Is...>) {
-            // You can safely ignore this silly ternary, the "scalar" is all
-            // that matters. The rest is just a dirty workaround...
-            return std::array<T, sizeof...(Is)>{ (Is+1) ? scalar : (T)0 ... };
-        }
-
-        // std::array constructor from C-style pointer (handled as an array)
-        template <typename T, std::size_t N>
-        constexpr std::array<T, N>
-        array_from_pointer(const T* c_array) {
-            return array_from_pointer_impl(c_array, make_index_sequence<N>());
-        }
-
-        template <typename T, std::size_t... Is>
-        constexpr std::array<T, sizeof...(Is)>
-        array_from_pointer_impl(const T* c_array, index_sequence<Is...>) {
-            return std::array<T, sizeof...(Is)>{ c_array[Is]... };
-        }
-    }
-
-// Boilerplate generators. All of these asume that T and N are in scope and have
-// the meaning used in the batch and batch_bool template definitions.
+// These macros all asume that T and N are in scope and have the meaning used in
+// the definitions of batch and batch_bool.
 #define XSIMD_FALLBACK_MAPPING_LOOP(RESULT_TYPE, EXPRESSION)  \
     RESULT_TYPE<T, N> result;  \
     for(std::size_t i = 0; i < N; ++i) {  \
@@ -407,18 +284,18 @@ namespace xsimd
 #define XSIMD_FALLBACK_BATCH_BITWISE_UNARY_OP(OPERATOR, X)  \
     XSIMD_FALLBACK_MAPPING_LOOP(  \
         batch,  \
-        detail::from_unsigned<T>::run(  \
-            OPERATOR detail::to_unsigned<T>::run(X[i])  \
+        detail::from_unsigned_integer<T>(  \
+            OPERATOR detail::to_unsigned_integer(X[i])  \
         )  \
     )
 
 #define XSIMD_FALLBACK_BATCH_BITWISE_BINARY_OP(OPERATOR, X, Y)  \
     XSIMD_FALLBACK_MAPPING_LOOP(  \
         batch,  \
-        detail::from_unsigned<T>::run(  \
-            detail::to_unsigned<T>::run(X[i])  \
+        detail::from_unsigned_integer<T>(  \
+            detail::to_unsigned_integer(X[i])  \
             OPERATOR  \
-            detail::to_unsigned<T>::run(Y[i])  \
+            detail::to_unsigned_integer(Y[i])  \
         )  \
     )
 
@@ -455,6 +332,13 @@ namespace xsimd
     template <typename T, std::size_t N>
     inline batch_bool<T, N>::batch_bool(bool b)
         : m_value(detail::array_from_scalar<bool, N>(b))
+    {
+    }
+
+    template <typename T, std::size_t N>
+    template <typename... Args, typename Enable>
+    inline batch_bool<T, N>::batch_bool(Args... exactly_N_bools)
+        : m_value{ exactly_N_bools... }
     {
     }
 
@@ -561,6 +445,13 @@ namespace xsimd
     template <typename T, std::size_t N>
     inline batch<T, N>::batch(T f)
         : m_value(detail::array_from_scalar<T, N>(f))
+    {
+    }
+
+    template <typename T, std::size_t N>
+    template <typename... Args, typename Enable>
+    inline batch<T, N>::batch(Args... exactly_N_scalars)
+        : m_value{ exactly_N_scalars... }
     {
     }
 
@@ -811,11 +702,11 @@ namespace xsimd
     {
         XSIMD_FALLBACK_MAPPING_LOOP(
             batch,
-            detail::from_unsigned<T>::run(
+            detail::from_unsigned_integer<T>(
                 ~(
-                    detail::to_unsigned<T>::run(lhs[i])
+                    detail::to_unsigned_integer(lhs[i])
                     &
-                    detail::to_unsigned<T>::run(rhs[i])
+                    detail::to_unsigned_integer(rhs[i])
                 )
             )
         )
