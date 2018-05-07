@@ -75,8 +75,8 @@ namespace xsimd
             std::pair<batch<T, N>, batch<T, N>> operator()(const batch<T, N>& a, const batch<T, N>& b)
             {
                 // {a, b, c, d} Δ {A, B, C, D} → std::pair{{a, A, b, B}, {c, C, d, D}}
-                auto lo = interleave_impl<0b0101, 64, int64_t, 4>{}(bitwise_cast<batch<int64_t, 4>>(a), bitwise_cast<batch<int64_t, 4>>(b));
-                auto hi = interleave_impl<0b1010, 64, int64_t, 4>{}(bitwise_cast<batch<int64_t, 4>>(a), bitwise_cast<batch<int64_t, 4>>(b));
+                auto lo = interleave_impl<AaCc, 64, int64_t, 4>{}(bitwise_cast<batch<int64_t, 4>>(a), bitwise_cast<batch<int64_t, 4>>(b));
+                auto hi = interleave_impl<BbDd, 64, int64_t, 4>{}(bitwise_cast<batch<int64_t, 4>>(a), bitwise_cast<batch<int64_t, 4>>(b));
                 batch<int64_t, 4> tmp_up = _mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0, 2, 0, 0));
                 batch<int64_t, 4> tmp_bt = _mm256_permute2f128_si256(lo, hi, _MM_SHUFFLE(0, 3, 0, 1));
                 return {
