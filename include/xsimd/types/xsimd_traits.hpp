@@ -9,6 +9,8 @@
 #ifndef XSIMD_TRAITS_HPP
 #define XSIMD_TRAITS_HPP
 
+#include <type_traits>
+
 #include "xsimd_types_include.hpp"
 
 #undef XSIMD_BATCH_INT_SIZE
@@ -125,6 +127,26 @@ namespace xsimd
     };
 #endif
 
+    /********************
+     * simd_return_type *
+     ********************/
+
+    namespace detail
+    {
+        template <class T1, class T2>
+        struct simd_condition
+        {
+            static constexpr bool value =
+                std::is_same<T1, T2>::value ||
+                std::is_same<T1, float>::value ||
+                std::is_same<T1, double>::value ||
+                std::is_same<T1, int64_t>::value ||
+                std::is_same<T1, int32_t>::value;
+        };
+    }
+
+    template <class T1, class T2>
+    using simd_return_type = typename std::enable_if<detail::simd_condition<T1, T2>::value, simd_type<T2>>::type;
 }
 
 #endif

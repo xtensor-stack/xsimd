@@ -16,7 +16,6 @@
 
 namespace xsimd
 {
-
     /******************************
      * Data transfer instructions *
      ******************************/
@@ -42,7 +41,7 @@ namespace xsimd
      * @return the batch wrapping the highest available instruction set. 
      */
     template <class T1, class T2 = T1>
-    simd_type<T2> load_aligned(const T1* src);
+    simd_return_type<T1, T2> load_aligned(const T1* src);
 
     /**
      * @ingroup data_transfer
@@ -62,7 +61,7 @@ namespace xsimd
      * @return the batch wrapping the highest available instruction set.
      */
     template <class T1, class T2 = T1>
-    simd_type<T2> load_unaligned(const T1* src);
+    simd_return_type<T1, T2> load_unaligned(const T1* src);
 
     /**
      * @ingroup data_transfer
@@ -108,7 +107,7 @@ namespace xsimd
       * @return the batch wrapping the highest available instruction set.
       */
     template <class T1, class T2 = T1>
-    simd_type<T2> load_simd(const T1* src, aligned_mode);
+    simd_return_type<T1, T2> load_simd(const T1* src, aligned_mode);
 
     /**
      * @ingroup generic_load_store
@@ -128,7 +127,7 @@ namespace xsimd
      * @return the batch wrapping the highest available instruction set.
      */
     template <class T1, class T2 = T1>
-    simd_type<T2> load_simd(const T1* src, unaligned_mode);
+    simd_return_type<T1, T2> load_simd(const T1* src, unaligned_mode);
 
     /**
      * @ingroup generic_load_store
@@ -269,7 +268,7 @@ namespace xsimd
     }
 
     template <class T1, class T2>
-    inline simd_type<T2> load_aligned(const T1* src)
+    inline simd_return_type<T1, T2> load_aligned(const T1* src)
     {
         return detail::simd_function_invoker<T1, simd_type<T2>>::load_aligned(src);
     }
@@ -281,7 +280,7 @@ namespace xsimd
     }
 
     template <class T1, class T2>
-    inline simd_type<T2> load_unaligned(const T1* src)
+    inline simd_return_type<T1, T2> load_unaligned(const T1* src)
     {
         return detail::simd_function_invoker<T1, simd_type<T2>>::load_unaligned(src);
     }
@@ -310,7 +309,7 @@ namespace xsimd
      ***************************************************/
 
     template <class T1, class T2>
-    inline simd_type<T2> load_simd(const T1* src, aligned_mode)
+    inline simd_return_type<T1, T2> load_simd(const T1* src, aligned_mode)
     {
         return load_aligned<T1, T2>(src);
     }
@@ -322,7 +321,7 @@ namespace xsimd
     }
 
     template <class T1, class T2>
-    inline simd_type<T2> load_simd(const T1* src, unaligned_mode)
+    inline simd_return_type<T1, T2> load_simd(const T1* src, unaligned_mode)
     {
         return load_unaligned<T1, T2>(src);
     }
