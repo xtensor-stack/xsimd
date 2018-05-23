@@ -54,7 +54,7 @@ namespace xsimd
     template <class T>
     struct simd_batch_traits<batch_bool<T, 4>>
     {
-        using value_type = bool;
+        using value_type = T;
         static constexpr std::size_t size = 4;
         using batch_type = batch<T, 4>;
         static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;

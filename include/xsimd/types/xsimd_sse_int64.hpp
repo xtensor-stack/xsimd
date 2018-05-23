@@ -23,7 +23,7 @@ namespace xsimd
     template <>
     struct simd_batch_traits<batch_bool<int64_t, 2>>
     {
-        using value_type = bool;
+        using value_type = int64_t;
         static constexpr std::size_t size = 2;
         using batch_type = batch<int64_t, 2>;
         static constexpr std::size_t align = 16;
