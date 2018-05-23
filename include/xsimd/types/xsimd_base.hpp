@@ -23,6 +23,9 @@ namespace xsimd
     template <class T, std::size_t N>
     class batch;
 
+    template <class X>
+    struct simd_batch_traits;
+
     /*******************
      * simd_batch_bool *
      *******************/
@@ -44,6 +47,9 @@ namespace xsimd
     class simd_batch_bool
     {
     public:
+
+        using value_type = typename simd_batch_traits<X>::value_type;
+        static std::size_t constexpr size = simd_batch_traits<X>::size;
 
         X& operator&=(const X& rhs);
         X& operator|=(const X& rhs);
@@ -88,9 +94,6 @@ namespace xsimd
     /**************
      * simd_batch *
      **************/
-
-    template <class X>
-    struct simd_batch_traits;
 
     /**
      * @class simd_batch
