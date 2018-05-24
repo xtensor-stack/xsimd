@@ -15,6 +15,8 @@
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
 
+#include "xsimd/types/xsimd_traits.hpp"
+
 namespace xsimd
 {
 
@@ -340,6 +342,13 @@ namespace xsimd
         out << space << name << " " << val_type << std::endl;
         out << dash << name_shift << '-' << shift << dash << std::endl
             << std::endl;
+
+        using return_type1 = simd_return_type<vector_type, vector_type>;
+        using return_type2 = simd_return_type<vector_type, vector_bool_type>;
+        using return_type3 = simd_return_type<vector_bool_type, vector_bool_type>;
+        success = success && std::is_same<return_type1, vector_type>::value;
+        success = success && std::is_same<return_type2, vector_bool_type>::value;
+        success = success && std::is_same<return_type3, vector_bool_type>::value;
 
         std::string topic = "operator[]               : ";
         detail::load_vec(lhs, tester.lhs);
