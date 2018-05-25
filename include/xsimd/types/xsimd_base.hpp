@@ -91,6 +91,9 @@ namespace xsimd
     template <class X>
     X operator!(const simd_batch_bool<X>& rhs);
 
+    template <class X>
+    std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs);
+
     /**************
      * simd_batch *
      **************/
@@ -206,6 +209,39 @@ namespace xsimd
 
     template <class T, std::size_t N>
     batch<T, N> operator>>(const batch<T, N>& lhs, const batch<T, N>& rhs);
+
+    /**************************
+     * bitwise cast functions *
+     **************************/
+
+    // Provides a reinterpret_case from batch<T_in, N_in> to batch<T_out, N_out>
+    template <class B_in, class B_out>
+    struct bitwise_cast_impl;
+
+    // Shorthand for defining an intrinsic-based bitwise_cast implementation
+    #define XSIMD_BITWISE_CAST_INTRINSIC(T_IN, N_IN, T_OUT, N_OUT, INTRINSIC)  \
+        template <>                                                            \
+        struct bitwise_cast_impl<batch<T_IN, N_IN>, batch<T_OUT, N_OUT>>       \
+        {                                                                      \
+            static inline batch<T_OUT, N_OUT> run(const batch<T_IN, N_IN>& x)  \
+            {                                                                  \
+                return INTRINSIC(x);                                           \
+            }                                                                  \
+        };
+
+
+    // Backwards-compatible interface to bitwise_cast_impl
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<float, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<double, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<int32_t, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<int64_t, N>& x);
 
     /**********************************
      * simd_batch_bool implementation *
@@ -389,6 +425,26 @@ namespace xsimd
     inline X operator!(const simd_batch_bool<X>& rhs)
     {
         return rhs() == X(false);
+    }
+
+    /**
+     * Insert the batch \c rhs into the stream \c out.
+     * @tparam X the actual type of batch.
+     * @param out the output stream.
+     * @param rhs the batch to output.
+     * @return the output stream.
+     */
+    template <class X>
+    inline std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs)
+    {
+        out << '(';
+        std::size_t s = simd_batch_bool<X>::size;
+        for (std::size_t i = 0; i < s - 1; ++i)
+        {
+            out << (rhs()[i] ? 'T' : 'F') << ", ";
+        }
+        out << (rhs()[s - 1] ? 'T' : 'F') << ')';
+        return out;
     }
 
     /*****************************
@@ -859,6 +915,34 @@ namespace xsimd
     inline batch<T, N> operator>>(const batch<T, N>& lhs, const batch<T, N>& rhs)
     {
         GENERIC_OPERATOR_IMPLEMENTATION(>>);
+    }
+
+    /*****************************************
+     * bitwise cast functions implementation *
+     *****************************************/
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<float, N>& x)
+    {
+        return bitwise_cast_impl<batch<float, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<double, N>& x)
+    {
+        return bitwise_cast_impl<batch<double, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<int32_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<int32_t, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    B bitwise_cast(const batch<int64_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<int64_t, N>, B>::run(x);
     }
 }
 

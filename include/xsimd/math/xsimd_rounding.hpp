@@ -130,8 +130,9 @@ namespace xsimd
 
 #elif (XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION) || (XSIMD_ARM_INSTR_SET == XSIMD_ARM7_NEON_VERSION)
 
+    // NOTE: Renamed to avoid collision with the fallback implementation
     template <class T, std::size_t N>
-    inline batch<T, N> ceil(const batch<T, N>& x)
+    inline batch<T, N> ceil_impl(const batch<T, N>& x)
     {
         using btype = batch<T, N>;
         btype tx = trunc(x);
@@ -139,7 +140,7 @@ namespace xsimd
     }
 
     template <class T, std::size_t N>
-    inline batch<T, N> floor(const batch<T, N>& x)
+    inline batch<T, N> floor_impl(const batch<T, N>& x)
     {
         using btype = batch<T, N>;
         btype tx = trunc(x);
@@ -147,7 +148,7 @@ namespace xsimd
     }
 
     template <class T, std::size_t N>
-    inline batch<T, N> nearbyint(const batch<T, N>& x)
+    inline batch<T, N> nearbyint_impl(const batch<T, N>& x)
     {
         using btype = batch<T, N>;
         btype s = bitofsign(x);
@@ -158,6 +159,24 @@ namespace xsimd
     }
 
     template <>
+    inline batch<float, 4> ceil(const batch<float, 4>& x)
+    {
+        return ceil_impl(x);
+    }
+
+    template <>
+    inline batch<float, 4> floor(const batch<float, 4>& x)
+    {
+        return floor_impl(x);
+    }
+
+    template <>
+    inline batch<float, 4> nearbyint(const batch<float, 4>& x)
+    {
+        return nearbyint_impl(x);
+    }
+
+    template <>
     inline batch<float, 4> trunc(const batch<float, 4>& x)
     {
         using btype = batch<float, 4>;
@@ -165,6 +184,24 @@ namespace xsimd
     }
 
 #if (XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION)
+    template <>
+    inline batch<double, 2> ceil(const batch<double, 2>& x)
+    {
+        return ceil_impl(x);
+    }
+
+    template <>
+    inline batch<double, 2> floor(const batch<double, 2>& x)
+    {
+        return floor_impl(x);
+    }
+
+    template <>
+    inline batch<double, 2> nearbyint(const batch<double, 2>& x)
+    {
+        return nearbyint_impl(x);
+    }
+
     template <>
     inline batch<double, 2> trunc(const batch<double, 2>& x)
     {
@@ -277,6 +314,36 @@ namespace xsimd
     inline batch<double, 2> nearbyint(const batch<double, 2>& x)
     {
         return vrndxq_f64(x);
+    }
+#endif
+
+    /***************************
+     * Fallback implementation *
+     ***************************/
+
+#if defined(XSIMD_ENABLE_FALLBACK)
+    template <class T, std::size_t N>
+    inline batch<T, N> ceil(const batch<T, N>& x)
+    {
+        XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::ceil, x)
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> floor(const batch<T, N>& x)
+    {
+        XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::floor, x)
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> trunc(const batch<T, N>& x)
+    {
+        XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::trunc, x)
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> nearbyint(const batch<T, N>& x)
+    {
+        XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::nearbyint, x)
     }
 #endif
 

@@ -74,3 +74,19 @@ TEST(xsimd, neon_double_fp_manipulation)
     EXPECT_TRUE(res);
 }
 #endif
+
+#if defined(XSIMD_ENABLE_FALLBACK)
+TEST(xsimd, fallback_float_fp_manipulation)
+{
+    std::ofstream out("log/fallback_float_fp_manipulation.log", std::ios_base::out);
+    bool res = xsimd::test_fp_manipulation<float, 7, 32>(out, "fallback float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_double_fp_manipulation)
+{
+    std::ofstream out("log/fallback_double_fp_manipulation.log", std::ios_base::out);
+    bool res = xsimd::test_fp_manipulation<double, 3, 32>(out, "fallback double");
+    EXPECT_TRUE(res);
+}
+#endif

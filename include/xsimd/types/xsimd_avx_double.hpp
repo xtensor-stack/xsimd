@@ -40,6 +40,8 @@ namespace xsimd
 
         operator __m256d() const;
 
+        bool operator[](std::size_t index) const;
+
     private:
 
         __m256d m_value;
@@ -190,6 +192,13 @@ namespace xsimd
     inline batch_bool<double, 4>::operator __m256d() const
     {
         return m_value;
+    }
+
+    inline bool batch_bool<double, 4>::operator[](std::size_t index) const
+    {
+        alignas(32) double x[4];
+        _mm256_store_pd(x, m_value);
+        return static_cast<bool>(x[index & 3]);
     }
 
     inline batch_bool<double, 4> operator&(const batch_bool<double, 4>& lhs, const batch_bool<double, 4>& rhs)

@@ -36,22 +36,6 @@ namespace xsimd
     batch_bool<float, 4> bool_cast(const batch_bool<int32_t, 4>& x);
     batch_bool<double, 2> bool_cast(const batch_bool<int64_t, 2>& x);
 
-    /**************************
-     * bitwise cast functions *
-     **************************/
-
-    template <class B>
-    B bitwise_cast(const batch<float, 4>& x);
-
-    template <class B>
-    B bitwise_cast(const batch<double, 2>& x);
-
-    template <class B>
-    B bitwise_cast(const batch<int32_t, 4>& x);
-
-    template <class B>
-    B bitwise_cast(const batch<int64_t, 2>& x);
-
     /***************************************
      * conversion functions implementation *
      ***************************************/
@@ -106,65 +90,45 @@ namespace xsimd
      * bitwise cast functions implementation *
      *****************************************/
 
-    template <>
-    inline batch<double, 2> bitwise_cast(const batch<float, 4>& x)
-    {
-        return _mm_castps_pd(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
+                                 double, 2,
+                                 _mm_castps_pd)
 
-    template <>
-    inline batch<int32_t, 4> bitwise_cast(const batch<float, 4>& x)
-    {
-        return _mm_castps_si128(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
+                                 int32_t, 4,
+                                 _mm_castps_si128)
 
-    template <>
-    inline batch<int64_t, 2> bitwise_cast(const batch<float, 4>& x)
-    {
-        return _mm_castps_si128(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
+                                 int64_t, 2,
+                                 _mm_castps_si128)
 
-    template <>
-    inline batch<float, 4> bitwise_cast(const batch<double, 2>& x)
-    {
-        return _mm_castpd_ps(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
+                                 float, 4,
+                                 _mm_castpd_ps)
 
-    template <>
-    inline batch<int32_t, 4> bitwise_cast(const batch<double, 2>& x)
-    {
-        return _mm_castpd_si128(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
+                                 int32_t, 4,
+                                 _mm_castpd_si128)
 
-    template <>
-    inline batch<int64_t, 2> bitwise_cast(const batch<double, 2>& x)
-    {
-        return _mm_castpd_si128(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
+                                 int64_t, 2,
+                                 _mm_castpd_si128)
 
-    template <>
-    inline batch<float, 4> bitwise_cast(const batch<int32_t, 4>& x)
-    {
-        return _mm_castsi128_ps(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4,
+                                 float, 4,
+                                 _mm_castsi128_ps)
 
-    template <>
-    inline batch<double, 2> bitwise_cast(const batch<int32_t, 4>& x)
-    {
-        return _mm_castsi128_pd(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4,
+                                 double, 2,
+                                 _mm_castsi128_pd)
 
-    template <>
-    inline batch<float, 4> bitwise_cast(const batch<int64_t, 2>& x)
-    {
-        return _mm_castsi128_ps(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2,
+                                 float, 4,
+                                 _mm_castsi128_ps)
 
-    template <>
-    inline batch<double, 2> bitwise_cast(const batch<int64_t, 2>& x)
-    {
-        return _mm_castsi128_pd(x);
-    }
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2,
+                                 double, 2,
+                                 _mm_castsi128_pd)
 }
 
 #endif

@@ -236,3 +236,61 @@ TEST(xsimd, neon_store)
 }
 #endif
 #endif
+
+#if defined(XSIMD_ENABLE_FALLBACK)
+TEST(xsimd, fallback_float_basic)
+{
+    std::ofstream out("log/fallback_float_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd<float, 7, 32>(out, "fallback float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_int32_basic)
+{
+    std::ofstream out("log/fallback_int32_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int32_t, 7, 32>(out, "fallback int32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_int64_basic)
+{
+    std::ofstream out("log/fallback_int64_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int64_t, 3, 32>(out, "fallback int64");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_double_basic)
+{
+    std::ofstream out("log/fallback_double_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd<double, 3, 32>(out, "fallback double");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_conversion)
+{
+    std::ofstream out("log/fallback_conversion.log", std::ios_base::out);
+    bool res = xsimd::test_simd_convert<3, 32>(out, "fallback conversion");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_cast)
+{
+    std::ofstream out("log/fallback_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_cast<3, 32>(out, "fallback cast");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_load)
+{
+    std::ofstream out("log/fallback_load.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load<3, 32>(out, "fallback load");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_store)
+{
+    std::ofstream out("log/fallback_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_store<3, 32>(out, "fallback store");
+    EXPECT_TRUE(res);
+}
+#endif

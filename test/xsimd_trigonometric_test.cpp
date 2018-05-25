@@ -74,3 +74,19 @@ TEST(xsimd, neon_double_trigonometric)
     EXPECT_TRUE(res);
 }
 #endif
+
+#if defined(XSIMD_ENABLE_FALLBACK)
+TEST(xsimd, fallback_float_trigonometric)
+{
+    std::ofstream out("log/fallback_float_trigonometric.log", std::ios_base::out);
+    bool res = xsimd::test_trigonometric<float, 7, 32>(out, "fallback float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_double_trigonometric)
+{
+    std::ofstream out("log/fallback_double_trigonometric.log", std::ios_base::out);
+    bool res = xsimd::test_trigonometric<double, 3, 32>(out, "fallback double");
+    EXPECT_TRUE(res);
+}
+#endif

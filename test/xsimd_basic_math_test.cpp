@@ -74,3 +74,19 @@ TEST(xsimd, neon_double_basic_math)
     EXPECT_TRUE(res);
 }
 #endif
+
+#if defined(XSIMD_ENABLE_FALLBACK)
+TEST(xsimd, fallback_float_basic_math)
+{
+    std::ofstream out("log/fallback_float_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<float, 7, 16>(out, "fallback float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_double_basic_math)
+{
+    std::ofstream out("log/fallback_double_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<double, 3, 32>(out, "fallback double");
+    EXPECT_TRUE(res);
+}
+#endif

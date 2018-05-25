@@ -11,6 +11,10 @@
 
 #include "../config/xsimd_include.hpp"
 
+#if defined(XSIMD_ENABLE_FALLBACK)
+#include "xsimd_fallback.hpp"
+#endif
+
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 #include "xsimd_sse_conversion.hpp"
 #include "xsimd_sse_double.hpp"
