@@ -30,6 +30,14 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: COMPILER=gcc GCC=6 ENABLE_FALLBACK=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
@@ -134,6 +142,8 @@ install:
         else
           cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DARM_ARCH_DIRECTORY="$ARM_ARCH_DIR" -DARM_GCC_VER="$GCC_VER" -DTARGET_ARCH="$ARM_SETTINGS" ;
         fi
+      elif [[ "$ENABLE_FALLBACK" == 1 ]] ; then
+        cmake -DENABLE_FALLBACK=ON . ;
       else
         cmake . ;
       fi
