@@ -136,13 +136,13 @@ namespace xsimd
             div_vv_res[i] = lhs[i] / rhs[i];
             div_vs_res[i] = lhs[i] / s;
             div_sv_res[i] = s / rhs[i];
-            //and_res[i] = lhs[i] & rhs[i];
-            //or_res[i] = lhs[i] | rhs[i];
-            //xor_res[i] = lhs[i] ^ rhs[i];
-            //not_res[i] = ~lhs[i];
-            //lnot_res[i] = !lhs[i];
-            //land_res[i] = lhs[i] && rhs[i];
-            //lor_res[i] = lhs[i] || rhs[i];
+            // and_res[i] = lhs[i] & rhs[i];
+            // or_res[i] = lhs[i] | rhs[i];
+            // xor_res[i] = lhs[i] ^ rhs[i];
+            // not_res[i] = ~lhs[i];
+            // lnot_res[i] = !lhs[i];
+            // land_res[i] = lhs[i] && rhs[i];
+            // lor_res[i] = lhs[i] || rhs[i];
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);
@@ -278,13 +278,13 @@ namespace xsimd
             div_vv_res[i] = lhs[i] / rhs[i];
             div_vs_res[i] = lhs[i] / s;
             div_sv_res[i] = s / rhs[i];
-            //and_res[i] = lhs[i] & rhs[i];
-            //or_res[i] = lhs[i] | rhs[i];
-            //xor_res[i] = lhs[i] ^ rhs[i];
-            //not_res[i] = ~lhs[i];
-            //lnot_res[i] = !lhs[i];
-            //land_res[i] = lhs[i] && rhs[i];
-            //lor_res[i] = lhs[i] || rhs[i];
+            and_res[i] = lhs[i] & rhs[i];
+            or_res[i] = lhs[i] | rhs[i];
+            xor_res[i] = lhs[i] ^ rhs[i];
+            not_res[i] = ~lhs[i];
+            lnot_res[i] = !lhs[i];
+            land_res[i] = lhs[i] && rhs[i];
+            lor_res[i] = lhs[i] || rhs[i];
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);
@@ -363,38 +363,58 @@ namespace xsimd
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
     };
 
+#if defined(XSIMD_ENABLE_FALLBACK)
     template <class I, class S>
     bool test_simd_bool(const batch<I, 7>& /* empty */, S& /*stream*/)
     {
-        return true;
+        using type = batch_bool<I, 7>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(std::array<bool, 7>{0, 0, 0, 0, 1, 1, 1});
+        type ihalf = type(std::array<bool, 7>{1, 1, 1, 1, 0, 0, 0});
+
+        bool success = true;
+        success = success && all((half | ihalf) == all_true);
+        success = success && all(half == half);
+        return success;
     }
 
     template <class I, class S>
     bool test_simd_bool(const batch<I, 3>& /* empty */, S& /*stream*/)
     {
-        return true;
+        using type = batch_bool<I, 3>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(std::array<bool, 3>{0, 0, 1});
+        type ihalf = type(std::array<bool, 3>{1, 1, 0});
+
+        bool success = true;
+        success = success && all((half | ihalf) == all_true);
+        success = success && all(half == half);
+        return success;
     }
+#endif
 
     template <class I, std::size_t N, class S>
-    bool test_simd_bool(const batch<I, N>& /*empty*/, S& /*stream*/)
+    bool test_simd_bool(const batch<I, N>& /*empty*/, S& stream)
     {
         bool success = true;
-        // auto bool_g = get_bool<typename simd_batch_traits<batch<I, N>>::batch_bool_type>{};
-        // success = success && all(bool_g.half != bool_g.ihalf);
-        // if (!success)
-        //     stream  << "test_simd_bool != failed.";
-        // success = success && all(bool_g.half == !bool_g.ihalf);
-        // if (!success)
-        //     stream  << "test_simd_bool ! failed.";
-        // success = success && all(bool_g.half == ~bool_g.ihalf);
-        // if (!success)
-        //     stream  << "test_simd_bool ~ failed.";
-        // success = success && all((bool_g.half | bool_g.ihalf) == bool_g.all_true);
-        // if (!success)
-        //     stream  << "test_simd_bool | failed.";
-        // success = success && all((bool_g.half & bool_g.ihalf) == bool_g.all_false);
-        // if (!success)
-        //     stream  << "test_simd_bool & failed.";
+        auto bool_g = get_bool<typename simd_batch_traits<batch<I, N>>::batch_bool_type>{};
+        success = success && all(bool_g.half != bool_g.ihalf);
+        if (!success)
+            stream  << "test_simd_bool != failed.";
+        success = success && all(bool_g.half == !bool_g.ihalf);
+        if (!success)
+            stream  << "test_simd_bool ! failed.";
+        success = success && all(bool_g.half == ~bool_g.ihalf);
+        if (!success)
+            stream  << "test_simd_bool ~ failed.";
+        success = success && all((bool_g.half | bool_g.ihalf) == bool_g.all_true);
+        if (!success)
+            stream  << "test_simd_bool | failed.";
+        success = success && all((bool_g.half & bool_g.ihalf) == bool_g.all_false);
+        if (!success)
+            stream  << "test_simd_bool & failed.";
         return success;
     }
 

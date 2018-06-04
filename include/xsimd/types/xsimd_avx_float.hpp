@@ -230,12 +230,23 @@ namespace xsimd
 
     inline batch_bool<float, 8> operator==(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
-        return _mm256_cmp_ps(lhs, rhs, _CMP_EQ_OQ);
+        #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+            return _mm256_castsi256_ps(_mm256_cmpeq_epi32(_mm256_castps_si256(lhs), _mm256_castps_si256(rhs)));
+        #else
+            __m128i lhs_low = _mm256_castsi256_si128(_mm256_castps_si256(lhs));
+            __m128i lhs_high = _mm256_extractf128_si256(_mm256_castps_si256(lhs), 1);
+            __m128i rhs_low = _mm256_castsi256_si128(_mm256_castps_si256(rhs));
+            __m128i rhs_high = _mm256_extractf128_si256(_mm256_castps_si256(rhs), 1);
+            __m128i res_low = _mm_cmpeq_epi32(lhs_low, rhs_low);
+            __m128i res_high = _mm_cmpeq_epi32(lhs_high, rhs_high);
+            __m256i result = _mm256_castsi128_si256(res_low);
+            return _mm256_castsi256_ps(_mm256_insertf128_si256(result, res_high, 1));
+        #endif
     }
 
     inline batch_bool<float, 8> operator!=(const batch_bool<float, 8>& lhs, const batch_bool<float, 8>& rhs)
     {
-        return _mm256_cmp_ps(lhs, rhs, _CMP_NEQ_OQ);
+        return _mm256_xor_ps(lhs, rhs);
     }
 
     inline bool all(const batch_bool<float, 8>& rhs)
