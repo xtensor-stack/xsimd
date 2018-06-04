@@ -31,6 +31,15 @@
 #include "xsimd_avx_int64.hpp"
 #endif
 
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#include "xsimd_avx512_conversion.hpp"
+#include "xsimd_avx512_bool.hpp"
+#include "xsimd_avx512_double.hpp"
+#include "xsimd_avx512_float.hpp"
+#include "xsimd_avx512_int32.hpp"
+#include "xsimd_avx512_int64.hpp"
+#endif
+
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
 #include "xsimd_neon_conversion.hpp"
 #include "xsimd_neon_bool.hpp"

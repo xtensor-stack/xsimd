@@ -27,6 +27,7 @@ info_map_type init_instruction_map()
     res[XSIMD_X86_SSE4_1_VERSION] = "Intel SSE4.1";
     res[XSIMD_X86_SSE4_2_VERSION] = "Intel SSE4.2";
     res[XSIMD_X86_AVX_VERSION] = "Intel AVX";
+    res[XSIMD_X86_AVX512_VERSION] = "Intel AVX 512";
     res[XSIMD_X86_FMA3_VERSION] = "Intel FMA3";
     res[XSIMD_X86_AVX2_VERSION] = "Intel AVX2";
     res[XSIMD_X86_MIC_VERSION] = "Intel MIC";

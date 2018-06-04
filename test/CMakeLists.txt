@@ -48,7 +48,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     else()
         CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
         if (HAS_CPP11_FLAG)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder -std=c++11")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
         else()
             message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
         endif()

@@ -58,6 +58,22 @@ TEST(xsimd, avx_double_trigonometric)
 }
 #endif
 
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+TEST(xsimd, avx512_float_trigonometric)
+{
+    std::ofstream out("log/avx512_float_trigonometric.log", std::ios_base::out);
+    bool res = xsimd::test_trigonometric<float, 16, 64>(out, "avx512 float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_double_trigonometric)
+{
+    std::ofstream out("log/avx512_double_trigonometric.log", std::ios_base::out);
+    bool res = xsimd::test_trigonometric<double, 8, 64>(out, "avx512 double");
+    EXPECT_TRUE(res);
+}
+#endif
+
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
 TEST(xsimd, neon_float_trigonometric)
 {
