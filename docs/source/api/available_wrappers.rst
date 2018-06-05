@@ -80,6 +80,22 @@ In addition to the wrappers defined above, the following wrappers are available:
 | batch<int64_t, 4> | batch_bool<int64_t, 4> |
 +-------------------+------------------------+
 
+- XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+
+In addition to the wrappers defined above, the followinf wrappers are available:
+
++-------------------+------------------------+
+| batch             | batch_bool             |
++===================+========================+
+| batch<float, 16>  | batch_bool<float, 16>  |
++-------------------+------------------------+
+| batch<int32_t, 16>| batch_bool<int32_t, 16>|
++-------------------+------------------------+
+| batch<double, 8>  | batch_bool<double, 8>  |
++-------------------+------------------------+
+| batch<int64_t, 8> | batch_bool<int64_t, 8> |
++-------------------+------------------------+
+
 ARM architecture
 ----------------
 
