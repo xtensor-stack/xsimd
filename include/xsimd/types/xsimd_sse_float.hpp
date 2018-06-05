@@ -225,7 +225,7 @@ namespace xsimd
 
     inline batch_bool<float, 4> operator==(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
     {
-        return _mm_cmpeq_ps(lhs, rhs);
+        return _mm_castsi128_ps(_mm_cmpeq_epi32(_mm_castps_si128(lhs), _mm_castps_si128(rhs)));
     }
 
     inline batch_bool<float, 4> operator!=(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
