@@ -358,7 +358,7 @@ namespace xsimd
     #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         return vceqq_u64(lhs, rhs);
     #else
-        return vreinterpretq_u64_u32(vreinterpretq_u32_u64(lhs), vreinterpretq_u32_u64(rhs));
+        return vreinterpretq_u64_u32(vceqq_u32(vreinterpretq_u32_u64(lhs), vreinterpretq_u32_u64(rhs)));
     #endif
     }
 
