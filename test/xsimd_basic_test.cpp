@@ -6,6 +6,7 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#include <complex>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -60,6 +61,54 @@ namespace xsimd
         simd_load_store_tester<N, A> tester(name);
         return test_simd_store(out, tester);
     }
+
+    // No batch exists for this type, that's required
+    // for testing simd_return_type
+    struct fake_scalar_type
+    {
+    };
+
+    struct res_checker
+    {
+        template <class T1, class T2>
+        simd_return_type<T1, T2> load_simd() const
+        {
+            return simd_return_type<T1, T2>();
+        }
+    };
+
+    template <class... T>
+    struct make_res_wrapper
+    {
+        using type = void;
+    };
+
+    template <class... T>
+    using res_wrapper = typename make_res_wrapper<T...>::type;
+
+    template <class T1, class T2, class = res_wrapper<>>
+    struct check_return_type
+    {
+    public:
+        static constexpr bool value() { return m_value; }
+    private:
+        static constexpr bool m_value = false;
+    };
+
+    template <class T1, class T2>
+    struct check_return_type<T1, T2, res_wrapper<decltype(std::declval<res_checker>().template load_simd<T1, T2>())>>
+    {
+    public:
+        static constexpr bool value() { return m_value; }
+    private:
+        static constexpr bool m_value = true;
+    };
+}
+
+TEST(xsimd, simd_return_type)
+{
+    EXPECT_TRUE((xsimd::check_return_type<double, double>::value()));
+    EXPECT_FALSE((xsimd::check_return_type<std::complex<double>, double>::value()));
 }
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
