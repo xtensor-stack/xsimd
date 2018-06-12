@@ -33,7 +33,8 @@ namespace xsimd
 
 		simd_type operator[](std::size_t I)
 		{
-			return m_stepper + simd_type(I);
+			using namespace std;
+			return fma(simd_type(I), simd_type(m_step), m_stepper);
 		}
 
 		void store_aligned(T* dst, std::size_t size) const
