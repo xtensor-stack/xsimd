@@ -151,28 +151,28 @@ namespace xsimd
 
         template <class T1, class T2>
         struct simd_return_type_impl
+            : std::enable_if<simd_condition<T1, T2>::value, simd_type<T2>>
         {
-            using type = typename std::enable_if<simd_condition<T1, T2>::value, simd_type<T2>>::type;
         };
 
+        // Do not rely on simd_return_type_impl<T1, T2> becasue N2 can be different from
+        // simd_type<T2>::size
         template <class T1, std::size_t N1, class T2, std::size_t N2>
         struct simd_return_type_impl<batch<T1, N1>, batch<T2, N2>>
+            : std::enable_if<simd_condition<T1, T2>::value, batch<T2, N2>>
         {
-            // Do not rely on simd_return_type_impl<T1, T2> becasue N2 can be different from
-            // simd_type<T2>::size
-            using type = typename std::enable_if<simd_condition<T1, T2>::value, batch<T2, N2>>::type;
         };
 
         template <class T1, std::size_t N1, class T2, std::size_t N2>
         struct simd_return_type_impl<batch<T1, N1>, batch_bool<T2, N2>>
+            : std::enable_if<simd_condition<T1, T2>::value, batch_bool<T2, N2>>
         {
-            using type = typename std::enable_if<simd_condition<T1, T2>::value, batch_bool<T2, N2>>::type;
         };
 
         template <class T1, std::size_t N1, class T2, std::size_t N2>
         struct simd_return_type_impl<batch_bool<T1, N1>, batch_bool<T2, N2>>
+            : std::enable_if<simd_condition<T1, T2>::value, batch_bool<T2, N2>>
         {
-            using type = typename std::enable_if<simd_condition<T1, T2>::value, batch_bool<T2, N2>>::type;
         };
     }
 
