@@ -55,17 +55,35 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_stack_buffer.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_alignment.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_complex.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int64.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_bool.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_complex.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_conversion.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_double.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_float.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_int32.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_int64.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_bool.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_complex.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_conversion.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_double.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_float.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int32.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int64.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_complex_base.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_fallback.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_complex.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int64.hpp
-    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_traits.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_types_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
@@ -76,6 +94,7 @@ target_include_directories(xsimd INTERFACE $<BUILD_INTERFACE:${XSIMD_INCLUDE_DIR
                                            $<INSTALL_INTERFACE:include>)
 
 OPTION(ENABLE_FALLBACK "build tests/benchmarks with fallback implementation" OFF)
+OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" ON)
 OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 
@@ -85,6 +104,12 @@ endif()
 
 if(ENABLE_FALLBACK)
     add_definitions(-DXSIMD_ENABLE_FALLBACK=1)
+endif()
+
+if(ENABLE_XTL_COMPLEX)
+    add_definitions(-DXSIMD_ENABLE_XTL_COMPLEX=1)
+    find_package(xtl 0.4.11 REQUIRED)
+    target_link_libraries(xsimd INTERFACE xtl)
 endif()
 
 if(BUILD_TESTS)

@@ -337,8 +337,9 @@ namespace xsimd
     struct get_bool<batch_bool<T, 4>>
     {
         using type = batch_bool<T, 4>;
-        type all_true = type(true);
-        type all_false = type(false);
+
+        type all_true = type(1);
+        type all_false = type(0);
         type half = type(0, 0, 1, 1);
         type ihalf = type(1, 1, 0, 0);
         type interspersed = type(0, 1, 0, 1);

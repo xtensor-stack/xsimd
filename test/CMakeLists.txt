@@ -47,7 +47,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
     elseif(NOT WIN32)
         CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
-        if (HAS_CPP11_FLAG)
+        if (ENABLE_XTL_COMPLEX)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++14")
+        elseif (HAS_CPP11_FLAG)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
         else()
             message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
@@ -103,6 +105,8 @@ set(XSIMD_TESTS
     xsimd_basic_test.cpp
     xsimd_basic_math_test.hpp
     xsimd_basic_math_test.cpp
+    xsimd_complex_basic_test.hpp
+    xsimd_complex_tester.hpp
     xsimd_error_gamma_test.hpp
     xsimd_error_gamma_test.cpp
     xsimd_exponential_test.hpp

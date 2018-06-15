@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -18,6 +19,10 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+#include "xtl/xcomplex.hpp"
+#endif
 
 namespace xsimd
 {
@@ -67,23 +72,50 @@ namespace xsimd
     }
 
     template <class T>
-    bool scalar_comparison(const T& lhs, const T& rhs)
+    struct scalar_comparison
     {
-        using std::max;
-        using std::abs;
-
-        T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
-        T absolute_zero_prox = 2048 * std::numeric_limits<T>::epsilon();
-
-        if (max(abs(lhs), abs(rhs)) < T(1e-3))
+        static bool run(const T& lhs, const T& rhs)
         {
-            return detail::check_is_small(lhs - rhs, absolute_zero_prox);
+            using std::max;
+            using std::abs;
+
+            T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
+            T absolute_zero_prox = 2048 * std::numeric_limits<T>::epsilon();
+
+            if (max(abs(lhs), abs(rhs)) < T(1e-3))
+            {
+                return detail::check_is_small(lhs - rhs, absolute_zero_prox);
+            }
+            else
+            {
+                return detail::check_is_close(lhs, rhs, relative_precision);
+            }
         }
-        else
+    };
+
+    template <class T>
+    struct scalar_comparison<std::complex<T>>
+    {
+        static bool run(const std::complex<T>& lhs, const std::complex<T>& rhs)
         {
-            return detail::check_is_close(lhs, rhs, relative_precision);
+            using real_comparison = scalar_comparison<T>;
+            return real_comparison::run(lhs.real(), rhs.real()) &&
+                real_comparison::run(lhs.imag(), rhs.imag());
         }
-    }
+    };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    struct scalar_comparison<xtl::xcomplex<T, T, i3ec>>
+    {
+        static bool run(const xtl::xcomplex<T, T, i3ec>& lhs, const xtl::xcomplex<T, T, i3ec>& rhs)
+        {
+            using real_comparison = scalar_comparison<T>;
+            return real_comparison::run(lhs.real(), rhs.real()) &&
+                real_comparison::run(lhs.imag(), rhs.imag());
+        }
+    };
+#endif
 
     template <class T, class A>
     int vector_comparison(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
@@ -95,7 +127,7 @@ namespace xsimd
         int nb_diff = 0;
         for (auto lhs_iter = lhs.begin(), rhs_iter = rhs.begin(); lhs_iter != lhs.end(); ++lhs_iter, ++rhs_iter)
         {
-            if (!scalar_comparison(*lhs_iter, *rhs_iter))
+            if (!scalar_comparison<T>::run(*lhs_iter, *rhs_iter))
             {
                 ++nb_diff;
             }
@@ -120,7 +152,7 @@ namespace xsimd
     {
         out << topic;
         out << std::setprecision(20);
-        if (scalar_comparison(res, ref))
+        if (scalar_comparison<T>::run(res, ref))
         {
             out << "OK" << std::endl;
             return true;
