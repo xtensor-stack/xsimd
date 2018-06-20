@@ -47,18 +47,6 @@ namespace xsimd
         __m128d m_value;
     };
 
-    batch_bool<double, 2> operator&(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
-    batch_bool<double, 2> operator|(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
-    batch_bool<double, 2> operator^(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
-    batch_bool<double, 2> operator~(const batch_bool<double, 2>& rhs);
-    batch_bool<double, 2> bitwise_andnot(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
-
-    batch_bool<double, 2> operator==(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
-    batch_bool<double, 2> operator!=(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs);
-
-    bool all(const batch_bool<double, 2>& rhs);
-    bool any(const batch_bool<double, 2>& rhs);
-
     /********************
      * batch<double, 2> *
      ********************/
@@ -198,49 +186,58 @@ namespace xsimd
         return static_cast<bool>(x[index & 1]);
     }
 
-    inline batch_bool<double, 2> operator&(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
+    namespace detail
     {
-        return _mm_and_pd(lhs, rhs);
-    }
+        template <>
+        struct batch_bool_kernel<double, 2>
+        {
+            using batch_type = batch_bool<double, 2>;
 
-    inline batch_bool<double, 2> operator|(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
-    {
-        return _mm_or_pd(lhs, rhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_and_pd(lhs, rhs);
+            }
 
-    inline batch_bool<double, 2> operator^(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
-    {
-        return _mm_xor_pd(lhs, rhs);
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_or_pd(lhs, rhs);
+            }
 
-    inline batch_bool<double, 2> operator~(const batch_bool<double, 2>& rhs)
-    {
-        return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_xor_pd(lhs, rhs);
+            }
 
-    inline batch_bool<double, 2> bitwise_andnot(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
-    {
-        return _mm_andnot_pd(lhs, rhs);
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm_xor_pd(rhs, _mm_castsi128_pd(_mm_set1_epi32(-1)));
+            }
 
-    inline batch_bool<double, 2> operator==(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
-    {
-        return _mm_castsi128_pd(_mm_cmpeq_epi32(_mm_castpd_si128(lhs), _mm_castpd_si128(rhs)));
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_andnot_pd(lhs, rhs);
+            }
 
-    inline batch_bool<double, 2> operator!=(const batch_bool<double, 2>& lhs, const batch_bool<double, 2>& rhs)
-    {
-        return _mm_cmpneq_pd(lhs, rhs);
-    }
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_castsi128_pd(_mm_cmpeq_epi32(_mm_castpd_si128(lhs), _mm_castpd_si128(rhs)));
+            }
 
-    inline bool all(const batch_bool<double, 2>& rhs)
-    {
-        return _mm_movemask_pd(rhs) == 3;
-    }
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_cmpneq_pd(lhs, rhs);
+            }
 
-    inline bool any(const batch_bool<double, 2>& rhs)
-    {
-        return _mm_movemask_pd(rhs) != 0;
+            static bool all(const batch_type& rhs)
+            {
+                return _mm_movemask_pd(rhs) == 3;
+            }
+
+            static bool any(const batch_type& rhs)
+            {
+                return _mm_movemask_pd(rhs) != 0;
+            }
+        };
     }
 
     /***********************************

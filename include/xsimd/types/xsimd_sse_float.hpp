@@ -47,18 +47,6 @@ namespace xsimd
         __m128 m_value;
     };
 
-    batch_bool<float, 4> operator&(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
-    batch_bool<float, 4> operator|(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
-    batch_bool<float, 4> operator^(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
-    batch_bool<float, 4> operator~(const batch_bool<float, 4>& rhs);
-    batch_bool<float, 4> bitwise_andnot(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
-
-    batch_bool<float, 4> operator==(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
-    batch_bool<float, 4> operator!=(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs);
-
-    bool all(const batch_bool<float, 4>& rhs);
-    bool any(const batch_bool<float, 4>& rhs);
-
     /*******************
      * batch<float, 4> *
      *******************/
@@ -198,49 +186,58 @@ namespace xsimd
         return static_cast<bool>(x[index & 3]);
     }
 
-    inline batch_bool<float, 4> operator&(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
+    namespace detail
     {
-        return _mm_and_ps(lhs, rhs);
-    }
+        template <>
+        struct batch_bool_kernel<float, 4>
+        {
+            using batch_type = batch_bool<float, 4>;
 
-    inline batch_bool<float, 4> operator|(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
-    {
-        return _mm_or_ps(lhs, rhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_and_ps(lhs, rhs);
+            }
 
-    inline batch_bool<float, 4> operator^(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
-    {
-        return _mm_xor_ps(lhs, rhs);
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_or_ps(lhs, rhs);
+            }
 
-    inline batch_bool<float, 4> operator~(const batch_bool<float, 4>& rhs)
-    {
-        return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(-1)));
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_xor_ps(lhs, rhs);
+            }
 
-    inline batch_bool<float, 4> bitwise_andnot(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
-    {
-        return _mm_andnot_ps(lhs, rhs);
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm_xor_ps(rhs, _mm_castsi128_ps(_mm_set1_epi32(-1)));
+            }
 
-    inline batch_bool<float, 4> operator==(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
-    {
-        return _mm_castsi128_ps(_mm_cmpeq_epi32(_mm_castps_si128(lhs), _mm_castps_si128(rhs)));
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_andnot_ps(lhs, rhs);
+            }
 
-    inline batch_bool<float, 4> operator!=(const batch_bool<float, 4>& lhs, const batch_bool<float, 4>& rhs)
-    {
-        return _mm_cmpneq_ps(lhs, rhs);
-    }
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_castsi128_ps(_mm_cmpeq_epi32(_mm_castps_si128(lhs), _mm_castps_si128(rhs)));
+            }
 
-    inline bool all(const batch_bool<float, 4>& rhs)
-    {
-        return _mm_movemask_ps(rhs) == 0x0F;
-    }
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_cmpneq_ps(lhs, rhs);
+            }
 
-    inline bool any(const batch_bool<float, 4>& rhs)
-    {
-        return _mm_movemask_ps(rhs) != 0;
+            static bool all(const batch_type& rhs)
+            {
+                return _mm_movemask_ps(rhs) == 0x0F;
+            }
+
+            static bool any(const batch_type& rhs)
+            {
+                return _mm_movemask_ps(rhs) != 0;
+            }
+        };
     }
 
     /**********************************

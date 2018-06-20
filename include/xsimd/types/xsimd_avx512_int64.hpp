@@ -24,7 +24,7 @@ namespace xsimd
     template <>
     struct simd_batch_traits<batch_bool<int64_t, 8>>
     {
-        using value_type = bool;
+        using value_type = int64_t;
         static constexpr std::size_t size = 8;
         using batch_type = batch<int64_t, 8>;
     };
@@ -44,7 +44,14 @@ namespace xsimd
         }
     };
 
-    GENERATE_AVX512_BOOL_OPS(int64_t, 8);
+    namespace detail
+    {
+        template <>
+        struct batch_bool_kernel<int64_t, 8>
+            : batch_bool_kernel_avx512<int64_t, 8>
+        {
+        };
+    }
 
     /*********************
      * batch<int64_t, 8> *

@@ -49,18 +49,6 @@ namespace xsimd
         __m256i m_value;
     };
 
-    batch_bool<int32_t, 8> operator&(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
-    batch_bool<int32_t, 8> operator|(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
-    batch_bool<int32_t, 8> operator^(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
-    batch_bool<int32_t, 8> operator~(const batch_bool<int32_t, 8>& rhs);
-    batch_bool<int32_t, 8> bitwise_andnot(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
-
-    batch_bool<int32_t, 8> operator==(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
-    batch_bool<int32_t, 8> operator!=(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs);
-
-    bool all(const batch_bool<int32_t, 8>& rhs);
-    bool any(const batch_bool<int32_t, 8>& rhs);
-
     /*********************
      * batch<int32_t, 8> *
      *********************/
@@ -214,76 +202,85 @@ namespace xsimd
         return static_cast<bool>(x[index & 7]);
     }
 
-    inline batch_bool<int32_t, 8> operator&(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
+    namespace detail
     {
+        template <>
+        struct batch_bool_kernel<int32_t, 8>
+        {
+            using batch_type = batch_bool<int32_t, 8>;
+
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_and_si256(lhs, rhs);
+                return _mm256_and_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int32_t, 8> operator|(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
-    {
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_or_si256(lhs, rhs);
+                return _mm256_or_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_or_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_or_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int32_t, 8> operator^(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
-    {
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_xor_si256(lhs, rhs);
+                return _mm256_xor_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_xor_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_xor_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int32_t, 8> operator~(const batch_bool<int32_t, 8>& rhs)
-    {
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
+                return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
 #else
-        XSIMD_SPLIT_AVX(rhs);
-        __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
-        __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
-        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+                XSIMD_SPLIT_AVX(rhs);
+                __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
+                __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
-    }
+            }
 
-    inline batch_bool<int32_t, 8> bitwise_andnot(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
-    {
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_andnot_si256(lhs, rhs);
+                return _mm256_andnot_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int32_t, 8> operator==(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
-    {
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_cmpeq_epi32(lhs, rhs);
+                return _mm256_cmpeq_epi32(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_cmpeq_epi32, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_cmpeq_epi32, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int32_t, 8> operator!=(const batch_bool<int32_t, 8>& lhs, const batch_bool<int32_t, 8>& rhs)
-    {
-        return ~(lhs == rhs);
-    }
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(lhs == rhs);
+            }
 
-    inline bool all(const batch_bool<int32_t, 8>& rhs)
-    {
-        return _mm256_testc_si256(rhs, batch_bool<int32_t, 8>(true)) != 0;
-    }
+            static bool all(const batch_type& rhs)
+            {
+                return _mm256_testc_si256(rhs, batch_bool<int32_t, 8>(true)) != 0;
+            }
 
-    inline bool any(const batch_bool<int32_t, 8>& rhs)
-    {
-        return !_mm256_testz_si256(rhs, rhs);
+            static bool any(const batch_type& rhs)
+            {
+                return !_mm256_testz_si256(rhs, rhs);
+            }
+        };
     }
 
     /************************************

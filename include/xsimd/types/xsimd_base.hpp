@@ -23,6 +23,15 @@ namespace xsimd
     template <class T, std::size_t N>
     class batch;
 
+    namespace detail
+    {
+        template <class T, std::size_t N>
+        struct batch_bool_kernel;
+
+        template <class T, std::size_t N>
+        struct batch_kernel;
+    }
+
     template <class X>
     struct simd_batch_traits;
 
@@ -69,6 +78,33 @@ namespace xsimd
         simd_batch_bool(simd_batch_bool&&) = default;
         simd_batch_bool& operator=(simd_batch_bool&&) = default;
     };
+
+    template <class X>
+    X operator&(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs);
+
+    template <class X>
+    X operator|(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs);
+
+    template <class X>
+    X operator^(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs);
+
+    template <class X>
+    X operator~(const simd_batch_bool<X>& rhs);
+
+    template <class X>
+    X bitwise_andnot(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs);
+
+    template <class X>
+    X operator==(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs);
+
+    template <class X>
+    X operator!=(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs);
+
+    template <class X>
+    bool all(const simd_batch_bool<X>& rhs);
+
+    template <class X>
+    bool any(const simd_batch_bool<X>& rhs);
 
     template <class X>
     X operator&&(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>& rhs);
@@ -310,6 +346,167 @@ namespace xsimd
         return *static_cast<const X*>(this);
     }
     //@}
+
+    /**
+    * @defgroup simd_batch_bool_bitwise Bitwise functions
+    */
+
+    /**
+     * @ingroup simd_batch_bool_bitwise
+     *
+     * Computes the bitwise and of batches \c lhs and \c rhs.
+     * @tparam X the actual type of boolean batch.
+     * @param lhs batch involved in the operation.
+     * @param rhs batch involved in the operation.
+     * @return the result of the bitwise and.
+     */
+    template <class X>
+    inline X operator&(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::bitwise_and(lhs(), rhs());
+    }
+
+    /**
+     * @ingroup simd_batch_bool_bitwise
+     *
+     * Computes the bitwise or of batches \c lhs and \c rhs.
+     * @tparam X the actual type of boolean batch.
+     * @param lhs batch involved in the operation.
+     * @param rhs batch involved in the operation.
+     * @return the result of the bitwise or.
+     */
+    template <class X>
+    inline X operator|(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::bitwise_or(lhs(), rhs());
+    }
+
+    /**
+     * @ingroup simd_batch_bool_bitwise
+     *
+     * Computes the bitwise xor of batches \c lhs and \c rhs.
+     * @tparam X the actual type of boolean batch.
+     * @param lhs batch involved in the operation.
+     * @param rhs batch involved in the operation.
+     * @return the result of the bitwise xor.
+     */
+    template <class X>
+    inline X operator^(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::bitwise_xor(lhs(), rhs());
+    }
+
+    /**
+     * @ingroup simd_batch_bool_bitwise
+     *
+     * Computes the bitwise not of batches \c lhs and \c rhs.
+     * @tparam X the actual type of boolean batch.
+     * @param lhs batch involved in the operation.
+     * @param rhs batch involved in the operation.
+     * @return the result of the bitwise not.
+     */
+    template <class X>
+    inline X operator~(const simd_batch_bool<X>& rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::bitwise_not(rhs());
+    }
+
+    /**
+     * @ingroup simd_batch_bool_bitwise
+     *
+     * Computes the bitwise and not of batches \c lhs and \c rhs.
+     * @tparam X the actual type of boolean batch.
+     * @param lhs batch involved in the operation.
+     * @param rhs batch involved in the operation.
+     * @return the result of the bitwise and not.
+     */
+    template <class X>
+    inline X bitwise_andnot(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::bitwise_andnot(lhs(), rhs());
+    }
+
+    /**
+     * @defgroup simd_batch_bool_comparison Comparison operators
+     */
+
+    /**
+     * @ingroup simd_batch_bool_comparison
+     *
+     * Element-wise equality of batches \c lhs and \c rhs.
+     * @param lhs batch involved in the comparison.
+     * @param rhs batch involved in the comparison.
+     * @return the result of the equality comparison.
+     */
+    template <class X>
+    inline X operator==(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::equal(lhs(), rhs());
+    }
+
+    /**
+     * @ingroup simd_batch_bool_comparison
+     *
+     * Element-wise inequality of batches \c lhs and \c rhs.
+     * @param lhs batch involved in the comparison.
+     * @param rhs batch involved in the comparison.
+     * @return the result of the inequality comparison.
+     */
+    template <class X>
+    inline X operator!=(const simd_batch_bool<X>& lhs, const simd_batch_bool<X>&rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::not_equal(lhs(), rhs());
+    }
+
+    /**
+     * @defgroup simd_batch_bool_reducers Reducers
+     */
+
+    /**
+     * @ingroup simd_batch_bool_reducers
+     *
+     * Returns true if all the boolean values in the batch are true,
+     * false otherwise.
+     * @param rhs the batch to reduce.
+     * @return a boolean scalar.
+     */
+    template <class X>
+    inline bool all(const simd_batch_bool<X>& rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::all(rhs());
+    }
+
+    /**
+     * @ingroup simd_batch_bool_reducers
+     *
+     * Return true if any of the boolean values in the batch is true,
+     * false otherwise.
+     * @param rhs the batch to reduce.
+     * @return a boolean scalar.
+     */
+    template <class X>
+    inline bool any(const simd_batch_bool<X>& rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::any(rhs());
+    }
 
     /**
      * @defgroup simd_batch_bool_logical Logical functions

@@ -49,18 +49,6 @@ namespace xsimd
         __m128i m_value;
     };
 
-    batch_bool<int64_t, 2> operator&(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
-    batch_bool<int64_t, 2> operator|(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
-    batch_bool<int64_t, 2> operator^(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
-    batch_bool<int64_t, 2> operator~(const batch_bool<int64_t, 2>& rhs);
-    batch_bool<int64_t, 2> bitwise_andnot(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
-
-    batch_bool<int64_t, 2> operator==(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
-    batch_bool<int64_t, 2> operator!=(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs);
-
-    bool all(const batch_bool<int64_t, 2>& rhs);
-    bool any(const batch_bool<int64_t, 2>& rhs);
-
     /*********************
      * batch<int64_t, 2> *
      *********************/
@@ -212,57 +200,66 @@ namespace xsimd
         return static_cast<bool>(x[index & 1]);
     }
 
-    inline batch_bool<int64_t, 2> operator&(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
+    namespace detail
     {
-        return _mm_and_si128(lhs, rhs);
-    }
+        template <>
+        struct batch_bool_kernel<int64_t, 2>
+        {
+            using batch_type = batch_bool<int64_t, 2>;
 
-    inline batch_bool<int64_t, 2> operator|(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
-    {
-        return _mm_or_si128(lhs, rhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_and_si128(lhs, rhs);
+            }
 
-    inline batch_bool<int64_t, 2> operator^(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
-    {
-        return _mm_xor_si128(lhs, rhs);
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_or_si128(lhs, rhs);
+            }
 
-    inline batch_bool<int64_t, 2> operator~(const batch_bool<int64_t, 2>& rhs)
-    {
-        return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_xor_si128(lhs, rhs);
+            }
 
-    inline batch_bool<int64_t, 2> bitwise_andnot(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
-    {
-        return _mm_andnot_si128(lhs, rhs);
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
+            }
 
-    inline batch_bool<int64_t, 2> operator==(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
-    {
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_andnot_si128(lhs, rhs);
+            }
+
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-        return _mm_cmpeq_epi64(lhs, rhs);
+                return _mm_cmpeq_epi64(lhs, rhs);
 #else
-        return detail::cmpeq_epi64_sse2(lhs, rhs);
+                return detail::cmpeq_epi64_sse2(lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 2> operator!=(const batch_bool<int64_t, 2>& lhs, const batch_bool<int64_t, 2>& rhs)
-    {
-        return ~(lhs == rhs);
-    }
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(lhs == rhs);
+            }
 
-    inline bool all(const batch_bool<int64_t, 2>& rhs)
-    {
-        return _mm_movemask_epi8(rhs) == 0xFFFF;
-    }
+            static bool all(const batch_type& rhs)
+            {
+                return _mm_movemask_epi8(rhs) == 0xFFFF;
+            }
 
-    inline bool any(const batch_bool<int64_t, 2>& rhs)
-    {
+            static bool any(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-        return !_mm_testz_si128(rhs, rhs);
+                return !_mm_testz_si128(rhs, rhs);
 #else
-        return _mm_movemask_epi8(rhs) != 0;
+                return _mm_movemask_epi8(rhs) != 0;
 #endif
+            }
+        };
     }
 
     /************************************
