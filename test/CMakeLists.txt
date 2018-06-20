@@ -45,7 +45,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/)
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
-    else()
+    elseif(NOT WIN32)
         CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
         if (HAS_CPP11_FLAG)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
