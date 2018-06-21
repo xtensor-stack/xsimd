@@ -113,44 +113,6 @@ namespace xsimd
         __m512 m_value;
     };
 
-    batch<float, 16> operator-(const batch<float, 16>& rhs);
-    batch<float, 16> operator+(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> operator-(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> operator*(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> operator/(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-
-    batch_bool<float, 16> operator==(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch_bool<float, 16> operator!=(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch_bool<float, 16> operator<(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch_bool<float, 16> operator<=(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-
-    batch<float, 16> operator&(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> operator|(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> operator^(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> operator~(const batch<float, 16>& rhs);
-    batch<float, 16> bitwise_andnot(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-
-    batch<float, 16> min(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> max(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> fmin(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-    batch<float, 16> fmax(const batch<float, 16>& lhs, const batch<float, 16>& rhs);
-
-    batch<float, 16> abs(const batch<float, 16>& rhs);
-    batch<float, 16> fabs(const batch<float, 16>& rhs);
-    batch<float, 16> sqrt(const batch<float, 16>& rhs);
-
-    batch<float, 16> fma(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z);
-    batch<float, 16> fms(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z);
-    batch<float, 16> fnma(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z);
-    batch<float, 16> fnms(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z);
-
-    float hadd(const batch<float, 16>& rhs);
-    batch<float, 16> haddp(const batch<float, 16>* row);
-
-    batch<float, 16> select(const batch_bool<float, 16>& cond, const batch<float, 16>& a, const batch<float, 16>& b);
-
-    batch_bool<float, 16> isnan(const batch<float, 16>& x);
-
     /************************************
      * batch<float, 16> implementation *
      ************************************/
@@ -338,149 +300,155 @@ namespace xsimd
         return x[index & 15];
     }
 
-    inline batch<float, 16> operator-(const batch<float, 16>& rhs)
+    namespace detail
     {
-        return _mm512_sub_ps(_mm512_setzero_ps(), rhs);
-    }
+        template <>
+        struct batch_kernel<float, 16>
+        {
+            using batch_type = batch<float, 16>;
+            using value_type = float;
+            using batch_bool_type = batch_bool<float, 16>;
 
-    inline batch<float, 16> operator+(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_add_ps(lhs, rhs);
-    }
+            static batch_type neg(const batch_type& rhs)
+            {
+                return _mm512_sub_ps(_mm512_setzero_ps(), rhs);
+            }
 
-    inline batch<float, 16> operator-(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_sub_ps(lhs, rhs);
-    }
+            static batch_type add(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_add_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> operator*(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_mul_ps(lhs, rhs);
-    }
+            static batch_type sub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_sub_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> operator/(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_div_ps(lhs, rhs);
-    }
+            static batch_type mul(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_mul_ps(lhs, rhs);
+            }
 
-    inline batch_bool<float, 16> operator==(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_cmp_ps_mask(lhs, rhs, _CMP_EQ_OQ);
-    }
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_div_ps(lhs, rhs);
+            }
 
-    inline batch_bool<float, 16> operator!=(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_cmp_ps_mask(lhs, rhs, _CMP_NEQ_OQ);
-    }
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmp_ps_mask(lhs, rhs, _CMP_EQ_OQ);
+            }
 
-    inline batch_bool<float, 16> operator<(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_cmp_ps_mask(lhs, rhs, _CMP_LT_OQ);
-    }
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmp_ps_mask(lhs, rhs, _CMP_NEQ_OQ);
+            }
 
-    inline batch_bool<float, 16> operator<=(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_cmp_ps_mask(lhs, rhs, _CMP_LE_OQ);
-    }
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmp_ps_mask(lhs, rhs, _CMP_LT_OQ);
+            }
 
-    inline batch<float, 16> operator&(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_and_ps(lhs, rhs);
-    }
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmp_ps_mask(lhs, rhs, _CMP_LE_OQ);
+            }
 
-    inline batch<float, 16> operator|(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_or_ps(lhs, rhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_and_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> operator^(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_xor_ps(lhs, rhs);
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_or_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> operator~(const batch<float, 16>& rhs)
-    {
-        return _mm512_xor_ps(rhs, _mm512_castsi512_ps(_mm512_set1_epi32(-1)));
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_xor_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> bitwise_andnot(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_andnot_ps(lhs, rhs);
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm512_xor_ps(rhs, _mm512_castsi512_ps(_mm512_set1_epi32(-1)));
+            }
 
-    inline batch<float, 16> min(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_min_ps(lhs, rhs);
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_andnot_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> max(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return _mm512_max_ps(lhs, rhs);
-    }
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_min_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> fmin(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return min(lhs, rhs);
-    }
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_max_ps(lhs, rhs);
+            }
 
-    inline batch<float, 16> fmax(const batch<float, 16>& lhs, const batch<float, 16>& rhs)
-    {
-        return max(lhs, rhs);
-    }
+            static batch_type fmin(const batch_type& lhs, const batch_type& rhs)
+            {
+                return min(lhs, rhs);
+            }
 
-    inline batch<float, 16> abs(const batch<float, 16>& rhs)
-    {
-        // return _mm512_abs_ps(rhs);
-        return (__m512)(_mm512_and_epi32((__m512i) ((__m512) (rhs)),
-                                         _mm512_set1_epi32(0x7fffffff)));
-    }
+            static batch_type fmax(const batch_type& lhs, const batch_type& rhs)
+            {
+                return max(lhs, rhs);
+            }
 
-    inline batch<float, 16> sqrt(const batch<float, 16>& rhs)
-    {
-        return _mm512_sqrt_ps(rhs);
-    }
+            static batch_type abs(const batch_type& rhs)
+            {
+                return (__m512)(_mm512_and_epi32((__m512i)((__m512)(rhs)),
+                                                 _mm512_set1_epi32(0x7fffffff)));
+            }
 
-    inline batch<float, 16> fabs(const batch<float, 16>& rhs)
-    {
-        return abs(rhs);
-    }
+            static batch_type fabs(const batch_type& rhs)
+            {
+                return abs(rhs);
+            }
 
-    inline batch<float, 16> fma(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z)
-    {
-        return _mm512_fmadd_ps(x, y, z);
-    }
+            static batch_type sqrt(const batch_type& rhs)
+            {
+                return _mm512_sqrt_ps(rhs);
+            }
 
-    inline batch<float, 16> fms(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z)
-    {
-        return _mm512_fmsub_ps(x, y, z);
-    }
+            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return _mm512_fmadd_ps(x, y, z);
+            }
 
-    inline batch<float, 16> fnma(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z)
-    {
-        return _mm512_fnmadd_ps(x, y, z);
-    }
+            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return _mm512_fmsub_ps(x, y, z);
+            }
 
-    inline batch<float, 16> fnms(const batch<float, 16>& x, const batch<float, 16>& y, const batch<float, 16>& z)
-    {
-        return _mm512_fnmsub_ps(x, y, z);
-    }
+            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return _mm512_fnmadd_ps(x, y, z);
+            }
 
-    inline float hadd(const batch<float, 16>& rhs)
-    {
-        // return _mm512_reduce_add_ps(rhs);
-        __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
-        __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
-        __m256 res1 = tmp1 + tmp2;
-        return hadd(batch<float, 8>(res1));
-    }
+            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return _mm512_fnmsub_ps(x, y, z);
+            }
 
-    inline batch<float, 16> haddp(const batch<float, 16>* row)
-    {
+            static value_type hadd(const batch_type& rhs)
+            {
+                __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
+                __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
+                __m256 res1 = tmp1 + tmp2;
+                return xsimd::hadd(batch<float, 8>(res1));
+            }
 
-    // The following folds over the vector once:
-    // tmp1 = [a0..8, b0..8]
-    // tmp2 = [a8..f, b8..f]
-    #define XSIMD_AVX512_HADDP_STEP1(I, a, b)                                                  \
+            static batch_type haddp(const simd_batch<batch_type>* row)
+            {
+                // The following folds over the vector once:
+                // tmp1 = [a0..8, b0..8]
+                // tmp2 = [a8..f, b8..f]
+#define XSIMD_AVX512_HADDP_STEP1(I, a, b)                                                  \
         batch<float, 16> res ## I;                                                             \
         {                                                                                      \
             auto tmp1 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(1, 0, 1, 0));                   \
@@ -488,22 +456,22 @@ namespace xsimd
             res ## I = tmp1 + tmp2;                                                            \
         }                                                                                      \
 
-        XSIMD_AVX512_HADDP_STEP1(1, row[ 0], row[ 4]);
-        XSIMD_AVX512_HADDP_STEP1(2, row[ 2], row[ 6]);
-        XSIMD_AVX512_HADDP_STEP1(3, row[ 1], row[ 5]);
-        XSIMD_AVX512_HADDP_STEP1(4, row[ 3], row[ 7]);
-        XSIMD_AVX512_HADDP_STEP1(5, row[ 8], row[12]);
-        XSIMD_AVX512_HADDP_STEP1(6, row[10], row[14]);
-        XSIMD_AVX512_HADDP_STEP1(7, row[ 9], row[13]);
-        XSIMD_AVX512_HADDP_STEP1(8, row[11], row[15]);
+                XSIMD_AVX512_HADDP_STEP1(1, row[0](), row[4]());
+                XSIMD_AVX512_HADDP_STEP1(2, row[2](), row[6]());
+                XSIMD_AVX512_HADDP_STEP1(3, row[1](), row[5]());
+                XSIMD_AVX512_HADDP_STEP1(4, row[3](), row[7]());
+                XSIMD_AVX512_HADDP_STEP1(5, row[8](), row[12]());
+                XSIMD_AVX512_HADDP_STEP1(6, row[10](), row[14]());
+                XSIMD_AVX512_HADDP_STEP1(7, row[9](), row[13]());
+                XSIMD_AVX512_HADDP_STEP1(8, row[11](), row[15]());
 
-    #undef XSIMD_AVX512_HADDP_STEP1
+#undef XSIMD_AVX512_HADDP_STEP1
 
-    // The following flds the code and shuffles so that hadd_ps produces the correct result
-    // tmp1 = [a0..4,  a8..12,  b0..4,  b8..12] (same for tmp3)
-    // tmp2 = [a5..8, a12..16, b5..8, b12..16]  (same for tmp4)
-    // tmp5 = [r1[0], r1[2], r2[0], r2[2], r1[4], r1[6] ...
-    #define XSIMD_AVX512_HADDP_STEP2(I, a, b, c, d)                                             \
+                // The following flds the code and shuffles so that hadd_ps produces the correct result
+                // tmp1 = [a0..4,  a8..12,  b0..4,  b8..12] (same for tmp3)
+                // tmp2 = [a5..8, a12..16, b5..8, b12..16]  (same for tmp4)
+                // tmp5 = [r1[0], r1[2], r2[0], r2[2], r1[4], r1[6] ...
+#define XSIMD_AVX512_HADDP_STEP2(I, a, b, c, d)                                             \
         batch<float, 8> halfx ## I;                                                             \
         {                                                                                       \
             batch<float, 16> tmp1 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(2, 0, 2, 0));        \
@@ -525,24 +493,26 @@ namespace xsimd
                                          _mm512_extractf32x8_ps(resx3, 1));                     \
         }                                                                                       \
 
-        XSIMD_AVX512_HADDP_STEP2(0, res1, res2, res3, res4);
-        XSIMD_AVX512_HADDP_STEP2(1, res5, res6, res7, res8);
+                XSIMD_AVX512_HADDP_STEP2(0, res1, res2, res3, res4);
+                XSIMD_AVX512_HADDP_STEP2(1, res5, res6, res7, res8);
 
-    #undef XSIMD_AVX512_HADDP_STEP2
+#undef XSIMD_AVX512_HADDP_STEP2
 
-        auto concat = _mm512_castps256_ps512(halfx0);
-        concat = _mm512_insertf32x8(concat, halfx1, 1);
-        return concat;
-    }
+                auto concat = _mm512_castps256_ps512(halfx0);
+                concat = _mm512_insertf32x8(concat, halfx1, 1);
+                return concat;
+            }
 
-    inline batch<float, 16> select(const batch_bool<float, 16>& cond, const batch<float, 16>& a, const batch<float, 16>& b)
-    {
-        return _mm512_mask_blend_ps(cond, b, a);
-    }
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
+                return _mm512_mask_blend_ps(cond, b, a);
+            }
 
-    inline batch_bool<float, 16> isnan(const batch<float, 16>& x)
-    {
-        return _mm512_cmp_ps_mask(x, x, _CMP_UNORD_Q);
+            static batch_bool_type isnan(const batch_type& x)
+            {
+                return _mm512_cmp_ps_mask(x, x, _CMP_UNORD_Q);
+            }
+        };
     }
 }
 

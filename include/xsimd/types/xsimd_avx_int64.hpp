@@ -449,7 +449,7 @@ namespace xsimd
                 __m128i res_low = _mm_sub_epi64(_mm_setzero_si128(), rhs_low);
                 __m128i res_high = _mm_sub_epi64(_mm_setzero_si128(), rhs_high);
                 XSIMD_RETURN_MERGED_SSE(res_low, res_high);
-#endif                return _mm_sub_epi64(_mm_setzero_si128(), rhs);
+#endif
             }
 
             static batch_type add(const batch_type& lhs, const batch_type& rhs)
