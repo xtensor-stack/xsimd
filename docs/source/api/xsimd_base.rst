@@ -25,6 +25,27 @@ Comparison operators
    :project: xsimd
    :content-only:
 
+Bitwise operators
+-----------------
+
+.. doxygengroup:: simd_batch_bitwise
+   :project: xsimd
+   :content-only:
+
+Reducers
+--------
+
+.. doxygengroup:: simd_batch_reducers
+   :project: xsimd
+   :content-only:
+
+Miscellaneous
+-------------
+
+.. doxygengroup:: batch_miscellaneous
+   :project: xsimd
+   :content-only:
+
 Other operators
 ---------------
 
