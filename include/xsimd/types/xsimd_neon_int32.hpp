@@ -16,6 +16,10 @@
 
 namespace xsimd
 {
+    /*********************
+     * batch<int32_t, 4> *
+     *********************/
+
     template <>
     struct simd_batch_traits<batch<int32_t, 4>>
     {
@@ -76,9 +80,12 @@ namespace xsimd
         simd_type m_value;
     };
 
-    /**
-     * Implementation of batch
-     */
+    batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
+    batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs);
+
+    /************************************
+     * batch<int32_t, 4> implementation *
+     ************************************/
 
     inline batch<int32_t, 4>::batch()
     {
@@ -234,88 +241,142 @@ namespace xsimd
         return m_value[index];
     }
 
-    inline batch<int32_t, 4> operator-(const batch<int32_t, 4>& lhs)
+
+
+    namespace detail
     {
-        return vnegq_s32(lhs);
+        template <>
+        struct batch_kernel<int32_t, 4>
+        {
+            using batch_type = batch<int32_t, 4>;
+            using value_type = int32_t;
+            using batch_bool_type = batch_bool<int32_t, 4>;
+
+            static batch_type neg(const batch_type& rhs)
+            {
+                return vnegq_s32(rhs);
+            }
+
+            static batch_type add(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vaddq_s32(lhs, rhs);
+            }
+
+            static batch_type sub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vsubq_s32(lhs, rhs);
+            }
+
+            static batch_type mul(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vmulq_s32(lhs, rhs);
+            }
+
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vcvtq_s32_f32(vcvtq_f32_s32(lhs) / vcvtq_f32_s32(rhs));
+            }
+
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vceqq_s32(lhs, rhs);
+            }
+
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return !(lhs == rhs);
+            }
+
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vcltq_s32(lhs, rhs);
+            }
+
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vcleq_s32(lhs, rhs);
+            }
+
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vandq_s32(lhs, rhs);
+            }
+
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vorrq_s32(lhs, rhs);
+            }
+
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return veorq_s32(lhs, rhs);
+            }
+
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return vmvnq_s32(rhs);
+            }
+
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vbicq_u32(lhs, rhs);
+            }
+
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vminq_s32(lhs, rhs);
+            }
+
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vmaxq_s32(lhs, rhs);
+            }
+
+            static batch_type abs(const batch_type& rhs)
+            {
+                return vabsq_s32(rhs);
+            }
+
+            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return x * y + z;
+            }
+
+            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return x * y - z;
+            }
+
+            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return -x * y + z;
+            }
+
+            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return -x * y - z;
+            }
+
+            static value_type hadd(const batch_type& rhs)
+            {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vaddvq_s32(rhs);
+#else
+                int32x2_t tmp = vpadd_s32(vget_low_s32(rhs), vget_high_s32(rhs));
+                tmp = vpadd_s32(tmp, tmp);
+                return vget_lane_s32(tmp, 0);
+#endif
+            }
+
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
+                return vbslq_s32(cond, a, b);
+            }
+        };
     }
 
-    inline batch<int32_t, 4> operator+(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vaddq_s32(lhs, rhs);
-    }
 
-    inline batch<int32_t, 4> operator-(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vsubq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> operator*(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vmulq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vcvtq_s32_f32(vcvtq_f32_s32(lhs) / vcvtq_f32_s32(rhs));
-    }
-
-    inline batch<int32_t, 4> min(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vminq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> max(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vmaxq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> fmin(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return min(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> fmax(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return max(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> abs(const batch<int32_t, 4>& lhs)
-    {
-        return vabsq_s32(lhs);
-    }
-
-    inline batch<int32_t, 4> fma(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return x * y + z;
-    }
-
-    inline batch<int32_t, 4> fms(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return x * y - z;
-    }
-
-    inline batch<int32_t, 4> fnma(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return -x * y + z;
-    }
-
-    inline batch<int32_t, 4> fnms(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return -x * y - z;
-    }
-
-    inline int32_t hadd(const batch<int32_t, 4>& rhs)
-    {
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-        return vaddvq_s32(rhs);
-    #else
-        int32x2_t tmp = vpadd_s32(vget_low_s32(rhs), vget_high_s32(rhs));
-        tmp = vpadd_s32(tmp, tmp);
-        return vget_lane_s32(tmp, 0);
-    #endif
-    }
-
-    inline batch<int32_t, 4> haddp(const batch<int32_t, 4>* row)
+    /*inline batch<int32_t, 4> haddp(const batch<int32_t, 4>* row)
     {
     #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
         int32x4_t tmp1 = vpaddq_s32(row[0], row[1]);
@@ -339,7 +400,7 @@ namespace xsimd
         // return = (a0..3, b0..3, c0..3, d0..3)
         return vcombine_s32(tmp1, tmp2);
     #endif
-    }
+    }*/
 
     namespace detail
     {
@@ -381,60 +442,6 @@ namespace xsimd
         return vshlq_s32(lhs, rhs);
     }
 
-    inline batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vceqq_s32(lhs, rhs);
-    }
-
-    inline batch_bool<int32_t, 4> operator!=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return !(lhs == rhs);
-    }
-
-    inline batch_bool<int32_t, 4> operator<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vcltq_s32(lhs, rhs);
-    }
-
-    inline batch_bool<int32_t, 4> operator<=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vcleq_s32(lhs, rhs);
-    }
-
-    inline batch_bool<int32_t, 4> operator>(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vcgtq_s32(lhs, rhs);
-    }
-
-    inline batch_bool<int32_t, 4> operator>=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vcgeq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> select(const batch_bool<int32_t, 4>& cond, const batch<int32_t, 4>& a, const batch<int32_t, 4>& b)
-    {
-        return vbslq_s32(cond, a, b);
-    }
-
-    inline batch<int32_t, 4> operator&(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vandq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> operator|(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return vorrq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> operator^(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return veorq_s32(lhs, rhs);
-    }
-
-    inline batch<int32_t, 4> operator~(const batch<int32_t, 4>& rhs)
-    {
-        return vmvnq_s32(rhs);
-    }
 }
 
 #endif
