@@ -687,7 +687,7 @@ namespace xsimd
 
             static batch_type haddp(const simd_batch<batch_type>* row)
             {
-                XSIMD_FALLBACK_MAPPING_LOOP(batch, hadd(row()[i]))
+                XSIMD_FALLBACK_MAPPING_LOOP(batch, hadd(row[i]()))
             }
 
             static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
