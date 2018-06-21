@@ -49,18 +49,6 @@ namespace xsimd
         __m128i m_value;
     };
 
-    batch_bool<int32_t, 4> operator&(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> operator|(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> operator^(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> operator~(const batch_bool<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> bitwise_andnot(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
-
-    batch_bool<int32_t, 4> operator==(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> operator!=(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs);
-
-    bool all(const batch_bool<int32_t, 4>& rhs);
-    bool any(const batch_bool<int32_t, 4>& rhs);
-
     /*********************
      * batch<int32_t, 4> *
      *********************/
@@ -121,37 +109,6 @@ namespace xsimd
         __m128i m_value;
     };
 
-    batch<int32_t, 4> operator-(const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator+(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator-(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator*(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-
-    batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> operator!=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> operator<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch_bool<int32_t, 4> operator<=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-
-    batch<int32_t, 4> operator&(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator|(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator^(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> operator~(const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> bitwise_andnot(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-
-    batch<int32_t, 4> min(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-    batch<int32_t, 4> max(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
-
-    batch<int32_t, 4> abs(const batch<int32_t, 4>& rhs);
-
-    batch<int32_t, 4> fma(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z);
-    batch<int32_t, 4> fms(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z);
-    batch<int32_t, 4> fnma(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z);
-    batch<int32_t, 4> fnms(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z);
-
-    int32_t hadd(const batch<int32_t, 4>& rhs);
-
-    batch<int32_t, 4> select(const batch_bool<int32_t, 4>& cond, const batch<int32_t, 4>& a, const batch<int32_t, 4>& b);
-
     batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
     batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs);
 
@@ -196,53 +153,62 @@ namespace xsimd
         return static_cast<bool>(x[index & 3]);
     }
 
-    inline batch_bool<int32_t, 4> operator&(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
+    namespace detail
     {
-        return _mm_and_si128(lhs, rhs);
-    }
+        template <>
+        struct batch_bool_kernel<int32_t, 4>
+        {
+            using batch_type = batch_bool<int32_t, 4>;
 
-    inline batch_bool<int32_t, 4> operator|(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
-    {
-        return _mm_or_si128(lhs, rhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_and_si128(lhs, rhs);
+            }
 
-    inline batch_bool<int32_t, 4> operator^(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
-    {
-        return _mm_xor_si128(lhs, rhs);
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_or_si128(lhs, rhs);
+            }
 
-    inline batch_bool<int32_t, 4> operator~(const batch_bool<int32_t, 4>& rhs)
-    {
-        return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_xor_si128(lhs, rhs);
+            }
 
-    inline batch_bool<int32_t, 4> bitwise_andnot(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
-    {
-        return _mm_andnot_si128(lhs, rhs);
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
+            }
 
-    inline batch_bool<int32_t, 4> operator==(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
-    {
-        return _mm_cmpeq_epi32(lhs, rhs);
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_andnot_si128(lhs, rhs);
+            }
 
-    inline batch_bool<int32_t, 4> operator!=(const batch_bool<int32_t, 4>& lhs, const batch_bool<int32_t, 4>& rhs)
-    {
-        return ~(lhs == rhs);
-    }
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_cmpeq_epi32(lhs, rhs);
+            }
 
-    inline bool all(const batch_bool<int32_t, 4>& rhs)
-    {
-        return _mm_movemask_epi8(rhs) == 0xFFFF;
-    }
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(lhs == rhs);
+            }
 
-    inline bool any(const batch_bool<int32_t, 4>& rhs)
-    {
+            static bool all(const batch_type& rhs)
+            {
+                return _mm_movemask_epi8(rhs) == 0xFFFF;
+            }
+
+            static bool any(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-        return !_mm_testz_si128(rhs, rhs);
+                return !_mm_testz_si128(rhs, rhs);
 #else
-        return _mm_movemask_epi8(rhs) != 0;
+                return _mm_movemask_epi8(rhs) != 0;
 #endif
+            }
+        };
     }
 
     /************************************
@@ -407,159 +373,170 @@ namespace xsimd
         return x[index & 3];
     }
 
-    inline batch<int32_t, 4> operator-(const batch<int32_t, 4>& rhs)
+    namespace detail
     {
-        return _mm_sub_epi32(_mm_setzero_si128(), rhs);
-    }
+        template <>
+        struct batch_kernel<int32_t, 4>
+        {
+            using batch_type = batch<int32_t, 4>;
+            using value_type = int32_t;
+            using batch_bool_type = batch_bool<int32_t, 4>;
 
-    inline batch<int32_t, 4> operator+(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_add_epi32(lhs, rhs);
-    }
+            static batch_type neg(const batch_type& rhs)
+            {
+                return _mm_sub_epi32(_mm_setzero_si128(), rhs);
+            }
 
-    inline batch<int32_t, 4> operator-(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_sub_epi32(lhs, rhs);
-    }
+            static batch_type add(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_add_epi32(lhs, rhs);
+            }
 
-    inline batch<int32_t, 4> operator*(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
+            static batch_type sub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_sub_epi32(lhs, rhs);
+            }
+
+            static batch_type mul(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-        return _mm_mullo_epi32(lhs, rhs);
+                return _mm_mullo_epi32(lhs, rhs);
 #else
-        __m128i a13 = _mm_shuffle_epi32(lhs, 0xF5);
-        __m128i b13 = _mm_shuffle_epi32(rhs, 0xF5);
-        __m128i prod02 = _mm_mul_epu32(lhs, rhs);
-        __m128i prod13 = _mm_mul_epu32(a13, b13);
-        __m128i prod01 = _mm_unpacklo_epi32(prod02, prod13);
-        __m128i prod23 = _mm_unpackhi_epi32(prod02, prod13);
-        return _mm_unpacklo_epi64(prod01, prod23);
+                __m128i a13 = _mm_shuffle_epi32(lhs, 0xF5);
+                __m128i b13 = _mm_shuffle_epi32(rhs, 0xF5);
+                __m128i prod02 = _mm_mul_epu32(lhs, rhs);
+                __m128i prod13 = _mm_mul_epu32(a13, b13);
+                __m128i prod01 = _mm_unpacklo_epi32(prod02, prod13);
+                __m128i prod23 = _mm_unpackhi_epi32(prod02, prod13);
+                return _mm_unpacklo_epi64(prod01, prod23);
 #endif
-    }
+            }
 
-    inline batch<int32_t, 4> operator/(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_cvttps_epi32(_mm_div_ps(_mm_cvtepi32_ps(lhs), _mm_cvtepi32_ps(rhs)));
-    }
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_cvttps_epi32(_mm_div_ps(_mm_cvtepi32_ps(lhs), _mm_cvtepi32_ps(rhs)));
+            }
 
-    inline batch_bool<int32_t, 4> operator==(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_cmpeq_epi32(lhs, rhs);
-    }
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_cmpeq_epi32(lhs, rhs);
+            }
 
-    inline batch_bool<int32_t, 4> operator!=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return ~(lhs == rhs);
-    }
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(lhs == rhs);
+            }
 
-    inline batch_bool<int32_t, 4> operator<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_cmplt_epi32(lhs, rhs);
-    }
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_cmplt_epi32(lhs, rhs);
+            }
 
-    inline batch_bool<int32_t, 4> operator<=(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return ~(rhs < lhs);
-    }
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(rhs < lhs);
+            }
 
-    inline batch<int32_t, 4> operator&(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_and_si128(lhs, rhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_and_si128(lhs, rhs);
+            }
 
-    inline batch<int32_t, 4> operator|(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_or_si128(lhs, rhs);
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_or_si128(lhs, rhs);
+            }
 
-    inline batch<int32_t, 4> operator^(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_xor_si128(lhs, rhs);
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_xor_si128(lhs, rhs);
+            }
 
-    inline batch<int32_t, 4> operator~(const batch<int32_t, 4>& rhs)
-    {
-        return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
+            }
 
-    inline batch<int32_t, 4> bitwise_andnot(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
-        return _mm_andnot_si128(lhs, rhs);
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm_andnot_si128(lhs, rhs);
+            }
 
-    inline batch<int32_t, 4> min(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-        return _mm_min_epi32(lhs, rhs);
+                return _mm_min_epi32(lhs, rhs);
 #else
-        __m128i greater = _mm_cmpgt_epi32(lhs, rhs);
-        return select(greater, rhs, lhs);
+                __m128i greater = _mm_cmpgt_epi32(lhs, rhs);
+                return select(greater, rhs, lhs);
 #endif
-    }
+            }
 
-    inline batch<int32_t, 4> max(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
-    {
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-        return _mm_max_epi32(lhs, rhs);
+                return _mm_max_epi32(lhs, rhs);
 #else
-        __m128i greater = _mm_cmpgt_epi32(lhs, rhs);
-        return select(greater, lhs, rhs);
+                __m128i greater = _mm_cmpgt_epi32(lhs, rhs);
+                return select(greater, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch<int32_t, 4> abs(const batch<int32_t, 4>& rhs)
-    {
+            static batch_type abs(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
-        return _mm_sign_epi32(rhs, rhs);
+                return _mm_sign_epi32(rhs, rhs);
 #else
-        __m128i sign = _mm_srai_epi32(rhs, 31);
-        __m128i inv = _mm_xor_si128(rhs, sign);
-        return _mm_sub_epi32(inv, sign);
+                __m128i sign = _mm_srai_epi32(rhs, 31);
+                __m128i inv = _mm_xor_si128(rhs, sign);
+                return _mm_sub_epi32(inv, sign);
 #endif
-    }
+            }
 
-    inline batch<int32_t, 4> fma(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return x * y + z;
-    }
+            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return x * y + z;
+            }
 
-    inline batch<int32_t, 4> fms(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return x * y - z;
-    }
+            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return x * y - z;
+            }
 
-    inline batch<int32_t, 4> fnma(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return -x * y + z;
-    }
+            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return -x * y + z;
+            }
 
-    inline batch<int32_t, 4> fnms(const batch<int32_t, 4>& x, const batch<int32_t, 4>& y, const batch<int32_t, 4>& z)
-    {
-        return -x * y - z;
-    }
+            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return -x * y - z;
+            }
 
-    inline int32_t hadd(const batch<int32_t, 4>& rhs)
-    {
+            static value_type hadd(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
-        __m128i tmp1 = _mm_hadd_epi32(rhs, rhs);
-        __m128i tmp2 = _mm_hadd_epi32(tmp1, tmp1);
-        return _mm_cvtsi128_si32(tmp2);
+                __m128i tmp1 = _mm_hadd_epi32(rhs, rhs);
+                __m128i tmp2 = _mm_hadd_epi32(tmp1, tmp1);
+                return _mm_cvtsi128_si32(tmp2);
 #else
-        __m128i tmp1 = _mm_shuffle_epi32(rhs, 0x0E);
-        __m128i tmp2 = _mm_add_epi32(rhs, tmp1);
-        __m128i tmp3 = _mm_shuffle_epi32(tmp2, 0x01);
-        __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
-        return _mm_cvtsi128_si32(tmp4);
+                __m128i tmp1 = _mm_shuffle_epi32(rhs, 0x0E);
+                __m128i tmp2 = _mm_add_epi32(rhs, tmp1);
+                __m128i tmp3 = _mm_shuffle_epi32(tmp2, 0x01);
+                __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
+                return _mm_cvtsi128_si32(tmp4);
 #endif
-    }
+            }
 
-    inline batch<int32_t, 4> select(const batch_bool<int32_t, 4>& cond, const batch<int32_t, 4>& a, const batch<int32_t, 4>& b)
-    {
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-        return _mm_blendv_epi8(b, a, cond);
+                return _mm_blendv_epi8(b, a, cond);
 #else
-        return _mm_or_si128(_mm_and_si128(cond, a), _mm_andnot_si128(cond, b));
+                return _mm_or_si128(_mm_and_si128(cond, a), _mm_andnot_si128(cond, b));
 #endif
+            }
+        };
     }
 
     inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs)

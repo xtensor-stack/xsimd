@@ -221,185 +221,190 @@ namespace xsimd
         return m_value[index];
     }
 
-    inline batch<double, 2> operator-(const batch<double, 2>& lhs)
+    namespace detail
     {
-        return vnegq_f64(lhs);
-    }
+        template <>
+        struct batch_kernel<double, 2>
+        {
+            using batch_type = batch<double, 2>;
+            using value_type = double;
+            using batch_bool_type = batch_bool<double, 2>;
 
-    inline batch<double, 2> operator+(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vaddq_f64(lhs, rhs);
-    }
+            static batch_type neg(const batch_type& rhs)
+            {
+                return vnegq_f64(rhs);
+            }
 
-    inline batch<double, 2> operator-(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vsubq_f64(lhs, rhs);
-    }
+            static batch_type add(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vaddq_f64(lhs, rhs);
+            }
 
-    inline batch<double, 2> operator*(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vmulq_f64(lhs, rhs);
-    }
+            static batch_type sub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vsubq_f64(lhs, rhs);
+            }
 
-    inline batch<double, 2> operator/(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-        return vdivq_f64(lhs, rhs);
-    #else
-        // from stackoverflow & https://projectne10.github.io/Ne10/doc/NE10__divc_8neon_8c_source.html
-        // get an initial estimate of 1/b.
-        float64x2_t reciprocal = vrecpeq_f64(rhs);
+            static batch_type mul(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vmulq_f64(lhs, rhs);
+            }
 
-        // use a couple Newton-Raphson steps to refine the estimate.  Depending on your
-        // application's accuracy requirements, you may be able to get away with only
-        // one refinement (instead of the two used here).  Be sure to test!
-        reciprocal = vmulq_f64(vrecpsq_f64(rhs, reciprocal), reciprocal);
-        reciprocal = vmulq_f64(vrecpsq_f64(rhs, reciprocal), reciprocal);
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vdivq_f64(lhs, rhs);
+#else
+                // from stackoverflow & https://projectne10.github.io/Ne10/doc/NE10__divc_8neon_8c_source.html
+                // get an initial estimate of 1/b.
+                float64x2_t reciprocal = vrecpeq_f64(rhs);
 
-        // and finally, compute a / b = a * (1 / b)
-        return vmulq_f64(lhs, reciprocal);
-    #endif
-    }
+                // use a couple Newton-Raphson steps to refine the estimate.  Depending on your
+                // application's accuracy requirements, you may be able to get away with only
+                // one refinement (instead of the two used here).  Be sure to test!
+                reciprocal = vmulq_f64(vrecpsq_f64(rhs, reciprocal), reciprocal);
+                reciprocal = vmulq_f64(vrecpsq_f64(rhs, reciprocal), reciprocal);
 
-    inline batch<double, 2> min(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vminq_f64(lhs, rhs);
-    }
+                // and finally, compute a / b = a * (1 / b)
+                return vmulq_f64(lhs, reciprocal);
+#endif
+            }
 
-    inline batch<double, 2> max(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vmaxq_f64(lhs, rhs);
-    }
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vceqq_f64(lhs, rhs);
+            }
 
-    inline batch<double, 2> fmin(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return min(lhs, rhs);
-    }
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return !(lhs == rhs);
+            }
 
-    inline batch<double, 2> fmax(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return max(lhs, rhs);
-    }
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vcltq_f64(lhs, rhs);
+            }
 
-    inline batch<double, 2> abs(const batch<double, 2>& lhs)
-    {
-        return vabsq_f64(lhs);
-    }
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vcleq_f64(lhs, rhs);
+            }
 
-    inline batch<double, 2> fabs(const batch<double, 2>& lhs)
-    {
-        return abs(lhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vreinterpretq_f64_u64(vandq_u64(vreinterpretq_u64_f64(lhs),
+                                                       vreinterpretq_u64_f64(rhs)));
+            }
 
-    inline batch<double, 2> sqrt(const batch<double, 2>& lhs)
-    {
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-        return vsqrtq_f64(lhs);
-    #else
-        float64x2_t sqrt_reciprocal = vrsqrteq_f64(lhs);
-        // one iter
-        // sqrt_reciprocal = sqrt_reciprocal * vrsqrtsq_f64(lhs * sqrt_reciprocal, sqrt_reciprocal);
-        return lhs * sqrt_reciprocal * vrsqrtsq_f64(lhs * sqrt_reciprocal, sqrt_reciprocal);
-    #endif
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vreinterpretq_f64_u64(vorrq_u64(vreinterpretq_u64_f64(lhs),
+                                                       vreinterpretq_u64_f64(rhs)));
+            }
 
-    inline batch<double, 2> fma(const batch<double, 2>& x, const batch<double, 2>& y, const batch<double, 2>& z)
-    {
-        return vfmaq_f64(z, x, y);
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vreinterpretq_f64_u64(veorq_u64(vreinterpretq_u64_f64(lhs),
+                                                       vreinterpretq_u64_f64(rhs)));
+            }
 
-    inline batch<double, 2> fms(const batch<double, 2>& x, const batch<double, 2>& y, const batch<double, 2>& z)
-    {
-        // return vfmsq_f64(-z, x, y);
-        return vfmaq_f64(-z, x, y);
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return vreinterpretq_f64_u32(vmvnq_u32(vreinterpretq_u32_f64(rhs)));
+            }
 
-    inline batch<double, 2> fnma(const batch<double, 2>& x, const batch<double, 2>& y, const batch<double, 2>& z)
-    {
-        return fma(-x, y, z);
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vreinterpretq_f32_u64(vbicq_u64(vreinterpretq_u64_f64(lhs), vreinterpretq_u64_f64(rhs)));
+            }
 
-    inline batch<double, 2> fnms(const batch<double, 2>& x, const batch<double, 2>& y, const batch<double, 2>& z)
-    {
-        return fms(-x, y, z);
-    }
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vminq_f64(lhs, rhs);
+            }
 
-    inline double hadd(const batch<double, 2>& rhs)
-    {
-    #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-        return vaddvq_f64(rhs);
-    #else
-        float64x2_t tmp = vpaddq_f64(rhs, rhs);
-        return vgetq_lane_f64(tmp, 0);
-    #endif
-    }
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vmaxq_f64(lhs, rhs);
+            }
 
-    inline batch<double, 2> haddp(const batch<double, 2>* row)
-    {
-        return vpaddq_f64(row[0], row[1]);
-    }
+            static batch_type fmin(const batch_type& lhs, const batch_type& rhs)
+            {
+                return min(lhs, rhs);
+            }
 
-    inline batch_bool<double, 2> operator==(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vceqq_f64(lhs, rhs);
-    }
+            static batch_type fmax(const batch_type& lhs, const batch_type& rhs)
+            {
+                return max(lhs, rhs);
+            }
 
-    inline batch_bool<double, 2> operator!=(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return !(lhs == rhs);
-    }
+            static batch_type abs(const batch_type& rhs)
+            {
+                return vabsq_f64(rhs);
+            }
 
-    inline batch_bool<double, 2> isnan(const batch<double, 2>& x)
-    {
-        return !(x == x);
-    }
+            static batch_type fabs(const batch_type& rhs)
+            {
+                return abs(rhs);
+            }
 
-    inline batch_bool<double, 2> operator<(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vcltq_f64(lhs, rhs);
-    }
+            static batch_type sqrt(const batch_type& rhs)
+            {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vsqrtq_f64(rhs);
+#else
+                float64x2_t sqrt_reciprocal = vrsqrteq_f64(rhs);
+                // one iter
+                // sqrt_reciprocal = sqrt_reciprocal * vrsqrtsq_f64(lhs * sqrt_reciprocal, sqrt_reciprocal);
+                return rhs * sqrt_reciprocal * vrsqrtsq_f64(rhs * sqrt_reciprocal, sqrt_reciprocal);
+#endif
+            }
 
-    inline batch_bool<double, 2> operator<=(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vcleq_f64(lhs, rhs);
-    }
+            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return vfmaq_f64(z, x, y);
+            }
 
-    inline batch_bool<double, 2> operator>(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vcgtq_f64(lhs, rhs);
-    }
+            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return vfmaq_f64(-z, x, y);
+            }
 
-    inline batch_bool<double, 2> operator>=(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vcgeq_f64(lhs, rhs);
-    }
+            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return fma(-x, y, z);
+            }
 
-    inline batch<double, 2> select(const batch_bool<double, 2>& cond, const batch<double, 2>& a, const batch<double, 2>& b)
-    {
-        return vbslq_f64(cond, a, b);
-    }
+            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return fms(-x, y, z);
+            }
 
-    inline batch<double, 2> operator&(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vreinterpretq_f64_u64(vandq_u64(vreinterpretq_u64_f64(lhs),
-                                               vreinterpretq_u64_f64(rhs)));
-    }
+            static value_type hadd(const batch_type& rhs)
+            {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vaddvq_f64(rhs);
+#else
+                float64x2_t tmp = vpaddq_f64(rhs, rhs);
+                return vgetq_lane_f64(tmp, 0);
+#endif
+            }
 
-    inline batch<double, 2> operator|(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vreinterpretq_f64_u64(vorrq_u64(vreinterpretq_u64_f64(lhs),
-                                               vreinterpretq_u64_f64(rhs)));
-    }
+            static batch_type haddp(const simd_batch<batch_type>* row)
+            {
+                return vpaddq_f64(row[0](), row[1]());
+            }
 
-    inline batch<double, 2> operator^(const batch<double, 2>& lhs, const batch<double, 2>& rhs)
-    {
-        return vreinterpretq_f64_u64(veorq_u64(vreinterpretq_u64_f64(lhs),
-                                               vreinterpretq_u64_f64(rhs)));
-    }
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
+                return vbslq_f64(cond, a, b);
+            }
 
-    inline batch<double, 2> operator~(const batch<double, 2>& rhs)
-    {
-        return vreinterpretq_f64_u32(vmvnq_u32(vreinterpretq_u32_f64(rhs)));
+            static batch_bool_type isnan(const batch_type& x)
+            {
+                return !(x == x);
+            }
+        };
     }
 }
 

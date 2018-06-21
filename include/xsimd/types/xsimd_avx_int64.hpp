@@ -49,18 +49,6 @@ namespace xsimd
         __m256i m_value;
     };
 
-    batch_bool<int64_t, 4> operator&(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> operator|(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> operator^(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> operator~(const batch_bool<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> bitwise_andnot(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
-
-    batch_bool<int64_t, 4> operator==(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> operator!=(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs);
-
-    bool all(const batch_bool<int64_t, 4>& rhs);
-    bool any(const batch_bool<int64_t, 4>& rhs);
-
     /*********************
      * batch<int64_t, 4> *
      *********************/
@@ -121,37 +109,6 @@ namespace xsimd
 
         __m256i m_value;
     };
-
-    batch<int64_t, 4> operator-(const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator+(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator-(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator*(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator/(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-
-    batch_bool<int64_t, 4> operator==(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> operator!=(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> operator<(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch_bool<int64_t, 4> operator<=(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-
-    batch<int64_t, 4> operator&(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator|(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator^(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> operator~(const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> bitwise_andnot(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-
-    batch<int64_t, 4> min(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-    batch<int64_t, 4> max(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs);
-
-    batch<int64_t, 4> abs(const batch<int64_t, 4>& rhs);
-
-    batch<int64_t, 4> fma(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z);
-    batch<int64_t, 4> fms(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z);
-    batch<int64_t, 4> fnma(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z);
-    batch<int64_t, 4> fnms(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z);
-
-    int64_t hadd(const batch<int64_t, 4>& rhs);
-
-    batch<int64_t, 4> select(const batch_bool<int64_t, 4>& cond, const batch<int64_t, 4>& a, const batch<int64_t, 4>& b);
 
     batch<int64_t, 4> operator<<(const batch<int64_t, 4>& lhs, int32_t rhs);
     batch<int64_t, 4> operator>>(const batch<int64_t, 4>& lhs, int32_t rhs);
@@ -215,76 +172,85 @@ namespace xsimd
         return static_cast<bool>(x[index & 3]);
     }
 
-    inline batch_bool<int64_t, 4> operator&(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
+    namespace detail
     {
+        template <>
+        struct batch_bool_kernel<int64_t, 4>
+        {
+            using batch_type = batch_bool<int64_t, 4>;
+
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_and_si256(lhs, rhs);
+                return _mm256_and_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator|(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_or_si256(lhs, rhs);
+                return _mm256_or_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_or_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_or_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator^(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_xor_si256(lhs, rhs);
+                return _mm256_xor_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_xor_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_xor_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator~(const batch_bool<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
+                return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
 #else
-        XSIMD_SPLIT_AVX(rhs);
-        __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
-        __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
-        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+                XSIMD_SPLIT_AVX(rhs);
+                __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
+                __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> bitwise_andnot(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_andnot_si256(lhs, rhs);
+                return _mm256_andnot_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator==(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
-    {
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_cmpeq_epi64(lhs, rhs);
+                return _mm256_cmpeq_epi64(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_cmpeq_epi64, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_cmpeq_epi64, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator!=(const batch_bool<int64_t, 4>& lhs, const batch_bool<int64_t, 4>& rhs)
-    {
-        return ~(lhs == rhs);
-    }
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(lhs == rhs);
+            }
 
-    inline bool all(const batch_bool<int64_t, 4>& rhs)
-    {
-        return _mm256_testc_si256(rhs, batch_bool<int64_t, 4>(true)) != 0;
-    }
+            static bool all(const batch_type& rhs)
+            {
+                return _mm256_testc_si256(rhs, batch_bool<int64_t, 4>(true)) != 0;
+            }
 
-    inline bool any(const batch_bool<int64_t, 4>& rhs)
-    {
-        return !_mm256_testz_si256(rhs, rhs);
+            static bool any(const batch_type& rhs)
+            {
+                return !_mm256_testz_si256(rhs, rhs);
+            }
+        };
     }
 
     /************************************
@@ -465,227 +431,236 @@ namespace xsimd
         return x[index & 3];
     }
 
-    inline batch<int64_t, 4> operator-(const batch<int64_t, 4>& rhs)
+    namespace detail
     {
+        template <>
+        struct batch_kernel<int64_t, 4>
+        {
+            using batch_type = batch<int64_t, 4>;
+            using value_type = int64_t;
+            using batch_bool_type = batch_bool<int64_t, 4>;
+
+            static batch_type neg(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_sub_epi64(_mm256_setzero_si256(), rhs);
+                return _mm256_sub_epi64(_mm256_setzero_si256(), rhs);
 #else
-        XSIMD_SPLIT_AVX(rhs);
-        __m128i res_low = _mm_sub_epi64(_mm_setzero_si128(), rhs_low);
-        __m128i res_high = _mm_sub_epi64(_mm_setzero_si128(), rhs_high);
-        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+                XSIMD_SPLIT_AVX(rhs);
+                __m128i res_low = _mm_sub_epi64(_mm_setzero_si128(), rhs_low);
+                __m128i res_high = _mm_sub_epi64(_mm_setzero_si128(), rhs_high);
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> operator+(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_type add(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_add_epi64(lhs, rhs);
+                return _mm256_add_epi64(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_add_epi64, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_add_epi64, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> operator-(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_type sub(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_sub_epi64(lhs, rhs);
+                return _mm256_sub_epi64(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_sub_epi64, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_sub_epi64, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> operator*(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        alignas(32) int64_t slhs[4], srhs[4];
-        lhs.store_aligned(slhs);
-        rhs.store_aligned(srhs);
-        return batch<int64_t, 4>(slhs[0] * srhs[0], slhs[1] * srhs[1], slhs[2] * srhs[2], slhs[3] * srhs[3]);
-    }
+            static batch_type mul(const batch_type& lhs, const batch_type& rhs)
+            {
+                alignas(32) int64_t slhs[4], srhs[4];
+                lhs.store_aligned(slhs);
+                rhs.store_aligned(srhs);
+                return batch<int64_t, 4>(slhs[0] * srhs[0], slhs[1] * srhs[1], slhs[2] * srhs[2], slhs[3] * srhs[3]);
+            }
 
-    inline batch<int64_t, 4> operator/(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        __m256d dlhs = _mm256_setr_pd(static_cast<double>(lhs[0]), static_cast<double>(lhs[1]),
-                                      static_cast<double>(lhs[2]), static_cast<double>(lhs[3]));
-        __m256d drhs = _mm256_setr_pd(static_cast<double>(rhs[0]), static_cast<double>(rhs[1]),
-                                      static_cast<double>(rhs[2]), static_cast<double>(rhs[3]));
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+                __m256d dlhs = _mm256_setr_pd(static_cast<double>(lhs[0]), static_cast<double>(lhs[1]),
+                                              static_cast<double>(lhs[2]), static_cast<double>(lhs[3]));
+                __m256d drhs = _mm256_setr_pd(static_cast<double>(rhs[0]), static_cast<double>(rhs[1]),
+                                              static_cast<double>(rhs[2]), static_cast<double>(rhs[3]));
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_cvtepi32_epi64(_mm256_cvttpd_epi32(_mm256_div_pd(dlhs, drhs)));
+                return _mm256_cvtepi32_epi64(_mm256_cvttpd_epi32(_mm256_div_pd(dlhs, drhs)));
 #else
-        using batch_int = batch<int32_t, 4>;
-        __m128i tmp = _mm256_cvttpd_epi32(_mm256_div_pd(dlhs, drhs));
-        __m128i res_low = _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(0));
-        __m128i res_high = _mm_unpackhi_epi32(tmp, batch_int(tmp) < batch_int(0));
-        __m256i result = _mm256_castsi128_si256(res_low);
-        return _mm256_insertf128_si256(result, res_high, 1);
+                using batch_int = batch<int32_t, 4>;
+                __m128i tmp = _mm256_cvttpd_epi32(_mm256_div_pd(dlhs, drhs));
+                __m128i res_low = _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(0));
+                __m128i res_high = _mm_unpackhi_epi32(tmp, batch_int(tmp) < batch_int(0));
+                __m256i result = _mm256_castsi128_si256(res_low);
+                return _mm256_insertf128_si256(result, res_high, 1);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator==(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_cmpeq_epi64(lhs, rhs);
+                return _mm256_cmpeq_epi64(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_cmpeq_epi64, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_cmpeq_epi64, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator!=(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        return ~(lhs == rhs);
-    }
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(lhs == rhs);
+            }
 
-    inline batch_bool<int64_t, 4> operator<(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_cmpgt_epi64(rhs, lhs);
+                return _mm256_cmpgt_epi64(rhs, lhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_cmpgt_epi64, rhs, lhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_cmpgt_epi64, rhs, lhs);
 #endif
-    }
+            }
 
-    inline batch_bool<int64_t, 4> operator<=(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        return ~(rhs < lhs);
-    }
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(rhs < lhs);
+            }
 
-    inline batch<int64_t, 4> operator&(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_and_si256(lhs, rhs);
+                return _mm256_and_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> operator|(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_or_si256(lhs, rhs);
+                return _mm256_or_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_or_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_or_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> operator^(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_xor_si256(lhs, rhs);
+                return _mm256_xor_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_xor_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_xor_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> operator~(const batch<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
+                return _mm256_xor_si256(rhs, _mm256_set1_epi32(-1));
 #else
-        XSIMD_SPLIT_AVX(rhs);
-        __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
-        __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
-        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+                XSIMD_SPLIT_AVX(rhs);
+                __m128i res_low = _mm_xor_si128(rhs_low, _mm_set1_epi32(-1));
+                __m128i res_high = _mm_xor_si128(rhs_high, _mm_set1_epi32(-1));
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> bitwise_andnot(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_andnot_si256(lhs, rhs);
+                return _mm256_andnot_si256(lhs, rhs);
 #else
-        XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_andnot_si128, lhs, rhs);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> min(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        batch_bool<int64_t, 4> cond = lhs < rhs;
-        return select(cond, lhs, rhs);
-    }
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                return select(lhs < rhs, lhs, rhs);
+            }
 
-    inline batch<int64_t, 4> max(const batch<int64_t, 4>& lhs, const batch<int64_t, 4>& rhs)
-    {
-        return select(lhs > rhs, lhs, rhs);
-    }
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                return select(lhs > rhs, lhs, rhs);
+            }
 
-    inline batch<int64_t, 4> abs(const batch<int64_t, 4>& rhs)
-    {
+            static batch_type abs(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        __m256i sign = _mm256_cmpgt_epi64(_mm256_setzero_si256(), rhs);
-        __m256i inv = _mm256_xor_si256(rhs, sign);
-        return _mm256_sub_epi64(inv, sign);
+                __m256i sign = _mm256_cmpgt_epi64(_mm256_setzero_si256(), rhs);
+                __m256i inv = _mm256_xor_si256(rhs, sign);
+                return _mm256_sub_epi64(inv, sign);
 #else
-        XSIMD_SPLIT_AVX(rhs);
-        __m128i sign_low = _mm_cmpgt_epi64(_mm_setzero_si128(), rhs_low);
-        __m128i sign_high = _mm_cmpgt_epi64(_mm_setzero_si128(), rhs_high);
-        __m128i inv_low = _mm_xor_si128(rhs_low, sign_low);
-        __m128i inv_high = _mm_xor_si128(rhs_high, sign_high);
-        __m128i res_low = _mm_sub_epi64(inv_low, sign_low);
-        __m128i res_high = _mm_sub_epi64(inv_high, sign_high);
-        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+                XSIMD_SPLIT_AVX(rhs);
+                __m128i sign_low = _mm_cmpgt_epi64(_mm_setzero_si128(), rhs_low);
+                __m128i sign_high = _mm_cmpgt_epi64(_mm_setzero_si128(), rhs_high);
+                __m128i inv_low = _mm_xor_si128(rhs_low, sign_low);
+                __m128i inv_high = _mm_xor_si128(rhs_high, sign_high);
+                __m128i res_low = _mm_sub_epi64(inv_low, sign_low);
+                __m128i res_high = _mm_sub_epi64(inv_high, sign_high);
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> fma(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z)
-    {
-        return x * y + z;
-    }
+            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return x * y + z;
+            }
 
-    inline batch<int64_t, 4> fms(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z)
-    {
-        return x * y - z;
-    }
+            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return x * y - z;
+            }
 
-    inline batch<int64_t, 4> fnma(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z)
-    {
-        return -x * y + z;
-    }
+            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return -x * y + z;
+            }
 
-    inline batch<int64_t, 4> fnms(const batch<int64_t, 4>& x, const batch<int64_t, 4>& y, const batch<int64_t, 4>& z)
-    {
-        return -x * y - z;
-    }
+            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return -x * y - z;
+            }
 
-
-    inline int64_t hadd(const batch<int64_t, 4>& rhs)
-    {
+            static value_type hadd(const batch_type& rhs)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        __m256i tmp1 = _mm256_shuffle_epi32(rhs, 0x0E);
-        __m256i tmp2 = _mm256_add_epi64(rhs, tmp1);
-        __m128i tmp3 = _mm256_extracti128_si256(tmp2, 1);
-        __m128i res = _mm_add_epi64(_mm256_castsi256_si128(tmp2), tmp3);
+                __m256i tmp1 = _mm256_shuffle_epi32(rhs, 0x0E);
+                __m256i tmp2 = _mm256_add_epi64(rhs, tmp1);
+                __m128i tmp3 = _mm256_extracti128_si256(tmp2, 1);
+                __m128i res = _mm_add_epi64(_mm256_castsi256_si128(tmp2), tmp3);
 #else
-        XSIMD_SPLIT_AVX(rhs);
-        __m128i tmp1 = _mm_shuffle_epi32(rhs_low, 0x0E);
-        __m128i tmp2 = _mm_add_epi64(tmp1, rhs_low);
-        __m128i tmp3 = _mm_shuffle_epi32(rhs_high, 0x0E);
-        __m128i tmp4 = _mm_add_epi64(tmp3, rhs_high);
-        __m128i res = _mm_add_epi64(tmp2, tmp4);
+                XSIMD_SPLIT_AVX(rhs);
+                __m128i tmp1 = _mm_shuffle_epi32(rhs_low, 0x0E);
+                __m128i tmp2 = _mm_add_epi64(tmp1, rhs_low);
+                __m128i tmp3 = _mm_shuffle_epi32(rhs_high, 0x0E);
+                __m128i tmp4 = _mm_add_epi64(tmp3, rhs_high);
+                __m128i res = _mm_add_epi64(tmp2, tmp4);
 #endif
 #if defined(__x86_64__)
-        return _mm_cvtsi128_si64(res);
+                return _mm_cvtsi128_si64(res);
 #else
-        union {
-            int64_t i;
-            __m128i m;
-        } u;
-        _mm_storel_epi64(&u.m, res);
-        return u.i;
+                union {
+                    int64_t i;
+                    __m128i m;
+                } u;
+                _mm_storel_epi64(&u.m, res);
+                return u.i;
 #endif
-    }
+            }
 
-    inline batch<int64_t, 4> select(const batch_bool<int64_t, 4>& cond, const batch<int64_t, 4>& a, const batch<int64_t, 4>& b)
-    {
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_blendv_epi8(b, a, cond);
+                return _mm256_blendv_epi8(b, a, cond);
 #else
-        XSIMD_SPLIT_AVX(cond);
-        XSIMD_SPLIT_AVX(a);
-        XSIMD_SPLIT_AVX(b);
-        __m128i res_low = _mm_blendv_epi8(b_low, a_low, cond_low);
-        __m128i res_high = _mm_blendv_epi8(b_high, a_high, cond_high);
-        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+                XSIMD_SPLIT_AVX(cond);
+                XSIMD_SPLIT_AVX(a);
+                XSIMD_SPLIT_AVX(b);
+                __m128i res_low = _mm_blendv_epi8(b_low, a_low, cond_low);
+                __m128i res_high = _mm_blendv_epi8(b_high, a_high, cond_high);
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
+            }
+        };
     }
 
     inline batch<int64_t, 4> operator<<(const batch<int64_t, 4>& lhs, int32_t rhs)

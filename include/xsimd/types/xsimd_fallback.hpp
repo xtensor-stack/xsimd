@@ -68,27 +68,6 @@ namespace xsimd
         std::array<bool, N> m_value;
     };
 
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator&(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator|(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator^(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator~(const batch_bool<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> bitwise_andnot(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs);
-
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator==(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator!=(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs);
-
-    template <typename T, std::size_t N>
-    bool all(const batch_bool<T, N>& rhs);
-    template <typename T, std::size_t N>
-    bool any(const batch_bool<T, N>& rhs);
-
     /***************
      * batch<T, N> *
      ***************/
@@ -152,7 +131,6 @@ namespace xsimd
         const T& operator[](std::size_t index) const;
         T& operator[](std::size_t index);
 
-
     private:
 
         template<typename U>
@@ -162,73 +140,6 @@ namespace xsimd
 
         std::array<T, N> m_value;
     };
-
-    template <typename T, std::size_t N>
-    batch<T, N> operator-(const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> operator+(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> operator-(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> operator*(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> operator/(const batch<T, N>& lhs, const batch<T, N>& rhs);
-
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator==(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator!=(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator<(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch_bool<T, N> operator<=(const batch<T, N>& lhs, const batch<T, N>& rhs);
-
-    template <typename T, std::size_t N>
-    batch<T, N> operator&(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> operator|(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> operator^(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> operator~(const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> bitwise_andnot(const batch<T, N>& lhs, const batch<T, N>& rhs);
-
-    template <typename T, std::size_t N>
-    batch<T, N> min(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> max(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> fmin(const batch<T, N>& lhs, const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> fmax(const batch<T, N>& lhs, const batch<T, N>& rhs);
-
-    template <typename T, std::size_t N>
-    batch<T, N> abs(const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> fabs(const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> sqrt(const batch<T, N>& rhs);
-
-    template <typename T, std::size_t N>
-    batch<T, N> fma(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
-    template <typename T, std::size_t N>
-    batch<T, N> fms(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
-    template <typename T, std::size_t N>
-    batch<T, N> fnma(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
-    template <typename T, std::size_t N>
-    batch<T, N> fnms(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z);
-
-    template <typename T, std::size_t N>
-    T hadd(const batch<T, N>& rhs);
-    template <typename T, std::size_t N>
-    batch<T, N> haddp(const batch<T, N>* row);
-
-    template <typename T, std::size_t N>
-    batch<T, N> select(const batch_bool<T, N>& cond, const batch<T, N>& a, const batch<T, N>& b);
-
-    template <typename T, std::size_t N>
-    batch_bool<T, N> isnan(const batch<T, N>& x);
 
     template <typename T, std::size_t N>
     batch<T, N> operator<<(const batch<T, N>& lhs, int32_t rhs);
@@ -373,64 +284,66 @@ namespace xsimd
         return m_value[index];
     }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator&(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs)
+    namespace detail
     {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, &, lhs, rhs)
-    }
+        template <class T, std::size_t N>
+        struct batch_bool_kernel
+        {
+            using batch_type = batch_bool<T, N>;
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator|(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, |, lhs, rhs)
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, &, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator^(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, ^, lhs, rhs)
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, | , lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator~(const batch_bool<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_UNARY_OP(batch_bool, ~, rhs)
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, ^, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> bitwise_andnot(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, (~(lhs[i] & rhs[i])))
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_UNARY_OP(batch_bool, ~, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator==(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, ==, lhs, rhs)
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, (~(lhs[i] & rhs[i])))
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator!=(const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, !=, lhs, rhs)
-    }
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, == , lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline bool all(const batch_bool<T, N>& rhs)
-    {
-        for(std::size_t i = 0; i < N; ++i) {
-            if(!rhs[i]) return false;
-        }
-        return true;
-    }
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, != , lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline bool any(const batch_bool<T, N>& rhs)
-    {
-        for(std::size_t i = 0; i < N; ++i) {
-            if(rhs[i]) return true;
-        }
-        return false;
+            static bool all(const batch_type& rhs)
+            {
+                for (std::size_t i = 0; i < N; ++i)
+                {
+                    if (!rhs[i]) return false;
+                }
+                return true;
+            }
+
+            static bool any(const batch_type& rhs)
+            {
+                for (std::size_t i = 0; i < N; ++i)
+                {
+                    if (rhs[i]) return true;
+                }
+                return false;
+            }
+        };
     }
 
     /**********************************
@@ -619,191 +532,174 @@ namespace xsimd
         }
     }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator-(const batch<T, N>& rhs)
+    namespace detail
     {
-        XSIMD_FALLBACK_UNARY_OP(batch, -, rhs)
-    }
+        template <class T, std::size_t N>
+        struct batch_kernel
+        {
+            using batch_type = batch<T, N>;
+            using value_type = T;
+            using batch_bool_type = batch_bool<T, N>;
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator+(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch, +, lhs, rhs)
-    }
+            static batch_type neg(const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_UNARY_OP(batch, -, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator-(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch, -, lhs, rhs)
-    }
+            static batch_type add(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch, +, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator*(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch, *, lhs, rhs)
-    }
+            static batch_type sub(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch, -, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator/(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch, /, lhs, rhs)
-    }
+            static batch_type mul(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch, *, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator==(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, ==, lhs, rhs)
-    }
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch, /, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator!=(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, !=, lhs, rhs)
-    }
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, == , lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator<(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, <, lhs, rhs)
-    }
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, != , lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> operator<=(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BINARY_OP(batch_bool, <=, lhs, rhs)
-    }
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, < , lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator&(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BITWISE_BINARY_OP(&, lhs, rhs)
-    }
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch_bool, <=, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator|(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BITWISE_BINARY_OP(|, lhs, rhs)
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BITWISE_BINARY_OP(&, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator^(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BITWISE_BINARY_OP(^, lhs, rhs)
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BITWISE_BINARY_OP(|, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> operator~(const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BITWISE_UNARY_OP(~, rhs)
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BITWISE_BINARY_OP(^ , lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> bitwise_andnot(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_MAPPING_LOOP(
-            batch,
-            detail::from_unsigned_integer<T>(
-                ~(
-                    detail::to_unsigned_integer(lhs[i])
-                    &
-                    detail::to_unsigned_integer(rhs[i])
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BITWISE_UNARY_OP(~, rhs)
+            }
+
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_MAPPING_LOOP(
+                    batch,
+                    detail::from_unsigned_integer<T>(
+                        ~(
+                            detail::to_unsigned_integer(lhs[i])
+                            &
+                            detail::to_unsigned_integer(rhs[i])
+                            )
+                        )
                 )
-            )
-        )
-    }
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> min(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::min, lhs, rhs)
-    }
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::min, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> max(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::max, lhs, rhs)
-    }
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::max, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> fmin(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::fmin, lhs, rhs)
-    }
+            static batch_type fmin(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::fmin, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> fmax(const batch<T, N>& lhs, const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::fmax, lhs, rhs)
-    }
+            static batch_type fmax(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(std::fmax, lhs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> abs(const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::abs, rhs)
-    }
+            static batch_type abs(const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::abs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> fabs(const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::fabs, rhs)
-    }
+            static batch_type fabs(const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::fabs, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> sqrt(const batch<T, N>& rhs)
-    {
-        XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::sqrt, rhs)
-    }
+            static batch_type sqrt(const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_UNARY_FUNC(std::sqrt, rhs)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> fma(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z)
-    {
-        XSIMD_FALLBACK_BATCH_TERNARY_FUNC(std::fma, x, y, z)
-    }
+            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                XSIMD_FALLBACK_BATCH_TERNARY_FUNC(std::fma, x, y, z)
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> fms(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z)
-    {
-        return fma(x, y, -z);
-    }
+            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return fma(x, y, -z);
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> fnma(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z)
-    {
-        return fma(-x, y, z);
-    }
+            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return fma(-x, y, z);
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> fnms(const batch<T, N>& x, const batch<T, N>& y, const batch<T, N>& z)
-    {
-        return fma(-x, y, -z);
-    }
+            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
+                return fma(-x, y, -z);
+            }
 
-    template <typename T, std::size_t N>
-    inline T hadd(const batch<T, N>& rhs)
-    {
-        T result = 0;
-        for(std::size_t i = 0; i < N; ++i) {
-            result += rhs[i];
-        }
-        return result;
-    }
+            static value_type hadd(const batch_type& rhs)
+            {
+                value_type result = 0;
+                for (std::size_t i = 0; i < N; ++i)
+                {
+                    result += rhs[i];
+                }
+                return result;
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> haddp(const batch<T, N>* row)
-    {
-        XSIMD_FALLBACK_MAPPING_LOOP(batch, hadd(row[i]))
-    }
+            static batch_type haddp(const simd_batch<batch_type>* row)
+            {
+                XSIMD_FALLBACK_MAPPING_LOOP(batch, hadd(row[i]()))
+            }
 
-    template <typename T, std::size_t N>
-    inline batch<T, N> select(const batch_bool<T, N>& cond, const batch<T, N>& a, const batch<T, N>& b)
-    {
-        XSIMD_FALLBACK_MAPPING_LOOP(batch, (cond[i] ? a[i] : b[i]))
-    }
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
+                XSIMD_FALLBACK_MAPPING_LOOP(batch, (cond[i] ? a[i] : b[i]))
+            }
 
-    template <typename T, std::size_t N>
-    inline batch_bool<T, N> isnan(const batch<T, N>& x)
-    {
-        XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, std::isnan(x[i]))
+            static batch_bool_type isnan(const batch_type& x)
+            {
+                XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, std::isnan(x[i]))
+            }
+        };
     }
 
     template <typename T, std::size_t N>

@@ -11,10 +11,31 @@ simd_batch_bool
    :project: xsimd
    :members:
 
+Bitwise operators
+-----------------
+
+.. doxygengroup:: simd_batch_bool_bitwise
+   :project: xsimd
+   :content-only:
+
 Logical operators
 -----------------
 
 .. doxygengroup:: simd_batch_bool_logical
+   :project: xsimd
+   :content-only:
+
+Comparison operators
+--------------------
+
+.. doxygengroup:: batch_bool_comparison
+   :project: xsimd
+   :content-only:
+   
+Reducers
+--------
+
+.. doxygengroup:: batch_bool_reducers
    :project: xsimd
    :content-only:
 

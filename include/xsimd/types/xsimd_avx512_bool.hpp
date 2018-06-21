@@ -95,48 +95,75 @@ namespace xsimd
         return (m_value & (1 << idx)) != 0;
     }
 
-    template <std::size_t N> 
-    struct mask_type;
-
-    template <>
-    struct mask_type<8>
+    namespace detail
     {
-        using type = __mmask8;
-    };
+        template <std::size_t N>
+        struct mask_type;
 
-    template <>
-    struct mask_type<16>
-    {
-        using type = __mmask16;
-    };
+        template <>
+        struct mask_type<8>
+        {
+            using type = __mmask8;
+        };
 
-#define AVX512_BOOL_OPERATOR(T, N, OP, CNT)                                                        \
-    inline batch_bool<T, N> OP (const batch_bool<T, N>& lhs, const batch_bool<T, N>& rhs)          \
-    {                                                                                              \
-        using mt = typename mask_type<N>::type;                                                    \
-        return CNT;                                                                                \
-    }                                                                                              \
+        template <>
+        struct mask_type<16>
+        {
+            using type = __mmask16;
+        };
 
+        template <class T, std::size_t N>
+        struct batch_bool_kernel_avx512
+        {
+            using batch_type = batch_bool<T, N>;
+            using mt = typename mask_type<N>::type;
 
-#define AVX512_BOOL_UNARY_OPERATOR(T, N, OP, CNT)                                                  \
-    inline batch_bool<T, N> OP (const batch_bool<T, N>& rhs)                                       \
-    {                                                                                              \
-        using mt = typename mask_type<N>::type;                                                    \
-        return CNT;                                                                                \
-    }                                                                                              \
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return mt(lhs) & mt(rhs);
+            }
 
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return mt(lhs) | mt(rhs);
+            }
 
-#define GENERATE_AVX512_BOOL_OPS(T, N)                                 \
-    AVX512_BOOL_OPERATOR(T, N, operator==, (~mt(lhs)) ^ mt(rhs));      \
-    AVX512_BOOL_OPERATOR(T, N, operator!=, mt(lhs) ^ mt(rhs));         \
-    AVX512_BOOL_OPERATOR(T, N, operator&, mt(lhs) & mt(rhs));          \
-    AVX512_BOOL_OPERATOR(T, N, operator|, mt(lhs) | mt(rhs));          \
-    AVX512_BOOL_OPERATOR(T, N, operator^, mt(lhs) ^ mt(rhs));          \
-    AVX512_BOOL_OPERATOR(T, N, bitwise_andnot, mt(lhs) ^ mt(rhs));     \
-    AVX512_BOOL_UNARY_OPERATOR(T, N, operator~, ~mt(rhs));             \
-    AVX512_BOOL_UNARY_OPERATOR(T, N, all, mt(rhs) == mt(-1));          \
-    AVX512_BOOL_UNARY_OPERATOR(T, N, any, mt(rhs) != mt(0));           \
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return mt(lhs) ^ mt(rhs);
+            }
 
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return ~mt(rhs);
+            }
+
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return mt(lhs) ^ mt(rhs);
+            }
+
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return (~mt(lhs)) ^ mt(rhs);
+            }
+
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return mt(lhs) ^ mt(rhs);
+            }
+
+            static bool all(const batch_type& rhs)
+            {
+                return mt(rhs) == mt(-1);
+            }
+
+            static bool any(const batch_type& rhs)
+            {
+                return mt(rhs) != mt(0);
+            }
+        };
+    }
 }
 
 #endif
