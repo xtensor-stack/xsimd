@@ -107,44 +107,6 @@ namespace xsimd
         __m256d m_value;
     };
 
-    batch<double, 4> operator-(const batch<double, 4>& rhs);
-    batch<double, 4> operator+(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> operator-(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> operator*(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> operator/(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-
-    batch_bool<double, 4> operator==(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch_bool<double, 4> operator!=(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch_bool<double, 4> operator<(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch_bool<double, 4> operator<=(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-
-    batch<double, 4> operator&(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> operator|(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> operator^(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> operator~(const batch<double, 4>& rhs);
-    batch<double, 4> bitwise_andnot(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-
-    batch<double, 4> min(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> max(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> fmin(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-    batch<double, 4> fmax(const batch<double, 4>& lhs, const batch<double, 4>& rhs);
-
-    batch<double, 4> abs(const batch<double, 4>& rhs);
-    batch<double, 4> fabs(const batch<double, 4>& rhs);
-    batch<double, 4> sqrt(const batch<double, 4>& rhs);
-
-    batch<double, 4> fma(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z);
-    batch<double, 4> fms(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z);
-    batch<double, 4> fnma(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z);
-    batch<double, 4> fnms(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z);
-
-    double hadd(const batch<double, 4>& rhs);
-    batch<double, 4> haddp(const batch<double, 4>* row);
-
-    batch<double, 4> select(const batch_bool<double, 4>& cond, const batch<double, 4>& a, const batch<double, 4>& b);
-
-    batch_bool<double, 4> isnan(const batch<double, 4>& x);
-
     /****************************************
      * batch_bool<double, 4> implementation *
      ****************************************/
@@ -406,190 +368,201 @@ namespace xsimd
         return x[index & 3];
     }
 
-    inline batch<double, 4> operator-(const batch<double, 4>& rhs)
+    namespace detail
     {
-        return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000)));
-    }
+        template <>
+        struct batch_kernel<double, 4>
+        {
+            using batch_type = batch<double, 4>;
+            using value_type = double;
+            using batch_bool_type = batch_bool<double, 4>;
 
-    inline batch<double, 4> operator+(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_add_pd(lhs, rhs);
-    }
+            static batch_type neg(const batch_type& rhs)
+            {
+                return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000)));
+            }
 
-    inline batch<double, 4> operator-(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_sub_pd(lhs, rhs);
-    }
+            static batch_type add(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_add_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> operator*(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_mul_pd(lhs, rhs);
-    }
+            static batch_type sub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_sub_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> operator/(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_div_pd(lhs, rhs);
-    }
+            static batch_type mul(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_mul_pd(lhs, rhs);
+            }
 
-    inline batch_bool<double, 4> operator==(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_cmp_pd(lhs, rhs, _CMP_EQ_OQ);
-    }
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_div_pd(lhs, rhs);
+            }
 
-    inline batch_bool<double, 4> operator!=(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_cmp_pd(lhs, rhs, _CMP_NEQ_OQ);
-    }
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_cmp_pd(lhs, rhs, _CMP_EQ_OQ);
+            }
 
-    inline batch_bool<double, 4> operator<(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_cmp_pd(lhs, rhs, _CMP_LT_OQ);
-    }
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_cmp_pd(lhs, rhs, _CMP_NEQ_OQ);
+            }
 
-    inline batch_bool<double, 4> operator<=(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_cmp_pd(lhs, rhs, _CMP_LE_OQ);
-    }
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_cmp_pd(lhs, rhs, _CMP_LT_OQ);
+            }
 
-    inline batch<double, 4> operator&(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_and_pd(lhs, rhs);
-    }
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_cmp_pd(lhs, rhs, _CMP_LE_OQ);
+            }
 
-    inline batch<double, 4> operator|(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_or_pd(lhs, rhs);
-    }
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_and_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> operator^(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_xor_pd(lhs, rhs);
-    }
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_or_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> operator~(const batch<double, 4>& rhs)
-    {
-        return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi32(-1)));
-    }
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_xor_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> bitwise_andnot(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_andnot_pd(lhs, rhs);
-    }
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm256_xor_pd(rhs, _mm256_castsi256_pd(_mm256_set1_epi32(-1)));
+            }
 
-    inline batch<double, 4> min(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_min_pd(lhs, rhs);
-    }
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_andnot_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> max(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return _mm256_max_pd(lhs, rhs);
-    }
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_min_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> fmin(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return min(lhs, rhs);
-    }
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_max_pd(lhs, rhs);
+            }
 
-    inline batch<double, 4> fmax(const batch<double, 4>& lhs, const batch<double, 4>& rhs)
-    {
-        return max(lhs, rhs);
-    }
+            static batch_type fmin(const batch_type& lhs, const batch_type& rhs)
+            {
+                return min(lhs, rhs);
+            }
 
-    inline batch<double, 4> abs(const batch<double, 4>& rhs)
-    {
-        __m256d sign_mask = _mm256_set1_pd(-0.);  // -0. = 1 << 63
-        return _mm256_andnot_pd(sign_mask, rhs);
-    }
+            static batch_type fmax(const batch_type& lhs, const batch_type& rhs)
+            {
+                return max(lhs, rhs);
+            }
 
-    inline batch<double, 4> fabs(const batch<double, 4>& rhs)
-    {
-        return abs(rhs);
-    }
+            static batch_type abs(const batch_type& rhs)
+            {
+                __m256d sign_mask = _mm256_set1_pd(-0.);  // -0. = 1 << 63
+                return _mm256_andnot_pd(sign_mask, rhs);
+            }
 
-    inline batch<double, 4> sqrt(const batch<double, 4>& rhs)
-    {
-        return _mm256_sqrt_pd(rhs);
-    }
+            static batch_type fabs(const batch_type& rhs)
+            {
+                return abs(rhs);
+            }
 
-    inline batch<double, 4> fma(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z)
-    {
+            static batch_type sqrt(const batch_type& rhs)
+            {
+                return _mm256_sqrt_pd(rhs);
+            }
+
+            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
-        return _mm256_fmadd_pd(x, y, z);
+                return _mm256_fmadd_pd(x, y, z);
 #elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
-        return _mm256_macc_pd(x, y, z);
+                return _mm256_macc_pd(x, y, z);
 #else
-        return x * y + z;
+                return x * y + z;
 #endif
-    }
+            }
 
-    inline batch<double, 4> fms(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z)
-    {
+            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
-        return _mm256_fmsub_pd(x, y, z);
+                return _mm256_fmsub_pd(x, y, z);
 #elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
-        return _mm256_msub_pd(x, y, z);
+                return _mm256_msub_pd(x, y, z);
 #else
-        return x * y - z;
+                return x * y - z;
 #endif
-    }
+            }
 
-    inline batch<double, 4> fnma(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z)
-    {
+            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
-        return _mm256_fnmadd_pd(x, y, z);
+                return _mm256_fnmadd_pd(x, y, z);
 #elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
-        return _mm256_nmacc_pd(x, y, z);
+                return _mm256_nmacc_pd(x, y, z);
 #else
-        return -x * y + z;
+                return -x * y + z;
 #endif
-    }
+            }
 
-    inline batch<double, 4> fnms(const batch<double, 4>& x, const batch<double, 4>& y, const batch<double, 4>& z)
-    {
+            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
+            {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA3_VERSION
-        return _mm256_fnmsub_pd(x, y, z);
+                return _mm256_fnmsub_pd(x, y, z);
 #elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AMD_FMA4_VERSION
-        return _mm256_nmsub_pd(x, y, z);
+                return _mm256_nmsub_pd(x, y, z);
 #else
-        return -x * y - z;
+                return -x * y - z;
 #endif
-    }
+            }
 
-    inline double hadd(const batch<double, 4>& rhs)
-    {
-        // rhs = (x0, x1, x2, x3)
-        // tmp = (x2, x3, x0, x1)
-        __m256d tmp = _mm256_permute2f128_pd(rhs, rhs, 1);
-        // tmp = (x2+x0, x3+x1, -, -)
-        tmp = _mm256_add_pd(rhs, tmp);
-        // tmp = (x2+x0+x3+x1, -, -, -)
-        tmp = _mm256_hadd_pd(tmp, tmp);
-        return _mm_cvtsd_f64(_mm256_extractf128_pd(tmp, 0));
-    }
+            static value_type hadd(const batch_type& rhs)
+            {
+                // rhs = (x0, x1, x2, x3)
+                // tmp = (x2, x3, x0, x1)
+                __m256d tmp = _mm256_permute2f128_pd(rhs, rhs, 1);
+                // tmp = (x2+x0, x3+x1, -, -)
+                tmp = _mm256_add_pd(rhs, tmp);
+                // tmp = (x2+x0+x3+x1, -, -, -)
+                tmp = _mm256_hadd_pd(tmp, tmp);
+                return _mm_cvtsd_f64(_mm256_extractf128_pd(tmp, 0));
+            }
 
-    inline batch<double, 4> haddp(const batch<double, 4>* row)
-    {
-        // row = (a,b,c,d)
-        // tmp0 = (a0+a1, b0+b1, a2+a3, b2+b3)
-        __m256d tmp0 = _mm256_hadd_pd(row[0], row[1]);
-        // tmp1 = (c0+c1, d0+d1, c2+c3, d2+d3)
-        __m256d tmp1 = _mm256_hadd_pd(row[2], row[3]);
-        // tmp2 = (a0+a1, b0+b1, c2+c3, d2+d3)
-        __m256d tmp2 = _mm256_blend_pd(tmp0, tmp1, 0b1100);
-        // tmp1 = (a2+a3, b2+b3, c2+c3, d2+d3)
-        tmp1 = _mm256_permute2f128_pd(tmp0, tmp1, 0x21);
-        return _mm256_add_pd(tmp1, tmp2);
-    }
+            static batch_type haddp(const simd_batch<batch_type>* row)
+            {
+                // row = (a,b,c,d)
+                // tmp0 = (a0+a1, b0+b1, a2+a3, b2+b3)
+                __m256d tmp0 = _mm256_hadd_pd(row[0](), row[1]());
+                // tmp1 = (c0+c1, d0+d1, c2+c3, d2+d3)
+                __m256d tmp1 = _mm256_hadd_pd(row[2](), row[3]());
+                // tmp2 = (a0+a1, b0+b1, c2+c3, d2+d3)
+                __m256d tmp2 = _mm256_blend_pd(tmp0, tmp1, 0b1100);
+                // tmp1 = (a2+a3, b2+b3, c2+c3, d2+d3)
+                tmp1 = _mm256_permute2f128_pd(tmp0, tmp1, 0x21);
+                return _mm256_add_pd(tmp1, tmp2);
+            }
 
-    inline batch<double, 4> select(const batch_bool<double, 4>& cond, const batch<double, 4>& a, const batch<double, 4>& b)
-    {
-        return _mm256_blendv_pd(b, a, cond);
-    }
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
+                return _mm256_blendv_pd(b, a, cond);
+            }
 
-    inline batch_bool<double, 4> isnan(const batch<double, 4>& x)
-    {
-        return _mm256_cmp_pd(x, x, _CMP_UNORD_Q);
+            static batch_bool_type isnan(const batch_type& x)
+            {
+                return _mm256_cmp_pd(x, x, _CMP_UNORD_Q);
+            }
+        };
     }
 }
 
