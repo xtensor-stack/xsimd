@@ -104,6 +104,7 @@ namespace xsimd
         using value_type = typename simd_batch_traits<X>::value_type;
         static constexpr std::size_t size = simd_batch_traits<X>::size;
         using real_batch = typename simd_batch_traits<X>::real_batch;
+        using real_value_type = typename value_type::value_type;
 
         simd_complex_batch() = default;
         explicit simd_complex_batch(const value_type& v);
@@ -137,12 +138,22 @@ namespace xsimd
         template <class T>
         void store_unaligned(T* real_dst, T* imag_dst) const;
 
+        template <class T>
+        X& load_aligned(const T* src);
+        template <class T>
+        X& load_unaligned(const T* src);
+
+        template <class T>
+        void store_aligned(T* dst) const;
+        template <class T>
+        void store_unaligned(T* dst) const;
+
         value_type operator[](std::size_t index) const;
 
         X& operator()();
         const X& operator()() const;
 
-    private:
+    protected:
 
         real_batch m_real;
         real_batch m_imag;
@@ -451,6 +462,54 @@ namespace xsimd
     {
         m_real.store_unaligned(real_dst);
         m_imag.store_unaligned(imag_dst);
+    }
+
+    template <class X>
+    template <class T>
+    inline X& simd_complex_batch<X>::load_aligned(const T* src)
+    {
+        using tmp_value_type = typename T::value_type;
+        const tmp_value_type* rbuf = reinterpret_cast<const tmp_value_type*>(src);
+        real_batch hi, lo;
+        hi.load_aligned(rbuf);
+        lo.load_aligned(rbuf + size);
+        return (*this)().load_complex(hi, lo);
+    }
+
+    template <class X>
+    template <class T>
+    inline X& simd_complex_batch<X>::load_unaligned(const T* src)
+    {
+        using tmp_value_type = typename T::value_type;
+        const tmp_value_type* rbuf = reinterpret_cast<const tmp_value_type*>(src);
+        real_batch hi, lo;
+        hi.load_unaligned(rbuf);
+        lo.load_unaligned(rbuf + size);
+        return (*this)().load_complex(hi, lo);
+    }
+
+    template <class X>
+    template <class T>
+    void simd_complex_batch<X>::store_aligned(T* dst) const
+    {
+        real_batch hi = (*this)().get_complex_high();
+        real_batch lo = (*this)().get_complex_low();
+        using tmp_value_type = typename T::value_type;
+        tmp_value_type* rbuf = reinterpret_cast<tmp_value_type*>(dst);
+        hi.store_aligned(rbuf);
+        lo.store_aligned(rbuf + size);
+    }
+
+    template <class X>
+    template <class T>
+    void simd_complex_batch<X>::store_unaligned(T* dst) const
+    {
+        real_batch hi = (*this)().get_complex_high();
+        real_batch lo = (*this)().get_complex_low();
+        using tmp_value_type = typename T::value_type;
+        tmp_value_type* rbuf = reinterpret_cast<tmp_value_type*>(dst);
+        hi.store_unaligned(rbuf);
+        lo.store_unaligned(rbuf + size);
     }
 
     template <class X>

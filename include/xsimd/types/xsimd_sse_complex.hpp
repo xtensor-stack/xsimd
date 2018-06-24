@@ -38,13 +38,16 @@ namespace xsimd
     {
     public:
 
-        batch_bool() = default;
-        using simd_complex_batch_bool::simd_complex_batch_bool;
-
+        using self_type = batch_bool<std::complex<float>, 4>;
+        using base_type = simd_complex_batch_bool<self_type>;
         using real_batch = batch_bool<float, 4>;
+
+        batch_bool() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch_bool(bool b0, bool b1, bool b2, bool b3)
-            : simd_complex_batch_bool(real_batch(b0, b1, b2, b3))
+            : base_type(real_batch(b0, b1, b2, b3))
         {
         }
     };
@@ -65,17 +68,28 @@ namespace xsimd
     {
     public:
 
-        batch() = default;
-        using simd_complex_batch::simd_complex_batch;
-
+        using self_type = batch<std::complex<float>, 4>;
+        using base_type = simd_complex_batch<self_type>;
         using value_type = std::complex<float>;
         using real_batch = batch<float, 4>;
+
+        batch() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch(value_type c0, value_type c1, value_type c2, value_type c3)
-            : simd_complex_batch(real_batch(c0.real(), c1.real(), c2.real(), c3.real()),
-                                 real_batch(c0.imag(), c1.imag(), c2.imag(), c3.imag()))
+            : base_type(real_batch(c0.real(), c1.real(), c2.real(), c3.real()),
+                        real_batch(c0.imag(), c1.imag(), c2.imag(), c3.imag()))
         {
         }
+
+    private:
+
+        batch& load_complex(const real_batch& hi, const real_batch& lo);
+        real_batch get_complex_high() const;
+        real_batch get_complex_low() const;
+
+        friend class simd_complex_batch<batch<std::complex<float>, 4>>;
     };
 
     /***************************************
@@ -94,13 +108,16 @@ namespace xsimd
     {
     public:
 
-        batch_bool() = default;
-        using simd_complex_batch_bool::simd_complex_batch_bool;
-
+        using self_type = batch_bool<std::complex<double>, 2>;
+        using base_type = simd_complex_batch_bool<self_type>;
         using real_batch = batch_bool<double, 2>;
+
+        batch_bool() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch_bool(bool b0, bool b1)
-            : simd_complex_batch_bool(real_batch(b0, b1))
+            : base_type(real_batch(b0, b1))
         {
         }
     };
@@ -121,18 +138,69 @@ namespace xsimd
     {
     public:
 
-        batch() = default;
-        using simd_complex_batch::simd_complex_batch;
-
+        using self_type = batch<std::complex<double>, 2>;
+        using base_type = simd_complex_batch<self_type>;
         using value_type = std::complex<double>;
         using real_batch = batch<double, 2>;
+
+        batch() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch(value_type c0, value_type c1)
-            : simd_complex_batch(real_batch(c0.real(), c1.real()),
-                                 real_batch(c0.imag(), c1.imag()))
+            : base_type(real_batch(c0.real(), c1.real()),
+                        real_batch(c0.imag(), c1.imag()))
         {
         }
+
+    private:
+
+        batch& load_complex(const real_batch& hi, const real_batch& lo);
+        real_batch get_complex_high() const;
+        real_batch get_complex_low() const;
+
+        friend class simd_complex_batch<batch<std::complex<double>, 2>>;
     };
+
+    /********************************************
+     * batch<std::complex<T>, N> implementation *
+     ********************************************/
+
+    inline batch<std::complex<float>, 4>&
+    batch<std::complex<float>, 4>::load_complex(const real_batch& hi, const real_batch& lo)
+    {
+        this->m_real = _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0));
+        this->m_imag = _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1));
+        return *this;
+    }
+
+    inline auto batch<std::complex<float>, 4>::get_complex_high() const -> real_batch
+    {
+        return _mm_unpacklo_ps(this->m_real, this->m_imag);
+    }
+
+    inline auto batch<std::complex<float>, 4>::get_complex_low() const -> real_batch
+    {
+        return _mm_unpackhi_ps(this->m_real, this->m_imag);
+    }
+
+    inline batch<std::complex<double>, 2>&
+    batch<std::complex<double>, 2>::load_complex(const real_batch& hi, const real_batch& lo)
+    {
+        this->m_real = _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0));
+        this->m_imag = _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1));
+        return *this;
+    }
+
+    inline auto batch<std::complex<double>, 2>::get_complex_high() const -> real_batch
+    {
+        return _mm_unpacklo_pd(this->m_real, this->m_imag);
+    }
+
+    inline auto batch<std::complex<double>, 2>::get_complex_low() const -> real_batch
+    {
+        return _mm_unpackhi_pd(this->m_real, this->m_imag);
+    }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
 
@@ -152,13 +220,16 @@ namespace xsimd
     {
     public:
 
-        batch_bool() = default;
-        using simd_complex_batch_bool::simd_complex_batch_bool;
-
+        using self_type = batch_bool<xtl::xcomplex<float, float, i3ec>, 4>;
+        using base_type = simd_complex_batch_bool<self_type>;
         using real_batch = batch_bool<float, 4>;
+
+        batch_bool() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch_bool(bool b0, bool b1, bool b2, bool b3)
-            : simd_complex_batch_bool(real_batch(b0, b1, b2, b3))
+            : base_type(real_batch(b0, b1, b2, b3))
         {
         }
     };
@@ -179,17 +250,28 @@ namespace xsimd
     {
     public:
 
-        batch() = default;
-        using simd_complex_batch::simd_complex_batch;
-
+        using self_type = batch<xtl::xcomplex<float, float, i3ec>, 4>;
+        using base_type = simd_complex_batch<self_type>;
         using value_type = xtl::xcomplex<float, float, i3ec>;
         using real_batch = batch<float, 4>;
+
+        batch() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch(value_type c0, value_type c1, value_type c2, value_type c3)
-            : simd_complex_batch(real_batch(c0.real(), c1.real(), c2.real(), c3.real()),
-                real_batch(c0.imag(), c1.imag(), c2.imag(), c3.imag()))
+            : base_type(real_batch(c0.real(), c1.real(), c2.real(), c3.real()),
+                        real_batch(c0.imag(), c1.imag(), c2.imag(), c3.imag()))
         {
         }
+
+    private:
+
+        batch& load_complex(const real_batch& hi, const real_batch& lo);
+        real_batch get_complex_high() const;
+        real_batch get_complex_low() const;
+
+        friend class simd_complex_batch<batch<xtl::xcomplex<float, float, i3ec>, 4>>;
     };
 
     /******************************************************
@@ -208,13 +290,16 @@ namespace xsimd
     {
     public:
 
-        batch_bool() = default;
-        using simd_complex_batch_bool::simd_complex_batch_bool;
-
+        using self_type = batch_bool<xtl::xcomplex<double, double, i3ec>, 2>;
+        using base_type = simd_complex_batch_bool<self_type>;
         using real_batch = batch_bool<double, 2>;
+
+        batch_bool() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch_bool(bool b0, bool b1)
-            : simd_complex_batch_bool(real_batch(b0, b1))
+            : base_type(real_batch(b0, b1))
         {
         }
     };
@@ -235,18 +320,75 @@ namespace xsimd
     {
     public:
 
-        batch() = default;
-        using simd_complex_batch::simd_complex_batch;
-
+        using self_type = batch<xtl::xcomplex<double, double, i3ec>, 2>;
+        using base_type = simd_complex_batch<self_type>;
         using value_type = xtl::xcomplex<double, double, i3ec>;
         using real_batch = batch<double, 2>;
+
+        batch() = default;
+        using base_type::base_type;
+
         // VS2015 has a bug with inheriting constructors involving SFINAE
         batch(value_type c0, value_type c1)
-            : simd_complex_batch(real_batch(c0.real(), c1.real()),
-                real_batch(c0.imag(), c1.imag()))
+            : base_type(real_batch(c0.real(), c1.real()),
+                        real_batch(c0.imag(), c1.imag()))
         {
         }
+
+    private:
+
+        batch& load_complex(const real_batch& hi, const real_batch& lo);
+        real_batch get_complex_high() const;
+        real_batch get_complex_low() const;
+
+        friend class simd_complex_batch<batch<xtl::xcomplex<double, double, i3ec>, 2>>;
     };
+
+    /***********************************************************
+     * batch<std::xcomplex<T, T, bool i3ec>, N> implementation *
+     ***********************************************************/
+
+    template <bool i3ec>
+    inline batch<xtl::xcomplex<float, float, i3ec>, 4>&
+    batch<xtl::xcomplex<float, float, i3ec>, 4>::load_complex(const real_batch& hi, const real_batch& lo)
+    {
+        this->m_real = _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0));
+        this->m_imag = _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1));
+        return *this;
+    }
+
+    template <bool i3ec>
+    inline auto batch<xtl::xcomplex<float, float, i3ec>, 4>::get_complex_high() const -> real_batch
+    {
+        return _mm_unpacklo_ps(this->m_real, this->m_imag);
+    }
+
+    template <bool i3ec>
+    inline auto batch<xtl::xcomplex<float, float, i3ec>, 4>::get_complex_low() const -> real_batch
+    {
+        return _mm_unpackhi_ps(this->m_real, this->m_imag);
+    }
+
+    template <bool i3ec>
+    inline batch<xtl::xcomplex<double, double, i3ec>, 2>&
+    batch<xtl::xcomplex<double, double, i3ec>, 2>::load_complex(const real_batch& hi, const real_batch& lo)
+    {
+        this->m_real = _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0));
+        this->m_imag = _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1));
+        return *this;
+    }
+
+    template <bool i3ec>
+    inline auto batch<xtl::xcomplex<double, double, i3ec>, 2>::get_complex_high() const -> real_batch
+    {
+        return _mm_unpacklo_pd(this->m_real, this->m_imag);
+    }
+
+    template <bool i3ec>
+    inline auto batch<xtl::xcomplex<double, double, i3ec>, 2>::get_complex_low() const -> real_batch
+    {
+        return _mm_unpackhi_pd(this->m_real, this->m_imag);
+    }
 
 #endif
 

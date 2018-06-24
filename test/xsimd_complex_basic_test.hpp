@@ -317,6 +317,133 @@ namespace xsimd
 
         return success;
     }
+
+    /**********************************
+     * simd_complex_load_store_tester *
+     **********************************/
+
+    template <class T, class R>
+    struct complex_rebind;
+
+    template <class T, class R>
+    struct complex_rebind<std::complex<T>, R>
+    {
+        using type = std::complex<R>;
+    };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec, class R>
+    struct complex_rebind<xtl::xcomplex<T, T, i3ec>, R>
+    {
+        using type = xtl::xcomplex<R, R, i3ec>;
+    };
+#endif
+
+    template <class T, class R>
+    using complex_rebind_t = typename complex_rebind<T, R>::type;
+
+    template <class T, std::size_t N, std::size_t A>
+    struct simd_complex_ls_tester
+        : simd_complex_tester<T, N, A>
+    {
+        using base_type = simd_complex_tester<T, N, A>;
+        using batch_type = batch<T, N>;
+        using value_type = typename T::value_type;
+        using real_batch_type = typename batch_type::real_batch;
+
+        using float_complex = complex_rebind_t<T, float>;
+        using double_complex = complex_rebind_t<T, double>;
+
+        using float_vector = std::vector<float, aligned_allocator<float, A>>;
+        using double_vector = std::vector<double, aligned_allocator<double, A>>;
+        using float_complex_vector = std::vector<float_complex, aligned_allocator<float_complex, A>>;
+        using double_complex_vector = std::vector<double_complex, aligned_allocator<double_complex, A>>;
+
+        std::string name;
+
+        float_vector f_vec_real;
+        float_vector f_vec_imag;
+        double_vector d_vec_real;
+        double_vector d_vec_imag;
+        float_complex_vector fc_vec;
+        double_complex_vector dc_vec;
+
+        simd_complex_ls_tester(const std::string& n);
+    };
+
+
+    template <class T, std::size_t N, std::size_t A>
+    inline simd_complex_ls_tester<T, N, A>::simd_complex_ls_tester(const std::string& n)
+        : name(n)
+    {
+        f_vec_real.resize(N);
+        f_vec_imag.resize(N);
+        d_vec_real.resize(N);
+        d_vec_imag.resize(N);
+        fc_vec.resize(N);
+        dc_vec.resize(N);
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            f_vec_real[i] = float(2 * i);
+            f_vec_imag[i] = float(2 * i + 1);
+            d_vec_real[i] = double(2 * i);
+            d_vec_imag[i] = double(2 * i + 1);
+            fc_vec[i] = float_complex(f_vec_real[i], f_vec_imag[i]);
+            dc_vec[i] = double_complex(d_vec_real[i], d_vec_imag[i]);
+        }
+    }
+
+    template <class T>
+    inline bool test_complex_simd_load_store(std::ostream& out, T& tester)
+    {
+        using batch_type = typename T::batch_type;
+        using real_batch_type = typename T::real_batch_type;
+        using float_vector = typename T::float_vector;
+        using double_vector = typename T::double_vector;
+        using float_complex_vector = typename T::float_complex_vector;
+        using double_complex_vector = typename T::double_complex_vector;
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
+
+        std::string topic = "load float complex   : ";
+        batch_type fref, fres;
+        fref.load_aligned(tester.f_vec_real.data(), tester.f_vec_imag.data());
+        fres.load_aligned(tester.fc_vec.data());
+        tmp_success = all(fres.real() == fref.real()) && all(fres.imag() == fref.imag());
+        success = tmp_success && success;
+
+        topic = "load double complex  : ";
+        batch_type dref, dres;
+        dref.load_aligned(tester.d_vec_real.data(), tester.d_vec_imag.data());
+        dres.load_aligned(tester.dc_vec.data());
+        tmp_success = all(dres.real() == dref.real()) && all(dres.imag() == dref.imag());
+        success = tmp_success && success;
+
+        topic = "store float complex  : ";
+        float_complex_vector fc_res(tester.fc_vec.size());
+        fres.store_aligned(fc_res.data());
+        tmp_success = check_almost_equal(topic, fc_res, tester.fc_vec, out);
+        success = tmp_success && success;
+
+        topic = "store double complex : ";
+        double_complex_vector dc_res(tester.dc_vec.size());
+        dres.store_aligned(dc_res.data());
+        tmp_success = check_almost_equal(topic, dc_res, tester.dc_vec, out);
+        success = tmp_success && success;
+
+        return success;
+    }
 }
 
 #endif
