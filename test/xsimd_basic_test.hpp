@@ -192,6 +192,7 @@ namespace xsimd
         res_type mul_vs_res;
         res_type mul_sv_res;
         res_type div_vv_res;
+        res_type mod_vv_res;
         res_type div_vs_res;
         res_type div_sv_res;
         res_type and_res;
@@ -240,6 +241,7 @@ namespace xsimd
         div_vv_res.resize(N);
         div_vs_res.resize(N);
         div_sv_res.resize(N);
+        mod_vv_res.resize(N);
         and_res.resize(N);
         or_res.resize(N);
         xor_res.resize(N);
@@ -278,6 +280,7 @@ namespace xsimd
             div_vv_res[i] = lhs[i] / rhs[i];
             div_vs_res[i] = lhs[i] / s;
             div_sv_res[i] = s / rhs[i];
+            mod_vv_res[i] = lhs[i] % rhs[i];
             and_res[i] = lhs[i] & rhs[i];
             or_res[i] = lhs[i] | rhs[i];
             xor_res[i] = lhs[i] ^ rhs[i];

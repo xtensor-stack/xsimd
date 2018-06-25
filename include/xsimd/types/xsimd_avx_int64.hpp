@@ -480,6 +480,7 @@ namespace xsimd
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
+#if defined(XSIMD_FAST_INTEGER_DIVISION)
                 __m256d dlhs = _mm256_setr_pd(static_cast<double>(lhs[0]), static_cast<double>(lhs[1]),
                                               static_cast<double>(lhs[2]), static_cast<double>(lhs[3]));
                 __m256d drhs = _mm256_setr_pd(static_cast<double>(rhs[0]), static_cast<double>(rhs[1]),
@@ -493,6 +494,9 @@ namespace xsimd
                 __m128i res_high = _mm_unpackhi_epi32(tmp, batch_int(tmp) < batch_int(0));
                 __m256i result = _mm256_castsi128_si256(res_low);
                 return _mm256_insertf128_si256(result, res_high, 1);
+#endif
+#else
+                XSIMD_MACRO_UNROLL_BINARY(/)
 #endif
             }
 

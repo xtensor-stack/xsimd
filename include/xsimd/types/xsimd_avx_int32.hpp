@@ -316,14 +316,9 @@ namespace xsimd
     inline batch<int32_t, 8>& batch<int32_t, 8>::load_aligned(const int64_t* src)
     {
         alignas(32) int32_t tmp[8];
-        tmp[0] = static_cast<int32_t>(src[0]);
-        tmp[1] = static_cast<int32_t>(src[1]);
-        tmp[2] = static_cast<int32_t>(src[2]);
-        tmp[3] = static_cast<int32_t>(src[3]);
-        tmp[4] = static_cast<int32_t>(src[4]);
-        tmp[5] = static_cast<int32_t>(src[5]);
-        tmp[6] = static_cast<int32_t>(src[6]);
-        tmp[7] = static_cast<int32_t>(src[7]);
+        unroller<8>([&](std::size_t i){
+            tmp[i] = static_cast<int32_t>(src[i]);
+        });
         m_value = _mm256_load_si256((__m256i const*)tmp);
         return *this;
     }
@@ -377,14 +372,9 @@ namespace xsimd
     {
         alignas(32) int32_t tmp[8];
         store_aligned(tmp);
-        dst[0] = int64_t(tmp[0]);
-        dst[1] = int64_t(tmp[1]);
-        dst[2] = int64_t(tmp[2]);
-        dst[3] = int64_t(tmp[3]);
-        dst[4] = int64_t(tmp[4]);
-        dst[5] = int64_t(tmp[5]);
-        dst[6] = int64_t(tmp[6]);
-        dst[7] = int64_t(tmp[7]);
+        unroller<8>([&](std::size_t i) {
+            dst[i] = static_cast<int64_t>(tmp[i]);
+        });
     }
 
     inline void batch<int32_t, 8>::store_unaligned(int64_t* dst) const
@@ -475,7 +465,28 @@ namespace xsimd
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
+#if defined(XSIMD_FAST_INTEGER_DIVISION)
                 return _mm256_cvttps_epi32(_mm256_div_ps(_mm256_cvtepi32_ps(lhs), _mm256_cvtepi32_ps(rhs)));
+#else
+                alignas(64) int32_t tmp_lhs[8], tmp_rhs[8], tmp_res[8];
+                lhs.store_aligned(tmp_lhs);
+                rhs.store_aligned(tmp_rhs);
+                unroller<8>([&](std::size_t i) {
+                    tmp_res[i] = tmp_lhs[i] / tmp_rhs[i];
+                });
+                return batch_type(tmp_res, aligned_mode());
+#endif
+            }
+
+            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
+            {
+                alignas(64) int32_t tmp_lhs[8], tmp_rhs[8], tmp_res[8];
+                lhs.store_aligned(tmp_lhs);
+                rhs.store_aligned(tmp_rhs);
+                unroller<8>([&](std::size_t i) {
+                    tmp_res[i] = tmp_lhs[i] % tmp_rhs[i];
+                });
+                return batch_type(tmp_res, aligned_mode());
             }
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)

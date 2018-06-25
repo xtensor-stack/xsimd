@@ -274,7 +274,22 @@ namespace xsimd
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
+#if defined(XSIMD_FAST_INTEGER_DIVISION)
                 return vcvtq_s32_f32(vcvtq_f32_s32(lhs) / vcvtq_f32_s32(rhs));
+#else
+                return int32x4_t{
+                    lhs[0] / rhs[0], lhs[1] / rhs[1],
+                    lhs[2] / rhs[2], lhs[3] / rhs[3]
+                };
+#endif
+            }
+
+            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
+            {
+                return int32x4_t{
+                    lhs[0] % rhs[0], lhs[1] % rhs[1],
+                    lhs[2] % rhs[2], lhs[3] % rhs[3]
+                };
             }
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)

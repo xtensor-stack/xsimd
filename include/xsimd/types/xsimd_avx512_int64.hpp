@@ -27,6 +27,7 @@ namespace xsimd
         using value_type = int64_t;
         static constexpr std::size_t size = 8;
         using batch_type = batch<int64_t, 8>;
+        static constexpr std::size_t align = 0;
     };
 
     template <>
@@ -63,6 +64,7 @@ namespace xsimd
         using value_type = int64_t;
         static constexpr std::size_t size = 8;
         using batch_bool_type = batch_bool<int64_t, 8>;
+        static constexpr std::size_t align = 64;
     };
 
     template <>
@@ -293,7 +295,16 @@ namespace xsimd
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
+#if defined(XSIMD_FAST_INTEGER_DIVISION)
                 return _mm512_cvttpd_epi64(_mm512_div_pd(_mm512_cvtepi64_pd(lhs), _mm512_cvtepi64_pd(rhs)));
+#else
+                XSIMD_MACRO_UNROLL_BINARY(/);
+#endif
+            }
+
+            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_MACRO_UNROLL_BINARY(%);
             }
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)

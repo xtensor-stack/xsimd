@@ -13,15 +13,16 @@
 #include <ostream>
 
 #include "../memory/xsimd_alignment.hpp"
+#include "xsimd_utils.hpp"
 
 namespace xsimd
 {
 
-    template <class T, std::size_t N>
-    class batch_bool;
+    template <class T, size_t N>
+    class batch;
 
     template <class T, std::size_t N>
-    class batch;
+    class batch_bool;
 
     namespace detail
     {
@@ -1173,6 +1174,56 @@ namespace xsimd
     inline X operator/(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs)
     {
         return X(lhs) / rhs();
+    }
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the integer modulo of the batch \c lhs by the batch \c rhs.
+     * @param lhs batch involved in the modulo.
+     * @param rhs batch involved in the modulo.
+     * @return the result of the modulo.
+     */
+    template <class X>
+    inline X operator%(const simd_batch<X>& lhs, const simd_batch<X>& rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::mod(lhs(), rhs());
+    }
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the integer modulo of the batch \c lhs by the scalar \c rhs. Equivalent to the
+     * modulo of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the modulo.
+     * @param rhs scalar involved in the modulo.
+     * @return the result of the modulo.
+     */
+    template <class X>
+    inline X operator%(const simd_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
+    {
+        return lhs() % X(rhs);
+    }
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the integer modulo of the scalar \c lhs and the batch \c rhs. Equivalent to the
+     * difference of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs scalar involved in the modulo.
+     * @param rhs batch involved in the modulo.
+     * @return the result of the modulo.
+     */
+    template <class X>
+    inline X operator%(const typename simd_batch<X>::value_type& lhs, const simd_batch<X>& rhs)
+    {
+        return X(lhs) % rhs();
     }
 
     /**
