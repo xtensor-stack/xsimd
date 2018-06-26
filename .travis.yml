@@ -32,7 +32,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-      env: COMPILER=gcc GCC=6 ENABLE_FALLBACK=1
+      env: COMPILER=gcc GCC=6 ENABLE_FALLBACK=1 ENABLE_XTL_COMPLEX=1
     - os: linux
       sudo: required
       addons:
@@ -153,7 +153,7 @@ install:
           cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DARM_ARCH_DIRECTORY="$ARM_ARCH_DIR" -DARM_GCC_VER="$GCC_VER" -DTARGET_ARCH="$ARM_SETTINGS" ;
         fi
       elif [[ "$ENABLE_FALLBACK" == 1 ]] ; then
-        cmake -DENABLE_FALLBACK=ON . ;
+        cmake -DENABLE_FALLBACK=ON -DENABLE_XTL_COMPLEX=ON . ;
       elif [[ "$ENABLE_XTL_COMPLEX" == 1 ]] ; then
         cmake -DENABLE_XTL_COMPLEX=ON . ;
       elif [[ "$AVX512" == 1 ]] ; then

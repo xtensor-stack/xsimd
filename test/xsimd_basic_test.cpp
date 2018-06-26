@@ -31,12 +31,8 @@ namespace xsimd
     template <class T, size_t N, size_t A>
     bool test_simd_complex(std::ostream& out, const std::string& name)
     {
-#ifndef XSIMD_ENABLE_FALLBACK
         simd_complex_basic_tester<T, N, A> tester(name);
         return test_simd_complex_basic(out, tester);
-#else
-        return true;
-#endif
     }
 
     template <class T, size_t N, size_t A>
@@ -78,12 +74,8 @@ namespace xsimd
     template <class T, size_t N, size_t A>
     bool test_complex_simd_load_store(std::ostream& out, const std::string& name)
     {
-#ifndef XSIMD_ENABLE_FALLBACK
         simd_complex_ls_tester<T, N, A> tester(name);
         return test_complex_simd_load_store(out, tester);
-#else
-        return true;
-#endif
     }
 
     // No batch exists for this type, that's required
@@ -134,6 +126,10 @@ TEST(xsimd, simd_return_type)
     EXPECT_TRUE((xsimd::check_return_type<double, double>::value()));
     EXPECT_FALSE((xsimd::check_return_type<std::complex<double>, double>::value()));
 }
+
+/*******************
+ * sse basic tests *
+ *******************/
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 TEST(xsimd, sse_float_basic)
@@ -253,6 +249,10 @@ TEST(xsimd, sse_xtl_xcomplex_double_load_store)
 #endif
 #endif
 
+/*******************
+ * avx basic tests *
+ *******************/
+
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TEST(xsimd, avx_float_basic)
 {
@@ -370,6 +370,10 @@ TEST(xsimd, avx_xtl_xcomplex_double_load_store)
 #endif
 #endif
 
+/**********************
+ * avx512 basic tests *
+ **********************/
+
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
 TEST(xsimd, avx512_float_basic)
 {
@@ -486,6 +490,10 @@ TEST(xsimd, avx512_xtl_xcomplex_double_load_store)
 }
 #endif
 #endif
+
+/********************
+ * neon basic tests *
+ ********************/
 
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
 TEST(xsimd, neon_float_basic)
@@ -610,6 +618,9 @@ TEST(xsimd, neon_xtl_xcomplex_double_load_store)
 #endif
 #endif
 
+/************************
+ * fallback basic tests *
+ ************************/
 
 #if defined(XSIMD_ENABLE_FALLBACK)
 TEST(xsimd, fallback_float_basic)
@@ -640,6 +651,36 @@ TEST(xsimd, fallback_double_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, fallback_complex_float_basic)
+{
+    std::ofstream out("log/fallback_complex_float_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_complex<std::complex<float>, 7, 32>(out, "fallback complex float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_complex_double_basic)
+{
+    std::ofstream out("log/fallback_complex_double_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_complex<std::complex<double>, 3, 32>(out, "fallback complex double");
+    EXPECT_TRUE(res);
+}
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+TEST(xsimd, fallback_xtl_xcomplex_float_basic)
+{
+    std::ofstream out("log/fallback_xtl_xcomplex_float_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_complex<xtl::xcomplex<float>, 7, 32>(out, "fallback xtl xcomplex float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_xtl_xcomplex_double_basic)
+{
+    std::ofstream out("log/fallback_xtl_xcomplex_double_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_complex<xtl::xcomplex<double>, 3, 32>(out, "fallback xtl xcomplex double");
+    EXPECT_TRUE(res);
+}
+#endif
+
 TEST(xsimd, fallback_conversion)
 {
     std::ofstream out("log/fallback_conversion.log", std::ios_base::out);
@@ -667,4 +708,34 @@ TEST(xsimd, fallback_store)
     bool res = xsimd::test_simd_store<3, 32>(out, "fallback store");
     EXPECT_TRUE(res);
 }
+
+TEST(xsimd, fallback_complex_float_load_store)
+{
+    std::ofstream out("log/fallback_complex_float_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_complex_simd_load_store<std::complex<float>, 7, 32>(out, "fallback complex float load store");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_complex_double_load_store)
+{
+    std::ofstream out("log/fallback_complex_double_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_complex_simd_load_store<std::complex<double>, 3, 32>(out, "fallback complex float double store");
+    EXPECT_TRUE(res);
+}
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+TEST(xsimd, fallback_xtl_xcomplex_float_load_store)
+{
+    std::ofstream out("log/fallback_xtl_xcomplex_float_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_complex_simd_load_store<xtl::xcomplex<float>, 7, 32>(out, "fallback xtl xcomplex float load store");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, fallback_xtl_xcomplex_double_load_store)
+{
+    std::ofstream out("log/fallback_xtl_xcomplex_double_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_complex_simd_load_store<xtl::xcomplex<double>, 3, 32>(out, "fallback xtl xcomplex double load store");
+    EXPECT_TRUE(res);
+}
+#endif
 #endif

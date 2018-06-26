@@ -15,7 +15,12 @@
 #include <utility>
 
 #include "xsimd_base.hpp"
+#include "xsimd_complex_base.hpp"
 #include "xsimd_utils.hpp"
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+#include "xtl/xcomplex.hpp"
+#endif
 
 namespace xsimd
 {
@@ -145,6 +150,180 @@ namespace xsimd
     batch<T, N> operator<<(const batch<T, N>& lhs, int32_t rhs);
     template <typename T, std::size_t N>
     batch<T, N> operator>>(const batch<T, N>& lhs, int32_t rhs);
+
+    /**********************************
+     * batch_bool<std::complex<T>, N> *
+     **********************************/
+
+    template <class T, std::size_t N>
+    struct simd_batch_traits<batch_bool<std::complex<T>, N>>
+        : complex_batch_bool_traits<std::complex<T>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+    {
+    };
+
+    template <class T, std::size_t N>
+    class batch_bool<std::complex<T>, N>
+        : public simd_complex_batch_bool<batch_bool<std::complex<T>, N>>
+    {
+    public:
+
+        using self_type = batch_bool<std::complex<T>, N>;
+        using base_type = simd_complex_batch_bool<self_type>;
+        using real_batch = batch_bool<T, N>;
+
+        batch_bool() = default;
+        using base_type::base_type;
+
+        // Constructor from N boolean parameters
+        template <
+            typename... Args,
+            typename Enable = detail::is_array_initializer_t<bool, N, Args...>
+        >
+        batch_bool(Args... exactly_N_bools)
+            : base_type(real_batch{ exactly_N_bools... })
+        {
+        }
+    };
+
+    /*****************************
+     * batch<std::complex<T>, N> *
+     *****************************/
+
+    template <class T, std::size_t N>
+    struct simd_batch_traits<batch<std::complex<T>, N>>
+        : complex_batch_traits<std::complex<T>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+    {
+    };
+
+    template <class T, std::size_t N>
+    class batch<std::complex<T>, N>
+        : public simd_complex_batch<batch<std::complex<T>, N>>
+    {
+    public:
+
+        using self_type = batch<std::complex<T>, N>;
+        using base_type = simd_complex_batch<self_type>;
+        using value_type = std::complex<T>;
+        using real_batch = batch<T, N>;
+
+        batch() = default;
+        using base_type::base_type;
+
+        // Constructor from N scalar parameters
+        template <
+            typename... Args,
+            typename Enable = typename detail::is_array_initializer<T, N, Args...>::type
+        >
+        batch(Args... exactly_N_scalars)
+            : base_type(real_batch{ exactly_N_scalars.real()... },
+                        real_batch{ exactly_N_scalars.imag()... })
+        {
+        }
+
+        using base_type::load_aligned;
+        using base_type::load_unaligned;
+        using base_type::store_aligned;
+        using base_type::store_unaligned;
+
+        template <class U>
+        self_type& load_aligned(const U* src);
+        template <class U>
+        self_type& load_unaligned(const U* src);
+
+        template <class U>
+        void store_aligned(U* dst) const;
+        template <class U>
+        void store_unaligned(U* dst) const;
+    };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+
+    /********************************************
+     * batch_bool<xtl::xcomplex<T, T, i3ec>, N> *
+     ********************************************/
+
+    template <class T, std::size_t N, bool i3ec>
+    struct simd_batch_traits<batch_bool<xtl::xcomplex<T, T, i3ec>, N>>
+        : complex_batch_bool_traits<xtl::xcomplex<T, T, i3ec>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+    {
+    };
+
+    template<class T, std::size_t N, bool i3ec>
+    class batch_bool<xtl::xcomplex<T, T, i3ec>, N>
+        : public simd_complex_batch_bool<batch_bool<xtl::xcomplex<T, T, i3ec>, N>>
+    {
+    public:
+
+        using self_type = batch_bool<xtl::xcomplex<T, T, i3ec>, N>;
+        using base_type = simd_complex_batch_bool<self_type>;
+        using real_batch = batch_bool<T, N>;
+
+        batch_bool() = default;
+        using base_type::base_type;
+
+        // VS2015 has a bug with inheriting constructors involving SFINAE
+        // Constructor from N boolean parameters
+        template <
+            typename... Args,
+            typename Enable = detail::is_array_initializer_t<bool, N, Args...>
+        >
+        batch_bool(Args... exactly_N_bools)
+            : base_type(real_batch{ exactly_N_bools... })
+        {
+        }
+    };
+
+    /***************************************
+     * batch<xtl::xcomplex<T, T, i3ec>, N> *
+     ***************************************/
+
+    template <class T, std::size_t N, bool i3ec>
+    struct simd_batch_traits<batch<xtl::xcomplex<T, T, i3ec>, N>>
+        : complex_batch_traits<xtl::xcomplex<T, T, i3ec>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+    {
+    };
+
+    template <class T, std::size_t N, bool i3ec>
+    class batch<xtl::xcomplex<T, T, i3ec>, N>
+        : public simd_complex_batch<batch<xtl::xcomplex<T, T, i3ec>, N>>
+    {
+    public:
+
+        using self_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+        using base_type = simd_complex_batch<self_type>;
+        using value_type = xtl::xcomplex<T, T, i3ec>;
+        using real_batch = batch<T, N>;
+
+        batch() = default;
+        using base_type::base_type;
+
+        // Constructor from N scalar parameters
+        template <
+            typename... Args,
+            typename Enable = typename detail::is_array_initializer<T, N, Args...>::type
+        >
+        batch(Args... exactly_N_scalars)
+            : base_type(real_batch{ exactly_N_scalars.real()... },
+                        real_batch{ exactly_N_scalars.imag()... })
+        {
+        }
+
+        using base_type::load_aligned;
+        using base_type::load_unaligned;
+        using base_type::store_aligned;
+        using base_type::store_unaligned;
+
+        template <class U>
+        self_type& load_aligned(const U* src);
+        template <class U>
+        self_type& load_unaligned(const U* src);
+
+        template <class U>
+        void store_aligned(U* dst) const;
+        template <class U>
+        void store_unaligned(U* dst) const;
+    };
+#endif
 
     /************************
      * conversion functions *
@@ -710,6 +889,106 @@ namespace xsimd
     template <typename T, std::size_t N>
     inline batch<T, N> operator>>(const batch<T, N>& lhs, int32_t rhs) {
         XSIMD_FALLBACK_MAPPING_LOOP(batch, (lhs[i] >> rhs))
+    }
+
+    /***********************************************
+     * utility functions to avoid code duplication *
+     ***********************************************/
+
+    namespace detail
+    {
+        template <std::size_t N, class B, class U>
+        inline std::pair<B, B> load_complex_impl(const U* src)
+        {
+            using value_type = typename U::value_type;
+            using dst_value_type = typename B::value_type;
+            const value_type* buf = reinterpret_cast<const value_type*>(src);
+            B real, imag;
+            for (std::size_t i = 0; i < N; ++i)
+            {
+                real[i] = static_cast<dst_value_type>(buf[2 * i]);
+                imag[i] = static_cast<dst_value_type>(buf[2 * i + 1]);
+            }
+            return std::make_pair(real, imag);
+        }
+
+        template <std::size_t N, class B, class U>
+        inline void store_complex_impl(const B& real, const B& imag, U* dst)
+        {
+            using value_type = typename U::value_type;
+            value_type* buf = reinterpret_cast<value_type*>(dst);
+            for (std::size_t i = 0; i < N; ++i)
+            {
+                buf[2 * i] = static_cast<value_type>(real[i]);
+                buf[2 * i + 1] = static_cast<value_type>(imag[i]);
+            }
+        }
+    }
+
+    /********************************************
+     * batch<std::complex<T, N>> implementation *
+     ********************************************/
+
+    template <class T, std::size_t N>
+    template <class U>
+    inline auto batch<std::complex<T>, N>::load_aligned(const U* src) -> self_type&
+    {
+        std::tie(this->m_real, this->m_imag) = detail::load_complex_impl<N, real_batch>(src);
+        return *this;
+    }
+
+    template <class T, std::size_t N>
+    template <class U>
+    inline auto batch<std::complex<T>, N>::load_unaligned(const U* src) -> self_type&
+    {
+        return load_aligned(src);
+    }
+
+    template <class T, std::size_t N>
+    template <class U>
+    inline void batch<std::complex<T>, N>::store_aligned(U* dst) const
+    {
+        detail::store_complex_impl<N>(this->m_real, this->m_imag, dst);
+    }
+
+    template <class T, std::size_t N>
+    template <class U>
+    inline void batch<std::complex<T>, N>::store_unaligned(U* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    /******************************************************
+     * batch<xtl::xcomplex<T, T, i3ec>, N> implementation *
+     ******************************************************/
+
+    template <class T, std::size_t N, bool i3ec>
+    template <class U>
+    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_aligned(const U* src) -> self_type&
+    {
+        std::tie(this->m_real, this->m_imag) = detail::load_complex_impl<N, real_batch>(src);
+        return *this;
+    }
+
+    template <class T, std::size_t N, bool i3ec>
+    template <class U>
+    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_unaligned(const U* src) -> self_type&
+    {
+        return load_aligned(src);
+    }
+
+    template <class T, std::size_t N, bool i3ec>
+    template <class U>
+    inline void batch<xtl::xcomplex<T, T, i3ec>, N>::store_aligned(U* dst) const
+    {
+        detail::store_complex_impl<N>(this->m_real, this->m_imag, dst);
+    }
+
+    template <class T, std::size_t N, bool i3ec>
+    template <class U>
+    inline void batch<xtl::xcomplex<T, T, i3ec>, N>::store_unaligned(U* dst) const
+    {
+        store_unaligned(dst);
     }
 
     /***************************************
