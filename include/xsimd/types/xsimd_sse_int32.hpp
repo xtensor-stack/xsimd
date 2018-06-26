@@ -414,7 +414,18 @@ namespace xsimd
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
+#if defined(XSIMD_FAST_INTEGER_DIVISION)
                 return _mm_cvttps_epi32(_mm_div_ps(_mm_cvtepi32_ps(lhs), _mm_cvtepi32_ps(rhs)));
+#else
+                alignas(16) int32_t tmp_lhs[4], tmp_rhs[4], tmp_res[4];
+                lhs.store_aligned(tmp_lhs);
+                rhs.store_aligned(tmp_rhs);
+                tmp_res[0] = tmp_lhs[0] / tmp_rhs[0];
+                tmp_res[1] = tmp_lhs[1] / tmp_rhs[1];
+                tmp_res[2] = tmp_lhs[2] / tmp_rhs[2];
+                tmp_res[3] = tmp_lhs[3] / tmp_rhs[3];
+                return batch_type(&tmp_res[0], aligned_mode());
+#endif
             }
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)

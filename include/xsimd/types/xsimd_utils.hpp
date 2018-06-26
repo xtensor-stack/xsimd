@@ -17,6 +17,9 @@ namespace xsimd
     template <class T, size_t N>
     class batch;
 
+    template <class T, std::size_t N>
+    class batch_bool;
+
     /**************
      * as_integer *
      **************/
@@ -251,6 +254,29 @@ namespace xsimd
             template <typename... Ts>
             using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
         #endif
+    }
+
+#define XSIMD_MACRO_UNROLL_BINARY(FUNC)                                                                   \
+    constexpr std::size_t size = simd_batch_traits<batch_type>::size;                                     \
+    using value_type = simd_batch_traits<batch_type>::value_type;                                         \
+    alignas(simd_batch_traits<batch_type>::align) value_type tmp_lhs[size], tmp_rhs[size], tmp_res[size]; \
+    lhs.store_aligned(tmp_lhs);                                                                           \
+    rhs.store_aligned(tmp_rhs);                                                                           \
+    unroller<size>([&](std::size_t i) {                                                                           \
+        tmp_res[i] = tmp_lhs[i] FUNC tmp_rhs[i];                                                          \
+    });                                                                                                   \
+    return batch_type(&tmp_res[0], aligned_mode());
+
+    template <class F, std::size_t... I>
+    inline void unroller_impl(F&& f, detail::index_sequence<I...>)
+    {
+        static_cast<void>(std::initializer_list<int>{(f(I), 0)...});
+    }
+
+    template <std::size_t N, class F>
+    inline void unroller(F&& f)
+    {
+        unroller_impl(f, detail::make_index_sequence<N>{});
     }
 
     /*****************************************

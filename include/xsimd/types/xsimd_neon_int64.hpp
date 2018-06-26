@@ -275,11 +275,16 @@ namespace xsimd
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION && defined(XSIMD_FAST_INTEGER_DIVISION)
                 return vcvtq_s64_f64(vcvtq_f64_s64(lhs) / vcvtq_f64_s64(rhs));
 #else
                 return{ lhs[0] / rhs[0], lhs[1] / rhs[1] };
 #endif
+            }
+
+            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
+            {
+                return{ lhs[0] % rhs[0], lhs[1] % rhs[1] };
             }
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
