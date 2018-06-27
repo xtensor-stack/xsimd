@@ -23,7 +23,8 @@ install:
   - conda update -q conda
   - conda info -a
   - conda install gtest cmake -c conda-forge
-  - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -D CMAKE_BUILD_TYPE=Release .
+  - conda install xtl -c quantstack
+  - cmake -G "NMake Makefiles" -D ENABLE_XTL_COMPLEX=1 -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -D CMAKE_BUILD_TYPE=Release .
   - nmake test_xsimd
   - cd test
 

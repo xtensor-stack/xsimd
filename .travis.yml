@@ -24,7 +24,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-      env: COMPILER=gcc GCC=6
+      env: COMPILER=gcc GCC=6 ENABLE_XTL_COMPLEX=1
     - os: linux
       addons:
         apt:
@@ -32,7 +32,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
-      env: COMPILER=gcc GCC=6 ENABLE_FALLBACK=1
+      env: COMPILER=gcc GCC=6 ENABLE_FALLBACK=1 ENABLE_XTL_COMPLEX=1
     - os: linux
       sudo: required
       addons:
@@ -139,6 +139,9 @@ install:
     # Useful for debugging any issues with conda
     - conda info -a
     - conda install gtest cmake -c conda-forge
+    - if [[ "$ENABLE_XTL_COMPLEX" == 1 ]] ; then
+        conda install xtl -c quantstack ;
+      fi
     - if [[ "$CROSS_COMPILE" == 1 ]] ; then
         if [[ "$ARM_ARCH_DIR" == "aarch64-linux-gnu" ]] ; then
           mkdir $HOME/linker_bin ;
@@ -150,7 +153,9 @@ install:
           cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DARM_ARCH_DIRECTORY="$ARM_ARCH_DIR" -DARM_GCC_VER="$GCC_VER" -DTARGET_ARCH="$ARM_SETTINGS" ;
         fi
       elif [[ "$ENABLE_FALLBACK" == 1 ]] ; then
-        cmake -DENABLE_FALLBACK=ON . ;
+        cmake -DENABLE_FALLBACK=ON -DENABLE_XTL_COMPLEX=ON . ;
+      elif [[ "$ENABLE_XTL_COMPLEX" == 1 ]] ; then
+        cmake -DENABLE_XTL_COMPLEX=ON . ;
       elif [[ "$AVX512" == 1 ]] ; then
         conda install gcc_linux-64 gxx_linux-64;
         sh install_sde.sh ;

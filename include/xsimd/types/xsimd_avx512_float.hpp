@@ -11,6 +11,7 @@
 
 #include <cstdint>
 
+#include "xsimd_avx512_bool.hpp"
 #include "xsimd_base.hpp"
 
 namespace xsimd

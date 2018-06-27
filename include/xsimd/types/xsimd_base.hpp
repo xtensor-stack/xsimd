@@ -59,7 +59,7 @@ namespace xsimd
     public:
 
         using value_type = typename simd_batch_traits<X>::value_type;
-        static std::size_t constexpr size = simd_batch_traits<X>::size;
+        static constexpr std::size_t size = simd_batch_traits<X>::size;
 
         X& operator&=(const X& rhs);
         X& operator|=(const X& rhs);
@@ -153,7 +153,7 @@ namespace xsimd
     public:
 
         using value_type = typename simd_batch_traits<X>::value_type;
-        static std::size_t constexpr size = simd_batch_traits<X>::size;
+        static constexpr std::size_t size = simd_batch_traits<X>::size;
 
         X& operator+=(const X& rhs);
         X& operator+=(const value_type& rhs);
