@@ -25,6 +25,8 @@ namespace xsimd
 
         batch_bool_avx512();
         explicit batch_bool_avx512(bool b);
+        template <class... Args, class Enable = detail::is_array_initializer_t<bool, sizeof(MASK) * 8, Args...>>
+        batch_bool_avx512(Args... args);
         batch_bool_avx512(const bool (&init)[sizeof(MASK) * 8]);
 
         batch_bool_avx512(const MASK& rhs);
@@ -45,6 +47,13 @@ namespace xsimd
     }
 
     template <class MASK, class T>
+    template <class... Args, class>
+    inline batch_bool_avx512<MASK, T>::batch_bool_avx512(Args... args)
+        : batch_bool_avx512({{static_cast<bool>(args)...}})
+    {
+    }
+
+    template <class MASK, class T>
     inline batch_bool_avx512<MASK, T>::batch_bool_avx512(bool b)
         : m_value(b ? -1 : 0)
     {
@@ -61,7 +70,7 @@ namespace xsimd
         template <class T, std::size_t IX, std::size_t... I>
         constexpr T get_init_value_impl(const bool (&init)[sizeof(T) * 8])
         {
-            return (init[IX] << IX) | get_init_value_impl<T, I...>(init);
+            return (T(init[IX]) << IX) | get_init_value_impl<T, I...>(init);
         }
         
         template <class T, std::size_t... I>
@@ -110,6 +119,12 @@ namespace xsimd
         struct mask_type<16>
         {
             using type = __mmask16;
+        };
+
+        template <>
+        struct mask_type<64>
+        {
+            using type = __mmask64;
         };
 
         template <class T, std::size_t N>

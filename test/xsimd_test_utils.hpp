@@ -81,12 +81,19 @@ namespace xsimd
             using std::max;
             using std::abs;
 
+            // direct compare integers -- but need tolerance for inexact double conversion
+            if (std::is_integral<T>::value && lhs < 10e6 && rhs < 10e6)
+            {
+                return lhs == rhs;
+            }
+
             T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
             T absolute_zero_prox = 2048 * std::numeric_limits<T>::epsilon();
 
             if (max(abs(lhs), abs(rhs)) < T(1e-3))
             {
-                return detail::check_is_small(T(lhs - rhs), absolute_zero_prox);
+                using res_type = decltype(lhs - rhs);
+                return detail::check_is_small(lhs - rhs, res_type(absolute_zero_prox));
             }
             else
             {
@@ -103,24 +110,6 @@ namespace xsimd
             using real_comparison = scalar_comparison<T>;
             return real_comparison::run(lhs.real(), rhs.real()) &&
                 real_comparison::run(lhs.imag(), rhs.imag());
-        }
-    };
-
-    template <>
-    struct scalar_comparison<char>
-    {
-        static bool run(char lhs, char rhs)
-        {
-            return lhs == rhs;
-        }
-    };
-
-    template <>
-    struct scalar_comparison<unsigned char>
-    {
-        static bool run(unsigned char lhs, unsigned char rhs)
-        {
-            return lhs == rhs;
         }
     };
 
@@ -156,7 +145,7 @@ namespace xsimd
                 indx_list.push_back(ind);
                 if (nb_diff < 5)
                 {
-                    std::cout << ind << ": lhs = " << *lhs_iter << " - rhs = " << *rhs_iter << std::endl;
+                    std::cout << ind << ": lhs = " << +(*lhs_iter) << " - rhs = " << +(*rhs_iter) << std::endl;
                 }
             }
         }
@@ -169,9 +158,9 @@ namespace xsimd
         os << '[';
         for (size_t i = 0; i < v.size() - 1; ++i)
         {
-            os << v[i] << ',';
+            os << +v[i] << ',';
         }
-        os << v.back() << ']' << std::endl;
+        os << +v.back() << ']' << std::endl;
         return os;
     }
 

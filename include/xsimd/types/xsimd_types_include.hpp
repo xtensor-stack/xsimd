@@ -19,6 +19,7 @@
 #include "xsimd_sse_conversion.hpp"
 #include "xsimd_sse_double.hpp"
 #include "xsimd_sse_float.hpp"
+#include "xsimd_sse_int8.hpp"
 #include "xsimd_sse_int32.hpp"
 #include "xsimd_sse_int64.hpp"
 #include "xsimd_sse_complex.hpp"
@@ -28,6 +29,7 @@
 #include "xsimd_avx_conversion.hpp"
 #include "xsimd_avx_double.hpp"
 #include "xsimd_avx_float.hpp"
+#include "xsimd_avx_int8.hpp"
 #include "xsimd_avx_int32.hpp"
 #include "xsimd_avx_int64.hpp"
 #include "xsimd_avx_complex.hpp"
@@ -38,6 +40,7 @@
 #include "xsimd_avx512_bool.hpp"
 #include "xsimd_avx512_double.hpp"
 #include "xsimd_avx512_float.hpp"
+#include "xsimd_avx512_int8.hpp"
 #include "xsimd_avx512_int32.hpp"
 #include "xsimd_avx512_int64.hpp"
 #include "xsimd_avx512_complex.hpp"
@@ -50,8 +53,10 @@
     #include "xsimd_neon_double.hpp"
 #endif
 #include "xsimd_neon_float.hpp"
-#include "xsimd_neon_int64.hpp"
+#include "xsimd_neon_int8.hpp"
+#include "xsimd_neon_uint8.hpp"
 #include "xsimd_neon_int32.hpp"
+#include "xsimd_neon_int64.hpp"
 #include "xsimd_neon_complex.hpp"
 #endif
 

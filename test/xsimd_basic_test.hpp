@@ -367,6 +367,28 @@ namespace xsimd
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
     };
 
+    template <class T>
+    struct get_bool<batch_bool<T, 32>>
+    {
+        using type = batch_bool<T, 32>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+    };
+
+    template <class T>
+    struct get_bool<batch_bool<T, 64>>
+    {
+        using type = batch_bool<T, 64>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = type (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+    };
+
 #if defined(XSIMD_ENABLE_FALLBACK)
     template <class I, class S>
     bool test_simd_bool(const batch<I, 7>& /* empty */, S& /*stream*/)
@@ -750,6 +772,46 @@ namespace xsimd
         return success;
     }
 
+    template <std::size_t N, class T, class S>
+    bool test_char_loading(T /**/, S& /*stream*/)
+    {
+        return true;
+    }
+
+    template <std::size_t N, class S>
+    bool test_char_loading(int8_t /**/, S& stream)
+    {
+        bool success = true;
+        char non_algn[64];
+        alignas(64) char algn[64];
+
+        for (std::size_t i = 0; i < 64; ++i)
+        {
+            non_algn[i] = i;
+            algn[i] = i;
+        }
+
+        batch<int8_t, N> bx, by, bz;
+        bx.load_aligned(algn);
+        by.load_unaligned(non_algn);
+
+        success = success && all(bx == by);
+        success = success && (bx[5] == 5);
+
+        bz = bx + by;
+        bz.store_aligned(algn);
+        bz.store_unaligned(non_algn);
+
+        success = success && std::equal(std::begin(non_algn), std::end(non_algn), std::begin(algn));
+        success = success && (algn[5] == 10);
+
+        if (!success)
+        {
+            stream << "Saving/Loading of chars into int8_t batch did not work!" << std::endl;
+        }
+        return success;
+    }
+
     template <class T>
     bool test_simd_int_basic(std::ostream& out, T& tester)
     {
@@ -1018,6 +1080,7 @@ namespace xsimd
 
         success = success && test_simd_int_shift(vector_type(value_type(0)), out);
         success = success && test_simd_bool(vector_type(value_type(0)), out);
+        success = success && test_char_loading<vector_type::size>(value_type(), out);
         return success;
     }
 

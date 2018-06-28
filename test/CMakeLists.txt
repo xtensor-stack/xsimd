@@ -30,6 +30,7 @@ OPTION(CROSS_COMPILE_ARM "cross compile for ARM targets" OFF)
 
 # Note: to compile on ARM (or cross compile), you may need to add the following:
 # -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
+# set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
 set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
 set(ARM_ARCH_DIRECTORY "arm-linux-gnueabi" CACHE STRING "ARM arch header dir")
 set(ARM_GCC_VER "4.7.3" CACHE STRING "ARM GCC header dir")
@@ -57,6 +58,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     endif()
 endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flax-vector-conversions")
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP /bigobj")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")

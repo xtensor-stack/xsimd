@@ -18,21 +18,25 @@
 #undef XSIMD_BATCH_DOUBLE_SIZE
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#define XSIMD_BATCH_INT8_SIZE 64
 #define XSIMD_BATCH_INT32_SIZE 16
 #define XSIMD_BATCH_INT64_SIZE 8
 #define XSIMD_BATCH_FLOAT_SIZE 16
 #define XSIMD_BATCH_DOUBLE_SIZE 8
 #elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#define XSIMD_BATCH_INT8_SIZE 32
 #define XSIMD_BATCH_INT32_SIZE 8
 #define XSIMD_BATCH_INT64_SIZE 4
 #define XSIMD_BATCH_FLOAT_SIZE 8
 #define XSIMD_BATCH_DOUBLE_SIZE 4
 #elif XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#define XSIMD_BATCH_INT8_SIZE 16
 #define XSIMD_BATCH_INT32_SIZE 4
 #define XSIMD_BATCH_INT64_SIZE 2
 #define XSIMD_BATCH_FLOAT_SIZE 4
 #define XSIMD_BATCH_DOUBLE_SIZE 2
 #elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+#define XSIMD_BATCH_INT8_SIZE 16
 #define XSIMD_BATCH_INT32_SIZE 4
 #define XSIMD_BATCH_INT64_SIZE 2
 #define XSIMD_BATCH_FLOAT_SIZE 4
@@ -70,6 +74,36 @@ namespace xsimd
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
 #ifdef XSIMD_BATCH_FLOAT_SIZE
+    template <>
+    struct simd_traits<int8_t>
+    {
+        using type = batch<int8_t, XSIMD_BATCH_INT8_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
+        static constexpr size_t size = type::size;
+    };
+
+    template <>
+    struct revert_simd_traits<batch<int8_t, XSIMD_BATCH_INT8_SIZE>>
+    {
+        using type = int8_t;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+
+    template <>
+    struct simd_traits<uint8_t>
+    {
+        using type = batch<uint8_t, XSIMD_BATCH_INT8_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
+        static constexpr size_t size = type::size;
+    };
+
+    template <>
+    struct revert_simd_traits<batch<uint8_t, XSIMD_BATCH_INT8_SIZE>>
+    {
+        using type = uint8_t;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+
     template <>
     struct simd_traits<int32_t>
     {
