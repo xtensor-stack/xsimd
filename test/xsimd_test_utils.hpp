@@ -64,8 +64,8 @@ namespace xsimd
         {
             using std::abs;
             T diff = abs(lhs - rhs);
-            T d1 = safe_division(diff, abs(rhs));
-            T d2 = safe_division(diff, abs(lhs));
+            T d1 = safe_division(diff, T(abs(rhs)));
+            T d2 = safe_division(diff, T(abs(lhs)));
 
             return d1 <= relative_precision && d2 <= relative_precision;
         }
@@ -84,7 +84,7 @@ namespace xsimd
 
             if (max(abs(lhs), abs(rhs)) < T(1e-3))
             {
-                return detail::check_is_small(lhs - rhs, absolute_zero_prox);
+                return detail::check_is_small(T(lhs - rhs), absolute_zero_prox);
             }
             else
             {
@@ -101,6 +101,24 @@ namespace xsimd
             using real_comparison = scalar_comparison<T>;
             return real_comparison::run(lhs.real(), rhs.real()) &&
                 real_comparison::run(lhs.imag(), rhs.imag());
+        }
+    };
+
+    template <>
+    struct scalar_comparison<char>
+    {
+        static bool run(char lhs, char rhs)
+        {
+            return lhs == rhs;
+        }
+    };
+
+    template <>
+    struct scalar_comparison<unsigned char>
+    {
+        static bool run(unsigned char lhs, unsigned char rhs)
+        {
+            return lhs == rhs;
         }
     };
 

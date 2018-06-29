@@ -78,6 +78,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_complex_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_fallback.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_int_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_complex.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_double.hpp

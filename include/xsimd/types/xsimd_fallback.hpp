@@ -121,6 +121,12 @@ namespace xsimd
         batch& load_aligned(const int64_t* src);
         batch& load_unaligned(const int64_t* src);
 
+        batch& load_aligned(const char* src);
+        batch& load_unaligned(const char* src);
+
+        batch& load_aligned(const unsigned char* src);
+        batch& load_unaligned(const unsigned char* src);
+
         void store_aligned(float* dst) const;
         void store_unaligned(float* dst) const;
 
@@ -132,6 +138,12 @@ namespace xsimd
 
         void store_aligned(int64_t* dst) const;
         void store_unaligned(int64_t* dst) const;
+
+        void store_aligned(char* dst) const;
+        void store_unaligned(char* dst) const;
+
+        void store_aligned(unsigned char* dst) const;
+        void store_unaligned(unsigned char* dst) const;
 
         const T& operator[](std::size_t index) const;
         T& operator[](std::size_t index);
@@ -633,6 +645,30 @@ namespace xsimd
     }
 
     template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_aligned(const char* src)
+    {
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_unaligned(const char* src)
+    {
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_aligned(const unsigned char* src)
+    {
+        return  this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::load_unaligned(const unsigned char* src)
+    {
+        return this->load_unaligned_impl(src);
+    }
+
+    template <typename T, std::size_t N>
     inline void batch<T, N>::store_aligned(float* dst) const
     {
         this->store_unaligned_impl(dst);
@@ -676,6 +712,29 @@ namespace xsimd
 
     template <typename T, std::size_t N>
     inline void batch<T, N>::store_unaligned(int64_t* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_aligned(char* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_unaligned(char* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_aligned(unsigned char* dst) const
+    {
+        this->store_unaligned_impl(dst);
+    }
+    template <typename T, std::size_t N>
+    inline void batch<T, N>::store_unaligned(unsigned char* dst) const
     {
         this->store_unaligned_impl(dst);
     }

@@ -61,6 +61,12 @@ namespace xsimd
         batch& load_aligned(const int64_t* src);
         batch& load_unaligned(const int64_t* src);
 
+        batch& load_aligned(const char* src);
+        batch& load_unaligned(const char* src);
+
+        batch& load_aligned(const unsigned char* src);
+        batch& load_unaligned(const unsigned char* src);
+
         void store_aligned(float* dst) const;
         void store_unaligned(float* dst) const;
 
@@ -72,6 +78,12 @@ namespace xsimd
 
         void store_aligned(int64_t* dst) const;
         void store_unaligned(int64_t* dst) const;
+
+        void store_aligned(char* dst) const;
+        void store_unaligned(char* dst) const;
+
+        void store_aligned(unsigned char* dst) const;
+        void store_unaligned(unsigned char* dst) const;
 
         int32_t operator[](std::size_t index) const;
 
@@ -191,6 +203,34 @@ namespace xsimd
         return *this;
     }
 
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const char* src)
+    {
+        int8x8_t tmp = vld1_s8((const int8_t*)src);
+        int16x8_t tmp2 = vmovl_s8(tmp);
+        int16x4_t tmp3 = vget_low_s16(tmp2);
+        m_value = vmovl_s16(tmp3);
+        return *this;
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_unaligned(const char* src)
+    {
+        return load_aligned(src);
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const unsigned char* src)
+    {
+        uint8x8_t tmp = vld1_u8((const uint8_t*)src);
+        uint16x8_t tmp2 = vmovl_u8(tmp);
+        uint16x4_t tmp3 = vget_low_u16(tmp2);
+        m_value = vmovl_u16(tmp3);
+        return *this;
+    }
+
+    inline batch<int32_t, 4>& batch<int32_t, 4>::load_unaligned(const unsigned char* src)
+    {
+        return load_aligned(src);
+    }
+
     inline void batch<int32_t, 4>::store_aligned(double* dst) const
     {
         alignas(16) int32_t tmp[4];
@@ -227,6 +267,32 @@ namespace xsimd
     }
 
     inline void batch<int32_t, 4>::store_unaligned(int64_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<int32_t, 4>::store_aligned(char* dst) const
+    {
+        int16x4_t tmp2 = vmovn_s32(m_value);
+        int16x8_t tmp3 = vcombine_s16(tmp2, vdup_n_s16(0));
+        int8x8_t tmp4 = vmovn_s16(tmp3);
+        vst1_s8((int8_t*)dst, tmp4);
+    }
+
+    inline void batch<int32_t, 4>::store_unaligned(char* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<int32_t, 4>::store_aligned(unsigned char* dst) const
+    {
+        uint16x4_t tmp2 = vmovn_u32(m_value);
+        uint16x8_t tmp3 = vcombine_u16(tmp2, vdup_n_u16(0));
+        uint8x8_t tmp4 = vmovn_u16(tmp3);
+        vst1_u8((uint8_t*)dst, tmp4);
+    }
+
+    inline void batch<int32_t, 4>::store_unaligned(unsigned char* dst) const
     {
         store_aligned(dst);
     }
