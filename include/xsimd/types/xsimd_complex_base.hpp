@@ -108,6 +108,8 @@ namespace xsimd
 
         simd_complex_batch() = default;
         explicit simd_complex_batch(const value_type& v);
+        explicit simd_complex_batch(const real_value_type& v);
+        explicit simd_complex_batch(const real_batch& re);
         simd_complex_batch(const real_batch& re, const real_batch& im);
 
         real_batch& real();
@@ -118,15 +120,23 @@ namespace xsimd
 
         X& operator+=(const X& rhs);
         X& operator+=(const value_type& rhs);
+        X& operator+=(const real_batch& rhs);
+        X& operator+=(const real_value_type& rhs);
 
         X& operator-=(const X& rhs);
         X& operator-=(const value_type& rhs);
+        X& operator-=(const real_batch& rhs);
+        X& operator-=(const real_value_type& rhs);
 
         X& operator*=(const X& rhs);
         X& operator*=(const value_type& rhs);
+        X& operator*=(const real_batch& rhs);
+        X& operator*=(const real_value_type& rhs);
 
         X& operator/=(const X& rhs);
         X& operator/=(const value_type& rhs);
+        X& operator/=(const real_batch& rhs);
+        X& operator/=(const real_value_type& rhs);
 
         template <class T>
         X& load_aligned(const T* real_src, const T* imag_src);
@@ -168,6 +178,14 @@ namespace xsimd
     X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
     template <class X>
     X operator+(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs);
+    template <class X>
+    X operator+(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs);
+    template <class X>
+    X operator+(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs);
 
     template <class X>
     X operator-(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs);
@@ -175,6 +193,14 @@ namespace xsimd
     X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
     template <class X>
     X operator-(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs);
+    template <class X>
+    X operator-(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs);
+    template <class X>
+    X operator-(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs);
 
     template <class X>
     X operator*(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs);
@@ -182,6 +208,14 @@ namespace xsimd
     X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
     template <class X>
     X operator*(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs);
+    template <class X>
+    X operator*(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs);
+    template <class X>
+    X operator*(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs);
 
     template <class X>
     X operator/(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs);
@@ -189,6 +223,14 @@ namespace xsimd
     X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs);
     template <class X>
     X operator/(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs);
+    template <class X>
+    X operator/(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs);
+    template <class X>
+    X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs);
+    template <class X>
+    X operator/(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs);
 
     template <class X>
     typename simd_batch_traits<X>::value_type
@@ -317,6 +359,18 @@ namespace xsimd
     }
 
     template <class X>
+    inline simd_complex_batch<X>::simd_complex_batch(const real_value_type& v)
+        : m_real(v), m_imag(real_value_type(0))
+    {
+    }
+
+    template <class X>
+    inline simd_complex_batch<X>::simd_complex_batch(const real_batch& re)
+        : m_real(re), m_imag(real_value_type(0))
+    {
+    }
+
+    template <class X>
     inline simd_complex_batch<X>::simd_complex_batch(const real_batch& re, const real_batch& im)
         : m_real(re), m_imag(im)
     {
@@ -361,6 +415,19 @@ namespace xsimd
     }
 
     template <class X>
+    inline X& simd_complex_batch<X>::operator+=(const real_batch& rhs)
+    {
+        m_real += rhs;
+        return (*this)();
+    }
+
+    template <class X>
+    inline X& simd_complex_batch<X>::operator+=(const real_value_type& rhs)
+    {
+        return (*this)() += real_batch(rhs);
+    }
+
+    template <class X>
     inline X& simd_complex_batch<X>::operator-=(const X& rhs)
     {
         m_real -= rhs.real();
@@ -372,6 +439,19 @@ namespace xsimd
     inline X& simd_complex_batch<X>::operator-=(const value_type& rhs)
     {
         return (*this)() -= X(rhs);
+    }
+
+    template <class X>
+    inline X& simd_complex_batch<X>::operator-=(const real_batch& rhs)
+    {
+        m_real -= rhs;
+        return (*this)();
+    }
+
+    template <class X>
+    inline X& simd_complex_batch<X>::operator-=(const real_value_type& rhs)
+    {
+        return (*this)() -= real_batch(rhs);
     }
 
     namespace detail
@@ -417,6 +497,20 @@ namespace xsimd
     }
 
     template <class X>
+    inline X& simd_complex_batch<X>::operator*=(const real_batch& rhs)
+    {
+        m_real *= rhs;
+        m_imag *= rhs;
+        return (*this)();
+    }
+
+    template <class X>
+    inline X& simd_complex_batch<X>::operator*=(const real_value_type& rhs)
+    {
+        return (*this)() *= real_batch(rhs);
+    }
+
+    template <class X>
     inline X& simd_complex_batch<X>::operator/=(const X& rhs)
     {
         using kernel = detail::complex_batch_multiplier<X, is_ieee_compliant<value_type>::value>;
@@ -428,6 +522,20 @@ namespace xsimd
     inline X& simd_complex_batch<X>::operator/=(const value_type& rhs)
     {
         return (*this)() /= X(rhs);
+    }
+
+    template <class X>
+    inline X& simd_complex_batch<X>::operator/=(const real_batch& rhs)
+    {
+        m_real /= rhs;
+        m_imag /= rhs;
+        return (*this)();
+    }
+
+    template <class X>
+    inline X& simd_complex_batch<X>::operator/=(const real_value_type& rhs)
+    {
+        return (*this)() /= real_batch(rhs);
     }
 
     template <class X>
@@ -562,6 +670,34 @@ namespace xsimd
     }
 
     template <class X>
+    inline X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
+    {
+        X tmp(lhs());
+        return tmp += X(rhs);
+    }
+
+    template <class X>
+    inline X operator+(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp += rhs();
+    }
+
+    template <class X>
+    inline X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
+    {
+        X tmp(lhs());
+        return tmp += X(rhs);
+    }
+
+    template <class X>
+    inline X operator+(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp += rhs();
+    }
+
+    template <class X>
     inline X operator-(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
     {
         X tmp(lhs());
@@ -577,6 +713,34 @@ namespace xsimd
 
     template <class X>
     inline X operator-(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp -= rhs();
+    }
+
+    template <class X>
+    inline X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
+    {
+        X tmp(lhs());
+        return tmp -= X(rhs);
+    }
+
+    template <class X>
+    inline X operator-(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp -= rhs();
+    }
+
+    template <class X>
+    inline X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
+    {
+        X tmp(lhs());
+        return tmp -= X(rhs);
+    }
+
+    template <class X>
+    inline X operator-(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
     {
         X tmp(lhs);
         return tmp -= rhs();
@@ -604,6 +768,34 @@ namespace xsimd
     }
 
     template <class X>
+    inline X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
+    {
+        X tmp(lhs());
+        return tmp *= X(rhs);
+    }
+
+    template <class X>
+    inline X operator*(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp *= rhs();
+    }
+
+    template <class X>
+    inline X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
+    {
+        X tmp(lhs());
+        return tmp *= X(rhs);
+    }
+
+    template <class X>
+    inline X operator*(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp *= rhs();
+    }
+
+    template <class X>
     inline X operator/(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
     {
         X tmp(lhs());
@@ -618,6 +810,34 @@ namespace xsimd
     }
     template <class X>
     inline X operator/(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp /= rhs();
+    }
+
+    template <class X>
+    inline X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
+    {
+        X tmp(lhs());
+        return tmp /= X(rhs);
+    }
+
+    template <class X>
+    inline X operator/(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
+    {
+        X tmp(lhs);
+        return tmp /= rhs();
+    }
+
+    template <class X>
+    inline X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
+    {
+        X tmp(lhs());
+        return tmp /= X(rhs);
+    }
+
+    template <class X>
+    inline X operator/(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
     {
         X tmp(lhs);
         return tmp /= rhs();

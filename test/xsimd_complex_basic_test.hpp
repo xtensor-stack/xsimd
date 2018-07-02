@@ -37,15 +37,31 @@ namespace xsimd
         res_type add_vv_res;
         res_type add_vs_res;
         res_type add_sv_res;
+        res_type add_vrv_res;
+        res_type add_rvv_res;
+        res_type add_vrs_res;
+        res_type add_rsv_res;
         res_type sub_vv_res;
         res_type sub_vs_res;
         res_type sub_sv_res;
+        res_type sub_vrv_res;
+        res_type sub_rvv_res;
+        res_type sub_vrs_res;
+        res_type sub_rsv_res;
         res_type mul_vv_res;
         res_type mul_vs_res;
         res_type mul_sv_res;
+        res_type mul_vrv_res;
+        res_type mul_rvv_res;
+        res_type mul_vrs_res;
+        res_type mul_rsv_res;
         res_type div_vv_res;
         res_type div_vs_res;
         res_type div_sv_res;
+        res_type div_vrv_res;
+        res_type div_rvv_res;
+        res_type div_vrs_res;
+        res_type div_rsv_res;
         value_type hadd_res;
 
         simd_complex_basic_tester(const std::string& name);
@@ -62,15 +78,31 @@ namespace xsimd
         add_vv_res.resize(N);
         add_vs_res.resize(N);
         add_sv_res.resize(N);
+        add_vrv_res.resize(N);
+        add_rvv_res.resize(N);
+        add_vrs_res.resize(N);
+        add_rsv_res.resize(N);
         sub_vv_res.resize(N);
         sub_vs_res.resize(N);
         sub_sv_res.resize(N);
+        sub_vrv_res.resize(N);
+        sub_rvv_res.resize(N);
+        sub_vrs_res.resize(N);
+        sub_rsv_res.resize(N);
         mul_vv_res.resize(N);
         mul_vs_res.resize(N);
         mul_sv_res.resize(N);
+        mul_vrv_res.resize(N);
+        mul_rvv_res.resize(N);
+        mul_vrs_res.resize(N);
+        mul_rsv_res.resize(N);
         div_vv_res.resize(N);
         div_vs_res.resize(N);
         div_sv_res.resize(N);
+        div_vrv_res.resize(N);
+        div_rvv_res.resize(N);
+        div_vrs_res.resize(N);
+        div_rsv_res.resize(N);
 
         s = value_type(real_value_type(1.4), real_value_type(2.3));
         hadd_res = real_value_type(0);
@@ -84,15 +116,31 @@ namespace xsimd
             add_vv_res[i] = lhs[i] + rhs[i];
             add_vs_res[i] = lhs[i] + s;
             add_sv_res[i] = s + rhs[i];
+            add_vrv_res[i] = lhs[i] + rhs[i].real();
+            add_rvv_res[i] = lhs[i].real() + rhs[i];
+            add_vrs_res[i] = lhs[i] + s.real();
+            add_rsv_res[i] = s.real() + rhs[i];
             sub_vv_res[i] = lhs[i] - rhs[i];
             sub_vs_res[i] = lhs[i] - s;
             sub_sv_res[i] = s - rhs[i];
+            sub_vrv_res[i] = lhs[i] - rhs[i].real();
+            sub_rvv_res[i] = lhs[i].real() - rhs[i];
+            sub_vrs_res[i] = lhs[i] - s.real();
+            sub_rsv_res[i] = s.real() - rhs[i];
             mul_vv_res[i] = lhs[i] * rhs[i];
             mul_vs_res[i] = lhs[i] * s;
             mul_sv_res[i] = s * rhs[i];
+            mul_vrv_res[i] = lhs[i] * rhs[i].real();
+            mul_rvv_res[i] = lhs[i].real() * rhs[i];
+            mul_vrs_res[i] = lhs[i] * s.real();
+            mul_rsv_res[i] = s.real() * rhs[i];
             div_vv_res[i] = lhs[i] / rhs[i];
             div_vs_res[i] = lhs[i] / s;
             div_sv_res[i] = s / rhs[i];
+            div_vrv_res[i] = lhs[i] / rhs[i].real();
+            div_rvv_res[i] = lhs[i].real() / rhs[i];
+            div_vrs_res[i] = lhs[i] / s.real();
+            div_rsv_res[i] = s.real() / rhs[i];
             hadd_res += lhs[i];
         }
 
@@ -179,6 +227,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.add_vs_res, out);
         success = success && tmp_success;
 
+        topic = "operator+=(simd, real)   : ";
+        vres = lhs;
+        vres += rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.add_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator+=(simd, reals)  : ";
+        vres = lhs;
+        vres += s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.add_vrs_res, out);
+        success = success && tmp_success;
+
         topic = "operator-=(simd, simd)   : ";
         vres = lhs;
         vres -= rhs;
@@ -191,6 +253,20 @@ namespace xsimd
         vres -= s;
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.sub_vs_res, out);
+        success = success && tmp_success;
+
+        topic = "operator-=(simd, real)   : ";
+        vres = lhs;
+        vres -= rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator-=(simd, reals)  : ";
+        vres = lhs;
+        vres -= s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vrs_res, out);
         success = success && tmp_success;
 
         topic = "operator*=(simd, simd)   : ";
@@ -207,6 +283,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.mul_vs_res, out);
         success = success && tmp_success;
 
+        topic = "operator*=(simd, real)   : ";
+        vres = lhs;
+        vres *= rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator*=(simd, reals)  : ";
+        vres = lhs;
+        vres *= s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vrs_res, out);
+        success = success && tmp_success;
+
         topic = "operator/=(simd, simd)   : ";
         vres = lhs;
         vres /= rhs;
@@ -219,6 +309,20 @@ namespace xsimd
         vres /= s;
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.div_vs_res, out);
+        success = success && tmp_success;
+
+        topic = "operator/=(simd, real)   : ";
+        vres = lhs;
+        vres /= rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.div_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator/=(simd, reals)  : ";
+        vres = lhs;
+        vres /= s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.div_vrs_res, out);
         success = success && tmp_success;
 
         topic = "operator+(simd, simd)    : ";
@@ -239,6 +343,30 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.add_sv_res, out);
         success = success && tmp_success;
 
+        topic = "operator+(simd, real)    : ";
+        vres = lhs + rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.add_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator+(real, simd)    : ";
+        vres = lhs.real() + rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.add_rvv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator+(simd, reals)   : ";
+        vres = lhs + s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.add_vrs_res, out);
+        success = success && tmp_success;
+
+        topic = "operator+(reals, simd)   : ";
+        vres = s.real() + rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.add_rsv_res, out);
+        success = success && tmp_success;
+
         topic = "operator-(simd, simd)    : ";
         vres = lhs - rhs;
         tester.store_vec(vres, res);
@@ -255,6 +383,30 @@ namespace xsimd
         vres = s - rhs;
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.sub_sv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator-(simd, real)    : ";
+        vres = lhs - rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator-(real, simd)    : ";
+        vres = lhs.real() - rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sub_rvv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator-(simd, reals)   : ";
+        vres = lhs - s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sub_vrs_res, out);
+        success = success && tmp_success;
+
+        topic = "operator-(reals, simd)   : ";
+        vres = s.real() - rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sub_rsv_res, out);
         success = success && tmp_success;
 
         topic = "operator*(simd, simd)    : ";
@@ -275,6 +427,30 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.mul_sv_res, out);
         success = success && tmp_success;
 
+        topic = "operator*(simd, real)    : ";
+        vres = lhs * rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator*(real, simd)    : ";
+        vres = lhs.real() * rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.mul_rvv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator*(simd, reals)   : ";
+        vres = lhs * s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.mul_vrs_res, out);
+        success = success && tmp_success;
+
+        topic = "operator*(reals, simd)   : ";
+        vres = s.real() * rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.mul_rsv_res, out);
+        success = success && tmp_success;
+
         topic = "operator/(simd, simd)    : ";
         vres = lhs / rhs;
         tester.store_vec(vres, res);
@@ -291,6 +467,30 @@ namespace xsimd
         vres = s / rhs;
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.div_sv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator/(simd, real)    : ";
+        vres = lhs / rhs.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.div_vrv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator/(real, simd)    : ";
+        vres = lhs.real() / rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.div_rvv_res, out);
+        success = success && tmp_success;
+
+        topic = "operator/(simd, reals)   : ";
+        vres = lhs / s.real();
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.div_vrs_res, out);
+        success = success && tmp_success;
+
+        topic = "operator/(reals, simd)   : ";
+        vres = s.real() / rhs;
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.div_rsv_res, out);
         success = success && tmp_success;
 
         topic = "hadd(simd)               : ";
