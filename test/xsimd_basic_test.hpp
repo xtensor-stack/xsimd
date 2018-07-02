@@ -1393,18 +1393,19 @@ namespace xsimd
           i32_vec(2 * N), i64_vec(2 * N), f_vec(2 * N), d_vec(2 * N), c_vec(16 * N), uc_vec(16 * N),
           i32_vec2(N), i64_vec2(N), f_vec2(N), d_vec2(N), c_vec2(8 * N), uc_vec2(8 * N)
     {
+        using uchar = unsigned char;
         std::iota(i32_vec.begin(), i32_vec.end(), int32_t(1));
         std::iota(i64_vec.begin(), i64_vec.end(), int64_t(1));
         std::iota(f_vec.begin(), f_vec.end(), float(1));
         std::iota(d_vec.begin(), d_vec.end(), double(1));
         std::iota(c_vec.begin(), c_vec.end(), char(1));
-        std::iota(uc_vec.begin(), uc_vec.end(), char(1));
+        std::iota(uc_vec.begin(), uc_vec.end(), uchar(1));
         std::iota(i32_vec2.begin(), i32_vec2.end(), int32_t(1));
         std::iota(i64_vec2.begin(), i64_vec2.end(), int64_t(1));
         std::iota(f_vec2.begin(), f_vec2.end(), float(1));
         std::iota(d_vec2.begin(), d_vec2.end(), double(1));
         std::iota(c_vec2.begin(), c_vec2.end(), char(1));
-        std::iota(uc_vec2.begin(), uc_vec2.end(), char(1));
+        std::iota(uc_vec2.begin(), uc_vec2.end(), uchar(1));
     }
 
     /*************
@@ -1649,6 +1650,14 @@ namespace xsimd
         std::copy(tester.c_vec.cbegin() + fsize, tester.c_vec.cend(), cvres.begin() + fsize);
         tmp_success = check_almost_equal(topic, cvres, tester.c_vec, out);
         success = tmp_success && success;
+
+        {
+            for (size_t i = 0; i < cvres.size(); ++i)
+            {
+                if (cvres[i] != tester.c_vec[i])
+                    std::cout << "diff at " << i << std::endl;
+            }
+        }
 
         topic = "store float  -> uchar  : ";
         detail::load_vec(fbres, tester.f_vec);
