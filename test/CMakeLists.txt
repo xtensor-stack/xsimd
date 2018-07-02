@@ -111,6 +111,14 @@ set(XSIMD_TESTS
     xsimd_error_gamma_test.cpp
     xsimd_exponential_test.hpp
     xsimd_exponential_test.cpp
+    xsimd_cexponential_test.hpp
+    xsimd_cexponential_test.cpp
+    xsimd_chyperbolic_test.hpp
+    xsimd_chyperbolic_test.cpp
+    xsimd_cpower_test.hpp
+    xsimd_cpower_test.cpp
+    xsimd_ctrigonometric_test.hpp
+    xsimd_ctrigonometric_test.cpp
     xsimd_fp_manipulation_test.hpp
     xsimd_fp_manipulation_test.cpp
     xsimd_hyperbolic_test.hpp

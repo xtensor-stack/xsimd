@@ -13,6 +13,7 @@
 #include "config/xsimd_config.hpp"
 #include "types/xsimd_traits.hpp"
 #include "math/xsimd_math.hpp"
+#include "math/xsimd_math_complex.hpp"
 
 namespace xsimd
 {

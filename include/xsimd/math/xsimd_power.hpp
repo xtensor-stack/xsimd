@@ -62,15 +62,27 @@ namespace xsimd
      * ====================================================
      */
 
+    namespace detail
+    {
+        template <class B>
+        struct pow_kernel
+        {
+            static inline B compute(const B& x, const B& y)
+            {
+                using b_type = B;
+                auto negx = x < b_type(0.);
+                b_type z = exp(y * log(abs(x)));
+                z = select(is_odd(y) && negx, -z, z);
+                auto invalid = negx && !(is_flint(y) || isinf(y));
+                return select(invalid, nan<b_type>(), z);
+            }
+        };
+    }
+
     template <class T, std::size_t N>
     inline batch<T, N> pow(const batch<T, N>& x, const batch<T, N>& y)
     {
-        using b_type = batch<T, N>;
-        auto negx = x < b_type(0.);
-        b_type z = exp(y * log(abs(x)));
-        z = select(is_odd(y) && negx, -z, z);
-        auto invalid = negx && !(is_flint(y) || isinf(y));
-        return select(invalid, nan<b_type>(), z);
+        return detail::pow_kernel<batch<T, N>>::compute(x, y);
     }
 
     /***********************

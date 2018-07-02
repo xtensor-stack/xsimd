@@ -856,7 +856,7 @@ namespace xsimd
                     const simd_complex_batch<X>& a,
                     const simd_complex_batch<X>& b)
     {
-        return X(select(cond, a.real(), b.real()), select(cond, a.imag(), b.imag()));
+        return X(select(cond.value(), a.real(), b.real()), select(cond.value(), a.imag(), b.imag()));
     }
 
     template <class X>
