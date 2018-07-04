@@ -24,6 +24,8 @@
 #include "xtl/xcomplex.hpp"
 #endif
 
+#define DEBUG_FLOAT_ACCURACY 0
+
 namespace xsimd
 {
 
@@ -143,11 +145,19 @@ namespace xsimd
             return -1;
         }
         int nb_diff = 0;
+        int ind = 0;
+        std::vector<int> indx_list;
         for (auto lhs_iter = lhs.begin(), rhs_iter = rhs.begin(); lhs_iter != lhs.end(); ++lhs_iter, ++rhs_iter)
         {
+            ++ind;
             if (!scalar_comparison<T>::run(*lhs_iter, *rhs_iter))
             {
                 ++nb_diff;
+                indx_list.push_back(ind);
+                if (nb_diff < 5)
+                {
+                    std::cout << ind << ": lhs = " << *lhs_iter << " - rhs = " << *rhs_iter << std::endl;
+                }
             }
         }
         return nb_diff;

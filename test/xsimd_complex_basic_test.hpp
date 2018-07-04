@@ -12,6 +12,7 @@
 #include "xsimd_test_utils.hpp"
 #include "xsimd_complex_tester.hpp"
 
+#include "xsimd/math/xsimd_math_complex.hpp"
 #include "xsimd/types/xsimd_traits.hpp"
 
 namespace xsimd
@@ -23,6 +24,7 @@ namespace xsimd
         using vector_type = typename base_type::vector_type;
         using value_type = typename base_type::value_type;
         using res_type = typename base_type::res_type;
+        using real_res_type = typename base_type::real_res_type;
         using real_value_type = typename base_type::real_value_type;
 
         std::string name;
@@ -62,6 +64,8 @@ namespace xsimd
         res_type div_rvv_res;
         res_type div_vrs_res;
         res_type div_rsv_res;
+        real_res_type norm_res;
+        res_type proj_res;
         value_type hadd_res;
 
         simd_complex_basic_tester(const std::string& name);
@@ -71,6 +75,8 @@ namespace xsimd
     simd_complex_basic_tester<T, N, A>::simd_complex_basic_tester(const std::string& n)
         : name(n)
     {
+        using std::norm;
+        using std::proj;
         lhs.resize(N);
         rhs.resize(N);
         mix_lhs_rhs.resize(N);
@@ -103,6 +109,8 @@ namespace xsimd
         div_rvv_res.resize(N);
         div_vrs_res.resize(N);
         div_rsv_res.resize(N);
+        norm_res.resize(N);
+        proj_res.resize(N);
 
         s = value_type(real_value_type(1.4), real_value_type(2.3));
         hadd_res = real_value_type(0);
@@ -141,6 +149,8 @@ namespace xsimd
             div_rvv_res[i] = lhs[i].real() / rhs[i];
             div_vrs_res[i] = lhs[i] / s.real();
             div_rsv_res[i] = s.real() / rhs[i];
+            norm_res[i] = norm(lhs[i]);
+            proj_res[i] = proj(lhs[i]);
             hadd_res += lhs[i];
         }
 
@@ -163,12 +173,14 @@ namespace xsimd
         using value_type = typename tester_type::value_type;
         using real_value_type = typename value_type::value_type;
         using res_type = typename tester_type::res_type;
+        using real_res_type = typename tester_type::real_res_type;
 
         vector_type lhs;
         vector_type rhs;
         vector_type mix_lhs_rhs;
         vector_type vres;
         res_type res(tester_type::size);
+        real_res_type rres(tester_type::size);
         value_type s = tester.s;
         bool success = true;
         bool tmp_success = true;
@@ -491,6 +503,18 @@ namespace xsimd
         vres = s.real() / rhs;
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.div_rsv_res, out);
+        success = success && tmp_success;
+
+        topic = "norm(simd)               : ";
+        typename vector_type::real_batch rvres = norm(lhs);
+        detail::store_vec(rvres, rres);
+        tmp_success = check_almost_equal(topic, rres, tester.norm_res, out);
+        success = success && tmp_success;
+
+        topic = "proj(simd)               : ";
+        vres = proj(lhs);
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.proj_res, out);
         success = success && tmp_success;
 
         topic = "hadd(simd)               : ";

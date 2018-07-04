@@ -215,7 +215,7 @@ namespace xsimd
             B z = a - p;
             auto test2 = z < B(0.5);
             z = select(test2, z - B(1.), z);
-            z = a * sin_impl(z, trigo_pi_tag());
+            z = a * trigo_kernel<B>::sin(z, trigo_pi_tag());
             z = abs(z);
             return sgngam * pi<B>() / (z * st);
         }
@@ -428,7 +428,7 @@ namespace xsimd
                 B z = q - p;
                 auto test2 = z < B(0.5);
                 z = select(test2, z - B(1.), z);
-                z = q * sin_impl(z, trigo_pi_tag());
+                z = q * trigo_kernel<B>::sin(z, trigo_pi_tag());
                 return -log(invpi<B>() * abs(z)) - w;
             }
 
@@ -550,7 +550,7 @@ namespace xsimd
                 B z = q - p;
                 auto test2 = (z < B(0.5));
                 z = select(test2, z - B(1.), z);
-                z = q * sin_impl(z, trigo_pi_tag());
+                z = q * trigo_kernel<B>::sin(z, trigo_pi_tag());
                 z = abs(z);
                 return logpi<B>() - log(z) - w;
             }
