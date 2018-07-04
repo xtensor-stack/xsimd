@@ -46,7 +46,11 @@ namespace xsimd
         template <class T, std::size_t N>
         inline batch<T, N> exp_complex_impl(const batch<T, N>& z)
         {
-            return exp(z.real()) * batch<T, N>(cos(z.imag()), sin(z.imag()));
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            r_type icos, isin;
+            sincos(z.imag(), isin, icos);
+            return exp(z.real()) * batch<T, N>(icos, isin);
         }
 
         template <class T, std::size_t N>
@@ -193,6 +197,19 @@ namespace xsimd
          *********/
 
         template <class T, std::size_t N>
+        inline void sincos_complex_impl(const batch<T, N>& z, batch<T, N>& si, batch<T, N>& co)
+        {
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            r_type rcos = cos(z.real());
+            r_type rsin = sin(z.real());
+            r_type icosh = cosh(z.imag());
+            r_type isinh = sinh(z.imag());
+            si = b_type(rsin * icosh, rcos * isinh);
+            co = b_type(rcos * icosh, -rsin * isinh);
+        }
+
+        template <class T, std::size_t N>
         inline batch<T, N> sin_complex_impl(const batch<T, N>& z)
         {
             return batch<T, N>(sin(z.real()) * cosh(z.imag()), cos(z.real()) * sinh(z.imag()));
@@ -237,6 +254,11 @@ namespace xsimd
             {
                 return tan_complex_impl(z);
             }
+
+            static inline void sincos(const batch_type& z, batch_type& si, batch_type& co)
+            {
+                return sincos_complex_impl(z, si, co);
+            }
         };
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
@@ -258,6 +280,11 @@ namespace xsimd
             static inline batch_type tan(const batch_type& z)
             {
                 return tan_complex_impl(z);
+            }
+
+            static inline void sincos(const batch_type& z, batch_type& si, batch_type& co)
+            {
+                return sincos_complex_impl(z, si, co);
             }
         };
 #endif

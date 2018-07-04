@@ -33,6 +33,16 @@ namespace xsimd
     batch<T, N> cos(const batch<T, N>& x);
 
     /**
+     * Computes the sine and the cosine of the batch \c x. This method is faster
+     * than calling sine and cosine independently.
+     * @param x batch of floating point values.
+     * @param si the sine of x.
+     * @param co the cosine of x.
+     */
+    template <class T, std::size_t N>
+    void sincos(const batch<T, N>& x, batch<T, N>& si, batch<T, N>& co);
+
+    /**
      * Computes the tangent of the batch \c x.
      * @param x batch of floating point values.
      * @return the tangent of \c x.
@@ -131,6 +141,24 @@ namespace xsimd
                 const B y = trigo_evaluation<B>::tan_eval(xr, test);
                 return y ^ bitofsign(a);
             }
+
+            static inline void sincos(const B& a, B& si, B& co)
+            {
+                const B x = abs(a);
+                B xr = nan<B>();
+                const B n = trigo_reducer<B>::reduce(x, xr);
+                auto tmp = select(n >= B(2.), B(1.), B(0.));
+                auto swap_bit = fma(B(-2.), tmp, n);
+                const B z = xr * xr;
+                const B se = trigo_evaluation<B>::sin_eval(z, xr);
+                const B ce = trigo_evaluation<B>::cos_eval(z);
+                auto sin_sign_bit = bitofsign(a) ^ select(tmp != B(0.), signmask<B>(), B(0.));
+                const B sin_z1 = select(swap_bit == B(0.), se, ce);
+                si = sin_z1 ^ sin_sign_bit;
+                auto cos_sign_bit = select((swap_bit ^ tmp) != B(0.), signmask<B>(), B(0.));
+                const B cos_z1 = select(swap_bit != B(0.), se, ce);
+                co = cos_z1 ^ cos_sign_bit;
+            }
         };
     }
 
@@ -144,6 +172,12 @@ namespace xsimd
     inline batch<T, N> cos(const batch<T, N>& x)
     {
         return detail::trigo_kernel<batch<T, N>>::cos(x);
+    }
+
+    template <class T, std::size_t N>
+    inline void sincos(const batch<T, N>& x, batch<T, N>& si, batch<T, N>& co)
+    {
+        detail::trigo_kernel<batch<T, N>>::sincos(x, si, co);
     }
 
     template <class T, std::size_t N>
