@@ -82,7 +82,9 @@ namespace xsimd
 
         vector_type input;
         vector_type vres;
+        vector_type vres2;
         res_type res(tester.input.size());
+        res_type res2(tester.input.size());
 
         bool success = true;
         bool tmp_success = true;
@@ -117,6 +119,18 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(topic, res, tester.cos_res, out);
+        success = success && tmp_success;
+
+        topic = "sincos: ";
+        for (size_t i = 0; i < tester.input.size(); i += tester.size)
+        {
+            detail::load_vec(input, tester.input, i);
+            sincos(input, vres, vres2);
+            detail::store_vec(vres, res, i);
+            detail::store_vec(vres2, res2, i);
+        }
+        tmp_success = check_almost_equal(topic, res, tester.sin_res, out);
+        tmp_success = check_almost_equal(topic, res2, tester.cos_res, out);
         success = success && tmp_success;
 
         topic = "tan   : ";

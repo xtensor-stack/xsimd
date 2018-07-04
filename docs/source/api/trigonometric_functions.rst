@@ -15,6 +15,10 @@ Trigonometric functions
 .. doxygenfunction:: cos
    :project: xsimd
 
+.. _sincos-func-ref:
+.. doxygenfunction:: sincos
+   :project: xsimd
+
 .. _tan-function-reference:
 .. doxygenfunction:: tan
    :project: xsimd
