@@ -217,6 +217,7 @@ namespace xsimd
         using base_type = simd_complex_batch<self_type>;
         using value_type = std::complex<T>;
         using real_batch = batch<T, N>;
+        using real_value_type = T;
 
         batch() = default;
         using base_type::base_type;
@@ -238,9 +239,18 @@ namespace xsimd
         using base_type::store_unaligned;
 
         template <class U>
-        self_type& load_aligned(const U* src);
+        typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
+        load_aligned(const U* src);
         template <class U>
-        self_type& load_unaligned(const U* src);
+        typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
+        load_unaligned(const U* src);
+
+        template <class U>
+        typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
+        load_aligned(const U* src);
+        template <class U>
+        typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
+        load_unaligned(const U* src);
 
         template <class U>
         void store_aligned(U* dst) const;
@@ -305,6 +315,7 @@ namespace xsimd
         using base_type = simd_complex_batch<self_type>;
         using value_type = xtl::xcomplex<T, T, i3ec>;
         using real_batch = batch<T, N>;
+        using real_value_type = T;
 
         batch() = default;
         using base_type::base_type;
@@ -326,9 +337,18 @@ namespace xsimd
         using base_type::store_unaligned;
 
         template <class U>
-        self_type& load_aligned(const U* src);
+        typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
+        load_aligned(const U* src);
         template <class U>
-        self_type& load_unaligned(const U* src);
+        typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
+        load_unaligned(const U* src);
+
+        template <class U>
+        typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
+        load_aligned(const U* src);
+        template <class U>
+        typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
+        load_unaligned(const U* src);
 
         template <class U>
         void store_aligned(U* dst) const;
@@ -990,7 +1010,8 @@ namespace xsimd
 
     template <class T, std::size_t N>
     template <class U>
-    inline auto batch<std::complex<T>, N>::load_aligned(const U* src) -> self_type&
+    inline auto batch<std::complex<T>, N>::load_aligned(const U* src)
+        -> typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
     {
         std::tie(this->m_real, this->m_imag) = detail::load_complex_impl<N, real_batch>(src);
         return *this;
@@ -998,7 +1019,29 @@ namespace xsimd
 
     template <class T, std::size_t N>
     template <class U>
-    inline auto batch<std::complex<T>, N>::load_unaligned(const U* src) -> self_type&
+    inline auto batch<std::complex<T>, N>::load_unaligned(const U* src)
+        -> typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
+    {
+        return load_aligned(src);
+    }
+
+    template <class T, std::size_t N>
+    template <class U>
+    inline auto batch<std::complex<T>, N>::load_aligned(const U* src)
+        -> typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
+    {
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            this->m_real[i] = static_cast<real_value_type>(src[i]);
+            this->m_imag[i] = real_value_type(0);
+        }
+        return *this;
+    }
+
+    template <class T, std::size_t N>
+    template <class U>
+    inline auto batch<std::complex<T>, N>::load_unaligned(const U* src)
+        -> typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
     {
         return load_aligned(src);
     }
@@ -1023,7 +1066,8 @@ namespace xsimd
 
     template <class T, std::size_t N, bool i3ec>
     template <class U>
-    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_aligned(const U* src) -> self_type&
+    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_aligned(const U* src)
+        -> typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
     {
         std::tie(this->m_real, this->m_imag) = detail::load_complex_impl<N, real_batch>(src);
         return *this;
@@ -1031,7 +1075,29 @@ namespace xsimd
 
     template <class T, std::size_t N, bool i3ec>
     template <class U>
-    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_unaligned(const U* src) -> self_type&
+    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_unaligned(const U* src)
+        -> typename std::enable_if<detail::is_complex<U>::value, self_type&>::type
+    {
+        return load_aligned(src);
+    }
+
+    template <class T, std::size_t N, bool i3ec>
+    template <class U>
+    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_aligned(const U* src)
+        -> typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
+    {
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            this->m_real[i] = static_cast<real_value_type>(src[i]);
+            this->m_imag[i] = real_value_type(0);
+        }
+        return *this;
+    }
+
+    template <class T, std::size_t N, bool i3ec>
+    template <class U>
+    inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_unaligned(const U* src)
+        -> typename std::enable_if<!detail::is_complex<U>::value, self_type&>::type
     {
         return load_aligned(src);
     }

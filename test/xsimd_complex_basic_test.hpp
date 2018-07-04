@@ -587,8 +587,10 @@ namespace xsimd
 
         float_vector f_vec_real;
         float_vector f_vec_imag;
+        float_vector f_vec_zero;
         double_vector d_vec_real;
         double_vector d_vec_imag;
+        double_vector d_vec_zero;
         float_complex_vector fc_vec;
         double_complex_vector dc_vec;
 
@@ -602,16 +604,20 @@ namespace xsimd
     {
         f_vec_real.resize(N);
         f_vec_imag.resize(N);
+        f_vec_zero.resize(N);
         d_vec_real.resize(N);
         d_vec_imag.resize(N);
+        d_vec_zero.resize(N);
         fc_vec.resize(N);
         dc_vec.resize(N);
         for (std::size_t i = 0; i < N; ++i)
         {
             f_vec_real[i] = float(2 * i);
             f_vec_imag[i] = float(2 * i + 1);
+            f_vec_zero[i] = float(0);
             d_vec_real[i] = double(2 * i);
             d_vec_imag[i] = double(2 * i + 1);
+            d_vec_zero[i] = double(0);
             fc_vec[i] = float_complex(f_vec_real[i], f_vec_imag[i]);
             dc_vec[i] = double_complex(d_vec_real[i], d_vec_imag[i]);
         }
@@ -664,6 +670,18 @@ namespace xsimd
         double_complex_vector dc_res(tester.dc_vec.size());
         dres.store_aligned(dc_res.data());
         tmp_success = check_almost_equal(topic, dc_res, tester.dc_vec, out);
+        success = tmp_success && success;
+
+        topic = "load float complex r : ";
+        fref.load_aligned(tester.f_vec_real.data(), tester.f_vec_zero.data());
+        fres.load_aligned(tester.f_vec_real.data());
+        tmp_success = all(fres.real() == fref.real()) && all(fres.imag() == fref.imag());
+        success = tmp_success && success;
+
+        topic = "load double complex r: ";
+        dref.load_aligned(tester.d_vec_real.data(), tester.d_vec_zero.data());
+        dres.load_aligned(tester.d_vec_real.data());
+        tmp_success = all(dres.real() == dref.real()) && all(dres.imag() == dref.imag());
         success = tmp_success && success;
 
         return success;
