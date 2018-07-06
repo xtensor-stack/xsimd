@@ -353,7 +353,7 @@ namespace xsimd
 
     inline batch<float, 8>& batch<float, 8>::load_unaligned(const char* src)
     {
-        load_aligned(src);
+        return load_aligned(src);
     }
 
     inline batch<float, 8>& batch<float, 8>::load_aligned(const unsigned char* src)
@@ -366,7 +366,7 @@ namespace xsimd
 
     inline batch<float, 8>& batch<float, 8>::load_unaligned(const unsigned char* src)
     {
-        load_aligned(src);
+        return load_aligned(src);
     }
 
     inline void batch<float, 8>::store_aligned(float* dst) const
