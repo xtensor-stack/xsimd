@@ -40,6 +40,18 @@ namespace xsimd
      * simd_complex_batch_bool *
      ***************************/
 
+     /**
+      * @class simd_complex_batch_bool
+      * @brief Base class for complex batch of boolean values.
+      *
+      * The simd_complex_batch_bool class is the base class for all classes representing
+      * a complex batch of boolean values. Complex batch of boolean values is meant for operations
+      * that may involve batches of complex vnmubers. Thus, the boolean values are stored as floating
+      * point values, and each type of batch of complex has its dedicated type of boolean batch.
+      *
+      * @tparam X The derived type
+      * @sa simd_complex_batch
+      */
     template <class X>
     class simd_complex_batch_bool : public simd_batch_bool<X>
     {
@@ -116,6 +128,21 @@ namespace xsimd
 #endif
     }
 
+    /**
+     * @class simd_complex_batch
+     * @brief Base class for batch complex numbers.
+     *
+     * The simd_complex_batch class is the base class for all classes representing
+     * a batch of complex numbers. Each type of batch (i.e. a class inheriting from
+     * simd_complex_batch) has its dedicated type of boolean batch (i.e. a class
+     * inheriting from simd_complex_batch_bool) for logical operations.
+     *
+     * Internally, a batch of complex numbers holds two batches of real numbers, one
+     * for the real part and one for the imaginary part.
+     *
+     * @tparam X The derived type
+     * @sa simd_complex_batch_bool
+     */
     template <class X>
     class simd_complex_batch
     {
@@ -285,12 +312,20 @@ namespace xsimd
      * xsimd_complex_batch_bool implementation *
      *******************************************/
 
+    /**
+     * Initializes all the values of the batch to \c b 
+     */
     template <class X>
     inline simd_complex_batch_bool<X>::simd_complex_batch_bool(bool b)
         : m_value(b)
     {
     }
 
+    /**
+     * Initializes the values of the batch with those of the real batch \c b.
+     * A real batch contains scalars whose type is the \c value_type of
+     * the complex number type.
+     */
     template <class X>
     inline simd_complex_batch_bool<X>::simd_complex_batch_bool(const real_batch& b)
         : m_value(b)
@@ -381,54 +416,89 @@ namespace xsimd
      * xsimd_complex_batch implementation *
      **************************************/
 
+    /**
+     * Initializes all the values of the batch to the complex value \c v.
+     */
     template <class X>
     inline simd_complex_batch<X>::simd_complex_batch(const value_type& v)
         : m_real(v.real()), m_imag(v.imag())
     {
     }
 
+    /**
+     * Initializes all the values of the batch to the real value \c v.
+     */
     template <class X>
     inline simd_complex_batch<X>::simd_complex_batch(const real_value_type& v)
         : m_real(v), m_imag(real_value_type(0))
     {
     }
 
+    /**
+     * Initializes the values of the batch whith those of the real batch \c re.
+     * Imaginary parts are set to 0.
+     */
     template <class X>
     inline simd_complex_batch<X>::simd_complex_batch(const real_batch& re)
         : m_real(re), m_imag(real_value_type(0))
     {
     }
 
+    /**
+     * Initializes the batch with two real batch, one for the real part and one for the inamginary
+     * part.
+     */
     template <class X>
     inline simd_complex_batch<X>::simd_complex_batch(const real_batch& re, const real_batch& im)
         : m_real(re), m_imag(im)
     {
     }
 
+    /**
+     * Returns a batch for the real part.
+     */
     template <class X>
     inline auto simd_complex_batch<X>::real() -> real_batch&
     {
         return m_real;
     }
 
+    /**
+     * Returns a batch for the imaginary part.
+     */
     template <class X>
     inline auto simd_complex_batch<X>::imag() -> real_batch&
     {
         return m_imag;
     }
 
+    /**
+     * Returns a const batch for the real part
+     */
     template <class X>
     inline auto simd_complex_batch<X>::real() const -> const real_batch&
     {
         return m_real;
     }
 
+    /**
+     * Returns a const batch for the imaginary part.
+     */
     template <class X>
     inline auto simd_complex_batch<X>::imag() const -> const real_batch&
     {
         return m_imag;
     }
 
+    /**
+     * @name Arithmetic computed assignment
+     */
+    //@{
+    /**
+     * Adds the batch \c rhs to \c this.
+     * @param rhs the batch to add.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator+=(const X& rhs)
     {
@@ -437,12 +507,22 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Adds the scalar \c rhs to each value contained in \c this.
+     * @param rhs the scalar to add.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator+=(const value_type& rhs)
     {
         return (*this)() += X(rhs);
     }
 
+    /**
+     * Adds the real batch \c rhs to \c this.
+     * @param rhs the real batch to add.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator+=(const real_batch& rhs)
     {
@@ -450,12 +530,22 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Adds the real scalar \c rhs to each value contained in \c this.
+     * @param rhs the real scalar to add.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator+=(const real_value_type& rhs)
     {
         return (*this)() += real_batch(rhs);
     }
 
+    /**
+     * Substracts the batch \c rhs to \c this.
+     * @param rhs the batch to substract.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator-=(const X& rhs)
     {
@@ -464,12 +554,22 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Substracts the scalar \c rhs to each value contained in \c this.
+     * @param rhs the scalar to substract.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator-=(const value_type& rhs)
     {
         return (*this)() -= X(rhs);
     }
 
+    /**
+     * Substracts the real batch \c rhs to \c this.
+     * @param rhs the batch to substract.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator-=(const real_batch& rhs)
     {
@@ -477,6 +577,11 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Substracts the real scalar \c rhs to each value contained in \c this.
+     * @param rhs the real scalar to substract.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator-=(const real_value_type& rhs)
     {
@@ -511,6 +616,11 @@ namespace xsimd
         };
     }
 
+    /**
+     * Multiplies \c this with the batch \c rhs.
+     * @param rhs the batch involved in the multiplication.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator*=(const X& rhs)
     {
@@ -519,12 +629,22 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Multiplies each scalar contained in \c this with the scalar \c rhs.
+     * @param rhs the scalar involved in the multiplication.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator*=(const value_type& rhs)
     {
         return (*this)() *= X(rhs);
     }
 
+    /**
+     * Multiplies \c this with the real batch \c rhs.
+     * @param rhs the real batch involved in the multiplication.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator*=(const real_batch& rhs)
     {
@@ -533,12 +653,22 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Multiplies each scalar contained in \c this with the real scalar \c rhs.
+     * @param rhs the real scalar involved in the multiplication.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator*=(const real_value_type& rhs)
     {
         return (*this)() *= real_batch(rhs);
     }
 
+    /**
+     * Divides \c this by the batch \c rhs.
+     * @param rhs the batch involved in the division.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator/=(const X& rhs)
     {
@@ -547,12 +677,22 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Divides each scalar contained in \c this by the scalar \c rhs.
+     * @param rhs the scalar involved in the division.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator/=(const value_type& rhs)
     {
         return (*this)() /= X(rhs);
     }
 
+    /**
+     * Divides \c this by the real batch \c rhs.
+     * @param rhs the real batch involved in the division.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator/=(const real_batch& rhs)
     {
@@ -561,12 +701,28 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Divides each scalar contained in \c this by the real scalar \c rhs.
+     * @param rhs the real scalar involved in the division.
+     * @return a reference to \c this.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator/=(const real_value_type& rhs)
     {
         return (*this)() /= real_batch(rhs);
     }
+    //@}
 
+    /**
+     * @name Load and store methods
+     */
+    //@{
+    /**
+     * Loads the N contiguous values pointed by \c real_src into the batch holding
+     * the real values, and N contiguous values pointed by \c imag_src into the
+     * batch holding the imaginary values.
+     * \c real_src and \c imag_src must be aligned.
+     */
     template <class X>
     template <class T>
     inline X& simd_complex_batch<X>::load_aligned(const T* real_src, const T* imag_src)
@@ -576,6 +732,12 @@ namespace xsimd
         return (*this)();
     }
 
+    /**
+     * Loads the N contiguous values pointed by \c real_src into the batch holding
+     * the real values, and N contiguous values pointed by \c imag_src into the
+     * batch holding the imaginary values.
+     * \c real_src and \c imag_src are not required to be aligned.
+     */
     template <class X>
     template <class T>
     inline X& simd_complex_batch<X>::load_unaligned(const T* real_src, const T* imag_src)
@@ -585,6 +747,12 @@ namespace xsimd
         return (*this)();
     }
     
+    /**
+     * Stores the N values of the batch holding the real values into a contiguous array
+     * pointed by \c real_dst., and the N values of the batch holding the imaginary values
+     * into a contiguous array pointer by \c imag_dst.
+     * \c real_dst and \c imag_dst must be aligned.
+     */
     template <class X>
     template <class T>
     inline void simd_complex_batch<X>::store_aligned(T* real_dst, T* imag_dst) const
@@ -593,6 +761,12 @@ namespace xsimd
         m_imag.store_aligned(imag_dst);
     }
 
+    /**
+     * Stores the N values of the batch holding the real values into a contiguous array
+     * pointed by \c real_dst., and the N values of the batch holding the imaginary values
+     * into a contiguous array pointer by \c imag_dst.
+     * \c real_dst and \c imag_dst are not required to be aligned.
+     */
     template <class X>
     template <class T>
     inline void simd_complex_batch<X>::store_unaligned(T* real_dst, T* imag_dst) const
@@ -601,6 +775,10 @@ namespace xsimd
         m_imag.store_unaligned(imag_dst);
     }
 
+    /**
+     * Loads the N contiguous values pointed by \c src into the batch.
+     * \c src must be aligned.
+     */
     template <class X>
     template <class T>
     inline typename std::enable_if<detail::is_complex<T>::value, X&>::type
@@ -614,6 +792,10 @@ namespace xsimd
         return (*this)().load_complex(hi, lo);
     }
 
+    /**
+     * Loads the N contiguous values pointed by \c src into the batch.
+     * \c src is not required to be aligned.
+     */
     template <class X>
     template <class T>
     inline typename std::enable_if<detail::is_complex<T>::value, X&>::type
@@ -627,6 +809,7 @@ namespace xsimd
         return (*this)().load_complex(hi, lo);
     }
 
+    ///@cond DOXYGEN_INCLUDE_SFINAE
     template <class X>
     template <class T>
     inline typename std::enable_if<!detail::is_complex<T>::value, X&>::type
@@ -646,7 +829,12 @@ namespace xsimd
         m_imag = real_batch(real_value_type(0));
         return (*this)();
     }
+    /// @endcond
 
+    /**
+     * Stores the N values of the batch into a contiguous array
+     * pointed by \c dst. \c dst must be aligned.
+     */
     template <class X>
     template <class T>
     inline void simd_complex_batch<X>::store_aligned(T* dst) const
@@ -659,6 +847,10 @@ namespace xsimd
         lo.store_aligned(rbuf + size);
     }
 
+    /**
+     * Stores the N values of the batch into a contiguous array
+     * pointed by \c dst. \c dst is not required to be aligned.
+     */
     template <class X>
     template <class T>
     inline void simd_complex_batch<X>::store_unaligned(T* dst) const
@@ -670,6 +862,7 @@ namespace xsimd
         hi.store_unaligned(rbuf);
         lo.store_unaligned(rbuf + size);
     }
+    //@}
 
     template <class X>
     inline auto simd_complex_batch<X>::operator[](std::size_t index) const -> value_type
@@ -677,28 +870,60 @@ namespace xsimd
         return value_type(m_real[index], m_imag[index]);
     }
 
+    /**
+     * @name Static downcast functions
+     */
+    //@{
+    /**
+     * Returns a reference to the actual derived type of the simd_batch_bool.
+     */
     template <class X>
     inline X& simd_complex_batch<X>::operator()()
     {
         return *static_cast<X*>(this);
     }
 
+    /**
+     * Returns a constant reference to the actual derived type of the simd_batch_bool.
+     */
     template <class X>
     inline const X& simd_complex_batch<X>::operator()() const
     {
         return *static_cast<const X*>(this);
     }
+    //@}
 
     /********************************
      * simd_complex_batch operators *
      ********************************/
 
+    /**
+     * @defgroup simd_complex_batch_arithmetic Arithmetic operators
+     */
+
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the opposite of the batch \c rhs.
+     * @tparam X the actual type of batch.
+     * @param rhs batch involved in the operation.
+     * @return the opposite of \c rhs.
+     */
     template <class X>
     inline X operator-(const simd_complex_batch<X>& rhs)
     {
         return X(-rhs().real(), -rhs().imag());
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the sum of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the addition.
+     * @param rhs batch involved in the addition.
+     * @return the result of the addition.
+     */
     template <class X>
     inline X operator+(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -706,6 +931,17 @@ namespace xsimd
         return tmp += rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the sum of the batch \c lhs and the scalar \c rhs. Equivalent to the
+     * sum of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the addition.
+     * @param rhs scalar involved in the addition.
+     * @return the result of the addition.
+     */
     template <class X>
     inline X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
@@ -713,6 +949,17 @@ namespace xsimd
         return tmp += X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the sum of the scalar \c lhs and the batch \c rhs. Equivalent to the
+     * sum of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs scalar involved in the addition.
+     * @param rhs batch involved in the addition.
+     * @return the result of the addition.
+     */
     template <class X>
     inline X operator+(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -720,6 +967,15 @@ namespace xsimd
         return tmp += rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the sum of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the addition.
+     * @param rhs real batch involved in the addition.
+     * @return the result of the addition.
+     */
     template <class X>
     inline X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
     {
@@ -727,6 +983,15 @@ namespace xsimd
         return tmp += X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the sum of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real batch involved in the addition.
+     * @param rhs batch involved in the addition.
+     * @return the result of the addition.
+     */
     template <class X>
     inline X operator+(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -734,6 +999,17 @@ namespace xsimd
         return tmp += rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the sum of the batch \c lhs and the real scalar \c rhs. Equivalent to the
+     * sum of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the addition.
+     * @param rhs real scalar involved in the addition.
+     * @return the result of the addition.
+     */
     template <class X>
     inline X operator+(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
     {
@@ -741,6 +1017,17 @@ namespace xsimd
         return tmp += X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the sum of the real scalar \c lhs and the batch \c rhs. Equivalent to the
+     * sum of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real scalar involved in the addition.
+     * @param rhs batch involved in the addition.
+     * @return the result of the addition.
+     */
     template <class X>
     inline X operator+(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -748,6 +1035,15 @@ namespace xsimd
         return tmp += rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the difference of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the difference.
+     * @param rhs batch involved in the difference.
+     * @return the result of the difference.
+     */
     template <class X>
     inline X operator-(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -755,6 +1051,17 @@ namespace xsimd
         return tmp -= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the difference of the batch \c lhs and the scalar \c rhs. Equivalent to the
+     * difference of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the difference.
+     * @param rhs scalar involved in the difference.
+     * @return the result of the difference.
+     */
     template <class X>
     inline X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
@@ -762,6 +1069,17 @@ namespace xsimd
         return tmp -= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the difference of the scalar \c lhs and the batch \c rhs. Equivalent to the
+     * difference of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs scalar involved in the difference.
+     * @param rhs batch involved in the difference.
+     * @return the result of the difference.
+     */
     template <class X>
     inline X operator-(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -769,6 +1087,15 @@ namespace xsimd
         return tmp -= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the difference of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the difference.
+     * @param rhs real batch involved in the difference.
+     * @return the result of the difference.
+     */
     template <class X>
     inline X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
     {
@@ -776,6 +1103,15 @@ namespace xsimd
         return tmp -= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the difference of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real batch involved in the difference.
+     * @param rhs batch involved in the difference.
+     * @return the result of the difference.
+     */
     template <class X>
     inline X operator-(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -783,6 +1119,17 @@ namespace xsimd
         return tmp -= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the difference of the batch \c lhs and the real scalar \c rhs. Equivalent to the
+     * difference of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the difference.
+     * @param rhs real scalar involved in the difference.
+     * @return the result of the difference.
+     */
     template <class X>
     inline X operator-(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
     {
@@ -790,6 +1137,17 @@ namespace xsimd
         return tmp -= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the difference of the real scalar \c lhs and the batch \c rhs. Equivalent to the
+     * difference of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real scalar involved in the difference.
+     * @param rhs batch involved in the difference.
+     * @return the result of the difference.
+     */
     template <class X>
     inline X operator-(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -797,6 +1155,15 @@ namespace xsimd
         return tmp -= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the product of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the product.
+     * @param rhs batch involved in the product.
+     * @return the result of the product.
+     */
     template <class X>
     inline X operator*(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -804,6 +1171,17 @@ namespace xsimd
         return tmp *= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the product of the batch \c lhs and the scalar \c rhs. Equivalent to the
+     * product of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the product.
+     * @param rhs scalar involved in the product.
+     * @return the result of the product.
+     */
     template <class X>
     inline X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
@@ -811,6 +1189,17 @@ namespace xsimd
         return tmp *= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the product of the scalar \c lhs and the batch \c rhs. Equivalent to the
+     * difference of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs scalar involved in the product.
+     * @param rhs batch involved in the product.
+     * @return the result of the product.
+     */
     template <class X>
     inline X operator*(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -818,6 +1207,15 @@ namespace xsimd
         return tmp *= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the product of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the product.
+     * @param rhs real batch involved in the product.
+     * @return the result of the product.
+     */
     template <class X>
     inline X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
     {
@@ -825,6 +1223,15 @@ namespace xsimd
         return tmp *= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the product of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real batch involved in the product.
+     * @param rhs batch involved in the product.
+     * @return the result of the product.
+     */
     template <class X>
     inline X operator*(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -832,6 +1239,17 @@ namespace xsimd
         return tmp *= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the product of the batch \c lhs and the real scalar \c rhs. Equivalent to the
+     * product of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the product.
+     * @param rhs real scalar involved in the product.
+     * @return the result of the product.
+     */
     template <class X>
     inline X operator*(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
     {
@@ -839,6 +1257,17 @@ namespace xsimd
         return tmp *= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the product of the real scalar \c lhs and the batch \c rhs. Equivalent to the
+     * difference of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real scalar involved in the product.
+     * @param rhs batch involved in the product.
+     * @return the result of the product.
+     */
     template <class X>
     inline X operator*(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -846,6 +1275,15 @@ namespace xsimd
         return tmp *= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the division of the batch \c lhs by the batch \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the division.
+     * @param rhs batch involved in the division.
+     * @return the result of the division.
+     */
     template <class X>
     inline X operator/(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -853,12 +1291,35 @@ namespace xsimd
         return tmp /= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the division of the batch \c lhs by the scalar \c rhs. Equivalent to the
+     * division of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the division.
+     * @param rhs scalar involved in the division.
+     * @return the result of the division.
+     */
     template <class X>
     inline X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)
     {
         X tmp(lhs());
         return tmp /= X(rhs);
     }
+
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the division of the scalar \c lhs and the batch \c rhs. Equivalent to the
+     * difference of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs scalar involved in the division.
+     * @param rhs batch involved in the division.
+     * @return the result of the division.
+     */
     template <class X>
     inline X operator/(const typename simd_batch_traits<X>::value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -866,6 +1327,15 @@ namespace xsimd
         return tmp /= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the division of the batch \c lhs by the batch \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the division.
+     * @param rhs real batch involved in the division.
+     * @return the result of the division.
+     */
     template <class X>
     inline X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_batch& rhs)
     {
@@ -873,6 +1343,15 @@ namespace xsimd
         return tmp /= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the division of the batch \c lhs by the batch \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real batch involved in the division.
+     * @param rhs batch involved in the division.
+     * @return the result of the division.
+     */
     template <class X>
     inline X operator/(const typename simd_batch_traits<X>::real_batch& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -880,6 +1359,17 @@ namespace xsimd
         return tmp /= rhs();
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the division of the batch \c lhs by the real scalar \c rhs. Equivalent to the
+     * division of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the division.
+     * @param rhs real scalar involved in the division.
+     * @return the result of the division.
+     */
     template <class X>
     inline X operator/(const simd_complex_batch<X>& lhs, const typename simd_batch_traits<X>::real_value_type& rhs)
     {
@@ -887,6 +1377,17 @@ namespace xsimd
         return tmp /= X(rhs);
     }
 
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * Computes the division of the real scalar \c lhs and the batch \c rhs. Equivalent to the
+     * difference of two batches where all the values of the first one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs real scalar involved in the division.
+     * @param rhs batch involved in the division.
+     * @return the result of the division.
+     */
     template <class X>
     inline X operator/(const typename simd_batch_traits<X>::real_value_type& lhs, const simd_complex_batch<X>& rhs)
     {
@@ -894,6 +1395,18 @@ namespace xsimd
         return tmp /= rhs();
     }
 
+
+    /**
+     * @defgroup simd_complex_batch_reducers Reducers
+     */
+
+    /**
+     * @ingroup simd_complex_batch_reducers
+     *
+     * Adds all the scalars of the batch \c rhs.
+     * @param rhs batch involved in the reduction
+     * @return the result of the reduction.
+     */
     template <class X>
     inline typename simd_batch_traits<X>::value_type
     hadd(const simd_complex_batch<X>& rhs)
@@ -902,6 +1415,24 @@ namespace xsimd
         return value_type(hadd(rhs.real()), hadd(rhs.imag()));
     }
 
+    /**
+     * @defgroup simd_complex_batch_miscellaneous Miscellaneous
+     */
+
+    /**
+    * @ingroup simd_complex_batch_miscellaneous
+    *
+    * Ternary operator for batches: selects values from the batches \c a or \c b
+    * depending on the boolean values in \c cond. Equivalent to
+    * \code{.cpp}
+    * for(std::size_t i = 0; i < N; ++i)
+    *     res[i] = cond[i] ? a[i] : b[i];
+    * \endcode
+    * @param cond batch condition.
+    * @param a batch values for truthy condition.
+    * @param b batch value for falsy condition.
+    * @return the result of the selection.
+    */
     template <class X>
     inline X select(const typename simd_batch_traits<X>::batch_bool_type& cond,
                     const simd_complex_batch<X>& a,
@@ -910,6 +1441,18 @@ namespace xsimd
         return X(select(cond.value(), a.real(), b.real()), select(cond.value(), a.imag(), b.imag()));
     }
 
+    /**
+     * @defgroup simd_complex_batch_comparison Comparison operators
+     */
+
+    /**
+     * @ingroup simd_complex_batch_comparison
+     *
+     * Element-wise equality comparison of batches \c lhs and \c rhs.
+     * @param lhs batch involved in the comparison.
+     * @param rhs batch involved in the comparison.
+     * @return a boolean batch.
+     */
     template <class X>
     inline typename simd_batch_traits<X>::batch_bool_type
     operator==(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
@@ -917,6 +1460,14 @@ namespace xsimd
         return (lhs.real() == rhs.real()) && (lhs.imag() == rhs.imag());
     }
 
+    /**
+     * @ingroup simd_complex_batch_comparison
+     *
+     * Element-wise inequality comparison of batches \c lhs and \c rhs.
+     * @param lhs batch involved in the comparison.
+     * @param rhs batch involved in the comparison.
+     * @return a boolean batch.
+     */
     template <class X>
     inline typename simd_batch_traits<X>::batch_bool_type
     operator!=(const simd_complex_batch<X>& lhs, const simd_complex_batch<X>& rhs)
@@ -924,6 +1475,13 @@ namespace xsimd
         return !(lhs == rhs);
     }
 
+    /**
+     * Insert the batch \c rhs into the stream \c out.
+     * @tparam X the actual type of batch.
+     * @param out the output stream.
+     * @param rhs the batch to output.
+     * @return the output stream.
+     */
     template <class X>
     inline std::ostream& operator<<(std::ostream& out, const simd_complex_batch<X>& rhs)
     {

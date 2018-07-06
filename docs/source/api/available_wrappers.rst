@@ -52,49 +52,61 @@ Depending on the value of XSIMD_X86_INSTR_SET, the following wrappers are availa
 
 - XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 
-+-------------------+------------------------+
-| batch             | batch_bool             |
-+===================+========================+
-| batch<float, 4>   | batch_bool<float, 4>   |
-+-------------------+------------------------+
-| batch<int32_t, 4> | batch_bool<int32_t, 4> |
-+-------------------+------------------------+
-| batch<double, 2>  | batch_bool<double, 2>  |
-+-------------------+------------------------+
-| batch<int64_t, 2> | batch_bool<int64_t, 2> |
-+-------------------+------------------------+
++--------------------------------+-------------------------------------+
+| batch                          | batch_bool                          |
++================================+=====================================+
+| batch<float, 4>                | batch_bool<float, 4>                |
++--------------------------------+-------------------------------------+
+| batch<int32_t, 4>              | batch_bool<int32_t, 4>              |
++--------------------------------+-------------------------------------+
+| batch<double, 2>               | batch_bool<double, 2>               |
++--------------------------------+-------------------------------------+
+| batch<int64_t, 2>              | batch_bool<int64_t, 2>              |
++--------------------------------+-------------------------------------+
+| batch<std::complex<float>, 4>  | batch_bool<std::complex<float>, 4>  |
++--------------------------------+-------------------------------------+
+| batch<std::complex<double>, 2> | batch_bool<std::complex<double>, 2> |
++--------------------------------+-------------------------------------+
 
 - XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 
 In addition to the wrappers defined above, the following wrappers are available:
 
-+-------------------+------------------------+
-| batch             | batch_bool             |
-+===================+========================+
-| batch<float, 8>   | batch_bool<float, 8>   |
-+-------------------+------------------------+
-| batch<int32_t, 8> | batch_bool<int32_t, 8> |
-+-------------------+------------------------+
-| batch<double, 4>  | batch_bool<double, 4>  |
-+-------------------+------------------------+
-| batch<int64_t, 4> | batch_bool<int64_t, 4> |
-+-------------------+------------------------+
++--------------------------------+-------------------------------------+
+| batch                          | batch_bool                          |
++================================+=====================================+
+| batch<float, 8>                | batch_bool<float, 8>                |
++--------------------------------+-------------------------------------+
+| batch<int32_t, 8>              | batch_bool<int32_t, 8>              |
++--------------------------------+-------------------------------------+
+| batch<double, 4>               | batch_bool<double, 4>               |
++--------------------------------+-------------------------------------+
+| batch<int64_t, 4>              | batch_bool<int64_t, 4>              |
++--------------------------------+-------------------------------------+
+| batch<std::complex<float>, 8>  | batch_bool<std::complex<float>, 8>  |
++--------------------------------+-------------------------------------+
+| batch<std::complex<double>, 4> | batch_bool<std::complex<double>, 4> |
++--------------------------------+-------------------------------------+
 
 - XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
 
 In addition to the wrappers defined above, the followinf wrappers are available:
 
-+-------------------+------------------------+
-| batch             | batch_bool             |
-+===================+========================+
-| batch<float, 16>  | batch_bool<float, 16>  |
-+-------------------+------------------------+
-| batch<int32_t, 16>| batch_bool<int32_t, 16>|
-+-------------------+------------------------+
-| batch<double, 8>  | batch_bool<double, 8>  |
-+-------------------+------------------------+
-| batch<int64_t, 8> | batch_bool<int64_t, 8> |
-+-------------------+------------------------+
++--------------------------------+-------------------------------------+
+| batch                          | batch_bool                          |
++================================+=====================================+
+| batch<float, 16>               | batch_bool<float, 16>               |
++--------------------------------+-------------------------------------+
+| batch<int32_t, 16>             | batch_bool<int32_t, 16>             |
++--------------------------------+-------------------------------------+
+| batch<double, 8>               | batch_bool<double, 8>               |
++--------------------------------+-------------------------------------+
+| batch<int64_t, 8>              | batch_bool<int64_t, 8>              |
++--------------------------------+-------------------------------------+
+| batch<std::complex<float>, 16> | batch_bool<std::complex<float>, 16> |
++--------------------------------+-------------------------------------+
+| batch<std::complex<double>, 8> | batch_bool<std::complex<double>, 8> |
++--------------------------------+-------------------------------------+
 
 ARM architecture
 ----------------
@@ -103,22 +115,37 @@ Depending on the value of XSIMD_ARM_INSTR_SET, the following wrappers are availa
 
 - XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
 
-+-------------------+------------------------+
-| batch             | batch_bool             |
-+-------------------+------------------------+
-| batch<float, 4>   | batch_bool<float, 4>   |
-+-------------------+------------------------+
-| batch<int32_t, 4> | batch_bool<int32_t, 4> |
-+-------------------+------------------------+
-| batch<int64_t, 2> | batch_bool<int64_t, 2> |
-+-------------------+------------------------+
++--------------------------------+-------------------------------------+
+| batch                          | batch_bool                          |
++================================+=====================================+
+| batch<float, 4>                | batch_bool<float, 4>                |
++--------------------------------+-------------------------------------+
+| batch<int32_t, 4>              | batch_bool<int32_t, 4>              |
++--------------------------------+-------------------------------------+
+| batch<int64_t, 2>              | batch_bool<int64_t, 2>              |
++--------------------------------+-------------------------------------+
+| batch<std::complex<float>, 4>  | batch_bool<std::complex<float>, 4>  |
++--------------------------------+-------------------------------------+
 
 - XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
 
 In addition to the wrappers defined above, the following wrapper is available:
 
-+-------------------+------------------------+
-| batch             | batch_bool             |
-+-------------------+------------------------+
-| batch<double, 2>  | batch_bool<double, 2>  |
-+-------------------+------------------------+
++--------------------------------+-------------------------------------+
+| batch                          | batch_bool                          |
++================================+=====================================+
+| batch<double, 2>               | batch_bool<double, 2>               |
++--------------------------------+-------------------------------------+
+| batch<std::complex<double>, 2> | batch_bool<std::complex<double>, 2> |
++--------------------------------+-------------------------------------+
+
+Warning: support for ``std::complex`` on ARM is still experimental. You may
+experience accuracy errors with ``std::complex<float>``.
+
+XTL complex support
+-------------------
+
+If the preprocessor token ``XSIMD_ENABLE_XTL_COMPLEX`` is defined, ``xsimd``
+provides batches for ``xtl::xcomplex``, similar to those for ``std::complex``.
+This requires ``xtl`` to be installed.
+

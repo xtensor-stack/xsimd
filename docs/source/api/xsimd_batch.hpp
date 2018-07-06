@@ -77,7 +77,7 @@ namespace xsimd
         explicit batch(T f);
 
         /**
-         * Initializes a batch with the specified boolean values.
+         * Initializes a batch with the specified scalar values.
          */
         batch(T f0, ..., T f3);
 
