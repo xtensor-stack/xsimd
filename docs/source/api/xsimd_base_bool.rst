@@ -28,14 +28,14 @@ Logical operators
 Comparison operators
 --------------------
 
-.. doxygengroup:: batch_bool_comparison
+.. doxygengroup:: simd_batch_bool_comparison
    :project: xsimd
    :content-only:
    
 Reducers
 --------
 
-.. doxygengroup:: batch_bool_reducers
+.. doxygengroup:: simd_batch_bool_reducers
    :project: xsimd
    :content-only:
 

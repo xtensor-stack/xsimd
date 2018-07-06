@@ -8,11 +8,11 @@ Basic functions
 ===============
 
 .. _abs-function-reference:
-.. doxygenfunction:: abs(const batch<T, N>& )
+.. doxygenfunction:: abs(const simd_batch<X>& )
    :project: xsimd
 
 .. _fabs-function-reference:
-.. doxygenfunction:: fabs(const batch<T, N>& )
+.. doxygenfunction:: fabs(const simd_batch<X>& )
    :project: xsimd
 
 .. _fmod-function-reference:
@@ -24,35 +24,35 @@ Basic functions
    :project: xsimd
 
 .. _fma-function-reference:
-.. doxygenfunction:: fma(const batch<T, N>&, const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: fma(const simd_batch<X>&, const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _fms-function-reference:
-.. doxygenfunction:: fms(const batch<T, N>&, const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: fms(const simd_batch<X>&, const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _fnma-function-reference:
-.. doxygenfunction:: fnma(const batch<T, N>&, const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: fnma(const simd_batch<X>&, const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _fnms-function-reference:
-.. doxygenfunction:: fnms(const batch<T, N>&, const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: fnms(const simd_batch<X>&, const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _min-function-reference:
-.. doxygenfunction:: min(const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: min(const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _max-function-reference:
-.. doxygenfunction:: max(const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: max(const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _fmin-function-reference:
-.. doxygenfunction:: fmin(const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: fmin(const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _fmax-function-reference:
-.. doxygenfunction:: fmax(const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: fmax(const simd_batch<X>&, const simd_batch<X>&)
    :project: xsimd
 
 .. _fdim-function-reference:

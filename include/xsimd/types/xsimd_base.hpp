@@ -499,9 +499,8 @@ namespace xsimd
     /**
      * @ingroup simd_batch_bool_bitwise
      *
-     * Computes the bitwise not of batches \c lhs and \c rhs.
+     * Computes the bitwise not of batch \c rhs.
      * @tparam X the actual type of boolean batch.
-     * @param lhs batch involved in the operation.
      * @param rhs batch involved in the operation.
      * @return the result of the bitwise not.
      */
@@ -965,6 +964,7 @@ namespace xsimd
      * @ingroup simd_batch_arithmetic
      *
      * Computes the opposite of the batch \c rhs.
+     * @tparam X the actual type of batch.
      * @param rhs batch involved in the operation.
      * @return the opposite of \c rhs.
      */
@@ -980,6 +980,7 @@ namespace xsimd
      * @ingroup simd_batch_arithmetic
      *
      * Computes the sum of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
      * @param lhs batch involved in the addition.
      * @param rhs batch involved in the addition.
      * @return the result of the addition.
@@ -1030,6 +1031,7 @@ namespace xsimd
      * @ingroup simd_batch_arithmetic
      *
      * Computes the difference of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
      * @param lhs batch involved in the difference.
      * @param rhs batch involved in the difference.
      * @return the result of the difference.
@@ -1080,6 +1082,7 @@ namespace xsimd
      * @ingroup simd_batch_arithmetic
      *
      * Computes the product of the batches \c lhs and \c rhs.
+     * @tparam X the actual type of batch.
      * @param lhs batch involved in the product.
      * @param rhs batch involved in the product.
      * @return the result of the product.
@@ -1130,6 +1133,7 @@ namespace xsimd
      * @ingroup simd_batch_arithmetic
      *
      * Computes the division of the batch \c lhs by the batch \c rhs.
+     * @tparam X the actual type of batch.
      * @param lhs batch involved in the division.
      * @param rhs batch involved in the division.
      * @return the result of the division.
@@ -1427,9 +1431,9 @@ namespace xsimd
     }
     
     /**
-     * Returns the smaller values of the batches \c x and \c y.
-     * @param x a batch of integer or floating point values.
-     * @param y a batch of integer or floating point values.
+     * Returns the smaller values of the batches \c lhs and \c rhs.
+     * @param lhs a batch of integer or floating point values.
+     * @param rhs a batch of integer or floating point values.
      * @return a batch of the smaller values.
      */
     template <class X>
@@ -1441,9 +1445,9 @@ namespace xsimd
     }
 
     /**
-     * Returns the larger values of the batches \c x and \c y.
-     * @param x a batch of integer or floating point values.
-     * @param y a batch of integer or floating point values.
+     * Returns the larger values of the batches \c lhs and \c rhs.
+     * @param lhs a batch of integer or floating point values.
+     * @param rhs a batch of integer or floating point values.
      * @return a batch of the larger values.
      */
     template <class X>
@@ -1455,9 +1459,9 @@ namespace xsimd
     }
 
     /**
-     * Returns the smaller values of the batches \c x and \c y.
-     * @param x a batch of floating point values.
-     * @param y a batch of floating point values.
+     * Returns the smaller values of the batches \c lhs and \c rhs.
+     * @param lhs a batch of floating point values.
+     * @param rhs a batch of floating point values.
      * @return a batch of the smaller values.
      */
     template <class X>
@@ -1469,9 +1473,9 @@ namespace xsimd
     }
 
     /**
-     * Returns the larger values of the batches \c x and \c y.
-     * @param x a batch of floating point values.
-     * @param y a batch of floating point values.
+     * Returns the larger values of the batches \c lhs and \c rhs.
+     * @param lhs a batch of floating point values.
+     * @param rhs a batch of floating point values.
      * @return a batch of the larger values.
      */
     template <class X>
@@ -1483,9 +1487,9 @@ namespace xsimd
     }
     
     /**
-     * Computes the absolute values of each scalar in the batch \c x.
-     * @param x batch of integer or floating point values.
-     * @return the asbolute values of \c x.
+     * Computes the absolute values of each scalar in the batch \c rhs.
+     * @param rhs batch of integer or floating point values.
+     * @return the asbolute values of \c rhs.
      */
     template <class X>
     inline X abs(const simd_batch<X>& rhs)
@@ -1496,9 +1500,9 @@ namespace xsimd
     }
 
     /**
-     * Computes the absolute values of each scalar in the batch \c x.
-     * @param x batch floating point values.
-     * @return the asbolute values of \c x.
+     * Computes the absolute values of each scalar in the batch \c rhs.
+     * @param rhs batch floating point values.
+     * @return the asbolute values of \c rhs.
      */
     template <class X>
     inline X fabs(const simd_batch<X>& rhs)
@@ -1509,9 +1513,9 @@ namespace xsimd
     }
 
     /**
-     * Computes the square root of the batch \c x.
-     * @param x batch of floating point values.
-     * @return the square root of \c x.
+     * Computes the square root of the batch \c rhs.
+     * @param rhs batch of floating point values.
+     * @return the square root of \c rhs.
      */
     template <class X>
     inline X sqrt(const simd_batch<X>& rhs)
@@ -1619,7 +1623,7 @@ namespace xsimd
     }
 
     /**
-     * @defgroup batch_miscellaneous Miscellaneous
+     * @defgroup simd_batch_miscellaneous Miscellaneous
      */
 
     /**

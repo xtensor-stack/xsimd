@@ -16,6 +16,6 @@ Classification functions
    :project: xsimd
 
 .. _isnan-func-ref:
-.. doxygenfunction:: isnan(const batch<T, N>&)
+.. doxygenfunction:: isnan(const simd_batch<X>&)
    :project: xsimd
 

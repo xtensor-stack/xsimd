@@ -4,53 +4,43 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-simd_batch
-==========
+simd_complex_batch
+==================
 
-.. doxygenclass:: xsimd::simd_batch
+.. doxygenclass:: xsimd::simd_complex_batch
    :project: xsimd
    :members:
 
 Arithmetic operators
 --------------------
 
-.. doxygengroup:: simd_batch_arithmetic
+.. doxygengroup:: simd_complex_batch_arithmetic
    :project: xsimd
    :content-only:
 
 Comparison operators
 --------------------
 
-.. doxygengroup:: simd_batch_comparison
-   :project: xsimd
-   :content-only:
-
-Bitwise operators
------------------
-
-.. doxygengroup:: simd_batch_bitwise
+.. doxygengroup:: simd_complex_batch_comparison
    :project: xsimd
    :content-only:
 
 Reducers
 --------
 
-.. doxygengroup:: simd_batch_reducers
+.. doxygengroup:: simd_complex_batch_reducers
    :project: xsimd
    :content-only:
 
 Miscellaneous
 -------------
 
-.. doxygengroup:: simd_batch_miscellaneous
+.. doxygengroup:: simd_complex_batch_miscellaneous
    :project: xsimd
    :content-only:
 
 Other operators
 ---------------
 
-.. doxygenfunction:: xsimd::operator!(const simd_batch<X>&)
-   :project: xsimd
-
-.. doxygenfunction:: xsimd::operator<<(std::ostream&, const simd_batch<X>&)
+.. doxygenfunction:: xsimd::operator<<(std::ostream&, const simd_complex_batch<X>&)
    :project: xsimd

@@ -12,7 +12,7 @@ Power functions
    :project: xsimd
 
 .. _sqrt-function-reference:
-.. doxygenfunction:: sqrt(const batch<T, N>&)
+.. doxygenfunction:: sqrt(const simd_batch<X>&)
    :project: xsimd
 
 .. _cbrt-function-reference:

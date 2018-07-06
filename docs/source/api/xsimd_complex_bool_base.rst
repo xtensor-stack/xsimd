@@ -4,15 +4,10 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Wrapper types
-=============
+simd_complex_batch_bool
+=======================
 
-.. toctree::
+.. doxygenclass:: xsimd::simd_complex_batch_bool
+   :project: xsimd
+   :members:
 
-   xsimd_base_bool
-   xsimd_base
-   xsimd_batch_bool
-   xsimd_batch
-   xsimd_complex_bool_base
-   xsimd_complex_base
-   available_wrappers
