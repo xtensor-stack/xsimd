@@ -11,7 +11,7 @@
 
 #include "xsimd_align.hpp"
 
-#define XSIMD_VERSION_MAJOR 5
+#define XSIMD_VERSION_MAJOR 6
 #define XSIMD_VERSION_MINOR 0
 #define XSIMD_VERSION_PATCH 0
 
