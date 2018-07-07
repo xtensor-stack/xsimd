@@ -139,8 +139,10 @@ In addition to the wrappers defined above, the following wrapper is available:
 | batch<std::complex<double>, 2> | batch_bool<std::complex<double>, 2> |
 +--------------------------------+-------------------------------------+
 
-Warning: support for ``std::complex`` on ARM is still experimental. You may
-experience accuracy errors with ``std::complex<float>``.
+.. warning::
+
+   Support for ``std::complex`` on ARM is still experimental. You may
+   experience accuracy errors with ``std::complex<float>``.
 
 XTL complex support
 -------------------
