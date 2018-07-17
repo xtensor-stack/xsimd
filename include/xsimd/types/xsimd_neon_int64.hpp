@@ -415,7 +415,7 @@ namespace xsimd
 
             static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
             {
-                return vbicq_u64(lhs, rhs);
+                return vbicq_s64(lhs, rhs);
             }
 
             static batch_type min(const batch_type& lhs, const batch_type& rhs)

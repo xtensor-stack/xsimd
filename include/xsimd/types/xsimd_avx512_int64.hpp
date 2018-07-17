@@ -38,11 +38,6 @@ namespace xsimd
     public:
         using base_class = batch_bool_avx512<__mmask8, batch_bool<int64_t, 8>>;
         using base_class::base_class;
-
-        batch_bool(bool b0, bool b1,  bool b2,  bool b3,  bool b4,  bool b5,  bool b6,  bool b7)
-            : base_class({{b0, b1, b2, b3, b4, b5, b6, b7}})
-        {
-        }
     };
 
     namespace detail

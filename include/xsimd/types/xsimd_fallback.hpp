@@ -1064,6 +1064,8 @@ namespace xsimd
      * batch<xtl::xcomplex<T, T, i3ec>, N> implementation *
      ******************************************************/
 
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+
     template <class T, std::size_t N, bool i3ec>
     template <class U>
     inline auto batch<xtl::xcomplex<T, T, i3ec>, N>::load_aligned(const U* src)
@@ -1115,6 +1117,8 @@ namespace xsimd
     {
         store_unaligned(dst);
     }
+
+#endif
 
     /***************************************
      * conversion functions implementation *

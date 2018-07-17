@@ -37,12 +37,6 @@ namespace xsimd
     public:
         using base_class = batch_bool_avx512<__mmask16, batch_bool<int32_t, 16>>;
         using base_class::base_class;
-
-        batch_bool(bool b0, bool b1,  bool b2,  bool b3,  bool b4,  bool b5,  bool b6,  bool b7,
-                   bool b8, bool b9, bool b10, bool b11, bool b12, bool b13, bool b14, bool b15)
-            : base_class({{b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15}})
-        {
-        }
     };
 
     namespace detail
@@ -419,22 +413,22 @@ namespace xsimd
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epu32_mask(lhs, rhs, _MM_CMPINT_EQ);
+                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_EQ);
             }
 
             static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epu32_mask(lhs, rhs, _MM_CMPINT_NE);
+                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_NE);
             }
 
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epu32_mask(lhs, rhs, _MM_CMPINT_LT);
+                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_LT);
             }
 
             static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epu32_mask(lhs, rhs, _MM_CMPINT_LE);
+                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_LE);
             }
 
             static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
@@ -499,6 +493,7 @@ namespace xsimd
 
             static value_type hadd(const batch_type& rhs)
             {
+                // TODO Why not _mm512_reduce_add_...?
                 __m256i tmp1 = _mm512_extracti32x8_epi32(rhs, 0);
                 __m256i tmp2 = _mm512_extracti32x8_epi32(rhs, 1);
                 __m256i res1 = tmp1 + tmp2;

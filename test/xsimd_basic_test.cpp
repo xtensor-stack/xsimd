@@ -146,6 +146,20 @@ TEST(xsimd, sse_double_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, sse_int8_basic)
+{
+    std::ofstream out("log/sse_int8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int8_t, 16, 16>(out, "sse int8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_uint8_basic)
+{
+    std::ofstream out("log/sse_uint8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<uint8_t, 16, 16>(out, "sse uint8");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, sse_int32_basic)
 {
     std::ofstream out("log/sse_int32_basic.log", std::ios_base::out);
@@ -249,9 +263,9 @@ TEST(xsimd, sse_xtl_xcomplex_double_load_store)
 #endif
 #endif
 
-/*******************
- * avx basic tests *
- *******************/
+  /*******************
+   * avx basic tests *
+   *******************/
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TEST(xsimd, avx_float_basic)
@@ -265,6 +279,20 @@ TEST(xsimd, avx_double_basic)
 {
     std::ofstream out("log/avx_double_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd<double, 4, 32>(out, "avx double");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_int8_basic)
+{
+    std::ofstream out("log/avx_int8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int8_t, 32, 32>(out, "avx int8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_uint8_basic)
+{
+    std::ofstream out("log/avx_uint8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<uint8_t, 32, 32>(out, "avx uint8");
     EXPECT_TRUE(res);
 }
 
@@ -389,6 +417,20 @@ TEST(xsimd, avx512_double_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx512_int8_basic)
+{
+    std::ofstream out("log/avx512_int8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int8_t, 64, 64>(out, "avx512 int8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_uint8_basic)
+{
+    std::ofstream out("log/avx512_uint8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<uint8_t, 64, 64>(out, "avx512 uint8");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_int32_basic)
 {
     std::ofstream out("log/avx512_int32_basic.log", std::ios_base::out);
@@ -499,7 +541,21 @@ TEST(xsimd, avx512_xtl_xcomplex_double_load_store)
 TEST(xsimd, neon_float_basic)
 {
     std::ofstream out("log/neon_float_basic.log", std::ios_base::out);
-    bool res = xsimd::test_simd<float, 4, 16>(out, "neon float");
+    bool res = xsimd::test_simd<float, 4, 32>(out, "neon float");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_int8_basic)
+{
+    std::ofstream out("log/neon_int8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int8_t, 16, 32>(out, "neon int8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_uint8_basic)
+{
+    std::ofstream out("log/neon_uint8_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<uint8_t, 16, 32>(out, "neon uint8");
     EXPECT_TRUE(res);
 }
 
