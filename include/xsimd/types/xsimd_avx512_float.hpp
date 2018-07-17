@@ -158,7 +158,7 @@ namespace xsimd
     }
 
     inline batch<float, 16>::batch(const float* src, unaligned_mode)
-        : m_value(_mm512_load_ps(src))
+        : m_value(_mm512_loadu_ps(src))
     {
     }
 
