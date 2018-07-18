@@ -32,7 +32,7 @@ namespace xsimd
     template <>
     class batch<uint8_t, 16> : public simd_batch<batch<uint8_t, 16>>
     {
-        using simd_type = int8x16_t;
+        using simd_type = uint8x16_t;
 
     public:
 
