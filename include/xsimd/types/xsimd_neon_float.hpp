@@ -462,7 +462,7 @@ namespace xsimd
 #else
                 batch<float, 4> sqrt_reciprocal = vrsqrteq_f32(rhs);
                 // one iter
-                // sqrt_reciprocal = sqrt_reciprocal * vrsqrtsq_f32(lhs * sqrt_reciprocal, sqrt_reciprocal);
+                sqrt_reciprocal = sqrt_reciprocal * batch<float, 4>(vrsqrtsq_f32(rhs * sqrt_reciprocal, sqrt_reciprocal));
                 batch<float, 4> sqrt_approx = rhs * sqrt_reciprocal * batch<float, 4>(vrsqrtsq_f32(rhs * sqrt_reciprocal, sqrt_reciprocal));
                 batch<float, 4> zero(0.f);
                 return select(rhs == zero, zero, sqrt_approx);
