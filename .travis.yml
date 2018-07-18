@@ -41,16 +41,6 @@ matrix:
             - ubuntu-toolchain-r-test
       env: AVX512=1
     - os: linux
-      dist: trusty
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
-          packages:
-            - clang-3.7
-      env: COMPILER=clang CLANG=3.7
-    - os: linux
       addons:
         apt:
           sources:
