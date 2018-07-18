@@ -24,7 +24,7 @@
 #include "xtl/xcomplex.hpp"
 #endif
 
-#define DEBUG_FLOAT_ACCURACY 1
+#define DEBUG_FLOAT_ACCURACY 0
 
 namespace xsimd
 {
