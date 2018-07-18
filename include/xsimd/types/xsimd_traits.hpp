@@ -280,6 +280,42 @@ namespace xsimd
 
     template <class T1, class T2>
     using simd_return_type = typename detail::simd_return_type_impl<T1, T2>::type;
+
+    /*****************
+     * is_batch_bool *
+     *****************/
+
+    template <class V>
+    struct is_batch_bool : std::false_type
+    {
+    };
+
+    template <class T, std::size_t N>
+    struct is_batch_bool<batch_bool<T, N>> : std::true_type
+    {
+    };
+
+    /********************
+     * is_batch_complex *
+     ********************/
+
+    template <class V>
+    struct is_batch_complex : std::false_type
+    {
+    };
+
+    template <class T, std::size_t N>
+    struct is_batch_complex<batch<std::complex<T>, N>> : std::true_type
+    {
+    };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec, std::size_t N>
+    struct is_batch_complex<batch<xtl::xcomplex<T, T, i3ec>, N>> : std::true_type
+    {
+    };
+#endif
+
 }
 
 #endif
