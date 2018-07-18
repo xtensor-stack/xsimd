@@ -133,7 +133,7 @@ namespace xsimd
         store_aligned(dst);
     }
 
-    inline batch<uint8_t, 16>::operator int8x16_t() const
+    inline batch<uint8_t, 16>::operator uint8x16_t() const
     {
         return m_value;
     }
