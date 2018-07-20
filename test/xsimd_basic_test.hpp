@@ -787,8 +787,8 @@ namespace xsimd
 
         for (std::size_t i = 0; i < 64; ++i)
         {
-            non_algn[i] = i;
-            algn[i] = i;
+            non_algn[i] = static_cast<char>(i);
+            algn[i] = static_cast<char>(i);
         }
 
         batch<int8_t, N> bx, by, bz;
