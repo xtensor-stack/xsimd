@@ -234,7 +234,7 @@ namespace xsimd
     template <class T, std::size_t N>
     template <class... Args, class>
     inline sse_batch_bool<T, N>::sse_batch_bool(Args... args)
-        : m_value(sse_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{}, static_cast<T>(-static_cast<bool>(args))...))
+        : m_value(sse_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{}, -static_cast<T>(static_cast<bool>(args))...))
     {
     }
 
@@ -587,9 +587,8 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
                 return _mm_sign_epi8(rhs, rhs);
 #else
-                __m128i sign = _mm_srai_epi8(rhs, 31);
-                __m128i inv = _mm_xor_si128(rhs, sign);
-                return _mm_sub_epi8(inv, sign);
+                __m128i neg = _mm_sub_epi8(_mm_setzero_si128(), rhs);
+                return _mm_min_epu8(rhs, neg);
 #endif
             }
         };
