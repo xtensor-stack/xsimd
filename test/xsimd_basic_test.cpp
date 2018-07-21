@@ -124,7 +124,7 @@ namespace xsimd
 TEST(xsimd, simd_return_type)
 {
     EXPECT_TRUE((xsimd::check_return_type<double, double>::value()));
-    EXPECT_FALSE((xsimd::check_return_type<std::complex<double>, double>::value()));
+    EXPECT_TRUE((xsimd::check_return_type<std::complex<double>, double>::value()));
 }
 
 /*******************

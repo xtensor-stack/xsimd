@@ -248,7 +248,7 @@ namespace xsimd
                 std::is_same<T1, int32_t>::value ||
                 std::is_same<T1, char>::value ||
                 std::is_same<T1, unsigned char>::value ||
-                (detail::is_complex<T1>::value && detail::is_complex<T2>::value);
+                detail::is_complex<T1>::value;
         };
 
         template <class T1, class T2>
