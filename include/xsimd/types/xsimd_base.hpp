@@ -11,6 +11,7 @@
 
 #include <cstddef>
 #include <ostream>
+#include <type_traits>
 
 #include "../memory/xsimd_alignment.hpp"
 #include "xsimd_utils.hpp"
@@ -180,6 +181,12 @@ namespace xsimd
         X& operator()();
         const X& operator()() const;
 
+        X& load_aligned(const char* src);
+        X& load_unaligned(const char* src);
+
+        void store_aligned(char* dst) const;
+        void store_unaligned(char* dst) const;
+
     protected:
 
         simd_batch() = default;
@@ -190,6 +197,8 @@ namespace xsimd
 
         simd_batch(simd_batch&&) = default;
         simd_batch& operator=(simd_batch&&) = default;
+        
+        using char_itype = typename std::conditional<std::is_signed<char>::value, int8_t, uint8_t>::type;
     };
 
     template <class X>
@@ -955,6 +964,30 @@ namespace xsimd
         return *static_cast<const X*>(this);
     }
     //@}
+
+    template <class X>
+    inline X& simd_batch<X>::load_aligned(const char* src)
+    {
+        return (*this)().load_aligned(reinterpret_cast<const char_itype*>(src));
+    }
+
+    template <class X>
+    inline X& simd_batch<X>::load_unaligned(const char* src)
+    {
+        return (*this)().load_unaligned(reinterpret_cast<const char_itype*>(src));
+    }
+
+    template <class X>
+    void simd_batch<X>::store_aligned(char* dst) const
+    {
+        return (*this)().store_aligned(reinterpret_cast<char_itype*>(dst));
+    }
+
+    template <class X>
+    void simd_batch<X>::store_unaligned(char* dst) const
+    {
+        return (*this)().store_unaligned(reinterpret_cast<char_itype*>(dst));
+    }
 
     /**
      * @defgroup simd_batch_arithmetic Arithmetic operators
