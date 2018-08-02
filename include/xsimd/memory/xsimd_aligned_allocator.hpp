@@ -72,6 +72,7 @@ namespace xsimd
         pointer allocate(size_type n, typename std::allocator<void>::const_pointer hint = 0);
         void deallocate(pointer p, size_type n);
 
+        size_type max_size() const noexcept;
         size_type size_max() const noexcept;
 
         template <class U, class... Args>
@@ -191,9 +192,19 @@ namespace xsimd
     }
 
     /**
-     * Returns the maximum theoretically possible value of \ n, for which the
+     * Returns the maximum theoretically possible value of \c n, for which the
      * call allocate(n, 0) could succeed.
-     * @return themaximum supported allocated size.
+     * @return the maximum supported allocated size.
+     */
+    template <class T, size_t A>
+    inline auto
+    aligned_allocator<T, A>::max_size() const noexcept -> size_type
+    {
+        return size_type(-1) / sizeof(T);
+    }
+
+    /**
+     * This method is deprecated, use max_size() instead
      */
     template <class T, size_t A>
     inline auto
@@ -203,8 +214,8 @@ namespace xsimd
     }
 
     /**
-     * Constructs an object of type \ T in allocated uninitialized memory 
-     * pointed to by \ p, using placement-new.
+     * Constructs an object of type \c T in allocated uninitialized memory 
+     * pointed to by \c p, using placement-new.
      * @param p pointer to allocated uninitialized memory.
      * @param args the constructor arguments to use.
      */
