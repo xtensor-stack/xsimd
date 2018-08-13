@@ -304,13 +304,13 @@ namespace xsimd
         struct batch_bool_kernel<int8_t, 64>
             : avx512_fallback_batch_bool_kernel<int8_t, 64>
         {
-        }
+        };
 
         template <>
         struct batch_bool_kernel<uint8_t, 64>
             : avx512_fallback_batch_bool_kernel<int8_t, 64>
         {
-        }
+        };
     }
 #endif
 
