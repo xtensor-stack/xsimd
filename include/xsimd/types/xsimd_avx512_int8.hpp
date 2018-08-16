@@ -373,8 +373,8 @@ namespace xsimd
 
         operator __m512i() const;
 
-        avx512_int_batch& load_aligned(const T* src);
-        avx512_int_batch& load_unaligned(const T* src);
+        batch<T, N>& load_aligned(const T* src);
+        batch<T, N>& load_unaligned(const T* src);
 
         void store_aligned(T* dst) const;
         void store_unaligned(T* dst) const;
@@ -415,12 +415,12 @@ namespace xsimd
         {
         }
 
-        base_class& load_aligned(const char* src)
+        batch& load_aligned(const char* src)
         {
             return load_aligned(reinterpret_cast<const int8_t*>(src));
         }
 
-        base_class& load_unaligned(const char* src)
+        batch& load_unaligned(const char* src)
         {
             return load_unaligned(reinterpret_cast<const int8_t*>(src));
         }
@@ -526,17 +526,17 @@ namespace xsimd
     }
 
     template <class T, std::size_t N>
-    inline avx512_int_batch<T, N>& avx512_int_batch<T, N>::load_aligned(const T* src)
+    inline batch<T, N>& avx512_int_batch<T, N>::load_aligned(const T* src)
     {
         m_value = _mm512_load_si512((__m512i const*) src);
-        return *this;
+        return (*this)();
     }
 
     template <class T, std::size_t N>
-    inline avx512_int_batch<T, N>& avx512_int_batch<T, N>::load_unaligned(const T* src)
+    inline batch<T, N>& avx512_int_batch<T, N>::load_unaligned(const T* src)
     {
         m_value = _mm512_loadu_si512((__m512i const*) src);
-        return *this;
+        return (*this)();
     }
 
     template <class T, std::size_t N>
