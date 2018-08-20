@@ -85,6 +85,30 @@ namespace xsimd
         return detail::pow_kernel<batch<T, N>>::compute(x, y);
     }
 
+    template <class T0, class T1>
+    inline typename std::enable_if<std::is_integral<T1>::value, T0>::type
+    pow(const T0& t0, const T1& t1)
+    {
+        T0 a = t0;
+        T1 b = t1;
+        bool const recip = b < 0;
+        T0 r{static_cast<T0>(1)};
+        while (1)
+        {
+            if (b & 1)
+            {
+                r *= a;
+            }
+            b /= 2;
+            if (b == 0)
+            {
+                break;
+            }
+            a *= a;
+        }
+        return recip ? 1 / r : r;
+    }
+
     /***********************
      * cbrt implementation *
      ***********************/

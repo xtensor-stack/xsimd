@@ -27,6 +27,7 @@ namespace xsimd
         res_type lhs;
         res_type rhs;
         res_type pow_res;
+        res_type ipow_res;
         res_type cbrt_res;
         res_type hypot_res;
 
@@ -41,6 +42,7 @@ namespace xsimd
         lhs.resize(nb_input);
         rhs.resize(nb_input);
         pow_res.resize(nb_input);
+        ipow_res.resize(nb_input);
         cbrt_res.resize(nb_input);
         hypot_res.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
@@ -48,6 +50,7 @@ namespace xsimd
             lhs[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             rhs[i] = value_type(10.2) / (i + 2) + value_type(0.25);
             pow_res[i] = std::pow(lhs[i], rhs[i]);
+            ipow_res[i] = std::pow(lhs[i], (long)i/N - nb_input / N / 2);
             cbrt_res[i] = std::cbrt(lhs[i]);
             hypot_res[i] = std::hypot(lhs[i], rhs[i]);
         }
@@ -89,6 +92,17 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(topic, res, tester.pow_res, out);
+        success = success && tmp_success;
+
+        topic = "ipow     : ";
+
+        for (size_t i = 0; i < tester.lhs.size(); i += tester.size)
+        {
+            detail::load_vec(lhs, tester.lhs, i);
+            vres = pow(lhs, i/tester.size - tester.lhs.size() / tester.size / 2);
+            detail::store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(topic, res, tester.ipow_res, out);
         success = success && tmp_success;
 
         topic = "hypot   : ";

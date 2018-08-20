@@ -24,6 +24,51 @@
 #include "xtl/xcomplex.hpp"
 #endif
 
+// define some overloads here as complex version does not exist in std::
+// and integer version does not exist for msvc
+
+namespace utils {
+
+    template <class T>
+    inline bool isinf(const std::complex<T>& c)
+    {
+        return std::isinf(std::real(c)) || std::isinf(std::imag(c));
+    }
+
+    template <class T>
+    inline bool isnan(const std::complex<T>& c)
+    {
+        return std::isnan(std::real(c)) || std::isnan(std::imag(c));
+    }
+
+    template <class T>
+    inline typename std::enable_if<!std::is_integral<T>::value, bool>::type isinf(const T& c)
+    {
+        return std::isinf(c);
+    }
+
+    template <class T>
+    inline typename std::enable_if<std::is_integral<T>::value, bool>::type isinf(const T&)
+    {
+        return false;
+    }
+
+    template <class T>
+    inline typename std::enable_if<!std::is_integral<T>::value, bool>::type isnan(const T& c)
+    {
+        return std::isnan(c);
+    }
+
+    template <class T>
+    inline typename std::enable_if<std::is_integral<T>::value, bool>::type isnan(const T&)
+    {
+        return false;
+    }
+
+}
+
+
+
 #define DEBUG_FLOAT_ACCURACY 0
 
 namespace xsimd
@@ -85,6 +130,16 @@ namespace xsimd
             if (std::is_integral<T>::value && lhs < 10e6 && rhs < 10e6)
             {
                 return lhs == rhs;
+            }
+
+            if (utils::isnan(lhs))
+            {
+                return utils::isnan(rhs);
+            }
+
+            if (utils::isinf(lhs))
+            {
+                return utils::isinf(rhs) && (lhs * rhs > 0) /* same sign */;
             }
 
             T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
