@@ -110,7 +110,12 @@ namespace xsimd
     template <class T, std::size_t N>
     inline batch<T, N> clip(const batch<T, N>& x, const batch<T, N>& lo, const batch<T, N>& hi)
     {
-        return select(x < lo, lo, select(x > hi, hi, x));
+        return min(hi, max(x, lo));
+    }
+    template <class T>
+    inline T clip(const T& x, const T& lo, const T& hi)
+    {
+        return std::min(hi, std::max(x, lo));
     }
 
     /*******************************************

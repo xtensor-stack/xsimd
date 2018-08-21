@@ -73,44 +73,58 @@ void benchmark_rounding()
     xsimd::run_benchmark_1op(xsimd::rint_fn(), std::cout, size, 100);
 }
 
+void benchmark_basic_math()
+{
+    std::size_t size = 20000;
+    xsimd::run_benchmark_2op(xsimd::fmod_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_2op(xsimd::remainder_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_2op(xsimd::fdim_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_3op(xsimd::clip_fn(), std::cout, size, 1000);
+#if 0
+    xsimd::run_benchmark_1op_pred(xsimd::isfinite_fn(), std::cout, size, 100);
+    xsimd::run_benchmark_1op_pred(xsimd::isinf_fn(), std::cout, size, 100);
+    xsimd::run_benchmark_1op_pred(xsimd::is_flint_fn(), std::cout, size, 100);
+    xsimd::run_benchmark_1op_pred(xsimd::is_odd_fn(), std::cout, size, 100);
+    xsimd::run_benchmark_1op_pred(xsimd::is_even_fn(), std::cout, size, 100);
+#endif
+}
+
 int main(int argc, char* argv[])
 {
+    const std::map<std::string, std::pair<std::string, void(*)()>> fn_map = {
+        {"op", {"arithmetic", benchmark_operation}},
+        {"exp", {"exponential and logarithm", benchmark_exp_log}},
+        {"trigo", {"trigonometric", benchmark_trigo}},
+        {"hyperbolic", {"hyperbolic", benchmark_hyperbolic}},
+        {"power", {"power", benchmark_power}},
+        {"basic_math", {"basic math", benchmark_basic_math}},
+        {"rounding", {"rounding", benchmark_rounding}},
+    };
+
     if (argc > 1)
     {
-        std::map<std::string, void(*)()> fn_map;
-        fn_map["op"] = benchmark_operation;
-        fn_map["exp"] = benchmark_exp_log;
-        fn_map["trigo"] = benchmark_trigo;
-        fn_map["hyperbolic"] = benchmark_hyperbolic;
-        fn_map["power"] = benchmark_power;
-        fn_map["rounding"] = benchmark_rounding;
-
         if (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h")
         {
-            std::cout << "Avalaible options:" << std::endl;
-            std::cout << "op        : run benchmark on aithmetic operations" << std::endl;
-            std::cout << "exp       : run benchmark on exponential and logarithm functions" << std::endl;
-            std::cout << "trigo     : run benchmark on trigonomeric functions" << std::endl;
-            std::cout << "hyperbolic: run benchmark on hyperbolic functions" << std::endl;
-            std::cout << "power     : run benchmark on power functions" << std::endl;
-            std::cout << "rounding  : run benchmark on rounding functions" << std::endl;
+            std::cout << "Available options:" << std::endl;
+            for(auto const& kv : fn_map)
+            {
+                std::cout << kv.first << ": run benchmark on " << kv.second.first << " functions" << std::endl;
+            }
         }
         else
         {
             for (int i = 1; i < argc; ++i)
             {
-                fn_map[std::string(argv[i])]();
+                fn_map.at(argv[i]).second();
             }
         }
     }
     else
     {
-        benchmark_operation();
-        benchmark_exp_log();
-        benchmark_trigo();
-        benchmark_hyperbolic();
-        benchmark_power();
-        benchmark_rounding();
+        for(auto const& kv : fn_map)
+        {
+            kv.second.second();
+        }
     }
     return 0;
 }
