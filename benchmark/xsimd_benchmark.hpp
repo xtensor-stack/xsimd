@@ -46,6 +46,21 @@ namespace xsimd
     }
 
     template <class T>
+    void init_benchmark(bench_vector<T>& op0, bench_vector<T>& op1, bench_vector<T>& op2, bench_vector<T>& res, size_t size)
+    {
+        op0.resize(size);
+        op1.resize(size);
+        op2.resize(size);
+        res.resize(size);
+        for (size_t i = 0; i < size; ++i)
+        {
+            op0[i] = T(0.5) + std::sqrt(T(i)) * T(9.) / T(size);
+            op1[i] = T(10.2) / T(i + 2) + T(0.25);
+            op2[i] = T(20.1) / T(i + 5) + T(0.65);
+        }
+    }
+
+    template <class T>
     void init_benchmark_arctrigo(bench_vector<T>& lhs, bench_vector<T>& rhs, bench_vector<T>& res, size_t size)
     {
         lhs.resize(size);
@@ -94,6 +109,25 @@ namespace xsimd
             for (size_t i = 0; i < s; ++i)
             {
                res[i] = f(lhs[i], rhs[i]);
+            }
+            auto end = std::chrono::steady_clock::now();
+            auto tmp = end - start;
+            t_res = tmp < t_res ? tmp : t_res;
+        }
+        return t_res;
+    }
+
+    template <class F, class V>
+    duration_type benchmark_scalar(F f, V& op0, V& op1, V& op2, V& res, std::size_t number)
+    {
+        size_t s = op0.size();
+        duration_type t_res = duration_type::max();
+        for (std::size_t count = 0; count < number; ++count)
+        {
+            auto start = std::chrono::steady_clock::now();
+            for (size_t i = 0; i < s; ++i)
+            {
+               res[i] = f(op0[i], op1[i], op2[i]);
             }
             auto end = std::chrono::steady_clock::now();
             auto tmp = end - start;
@@ -202,6 +236,64 @@ namespace xsimd
                 bres2.store_aligned(&res[j]);
                 bres3.store_aligned(&res[k]);
                 bres4.store_aligned(&res[l]);
+            }
+            auto end = std::chrono::steady_clock::now();
+            auto tmp = end - start;
+            t_res = tmp < t_res ? tmp : t_res;
+        }
+        return t_res;
+    }
+
+
+    template <class B, class F, class V>
+    duration_type benchmark_simd(F f, V& op0, V& op1, V& op2, V& res, std::size_t number)
+    {
+        std::size_t s = op0.size();
+        duration_type t_res = duration_type::max();
+        for (std::size_t count = 0; count < number; ++count)
+        {
+            auto start = std::chrono::steady_clock::now();
+            for (std::size_t i = 0; i <= (s - B::size); i += B::size)
+            {
+                B bop0(&op0[i], aligned_mode()),
+                  bop1(&op1[i], aligned_mode()),
+                  bop2(&op2[i], aligned_mode());
+                B bres = f(bop0, bop1, bop2);
+                bres.store_aligned(&res[i]);
+            }
+            auto end = std::chrono::steady_clock::now();
+            auto tmp = end - start;
+            t_res = tmp < t_res ? tmp : t_res;
+        }
+        return t_res;
+    }
+
+    template <class B, class F, class V>
+    duration_type benchmark_simd_unrolled(F f, V& op0, V& op1, V& op2, V& res, std::size_t number)
+    {
+        std::size_t s = op0.size();
+        std::size_t inc = 4 * B::size;
+        duration_type t_res = duration_type::max();
+        for (std::size_t count = 0; count < number; ++count)
+        {
+            auto start = std::chrono::steady_clock::now();
+            for (std::size_t i = 0; i <= (s - inc); i += inc)
+            {
+                size_t j = i + B::size;
+                size_t k = j + B::size;
+                size_t l = k + B::size;
+                B bop0_i(&op0[i], aligned_mode()), bop1_i(&op1[i], aligned_mode()), bop2_i(&op2[i], aligned_mode());
+                B bop0_j(&op0[j], aligned_mode()), bop1_j(&op1[j], aligned_mode()), bop2_j(&op2[j], aligned_mode());
+                B bop0_k(&op0[k], aligned_mode()), bop1_k(&op1[k], aligned_mode()), bop2_k(&op2[k], aligned_mode());
+                B bop0_l(&op0[l], aligned_mode()), bop1_l(&op1[l], aligned_mode()), bop2_l(&op2[l], aligned_mode());
+                B bres_i = f(bop0_i, bop1_i, bop2_i);
+                B bres_j = f(bop0_j, bop1_j, bop2_j);
+                B bres_k = f(bop0_k, bop1_k, bop2_k);
+                B bres_l = f(bop0_l, bop1_l, bop2_l);
+                bres_i.store_aligned(&res[i]);
+                bres_j.store_aligned(&res[j]);
+                bres_k.store_aligned(&res[k]);
+                bres_l.store_aligned(&res[l]);
             }
             auto end = std::chrono::steady_clock::now();
             auto tmp = end - start;
@@ -378,6 +470,86 @@ namespace xsimd
         out << "============================" << std::endl;
     }
 
+    template <class F, class OS>
+    void run_benchmark_3op(F f, OS& out, std::size_t size, std::size_t iter)
+    {
+        bench_vector<float> f_op0, f_op1, f_op2, f_res;
+        bench_vector<double> d_op0, d_op1, d_op2, d_res;
+
+        init_benchmark(f_op0, f_op1, f_op2, f_res, size);
+        init_benchmark(d_op0, d_op1, d_op2, d_res, size);
+
+        duration_type t_float_scalar = benchmark_scalar(f, f_op0, f_op1, f_op2, f_res, iter);
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+        duration_type t_float_sse = benchmark_simd<batch<float, 4>>(f, f_op0, f_op1, f_op2, f_res, iter);
+        duration_type t_float_sse_u = benchmark_simd_unrolled<batch<float, 4>>(f, f_op0, f_op1, f_op2, f_res, iter);
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+        duration_type t_float_avx = benchmark_simd<batch<float, 8>>(f, f_op0, f_op1, f_op2, f_res, iter);
+        duration_type t_float_avx_u = benchmark_simd_unrolled<batch<float, 8>>(f, f_op0, f_op1, f_op2, f_res, iter);
+#endif
+        duration_type t_double_scalar = benchmark_scalar(f, d_op0, d_op1, d_op2, d_res, iter);
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+        duration_type t_double_sse = benchmark_simd<batch<double, 2>>(f, d_op0, d_op1, d_op2, d_res, iter);
+        duration_type t_double_sse_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_op0, d_op1, d_op2, d_res, iter);
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+        duration_type t_double_avx = benchmark_simd<batch<double, 4>>(f, d_op0, d_op1, d_op2, d_res, iter);
+        duration_type t_double_avx_u = benchmark_simd_unrolled<batch<double, 4>>(f, d_op0, d_op1, d_op2, d_res, iter);
+#endif
+#if defined(XSIMD_ARM_INSTR_SET)
+        duration_type t_float_neon = benchmark_simd<batch<float, 4>>(f, f_op0, f_op1, f_op2, f_res, iter);
+        duration_type t_float_neon_u = benchmark_simd_unrolled<batch<float, 4>>(f, f_op0, f_op1, f_op2, f_res, iter);
+        duration_type t_double_neon = benchmark_simd<batch<double, 2>>(f, d_op0, d_op1, d_op2, d_res, iter);
+        duration_type t_double_neon_u = benchmark_simd_unrolled<batch<double, 2>>(f, d_op0, d_op1, d_op2, d_res, iter);
+#endif
+#if defined(XSIMD_ENABLE_FALLBACK)
+        duration_type t_float_fallback = benchmark_simd<batch<float, 7>>(f, f_op0, f_op1, f_op2, f_res, iter);
+        duration_type t_float_fallback_u = benchmark_simd_unrolled<batch<float, 7>>(f, f_op0, f_op1, f_op2, f_res, iter);
+        duration_type t_double_fallback = benchmark_simd<batch<double, 3>>(f, d_op0, d_op1, d_op2, d_res, iter);
+        duration_type t_double_fallback_u = benchmark_simd_unrolled<batch<double, 3>>(f, d_op0, d_op1, d_op2, d_res, iter);
+#endif
+
+        out << "============================" << std::endl;
+        out << f.name() << std::endl;
+        out << "scalar float   : " << t_float_scalar.count() << "ms" << std::endl;
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+        out << "sse float      : " << t_float_sse.count() << "ms" << std::endl;
+        out << "sse float unr  : " << t_float_sse_u.count() << "ms" << std::endl;
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+        out << "avx float      : " << t_float_avx.count() << "ms" << std::endl;
+        out << "avx float unr  : " << t_float_avx_u.count() << "ms" << std::endl;
+#endif
+#if defined(XSIMD_ARM_INSTR_SET)
+        out << "neon float     : " << t_float_neon.count() << "ms" << std::endl;
+        out << "neon float unr : " << t_float_neon_u.count() << "ms" << std::endl;
+#endif
+#if defined(XSIMD_ENABLE_FALLBACK)
+        out << "flbk float     : " << t_float_fallback.count() << "ms" << std::endl;
+        out << "flbk float unr : " << t_float_fallback_u.count() << "ms" << std::endl;
+#endif
+        out << "scalar double  : " << t_double_scalar.count() << "ms" << std::endl;
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+        out << "sse double     : " << t_double_sse.count() << "ms" << std::endl;
+        out << "sse double unr : " << t_double_sse_u.count() << "ms" << std::endl;
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+        out << "avx double     : " << t_double_avx.count() << "ms" << std::endl;
+        out << "avx double unr : " << t_double_avx_u.count() << "ms" << std::endl;
+#endif
+#if defined(XSIMD_ARM_INSTR_SET)
+        out << "neon double    : " << t_double_neon.count() << "ms" << std::endl;
+        out << "neon double unr: " << t_double_neon_u.count() << "ms" << std::endl;
+#endif
+#if defined(XSIMD_ENABLE_FALLBACK)
+        out << "flbk double    : " << t_double_fallback.count() << "ms" << std::endl;
+        out << "flbk double unr: " << t_double_fallback_u.count() << "ms" << std::endl;
+#endif
+        out << "============================" << std::endl;
+    }
+
+
 #define DEFINE_OP_FUNCTOR_2OP(OP, NAME)\
     struct NAME##_fn {\
         template <class T>\
@@ -396,6 +568,13 @@ namespace xsimd
     struct FN##_fn{\
         template <class T>\
         inline T operator()(const T&lhs, const T& rhs) const { using std::FN; using xsimd::FN; return FN(lhs, rhs); }\
+        inline std::string name() const { return #FN; }\
+    }
+
+#define DEFINE_FUNCTOR_3OP(FN)\
+    struct FN##_fn{\
+        template <class T>\
+        inline T operator()(const T& op0, const T& op1, const T& op2) const { using xsimd::FN; return FN(op0, op1, op2); }\
         inline std::string name() const { return #FN; }\
     }
 
@@ -437,6 +616,18 @@ DEFINE_FUNCTOR_1OP(trunc);
 DEFINE_FUNCTOR_1OP(round);
 DEFINE_FUNCTOR_1OP(nearbyint);
 DEFINE_FUNCTOR_1OP(rint);
+
+DEFINE_FUNCTOR_2OP(fmod);
+DEFINE_FUNCTOR_2OP(remainder);
+DEFINE_FUNCTOR_2OP(fdim);
+DEFINE_FUNCTOR_3OP(clip);
+#if 0
+DEFINE_FUNCTOR_1OP(isfinite);
+DEFINE_FUNCTOR_1OP(isinf);
+DEFINE_FUNCTOR_1OP(is_flint);
+DEFINE_FUNCTOR_1OP(is_odd);
+DEFINE_FUNCTOR_1OP(is_even);
+#endif
 
 }
 
