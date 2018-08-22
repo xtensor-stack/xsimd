@@ -214,7 +214,7 @@ namespace xsimd
     }
 
     /**
-     * Constructs an object of type \c T in allocated uninitialized memory 
+     * Constructs an object of type \c T in allocated uninitialized memory
      * pointed to by \c p, using placement-new.
      * @param p pointer to allocated uninitialized memory.
      * @param args the constructor arguments to use.
@@ -334,7 +334,7 @@ namespace xsimd
                 (block_size - ((size_t(p) / sizeof(T)) & block_mask)) & block_mask,
                 size);
         }
-    };
+    }
 }
 
 #endif

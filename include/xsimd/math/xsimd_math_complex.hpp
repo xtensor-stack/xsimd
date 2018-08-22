@@ -226,7 +226,6 @@ namespace xsimd
         {
             using b_type = batch<T, N>;
             using r_type = typename b_type::real_batch;
-            using v_type = typename r_type::value_type;
             r_type d = cos(2 * z.real()) + cosh(2 * z.imag());
             b_type winf(infinity<r_type>(), infinity<r_type>());
             r_type wreal = sin(2 * z.real()) / d;
@@ -676,7 +675,7 @@ namespace xsimd
         real_batch scale = select(cond, real_batch(2.), real_batch(detail::csqrt_scale<rvt>()));
         real_batch r = abs(X(x, y));
 
-        auto condxp = x > real_batch(0.);        
+        auto condxp = x > real_batch(0.);
         real_batch t0 = select(condxp, sqrt(0.5 * (r + x)), sqrt(0.5 * (r - x)));
         real_batch r0 = scale * fabs((0.5 * y) / t0);
         t0 *= scale;
