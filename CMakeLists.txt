@@ -21,7 +21,7 @@ foreach(ver ${xsimd_version_defines})
         set(XSIMD_VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
     endif()
 endforeach()
-set(${PROJECT_NAME}_VERSION 
+set(${PROJECT_NAME}_VERSION
     ${XSIMD_VERSION_MAJOR}.${XSIMD_VERSION_MINOR}.${XSIMD_VERSION_PATCH})
 message(STATUS "xsimd v${${PROJECT_NAME}_VERSION}")
 
@@ -102,7 +102,7 @@ target_include_directories(xsimd INTERFACE $<BUILD_INTERFACE:${XSIMD_INCLUDE_DIR
 
 OPTION(ENABLE_FALLBACK "build tests/benchmarks with fallback implementation" OFF)
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
-OPTION(BUILD_TESTS "xsimd test suite" ON)
+OPTION(BUILD_TESTS "xsimd test suite" OFF)
 OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
