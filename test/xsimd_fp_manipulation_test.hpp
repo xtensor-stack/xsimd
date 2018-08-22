@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -91,6 +92,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.ldexp_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::ldexp(tester.input[0], tester.exponent), tester.ldexp_res[0], out);
 
         topic = "frexp    : ";
         detail::load_vec(input, tester.input);
@@ -98,6 +100,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.frexp_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::frexp(tester.input[0], tester.exponent), tester.frexp_res[0], out);
 
         return success;
     }

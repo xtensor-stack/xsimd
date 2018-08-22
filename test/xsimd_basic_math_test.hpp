@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -88,6 +89,7 @@ namespace xsimd
         res_type res(tester_type::size);
         bool success = true;
         bool tmp_success = true;
+        typename res_type::value_type scalar_cond_res;
 
         std::string val_type = value_type_name<vector_type>();
         std::string shift = std::string(val_type.size(), '-');
@@ -108,6 +110,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.fmod_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::fmod(lhs[0], rhs[0]), tester.fmod_res[0], out);
 
         topic = "remainder: ";
         detail::load_vec(lhs, tester.lhs_input);
@@ -116,6 +119,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.remainder_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::remainder(lhs[0], rhs[0]), tester.remainder_res[0], out);
 
         topic = "fdim     : ";
         detail::load_vec(lhs, tester.lhs_input);
@@ -124,6 +128,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.fdim_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::fdim(lhs[0], rhs[0]), tester.fdim_res[0], out);
 
         topic = "clip     : ";
         detail::load_vec(lhs, tester.clip_input);
@@ -131,6 +136,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.clip_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::clip(lhs[0], tester.clip_lo, tester.clip_hi), tester.clip_res[0], out);
 
         topic = "isfinite : ";
         lhs = vector_type(12.);
@@ -143,6 +149,8 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.inf_res, out);
         success = success && tmp_success;
+        scalar_cond_res = xsimd::isfinite(lhs[0])?1.:0.;
+        success &= check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
 
         topic = "isinf    : ";
         lhs = vector_type(12.);
@@ -155,6 +163,8 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.inf_res, out);
         success = success && tmp_success;
+        scalar_cond_res = xsimd::isinf(lhs[0])?0.:1.;
+        success &= check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
 
         return success;
 }

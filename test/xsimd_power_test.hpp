@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -104,6 +105,8 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.ipow_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::pow(tester.lhs[0], - tester.lhs.size() / tester.size / 2),
+                                             tester.ipow_res[0], out);
 
         topic = "hypot   : ";
         for (size_t i = 0; i < tester.lhs.size(); i += tester.size)
@@ -115,6 +118,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.hypot_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::hypot(tester.lhs[0], tester.rhs[0]), tester.hypot_res[0], out);
 
         topic = "cbrt    : ";
         for (size_t i = 0; i < tester.lhs.size(); i += tester.size)
@@ -124,6 +128,7 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(topic, res, tester.cbrt_res, out);
+        success &= check_almost_equal(topic, xsimd::cbrt(tester.lhs[0]), res[0], out);
 
         success = success && tmp_success;
         return success;

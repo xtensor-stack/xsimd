@@ -560,14 +560,14 @@ namespace xsimd
 #define DEFINE_FUNCTOR_1OP(FN)\
     struct FN##_fn {\
         template <class T>\
-        inline T operator()(const T& x) const { using std::FN; using xsimd::FN; return FN(x); }\
+        inline T operator()(const T& x) const { using xsimd::FN; return FN(x); }\
         inline std::string name() const { return #FN; }\
     }
 
 #define DEFINE_FUNCTOR_2OP(FN)\
     struct FN##_fn{\
         template <class T>\
-        inline T operator()(const T&lhs, const T& rhs) const { using std::FN; using xsimd::FN; return FN(lhs, rhs); }\
+        inline T operator()(const T&lhs, const T& rhs) const { using xsimd::FN; return FN(lhs, rhs); }\
         inline std::string name() const { return #FN; }\
     }
 

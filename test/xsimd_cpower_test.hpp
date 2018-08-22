@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_complex_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -146,6 +147,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.pow_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::pow(tester.lhs_np[0], tester.rhs[0]), tester.pow_res[0], out);
 
         topic = "sqrt_nn : ";
         for (size_t i = 0; i < tester.lhs_nn.size(); i += tester.size)
@@ -156,7 +158,8 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.sqrt_nn_res, out);
         success = success && tmp_success;
-        
+        success &= check_almost_equal(topic, xsimd::sqrt(tester.lhs_nn[0]), tester.sqrt_nn_res[0], out);
+
         topic = "sqrt_pn : ";
         for (size_t i = 0; i < tester.lhs_pn.size(); i += tester.size)
         {

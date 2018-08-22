@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_complex_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -114,6 +115,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.sinh_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::sinh(tester.input[0]), tester.sinh_res[0], out);
 
         topic = "cosh  : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
@@ -124,6 +126,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.cosh_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::cosh(tester.input[0]), tester.cosh_res[0], out);
 
         topic = "tanh  : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
@@ -134,6 +137,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.tanh_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::tanh(tester.input[0]), tester.tanh_res[0], out);
 
         topic = "asinh : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
@@ -144,6 +148,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.asinh_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::asinh(tester.input[0]), tester.asinh_res[0], out);
 
         topic = "acosh : ";
         for (size_t i = 0; i < tester.acosh_input.size(); i += tester.size)
@@ -154,6 +159,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.acosh_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::acosh(tester.acosh_input[0]), tester.acosh_res[0], out);
 
         topic = "atanh : ";
         for (size_t i = 0; i < tester.atanh_input.size(); i += tester.size)
@@ -164,6 +170,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.atanh_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::atanh(tester.atanh_input[0]), tester.atanh_res[0], out);
 
         return success;
     }

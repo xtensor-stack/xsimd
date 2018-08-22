@@ -16,6 +16,7 @@
 #include "xsimd_tester.hpp"
 
 #include "xsimd/types/xsimd_traits.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -651,42 +652,49 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.min_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::min(tester.lhs[0], tester.rhs[0]), tester.min_res[0], out);
 
         topic = "max(simd, simd)          : ";
         vres = max(lhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.max_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::max(tester.lhs[0], tester.rhs[0]), tester.max_res[0], out);
 
         topic = "fmin(simd, simd)         : ";
         vres = fmin(lhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.min_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::fmin(tester.lhs[0], tester.rhs[0]), tester.min_res[0], out);
 
         topic = "fmax(simd, simd)         : ";
         vres = fmax(lhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.max_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::fmax(tester.lhs[0], tester.rhs[0]), tester.max_res[0], out);
 
         topic = "abs(simd)                : ";
         vres = abs(lhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.abs_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::abs(tester.lhs[0]), tester.abs_res[0], out);
 
         topic = "sqrt(simd)               : ";
         vres = sqrt(lhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.sqrt_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::sqrt(tester.lhs[0]), tester.sqrt_res[0], out);
 
         topic = "fma(simd, simd, simd)    : ";
         vres = fma(lhs, rhs, rhs);
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.fma_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::fma(tester.lhs[0], tester.rhs[0], tester.rhs[0]),  tester.fma_res[0], out);
 
         topic = "fms(simd, simd, simd)    : ";
         vres = fms(lhs, rhs, rhs);
