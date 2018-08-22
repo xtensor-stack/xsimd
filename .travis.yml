@@ -138,23 +138,23 @@ install:
           ln -s /usr/bin/aarch64-linux-gnu-ld $HOME/linker_bin/ld ;
           echo "SETTING GNU LINKER DIR" ;
           ls -al $HOME/linker_bin/ld ;
-          cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DARM_ARCH_DIRECTORY="$ARM_ARCH_DIR" -DARM_GCC_VER="$GCC_VER" -DTARGET_ARCH="$ARM_SETTINGS --prefix=$HOME/linker_bin/" ;
+          cmake . -DBUILD_TESTS=ON -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DARM_ARCH_DIRECTORY="$ARM_ARCH_DIR" -DARM_GCC_VER="$GCC_VER" -DTARGET_ARCH="$ARM_SETTINGS --prefix=$HOME/linker_bin/" ;
         else
-          cmake . -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DARM_ARCH_DIRECTORY="$ARM_ARCH_DIR" -DARM_GCC_VER="$GCC_VER" -DTARGET_ARCH="$ARM_SETTINGS" ;
+          cmake . -DBUILD_TESTS=ON -DCROSS_COMPILE_ARM=ON -DDOWNLOAD_GTEST=ON -DARM_ARCH_DIRECTORY="$ARM_ARCH_DIR" -DARM_GCC_VER="$GCC_VER" -DTARGET_ARCH="$ARM_SETTINGS" ;
         fi
       elif [[ "$ENABLE_FALLBACK" == 1 ]] ; then
-        cmake -DENABLE_FALLBACK=ON -DENABLE_XTL_COMPLEX=ON . ;
+        cmake -DBUILD_TESTS=ON -DENABLE_FALLBACK=ON -DENABLE_XTL_COMPLEX=ON . ;
       elif [[ "$ENABLE_XTL_COMPLEX" == 1 ]] ; then
-        cmake -DENABLE_XTL_COMPLEX=ON . ;
+        cmake -DBUILD_TESTS=ON -DENABLE_XTL_COMPLEX=ON . ;
       elif [[ "$AVX512" == 1 ]] ; then
         conda install gcc_linux-64 gxx_linux-64;
         sh install_sde.sh ;
         export PATH="$HOME/miniconda/bin:$PATH" ;
         export CC=x86_64-conda_cos6-linux-gnu-gcc CXX=x86_64-conda_cos6-linux-gnu-g++ ;
         which $CXX ;
-        cmake . -DTARGET_ARCH=skylake-avx512 -DCMAKE_INSTALL_PREFIX=$HOME/miniconda -DDOWNLOAD_GTEST=ON ;
+        cmake . -DBUILD_TESTS=ON -DTARGET_ARCH=skylake-avx512 -DCMAKE_INSTALL_PREFIX=$HOME/miniconda -DDOWNLOAD_GTEST=ON ;
       else
-        cmake . ;
+        cmake . -DBUILD_TESTS=ON ;
       fi
     - make -j2 test_xsimd
     - cd test
