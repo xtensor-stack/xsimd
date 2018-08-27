@@ -77,6 +77,31 @@ namespace xsimd
                 return select(invalid, nan<b_type>(), z);
             }
         };
+
+      template <class T0, class T1>
+      inline T0
+      ipow(const T0& t0, const T1& t1)
+      {
+          static_assert(std::is_integral<T1>::value, "second argument must be an integer");
+          T0 a = t0;
+          T1 b = t1;
+          bool const recip = b < 0;
+          T0 r{static_cast<T0>(1)};
+          while (1)
+          {
+              if (b & 1)
+              {
+                  r *= a;
+              }
+              b /= 2;
+              if (b == 0)
+              {
+                  break;
+              }
+              a *= a;
+          }
+          return recip ? 1 / r : r;
+      }
     }
 
     template <class T, std::size_t N>
@@ -85,28 +110,11 @@ namespace xsimd
         return detail::pow_kernel<batch<T, N>>::compute(x, y);
     }
 
-    template <class T0, class T1>
-    inline typename std::enable_if<std::is_integral<T1>::value, T0>::type
-    pow(const T0& t0, const T1& t1)
+    template <class T0, std::size_t N, class T1>
+    inline typename std::enable_if<std::is_integral<T1>::value, batch<T0, N>>::type
+    pow(const batch<T0, N>& t0, const T1& t1)
     {
-        T0 a = t0;
-        T1 b = t1;
-        bool const recip = b < 0;
-        T0 r{static_cast<T0>(1)};
-        while (1)
-        {
-            if (b & 1)
-            {
-                r *= a;
-            }
-            b /= 2;
-            if (b == 0)
-            {
-                break;
-            }
-            a *= a;
-        }
-        return recip ? 1 / r : r;
+        return detail::ipow(t0, t1);
     }
 
     /***********************

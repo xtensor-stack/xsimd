@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -100,6 +101,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.ceil_res, out);
         success = success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::ceil(tester.input[0]), tester.ceil_res[0], out);
 
         topic = "floor     : ";
         for (size_t i = 0; i < res.size(); ++i)
@@ -108,6 +110,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.floor_res, out);
         success = success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::floor(tester.input[0]), tester.floor_res[0], out);
 
         topic = "trunc     : ";
         for (size_t i = 0; i < res.size(); ++i)
@@ -116,6 +119,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.trunc_res, out);
         success = success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::trunc(tester.input[0]), tester.trunc_res[0], out);
 
         topic = "round     : ";
         for (size_t i = 0; i < res.size(); ++i)
@@ -124,6 +128,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.round_res, out);
         success = success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::round(tester.input[0]), tester.round_res[0], out);
 
         topic = "nearbyint : ";
         for (size_t i = 0; i < res.size(); ++i)
@@ -132,6 +137,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.nearbyint_res, out);
         success = success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::nearbyint(tester.input[0]), tester.nearbyint_res[0], out);
 
         topic = "rint      : ";
         for (size_t i = 0; i < res.size(); ++i)
@@ -140,6 +146,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.rint_res, out);
         success = success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::rint(tester.input[0]), tester.rint_res[0], out);
 
         return success;
     }

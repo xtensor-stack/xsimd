@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -102,6 +103,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.erf_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::erf(tester.input[0]), tester.erf_res[0], out);
 
         topic = "erfc                    : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
@@ -112,6 +114,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.erfc_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::erfc(tester.input[0]), tester.erfc_res[0], out);
 
         topic = "tgamma                  : ";
         for (size_t i = 0; i < tester.gamma_input.size(); i += tester.size)
@@ -122,6 +125,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.tgamma_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::tgamma(tester.gamma_input[0]), tester.tgamma_res[0], out);
 
         topic = "tgamma (negative input) : ";
         for (size_t i = 0; i < tester.gamma_neg_input.size(); i += tester.size)
@@ -132,6 +136,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.tgamma_neg_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::tgamma(tester.gamma_neg_input[0]), tester.tgamma_neg_res[0], out);
 
 #ifndef __APPLE__
         topic = "lgamma                  : ";
@@ -143,6 +148,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.lgamma_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::lgamma(tester.gamma_input[0]), tester.lgamma_res[0], out);
 
         topic = "lgamma (negative input) : ";
         for (size_t i = 0; i < tester.gamma_neg_input.size(); i += tester.size)
@@ -153,6 +159,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.lgamma_neg_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::lgamma(tester.gamma_neg_input[0]), tester.lgamma_neg_res[0], out);
 #endif
         return success;
     }

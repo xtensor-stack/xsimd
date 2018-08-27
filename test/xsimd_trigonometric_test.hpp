@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -110,6 +111,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.sin_res, out);
         success = success && tmp_success;
+        (void)xsimd::sin(tester.input[0]);
 
         topic = "cos   : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
@@ -120,6 +122,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.cos_res, out);
         success = success && tmp_success;
+        (void)xsimd::cos(tester.input[0]);
 
         topic = "sincos: ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
@@ -132,6 +135,7 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.sin_res, out);
         tmp_success = check_almost_equal(topic, res2, tester.cos_res, out);
         success = success && tmp_success;
+        (void)xsimd::sincos(tester.input[0], res[0], res2[0]);
 
         topic = "tan   : ";
         for (size_t i = 0; i < tester.input.size(); i += tester.size)
@@ -142,6 +146,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.tan_res, out);
         success = success && tmp_success;
+        (void)xsimd::tan(tester.input[0]);
 
         topic = "asin  : ";
         for (size_t i = 0; i < tester.ainput.size(); i += tester.size)
@@ -151,6 +156,7 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(topic, res, tester.asin_res, out);
+        (void)xsimd::asin(tester.input[0]);
 
         topic = "acos  : ";
         for (size_t i = 0; i < tester.ainput.size(); i += tester.size)
@@ -160,6 +166,7 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(topic, res, tester.acos_res, out);
+        (void)xsimd::acos(tester.input[0]);
 
         topic = "atan  : ";
         for (size_t i = 0; i < tester.atan_input.size(); i += tester.size)
@@ -169,6 +176,7 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(topic, res, tester.atan_res, out);
+        (void)xsimd::atan(tester.input[0]);
 
         topic = "atan2 : ";
         vector_type atan2_lhs(tester.atan2_lhs);
@@ -179,6 +187,7 @@ namespace xsimd
             detail::store_vec(vres, res, i);
         }
         tmp_success = check_almost_equal(topic, res, tester.atan2_res, out);
+        (void)xsimd::atan2(tester.atan2_lhs, tester.input[0]);
 
         success = success && tmp_success;
         return success;

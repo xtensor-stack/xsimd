@@ -11,6 +11,7 @@
 
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
+#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -104,6 +105,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.exp_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::exp(tester.exp_input[0]), tester.exp_res[0], out);
 
         topic = "exp2  : ";
         for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
@@ -114,6 +116,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.exp2_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::exp2(tester.exp_input[0]), tester.exp2_res[0], out);
 
         topic = "expm1 : ";
         for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
@@ -124,6 +127,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.expm1_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::expm1(tester.exp_input[0]), tester.expm1_res[0], out);
 
         topic = "log   : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
@@ -134,6 +138,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.log_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::log(tester.log_input[0]), tester.log_res[0], out);
 
         topic = "log2  : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
@@ -144,6 +149,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.log2_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::log2(tester.log_input[0]), tester.log2_res[0], out);
 
         topic = "log10 : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
@@ -154,6 +160,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.log10_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::log10(tester.log_input[0]), tester.log10_res[0], out);
 
         topic = "log1p : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
@@ -164,6 +171,7 @@ namespace xsimd
         }
         tmp_success = check_almost_equal(topic, res, tester.log1p_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::log1p(tester.log_input[0]), tester.log1p_res[0], out);
 
         return success;
     }

@@ -510,12 +510,14 @@ namespace xsimd
         detail::store_vec(rvres, rres);
         tmp_success = check_almost_equal(topic, rres, tester.norm_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::norm(tester.lhs[0]), tester.norm_res[0], out);
 
         topic = "proj(simd)               : ";
         vres = proj(lhs);
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.proj_res, out);
         success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::proj(tester.lhs[0]), tester.proj_res[0], out);
 
         topic = "hadd(simd)               : ";
         value_type sres = hadd(lhs);
