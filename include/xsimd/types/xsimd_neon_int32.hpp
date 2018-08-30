@@ -501,7 +501,7 @@ namespace xsimd
                 REPEAT_32(vshlq_n_s32, 0);
                 default: break;
             }
-            return batch<int32_t, 4>(0);
+            return batch<int32_t, 4>(int32_t(0));
         }
 
         inline batch<int32_t, 4> shift_right(const batch<int32_t, 4>& lhs, const int n)
@@ -512,7 +512,7 @@ namespace xsimd
                 REPEAT_32(vshrq_n_s32, 0);
                 default: break;
             }
-            return batch<int32_t, 4>(0);
+            return batch<int32_t, 4>(int32_t(0));
         }
     }
 
