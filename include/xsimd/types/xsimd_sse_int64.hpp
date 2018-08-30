@@ -527,6 +527,11 @@ namespace xsimd
 
             }
 
+            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_MACRO_UNROLL_BINARY(%);
+            }
+
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION

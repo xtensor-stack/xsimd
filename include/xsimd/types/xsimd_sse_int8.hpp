@@ -468,6 +468,11 @@ namespace xsimd
                 XSIMD_MACRO_UNROLL_BINARY(/);
             }
 
+            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_MACRO_UNROLL_BINARY(%);
+            }
+
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm_cmpeq_epi8(lhs, rhs);

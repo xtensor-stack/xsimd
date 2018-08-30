@@ -824,6 +824,11 @@ namespace xsimd
                 XSIMD_FALLBACK_BINARY_OP(batch, /, lhs, rhs)
             }
 
+            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BINARY_OP(batch, % , lhs, rhs)
+            }
+
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
                 XSIMD_FALLBACK_BINARY_OP(batch_bool, == , lhs, rhs)

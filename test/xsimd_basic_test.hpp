@@ -1011,6 +1011,12 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.div_sv_res, out);
         success = success && tmp_success;
 
+        topic = "operator%(simd, simd)    : ";
+        vres = lhs % rhs;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.mod_vv_res, out);
+        success = success && tmp_success;
+
         topic = "min(simd, simd)          : ";
         vres = min(lhs, rhs);
         detail::store_vec(vres, res);
