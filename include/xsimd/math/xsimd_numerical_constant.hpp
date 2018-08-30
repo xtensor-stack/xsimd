@@ -42,7 +42,7 @@ namespace xsimd
     template <>                                         \
     constexpr float NAME<float>() noexcept              \
     {                                                   \
-        return detail::caster32_t(SINGLE).f;            \
+      return detail::caster32_t(uint32_t(SINGLE)).f;	\
     }                                                   \
     template <>                                         \
     constexpr double NAME<double>() noexcept            \
