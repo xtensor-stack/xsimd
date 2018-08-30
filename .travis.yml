@@ -1,4 +1,5 @@
 language: cpp
+dist: trusty
 matrix:
   include:
     - os: linux
@@ -45,7 +46,6 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
           packages:
             - clang-3.8
       env: COMPILER=clang CLANG=3.8
@@ -54,7 +54,6 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
           packages:
             - clang-3.9
             - g++-arm-linux-gnueabi
@@ -68,7 +67,6 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
           packages:
             - clang-3.9
             - g++-arm-linux-gnueabi
@@ -82,7 +80,6 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
           packages:
             - clang-3.9
             - g++-4.8-aarch64-linux-gnu
