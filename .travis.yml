@@ -47,14 +47,6 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - clang-3.8
-      env: COMPILER=clang CLANG=3.8
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
             - clang-3.9
             - g++-arm-linux-gnueabi
             - g++-multilib
@@ -89,6 +81,35 @@ matrix:
             - qemu
             - qemu-system-arm
       env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1 ARM_ARCH_DIR=aarch64-linux-gnu GCC_VER=4.8.4 ARM_SETTINGS="armv8-a -target aarch64-linux-gnueabi"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - g++-4.9
+            - clang-4.0
+      env: COMPILER=clang CLANG=4.0
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - g++-4.9
+            - clang-5.0
+      env: COMPILER=clang CLANG=5.0
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - clang-6.0
+      env: COMPILER=clang CLANG=6.0
     - os: osx
       osx_image: xcode8
       compiler: clang
