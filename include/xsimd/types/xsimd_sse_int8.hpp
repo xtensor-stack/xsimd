@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+* Copyright (c) 2016, Wolf Vollprecht, Johan Mabille and Sylvain Corlay    *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
 *                                                                          *
@@ -12,6 +12,7 @@
 #include <cstdint>
 
 #include "xsimd_base.hpp"
+#include "xsimd_sse_int_base.hpp"
 
 namespace xsimd
 {
@@ -38,27 +39,6 @@ namespace xsimd
         static constexpr std::size_t align = 16;
     };
 
-    template <class T, std::size_t N>
-    class sse_batch_bool : public simd_batch_bool<batch_bool<T, N>>
-    {
-    public:
-
-        sse_batch_bool();
-        explicit sse_batch_bool(bool b);
-        template <class... Args, class Enable = detail::is_array_initializer_t<bool, N, Args...>>
-        sse_batch_bool(Args... args);
-        sse_batch_bool(const __m128i& rhs);
-        sse_batch_bool& operator=(const __m128i& rhs);
-
-        operator __m128i() const;
-
-        bool operator[](std::size_t index) const;
-
-    private:
-
-        __m128i m_value;
-    };
-
     template <>
     class batch_bool<int8_t, 16> : public sse_batch_bool<int8_t, 16>
     {
@@ -72,6 +52,21 @@ namespace xsimd
     public:
         using sse_batch_bool::sse_batch_bool;
     };
+
+    namespace detail
+    {
+        template <>
+        struct batch_bool_kernel<int8_t, 16>
+            : public sse_int_batch_bool_kernel<int8_t>
+        {
+        };
+
+        template <>
+        struct batch_bool_kernel<uint8_t, 16>
+            : public sse_int_batch_bool_kernel<uint8_t>
+        {
+        };
+    }
 
     /***********************
      * sse_int_batch<T, N> *
@@ -93,36 +88,6 @@ namespace xsimd
         static constexpr std::size_t size = 16;
         using batch_bool_type = batch_bool<uint8_t, 16>;
         static constexpr std::size_t align = 16;
-    };
-
-    template <class T, std::size_t N>
-    class sse_int_batch : public simd_batch<batch<T, N>>
-    {
-    public:
-
-        sse_int_batch();
-        explicit sse_int_batch(T i);
-        template <class... Args, class Enable = detail::is_array_initializer_t<T, N, Args...>>
-        sse_int_batch(Args... args);
-        explicit sse_int_batch(const T* src);
-        sse_int_batch(const T* src, aligned_mode);
-        sse_int_batch(const T* src, unaligned_mode);
-        sse_int_batch(const __m128i& rhs);
-        sse_int_batch& operator=(const __m128i& rhs);
-
-        operator __m128i() const;
-
-        batch<T, N>& load_aligned(const T* src);
-        batch<T, N>& load_unaligned(const T* src);
-
-        void store_aligned(T* dst) const;
-        void store_unaligned(T* dst) const;
-
-        T operator[](std::size_t index) const;
-
-    private:
-
-        __m128i m_value;
     };
 
     template <>
@@ -182,267 +147,22 @@ namespace xsimd
         using sse_int_batch::sse_int_batch;
     };
 
-    // template <>
-    // class batch<int16_t, 8> : public sse_int_batch<int16_t, 8>
-    // {
-    // public:
-    //     using sse_int_batch::sse_int_batch;
-    // };
-
-    // template <>
-    // class batch<uint16_t, 8> : public sse_int_batch<uint16_t, 8>
-    // {
-    // public:
-    //     using sse_int_batch::sse_int_batch;
-    // };
-
     batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, int32_t rhs);
     batch<int8_t, 16> operator>>(const batch<int8_t, 16>& lhs, int32_t rhs);
     batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, int32_t rhs);
     batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, int32_t rhs);
 
-    namespace sse_detail
-    {
-        template <class... Args>
-        inline __m128i int_init(std::integral_constant<std::size_t, 1>, Args... args)
-        {
-            return _mm_setr_epi8(args...);
-        }
-
-        template <class... Args>
-        inline __m128i int_init(std::integral_constant<std::size_t, 2>, Args... args)
-        {
-            return _mm_setr_epi16(args...);
-        }
-    }
-
-    /***********************************
-     * batch_bool<T, N> implementation *
-     ***********************************/
-
-    template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::sse_batch_bool()
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::sse_batch_bool(bool b)
-        : m_value(_mm_set1_epi32(-(T)b))
-    {
-    }
-
-    template <class T, std::size_t N>
-    template <class... Args, class>
-    inline sse_batch_bool<T, N>::sse_batch_bool(Args... args)
-        : m_value(sse_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{}, -static_cast<T>(static_cast<bool>(args))...))
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::sse_batch_bool(const __m128i& rhs)
-        : m_value(rhs)
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>& sse_batch_bool<T, N>::operator=(const __m128i& rhs)
-    {
-        m_value = rhs;
-        return *this;
-    }
-
-    template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::operator __m128i() const
-    {
-        return m_value;
-    }
-
-    template <class T, std::size_t N>
-    inline bool sse_batch_bool<T, N>::operator[](std::size_t index) const
-    {
-        alignas(16) T x[N];
-        _mm_store_si128((__m128i*)x, m_value);
-        return static_cast<bool>(x[index & (N - 1)]);
-    }
-
-    namespace detail
-    {
-        template <class T>
-        struct sse_int8_batch_bool_kernel
-        {
-            using batch_type = batch_bool<T, 16>;
-            constexpr static bool is_signed = std::is_signed<T>::value;
-            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_and_si128(lhs, rhs);
-            }
-
-            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_or_si128(lhs, rhs);
-            }
-
-            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_xor_si128(lhs, rhs);
-            }
-
-            static batch_type bitwise_not(const batch_type& rhs)
-            {
-                return _mm_xor_si128(rhs, _mm_set1_epi32(-1));
-            }
-
-            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_andnot_si128(lhs, rhs);
-            }
-
-            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_cmpeq_epi8(lhs, rhs);
-            }
-
-            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
-            {
-                return ~(lhs == rhs);
-            }
-
-            static bool all(const batch_type& rhs)
-            {
-                return _mm_movemask_epi8(rhs) == 0xFFFF;
-            }
-
-            static bool any(const batch_type& rhs)
-            {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-                return !_mm_testz_si128(rhs, rhs);
-#else
-                return _mm_movemask_epi8(rhs) != 0;
-#endif
-            }
-        };
-
-        template <>
-        struct batch_bool_kernel<int8_t, 16>
-            : public sse_int8_batch_bool_kernel<int8_t>
-        {
-        };
-
-        template <>
-        struct batch_bool_kernel<uint8_t, 16>
-            : public sse_int8_batch_bool_kernel<uint8_t>
-        {
-        };
-    }
-
-    /**************************************
-     * sse_int_batch<T, N> implementation *
-     **************************************/
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>::sse_int_batch()
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>::sse_int_batch(T i)
-        : m_value(_mm_set1_epi8(i))
-    {
-    }
-
-    template <class T, std::size_t N>
-    template <class... Args, class>
-    inline sse_int_batch<T, N>::sse_int_batch(Args... args)
-        : m_value(sse_detail::int_init(args...))
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>::sse_int_batch(const T* src)
-        : m_value(_mm_loadu_si128((__m128i const*)src))
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>::sse_int_batch(const T* src, aligned_mode)
-        : m_value(_mm_load_si128((__m128i const*)src))
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>::sse_int_batch(const T* src, unaligned_mode)
-        : m_value(_mm_loadu_si128((__m128i const*)src))
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>::sse_int_batch(const __m128i& rhs)
-        : m_value(rhs)
-    {
-    }
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>& sse_int_batch<T, N>::operator=(const __m128i& rhs)
-    {
-        m_value = rhs;
-        return *this;
-    }
-
-    template <class T, std::size_t N>
-    inline sse_int_batch<T, N>::operator __m128i() const
-    {
-        return m_value;
-    }
-
-    template <class T, std::size_t N>
-    inline batch<T, N>& sse_int_batch<T, N>::load_aligned(const T* src)
-    {
-        m_value = _mm_load_si128((__m128i const*)src);
-        return (*this)();
-    }
-
-    template <class T, std::size_t N>
-    inline batch<T, N>& sse_int_batch<T, N>::load_unaligned(const T* src)
-    {
-        m_value = _mm_loadu_si128((__m128i const*)src);
-        return (*this)();
-    }
-
-    template <class T, std::size_t N>
-    inline void sse_int_batch<T, N>::store_aligned(T* dst) const
-    {
-        _mm_store_si128((__m128i*)dst, m_value);
-    }
-
-    template <class T, std::size_t N>
-    inline void sse_int_batch<T, N>::store_unaligned(T* dst) const
-    {
-        _mm_storeu_si128((__m128i*)dst, m_value);
-    }
-
-    template <class T, std::size_t N>
-    inline T sse_int_batch<T, N>::operator[](std::size_t index) const
-    {
-        alignas(16) T x[N];
-        store_aligned(x);
-        return x[index & (N - 1)];
-    }
-
     namespace detail
     {
         template <class T>
         struct sse_int8_batch_kernel
+            : sse_int_kernel_base<batch<T, 16>>
         {
             using batch_type = batch<T, 16>;
             using value_type = T;
             using batch_bool_type = batch_bool<T, 16>;
 
             static constexpr bool is_signed = std::is_signed<value_type>::value;
-
-            static batch_type neg(const batch_type& rhs)
-            {
-                return _mm_sub_epi8(_mm_setzero_si128(), rhs);
-            }
 
             static batch_type add(const batch_type& lhs, const batch_type& rhs)
             {
@@ -462,75 +182,9 @@ namespace xsimd
                 );
             }
 
-            static batch_type div(const batch_type& lhs, const batch_type& rhs)
-            {
-                // TODO implement divison as floating point!
-                XSIMD_MACRO_UNROLL_BINARY(/);
-            }
-
-            static batch_type mod(const batch_type& lhs, const batch_type& rhs)
-            {
-                XSIMD_MACRO_UNROLL_BINARY(%);
-            }
-
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm_cmpeq_epi8(lhs, rhs);
-            }
-
-            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
-            {
-                return ~(lhs == rhs);
-            }
-
-            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
-            {
-                return ~(rhs < lhs);
-            }
-
-            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_and_si128(lhs, rhs);
-            }
-
-            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_or_si128(lhs, rhs);
-            }
-
-            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_xor_si128(lhs, rhs);
-            }
-
-            static batch_type bitwise_not(const batch_type& rhs)
-            {
-                return _mm_xor_si128(rhs, _mm_set1_epi8(-1));
-            }
-
-            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm_andnot_si128(lhs, rhs);
-            }
-
-            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return x * y + z;
-            }
-
-            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return x * y - z;
-            }
-
-            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return -x * y + z;
-            }
-
-            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return -x * y - z;
             }
 
             static value_type hadd(const batch_type& rhs)
@@ -558,7 +212,7 @@ namespace xsimd
 
         template <>
         struct batch_kernel<int8_t, 16>
-            : public sse_int8_batch_kernel<int8_t>
+            : sse_int8_batch_kernel<int8_t>
         {
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
@@ -631,20 +285,6 @@ namespace xsimd
                 return rhs;
             }
         };
-    }
-
-    namespace sse_detail
-    {
-        template <class F, class T, std::size_t N>
-        inline batch<T, N> shift_impl(F&& f, const batch<T, N>& lhs, int32_t rhs)
-        {
-            alignas(16) T tmp_lhs[N], tmp_res[N];
-            lhs.store_aligned(&tmp_lhs[0]);
-            unroller<N>([&](std::size_t i) {
-                tmp_res[i] = f(tmp_lhs[i], rhs);
-            });
-            return batch<T, N>(tmp_res, aligned_mode());
-        }
     }
 
     inline batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, int32_t rhs)

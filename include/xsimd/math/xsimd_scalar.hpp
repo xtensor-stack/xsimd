@@ -11,7 +11,9 @@
 
 #include <cmath>
 
-namespace xsimd {
+namespace xsimd
+{
+
     /*********************************************
      * scalar fallback for xsimd math operations *
      *********************************************/

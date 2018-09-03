@@ -291,7 +291,7 @@ namespace xsimd
             lor_res[i] = lhs[i] || rhs[i];
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
-            abs_res[i] = abs(lhs[i]);
+            abs_res[i] = uabs(lhs[i]);
             fma_res[i] = lhs[i] * rhs[i] + rhs[i];
             fms_res[i] = lhs[i] * rhs[i] - rhs[i];
             fnma_res[i] = -lhs[i] * rhs[i] + rhs[i];
