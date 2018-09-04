@@ -21,16 +21,16 @@ namespace xsimd
      ********************/
 
     template <class T, std::size_t N>
-    class sse_batch_bool : public simd_batch_bool<batch_bool<T, N>>
+    class sse_int_batch_bool : public simd_batch_bool<batch_bool<T, N>>
     {
     public:
 
-        sse_batch_bool();
-        explicit sse_batch_bool(bool b);
+        sse_int_batch_bool();
+        explicit sse_int_batch_bool(bool b);
         template <class... Args, class Enable = detail::is_array_initializer_t<bool, N, Args...>>
-        sse_batch_bool(Args... args);
-        sse_batch_bool(const __m128i& rhs);
-        sse_batch_bool& operator=(const __m128i& rhs);
+        sse_int_batch_bool(Args... args);
+        sse_int_batch_bool(const __m128i& rhs);
+        sse_int_batch_bool& operator=(const __m128i& rhs);
 
         operator __m128i() const;
 
@@ -88,6 +88,18 @@ namespace xsimd
         {
             return _mm_setr_epi16(args...);
         }
+
+        template <class... Args>
+        inline __m128i int_init(std::integral_constant<std::size_t, 4>, Args... args)
+        {
+            return _mm_setr_epi32(args...);
+        }
+
+        template <class... Args, class I0, class I1>
+        inline __m128i int_init(std::integral_constant<std::size_t, 8>, I0 i0, I1 i1)
+        {
+            return _mm_set_epi64x(i1, i0);
+        }
     }
 
     /***********************************
@@ -95,44 +107,44 @@ namespace xsimd
      ***********************************/
 
     template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::sse_batch_bool()
+    inline sse_int_batch_bool<T, N>::sse_int_batch_bool()
     {
     }
 
     template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::sse_batch_bool(bool b)
+    inline sse_int_batch_bool<T, N>::sse_int_batch_bool(bool b)
         : m_value(_mm_set1_epi32(-(int)b))
     {
     }
 
     template <class T, std::size_t N>
     template <class... Args, class>
-    inline sse_batch_bool<T, N>::sse_batch_bool(Args... args)
+    inline sse_int_batch_bool<T, N>::sse_int_batch_bool(Args... args)
         : m_value(sse_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{}, -static_cast<T>(static_cast<bool>(args))...))
     {
     }
 
     template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::sse_batch_bool(const __m128i& rhs)
+    inline sse_int_batch_bool<T, N>::sse_int_batch_bool(const __m128i& rhs)
         : m_value(rhs)
     {
     }
 
     template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>& sse_batch_bool<T, N>::operator=(const __m128i& rhs)
+    inline sse_int_batch_bool<T, N>& sse_int_batch_bool<T, N>::operator=(const __m128i& rhs)
     {
         m_value = rhs;
         return *this;
     }
 
     template <class T, std::size_t N>
-    inline sse_batch_bool<T, N>::operator __m128i() const
+    inline sse_int_batch_bool<T, N>::operator __m128i() const
     {
         return m_value;
     }
 
     template <class T, std::size_t N>
-    inline bool sse_batch_bool<T, N>::operator[](std::size_t index) const
+    inline bool sse_int_batch_bool<T, N>::operator[](std::size_t index) const
     {
         alignas(16) T x[N];
         _mm_store_si128((__m128i*)x, m_value);

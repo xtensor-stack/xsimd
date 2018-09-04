@@ -332,8 +332,4 @@ namespace xsimd
 
 }
 
-// #undef XSIMD_APPLY_SSE_FUNCTION
-// #undef XSIMD_RETURN_MERGED_SSE
-// #undef XSIMD_SPLIT_AVX
-
 #endif

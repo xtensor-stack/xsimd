@@ -35,17 +35,17 @@ namespace xsimd
     };
 
     template <>
-    class batch_bool<int16_t, 8> : public sse_batch_bool<int16_t, 8>
+    class batch_bool<int16_t, 8> : public sse_int_batch_bool<int16_t, 8>
     {
     public:
-        using sse_batch_bool::sse_batch_bool;
+        using sse_int_batch_bool::sse_int_batch_bool;
     };
 
     template <>
-    class batch_bool<uint16_t, 8> : public sse_batch_bool<uint16_t, 8>
+    class batch_bool<uint16_t, 8> : public sse_int_batch_bool<uint16_t, 8>
     {
     public:
-        using sse_batch_bool::sse_batch_bool;
+        using sse_int_batch_bool::sse_int_batch_bool;
     };
 
     namespace detail
