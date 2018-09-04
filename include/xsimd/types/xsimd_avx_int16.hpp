@@ -248,8 +248,8 @@ namespace xsimd
                 XSIMD_SPLIT_AVX(cond);
                 XSIMD_SPLIT_AVX(a);
                 XSIMD_SPLIT_AVX(b);
-                __m128i res_low = _mm_blend_epi16(b_low, a_low, cond_low);
-                __m128i res_high = _mm_blend_epi16(b_high, a_high, cond_high);
+                __m128i res_low = _mm_blendv_epi8(b_low, a_low, cond_low);
+                __m128i res_high = _mm_blendv_epi8(b_high, a_high, cond_high);
                 XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
             }
