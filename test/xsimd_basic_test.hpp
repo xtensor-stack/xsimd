@@ -390,6 +390,32 @@ namespace xsimd
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
     };
 
+    template <class T>
+    struct test_more_int
+    {
+        bool run()
+        {
+            return true;
+        }
+    };
+
+    template <class T>
+    struct test_more_int<batch<T, 8>>
+    {
+        bool run()
+        {
+            using B = batch<T, 8>;
+            B a(1,3,1,3, 1,3,1,3);
+            B b(2);
+            B c(2,3,2,3, 2,3,2,3);
+            auto r1 = xsimd::max(a, b);
+            auto r2 = xsimd::abs(a);
+            auto r3 = xsimd::min(a, b);
+            return xsimd::all(c == r1);
+        }
+    };
+
+
 #if defined(XSIMD_ENABLE_FALLBACK)
     template <class I, class S>
     bool test_simd_bool(const batch<I, 7>& /* empty */, S& /*stream*/)
@@ -1095,6 +1121,7 @@ namespace xsimd
         success = success && test_simd_int_shift(vector_type(value_type(0)), out);
         success = success && test_simd_bool(vector_type(value_type(0)), out);
         success = success && test_char_loading<vector_type::size>(value_type(), out);
+        success = success && test_more_int<vector_type>{}.run();
         return success;
     }
 

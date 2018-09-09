@@ -166,32 +166,24 @@ namespace xsimd
 
             static batch_type min(const batch_type& lhs, const batch_type& rhs)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
                 return _mm_min_epi16(lhs, rhs);
-#else
-                __m128i greater = _mm_cmpgt_epi8(lhs, rhs);
-                return select(greater, rhs, lhs);
-#endif
             }
 
             static batch_type max(const batch_type& lhs, const batch_type& rhs)
             {
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
                 return _mm_max_epi16(lhs, rhs);
-#else
-                __m128i greater = _mm_cmpgt_epi8(lhs, rhs);
-                return select(greater, lhs, rhs);
-#endif
             }
-
 
             static batch_type abs(const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
-                return _mm_sign_epi16(rhs, rhs);
+                return _mm_abs_epi16(rhs);
 #else
-                return _mm_min_epu16(rhs, -rhs);
+                __m128i tmp, res;
+                tmp = _mm_cmplt_epi16(rhs, _mm_setzero_si128());
+                res = _mm_xor_si128(rhs, tmp);
+                res = _mm_sub_epi16(res, tmp);
+                return res;
 #endif
             }
         };
@@ -208,7 +200,7 @@ namespace xsimd
 
             static batch_type min(const batch_type& lhs, const batch_type& rhs)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
                 return _mm_min_epu16(lhs, rhs);
 #else
                 return select(lhs < rhs, lhs, rhs);
@@ -217,7 +209,7 @@ namespace xsimd
 
             static batch_type max(const batch_type& lhs, const batch_type& rhs)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
                 return _mm_max_epu16(lhs, rhs);
 #else
                 return select(lhs < rhs, rhs, lhs);

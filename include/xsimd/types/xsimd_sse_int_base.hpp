@@ -15,6 +15,22 @@
 
 namespace xsimd
 {
+    /********************
+     * helper functions *
+     ********************/
+
+    namespace detail
+    {
+        inline __m128i cmpeq_epi64_sse2(__m128i lhs, __m128i rhs)
+        {
+            __m128i tmp1 = _mm_cmpeq_epi32(lhs, rhs);
+            __m128i tmp2 = _mm_shuffle_epi32(tmp1, 0xB1);
+            __m128i tmp3 = _mm_and_si128(tmp1, tmp2);
+            __m128i tmp4 = _mm_srai_epi32(tmp3, 31);
+            return _mm_shuffle_epi32(tmp4, 0xF5);
+        }
+    }
+
 
     /********************
      * batch_bool<T, N> *
@@ -194,7 +210,13 @@ namespace xsimd
                     case 4:
                         return _mm_cmpeq_epi32(lhs, rhs);
                     case 8:
+                    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
                         return _mm_cmpeq_epi64(lhs, rhs);
+#else
+                        return detail::cmpeq_epi64_sse2(lhs, rhs);
+#endif
+                    }
                 }
             }
 
