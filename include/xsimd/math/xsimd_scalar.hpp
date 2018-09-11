@@ -11,7 +11,9 @@
 
 #include <cmath>
 
-namespace xsimd {
+namespace xsimd
+{
+
     /*********************************************
      * scalar fallback for xsimd math operations *
      *********************************************/
@@ -26,7 +28,18 @@ namespace xsimd {
     using std::atanh;
     using std::cbrt;
     using std::ceil;
+#ifdef _WIN32
+    inline float copysign(float x, float y)
+    {
+      return ::copysign(x, y);
+    }
+    inline double copysign(double x, double y)
+    {
+      return ::copysign(x, y);
+    }
+#else
     using std::copysign;
+#endif
     using std::cos;
     using std::cosh;
     using std::erf;
