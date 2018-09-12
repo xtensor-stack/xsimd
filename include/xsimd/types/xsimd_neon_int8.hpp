@@ -92,7 +92,7 @@ namespace xsimd
 
     template <class... Args, class>
     inline batch<int8_t, 16>::batch(Args... args)
-        : m_value{args...}
+        : m_value{static_cast<int8_t>(args)...}
     {
     }
 
