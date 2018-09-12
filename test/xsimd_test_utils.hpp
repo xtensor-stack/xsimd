@@ -73,6 +73,21 @@ namespace utils {
 
 namespace xsimd
 {
+    template <class T>
+    inline T uabs(T val)
+    {
+        return std::abs(val);
+    }
+
+    inline uint32_t uabs(uint32_t val)
+    {
+        return val;
+    }
+
+    inline uint64_t uabs(uint64_t val)
+    {
+        return val;
+    }
 
     template <class T>
     inline std::string value_type_name()
@@ -87,7 +102,7 @@ namespace xsimd
         bool check_is_small(const T& value, const T& tolerance)
         {
             using std::abs;
-            return abs(value) < abs(tolerance);
+            return uabs(value) < uabs(tolerance);
         }
 
         template <class T>
@@ -110,9 +125,9 @@ namespace xsimd
         bool check_is_close(const T& lhs, const T& rhs, const T& relative_precision)
         {
             using std::abs;
-            T diff = abs(lhs - rhs);
-            T d1 = safe_division(diff, T(abs(rhs)));
-            T d2 = safe_division(diff, T(abs(lhs)));
+            T diff = uabs(lhs - rhs);
+            T d1 = safe_division(diff, T(uabs(rhs)));
+            T d2 = safe_division(diff, T(uabs(lhs)));
 
             return d1 <= relative_precision && d2 <= relative_precision;
         }
@@ -145,7 +160,7 @@ namespace xsimd
             T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
             T absolute_zero_prox = 2048 * std::numeric_limits<T>::epsilon();
 
-            if (max(abs(lhs), abs(rhs)) < T(1e-3))
+            if (max(uabs(lhs), uabs(rhs)) < T(1e-3))
             {
                 using res_type = decltype(lhs - rhs);
                 return detail::check_is_small(lhs - rhs, res_type(absolute_zero_prox));

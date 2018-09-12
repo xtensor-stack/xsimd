@@ -861,8 +861,4 @@ namespace xsimd
     }
 }
 
-#undef XSIMD_SPLIT_AVX512
-#undef XSIMD_RETURN_MERGED_AVX
-#undef XSIMD_APPLY_AVX2_FUNCTION
-
 #endif
