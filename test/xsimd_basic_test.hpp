@@ -399,19 +399,158 @@ namespace xsimd
         }
     };
 
+    template <class T, std::size_t N>
+    bool stored_equal(batch<T, N>& b, const std::array<T, N>& arr)
+    {
+        std::array<T, N> stored;
+        b.store_unaligned(stored.data());
+        bool result = true;
+
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            result = result && (stored[i] == arr[i]);
+        }
+        return result;
+    }
+
+    template <class T>
+    struct test_more_int<batch<T, 2>>
+    {
+        void run()
+        {
+            using B = batch<T, 2>;
+            using BB = batch_bool<T, 2>;
+
+            T max = std::numeric_limits<T>::max();
+            T min = std::numeric_limits<T>::min();
+            std::array<T, 2> maxmin_cmp{max, min};
+            B maxmin(max, min);
+            EXPECT_TRUE(stored_equal(maxmin, maxmin_cmp));
+
+            B a(1, 3);
+            B b(2);
+            B c(2, 3);
+
+            auto r1 = xsimd::max(a, c);
+            auto r2 = xsimd::abs(a);
+            auto r3 = xsimd::min(a, c);
+
+            EXPECT_TRUE(stored_equal(r1, {2, 3}));
+            EXPECT_TRUE(stored_equal(r3, {1, 3}));
+
+            auto r4 = a < b; // test lt
+            BB e4(1, 0);
+            EXPECT_TRUE(xsimd::all(r4 == e4));
+        }
+    };
+
+    template <class T>
+    struct test_more_int<batch<T, 4>>
+    {
+        void run()
+        {
+            using B = batch<T, 4>;
+            using BB = batch_bool<T, 4>;
+
+            B a(1,3,1,1);
+            B b(2);
+            B c(2,3,2,3);
+
+            auto r1 = xsimd::max(a, c);
+            auto r2 = xsimd::abs(a);
+            auto r3 = xsimd::min(a, c);
+
+            EXPECT_TRUE(stored_equal(r1, {2, 3, 2, 3}));
+            EXPECT_TRUE(stored_equal(r3, {1, 3, 1, 1}));
+
+            auto r4 = a < b; // test lt
+            BB e4(1,0,1,1);
+            EXPECT_TRUE(xsimd::all(r4 == e4));
+        }
+    };
+
     template <class T>
     struct test_more_int<batch<T, 8>>
     {
-        bool run()
+        void run()
         {
             using B = batch<T, 8>;
-            B a(1,3,1,3, 1,3,1,3);
+            using BB = batch_bool<T, 8>;
+
+            T max = std::numeric_limits<T>::max();
+            T min = std::numeric_limits<T>::min();
+            std::array<T, 8> maxmin_cmp{0, 0, max, 0, min, 0, 0, 0};
+            B maxmin(0, 0, max, 0, min, 0, 0, 0);
+            stored_equal(maxmin, maxmin_cmp);
+
+            B a(1,3,1,3, 1,1,3,3);
             B b(2);
             B c(2,3,2,3, 2,3,2,3);
+
+            auto r1 = xsimd::max(a, c);
+            auto r2 = xsimd::abs(a);
+            auto r3 = xsimd::min(a, c);
+            auto r4 = a < b; // test lt
+
+            BB e4(1,0,1,0, 1,1,0,0);
+            EXPECT_TRUE(xsimd::all(r4 == e4));
+        }
+    };
+
+    template <class T>
+    struct test_more_int<batch<T, 16>>
+    {
+        void run()
+        {
+            using B = batch<T, 16>;
+            using BB = batch_bool<T, 16>;
+
+            T max = std::numeric_limits<T>::max();
+            T min = std::numeric_limits<T>::min();
+            std::array<T, 16> maxmin_cmp{0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0};
+            B maxmin(0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0);
+            stored_equal(maxmin, maxmin_cmp);
+
+            B a(1,3,1,3, 1,3,1,3, 3,3,3,3, min,max,max,min);
+            B b(2);
+            B c(2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3);
             auto r1 = xsimd::max(a, b);
             auto r2 = xsimd::abs(a);
             auto r3 = xsimd::min(a, b);
-            return xsimd::all(c == r1);
+            auto r4 = a < b; // test lt
+            auto r5 = a == c;
+            auto r6 = a != c;
+
+            BB e4(1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1);
+            EXPECT_TRUE(xsimd::all(r4 == e4));
+
+            BB e5(0,1,0,1, 0,1,0,1, 0,1,0,1, 0,0,0,0);
+            EXPECT_TRUE(xsimd::all(r5 == e5));
+            EXPECT_TRUE(xsimd::all(r6 == !e5));
+        }
+    };
+
+    template <class T>
+    struct test_more_int<batch<T, 32>>
+    {
+        void run()
+        {
+            using B = batch<T, 32>;
+            using BB = batch_bool<T, 32>;
+            T max = std::numeric_limits<T>::max();
+            T min = std::numeric_limits<T>::min();
+
+            B a(1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 3,3,3,3, min,max,max,min);
+            B b(2);
+            B c(2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3);
+
+            auto r1 = xsimd::max(a, b);
+            auto r2 = xsimd::abs(a);
+            auto r3 = xsimd::min(a, b);
+            auto r4 = a < b; // test lt
+
+            BB e4(1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1);
+            EXPECT_TRUE(xsimd::all(r4 == e4));
         }
     };
 
@@ -1121,7 +1260,7 @@ namespace xsimd
         success = success && test_simd_int_shift(vector_type(value_type(0)), out);
         success = success && test_simd_bool(vector_type(value_type(0)), out);
         success = success && test_char_loading<vector_type::size>(value_type(), out);
-        success = success && test_more_int<vector_type>{}.run();
+        test_more_int<vector_type>{}.run();
         return success;
     }
 

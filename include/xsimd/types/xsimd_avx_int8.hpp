@@ -361,11 +361,18 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
                 auto xor_lhs = _mm256_xor_si256(lhs, _mm256_set1_epi8(std::numeric_limits<int8_t>::lowest()));
                 auto xor_rhs = _mm256_xor_si256(rhs, _mm256_set1_epi8(std::numeric_limits<int8_t>::lowest()));
-                return _mm256_cmpgt_epi8(xor_lhs, xor_rhs);
+                return _mm256_cmpgt_epi8(xor_rhs, xor_lhs);
 #else
-                auto xor_lhs = _mm256_xor_si256(lhs, _mm256_set1_epi8(std::numeric_limits<int8_t>::lowest()));
-                auto xor_rhs = _mm256_xor_si256(rhs, _mm256_set1_epi8(std::numeric_limits<int8_t>::lowest()));
-                XSIMD_APPLY_SSE_FUNCTION(_mm_cmpgt_epi8, xor_lhs, xor_rhs);
+                XSIMD_SPLIT_AVX(lhs);
+                XSIMD_SPLIT_AVX(rhs);
+                auto xer = _mm_set1_epi8(std::numeric_limits<int8_t>::lowest());
+                lhs_low  = _mm_xor_si128(lhs_low,  xer);
+                lhs_high = _mm_xor_si128(lhs_high, xer);
+                rhs_low  = _mm_xor_si128(rhs_low,  xer);
+                rhs_high = _mm_xor_si128(rhs_high, xer);
+                __m128i res_low =  _mm_cmpgt_epi8(rhs_low, lhs_low);
+                __m128i res_high = _mm_cmpgt_epi8(rhs_high, lhs_high);
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
             }
 
