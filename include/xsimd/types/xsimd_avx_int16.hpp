@@ -178,11 +178,6 @@ namespace xsimd
 #endif
             }
 
-            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
-            {
-                return ~(lhs == rhs);
-            }
-
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
@@ -191,12 +186,6 @@ namespace xsimd
                 XSIMD_APPLY_SSE_FUNCTION(_mm_cmpgt_epi16, rhs, lhs);
 #endif
             }
-
-            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
-            {
-                return ~(rhs < lhs);
-            }
-
 
             static batch_type min(const batch_type& lhs, const batch_type& rhs)
             {
@@ -329,7 +318,6 @@ namespace xsimd
             return val >> rhs;
         }, lhs, rhs);
     }
-
 }
 
 #endif
