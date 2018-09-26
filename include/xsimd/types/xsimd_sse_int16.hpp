@@ -81,19 +81,19 @@ namespace xsimd
         static constexpr std::size_t align = 16;
     };
 
-	template <>
-	class batch<int16_t, 8> : public sse_int_batch<int16_t, 8>
-	{
-	public:
-	    using sse_int_batch::sse_int_batch;
-	};
+    template <>
+    class batch<int16_t, 8> : public sse_int_batch<int16_t, 8>
+    {
+    public:
+	using sse_int_batch::sse_int_batch;
+    };
 
-	template <>
-	class batch<uint16_t, 8> : public sse_int_batch<uint16_t, 8>
-	{
-	public:
-	    using sse_int_batch::sse_int_batch;
-	};
+    template <>
+    class batch<uint16_t, 8> : public sse_int_batch<uint16_t, 8>
+    {
+    public:
+	using sse_int_batch::sse_int_batch;
+    };
 
     batch<int16_t, 8> operator<<(const batch<int16_t, 8>& lhs, int32_t rhs);
     batch<int16_t, 8> operator>>(const batch<int16_t, 8>& lhs, int32_t rhs);

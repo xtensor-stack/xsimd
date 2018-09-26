@@ -382,6 +382,62 @@ namespace xsimd
     template <class B, std::size_t N = simd_batch_traits<B>::size>
     B bitwise_cast(const batch<int64_t, N>& x);
 
+    /****************
+     * helper macro *
+     ****************/
+
+#define XSIMD_DECLARE_LOAD_STORE(TYPE, N, CVT_TYPE)                            \
+    batch<TYPE, N>& load_aligned(const CVT_TYPE*);                             \
+    batch<TYPE, N>& load_unaligned(const CVT_TYPE*);                           \
+    void store_aligned(CVT_TYPE* dst) const;                                   \
+    void store_unaligned(CVT_TYPE* dst) const
+
+#define XSIMD_DEFINE_LOAD_STORE(TYPE, N, CVT_TYPE, ALIGNMENT)                  \
+    inline batch<TYPE, N>& batch<TYPE, N>::load_aligned(const CVT_TYPE* src)   \
+    {                                                                          \
+        alignas(ALIGNMENT) TYPE tmp[N];                                        \
+        unroller<N>([&](std::size_t i) {                                       \
+            tmp[i] = static_cast<TYPE>(src[i]);                                \
+        });                                                                    \
+        return load_aligned(tmp);                                              \
+    }                                                                          \
+    inline batch<TYPE, N>& batch<TYPE, N>::load_unaligned(const CVT_TYPE* src) \
+    {                                                                          \
+        return load_aligned(src);                                              \
+    }                                                                          \
+    inline void batch<TYPE, N>::store_aligned(CVT_TYPE* dst) const             \
+    {                                                                          \
+        alignas(ALIGNMENT) TYPE tmp[N];                                        \
+        store_aligned(tmp);                                                    \
+        unroller<N>([&](std::size_t i) {                                       \
+            dst[i] = static_cast<CVT_TYPE>(tmp[i]);                            \
+        });                                                                    \
+    }                                                                          \
+    inline void batch<TYPE, N>::store_unaligned(CVT_TYPE* dst) const           \
+    {                                                                          \
+        return store_aligned(dst);                                             \
+    }
+
+#define XSIMD_DECLARE_LOAD_STORE_INT8(TYPE, N)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t);                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t);                               \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t);                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t);                               \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t);                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t);                               \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
+
+#define XSIMD_DEFINE_LOAD_STORE_INT8(TYPE, N, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int16_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint16_t, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int32_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint32_t, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int64_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint64_t, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, float, ALIGNMENT)                         \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, double, ALIGNMENT)
+
     /**********************************
      * simd_batch_bool implementation *
      **********************************/

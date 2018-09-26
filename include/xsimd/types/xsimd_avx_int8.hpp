@@ -17,9 +17,9 @@
 namespace xsimd
 {
 
-    /****************************
-     * batch_bool<int8 / int16> *
-     ****************************/
+    /**************************
+     * batch_bool<int8_t, 32> *
+     **************************/
 
     template <>
     struct simd_batch_traits<batch_bool<int8_t, 32>>
@@ -93,7 +93,7 @@ namespace xsimd
     {
     public:
 
-        using base_class = avx_int_batch;
+        using base_class = avx_int_batch<int8_t, 32>;
         using base_class::base_class;
         using base_class::load_aligned;
         using base_class::load_unaligned;
@@ -117,38 +117,32 @@ namespace xsimd
         {
         }
 
-        batch& load_aligned(const char* src)
-        {
-            return load_aligned(reinterpret_cast<const int8_t*>(src));
-        }
-
-        batch& load_unaligned(const char* src)
-        {
-            return load_unaligned(reinterpret_cast<const int8_t*>(src));
-        }
-
-        void store_aligned(char* dst)
-        {
-            return store_aligned(reinterpret_cast<int8_t*>(dst));
-        }
-
-        void store_unaligned(char* dst)
-        {
-            return store_unaligned(reinterpret_cast<int8_t*>(dst));
-        }
+        XSIMD_DECLARE_LOAD_STORE_INT8(int8_t, 32);
     };
 
     template <>
     class batch<uint8_t, 32> : public avx_int_batch<uint8_t, 32>
     {
     public:
-        using avx_int_batch::avx_int_batch;
+        
+        using base_class = avx_int_batch<uint8_t, 32>;
+        using base_class::base_class;
+        using base_class::load_aligned;
+        using base_class::load_unaligned;
+        using base_class::store_aligned;
+        using base_class::store_unaligned;
+
+        XSIMD_DECLARE_LOAD_STORE_INT8(uint8_t, 32);
     };
 
     batch<int8_t, 32> operator<<(const batch<int8_t, 32>& lhs, int32_t rhs);
     batch<int8_t, 32> operator>>(const batch<int8_t, 32>& lhs, int32_t rhs);
     batch<uint8_t, 32> operator<<(const batch<uint8_t, 32>& lhs, int32_t rhs);
     batch<uint8_t, 32> operator>>(const batch<uint8_t, 32>& lhs, int32_t rhs);
+
+    /************************************
+     * batch<int8_t, 32> implementation *
+     ************************************/
 
     namespace detail
     {
@@ -416,6 +410,8 @@ namespace xsimd
         }, lhs, rhs);
     }
 
+    XSIMD_DEFINE_LOAD_STORE_INT8(int8_t, 32, 32);
+
     inline batch<uint8_t, 32> operator<<(const batch<uint8_t, 32>& lhs, int32_t rhs)
     {
         return avx_detail::shift_impl([](uint8_t val, int32_t rhs) {
@@ -429,6 +425,8 @@ namespace xsimd
             return val >> rhs;
         }, lhs, rhs);
     }
+
+    XSIMD_DEFINE_LOAD_STORE_INT8(uint8_t, 32, 32);
 }
 
 #endif

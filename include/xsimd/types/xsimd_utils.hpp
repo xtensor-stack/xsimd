@@ -10,6 +10,7 @@
 #define XSIMD_UTILS_HPP
 
 #include <cstdint>
+#include <type_traits>
 
 namespace xsimd
 {
@@ -25,7 +26,9 @@ namespace xsimd
      **************/
 
     template <class T>
-    struct as_integer;
+    struct as_integer : std::make_signed<T>
+    {
+    };
 
     template <>
     struct as_integer<float>
@@ -53,7 +56,9 @@ namespace xsimd
      ***********************/
 
     template <class T>
-    struct as_unsigned_integer;
+    struct as_unsigned_integer : std::make_unsigned<T>
+    {
+    };
 
     template <>
     struct as_unsigned_integer<float>
@@ -67,18 +72,6 @@ namespace xsimd
         using type = uint64_t;
     };
 
-    template <>
-    struct as_unsigned_integer<int32_t>
-    {
-        using type = uint32_t;
-    };
-
-    template <>
-    struct as_unsigned_integer<int64_t>
-    {
-        using type = uint64_t;
-    };
-
     template <class T, std::size_t N>
     struct as_unsigned_integer<batch<T, N>>
     {
@@ -87,6 +80,32 @@ namespace xsimd
 
     template <class T>
     using as_unsigned_integer_t = typename as_unsigned_integer<T>::type;
+
+    /******************
+     * flip_sign_type *
+     ******************/
+
+    namespace detail
+    {
+        template <class T, bool is_signed>
+        struct flipped_sign_type_impl : std::make_signed<T>
+        {
+        };
+
+        template <class T>
+        struct flipped_sign_type_impl<T, true> : std::make_unsigned<T>
+        {
+        };
+    }
+
+    template <class T>
+    struct flipped_sign_type
+        : detail::flipped_sign_type_impl<T, std::is_signed<T>::value>
+    {
+    };
+
+    template <class T>
+    using flipped_sign_type_t = typename flipped_sign_type<T>::type;
 
     /***********
      * as_float *

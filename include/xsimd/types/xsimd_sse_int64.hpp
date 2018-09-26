@@ -436,7 +436,7 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
                 return _mm_cmpeq_epi64(lhs, rhs);
 #else
-                return detail::cmpeq_epi64_sse2(lhs, rhs);
+                return sse_detail::cmpeq_epi64_sse2(lhs, rhs);
 #endif
             }
 
