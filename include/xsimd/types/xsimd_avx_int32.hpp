@@ -316,6 +316,8 @@ namespace xsimd
     XSIMD_DEFINE_LOAD_STORE(uint32_t, 8, float, 32)
     XSIMD_DEFINE_LOAD_STORE(uint32_t, 8, double, 32)
 
+#undef AVX_DEFINE_LOAD_STORE_INT32
+
     namespace detail
     {
         template <>

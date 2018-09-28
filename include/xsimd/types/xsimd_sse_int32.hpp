@@ -303,6 +303,8 @@ namespace xsimd
     XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, float, 16)
     XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, double, 16)
     
+#undef SSE_DEFINE_LOAD_STORE_INT32
+
     namespace detail
     {
         template <class T>
