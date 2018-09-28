@@ -59,6 +59,8 @@ namespace xsimd
     {
     public:
 
+        using base_type = simd_batch<batch<T, N>>;
+
         avx_int_batch();
         explicit avx_int_batch(T i);
         // Constructor from N scalar parameters
@@ -76,12 +78,23 @@ namespace xsimd
         batch<T, N>& load_aligned(const T* src);
         batch<T, N>& load_unaligned(const T* src);
 
+        batch<T, N>& load_aligned(const flipped_sign_type_t<T>* src);
+        batch<T, N>& load_unaligned(const flipped_sign_type_t<T>* src);
+
         void store_aligned(T* dst) const;
         void store_unaligned(T* dst) const;
 
+        void store_aligned(flipped_sign_type_t<T>* dst) const;
+        void store_unaligned(flipped_sign_type_t<T>* dst) const;
+
+        using base_type::load_aligned;
+        using base_type::load_unaligned;
+        using base_type::store_aligned;
+        using base_type::store_unaligned;
+
         T operator[](std::size_t index) const;
 
-    private:
+    protected:
 
         __m256i m_value;
     };
@@ -348,6 +361,20 @@ namespace xsimd
     }
 
     template <class T, std::size_t N>
+    inline batch<T, N>& avx_int_batch<T, N>::load_aligned(const flipped_sign_type_t<T>* src)
+    {
+        m_value = _mm256_load_si256((__m256i const*) src);
+        return (*this)();
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N>& avx_int_batch<T, N>::load_unaligned(const flipped_sign_type_t<T>* src)
+    {
+        m_value = _mm256_loadu_si256((__m256i const*) src);
+        return (*this)();
+    }
+
+    template <class T, std::size_t N>
     inline void avx_int_batch<T, N>::store_aligned(T* dst) const
     {
         _mm256_store_si256((__m256i*) dst, m_value);
@@ -358,6 +385,19 @@ namespace xsimd
     {
         _mm256_storeu_si256((__m256i*) dst, m_value);
     }
+
+    template <class T, std::size_t N>
+    inline void avx_int_batch<T, N>::store_aligned(flipped_sign_type_t<T>* dst) const
+    {
+        _mm256_store_si256((__m256i*) dst, m_value);
+    }
+
+    template <class T, std::size_t N>
+    inline void avx_int_batch<T, N>::store_unaligned(flipped_sign_type_t<T>* dst) const
+    {
+        _mm256_storeu_si256((__m256i*) dst, m_value);
+    }
+
 
     template <class T, std::size_t N>
     inline T avx_int_batch<T, N>::operator[](std::size_t index) const

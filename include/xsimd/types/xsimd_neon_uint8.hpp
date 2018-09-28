@@ -36,6 +36,8 @@ namespace xsimd
 
     public:
 
+        using base_type = simd_batch<batch<uint8_t, 16>>;
+
         batch();
         explicit batch(uint8_t d);
 
@@ -51,11 +53,24 @@ namespace xsimd
 
         operator simd_type() const;
 
+        batch& load_aligned(const int8_t* src);
+        batch& load_unaligned(const int8_t* src);
+
         batch& load_aligned(const uint8_t* src);
         batch& load_unaligned(const uint8_t* src);
 
+        void store_aligned(int8_t* dst) const;
+        void store_unaligned(int8_t* dst) const;
+
         void store_aligned(uint8_t* dst) const;
         void store_unaligned(uint8_t* dst) const;
+
+        using base_type::load_aligned;
+        using base_type::load_unaligned;
+        using base_type::store_aligned;
+        using base_type::store_unaligned;
+
+        XSIMD_DECLARE_LOAD_STORE_INT8(uint8_t, 16);
 
         uint8_t operator[](std::size_t index) const;
 
@@ -112,6 +127,18 @@ namespace xsimd
         return *this;
     }
 
+    inline batch<uint8_t, 16>& batch<uint8_t, 16>::load_aligned(const int8_t* src)
+    {
+        m_value = vld1q_s8(src);
+        return *this;
+    }
+
+    inline batch<uint8_t, 16>& batch<uint8_t, 16>::load_unaligned(const int8_t* src)
+    {
+        return load_aligned(src);
+    }
+
+
     inline batch<uint8_t, 16>& batch<uint8_t, 16>::load_aligned(const uint8_t* src)
     {
         m_value = vld1q_u8(src);
@@ -123,6 +150,16 @@ namespace xsimd
         return load_aligned(src);
     }
 
+    inline void batch<uint8_t, 16>::store_aligned(int8_t* dst) const
+    {
+        vst1q_s8(dst, m_value);
+    }
+
+    inline void batch<uint8_t, 16>::store_unaligned(int8_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
     inline void batch<uint8_t, 16>::store_aligned(uint8_t* dst) const
     {
         vst1q_u8(dst, m_value);
@@ -132,6 +169,8 @@ namespace xsimd
     {
         store_aligned(dst);
     }
+
+    XSIMD_DEFINE_LOAD_STORE_INT8(uint8_t, 16, 16)
 
     inline batch<uint8_t, 16>::operator uint8x16_t() const
     {

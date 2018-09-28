@@ -16,6 +16,11 @@
 
 namespace xsimd
 {
+
+    /**************************
+     * batch_bool<int16_t, 8> *
+     **************************/
+
     template <>
     struct simd_batch_traits<batch_bool<int16_t, 8>>
     {
@@ -63,6 +68,10 @@ namespace xsimd
         };
     }
 
+    /*********************
+     * batch<int16_t, 8> *
+     *********************/
+
     template <>
     struct simd_batch_traits<batch<int16_t, 8>>
     {
@@ -81,24 +90,44 @@ namespace xsimd
         static constexpr std::size_t align = 16;
     };
 
-	template <>
-	class batch<int16_t, 8> : public sse_int_batch<int16_t, 8>
-	{
-	public:
-	    using sse_int_batch::sse_int_batch;
-	};
+    template <>
+    class batch<int16_t, 8> : public sse_int_batch<int16_t, 8>
+    {
+    public:
 
-	template <>
-	class batch<uint16_t, 8> : public sse_int_batch<uint16_t, 8>
-	{
-	public:
-	    using sse_int_batch::sse_int_batch;
-	};
+        using base_class = sse_int_batch<int16_t, 8>;
+        using base_class::base_class;
+        using base_class::load_aligned;
+        using base_class::load_unaligned;
+        using base_class::store_aligned;
+        using base_class::store_unaligned;
+
+        XSIMD_DECLARE_LOAD_STORE_INT16(int16_t, 8);
+    };
+
+    template <>
+    class batch<uint16_t, 8> : public sse_int_batch<uint16_t, 8>
+    {
+    public:
+
+        using base_class = sse_int_batch<uint16_t, 8>;
+        using base_class::base_class;
+        using base_class::load_aligned;
+        using base_class::load_unaligned;
+        using base_class::store_aligned;
+        using base_class::store_unaligned;
+
+        XSIMD_DECLARE_LOAD_STORE_INT16(uint16_t, 8);
+    };
 
     batch<int16_t, 8> operator<<(const batch<int16_t, 8>& lhs, int32_t rhs);
     batch<int16_t, 8> operator>>(const batch<int16_t, 8>& lhs, int32_t rhs);
     batch<uint16_t, 8> operator<<(const batch<uint16_t, 8>& lhs, int32_t rhs);
     batch<uint16_t, 8> operator>>(const batch<uint16_t, 8>& lhs, int32_t rhs);
+
+    /************************************
+     * batch<int16_t, 8> implementation *
+     ************************************/
 
     namespace detail
     {
@@ -223,6 +252,8 @@ namespace xsimd
         };
     }
 
+    XSIMD_DEFINE_LOAD_STORE_INT16(int16_t, 8, 16)
+
     inline batch<int16_t, 8> operator<<(const batch<int16_t, 8>& lhs, int32_t rhs)
     {
         return sse_detail::shift_impl([](int16_t lhs, int32_t s) { return lhs << s; }, lhs, rhs);
@@ -232,6 +263,8 @@ namespace xsimd
     {
         return sse_detail::shift_impl([](int16_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
     }
+
+    XSIMD_DEFINE_LOAD_STORE_INT16(uint16_t, 8, 16)
 
     inline batch<uint16_t, 8> operator<<(const batch<uint16_t, 8>& lhs, int32_t rhs)
     {

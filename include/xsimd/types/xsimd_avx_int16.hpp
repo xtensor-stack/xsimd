@@ -17,9 +17,9 @@
 namespace xsimd
 {
 
-    /*********************
-     * batch_bool<int16> *
-     *********************/
+    /***************************
+     * batch_bool<int16_t, 16> *
+     ***************************/
 
     template <>
     struct simd_batch_traits<batch_bool<int16_t, 16>>
@@ -92,15 +92,35 @@ namespace xsimd
     class batch<int16_t, 16> : public avx_int_batch<int16_t, 16>
     {
     public:
-        using avx_int_batch::avx_int_batch;
+
+        using base_class = avx_int_batch<int16_t, 16>;
+        using base_class::base_class;
+        using base_class::load_aligned;
+        using base_class::load_unaligned;
+        using base_class::store_aligned;
+        using base_class::store_unaligned;
+
+        XSIMD_DECLARE_LOAD_STORE_INT16(int16_t, 16);
     };
 
     template <>
     class batch<uint16_t, 16> : public avx_int_batch<uint16_t, 16>
     {
     public:
-        using avx_int_batch::avx_int_batch;
+
+        using base_class = avx_int_batch<uint16_t, 16>;
+        using base_class::base_class;
+        using base_class::load_aligned;
+        using base_class::load_unaligned;
+        using base_class::store_aligned;
+        using base_class::store_unaligned;
+
+        XSIMD_DECLARE_LOAD_STORE_INT16(uint16_t, 16);
     };
+
+    /*************************************
+     * batch<int16_t, 16> implementation *
+     *************************************/
 
     namespace detail
     {
@@ -299,6 +319,8 @@ namespace xsimd
         };
     }
 
+    XSIMD_DEFINE_LOAD_STORE_INT16(int16_t, 16, 32)
+
     // TODO implement by converting to int16
     inline batch<int16_t, 16> operator<<(const batch<int16_t, 16>& lhs, int32_t rhs)
     {
@@ -313,6 +335,8 @@ namespace xsimd
             return val >> rhs;
         }, lhs, rhs);
     }
+
+    XSIMD_DEFINE_LOAD_STORE_INT16(uint16_t, 16, 32)
 
     inline batch<uint16_t, 16> operator<<(const batch<uint16_t, 16>& lhs, int32_t rhs)
     {
