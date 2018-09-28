@@ -94,7 +94,7 @@ namespace xsimd
 
         T operator[](std::size_t index) const;
 
-    private:
+    protected:
 
         __m256i m_value;
     };
