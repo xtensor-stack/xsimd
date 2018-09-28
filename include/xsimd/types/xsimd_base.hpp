@@ -468,6 +468,16 @@ namespace xsimd
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
 
+#define XSIMD_DECLARE_LOAD_STORE_INT64(TYPE, N)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t);                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t);                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t);                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t);                               \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t);                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t);                               \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
+
     /**********************************
      * simd_batch_bool implementation *
      **********************************/

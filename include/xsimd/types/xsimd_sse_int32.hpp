@@ -103,9 +103,6 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_INT32(int32_t, 4);
     };
 
-    batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
-    batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs);
-
     template <>
     class batch<uint32_t, 4> : public sse_int_batch<uint32_t, 4>
     {
@@ -121,6 +118,8 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_INT32(uint32_t, 4);
     };
 
+    batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
+    batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs);
     batch<uint32_t, 4> operator<<(const batch<uint32_t, 4>& lhs, int32_t rhs);
     batch<uint32_t, 4> operator>>(const batch<uint32_t, 4>& lhs, int32_t rhs);
 
