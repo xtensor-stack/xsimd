@@ -8,6 +8,7 @@
 
 #ifndef XSIMD_SCALAR_HPP
 #define XSIMD_SCALAR_HPP
+#include <xsimd/types/xsimd_fallback.hpp>
 
 #include <cmath>
 
@@ -23,13 +24,30 @@ namespace xsimd
     using std::acosh;
     using std::asin;
     using std::asinh;
-    using std::atan2;
-    using std::atan;
+
+    template<class T> std::complex<T> atan2(std::complex<T> x, std::complex<T> y) { return std::atan2(x, y); }
+    inline float atan2(float x, float y) { return atan2(batch<float, 1>{x}, batch<float, 1>{y})[0]; }
+    inline double atan2(double x, double y) { return atan2(batch<double, 1>{x}, batch<double, 1>{y})[0]; }
+    template<class IntegerType> typename std::enable_if<std::is_integral<IntegerType>::value, double>::type
+    atan2(IntegerType x, IntegerType y) { return atan2(static_cast<double>(x), static_cast<double>(y)); }
+
+    template<class T> std::complex<T> atan(std::complex<T> x) { return std::atan(x); }
+    inline float atan(float x) { return atan(batch<float, 1>{x})[0]; }
+    inline double atan(double x) { return atan(batch<double, 1>{x})[0]; }
+    template<class IntegerType> typename std::enable_if<std::is_integral<IntegerType>::value, double>::type
+    atan(IntegerType x) { return atan(static_cast<double>(x)); }
+
     using std::atanh;
     using std::cbrt;
     using std::ceil;
     using std::copysign;
-    using std::cos;
+
+    template<class T> std::complex<T> cos(std::complex<T> x) { return std::cos(x); }
+    inline float cos(float x) { return cos(batch<float, 1>{x})[0]; }
+    inline double cos(double x) { return cos(batch<double, 1>{x})[0]; }
+    template<class IntegerType> typename std::enable_if<std::is_integral<IntegerType>::value, double>::type
+    cos(IntegerType x) { return cos(static_cast<double>(x)); }
+
     using std::cosh;
     using std::erf;
     using std::erfc;
@@ -57,10 +75,22 @@ namespace xsimd
     using std::rint;
     using std::round;
     using std::round;
-    using std::sin;
+
+    template<class T> std::complex<T> sin(std::complex<T> x) { return std::sin(x); }
+    inline float sin(float x) { return sin(batch<float, 1>{x})[0]; }
+    inline double sin(double x) { return sin(batch<double, 1>{x})[0]; }
+    template<class IntegerType> typename std::enable_if<std::is_integral<IntegerType>::value, double>::type
+    sin(IntegerType x) { return sin(static_cast<double>(x)); }
+
     using std::sinh;
     using std::sqrt;
-    using std::tan;
+
+    template<class T> std::complex<T> tan(std::complex<T> x) { return std::tan(x); }
+    inline float tan(float x) { return tan(batch<float, 1>{x})[0]; }
+    inline double tan(double x) { return tan(batch<double, 1>{x})[0]; }
+    template<class IntegerType> typename std::enable_if<std::is_integral<IntegerType>::value, double>::type
+    tan(IntegerType x) { return tan(static_cast<double>(x)); }
+
     using std::tanh;
     using std::tgamma;
     using std::trunc;

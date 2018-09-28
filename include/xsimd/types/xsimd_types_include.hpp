@@ -11,6 +11,7 @@
 
 #include "../config/xsimd_include.hpp"
 
+#define XSIMD_ENABLE_FALLBACK
 #if defined(XSIMD_ENABLE_FALLBACK)
 #include "xsimd_fallback.hpp"
 #endif

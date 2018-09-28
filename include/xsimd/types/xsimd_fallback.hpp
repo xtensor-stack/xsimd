@@ -575,7 +575,7 @@ namespace xsimd
     template <typename T, std::size_t N>
     template <typename... Args, typename Enable>
     inline batch<T, N>::batch(Args... exactly_N_scalars)
-        : m_value{ exactly_N_scalars... }
+        : m_value{ static_cast<T>(exactly_N_scalars)... }
     {
     }
 
@@ -920,7 +920,7 @@ namespace xsimd
 
             static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
             {
-                XSIMD_FALLBACK_BATCH_TERNARY_FUNC(std::fma, x, y, z)
+                XSIMD_FALLBACK_BATCH_TERNARY_FUNC([](T x, T y, T z) { return x * y + z; }, x, y, z)
             }
 
             static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
