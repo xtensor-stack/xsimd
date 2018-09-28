@@ -246,7 +246,9 @@ namespace xsimd
 
     inline void sincos(float val, float&s, float& c)
     {
-#ifdef _GNU_SOURCE
+#if defined(__APPLE__)
+        __sincosf(val, &s, &c);
+#elif defined(_GNU_SOURCE)
         ::sincosf(val, &s, &c);
 #else
         s = std::sin(val);
@@ -256,7 +258,9 @@ namespace xsimd
 
     inline void sincos(double val, double&s, double& c)
     {
-#ifdef _GNU_SOURCE
+#if defined(__APPLE__)
+        __sincos(val, &s, &c);
+#elif defined(_GNU_SOURCE)
         ::sincos(val, &s, &c);
 #else
         s = std::sin(val);
