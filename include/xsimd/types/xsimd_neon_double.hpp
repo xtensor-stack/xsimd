@@ -45,41 +45,7 @@ namespace xsimd
 
         operator simd_type() const;
 
-        batch& load_aligned(const float* src);
-        batch& load_unaligned(const float* src);
-
-        batch& load_aligned(const double* src);
-        batch& load_unaligned(const double* src);
-
-        batch& load_aligned(const int32_t* src);
-        batch& load_unaligned(const int32_t* src);
-
-        batch& load_aligned(const int64_t* src);
-        batch& load_unaligned(const int64_t* src);
-
-        batch& load_aligned(const int8_t* src);
-        batch& load_unaligned(const int8_t* src);
-
-        batch& load_aligned(const uint8_t* src);
-        batch& load_unaligned(const uint8_t* src);
-
-        void store_aligned(float* dst) const;
-        void store_unaligned(float* dst) const;
-
-        void store_aligned(double* dst) const;
-        void store_unaligned(double* dst) const;
-
-        void store_aligned(int32_t* dst) const;
-        void store_unaligned(int32_t* dst) const;
-
-        void store_aligned(int64_t* dst) const;
-        void store_unaligned(int64_t* dst) const;
-
-        void store_aligned(int8_t* dst) const;
-        void store_unaligned(int8_t* dst) const;
-
-        void store_aligned(uint8_t* dst) const;
-        void store_unaligned(uint8_t* dst) const;
+        XSIMD_DECLARE_LOAD_STORE_ALL(double, 2);
 
         using base_type::load_aligned;
         using base_type::load_unaligned;
@@ -137,50 +103,6 @@ namespace xsimd
         return *this;
     }
 
-    inline batch<double, 2>& batch<double, 2>::load_aligned(const float* d)
-    {
-        m_value = vcvt_f64_f32(vld1_f32(d));
-        return *this;
-    }
-
-    inline batch<double, 2>& batch<double, 2>::load_unaligned(const float* d)
-    {
-        return load_aligned(d);
-    }
-
-    inline batch<double, 2>& batch<double, 2>::load_aligned(const double* d)
-    {
-        m_value = vld1q_f64(d);
-        return *this;
-    }
-
-    inline batch<double, 2>& batch<double, 2>::load_unaligned(const double* d)
-    {
-        return load_aligned(d);
-    }
-
-    inline batch<double, 2>& batch<double, 2>::load_aligned(const int32_t* d)
-    {
-        m_value = vcvt_f64_f32(vcvt_f32_s32(vld1_s32(d)));
-        return *this;
-    }
-
-    inline batch<double, 2>& batch<double, 2>::load_unaligned(const int32_t* d)
-    {
-        return load_aligned(d);
-    }
-
-    inline batch<double, 2>& batch<double, 2>::load_aligned(const int64_t* d)
-    {
-        m_value = vcvtq_f64_s64(vld1q_s64(d));
-        return *this;
-    }
-
-    inline batch<double, 2>& batch<double, 2>::load_unaligned(const int64_t* d)
-    {
-        return load_aligned(d);
-    }
-
     inline batch<double, 2>& batch<double, 2>::load_aligned(const int8_t* src)
     {
         int8x8_t tmp = vld1_s8((const int8_t*)src);
@@ -215,54 +137,100 @@ namespace xsimd
         return load_aligned(src);
     }
 
-    inline void batch<double, 2>::store_aligned(float* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const int16_t* src)
     {
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-        vst1_f32(dst, vcvt_f32_f64(m_value));
-#else
-        dst[0] = static_cast<float>(m_value[0]);
-        dst[1] = static_cast<float>(m_value[1]);
-#endif
+        int16x4_t tmp1 = vld1_s16(src);
+        int32x4_t tmp2 = vmovl_s16(tmp1);
+        float32x4_t tmp3 = vcvtq_f32_s32(tmp2);
+        float32x2_t tmp4 = vget_low_f32(tmp3);
+        m_value = vcvt_f64_f32(tmp4);
+        return *this;
     }
 
-    inline void batch<double, 2>::store_unaligned(float* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const int16_t* src)
     {
-        store_aligned(dst);
+        return load_aligned(src);
     }
 
-    inline void batch<double, 2>::store_aligned(double* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const uint16_t* src)
     {
-        vst1q_f64(dst, m_value);
+        uint16x4_t tmp1 = vld1_u16(src);
+        uint32x4_t tmp2 = vmovl_u16(tmp1);
+        float32x4_t tmp3 = vcvtq_f32_u32(tmp2);
+        float32x2_t tmp4 = vget_low_f32(tmp3);
+        m_value = vcvt_f64_f32(tmp4);
+        return *this;
     }
 
-    inline void batch<double, 2>::store_unaligned(double* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const uint16_t* src)
     {
-        store_aligned(dst);
+        return load_aligned(src);
     }
 
-    inline void batch<double, 2>::store_aligned(int32_t* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const int32_t* d)
     {
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-        vst1_s32(dst, vcvt_s32_f32(vcvt_f32_f64(m_value)));
-#else
-        dst[0] = static_cast<int32_t>(m_value[0]);
-        dst[1] = static_cast<int32_t>(m_value[1]);
-#endif
+        m_value = vcvt_f64_f32(vcvt_f32_s32(vld1_s32(d)));
+        return *this;
     }
 
-    inline void batch<double, 2>::store_unaligned(int32_t* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const int32_t* d)
     {
-        store_aligned(dst);
+        return load_aligned(d);
     }
 
-    inline void batch<double, 2>::store_aligned(int64_t* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const uint32_t* d)
     {
-        vst1q_s64(dst, vcvtq_s64_f64(m_value));
+        m_value = vcvt_f64_f32(vcvt_f32_u32(vld1_u32(d)));
+        return *this;
     }
 
-    inline void batch<double, 2>::store_unaligned(int64_t* dst) const
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const uint32_t* d)
     {
-        store_aligned(dst);
+        return load_aligned(d);
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const int64_t* d)
+    {
+        m_value = vcvtq_f64_s64(vld1q_s64(d));
+        return *this;
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const int64_t* d)
+    {
+        return load_aligned(d);
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const uint64_t* d)
+    {
+        m_value = vcvtq_f64_u64(vld1q_u64(d));
+        return *this;
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const uint64_t* d)
+    {
+        return load_aligned(d);
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const float* d)
+    {
+        m_value = vcvt_f64_f32(vld1_f32(d));
+        return *this;
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const float* d)
+    {
+        return load_aligned(d);
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_aligned(const double* d)
+    {
+        m_value = vld1q_f64(d);
+        return *this;
+    }
+
+    inline batch<double, 2>& batch<double, 2>::load_unaligned(const double* d)
+    {
+        return load_aligned(d);
     }
 
     inline void batch<double, 2>::store_aligned(int8_t* dst) const
@@ -287,12 +255,127 @@ namespace xsimd
         uint32x2_t tmp2 = vcvtn_u32_f32(tmp);
         uint32x4_t tmp3 = vcombine_u32(tmp2, vdup_n_u32(0));
         uint16x4_t tmp4 = vmovn_u32(tmp3);
-        uint16x8_t tmp5 = vcombine_u16(tmp4, vdup_n_u16(0));
+        uint16x8_t tmp5 = vcombine_u16(tmp4, vdup_n_s16(0));
         uint8x8_t tmp6 = vmovn_u16(tmp5);
         vst1_u8((uint8_t*)dst, tmp6);
     }
 
     inline void batch<double, 2>::store_unaligned(uint8_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(int16_t* dst) const
+    {
+        float32x2_t tmp = vcvt_f32_f64(m_value);
+        int32x2_t tmp2 = vcvtn_s32_f32(tmp);
+        int32x4_t tmp3 = vcombine_s32(tmp2, vdup_n_s32(0));
+        int16x4_t tmp4 = vmovn_s32(tmp3);
+        vst1_s16((int16_t*)dst, tmp4);
+    }
+
+    inline void batch<double, 2>::store_unaligned(int16_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(uint16_t* dst) const
+    {
+        float32x2_t tmp = vcvt_f32_f64(m_value);
+        uint32x2_t tmp2 = vcvtn_u32_f32(tmp);
+        uint32x4_t tmp3 = vcombine_u32(tmp2, vdup_n_u32(0));
+        uint16x4_t tmp4 = vmovn_u32(tmp3);
+        uint16x8_t tmp5 = vcombine_u16(tmp4, vdup_n_u16(0));
+        uint8x8_t tmp6 = vmovn_u16(tmp5);
+        vst1_u16((uint16_t*)dst, tmp6);
+    }
+
+    inline void batch<double, 2>::store_unaligned(uint16_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(int32_t* dst) const
+    {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        vst1_s32(dst, vcvt_s32_f32(vcvt_f32_f64(m_value)));
+#else
+        dst[0] = static_cast<int32_t>(m_value[0]);
+        dst[1] = static_cast<int32_t>(m_value[1]);
+#endif
+    }
+
+    inline void batch<double, 2>::store_unaligned(int32_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(uint32_t* dst) const
+    {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        vst1_u32(dst, vcvt_u32_f32(vcvt_f32_f64(m_value)));
+#else
+        dst[0] = static_cast<uint32_t>(m_value[0]);
+        dst[1] = static_cast<uint32_t>(m_value[1]);
+#endif
+    }
+
+    inline void batch<double, 2>::store_unaligned(uint32_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(int64_t* dst) const
+    {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        vst1q_s64(dst, vcvtq_s64_f64(m_value));
+#else
+        dst[0] = static_cast<int64_t>(m_value[0]);
+        dst[1] = static_cast<int64_t>(m_value[1]);
+#endif
+    }
+
+    inline void batch<double, 2>::store_unaligned(int64_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(uint64_t* dst) const
+    {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        vst1q_u64(dst, vcvtq_u64_f64(m_value));
+#else
+        dst[0] = static_cast<uint64_t>(m_value[0]);
+        dst[1] = static_cast<uint64_t>(m_value[1]);
+#endif
+    }
+
+    inline void batch<double, 2>::store_unaligned(uint64_t* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(float* dst) const
+    {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        vst1_f32(dst, vcvt_f32_f64(m_value));
+#else
+        dst[0] = static_cast<float>(m_value[0]);
+        dst[1] = static_cast<float>(m_value[1]);
+#endif
+    }
+
+    inline void batch<double, 2>::store_unaligned(float* dst) const
+    {
+        store_aligned(dst);
+    }
+
+    inline void batch<double, 2>::store_aligned(double* dst) const
+    {
+        vst1q_f64(dst, m_value);
+    }
+
+    inline void batch<double, 2>::store_unaligned(double* dst) const
     {
         store_aligned(dst);
     }
