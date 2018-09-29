@@ -79,7 +79,7 @@ namespace xsimd
 
         operator __m128() const;
 
-        XSIMD_DECLARE_LOAD_STORE_FP(float, 4);
+        XSIMD_DECLARE_LOAD_STORE_ALL(float, 4);
 
         using base_type::load_aligned;
         using base_type::load_unaligned;
