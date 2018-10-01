@@ -9,14 +9,15 @@
 #ifndef XSIMD_AVX512_BOOL_HPP
 #define XSIMD_AVX512_BOOL_HPP
 
+#include "xsimd_avx512_int_base.hpp"
 #include "xsimd_utils.hpp"
-
-#include "xsimd_base.hpp"
 
 namespace xsimd
 {
-    template <class MASK, class T>
-    class batch_bool_avx512;
+
+    /*********************
+     * batch_bool_avx512 *
+     *********************/
 
     template <class MASK, class T>
     class batch_bool_avx512
@@ -40,6 +41,36 @@ namespace xsimd
 
         MASK m_value;
     };
+
+    /******************************
+     * avx512_fallback_batch_bool *
+     ******************************/
+
+    template <class T, std::size_t N>
+    class avx512_fallback_batch_bool : public simd_batch_bool<batch_bool<T, N>>
+    {
+    public:
+
+        avx512_fallback_batch_bool();
+        explicit avx512_fallback_batch_bool(bool b);
+        template <class... Args, class Enable = detail::is_array_initializer_t<bool, N, Args...>>
+        avx512_fallback_batch_bool(Args... args);
+
+        avx512_fallback_batch_bool(const __m512i& rhs);
+        avx512_fallback_batch_bool& operator=(const __m512i& rhs);
+
+        operator __m512i() const;
+
+        bool operator[](std::size_t index) const;
+
+    private:
+
+        __m512i m_value;
+    };
+
+    /************************************
+     * batch_bool_avx512 implementation *
+     ************************************/
 
     template <class MASK, class T>
     inline batch_bool_avx512<MASK, T>::batch_bool_avx512()
@@ -176,6 +207,116 @@ namespace xsimd
             static bool any(const batch_type& rhs)
             {
                 return mt(rhs) != mt(0);
+            }
+        };
+    }
+
+    /*********************************************
+     * avx512_fallback_batch_bool implementation *
+     *********************************************/
+    
+    template <class T, std::size_t N>
+    inline avx512_fallback_batch_bool<T, N>::avx512_fallback_batch_bool()
+    {
+    }
+
+    template <class T, std::size_t N>
+    inline avx512_fallback_batch_bool<T, N>::avx512_fallback_batch_bool(bool b)
+        : m_value(_mm512_set1_epi64(-(int64_t)b))
+    {
+    }
+
+    template <class T, std::size_t N>
+    template <class... Args, class>
+    inline avx512_fallback_batch_bool<T, N>::avx512_fallback_batch_bool(Args... args)
+        : m_value(avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(int8_t)>{},
+                  static_cast<int8_t>(-static_cast<bool>(args))...))
+    {
+    }
+
+    template <class T, std::size_t N>
+    inline avx512_fallback_batch_bool<T, N>::avx512_fallback_batch_bool(const __m512i& rhs)
+        : m_value(rhs)
+    {
+    }
+
+    template <class T, std::size_t N>
+    inline avx512_fallback_batch_bool<T, N>::operator __m512i() const
+    {
+        return m_value;
+    }
+
+    template <class T, std::size_t N>
+    inline avx512_fallback_batch_bool<T, N>& avx512_fallback_batch_bool<T, N>::operator=(const __m512i& rhs)
+    {
+        m_value = rhs;
+        return *this;
+    }
+
+    template <class T, std::size_t N>
+    inline bool avx512_fallback_batch_bool<T, N>::operator[](std::size_t idx) const
+    {
+        alignas(64) T x[N];
+        _mm512_store_si512((__m512i*) x, m_value);
+        return x[idx & (N - 1)];
+    }
+
+    namespace detail
+    {
+        template <class T, std::size_t N>
+        struct avx512_fallback_batch_bool_kernel
+        {
+            using batch_type = batch_bool<T, N>;
+
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_and_si512(lhs, rhs);
+            }
+
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_or_si512(lhs, rhs);
+            }
+
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_xor_si512(lhs, rhs);
+            }
+
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return _mm512_xor_si512(rhs, _mm512_set1_epi64(-1)); // xor with all one
+            }
+
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_andnot_si512(lhs, rhs);
+            }
+
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return ~(lhs ^ rhs);
+            }
+
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return lhs ^ rhs;
+            }
+
+            static bool all(const batch_type& rhs)
+            {
+                XSIMD_SPLIT_AVX512(rhs);
+                bool res_hi = _mm256_testc_si256(rhs_high, batch_bool<int32_t, 8>(true)) != 0;
+                bool res_lo = _mm256_testc_si256(rhs_low, batch_bool<int32_t, 8>(true)) != 0;
+                return res_hi && res_lo;
+            }
+
+            static bool any(const batch_type& rhs)
+            {
+                XSIMD_SPLIT_AVX512(rhs);
+                bool res_hi = !_mm256_testz_si256(rhs_high, rhs_high);
+                bool res_lo = !_mm256_testz_si256(rhs_low, rhs_low);
+                return res_hi || res_lo;
             }
         };
     }
