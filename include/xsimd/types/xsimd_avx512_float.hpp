@@ -31,19 +31,12 @@ namespace xsimd
     };
 
     template <>
-    class batch_bool<float, 16> : 
-        public batch_bool_avx512<__mmask16, batch_bool<float, 16>>,
-        public simd_batch_bool<batch_bool<float, 16>>
+    class batch_bool<float, 16> : public batch_bool_avx512<__mmask16, batch_bool<float, 16>>,
+                                  public simd_batch_bool<batch_bool<float, 16>>
     {
     public:
         using base_class = batch_bool_avx512<__mmask16, batch_bool<float, 16>>;
         using base_class::base_class;
-
-        batch_bool(bool b0, bool b1,  bool b2,  bool b3,  bool b4,  bool b5,  bool b6,  bool b7,
-                   bool b8, bool b9, bool b10, bool b11, bool b12, bool b13, bool b14, bool b15)
-            : base_class({{b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15}})
-        {
-        }
     };
 
     namespace detail
@@ -88,41 +81,7 @@ namespace xsimd
 
         operator __m512() const;
 
-        batch& load_aligned(const int32_t* src);
-        batch& load_unaligned(const int32_t* src);
-
-        batch& load_aligned(const int64_t* src);
-        batch& load_unaligned(const int64_t* src);
-
-        batch& load_aligned(const float* src);
-        batch& load_unaligned(const float* src);
-
-        batch& load_aligned(const double* src);
-        batch& load_unaligned(const double* src);
-
-        batch& load_aligned(const int8_t* src);
-        batch& load_unaligned(const int8_t* src);
-
-        batch& load_aligned(const uint8_t* src);
-        batch& load_unaligned(const uint8_t* src);
-
-        void store_aligned(int32_t* dst) const;
-        void store_unaligned(int32_t* dst) const;
-
-        void store_aligned(int64_t* dst) const;
-        void store_unaligned(int64_t* dst) const;
-
-        void store_aligned(float* dst) const;
-        void store_unaligned(float* dst) const;
-
-        void store_aligned(double* dst) const;
-        void store_unaligned(double* dst) const;
-
-        void store_aligned(int8_t* dst) const;
-        void store_unaligned(int8_t* dst) const;
-
-        void store_aligned(uint8_t* dst) const;
-        void store_unaligned(uint8_t* dst) const;
+        XSIMD_DECLARE_LOAD_STORE_ALL(float, 16);
 
         using base_type::load_aligned;
         using base_type::load_unaligned;
@@ -186,77 +145,6 @@ namespace xsimd
         return m_value;
     }
 
-    inline batch<float, 16>& batch<float, 16>::load_aligned(const float* src)
-    {
-        m_value = _mm512_load_ps(src);
-        return *this;
-    }
-
-    inline batch<float, 16>& batch<float, 16>::load_unaligned(const float* src)
-    {
-        m_value = _mm512_loadu_ps(src);
-        return *this;
-    }
-
-    inline batch<float, 16>& batch<float, 16>::load_aligned(const int64_t* src)
-    {
-        alignas(64) float tmp[16];
-        tmp[0] = static_cast<float>(src[0]);
-        tmp[1] = static_cast<float>(src[1]);
-        tmp[2] = static_cast<float>(src[2]);
-        tmp[3] = static_cast<float>(src[3]);
-        tmp[4] = static_cast<float>(src[4]);
-        tmp[5] = static_cast<float>(src[5]);
-        tmp[6] = static_cast<float>(src[6]);
-        tmp[7] = static_cast<float>(src[7]);
-        tmp[8] = static_cast<float>(src[8]);
-        tmp[9] = static_cast<float>(src[9]);
-        tmp[10] = static_cast<float>(src[10]);
-        tmp[11] = static_cast<float>(src[11]);
-        tmp[12] = static_cast<float>(src[12]);
-        tmp[13] = static_cast<float>(src[13]);
-        tmp[14] = static_cast<float>(src[14]);
-        tmp[15] = static_cast<float>(src[15]);
-        m_value = _mm512_load_ps(tmp);
-        return *this;
-    }
-
-    inline batch<float, 16>& batch<float, 16>::load_unaligned(const int64_t* src)
-    {
-        return load_aligned(src);
-    }
-
-    inline batch<float, 16>& batch<float, 16>::load_aligned(const int32_t* src)
-    {
-        // TODO select correct rounding direction?
-        m_value = _mm512_cvt_roundepi32_ps(_mm512_load_si512(src), _MM_FROUND_CUR_DIRECTION);
-        return *this;
-    }
-
-    inline batch<float, 16>& batch<float, 16>::load_unaligned(const int32_t* src)
-    {
-        m_value = _mm512_cvt_roundepi32_ps(_mm512_loadu_si512(src), _MM_FROUND_CUR_DIRECTION);
-        return *this;
-    }
-
-    inline batch<float, 16>& batch<float, 16>::load_aligned(const double* src)
-    {
-        __m256 tmp1 = _mm512_cvtpd_ps(_mm512_load_pd(src));
-        __m256 tmp2 = _mm512_cvtpd_ps(_mm512_load_pd(src + 8));
-        m_value = _mm512_castps256_ps512(tmp1);
-        m_value = _mm512_insertf32x8(m_value, tmp2, 1);
-        return *this;
-    }
-
-    inline batch<float, 16>& batch<float, 16>::load_unaligned(const double* src)
-    {
-        __m256 tmp1 = _mm512_cvtpd_ps(_mm512_loadu_pd(src));
-        __m256 tmp2 = _mm512_cvtpd_ps(_mm512_loadu_pd(src + 8));
-        m_value = _mm512_castps256_ps512(tmp1);
-        m_value = _mm512_insertf32x8(m_value, tmp2, 1);
-        return *this;
-    }
-
     inline batch<float, 16>& batch<float, 16>::load_aligned(const int8_t* src)
     {
         __m128i tmp = _mm_load_si128((const __m128i*)src);
@@ -289,63 +177,95 @@ namespace xsimd
         return *this;
     }
 
-    inline void batch<float, 16>::store_aligned(int32_t* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_aligned(const int16_t* src)
     {
-        _mm512_store_si512((__m512i *)dst, _mm512_cvtps_epi32(m_value));
+        __m256i tmp = _mm256_load_si256((const __m256i*)src);
+        __m512i tmp2 = _mm512_cvtepi16_epi32(tmp);
+        m_value = _mm512_cvtepi32_ps(tmp2);
+        return *this;
     }
 
-    inline void batch<float, 16>::store_unaligned(int32_t* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_unaligned(const int16_t* src)
     {
-        _mm512_storeu_si512((__m512i *)dst, _mm512_cvtps_epi32(m_value));
+        __m256i tmp = _mm256_loadu_si256((const __m256i*)src);
+        __m512i tmp2 = _mm512_cvtepi16_epi32(tmp);
+        m_value = _mm512_cvtepi32_ps(tmp2);
+        return *this;
     }
 
-    inline void batch<float, 16>::store_aligned(int64_t* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_aligned(const uint16_t* src)
     {
-        alignas(64) float tmp[16];
-        store_aligned(tmp);
-        dst[0] = int64_t(tmp[0]);
-        dst[1] = int64_t(tmp[1]);
-        dst[2] = int64_t(tmp[2]);
-        dst[3] = int64_t(tmp[3]);
-        dst[4] = int64_t(tmp[4]);
-        dst[5] = int64_t(tmp[5]);
-        dst[6] = int64_t(tmp[6]);
-        dst[7] = int64_t(tmp[7]);
-        dst[8] = int64_t(tmp[8]);
-        dst[9] = int64_t(tmp[9]);
-        dst[10] = int64_t(tmp[10]);
-        dst[11] = int64_t(tmp[11]);
-        dst[12] = int64_t(tmp[12]);
-        dst[13] = int64_t(tmp[13]);
-        dst[14] = int64_t(tmp[14]);
-        dst[15] = int64_t(tmp[15]);
+        __m256i tmp = _mm256_load_si256((const __m256i*)src);
+        __m512i tmp2 = _mm512_cvtepu16_epi32(tmp);
+        m_value = _mm512_cvtepi32_ps(tmp2);
+        return *this;
     }
 
-    inline void batch<float, 16>::store_unaligned(int64_t* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_unaligned(const uint16_t* src)
     {
-        store_aligned(dst);
+        __m256i tmp = _mm256_loadu_si256((const __m256i*)src);
+        __m512i tmp2 = _mm512_cvtepu16_epi32(tmp);
+        m_value = _mm512_cvtepi32_ps(tmp2);
+        return *this;
     }
 
-    inline void batch<float, 16>::store_aligned(float* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_aligned(const int32_t* src)
     {
-        _mm512_store_ps(dst, m_value);
+        // TODO select correct rounding direction?
+        m_value = _mm512_cvt_roundepi32_ps(_mm512_load_si512(src), _MM_FROUND_CUR_DIRECTION);
+        return *this;
     }
 
-    inline void batch<float, 16>::store_unaligned(float* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_unaligned(const int32_t* src)
     {
-        _mm512_storeu_ps(dst, m_value);
+        m_value = _mm512_cvt_roundepi32_ps(_mm512_loadu_si512(src), _MM_FROUND_CUR_DIRECTION);
+        return *this;
     }
 
-    inline void batch<float, 16>::store_aligned(double* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_aligned(const uint32_t* src)
     {
-        _mm512_store_pd(dst, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 0)));
-        _mm512_store_pd(dst + 8, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 1)));
+        // TODO select correct rounding direction?
+        m_value = _mm512_cvt_roundepu32_ps(_mm512_load_si512(src), _MM_FROUND_CUR_DIRECTION);
+        return *this;
     }
 
-    inline void batch<float, 16>::store_unaligned(double* dst) const
+    inline batch<float, 16>& batch<float, 16>::load_unaligned(const uint32_t* src)
     {
-        _mm512_storeu_pd(dst, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 0)));
-        _mm512_storeu_pd(dst + 8, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 1)));
+        m_value = _mm512_cvt_roundepu32_ps(_mm512_loadu_si512(src), _MM_FROUND_CUR_DIRECTION);
+        return *this;
+    }
+
+    XSIMD_DEFINE_LOAD_STORE(float, 16, int64_t, 64)
+    XSIMD_DEFINE_LOAD_STORE(float, 16, uint64_t, 64)
+
+    inline batch<float, 16>& batch<float, 16>::load_aligned(const float* src)
+    {
+        m_value = _mm512_load_ps(src);
+        return *this;
+    }
+
+    inline batch<float, 16>& batch<float, 16>::load_unaligned(const float* src)
+    {
+        m_value = _mm512_loadu_ps(src);
+        return *this;
+    }
+
+    inline batch<float, 16>& batch<float, 16>::load_aligned(const double* src)
+    {
+        __m256 tmp1 = _mm512_cvtpd_ps(_mm512_load_pd(src));
+        __m256 tmp2 = _mm512_cvtpd_ps(_mm512_load_pd(src + 8));
+        m_value = _mm512_castps256_ps512(tmp1);
+        m_value = _mm512_insertf32x8(m_value, tmp2, 1);
+        return *this;
+    }
+
+    inline batch<float, 16>& batch<float, 16>::load_unaligned(const double* src)
+    {
+        __m256 tmp1 = _mm512_cvtpd_ps(_mm512_loadu_pd(src));
+        __m256 tmp2 = _mm512_cvtpd_ps(_mm512_loadu_pd(src + 8));
+        m_value = _mm512_castps256_ps512(tmp1);
+        m_value = _mm512_insertf32x8(m_value, tmp2, 1);
+        return *this;
     }
 
     inline void batch<float, 16>::store_aligned(int8_t* dst) const
@@ -374,6 +294,76 @@ namespace xsimd
         __m512i tmp = _mm512_cvtps_epu32(m_value);
         __m128i tmp2 = _mm512_cvtusepi32_epi8(tmp);
         _mm_storeu_si128((__m128i*)dst, tmp2);
+    }
+
+    inline void batch<float, 16>::store_aligned(int16_t* dst) const
+    {
+        __m512i tmp = _mm512_cvtps_epi32(m_value);
+        __m256i tmp2 = _mm512_cvtepi32_epi16(tmp);
+        _mm256_store_si256((__m256i*)dst, tmp2);
+    }
+
+    inline void batch<float, 16>::store_unaligned(int16_t* dst) const
+    {
+        __m512i tmp = _mm512_cvtps_epi32(m_value);
+        __m256i tmp2 = _mm512_cvtepi32_epi16(tmp);
+        _mm256_storeu_si256((__m256i*)dst, tmp2);
+    }
+
+    inline void batch<float, 16>::store_aligned(uint16_t* dst) const
+    {
+        __m512i tmp = _mm512_cvtps_epu32(m_value);
+        __m256i tmp2 = _mm512_cvtusepi32_epi16(tmp);
+        _mm256_store_si256((__m256i*)dst, tmp2);
+    }
+
+    inline void batch<float, 16>::store_unaligned(uint16_t* dst) const
+    {
+        __m512i tmp = _mm512_cvtps_epu32(m_value);
+        __m256i tmp2 = _mm512_cvtusepi32_epi16(tmp);
+        _mm256_storeu_si256((__m256i*)dst, tmp2);
+    }
+
+    inline void batch<float, 16>::store_aligned(int32_t* dst) const
+    {
+        _mm512_store_si512((__m512i *)dst, _mm512_cvtps_epi32(m_value));
+    }
+
+    inline void batch<float, 16>::store_unaligned(int32_t* dst) const
+    {
+        _mm512_storeu_si512((__m512i *)dst, _mm512_cvtps_epi32(m_value));
+    }
+
+    inline void batch<float, 16>::store_aligned(uint32_t* dst) const
+    {
+        _mm512_store_si512((__m512i *)dst, _mm512_cvtps_epu32(m_value));
+    }
+
+    inline void batch<float, 16>::store_unaligned(uint32_t* dst) const
+    {
+        _mm512_storeu_si512((__m512i *)dst, _mm512_cvtps_epu32(m_value));
+    }
+
+    inline void batch<float, 16>::store_aligned(float* dst) const
+    {
+        _mm512_store_ps(dst, m_value);
+    }
+
+    inline void batch<float, 16>::store_unaligned(float* dst) const
+    {
+        _mm512_storeu_ps(dst, m_value);
+    }
+
+    inline void batch<float, 16>::store_aligned(double* dst) const
+    {
+        _mm512_store_pd(dst, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 0)));
+        _mm512_store_pd(dst + 8, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 1)));
+    }
+
+    inline void batch<float, 16>::store_unaligned(double* dst) const
+    {
+        _mm512_storeu_pd(dst, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 0)));
+        _mm512_storeu_pd(dst + 8, _mm512_cvtps_pd(_mm512_extractf32x8_ps(m_value, 1)));
     }
 
     inline float batch<float, 16>::operator[](std::size_t index) const
