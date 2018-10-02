@@ -27,31 +27,31 @@ namespace xsimd
         using int64_batch = typename T::int64_batch;
         using float_batch = typename T::float_batch;
         using double_batch = typename T::double_batch;
+        using int8_vector = typename T::int8_vector;
+        using uint8_vector = typename T::uint8_vector;
         using int32_vector = typename T::int32_vector;
         using int64_vector = typename T::int64_vector;
         using float_vector = typename T::float_vector;
         using double_vector = typename T::double_vector;
-        using char_vector = typename T::char_vector;
-        using uchar_vector = typename T::uchar_vector;
 
         int32_batch i32bres;
         int64_batch i64bres;
         float_batch fbres;
         double_batch dbres;
 
+        int8_vector cvres(float_batch::size);
+        uint8_vector ucvres(float_batch::size);
         int32_vector i32vres(float_batch::size);
         int64_vector i64vres(float_batch::size);
         float_vector fvres(float_batch::size);
         double_vector dvres(float_batch::size);
-        char_vector cvres(float_batch::size);
-        uchar_vector ucvres(float_batch::size);
 
+        int8_vector cvres2(float_batch::size);
+        uint8_vector ucvres2(float_batch::size);
         int32_vector i32vres2(double_batch::size);
         int64_vector i64vres2(double_batch::size);
         float_vector fvres2(double_batch::size);
         double_vector dvres2(double_batch::size);
-        char_vector cvres2(float_batch::size);
-        uchar_vector ucvres2(float_batch::size);
 
         bool success = true;
         bool tmp_success = true;
@@ -115,26 +115,26 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
-        topic = "load char    -> float  : ";
-        fbres = load_simd<char, float>(tester.c_vec.data(), aligned_mode());
+        topic = "load int8    -> float  : ";
+        fbres = load_simd<int8_t, float>(tester.i8_vec.data(), aligned_mode());
         store_simd(fvres.data(), fbres, aligned_mode());
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
-        topic = "loadu char   -> float  : ";
-        fbres = load_simd<char, float>(tester.c_vec.data(), unaligned_mode());
+        topic = "loadu int8   -> float  : ";
+        fbres = load_simd<int8_t, float>(tester.i8_vec.data(), unaligned_mode());
         store_simd(fvres.data(), fbres, unaligned_mode());
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
-        topic = "load uchar   -> float  : ";
-        fbres = load_simd<unsigned char, float>(tester.uc_vec.data(), aligned_mode());
+        topic = "load uint8   -> float  : ";
+        fbres = load_simd<uint8_t, float>(tester.ui8_vec.data(), aligned_mode());
         store_simd(fvres.data(), fbres, aligned_mode());
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
-        topic = "loadu uchar  -> float  : ";
-        fbres = load_simd<unsigned char, float>(tester.uc_vec.data(), unaligned_mode());
+        topic = "loadu uint8  -> float  : ";
+        fbres = load_simd<uint8_t, float>(tester.ui8_vec.data(), unaligned_mode());
         store_simd(fvres.data(), fbres, unaligned_mode());
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
@@ -189,26 +189,26 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "load char    -> double : ";
-        dbres = load_simd<char, double>(tester.c_vec.data(), aligned_mode());
+        topic = "load int8    -> double : ";
+        dbres = load_simd<int8_t, double>(tester.i8_vec.data(), aligned_mode());
         store_simd(dvres2.data(), dbres, aligned_mode());
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "loadu char   -> double : ";
-        dbres = load_simd<char, double>(tester.c_vec.data(), unaligned_mode());
+        topic = "loadu int8   -> double : ";
+        dbres = load_simd<int8_t, double>(tester.i8_vec.data(), unaligned_mode());
         store_simd(dvres2.data(), dbres, unaligned_mode());
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "load uchar   -> double : ";
-        dbres = load_simd<unsigned char, double>(tester.uc_vec.data(), aligned_mode());
+        topic = "load uint8   -> double : ";
+        dbres = load_simd<uint8_t, double>(tester.ui8_vec.data(), aligned_mode());
         store_simd(dvres2.data(), dbres, aligned_mode());
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "loadu uchar  -> double : ";
-        dbres = load_simd<unsigned char, double>(tester.uc_vec.data(), unaligned_mode());
+        topic = "loadu uint8  -> double : ";
+        dbres = load_simd<uint8_t, double>(tester.ui8_vec.data(), unaligned_mode());
         store_simd(dvres2.data(), dbres, unaligned_mode());
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
@@ -263,26 +263,26 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
-        topic = "load char    -> int32  : ";
-        i32bres = load_simd<char, int32_t>(tester.c_vec.data(), aligned_mode());
+        topic = "load int8    -> int32  : ";
+        i32bres = load_simd<int8_t, int32_t>(tester.i8_vec.data(), aligned_mode());
         store_simd(i32vres.data(), i32bres, aligned_mode());
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
-        topic = "loadu char   -> int32  : ";
-        i32bres = load_simd<char, int32_t>(tester.c_vec.data(), unaligned_mode());
+        topic = "loadu int8   -> int32  : ";
+        i32bres = load_simd<int8_t, int32_t>(tester.i8_vec.data(), unaligned_mode());
         store_simd(i32vres.data(), i32bres, unaligned_mode());
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
-        topic = "load uchar   -> int32  : ";
-        i32bres = load_simd<unsigned char, int32_t>(tester.uc_vec.data(), aligned_mode());
+        topic = "load uint8   -> int32  : ";
+        i32bres = load_simd<uint8_t, int32_t>(tester.ui8_vec.data(), aligned_mode());
         store_simd(i32vres.data(), i32bres, aligned_mode());
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
-        topic = "loadu uchar  -> int32  : ";
-        i32bres = load_simd<unsigned char, int32_t>(tester.uc_vec.data(), unaligned_mode());
+        topic = "loadu uint8  -> int32  : ";
+        i32bres = load_simd<uint8_t, int32_t>(tester.ui8_vec.data(), unaligned_mode());
         store_simd(i32vres.data(), i32bres, unaligned_mode());
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
@@ -337,26 +337,26 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
 
-        topic = "load char    -> int64  : ";
-        i64bres = load_simd<char, int64_t>(tester.c_vec.data(), aligned_mode());
+        topic = "load int8    -> int64  : ";
+        i64bres = load_simd<int8_t, int64_t>(tester.i8_vec.data(), aligned_mode());
         store_simd(i64vres2.data(), i64bres, aligned_mode());
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
 
-        topic = "loadu char   -> int64  : ";
-        i64bres = load_simd<char, int64_t>(tester.c_vec.data(), unaligned_mode());
+        topic = "loadu int8   -> int64  : ";
+        i64bres = load_simd<int8_t, int64_t>(tester.i8_vec.data(), unaligned_mode());
         store_simd(i64vres2.data(), i64bres, unaligned_mode());
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
 
-        topic = "load uchar   -> int64  : ";
-        i64bres = load_simd<unsigned char, int64_t>(tester.uc_vec.data(), aligned_mode());
+        topic = "load uint8   -> int64  : ";
+        i64bres = load_simd<uint8_t, int64_t>(tester.ui8_vec.data(), aligned_mode());
         store_simd(i64vres2.data(), i64bres, aligned_mode());
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
 
-        topic = "loadu uchar  -> int64  : ";
-        i64bres = load_simd<unsigned char, int64_t>(tester.uc_vec.data(), unaligned_mode());
+        topic = "loadu uint8  -> int64  : ";
+        i64bres = load_simd<uint8_t, int64_t>(tester.ui8_vec.data(), unaligned_mode());
         store_simd(i64vres2.data(), i64bres, unaligned_mode());
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
@@ -379,8 +379,8 @@ namespace xsimd
         using int64_vector = typename T::int64_vector;
         using float_vector = typename T::float_vector;
         using double_vector = typename T::double_vector;
-        using char_vector = typename T::char_vector;
-        using uchar_vector = typename T::uchar_vector;
+        using int8_vector = typename T::int8_vector;
+        using uint8_vector = typename T::uint8_vector;
 
         int32_batch i32bres;
         int64_batch i64bres;
@@ -393,16 +393,15 @@ namespace xsimd
         int64_vector i64vres(fsize);
         float_vector fvres(fsize);
         double_vector dvres(fsize);
-        char_vector cvres(fsize * 8);
-        uchar_vector ucvres(fsize * 8);
+        int8_vector cvres(fsize * 8);
+        uint8_vector ucvres(fsize * 8);
 
         int32_vector i32vres2(dsize);
         int64_vector i64vres2(dsize);
         float_vector fvres2(dsize);
         double_vector dvres2(dsize);
-        char_vector cvres2(dsize * 8, char(0));
-        using uchar = unsigned char;
-        uchar_vector ucvres2(dsize * 8, uchar(0));
+        int8_vector cvres2(dsize * 8, int8_t(0));
+        uint8_vector ucvres2(dsize * 8, uint8_t(0));
 
         bool success = true;
         bool tmp_success = true;
@@ -467,32 +466,32 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
         success = tmp_success && success;
 
-        topic = "store float   -> char   : ";
+        topic = "store float   -> int8   : ";
         fbres = load_simd<float>(tester.f_vec.data(), aligned_mode());
-        store_simd<char, float>(cvres.data(), fbres, aligned_mode());
-        std::copy(tester.c_vec.cbegin() + fsize, tester.c_vec.cend(), cvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, cvres, tester.c_vec, out);
+        store_simd<int8_t, float>(cvres.data(), fbres, aligned_mode());
+        std::copy(tester.i8_vec.cbegin() + fsize, tester.i8_vec.cend(), cvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, cvres, tester.i8_vec, out);
         success = tmp_success && success;
 
-        topic = "storeu float  -> char   : ";
+        topic = "storeu float  -> int8   : ";
         fbres = load_simd<float>(tester.f_vec.data(), unaligned_mode());
-        store_simd<char, float>(cvres.data(), fbres, unaligned_mode());
-        std::copy(tester.c_vec.cbegin() + fsize, tester.c_vec.cend(), cvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, cvres, tester.c_vec, out);
+        store_simd<int8_t, float>(cvres.data(), fbres, unaligned_mode());
+        std::copy(tester.i8_vec.cbegin() + fsize, tester.i8_vec.cend(), cvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, cvres, tester.i8_vec, out);
         success = tmp_success && success;
 
-        topic = "store float   -> uchar  : ";
+        topic = "store float   -> uint8  : ";
         fbres = load_simd<float>(tester.f_vec.data(), aligned_mode());
-        store_simd<unsigned char, float>(ucvres.data(), fbres, aligned_mode());
-        std::copy(tester.uc_vec.cbegin() + fsize, tester.uc_vec.cend(), ucvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, ucvres, tester.uc_vec, out);
+        store_simd<uint8_t, float>(ucvres.data(), fbres, aligned_mode());
+        std::copy(tester.ui8_vec.cbegin() + fsize, tester.ui8_vec.cend(), ucvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, ucvres, tester.ui8_vec, out);
         success = tmp_success && success;
 
-        topic = "storeu float  -> uchar  : ";
+        topic = "storeu float  -> uint8  : ";
         fbres = load_simd<float>(tester.f_vec.data(), unaligned_mode());
-        store_simd<unsigned char, float>(ucvres.data(), fbres, unaligned_mode());
-        std::copy(tester.uc_vec.cbegin() + fsize, tester.uc_vec.cend(), ucvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, ucvres, tester.uc_vec, out);
+        store_simd<uint8_t, float>(ucvres.data(), fbres, unaligned_mode());
+        std::copy(tester.ui8_vec.cbegin() + fsize, tester.ui8_vec.cend(), ucvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, ucvres, tester.ui8_vec, out);
         success = tmp_success && success;
 
         // double
@@ -545,32 +544,32 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "store double  -> char   : ";
+        topic = "store double  -> int8   : ";
         dbres = load_simd<double>(tester.d_vec.data(), aligned_mode());
-        store_simd<char, double>(cvres2.data(), dbres, aligned_mode());
-        std::copy(tester.c_vec2.cbegin() + dsize, tester.c_vec2.cend(), cvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, cvres2, tester.c_vec2, out);
+        store_simd<int8_t, double>(cvres2.data(), dbres, aligned_mode());
+        std::copy(tester.i8_vec2.cbegin() + dsize, tester.i8_vec2.cend(), cvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, cvres2, tester.i8_vec2, out);
         success = tmp_success && success;
 
-        topic = "storeu double -> char   : ";
+        topic = "storeu double -> int8   : ";
         dbres = load_simd<double>(tester.d_vec.data(), unaligned_mode());
-        store_simd<char, double>(cvres2.data(), dbres, unaligned_mode());
-        std::copy(tester.c_vec2.cbegin() + dsize, tester.c_vec2.cend(), cvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, cvres2, tester.c_vec2, out);
+        store_simd<int8_t, double>(cvres2.data(), dbres, unaligned_mode());
+        std::copy(tester.i8_vec2.cbegin() + dsize, tester.i8_vec2.cend(), cvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, cvres2, tester.i8_vec2, out);
         success = tmp_success && success;
 
-        topic = "store double  -> uchar  : ";
+        topic = "store double  -> uint8  : ";
         dbres = load_simd<double>(tester.d_vec.data(), aligned_mode());
-        store_simd<unsigned char, double>(ucvres2.data(), dbres, aligned_mode());
-        std::copy(tester.uc_vec2.cbegin() + dsize, tester.uc_vec2.cend(), ucvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, ucvres2, tester.uc_vec2, out);
+        store_simd<uint8_t, double>(ucvres2.data(), dbres, aligned_mode());
+        std::copy(tester.ui8_vec2.cbegin() + dsize, tester.ui8_vec2.cend(), ucvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ucvres2, tester.ui8_vec2, out);
         success = tmp_success && success;
 
-        topic = "storeu double -> uchar  : ";
+        topic = "storeu double -> uint8  : ";
         dbres = load_simd<double>(tester.d_vec.data(), unaligned_mode());
-        store_simd<unsigned char, double>(ucvres2.data(), dbres, unaligned_mode());
-        std::copy(tester.uc_vec2.cbegin() + dsize, tester.uc_vec2.cend(), ucvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, ucvres2, tester.uc_vec2, out);
+        store_simd<uint8_t, double>(ucvres2.data(), dbres, unaligned_mode());
+        std::copy(tester.ui8_vec2.cbegin() + dsize, tester.ui8_vec2.cend(), ucvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ucvres2, tester.ui8_vec2, out);
         success = tmp_success && success;
 
         // int32
@@ -623,32 +622,32 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
         success = tmp_success && success;
 
-        topic = "store int32   -> char   : ";
+        topic = "store int32   -> int8   : ";
         i32bres = load_simd<int32_t>(tester.i32_vec.data(), aligned_mode());
-        store_simd<char, int32_t>(cvres.data(), i32bres, aligned_mode());
-        std::copy(tester.c_vec.cbegin() + fsize, tester.c_vec.cend(), cvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, cvres, tester.c_vec, out);
+        store_simd<int8_t, int32_t>(cvres.data(), i32bres, aligned_mode());
+        std::copy(tester.i8_vec.cbegin() + fsize, tester.i8_vec.cend(), cvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, cvres, tester.i8_vec, out);
         success = tmp_success && success;
 
-        topic = "storeu int32  -> char   : ";
+        topic = "storeu int32  -> int8   : ";
         i32bres = load_simd<int32_t>(tester.i32_vec.data(), unaligned_mode());
-        store_simd<char, int32_t>(cvres.data(), i32bres, unaligned_mode());
-        std::copy(tester.c_vec.cbegin() + fsize, tester.c_vec.cend(), cvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, cvres, tester.c_vec, out);
+        store_simd<int8_t, int32_t>(cvres.data(), i32bres, unaligned_mode());
+        std::copy(tester.i8_vec.cbegin() + fsize, tester.i8_vec.cend(), cvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, cvres, tester.i8_vec, out);
         success = tmp_success && success;
 
-        topic = "store int32   -> uchar  : ";
+        topic = "store int32   -> uint8  : ";
         i32bres = load_simd<int32_t>(tester.i32_vec.data(), aligned_mode());
-        store_simd<unsigned char, int32_t>(ucvres.data(), i32bres, aligned_mode());
-        std::copy(tester.uc_vec.cbegin() + fsize, tester.uc_vec.cend(), ucvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, ucvres, tester.uc_vec, out);
+        store_simd<uint8_t, int32_t>(ucvres.data(), i32bres, aligned_mode());
+        std::copy(tester.ui8_vec.cbegin() + fsize, tester.ui8_vec.cend(), ucvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, ucvres, tester.ui8_vec, out);
         success = tmp_success && success;
 
-        topic = "storeu int32  -> uchar  : ";
+        topic = "storeu int32  -> uint8  : ";
         i32bres = load_simd<int32_t>(tester.i32_vec.data(), unaligned_mode());
-        store_simd<unsigned char, int32_t>(ucvres.data(), i32bres, unaligned_mode());
-        std::copy(tester.uc_vec.cbegin() + fsize, tester.uc_vec.cend(), ucvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, ucvres, tester.uc_vec, out);
+        store_simd<uint8_t, int32_t>(ucvres.data(), i32bres, unaligned_mode());
+        std::copy(tester.ui8_vec.cbegin() + fsize, tester.ui8_vec.cend(), ucvres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, ucvres, tester.ui8_vec, out);
         success = tmp_success && success;
 
         // int64
@@ -701,32 +700,32 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "store int64   -> char   : ";
+        topic = "store int64   -> int8   : ";
         i64bres = load_simd<int64_t>(tester.i64_vec.data(), aligned_mode());
-        store_simd<char, int64_t>(cvres2.data(), i64bres, aligned_mode());
-        std::copy(tester.c_vec2.cbegin() + dsize, tester.c_vec2.cend(), cvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, cvres2, tester.c_vec2, out);
+        store_simd<int8_t, int64_t>(cvres2.data(), i64bres, aligned_mode());
+        std::copy(tester.i8_vec2.cbegin() + dsize, tester.i8_vec2.cend(), cvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, cvres2, tester.i8_vec2, out);
         success = tmp_success && success;
 
-        topic = "storeu int64  -> char   : ";
+        topic = "storeu int64  -> int8   : ";
         i64bres = load_simd<int64_t>(tester.i64_vec.data(), unaligned_mode());
-        store_simd<char, int64_t>(cvres2.data(), i64bres, unaligned_mode());
-        std::copy(tester.c_vec2.cbegin() + dsize, tester.c_vec2.cend(), cvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, cvres2, tester.c_vec2, out);
+        store_simd<int8_t, int64_t>(cvres2.data(), i64bres, unaligned_mode());
+        std::copy(tester.i8_vec2.cbegin() + dsize, tester.i8_vec2.cend(), cvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, cvres2, tester.i8_vec2, out);
         success = tmp_success && success;
 
-        topic = "store int64   -> uchar  : ";
+        topic = "store int64   -> uint8_t  : ";
         i64bres = load_simd<int64_t>(tester.i64_vec.data(), aligned_mode());
-        store_simd<unsigned char, int64_t>(ucvres2.data(), i64bres, aligned_mode());
-        std::copy(tester.uc_vec2.cbegin() + dsize, tester.uc_vec2.cend(), ucvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, ucvres2, tester.uc_vec2, out);
+        store_simd<uint8_t, int64_t>(ucvres2.data(), i64bres, aligned_mode());
+        std::copy(tester.ui8_vec2.cbegin() + dsize, tester.ui8_vec2.cend(), ucvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ucvres2, tester.ui8_vec2, out);
         success = tmp_success && success;
 
-        topic = "storeu int64  -> uchar  : ";
+        topic = "storeu int64  -> uint8_t  : ";
         i64bres = load_simd<int64_t>(tester.i64_vec.data(), unaligned_mode());
-        store_simd<unsigned char, int64_t>(ucvres2.data(), i64bres, unaligned_mode());
-        std::copy(tester.uc_vec2.cbegin() + dsize, tester.uc_vec2.cend(), ucvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, ucvres2, tester.uc_vec2, out);
+        store_simd<uint8_t, int64_t>(ucvres2.data(), i64bres, unaligned_mode());
+        std::copy(tester.ui8_vec2.cbegin() + dsize, tester.ui8_vec2.cend(), ucvres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ucvres2, tester.ui8_vec2, out);
         success = tmp_success && success;
 
         return success;

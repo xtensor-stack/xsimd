@@ -171,7 +171,7 @@ namespace xsimd
     inline batch<double, 8>& batch<double, 8>::load_aligned(const int16_t* src)
     {
         __m128i tmp = _mm_load_si128((const __m128i*)src);
-        __m512i tmp2 = _mm512_cvtepi8_epi64(tmp);
+        __m512i tmp2 = _mm512_cvtepi16_epi64(tmp);
         m_value = _mm512_cvtepi64_pd(tmp2);
         return *this;
     }
@@ -179,7 +179,7 @@ namespace xsimd
     inline batch<double, 8>& batch<double, 8>::load_unaligned(const int16_t* src)
     {
         __m128i tmp = _mm_loadu_si128((const __m128i*)src);
-        __m512i tmp2 = _mm512_cvtepi8_epi64(tmp);
+        __m512i tmp2 = _mm512_cvtepi16_epi64(tmp);
         m_value = _mm512_cvtepi64_pd(tmp2);
         return *this;
     }
