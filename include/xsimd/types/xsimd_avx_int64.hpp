@@ -167,7 +167,7 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
             __m256i res = _mm256_cvtepi16_epi64(tmp);
 #else
-            __m128i tmp2 = _mm_shufflelo_epi16(tmp, _MM_SHUFFLE(3, 2, 0, 1));
+            __m128i tmp2 = _mm_shufflelo_epi16(tmp, _MM_SHUFFLE(0, 1, 3, 2));
             __m128i tmp_lo = _mm_cvtepi16_epi64(tmp);
             __m128i tmp_hi = _mm_cvtepi16_epi64(tmp2);
             __m256i res = _mm256_castsi128_si256(tmp_lo);
@@ -180,9 +180,9 @@ namespace xsimd
         {
             __m128i tmp = _mm_loadl_epi64((const __m128i*)src);
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-            __m256i res = _mm256_cvtepu8_epi64(tmp);
+            __m256i res = _mm256_cvtepu16_epi64(tmp);
 #else
-            __m128i tmp2 = _mm_shufflelo_epi16(tmp, _MM_SHUFFLE(3, 2, 0, 1));
+            __m128i tmp2 = _mm_shufflelo_epi16(tmp, _MM_SHUFFLE(0, 1, 3, 2));
             __m128i tmp_lo = _mm_cvtepu16_epi64(tmp);
             __m128i tmp_hi = _mm_cvtepu16_epi64(tmp2);
             __m256i res = _mm256_castsi128_si256(tmp_lo);

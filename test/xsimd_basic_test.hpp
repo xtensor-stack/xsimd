@@ -1604,28 +1604,40 @@ namespace xsimd
         using float_batch = batch<float, N * 2>;
         using double_batch = batch<double, N>;
 
+        using int8_vector = std::vector<int8_t, aligned_allocator<int8_t, A>>;
+        using uint8_vector = std::vector<uint8_t, aligned_allocator<uint8_t, A>>;
+        using int16_vector = std::vector<int16_t, aligned_allocator<int16_t, A>>;
+        using uint16_vector = std::vector<uint16_t, aligned_allocator<uint16_t, A>>;
         using int32_vector = std::vector<int32_t, aligned_allocator<int32_t, A>>;
+        using uint32_vector = std::vector<uint32_t, aligned_allocator<uint32_t, A>>;
         using int64_vector = std::vector<int64_t, aligned_allocator<int64_t, A>>;
+        using uint64_vector = std::vector<uint64_t, aligned_allocator<uint64_t, A>>;
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
-        using char_vector = std::vector<char, aligned_allocator<char, A>>;
-        using uchar_vector = std::vector<unsigned char, aligned_allocator<unsigned char, A>>;
 
         std::string name;
 
+        int8_vector i8_vec;
+        uint8_vector ui8_vec;
+        int16_vector i16_vec;
+        uint16_vector ui16_vec;
         int32_vector i32_vec;
+        uint32_vector ui32_vec;
         int64_vector i64_vec;
+        uint64_vector ui64_vec;
         float_vector f_vec;
         double_vector d_vec;
-        char_vector c_vec;
-        uchar_vector uc_vec;
 
+        int8_vector i8_vec2;
+        uint8_vector ui8_vec2;
+        int16_vector i16_vec2;
+        uint16_vector ui16_vec2;
         int32_vector i32_vec2;
+        uint32_vector ui32_vec2;
         int64_vector i64_vec2;
+        uint64_vector ui64_vec2;
         float_vector f_vec2;
         double_vector d_vec2;
-        char_vector c_vec2;
-        uchar_vector uc_vec2;
 
         simd_load_store_tester(const std::string& n);
     };
@@ -1633,21 +1645,31 @@ namespace xsimd
     template <std::size_t N, std::size_t A>
     inline simd_load_store_tester<N, A>::simd_load_store_tester(const std::string& n)
         : name(n),
-          i32_vec(2 * N), i64_vec(2 * N), f_vec(2 * N), d_vec(2 * N), c_vec(16 * N), uc_vec(16 * N),
-          i32_vec2(N), i64_vec2(N), f_vec2(N), d_vec2(N), c_vec2(8 * N), uc_vec2(8 * N)
+          i8_vec(16 * N), ui8_vec(16 * N), i16_vec(16 * N), ui16_vec(16 * N),
+          i32_vec(2 * N), ui32_vec(2 * N), i64_vec(2 * N), ui64_vec(2 * N), f_vec(2 * N), d_vec(2 * N),
+          i8_vec2(8 * N), ui8_vec2(8 * N), i16_vec2(8 * N), ui16_vec2(8 * N),
+          i32_vec2(N), ui32_vec2(N), i64_vec2(N), ui64_vec2(N), f_vec2(N), d_vec2(N)
     {
+        std::iota(i8_vec.begin(), i8_vec.end(), int8_t(1));
+        std::iota(ui8_vec.begin(), ui8_vec.end(), uint8_t(1));
+        std::iota(i16_vec.begin(), i16_vec.end(), int16_t(1));
+        std::iota(ui16_vec.begin(), ui16_vec.end(), uint16_t(1));
         std::iota(i32_vec.begin(), i32_vec.end(), int32_t(1));
+        std::iota(ui32_vec.begin(), ui32_vec.end(), uint32_t(1));
         std::iota(i64_vec.begin(), i64_vec.end(), int64_t(1));
+        std::iota(ui64_vec.begin(), ui64_vec.end(), uint64_t(1));
         std::iota(f_vec.begin(), f_vec.end(), float(1));
         std::iota(d_vec.begin(), d_vec.end(), double(1));
-        std::iota(c_vec.begin(), c_vec.end(), char(1));
-        std::iota(uc_vec.begin(), uc_vec.end(), char(1));
+        std::iota(i8_vec2.begin(), i8_vec2.end(), int8_t(1));
+        std::iota(ui8_vec2.begin(), ui8_vec2.end(), uint8_t(1));
+        std::iota(i16_vec2.begin(), i16_vec2.end(), int16_t(1));
+        std::iota(ui16_vec2.begin(), ui16_vec2.end(), uint16_t(1));
         std::iota(i32_vec2.begin(), i32_vec2.end(), int32_t(1));
+        std::iota(ui32_vec2.begin(), ui32_vec2.end(), uint32_t(1));
         std::iota(i64_vec2.begin(), i64_vec2.end(), int64_t(1));
+        std::iota(ui64_vec2.begin(), ui64_vec2.end(), uint64_t(1));
         std::iota(f_vec2.begin(), f_vec2.end(), float(1));
         std::iota(d_vec2.begin(), d_vec2.end(), double(1));
-        std::iota(c_vec2.begin(), c_vec2.end(), char(1));
-        std::iota(uc_vec2.begin(), uc_vec2.end(), char(1));
     }
 
     /*************
@@ -1661,31 +1683,44 @@ namespace xsimd
         using int64_batch = typename T::int64_batch;
         using float_batch = typename T::float_batch;
         using double_batch = typename T::double_batch;
+
+        using int8_vector = typename T::int8_vector;
+        using uint8_vector = typename T::uint8_vector;
+        using int16_vector = typename T::int16_vector;
+        using uint16_vector = typename T::uint16_vector;
         using int32_vector = typename T::int32_vector;
+        using uint32_vector = typename T::uint32_vector;
         using int64_vector = typename T::int64_vector;
+        using uint64_vector = typename T::uint64_vector;
         using float_vector = typename T::float_vector;
         using double_vector = typename T::double_vector;
-        using char_vector = typename T::char_vector;
-        using uchar_vector = typename T::uchar_vector;
 
         int32_batch i32bres;
         int64_batch i64bres;
         float_batch fbres;
         double_batch dbres;
 
+        int8_vector i8vres(float_batch::size);
+        uint8_vector ui8vres(float_batch::size);
+        int16_vector i16vres(float_batch::size);
+        uint16_vector ui16vres(float_batch::size);
         int32_vector i32vres(float_batch::size);
+        uint32_vector ui32vres(float_batch::size);
         int64_vector i64vres(float_batch::size);
+        uint64_vector ui64vres(float_batch::size);
         float_vector fvres(float_batch::size);
         double_vector dvres(float_batch::size);
-        char_vector cvres(float_batch::size);
-        uchar_vector ucvres(float_batch::size);
 
+        int8_vector i8vres2(double_batch::size);
+        uint8_vector ui8vres2(double_batch::size);
+        int16_vector i16vres2(double_batch::size);
+        uint16_vector ui16vres2(double_batch::size);
         int32_vector i32vres2(double_batch::size);
+        uint32_vector ui32vres2(double_batch::size);
         int64_vector i64vres2(double_batch::size);
+        uint64_vector ui64vres2(double_batch::size);
         float_vector fvres2(double_batch::size);
         double_vector dvres2(double_batch::size);
-        char_vector cvres2(float_batch::size);
-        uchar_vector ucvres2(float_batch::size);
 
         bool success = true;
         bool tmp_success = true;
@@ -1700,117 +1735,209 @@ namespace xsimd
         out << dash << name_shift << dash << std::endl
             << std::endl;
 
-        std::string topic = "load int32  -> float  : ";
+        std::string topic = "load int8    -> float  : ";
+        detail::load_vec(fbres, tester.i8_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load uint8   -> float  : ";
+        detail::load_vec(fbres, tester.ui8_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load int16   -> float  : ";
+        detail::load_vec(fbres, tester.i16_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load uint16  -> float  : ";
+        detail::load_vec(fbres, tester.ui16_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load int32   -> float  : ";
         detail::load_vec(fbres, tester.i32_vec);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
-        topic = "load int64  -> float  : ";
+        topic = "load uint32  -> float  : ";
+        detail::load_vec(fbres, tester.ui32_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load int64   -> float  : ";
         detail::load_vec(fbres, tester.i64_vec);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
-        topic = "load double -> float  : ";
+        topic = "load uint64  -> float  : ";
+        detail::load_vec(fbres, tester.ui64_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load double  -> float  : ";
         detail::load_vec(fbres, tester.d_vec);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
-        topic = "load char   -> float  : ";
-        detail::load_vec(fbres, tester.c_vec);
-        detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        topic = "load int8    -> double : ";
+        detail::load_vec(dbres, tester.i8_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
 
-        topic = "load uchar  -> float  : ";
-        detail::load_vec(fbres, tester.uc_vec);
-        detail::store_vec(fbres, fvres);
-        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        topic = "load uint8   -> double : ";
+        detail::load_vec(dbres, tester.ui8_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
 
-        topic = "load int32  -> double : ";
+        topic = "load int16   -> double : ";
+        detail::load_vec(dbres, tester.i16_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load uint16  -> double : ";
+        detail::load_vec(dbres, tester.ui16_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load int32   -> double : ";
         detail::load_vec(dbres, tester.i32_vec);
         detail::store_vec(dbres, dvres2);
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "load int64  -> double : ";
+        topic = "load uint32  -> double : ";
+        detail::load_vec(dbres, tester.ui32_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load int64   -> double : ";
         detail::load_vec(dbres, tester.i64_vec);
         detail::store_vec(dbres, dvres2);
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "load float  -> double : ";
+        topic = "load uint64  -> double : ";
+        detail::load_vec(dbres, tester.ui64_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load float   -> double : ";
         detail::load_vec(dbres, tester.f_vec);
         detail::store_vec(dbres, dvres2);
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
-        topic = "load char   -> double : ";
-        detail::load_vec(dbres, tester.c_vec);
-        detail::store_vec(dbres, dvres2);
-        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        topic = "load int8    -> int32  : ";
+        detail::load_vec(i32bres, tester.i8_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
 
-        topic = "load uchar  -> double : ";
-        detail::load_vec(dbres, tester.uc_vec);
-        detail::store_vec(dbres, dvres2);
-        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        topic = "load uint8   -> int32  : ";
+        detail::load_vec(i32bres, tester.ui8_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
 
-        topic = "load int64  -> int32  : ";
+        topic = "load int16   -> int32  : ";
+        detail::load_vec(i32bres, tester.i16_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load uint16  -> int32  : ";
+        detail::load_vec(i32bres, tester.ui16_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load int64   -> int32  : ";
         detail::load_vec(i32bres, tester.i64_vec);
         detail::store_vec(i32bres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
-        topic = "load float  -> int32  : ";
+        topic = "load uint64  -> int32  : ";
+        detail::load_vec(i32bres, tester.ui64_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load float   -> int32  : ";
         detail::load_vec(i32bres, tester.f_vec);
         detail::store_vec(i32bres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
-        topic = "load double -> int32  : ";
+        topic = "load double  -> int32  : ";
         detail::load_vec(i32bres, tester.d_vec);
         detail::store_vec(i32bres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
 
-        topic = "load char   -> int32  : ";
-        detail::load_vec(i32bres, tester.c_vec);
-        detail::store_vec(i32bres, i32vres);
-        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        topic = "load int8    -> int64  : ";
+        detail::load_vec(i64bres, tester.i8_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
 
-        topic = "load uchar  -> int32  : ";
-        detail::load_vec(i32bres, tester.uc_vec);
-        detail::store_vec(i32bres, i32vres);
-        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        topic = "load uint8   -> int64  : ";
+        detail::load_vec(i64bres, tester.ui8_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
 
-        topic = "load int32  -> int64  : ";
+        topic = "load int16   -> int64  : ";
+        detail::load_vec(i64bres, tester.i16_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load uint16  -> int64  : ";
+        detail::load_vec(i64bres, tester.ui16_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load int32   -> int64  : ";
         detail::load_vec(i64bres, tester.i32_vec);
         detail::store_vec(i64bres, i64vres2);
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
 
-        topic = "load float  -> int64  : ";
+        topic = "load uint32  -> int64  : ";
+        detail::load_vec(i64bres, tester.ui32_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load float   -> int64  : ";
         detail::load_vec(i64bres, tester.f_vec);
         detail::store_vec(i64bres, i64vres2);
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
 
-        topic = "load double -> int64  : ";
+        topic = "load double  -> int64  : ";
         detail::load_vec(i64bres, tester.d_vec);
         detail::store_vec(i64bres, i64vres2);
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
-
-        topic = "load char   -> int64  : ";
-        detail::load_vec(i64bres, tester.c_vec);
-        detail::store_vec(i64bres, i64vres2);
-        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
-
-        topic = "load uchar  -> int64  : ";
-        detail::load_vec(i64bres, tester.uc_vec);
-        detail::store_vec(i64bres, i64vres2);
-        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
 
         return success;
     }
@@ -1826,12 +1953,16 @@ namespace xsimd
         using int64_batch = typename T::int64_batch;
         using float_batch = typename T::float_batch;
         using double_batch = typename T::double_batch;
+        using int8_vector = typename T::int8_vector;
+        using uint8_vector = typename T::uint8_vector;
+        using int16_vector = typename T::int16_vector;
+        using uint16_vector = typename T::uint16_vector;
         using int32_vector = typename T::int32_vector;
+        using uint32_vector = typename T::uint32_vector;
         using int64_vector = typename T::int64_vector;
+        using uint64_vector = typename T::uint64_vector;
         using float_vector = typename T::float_vector;
         using double_vector = typename T::double_vector;
-        using char_vector = typename T::char_vector;
-        using uchar_vector = typename T::uchar_vector;
 
         int32_batch i32bres;
         int64_batch i64bres;
@@ -1840,20 +1971,27 @@ namespace xsimd
 
         constexpr std::size_t fsize = float_batch::size;
         constexpr std::size_t dsize = double_batch::size;
+        int8_vector i8vres(fsize * 8);
+        uint8_vector ui8vres(fsize * 8);
+        int16_vector i16vres(fsize * 8);
+        uint16_vector ui16vres(fsize * 8);
         int32_vector i32vres(fsize);
+        uint32_vector ui32vres(fsize);
         int64_vector i64vres(fsize);
+        uint64_vector ui64vres(fsize);
         float_vector fvres(fsize);
         double_vector dvres(fsize);
-        char_vector cvres(fsize * 8);
-        uchar_vector ucvres(fsize * 8);
 
+        int8_vector i8vres2(dsize * 8, int8_t(0));
+        uint8_vector ui8vres2(dsize * 8, uint8_t(0));
+        int16_vector i16vres2(dsize * 8, int16_t(0));
+        uint16_vector ui16vres2(dsize * 8, uint16_t(0));
         int32_vector i32vres2(dsize);
+        uint32_vector ui32vres2(dsize);
         int64_vector i64vres2(dsize);
+        uint64_vector ui64vres2(dsize);
         float_vector fvres2(dsize);
         double_vector dvres2(dsize);
-        char_vector cvres2(dsize * 8, char(0));
-        using uchar = unsigned char;
-        uchar_vector ucvres2(dsize * 8, uchar(0));
 
         bool success = true;
         bool tmp_success = true;
@@ -1868,10 +2006,44 @@ namespace xsimd
         out << dash << name_shift << dash << std::endl
             << std::endl;
 
-        std::string topic = "store float  -> int32  : ";
+        std::string topic = "store float  -> int8   : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, i8vres);
+        std::copy(tester.i8_vec.cbegin() + fsize, tester.i8_vec.cend(), i8vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, i8vres, tester.i8_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> uint8  : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, ui8vres);
+        std::copy(tester.ui8_vec.cbegin() + fsize, tester.ui8_vec.cend(), ui8vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, ui8vres, tester.ui8_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> int16  : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, i16vres);
+        std::copy(tester.i16_vec.cbegin() + fsize, tester.i16_vec.cend(), i16vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, i16vres, tester.i16_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> uint16 : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, ui16vres);
+        std::copy(tester.ui16_vec.cbegin() + fsize, tester.ui16_vec.cend(), ui16vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, i16vres, tester.i16_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> int32  : ";
         detail::load_vec(fbres, tester.f_vec);
         detail::store_vec(fbres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> uint32 : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, ui32vres);
+        tmp_success = check_almost_equal(topic, ui32vres, tester.ui32_vec, out);
         success = tmp_success && success;
 
         topic = "store float  -> int64  : ";
@@ -1880,24 +2052,44 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i64vres, tester.i64_vec, out);
         success = tmp_success && success;
 
+        topic = "store float  -> uint64 : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, ui64vres);
+        tmp_success = check_almost_equal(topic, ui64vres, tester.ui64_vec, out);
+        success = tmp_success && success;
+
         topic = "store float  -> double : ";
         detail::load_vec(fbres, tester.f_vec);
         detail::store_vec(fbres, dvres);
         tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
         success = tmp_success && success;
 
-        topic = "store float  -> char   : ";
-        detail::load_vec(fbres, tester.f_vec);
-        detail::store_vec(fbres, cvres);
-        std::copy(tester.c_vec.cbegin() + fsize, tester.c_vec.cend(), cvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, cvres, tester.c_vec, out);
+        topic = "store double -> int8   : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, i8vres2);
+        std::copy(tester.i8_vec2.cbegin() + dsize, tester.i8_vec2.cend(), i8vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, i8vres2, tester.i8_vec2, out);
         success = tmp_success && success;
 
-        topic = "store float  -> uchar  : ";
-        detail::load_vec(fbres, tester.f_vec);
-        detail::store_vec(fbres, ucvres);
-        std::copy(tester.uc_vec.cbegin() + fsize, tester.uc_vec.cend(), ucvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, ucvres, tester.uc_vec, out);
+        topic = "store double -> uint8  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, ui8vres2);
+        std::copy(tester.ui8_vec2.cbegin() + dsize, tester.ui8_vec2.cend(), ui8vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ui8vres2, tester.ui8_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> int16  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, i16vres2);
+        std::copy(tester.i16_vec2.cbegin() + dsize, tester.i16_vec2.cend(), i16vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, i16vres2, tester.i16_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> uint16 : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, ui16vres2);
+        std::copy(tester.ui16_vec2.cbegin() + dsize, tester.ui16_vec2.cend(), ui16vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ui16vres2, tester.ui16_vec2, out);
         success = tmp_success && success;
 
         topic = "store double -> int32  : ";
@@ -1906,10 +2098,22 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i32vres2, tester.i32_vec2, out);
         success = tmp_success && success;
 
+        topic = "store double -> uint32 : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, ui32vres2);
+        tmp_success = check_almost_equal(topic, ui32vres2, tester.ui32_vec2, out);
+        success = tmp_success && success;
+
         topic = "store double -> int64  : ";
         detail::load_vec(dbres, tester.d_vec);
         detail::store_vec(dbres, i64vres2);
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> uint64 : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, ui64vres2);
+        tmp_success = check_almost_equal(topic, ui64vres2, tester.ui64_vec2, out);
         success = tmp_success && success;
 
         topic = "store double -> float  : ";
@@ -1918,24 +2122,38 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
         success = tmp_success && success;
 
-        topic = "store double -> char   : ";
-        detail::load_vec(dbres, tester.d_vec);
-        detail::store_vec(dbres, cvres2);
-        std::copy(tester.c_vec2.cbegin() + dsize, tester.c_vec2.cend(), cvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, cvres2, tester.c_vec2, out);
-        success = tmp_success && success;
-
-        topic = "store double -> uchar  : ";
-        detail::load_vec(dbres, tester.d_vec);
-        detail::store_vec(dbres, ucvres2);
-        std::copy(tester.uc_vec2.cbegin() + dsize, tester.uc_vec2.cend(), ucvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, ucvres2, tester.uc_vec2, out);
-        success = tmp_success && success;
-
-        topic = "store int32  -> float  : ";
+        topic = "store int32  -> int8   : ";
         detail::load_vec(i32bres, tester.i32_vec);
-        detail::store_vec(i32bres, i32vres);
-        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        detail::store_vec(i32bres, i8vres);
+        std::copy(tester.i8_vec.cbegin() + fsize, tester.i8_vec.cend(), i8vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, i8vres, tester.i8_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> uint8  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, ui8vres);
+        std::copy(tester.ui8_vec.cbegin() + fsize, tester.ui8_vec.cend(), ui8vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, ui8vres, tester.ui8_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> int16  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, i16vres);
+        std::copy(tester.i16_vec.cbegin() + fsize, tester.i16_vec.cend(), i16vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, i16vres, tester.i16_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> uint16 : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, ui16vres);
+        std::copy(tester.ui16_vec.cbegin() + fsize, tester.ui16_vec.cend(), ui16vres.begin() + fsize);
+        tmp_success = check_almost_equal(topic, ui16vres, tester.ui16_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> uint64 : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, ui64vres);
+        tmp_success = check_almost_equal(topic, ui64vres, tester.ui64_vec, out);
         success = tmp_success && success;
 
         topic = "store int32  -> int64  : ";
@@ -1944,30 +2162,50 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i64vres, tester.i64_vec, out);
         success = tmp_success && success;
 
+        topic = "store int32  -> uint64 : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, ui64vres);
+        tmp_success = check_almost_equal(topic, ui64vres, tester.ui64_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> float  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
         topic = "store int32  -> double : ";
         detail::load_vec(i32bres, tester.i32_vec);
         detail::store_vec(i32bres, dvres);
         tmp_success = check_almost_equal(topic, dvres, tester.d_vec, out);
         success = tmp_success && success;
 
-        topic = "store int32  -> char   : ";
-        detail::load_vec(i32bres, tester.i32_vec);
-        detail::store_vec(i32bres, cvres);
-        std::copy(tester.c_vec.cbegin() + fsize, tester.c_vec.cend(), cvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, cvres, tester.c_vec, out);
-        success = tmp_success && success;
-
-        topic = "store int32  -> uchar  : ";
-        detail::load_vec(i32bres, tester.i32_vec);
-        detail::store_vec(i32bres, ucvres);
-        std::copy(tester.uc_vec.cbegin() + fsize, tester.uc_vec.cend(), ucvres.begin() + fsize);
-        tmp_success = check_almost_equal(topic, ucvres, tester.uc_vec, out);
-        success = tmp_success && success;
-
-        topic = "store int64  -> float  : ";
+        topic = "store int64  -> int8   : ";
         detail::load_vec(i64bres, tester.i64_vec);
-        detail::store_vec(i64bres,fvres2);
-        tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
+        detail::store_vec(i64bres, i8vres2);
+        std::copy(tester.i8_vec2.cbegin() + dsize, tester.i8_vec2.cend(), i8vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, i8vres2, tester.i8_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> uchar  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, ui8vres2);
+        std::copy(tester.ui8_vec2.cbegin() + dsize, tester.ui8_vec2.cend(), ui8vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ui8vres2, tester.ui8_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> int16  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, i16vres2);
+        std::copy(tester.i16_vec2.cbegin() + dsize, tester.i16_vec2.cend(), i16vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, i16vres2, tester.i16_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> uint16 : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, ui16vres2);
+        std::copy(tester.ui16_vec2.cbegin() + dsize, tester.ui16_vec2.cend(), ui16vres2.begin() + dsize);
+        tmp_success = check_almost_equal(topic, ui16vres2, tester.ui16_vec2, out);
         success = tmp_success && success;
 
         topic = "store int64  -> int32  : ";
@@ -1976,24 +2214,22 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i32vres2, tester.i32_vec2, out);
         success = tmp_success && success;
 
+        topic = "store int64  -> uint32 : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, ui32vres2);
+        tmp_success = check_almost_equal(topic, ui32vres2, tester.ui32_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> float  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres,fvres2);
+        tmp_success = check_almost_equal(topic, fvres2, tester.f_vec2, out);
+        success = tmp_success && success;
+
         topic = "store int64  -> double : ";
         detail::load_vec(i64bres, tester.i64_vec);
         detail::store_vec(i64bres, dvres2);
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
-        success = tmp_success && success;
-
-        topic = "store int64  -> char   : ";
-        detail::load_vec(i64bres, tester.i64_vec);
-        detail::store_vec(i64bres, cvres2);
-        std::copy(tester.c_vec2.cbegin() + dsize, tester.c_vec2.cend(), cvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, cvres2, tester.c_vec2, out);
-        success = tmp_success && success;
-
-        topic = "store int64  -> uchar  : ";
-        detail::load_vec(i64bres, tester.i64_vec);
-        detail::store_vec(i64bres, ucvres2);
-        std::copy(tester.uc_vec2.cbegin() + dsize, tester.uc_vec2.cend(), ucvres2.begin() + dsize);
-        tmp_success = check_almost_equal(topic, ucvres2, tester.uc_vec2, out);
         success = tmp_success && success;
 
         return success;
