@@ -63,14 +63,17 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int8.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int64.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_bool.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_complex.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_conversion.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_int8.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_int16.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_int64.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx512_int_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_bool.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_complex.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_conversion.hpp
@@ -91,6 +94,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int8.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int64.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_traits.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_types_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
