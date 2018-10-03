@@ -118,6 +118,30 @@ namespace xsimd
             return _mm_set_epi64x(i1, i0);
         }
 
+        template <class T>
+        inline __m128i int_set(std::integral_constant<std::size_t, 1>, T v)
+        {
+            return _mm_set1_epi8(v);
+        }
+
+        template <class T>
+        inline __m128i int_set(std::integral_constant<std::size_t, 2>, T v)
+        {
+            return _mm_set1_epi16(v);
+        }
+
+        template <class T>
+        inline __m128i int_set(std::integral_constant<std::size_t, 4>, T v)
+        {
+            return _mm_set1_epi32(v);
+        }
+
+        template <class T>
+        inline __m128i int_set(std::integral_constant<std::size_t, 8>, T v)
+        {
+            return _mm_set1_epi64x(v);
+        }
+
         inline __m128i cmpeq_epi64_sse2(__m128i lhs, __m128i rhs)
         {
             __m128i tmp1 = _mm_cmpeq_epi32(lhs, rhs);
@@ -262,10 +286,7 @@ namespace xsimd
 
     template <class T, std::size_t N>
     inline sse_int_batch<T, N>::sse_int_batch(T i)
-        : m_value(sizeof(T) == 1 ? _mm_set1_epi8(i)  :
-                  sizeof(T) == 2 ? _mm_set1_epi16(i) :
-                  sizeof(T) == 4 ? _mm_set1_epi32(i) : 
-                                   _mm_set1_epi64x(i))
+        : m_value(sse_detail::int_set(std::integral_constant<std::size_t, sizeof(T)>{}, i))
     {
     }
 
