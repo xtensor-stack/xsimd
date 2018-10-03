@@ -155,6 +155,30 @@ namespace xsimd
             // _mm512_setr_epi64 is a macro, preventing parameter pack expansion ...
             return _mm512_setr_epi64(t0, t1, t2, t3, t4, t5, t6, t7);
         }
+
+        template <class T>
+        inline __m512i int_set(std::integral_constant<std::size_t, 1>, T v)
+        {
+            return _mm512_set1_epi8(v);
+        }
+
+        template <class T>
+        inline __m512i int_set(std::integral_constant<std::size_t, 2>, T v)
+        {
+            return _mm512_set1_epi16(v);
+        }
+
+        template <class T>
+        inline __m512i int_set(std::integral_constant<std::size_t, 4>, T v)
+        {
+            return _mm512_set1_epi32(v);
+        }
+
+        template <class T>
+        inline __m512i int_set(std::integral_constant<std::size_t, 8>, T v)
+        {
+            return _mm512_set1_epi64(v);
+        }
     }
 
     template <class T, std::size_t N>
@@ -164,9 +188,7 @@ namespace xsimd
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>::avx512_int_batch(T i)
-        : m_value(sizeof(T) == 1 ? _mm512_set1_epi8(i)  :
-                  sizeof(T) == 2 ? _mm512_set1_epi16(i) :
-                  sizeof(T) == 4 ? _mm512_set1_epi32(i) : _mm512_set1_epi64(i))
+        : m_value(avx512_detail::int_set(std::integral_constant<std::size_t, sizeof(T)>{}, i))
     {
     }
 

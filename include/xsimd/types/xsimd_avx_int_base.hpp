@@ -124,6 +124,30 @@ namespace xsimd
         {
             return _mm256_setr_epi64x(args...);
         }
+
+        template <class T>
+        inline __m256i int_set(std::integral_constant<std::size_t, 1>, T v)
+        {
+            return _mm256_set1_epi8(v);
+        }
+
+        template <class T>
+        inline __m256i int_set(std::integral_constant<std::size_t, 2>, T v)
+        {
+            return _mm256_set1_epi16(v);
+        }
+
+        template <class T>
+        inline __m256i int_set(std::integral_constant<std::size_t, 4>, T v)
+        {
+            return _mm256_set1_epi32(v);
+        }
+
+        template <class T>
+        inline __m256i int_set(std::integral_constant<std::size_t, 8>, T v)
+        {
+            return _mm256_set1_epi64x(v);
+        }
     }
 
     /*****************************************
@@ -295,10 +319,7 @@ namespace xsimd
 
     template <class T, std::size_t N>
     inline avx_int_batch<T, N>::avx_int_batch(T i)
-        : m_value(sizeof(T) == 1 ? _mm256_set1_epi8(i)  :
-                  sizeof(T) == 2 ? _mm256_set1_epi16(i) :
-                  sizeof(T) == 4 ? _mm256_set1_epi32(i) : 
-                                   _mm256_set1_epi64x(i))
+        : m_value(avx_detail::int_set(std::integral_constant<std::size_t, sizeof(T)>{}, i))
     {
     }
 
