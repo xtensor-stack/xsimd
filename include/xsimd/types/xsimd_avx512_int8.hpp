@@ -38,7 +38,7 @@ namespace xsimd
     };
 
 #if defined(XSIMD_AVX512BW_AVAILABLE)
-    
+
     template <>
     class batch_bool<int8_t, 64> :
         public batch_bool_avx512<__mmask64, batch_bool<int8_t, 64>>,
@@ -351,7 +351,7 @@ namespace xsimd
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epi8_mask(lhs, rhs, _MM_CMPINT_EQ);
+                return _mm512_cmpeq_epi8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(eq, lhs, rhs);
             #endif
@@ -360,7 +360,7 @@ namespace xsimd
             static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epi8_mask(lhs, rhs, _MM_CMPINT_NE);
+                return _mm512_cmpneq_epi8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(neq, lhs, rhs);
             #endif
@@ -369,7 +369,7 @@ namespace xsimd
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epi8_mask(lhs, rhs, _MM_CMPINT_LT);
+                return _mm512_cmplt_epi8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(lt, lhs, rhs);
             #endif
@@ -378,7 +378,7 @@ namespace xsimd
             static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epi8_mask(lhs, rhs, _MM_CMPINT_LE);
+                return _mm512_cmple_epi8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(lte, lhs, rhs);
             #endif
@@ -415,7 +415,7 @@ namespace xsimd
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epu8_mask(lhs, rhs, _MM_CMPINT_EQ);
+                return _mm512_cmpeq_epu8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(eq, lhs, rhs);
             #endif
@@ -424,7 +424,7 @@ namespace xsimd
             static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epu8_mask(lhs, rhs, _MM_CMPINT_NE);
+                return _mm512_cmpneq_epu8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(neq, lhs, rhs);
             #endif
@@ -433,7 +433,7 @@ namespace xsimd
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epu8_mask(lhs, rhs, _MM_CMPINT_LT);
+                return _mm512_cmplt_epu8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(lt, lhs, rhs);
             #endif
@@ -442,7 +442,7 @@ namespace xsimd
             static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_cmp_epu8_mask(lhs, rhs, _MM_CMPINT_LE);
+                return _mm512_cmple_epu8_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION(lte, lhs, rhs);
             #endif
@@ -465,7 +465,7 @@ namespace xsimd
     }
 
     XSIMD_DEFINE_LOAD_STORE_INT8(int8_t, 64, 64)
-    
+
     inline batch<uint8_t, 64> operator<<(const batch<uint8_t, 64>& lhs, int32_t rhs)
     {
         return avx_detail::shift_impl([](uint8_t val, int32_t rhs) {

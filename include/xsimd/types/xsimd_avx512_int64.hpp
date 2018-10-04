@@ -30,7 +30,7 @@ namespace xsimd
     };
 
     template <>
-    class batch_bool<int64_t, 8> : 
+    class batch_bool<int64_t, 8> :
         public batch_bool_avx512<__mmask8, batch_bool<int64_t, 8>>,
         public simd_batch_bool<batch_bool<int64_t, 8>>
     {
@@ -318,22 +318,22 @@ namespace xsimd
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi64_mask(lhs, rhs, _MM_CMPINT_EQ);
+                return _mm512_cmpeq_epi64_mask(lhs, rhs);
             }
 
             static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi64_mask(lhs, rhs, _MM_CMPINT_NE);
+                return _mm512_cmpneq_epi64_mask(lhs, rhs);
             }
 
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi64_mask(lhs, rhs, _MM_CMPINT_LT);
+                return _mm512_cmplt_epi64_mask(lhs, rhs);
             }
 
             static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi64_mask(lhs, rhs, _MM_CMPINT_LE);
+                return _mm512_cmple_epi64_mask(lhs, rhs);
             }
 
             static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
