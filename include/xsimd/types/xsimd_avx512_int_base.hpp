@@ -10,6 +10,7 @@
 #define XSIMD_AVX_INT512_BASE_HPP
 
 #include "xsimd_base.hpp"
+#include "xsimd_utils.hpp"
 
 namespace xsimd
 {
@@ -22,11 +23,11 @@ namespace xsimd
     __m512i result = _mm512_castsi256_si512(res_low);                                                 \
     return _mm512_inserti64x4(result, res_high, 1)                                                    \
 
-#define XSIMD_APPLY_AVX2_FUNCTION(func, avx_lhs, avx_rhs)                                             \
+#define XSIMD_APPLY_AVX2_FUNCTION(N, func, avx_lhs, avx_rhs)                                          \
     XSIMD_SPLIT_AVX512(avx_lhs);                                                                      \
     XSIMD_SPLIT_AVX512(avx_rhs);                                                                      \
-    __m256i res_low = detail::batch_kernel<value_type, 32> :: func (avx_lhs##_low, avx_rhs##_low);    \
-    __m256i res_high = detail::batch_kernel<value_type, 32> :: func (avx_lhs##_high, avx_rhs##_high); \
+    __m256i res_low = detail::batch_kernel<value_type, N> :: func (avx_lhs##_low, avx_rhs##_low);     \
+    __m256i res_high = detail::batch_kernel<value_type, N> :: func (avx_lhs##_high, avx_rhs##_high);  \
     XSIMD_RETURN_MERGED_AVX(res_low, res_high);
 
     template <class T, std::size_t N>
@@ -80,27 +81,8 @@ namespace xsimd
 
     namespace avx512_detail
     {
-        // From stackoverflow: https://stackoverflow.com/a/15908420/1347553
-        template<unsigned... Is>
-        struct rseq
-        {
-            using type = rseq;
-        };
-
-        template<unsigned I, unsigned... Is>
-        struct rgen_seq
-            : rgen_seq<I - 1, Is..., I - 1>
-        {
-        };
-
-        template<unsigned... Is>
-        struct rgen_seq<0, Is...>
-            : rseq<Is...>
-        {
-        };
-
-        template<class Tup, unsigned... Is>
-        __m512i revert_args_set_epi8(Tup&& t, rseq<Is...>)
+        template<class Tup, std::size_t... Is>
+        __m512i revert_args_set_epi8(Tup&& t, detail::index_sequence<Is...>)
         {
             // funny, this instruction is not yet implemented in clang or gcc (will come in future versions)
 #if defined(__clang__) || __GNUC__
@@ -113,8 +95,8 @@ namespace xsimd
 #endif
         }
 
-        template<class Tup, unsigned... Is>
-        __m512i revert_args_set_epi16(Tup&& t, rseq<Is...>)
+        template<class Tup, std::size_t... Is>
+        __m512i revert_args_set_epi16(Tup&& t, detail::index_sequence<Is...>)
         {
 #if defined(__clang__) || __GNUC__
             return __extension__ (__m512i)(__v32hi)
@@ -129,13 +111,13 @@ namespace xsimd
         template <class... Args>
         __m512i int_init(std::integral_constant<std::size_t, 1>, Args... args)
         {
-            return revert_args_set_epi8(std::forward_as_tuple(args...), rgen_seq<sizeof...(Args)>{});
+            return revert_args_set_epi8(std::forward_as_tuple(args...), detail::make_index_sequence<sizeof...(Args)>{});
         }
 
         template <class... Args>
         __m512i int_init(std::integral_constant<std::size_t, 2>, Args... args)
         {
-            return revert_args_set_epi16(std::forward_as_tuple(args...), rgen_seq<sizeof...(Args)>{});
+            return revert_args_set_epi16(std::forward_as_tuple(args...), detail::make_index_sequence<sizeof...(Args)>{});
         }
 
         inline __m512i int_init(std::integral_constant<std::size_t, 4>,
@@ -312,4 +294,3 @@ namespace xsimd
 }
 
 #endif
-

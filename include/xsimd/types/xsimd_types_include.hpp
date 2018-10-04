@@ -43,6 +43,7 @@
 #include "xsimd_avx512_double.hpp"
 #include "xsimd_avx512_float.hpp"
 #include "xsimd_avx512_int8.hpp"
+#include "xsimd_avx512_int16.hpp"
 #include "xsimd_avx512_int32.hpp"
 #include "xsimd_avx512_int64.hpp"
 #include "xsimd_avx512_complex.hpp"

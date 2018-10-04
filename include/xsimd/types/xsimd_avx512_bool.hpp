@@ -103,7 +103,7 @@ namespace xsimd
         {
             return (T(init[IX]) << IX) | get_init_value_impl<T, I...>(init);
         }
-        
+
         template <class T, std::size_t... I>
         constexpr T get_init_value(const bool (&init)[sizeof(T) * 8], detail::index_sequence<I...>)
         {
@@ -150,6 +150,12 @@ namespace xsimd
         struct mask_type<16>
         {
             using type = __mmask16;
+        };
+
+        template <>
+        struct mask_type<32>
+        {
+            using type = __mmask32;
         };
 
         template <>
@@ -214,7 +220,7 @@ namespace xsimd
     /*********************************************
      * avx512_fallback_batch_bool implementation *
      *********************************************/
-    
+
     template <class T, std::size_t N>
     inline avx512_fallback_batch_bool<T, N>::avx512_fallback_batch_bool()
     {

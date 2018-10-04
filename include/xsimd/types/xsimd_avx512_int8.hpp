@@ -15,6 +15,9 @@
 namespace xsimd
 {
 
+#define XSIMD_APPLY_AVX2_FUNCTION_INT8(func, avx_lhs, avx_rhs) \
+    XSIMD_APPLY_AVX2_FUNCTION(32, func, avx_lhs, avx_rhs)
+
     /****************************
      * batch_bool<int8 / int16> *
      ****************************/
@@ -218,7 +221,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_add_epi8(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(add, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(add, lhs, rhs);
             #endif
             }
 
@@ -227,7 +230,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_sub_epi8(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(sub, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(sub, lhs, rhs);
             #endif
             }
 
@@ -238,13 +241,13 @@ namespace xsimd
                 batch_type lower = _mm512_slli_epi16(_mm512_mullo_epi16(_mm512_srli_epi16(lhs, 8), _mm512_srli_epi16(rhs, 8)), 8);
                 return _mm512_or_si512(upper, lower);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(mul, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(mul, lhs, rhs);
             #endif
             }
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
-                XSIMD_APPLY_AVX2_FUNCTION(div, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(div, lhs, rhs);
             }
 
             static batch_type mod(const batch_type& lhs, const batch_type& rhs)
@@ -335,7 +338,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_min_epi8(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(min, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(min, lhs, rhs);
             #endif
             }
 
@@ -344,7 +347,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_max_epi8(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(max, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(max, lhs, rhs);
             #endif
             }
 
@@ -353,7 +356,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmpeq_epi8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(eq, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(eq, lhs, rhs);
             #endif
             }
 
@@ -362,7 +365,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmpneq_epi8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(neq, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(neq, lhs, rhs);
             #endif
             }
 
@@ -371,7 +374,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmplt_epi8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(lt, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(lt, lhs, rhs);
             #endif
             }
 
@@ -380,7 +383,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmple_epi8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(lte, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(lte, lhs, rhs);
             #endif
             }
         };
@@ -399,7 +402,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_min_epu8(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(min, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(min, lhs, rhs);
             #endif
             }
 
@@ -408,7 +411,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_max_epu8(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(max, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(max, lhs, rhs);
             #endif
             }
 
@@ -417,7 +420,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmpeq_epu8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(eq, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(eq, lhs, rhs);
             #endif
             }
 
@@ -426,7 +429,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmpneq_epu8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(neq, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(neq, lhs, rhs);
             #endif
             }
 
@@ -435,7 +438,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmplt_epu8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(lt, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(lt, lhs, rhs);
             #endif
             }
 
@@ -444,7 +447,7 @@ namespace xsimd
             #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_cmple_epu8_mask(lhs, rhs);
             #else
-                XSIMD_APPLY_AVX2_FUNCTION(lte, lhs, rhs);
+                XSIMD_APPLY_AVX2_FUNCTION_INT8(lte, lhs, rhs);
             #endif
             }
         };
@@ -481,6 +484,8 @@ namespace xsimd
     }
 
     XSIMD_DEFINE_LOAD_STORE_INT8(uint8_t, 64, 64)
+
+#undef XSIMD_APPLY_AVX2_FUNCTION_INT8
 }
 
 #endif
