@@ -132,6 +132,17 @@ namespace xsimd
         template <class B, class T = typename B::value_type>
         struct expm1_kernel;
 
+        template <class T, std::size_t N>
+        inline batch<T, N> expm1_real_impl(const batch<T, N>& x)
+        {
+            using b_type = batch<T, N>;
+            return select(x < logeps<b_type>(),
+                          b_type(-1.),
+                          select(x > maxlog<b_type>(),
+                                 infinity<b_type>(),
+                                 expm1_kernel<b_type, T>::compute_impl(x)));
+        }
+
         template <class B>
         struct expm1_kernel<B, float>
         {
@@ -144,7 +155,7 @@ namespace xsimd
              * (See copy at http://boost.org/LICENSE_1_0.txt)
              * ====================================================
              */
-            static inline B compute(const B& a)
+            static inline B compute_impl(const B& a)
             {
                 B k = nearbyint(invlog_2<B>() * a);
                 B x = fnma(k, log_2hi<B>(), a);
@@ -165,6 +176,11 @@ namespace xsimd
                 B y = B(1.) - two2mk - (e - x);
                 return ldexp(y, ik);
             }
+
+            static inline B compute(const B& a)
+            {
+                return expm1_real_impl(a);
+            }
         };
 
         template <class B>
@@ -179,7 +195,7 @@ namespace xsimd
              * (See copy at http://boost.org/LICENSE_1_0.txt)
              * ====================================================
              */
-            static inline B compute(const B& a)
+            static inline B compute_impl(const B& a)
             {
                 B k = nearbyint(invlog_2<B>() * a);
                 B hi = fnma(k, log_2hi<B>(), a);
@@ -205,6 +221,11 @@ namespace xsimd
                 B y = select(k < B(20.), ct1, ct2);
                 return ldexp(y, ik);
             }
+
+            static inline B compute(const B& a)
+            {
+                return expm1_real_impl(a);
+            }
         };
     }
 
@@ -212,11 +233,7 @@ namespace xsimd
     inline batch<T, N> expm1(const batch<T, N>& x)
     {
         using b_type = batch<T, N>;
-        return select(x < logeps<b_type>(),
-                      b_type(-1.),
-                      select(x > maxlog<b_type>(),
-                             infinity<b_type>(),
-                             detail::expm1_kernel<b_type, T>::compute(x)));
+        return detail::expm1_kernel<b_type, T>::compute(x);
     }
 }
 

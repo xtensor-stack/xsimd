@@ -77,6 +77,46 @@ namespace xsimd
         };
 #endif
 
+        /*********
+         * expm1 *
+         *********/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> expm1_complex_impl(const batch<T, N>& z)
+        {
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            r_type isin = sin(z.imag());
+            r_type rem1 = expm1(z.real());
+            r_type re = rem1 + r_type(1.);
+            r_type si = sin(z.imag() * r_type(0.5));
+            return batch<T, N>(rem1 - r_type(2.) * re * si * si, re * isin);
+        }
+
+        template <class T, std::size_t N>
+        struct expm1_kernel<batch<std::complex<T>, N>, std::complex<T>>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return expm1_complex_impl(z);
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct expm1_kernel<batch<xtl::xcomplex<T, T, i3ec>, N>, xtl::xcomplex<T, T, i3ec>>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return expm1_complex_impl(z);
+            }
+        };
+#endif
+
         /*******
          * log *
          *******/

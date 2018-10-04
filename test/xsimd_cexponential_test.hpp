@@ -29,6 +29,7 @@ namespace xsimd
 
         res_type exp_input;
         res_type exp_res;
+        res_type expm1_res;
 
         res_type log_input;
         res_type log_res;
@@ -46,6 +47,7 @@ namespace xsimd
         size_t nb_input = N * 10000;
         exp_input.resize(nb_input);
         exp_res.resize(nb_input);
+        expm1_res.resize(nb_input);
         log_input.resize(nb_input);
         log_res.resize(nb_input);
         log10_res.resize(nb_input);
@@ -54,6 +56,7 @@ namespace xsimd
             exp_input[i] = value_type(real_value_type(-1.5) + i * real_value_type(3) / nb_input,
                                       real_value_type(-1.3) + i * real_value_type(2) / nb_input);
             exp_res[i] = exp(exp_input[i]);
+            expm1_res[i] = expm1(exp_input[i]);
             log_input[i] = value_type(real_value_type(0.001 + i * 100 / nb_input),
                                       real_value_type(0.002 + i * 110 / nb_input));
             log_res[i] = log(log_input[i]);
@@ -100,6 +103,16 @@ namespace xsimd
         success = success && tmp_success;
         success &= check_almost_equal(topic, xsimd::exp(tester.exp_input[0]), tester.exp_res[0], out);
 
+        topic = "cexpm1 : ";
+        for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
+        {
+            tester.load_vec(exp_input, tester.exp_input, i);
+            vres = expm1(exp_input);
+            tester.store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(topic, res, tester.expm1_res, out);
+        success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::expm1(tester.exp_input[0]), tester.expm1_res[0], out);
 
         topic = "clog   : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)

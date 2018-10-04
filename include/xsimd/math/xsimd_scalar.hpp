@@ -114,12 +114,33 @@ namespace xsimd
         return std::pow(T(10), x);
     }
 
+    namespace detail
+    {
+        template <class C>
+        inline C expm1_complex_scalar_impl(const C& val)
+        {
+            using T = typename C::value_type;
+            T isin = sin(val.imag());
+            T rem1 = expm1(val.real());
+            T re = rem1 + T(1.);
+            T si = sin(val.imag() * T(0.5));
+            return std::complex<T>(rem1 - T(2.) * re *si * si, re * isin);
+        }
+    }
+
     template <class T>
     inline std::complex<T> expm1(const std::complex<T>& val)
     {
-        // FIXME: probably not accurate
-        return std::exp(val) - 1;
+        return detail::expm1_complex_scalar_impl(val);
     }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> expm1(const xtl::xcomplex<T, T, i3ec>& val)
+    {
+        return detail::expm1_complex_scalar_impl(val);
+    }
+#endif
 
     template <class T0, class T1>
     inline typename std::enable_if<std::is_integral<T1>::value, T0>::type
