@@ -186,6 +186,48 @@ namespace xsimd
         };
 #endif
 
+        /*********
+         * log1p *
+         *********/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> log1p_complex_impl(const batch<T, N>& z)
+        {
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            b_type u = b_type(1.) + z;
+            b_type logu = log(u);
+            return select(u == b_type(1.),
+                          z,
+                          select(u.real() <= r_type(0.),
+                                 logu,
+                                 logu * z / (u - b_type(1.))));
+        }
+
+        template <class T, std::size_t N>
+        struct log1p_kernel<batch<std::complex<T>, N>, std::complex<T>>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return log1p_complex_impl(z);
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct log1p_kernel<batch<xtl::xcomplex<T, T, i3ec>, N>, xtl::xcomplex<T, T, i3ec>>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return log1p_complex_impl(z);
+            }
+        };
+#endif
+
         /*******
          * pow *
          *******/

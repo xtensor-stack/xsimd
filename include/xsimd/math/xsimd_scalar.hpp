@@ -220,12 +220,30 @@ namespace xsimd
         return std::log(val) / std::log(T(2));
     }
 
+    namespace detail
+    {
+        template <class C>
+        inline C log1p_complex_scalar_impl(const C& val)
+        {
+            using T = typename C::value_type;
+            C u = C(1.) + val;
+            return u == C(1.) ? val : (u.real() <= T(0.) ? log(u) : log(u) * val / (u - C(1.)));
+        }
+    }
+
     template <class T>
     inline std::complex<T> log1p(const std::complex<T>& val)
     {
-        return std::log(val + 1);
+        return detail::log1p_complex_scalar_impl(val);
     }
 
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> log1p(const xtl::xcomplex<T, T, i3ec>& val)
+    {
+        return detail::log1p_complex_scalar_impl(val);
+    }
+#endif
 
     template <class T0, class T1>
     inline auto min(T0 const &self, T1 const &other) ->
