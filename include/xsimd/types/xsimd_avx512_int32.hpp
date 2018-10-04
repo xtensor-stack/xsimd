@@ -29,7 +29,7 @@ namespace xsimd
     };
 
     template <>
-    class batch_bool<int32_t, 16> : 
+    class batch_bool<int32_t, 16> :
         public batch_bool_avx512<__mmask16, batch_bool<int32_t, 16>>,
         public simd_batch_bool<batch_bool<int32_t, 16>>
     {
@@ -143,7 +143,7 @@ namespace xsimd
     //XSIMD_DEFINE_LOAD_STORE(int32_t, 16, uint32_t, 64)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 16, int64_t, 64)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 16, uint64_t, 64)
-   
+
     inline batch<int32_t, 16>& batch<int32_t, 16>::load_aligned(const float* src)
     {
         this->m_value = _mm512_cvtps_epi32(_mm512_load_ps(src));
@@ -293,22 +293,22 @@ namespace xsimd
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_EQ);
+                return _mm512_cmpeq_epi32_mask(lhs, rhs);
             }
 
             static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_NE);
+                return _mm512_cmpneq_epi32_mask(lhs, rhs);
             }
 
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_LT);
+                return _mm512_cmplt_epi32_mask(lhs, rhs);
             }
 
             static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_cmp_epi32_mask(lhs, rhs, _MM_CMPINT_LE);
+                return _mm512_cmple_epi32_mask(lhs, rhs);
             }
 
             static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
