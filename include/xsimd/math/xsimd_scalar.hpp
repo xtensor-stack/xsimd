@@ -217,8 +217,16 @@ namespace xsimd
     template <class T>
     std::complex<T> log2(const std::complex<T>& val)
     {
-        return std::log(val) / std::log(T(2));
+        return log(val) / log(T(2));
     }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> log2(const xtl::xcomplex<T, T, i3ec>& val)
+    {
+        return log(val) / log(T(2));
+    }
+#endif
 
     namespace detail
     {

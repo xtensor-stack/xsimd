@@ -151,16 +151,49 @@ namespace xsimd
         };
 #endif
 
+        /*********************
+         * logN_complex_impl *
+         *********************/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> logN_complex_impl(const batch<T, N>& z, typename batch<T, N>::real_value_type base)
+        {
+            using b_type = batch<T, N>;
+            using rv_type = typename b_type::real_value_type;
+            return log(z) / b_type(rv_type(base));
+        }
+
+        /********
+         * log2 *
+         ********/
+
+        template <class T, std::size_t N>
+        struct log2_kernel<batch<std::complex<T>, N>, std::complex<T>>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return logN_complex_impl(z, std::log(2));
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct log2_kernel<batch<xtl::xcomplex<T, T, i3ec>, N>, xtl::xcomplex<T, T, i3ec>>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return logN_complex_impl(z, std::log(2));
+            }
+        };
+#endif
+
         /*********
          * log10 *
          *********/
-
-        template <class T, std::size_t N>
-        inline batch<T, N> log10_complex_impl(const batch<T, N>& z)
-        {
-            using real_value_type = typename batch<T, N>::real_value_type;
-            return log(z) / batch<T, N>(real_value_type(std::log(10)));
-        }
 
         template <class T, std::size_t N>
         struct log10_kernel<batch<std::complex<T>, N>, std::complex<T>>
@@ -169,7 +202,7 @@ namespace xsimd
 
             static inline batch_type compute(const batch_type& z)
             {
-                return log10_complex_impl(z);
+                return logN_complex_impl(z, std::log(10));
             }
         };
 
@@ -181,7 +214,7 @@ namespace xsimd
 
             static inline batch_type compute(const batch_type& z)
             {
-                return log10_complex_impl(z);
+                return logN_complex_impl(z, std::log(10));
             }
         };
 #endif

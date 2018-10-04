@@ -33,7 +33,9 @@ namespace xsimd
 
         res_type log_input;
         res_type log_res;
+        res_type log2_res;
         res_type log10_res;
+        res_type log1p_res;
 
         simd_cexponential_tester(const std::string& n);
     };
@@ -50,7 +52,9 @@ namespace xsimd
         expm1_res.resize(nb_input);
         log_input.resize(nb_input);
         log_res.resize(nb_input);
+        log2_res.resize(nb_input);
         log10_res.resize(nb_input);
+        log1p_res.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
             exp_input[i] = value_type(real_value_type(-1.5) + i * real_value_type(3) / nb_input,
@@ -60,7 +64,9 @@ namespace xsimd
             log_input[i] = value_type(real_value_type(0.001 + i * 100 / nb_input),
                                       real_value_type(0.002 + i * 110 / nb_input));
             log_res[i] = log(log_input[i]);
+            log2_res[i] = log2(log_input[i]);
             log10_res[i] = log10(log_input[i]);
+            log1p_res[i] = log1p(log_input[i]);
         }
     }
 
@@ -125,6 +131,17 @@ namespace xsimd
         success = success && tmp_success;
         success &= check_almost_equal(topic, xsimd::log(tester.log_input[0]), tester.log_res[0], out);
 
+        topic = "clog2  : ";
+        for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
+        {
+            tester.load_vec(log_input, tester.log_input, i);
+            vres = log2(log_input);
+            tester.store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(topic, res, tester.log2_res, out);
+        success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::log2(tester.log_input[0]), tester.log2_res[0], out);
+
         topic = "clog10 : ";
         for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
         {
@@ -135,6 +152,17 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.log10_res, out);
         success = success && tmp_success;
         success &= check_almost_equal(topic, xsimd::log10(tester.log_input[0]), tester.log10_res[0], out);
+
+        topic = "clog1p : ";
+        for (size_t i = 0; i < tester.log_input.size(); i += tester.size)
+        {
+            tester.load_vec(log_input, tester.log_input, i);
+            vres = log1p(log_input);
+            tester.store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(topic, res, tester.log1p_res, out);
+        success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::log1p(tester.log_input[0]), tester.log1p_res[0], out);
 
         return success;
     }
