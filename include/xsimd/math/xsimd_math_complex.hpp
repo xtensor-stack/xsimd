@@ -492,7 +492,9 @@ namespace xsimd
             num = x2 + num * num;
             r_type den = y - one;
             den = x2 + den * den;
-            b_type res(w, 0.25 * log(num / den));
+            b_type res = select((x == r_type(0.)) && (y == r_type(1.)),
+                                b_type(r_type(0.), infinity<r_type>()),
+                                b_type(w, 0.25 * log(num / den)));
             return res;
         }
 
