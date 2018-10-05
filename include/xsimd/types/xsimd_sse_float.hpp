@@ -394,9 +394,17 @@ namespace xsimd
 
     inline void batch<float, 4>::store_aligned(uint16_t* dst) const
     {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
         __m128i tmp = _mm_cvtps_epi32(m_value);
         __m128i tmp1 = _mm_packus_epi32(tmp, _mm_set1_epi32(0));
         _mm_storel_epi64((__m128i*)dst, tmp1);
+#else
+        alignas(16) float tmp[4];
+        _mm_store_si128((__m128i*)tmp, src);
+        unroller<4>([&](std::size_t i){
+            dst[i] = static_cast<uint16_t>(tmp[i]);
+        });
+#endif
     }
 
     inline void batch<float, 4>::store_unaligned(uint16_t* dst) const
