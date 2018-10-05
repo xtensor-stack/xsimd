@@ -39,6 +39,46 @@ namespace xsimd
 
     namespace detail
     {
+        /********
+         * sign *
+         ********/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> sign_complex_impl(const batch<T, N>& z)
+        {
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            auto rz = z.real();
+            auto iz = z.imag();
+            return select(rz != r_type(0.),
+                          b_type(sign(rz)),
+                          b_type(sign(iz)));
+        }
+
+        template <class T, std::size_t N>
+        struct sign_impl<batch<std::complex<T>, N>, false>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return sign_complex_impl(z);
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct sign_impl<batch<xtl::xcomplex<T, T, i3ec>, N>, false>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return sign_complex_impl(z);
+            }
+        };
+#endif
+
         /*******
          * exp *
          *******/
@@ -77,6 +117,46 @@ namespace xsimd
         };
 #endif
 
+        /*********
+         * expm1 *
+         *********/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> expm1_complex_impl(const batch<T, N>& z)
+        {
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            r_type isin = sin(z.imag());
+            r_type rem1 = expm1(z.real());
+            r_type re = rem1 + r_type(1.);
+            r_type si = sin(z.imag() * r_type(0.5));
+            return batch<T, N>(rem1 - r_type(2.) * re * si * si, re * isin);
+        }
+
+        template <class T, std::size_t N>
+        struct expm1_kernel<batch<std::complex<T>, N>, std::complex<T>>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return expm1_complex_impl(z);
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct expm1_kernel<batch<xtl::xcomplex<T, T, i3ec>, N>, xtl::xcomplex<T, T, i3ec>>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return expm1_complex_impl(z);
+            }
+        };
+#endif
+
         /*******
          * log *
          *******/
@@ -111,16 +191,49 @@ namespace xsimd
         };
 #endif
 
+        /*********************
+         * logN_complex_impl *
+         *********************/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> logN_complex_impl(const batch<T, N>& z, typename batch<T, N>::real_value_type base)
+        {
+            using b_type = batch<T, N>;
+            using rv_type = typename b_type::real_value_type;
+            return log(z) / b_type(rv_type(base));
+        }
+
+        /********
+         * log2 *
+         ********/
+
+        template <class T, std::size_t N>
+        struct log2_kernel<batch<std::complex<T>, N>, std::complex<T>>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return logN_complex_impl(z, std::log(2));
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct log2_kernel<batch<xtl::xcomplex<T, T, i3ec>, N>, xtl::xcomplex<T, T, i3ec>>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return logN_complex_impl(z, std::log(2));
+            }
+        };
+#endif
+
         /*********
          * log10 *
          *********/
-
-        template <class T, std::size_t N>
-        inline batch<T, N> log10_complex_impl(const batch<T, N>& z)
-        {
-            using real_value_type = typename batch<T, N>::real_value_type;
-            return log(z) / batch<T, N>(real_value_type(std::log(10)));
-        }
 
         template <class T, std::size_t N>
         struct log10_kernel<batch<std::complex<T>, N>, std::complex<T>>
@@ -129,7 +242,7 @@ namespace xsimd
 
             static inline batch_type compute(const batch_type& z)
             {
-                return log10_complex_impl(z);
+                return logN_complex_impl(z, std::log(10));
             }
         };
 
@@ -141,7 +254,49 @@ namespace xsimd
 
             static inline batch_type compute(const batch_type& z)
             {
-                return log10_complex_impl(z);
+                return logN_complex_impl(z, std::log(10));
+            }
+        };
+#endif
+
+        /*********
+         * log1p *
+         *********/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> log1p_complex_impl(const batch<T, N>& z)
+        {
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            b_type u = b_type(1.) + z;
+            b_type logu = log(u);
+            return select(u == b_type(1.),
+                          z,
+                          select(u.real() <= r_type(0.),
+                                 logu,
+                                 logu * z / (u - b_type(1.))));
+        }
+
+        template <class T, std::size_t N>
+        struct log1p_kernel<batch<std::complex<T>, N>, std::complex<T>>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return log1p_complex_impl(z);
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct log1p_kernel<batch<xtl::xcomplex<T, T, i3ec>, N>, xtl::xcomplex<T, T, i3ec>>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return log1p_complex_impl(z);
             }
         };
 #endif

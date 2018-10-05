@@ -114,12 +114,33 @@ namespace xsimd
         return std::pow(T(10), x);
     }
 
+    namespace detail
+    {
+        template <class C>
+        inline C expm1_complex_scalar_impl(const C& val)
+        {
+            using T = typename C::value_type;
+            T isin = sin(val.imag());
+            T rem1 = expm1(val.real());
+            T re = rem1 + T(1.);
+            T si = sin(val.imag() * T(0.5));
+            return std::complex<T>(rem1 - T(2.) * re *si * si, re * isin);
+        }
+    }
+
     template <class T>
     inline std::complex<T> expm1(const std::complex<T>& val)
     {
-        // FIXME: probably not accurate
-        return std::exp(val) - 1;
+        return detail::expm1_complex_scalar_impl(val);
     }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> expm1(const xtl::xcomplex<T, T, i3ec>& val)
+    {
+        return detail::expm1_complex_scalar_impl(val);
+    }
+#endif
 
     template <class T0, class T1>
     inline typename std::enable_if<std::is_integral<T1>::value, T0>::type
@@ -175,36 +196,80 @@ namespace xsimd
     }
 
     template <class T>
-    inline double sign(const T&v)
+    inline T sign(const T& v)
     {
-        return v < 0 ? -1. : v == 0 ? 0. : 1.;
+        return v < T(0) ? T(-1.) : v == T(0) ? T(0.) : T(1.);
+    }
+
+    namespace detail
+    {
+        template <class C>
+        inline C sign_complex_scalar_impl(const C& v)
+        {
+            using value_type = typename C::value_type;
+            if (v.real())
+            {
+                return C(sign(v.real()), value_type(0));
+            }
+            else
+            {
+                return C(sign(v.imag()), value_type(0));
+            }
+        }
     }
 
     template <class T>
     inline std::complex<T> sign(const std::complex<T>& v)
     {
-        if (v.real())
-        {
-            return {sign(v.real()), 0};
-        }
-        else
-        {
-            return {sign(v.imag()), 0};
-        }
+        return detail::sign_complex_scalar_impl(v);
     }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> sign(const xtl::xcomplex<T, T, i3ec>& v)
+    {
+        return detail::sign_complex_scalar_impl(v);
+    }
+#endif
 
     template <class T>
     std::complex<T> log2(const std::complex<T>& val)
     {
-        return std::log(val) / std::log(T(2));
+        return log(val) / log(T(2));
+    }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> log2(const xtl::xcomplex<T, T, i3ec>& val)
+    {
+        return log(val) / log(T(2));
+    }
+#endif
+
+    namespace detail
+    {
+        template <class C>
+        inline C log1p_complex_scalar_impl(const C& val)
+        {
+            using T = typename C::value_type;
+            C u = C(1.) + val;
+            return u == C(1.) ? val : (u.real() <= T(0.) ? log(u) : log(u) * val / (u - C(1.)));
+        }
     }
 
     template <class T>
     inline std::complex<T> log1p(const std::complex<T>& val)
     {
-        return std::log(val + 1);
+        return detail::log1p_complex_scalar_impl(val);
     }
 
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> log1p(const xtl::xcomplex<T, T, i3ec>& val)
+    {
+        return detail::log1p_complex_scalar_impl(val);
+    }
+#endif
 
     template <class T0, class T1>
     inline auto min(T0 const &self, T1 const &other) ->

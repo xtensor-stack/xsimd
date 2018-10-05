@@ -61,7 +61,7 @@ namespace xsimd
          * ====================================================
          */
 
-        template <class B, bool cond = std::is_floating_point<typename B::value_type>::value>
+        template <class B, bool cond = std::is_integral<typename B::value_type>::value>
         struct sign_impl
         {
             static inline B compute(const B& a)
@@ -71,7 +71,7 @@ namespace xsimd
         };
 
         template <class B>
-        struct sign_impl<B, true>
+        struct sign_impl<B, false>
         {
             static inline B compute(const B& a)
             {
