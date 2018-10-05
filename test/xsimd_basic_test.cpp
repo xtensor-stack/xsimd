@@ -487,6 +487,20 @@ TEST(xsimd, avx512_uint8_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx512_int16_basic)
+{
+    std::ofstream out("log/avx512_int16_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int16_t, 32, 64>(out, "avx512 int16");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_uint16_basic)
+{
+    std::ofstream out("log/avx512_uint16_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<uint16_t, 32, 64>(out, "avx512 uint16");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_int32_basic)
 {
     std::ofstream out("log/avx512_int32_basic.log", std::ios_base::out);
