@@ -374,7 +374,7 @@ namespace xsimd
         _mm_storel_epi64((__m128i*)dst, tmp1);
 #else
         alignas(16) double tmp[2];
-        _mm_store_si128((__m128i*)tmp, m_value);
+        _mm_store_pd(tmp, m_value);
         unroller<2>([&](std::size_t i){
             dst[i] = static_cast<uint16_t>(tmp[i]);
         });
