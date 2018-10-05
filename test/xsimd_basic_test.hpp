@@ -649,12 +649,13 @@ namespace xsimd
         out << dash << name_shift << '-' << shift << dash << std::endl
             << std::endl;
 
-        using return_type1 = simd_return_type<vector_type, vector_type>;
+        /*using return_type1 = simd_return_type<vector_type, vector_type>;
         using return_type2 = simd_return_type<vector_type, vector_bool_type>;
-        using return_type3 = simd_return_type<vector_bool_type, vector_bool_type>;
+        using return_type3 = simd_return_type<vector_bool_type, vector_bool_type>;*/
+        using return_type1 = simd_return_type<value_type, value_type, vector_type::size>;
+        using return_type2 = simd_return_type<bool, value_type, vector_type::size>;
         success = success && std::is_same<return_type1, vector_type>::value;
         success = success && std::is_same<return_type2, vector_bool_type>::value;
-        success = success && std::is_same<return_type3, vector_bool_type>::value;
 
         std::string topic = "operator[]               : ";
         detail::load_vec(lhs, tester.lhs);
