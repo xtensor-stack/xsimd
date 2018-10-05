@@ -196,23 +196,41 @@ namespace xsimd
     }
 
     template <class T>
-    inline double sign(const T&v)
+    inline T sign(const T& v)
     {
-        return v < 0 ? -1. : v == 0 ? 0. : 1.;
+        return v < T(0) ? T(-1.) : v == T(0) ? T(0.) : T(1.);
+    }
+
+    namespace detail
+    {
+        template <class C>
+        inline C sign_complex_scalar_impl(const C& v)
+        {
+            using value_type = typename C::value_type;
+            if (v.real())
+            {
+                return C(sign(v.real()), value_type(0));
+            }
+            else
+            {
+                return C(sign(v.imag()), value_type(0));
+            }
+        }
     }
 
     template <class T>
     inline std::complex<T> sign(const std::complex<T>& v)
     {
-        if (v.real())
-        {
-            return {sign(v.real()), 0};
-        }
-        else
-        {
-            return {sign(v.imag()), 0};
-        }
+        return detail::sign_complex_scalar_impl(v);
     }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> sign(const xtl::xcomplex<T, T, i3ec>& v)
+    {
+        return detail::sign_complex_scalar_impl(v);
+    }
+#endif
 
     template <class T>
     std::complex<T> log2(const std::complex<T>& val)

@@ -37,6 +37,8 @@ namespace xsimd
         res_type log10_res;
         res_type log1p_res;
 
+        res_type sign_res;
+
         simd_cexponential_tester(const std::string& n);
     };
 
@@ -55,6 +57,7 @@ namespace xsimd
         log2_res.resize(nb_input);
         log10_res.resize(nb_input);
         log1p_res.resize(nb_input);
+        sign_res.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
             exp_input[i] = value_type(real_value_type(-1.5) + i * real_value_type(3) / nb_input,
@@ -67,6 +70,7 @@ namespace xsimd
             log2_res[i] = log2(log_input[i]);
             log10_res[i] = log10(log_input[i]);
             log1p_res[i] = log1p(log_input[i]);
+            sign_res[i] = sign(exp_input[i]);
         }
     }
 
@@ -164,6 +168,16 @@ namespace xsimd
         success = success && tmp_success;
         success &= check_almost_equal(topic, xsimd::log1p(tester.log_input[0]), tester.log1p_res[0], out);
 
+        topic = "csign  : ";
+        for (size_t i = 0; i < tester.exp_input.size(); i += tester.size)
+        {
+            tester.load_vec(exp_input, tester.exp_input, i);
+            vres = sign(exp_input);
+            tester.store_vec(vres, res, i);
+        }
+        tmp_success = check_almost_equal(topic, res, tester.sign_res, out);
+        success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::sign(tester.exp_input[0]), tester.sign_res[0], out);
         return success;
     }
 }

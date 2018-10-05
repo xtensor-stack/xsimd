@@ -39,6 +39,46 @@ namespace xsimd
 
     namespace detail
     {
+        /********
+         * sign *
+         ********/
+
+        template <class T, std::size_t N>
+        inline batch<T, N> sign_complex_impl(const batch<T, N>& z)
+        {
+            using b_type = batch<T, N>;
+            using r_type = typename b_type::real_batch;
+            auto rz = z.real();
+            auto iz = z.imag();
+            return select(rz != r_type(0.),
+                          b_type(sign(rz)),
+                          b_type(sign(iz)));
+        }
+
+        template <class T, std::size_t N>
+        struct sign_impl<batch<std::complex<T>, N>, false>
+        {
+            using batch_type = batch<std::complex<T>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return sign_complex_impl(z);
+            }
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct sign_impl<batch<xtl::xcomplex<T, T, i3ec>, N>, false>
+        {
+            using batch_type = batch<xtl::xcomplex<T, T, i3ec>, N>;
+
+            static inline batch_type compute(const batch_type& z)
+            {
+                return sign_complex_impl(z);
+            }
+        };
+#endif
+
         /*******
          * exp *
          *******/
