@@ -44,13 +44,17 @@ namespace xsimd
          * ====================================================
          */
 
-#if defined(i386) || defined(i486) ||                   \
+#if defined(__GNUC__) && defined(__BYTE_ORDER__)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define XSIMD_LITTLE_ENDIAN
+#endif
+#elif defined(i386) || defined(i486) ||                 \
     defined(intel) || defined(x86) || defined(i86pc) || \
     defined(__alpha) || defined(__osf__)
-#define __LITTLE_ENDIAN
+#define XSIMD_LITTLE_ENDIAN
 #endif
 
-#ifdef __LITTLE_ENDIAN
+#ifdef XSIMD_LITTLE_ENDIAN
 #define LOW_WORD_IDX 0
 #define HIGH_WORD_IDX sizeof(std::uint32_t)
 #else
@@ -622,6 +626,7 @@ namespace xsimd
         }
     }
 
+#undef XSIMD_LITTLE_ENDIAN
 #undef SET_LOW_WORD
 #undef SET_HIGH_WORD
 #undef GET_LOW_WORD
