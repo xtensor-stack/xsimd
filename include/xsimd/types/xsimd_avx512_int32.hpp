@@ -303,12 +303,12 @@ namespace xsimd
 
     namespace detail
     {
-        template <>
-        struct batch_kernel<int32_t, 16>
+        template <class T>
+        struct avx512_int32_batch_kernel
         {
-            using batch_type = batch<int32_t, 16>;
-            using value_type = int32_t;
-            using batch_bool_type = batch_bool<int32_t, 16>;
+            using batch_type = batch<T, 16>;
+            using value_type = T;
+            using batch_bool_type = batch_bool<T, 16>;
 
             static batch_type neg(const batch_type& rhs)
             {
@@ -330,38 +330,9 @@ namespace xsimd
                 return _mm512_mullo_epi32(lhs, rhs);
             }
 
-            static batch_type div(const batch_type& lhs, const batch_type& rhs)
-            {
-#if defined(XSIMD_FAST_INTEGER_DIVISION)
-                return _mm512_cvttps_epi32(_mm512_div_ps(_mm512_cvtepi32_ps(lhs), _mm512_cvtepi32_ps(rhs)));
-#else
-                XSIMD_MACRO_UNROLL_BINARY(/);
-#endif
-            }
-
             static batch_type mod(const batch_type& lhs, const batch_type& rhs)
             {
                 XSIMD_MACRO_UNROLL_BINARY(%);
-            }
-
-            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm512_cmpeq_epi32_mask(lhs, rhs);
-            }
-
-            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm512_cmpneq_epi32_mask(lhs, rhs);
-            }
-
-            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm512_cmplt_epi32_mask(lhs, rhs);
-            }
-
-            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm512_cmple_epi32_mask(lhs, rhs);
             }
 
             static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
@@ -389,21 +360,6 @@ namespace xsimd
                 return _mm512_andnot_si512(lhs, rhs);
             }
 
-            static batch_type min(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm512_min_epi32(lhs, rhs);
-            }
-
-            static batch_type max(const batch_type& lhs, const batch_type& rhs)
-            {
-                return _mm512_max_epi32(lhs, rhs);
-            }
-
-            static batch_type abs(const batch_type& rhs)
-            {
-                return _mm512_abs_epi32(rhs);
-            }
-
             static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
             {
                 return x * y + z;
@@ -422,6 +378,59 @@ namespace xsimd
             static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
             {
                 return -x * y - z;
+            }
+        };
+
+        template <>
+        struct batch_kernel<int32_t, 16>
+            : public avx512_int32_batch_kernel<int32_t>
+        {
+            using batch_type = batch<int32_t, 16>;
+            using value_type = int32_t;
+            using batch_bool_type = batch_bool<int32_t, 16>;
+
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
+            {
+#if defined(XSIMD_FAST_INTEGER_DIVISION)
+                return _mm512_cvttps_epi32(_mm512_div_ps(_mm512_cvtepi32_ps(lhs), _mm512_cvtepi32_ps(rhs)));
+#else
+                XSIMD_MACRO_UNROLL_BINARY(/);
+#endif
+            }
+
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmpeq_epi32_mask(lhs, rhs);
+            }
+
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmpneq_epi32_mask(lhs, rhs);
+            }
+
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmplt_epi32_mask(lhs, rhs);
+            }
+
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmple_epi32_mask(lhs, rhs);
+            }
+
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_min_epi32(lhs, rhs);
+            }
+
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_max_epi32(lhs, rhs);
+            }
+
+            static batch_type abs(const batch_type& rhs)
+            {
+                return _mm512_abs_epi32(rhs);
             }
 
             static value_type hadd(const batch_type& rhs)
