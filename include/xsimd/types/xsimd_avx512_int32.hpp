@@ -29,6 +29,15 @@ namespace xsimd
     };
 
     template <>
+    struct simd_batch_traits<batch_bool<uint32_t, 16>>
+    {
+        using value_type = uint32_t;
+        static constexpr std::size_t size = 16;
+        using batch_type = batch<uint32_t, 16>;
+        static constexpr std::size_t align = 0;
+    };
+
+    template <>
     class batch_bool<int32_t, 16> :
         public batch_bool_avx512<__mmask16, batch_bool<int32_t, 16>>,
         public simd_batch_bool<batch_bool<int32_t, 16>>
@@ -38,11 +47,27 @@ namespace xsimd
         using base_class::base_class;
     };
 
+    template <>
+    class batch_bool<uint32_t, 16> :
+        public batch_bool_avx512<__mmask16, batch_bool<uint32_t, 16>>,
+        public simd_batch_bool<batch_bool<uint32_t, 16>>
+    {
+    public:
+        using base_class = batch_bool_avx512<__mmask16, batch_bool<uint32_t, 16>>;
+        using base_class::base_class;
+    };
+
     namespace detail
     {
         template <>
         struct batch_bool_kernel<int32_t, 16>
             : batch_bool_kernel_avx512<int32_t, 16>
+        {
+        };
+
+        template <>
+        struct batch_bool_kernel<uint32_t, 16>
+            : batch_bool_kernel_avx512<uint32_t, 16>
         {
         };
     }
@@ -61,6 +86,15 @@ namespace xsimd
     };
 
     template <>
+    struct simd_batch_traits<batch<uint32_t, 16>>
+    {
+        using value_type = uint32_t;
+        static constexpr std::size_t size = 16;
+        using batch_bool_type = batch_bool<uint32_t, 16>;
+        static constexpr std::size_t align = 64;
+    };
+
+    template <>
     class batch<int32_t, 16> : public avx512_int_batch<int32_t, 16>
     {
     public:
@@ -75,10 +109,29 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_INT32(int32_t, 16);
     };
 
+    template <>
+    class batch<uint32_t, 16> : public avx512_int_batch<uint32_t, 16>
+    {
+    public:
+
+        using base_type = avx512_int_batch<uint32_t, 16>;
+        using base_type::base_type;
+        using base_type::load_aligned;
+        using base_type::load_unaligned;
+        using base_type::store_aligned;
+        using base_type::store_unaligned;
+
+        XSIMD_DECLARE_LOAD_STORE_INT32(uint32_t, 16);
+    };
+
     batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs);
     batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs);
     batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
     batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
+    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, uint32_t rhs);
+    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, uint32_t rhs);
+    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<uint32_t, 16>& rhs);
+    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<uint32_t, 16>& rhs);
 
     /*************************************
      * batch<int32_t, 16> implementation *
