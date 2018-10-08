@@ -9,9 +9,6 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
-#if defined(_WIN32)
-#include <windows.h>
-#endif
 
 namespace xsimd
 {
@@ -49,10 +46,6 @@ namespace xsimd
 
 #if defined(__GNUC__) && defined(__BYTE_ORDER__)
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define XSIMD_LITTLE_ENDIAN
-#endif
-#elif defined(_WIN32)
-#if REG_DWORD == REG_DWORD_LITTLE_ENDIAN
 #define XSIMD_LITTLE_ENDIAN
 #endif
 #elif defined(i386) || defined(i486) ||                 \
