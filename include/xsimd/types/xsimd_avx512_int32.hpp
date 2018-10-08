@@ -128,10 +128,10 @@ namespace xsimd
     batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs);
     batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
     batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
-    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, uint32_t rhs);
-    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, uint32_t rhs);
-    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<uint32_t, 16>& rhs);
-    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<uint32_t, 16>& rhs);
+    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, int32_t rhs);
+    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, int32_t rhs);
+    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
+    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
 
     /*************************************
      * batch<int32_t, 16> implementation *
@@ -518,6 +518,26 @@ namespace xsimd
     }
 
     inline batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
+    {
+        return _mm512_srlv_epi32(lhs, rhs);
+    }
+
+    inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, int32_t rhs)
+    {
+        return _mm512_slli_epi32(lhs, rhs);
+    }
+
+    inline batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, int32_t rhs)
+    {
+        return _mm512_srli_epi32(lhs, rhs);
+    }
+
+    inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
+    {
+        return _mm512_sllv_epi32(lhs, rhs);
+    }
+
+    inline batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
     {
         return _mm512_srlv_epi32(lhs, rhs);
     }
