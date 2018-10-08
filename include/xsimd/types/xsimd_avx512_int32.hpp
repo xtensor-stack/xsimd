@@ -379,6 +379,20 @@ namespace xsimd
             {
                 return -x * y - z;
             }
+
+            static value_type hadd(const batch_type& rhs)
+            {
+                // TODO Why not _mm512_reduce_add_...?
+                __m256i tmp1 = _mm512_extracti32x8_epi32(rhs, 0);
+                __m256i tmp2 = _mm512_extracti32x8_epi32(rhs, 1);
+                __m256i res1 = tmp1 + tmp2;
+                return xsimd::hadd(batch<int32_t, 8>(res1));
+            }
+
+            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            {
+                return _mm512_mask_blend_epi32(cond, b, a);
+            }
         };
 
         template <>
@@ -432,19 +446,58 @@ namespace xsimd
             {
                 return _mm512_abs_epi32(rhs);
             }
+        };
 
-            static value_type hadd(const batch_type& rhs)
+        template <>
+        struct batch_kernel<uint32_t, 16>
+            : public avx512_int32_batch_kernel<uint32_t>
+        {
+            using batch_type = batch<uint32_t, 16>;
+            using value_type = uint32_t;
+            using batch_bool_type = batch_bool<uint32_t, 16>;
+
+            static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
-                // TODO Why not _mm512_reduce_add_...?
-                __m256i tmp1 = _mm512_extracti32x8_epi32(rhs, 0);
-                __m256i tmp2 = _mm512_extracti32x8_epi32(rhs, 1);
-                __m256i res1 = tmp1 + tmp2;
-                return xsimd::hadd(batch<int32_t, 8>(res1));
+#if defined(XSIMD_FAST_INTEGER_DIVISION)
+                return _mm512_cvttps_epu32(_mm512_div_ps(_mm512_cvtepu32_ps(lhs), _mm512_cvtepu32_ps(rhs)));
+#else
+                XSIMD_MACRO_UNROLL_BINARY(/);
+#endif
             }
 
-            static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
+            static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
-                return _mm512_mask_blend_epi32(cond, b, a);
+                return _mm512_cmpeq_epu32_mask(lhs, rhs);
+            }
+
+            static batch_bool_type neq(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmpneq_epu32_mask(lhs, rhs);
+            }
+
+            static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmplt_epu32_mask(lhs, rhs);
+            }
+
+            static batch_bool_type lte(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_cmple_epu32_mask(lhs, rhs);
+            }
+
+            static batch_type min(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_min_epu32(lhs, rhs);
+            }
+
+            static batch_type max(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_max_epu32(lhs, rhs);
+            }
+
+            static batch_type abs(const batch_type& rhs)
+            {
+                return rhs;
             }
         };
     }
