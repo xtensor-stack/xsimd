@@ -32,7 +32,7 @@ namespace xsimd
      * @return the batch wrapping the highest available instruction set. 
      */
     template <class T1, class T2 = T1>
-    simd_type<T2> set_simd(const T1& value);
+    simd_return_type<T1, T2> set_simd(const T1& value);
 
     /**
      * @ingroup data_transfer
@@ -439,15 +439,15 @@ namespace xsimd
      ***********************************************/
 
     template <class T1, class T2>
-    inline simd_type<T2> set_simd(const T1& value)
+    inline simd_return_type<T1, T2> set_simd(const T1& value)
     {
-        return detail::simd_function_invoker<T1, simd_type<T2>>::set_simd(value);
+        return detail::simd_function_invoker<T1, simd_return_type<T1, T2>>::set_simd(value);
     }
 
     template <class T1, class T2>
     inline simd_return_type<T1, T2> load_aligned(const T1* src)
     {
-        return detail::simd_function_invoker<T1, simd_type<T2>>::load_aligned(src);
+        return detail::simd_function_invoker<T1, simd_return_type<T1, T2>>::load_aligned(src);
     }
 
     template <class T1, class T2>
@@ -459,7 +459,7 @@ namespace xsimd
     template <class T1, class T2>
     inline simd_return_type<T1, T2> load_aligned(const T1* real_src, const T1* imag_src)
     {
-        return detail::simd_complex_invoker<T1, simd_type<T2>>::load_aligned(real_src, imag_src);
+        return detail::simd_complex_invoker<T1, simd_return_type<T1, T2>>::load_aligned(real_src, imag_src);
     }
 
     template <class T1, class T2>
@@ -471,7 +471,7 @@ namespace xsimd
     template <class T1, class T2>
     inline simd_return_type<T1, T2> load_unaligned(const T1* src)
     {
-        return detail::simd_function_invoker<T1, simd_type<T2>>::load_unaligned(src);
+        return detail::simd_function_invoker<T1, simd_return_type<T1, T2>>::load_unaligned(src);
     }
 
     template <class T1, class T2>
@@ -483,7 +483,7 @@ namespace xsimd
     template <class T1, class T2>
     inline simd_return_type<T1, T2> load_unaligned(const T1* real_src, const T1* imag_src)
     {
-        return detail::simd_complex_invoker<T1, simd_type<T2>>::load_unaligned(real_src, imag_src);
+        return detail::simd_complex_invoker<T1, simd_return_type<T1, T2>>::load_unaligned(real_src, imag_src);
     }
 
     template <class T1, class T2>
