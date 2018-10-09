@@ -482,7 +482,7 @@ namespace xsimd
 
             static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
             {
-                return vreinterpretq_f32_u64(vbicq_u64(vreinterpretq_u64_f64(lhs), vreinterpretq_u64_f64(rhs)));
+                return vreinterpretq_f64_u64(vbicq_u64(vreinterpretq_u64_f64(lhs), vreinterpretq_u64_f64(rhs)));
             }
 
             static batch_type min(const batch_type& lhs, const batch_type& rhs)
