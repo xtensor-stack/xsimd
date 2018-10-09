@@ -80,6 +80,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int8.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int16.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int64.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_uint8.hpp
@@ -165,4 +166,3 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
 install(EXPORT ${PROJECT_NAME}-targets
         FILE ${PROJECT_NAME}Targets.cmake
         DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
-
