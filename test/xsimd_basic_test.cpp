@@ -522,6 +522,13 @@ TEST(xsimd, avx512_int64_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx512_uint64_basic)
+{
+    std::ofstream out("log/avx512_uint64_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<uint64_t, 8, 64>(out, "avx512 uint64");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_complex_float_basic)
 {
     std::ofstream out("log/avx512_complex_float_basic.log", std::ios_base::out);
