@@ -30,6 +30,9 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> clip(const batch<T, N>& x, const batch<T, N>& lo, const batch<T, N>& hi);
 
+    template <class T, std::size_t N>
+    batch<T, N> nextafter(const batch<T, N>& from, const batch<T, N>& to);
+
     /****************************
      * Classification functions *
      ****************************/
@@ -118,13 +121,82 @@ namespace xsimd
         return std::min(hi, std::max(x, lo));
     }
 
+    namespace detail
+    {
+        template <class T, std::size_t N, bool is_int = std::is_integral<T>::value>
+        struct nextafter_kernel
+        {
+            using batch_type = batch<T, N>;
+
+            static inline batch_type next(const batch_type& b) noexcept
+            {
+                return select(b != maxvalue<batch_type>(),
+                              b + T(1),
+                              b);
+            }
+
+            static inline batch_type prev(const batch_type& b) noexcept
+            {
+                select(b != minvalue<batch_type>(),
+                       b - T(1),
+                       b);
+            }
+        };
+
+        template <class T, std::size_t N>
+        struct bitwise_cast_batch;
+
+        template <std::size_t N>
+        struct bitwise_cast_batch<float, N>
+        {
+            using type = batch<int32_t, N>;
+        };
+
+        template <std::size_t N>
+        struct bitwise_cast_batch<double, N>
+        {
+            using type = batch<int64_t, N>;
+        };
+
+        template <class T, std::size_t N>
+        struct nextafter_kernel<T, N, false>
+        {
+            using batch_type = batch<T, N>;
+            using int_batch = typename bitwise_cast_batch<T, N>::type;
+            using int_type = typename int_batch::value_type;
+
+            static inline batch_type next(const batch_type& b) noexcept
+            {
+                batch_type n = bitwise_cast<batch_type>(bitwise_cast<int_batch>(b) + int_type(1));
+                return select(b == infinity<batch_type>(), b, n);
+            }
+
+            static inline batch_type prev(const batch_type& b) noexcept
+            {
+                batch_type p = bitwise_cast<batch_type>(bitwise_cast<int_batch>(b) - int_type(1));
+                return select(b == minusinfinity<batch_type>(), b, p);
+            }
+        };
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> nextafter(const batch<T, N>& from, const batch<T, N>& to)
+    {
+        using kernel = detail::nextafter_kernel<T, N>;
+        return select(from == to,
+                      from,
+                      select(to > from,
+                             kernel::next(from),
+                             kernel::prev(from)));
+    }
+
     /*******************************************
      * Classification functions implementation *
      *******************************************/
 
     /**
-     * Determines if the scalars in the given batch \c x have finite values,
-     * i.e. theyr are different from infinite or NaN.
+     * Determines if the scalars in the given batch \c x are finite values,
+     * i.e. they are different from infinite or NaN.
      * @param x batch of floating point values.
      * @return a batch of booleans.
      */

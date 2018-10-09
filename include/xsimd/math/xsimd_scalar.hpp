@@ -51,6 +51,7 @@ namespace xsimd
     using std::log2;
     using std::log;
     using std::nearbyint;
+    using std::nextafter;
     using std::proj;
     using std::remainder;
     using std::rint;
