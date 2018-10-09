@@ -643,6 +643,13 @@ TEST(xsimd, neon_uint8_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, neon_int16_basic)
+{
+    std::ofstream out("log/neon_int16_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<int16_t, 8, 32>(out, "neon int16");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_int32_basic)
 {
     std::ofstream out("log/neon_int32_basic.log", std::ios_base::out);
