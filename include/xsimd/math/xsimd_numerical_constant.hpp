@@ -123,6 +123,12 @@ namespace xsimd
     template <class T>
     constexpr T zero() noexcept;
 
+    template <class T>
+    constexpr T minvalue() noexcept;
+
+    template <class T>
+    constexpr T maxvalue() noexcept;
+
     /**************************
      * allbits implementation *
      **************************/
@@ -273,6 +279,57 @@ namespace xsimd
     {
         return T(typename T::value_type(0));
     }
+
+    /***************************
+     * minvalue implementation *
+     ***************************/
+
+    namespace detail
+    {
+        template <class T>
+        struct minvalue_impl
+        {
+            static constexpr T get_value() noexcept
+            {
+                return std::numeric_limits<typename T::value_type>::min();
+            }
+        };
+
+        template <>
+        struct minvalue_impl<float>
+        {
+            static constexpr float get_value() noexcept
+            {
+                return detail::caster32_t(uint32_t(0xff7fffff)).f;
+            }
+        };
+
+        template <>
+        struct minvalue_impl<double>
+        {
+            static constexpr double get_value() noexcept
+            {
+                return detail::caster64_t(uint64_t(0xffefffffffffffff)).f;
+            }
+        };
+    }
+
+    template <class T>
+    constexpr T minvalue() noexcept
+    {
+        return T(detail::minvalue_impl<typename T::value_type>::get_value());
+    }
+
+    /***************************
+     * maxvalue implementation *
+     ***************************/
+
+    template <class T>
+    constexpr T maxvalue() noexcept
+    {
+        return T(std::numeric_limits<typename T::value_type>::max());
+    }
+    
 }
 
 #endif

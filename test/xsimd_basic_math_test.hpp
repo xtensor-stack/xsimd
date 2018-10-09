@@ -30,6 +30,7 @@ namespace xsimd
 
         res_type lhs_input;
         res_type rhs_input;
+        res_type from_input;
         res_type fmod_res;
         res_type remainder_res;
         res_type fdim_res;
@@ -39,6 +40,7 @@ namespace xsimd
         res_type clip_res;
         res_type inf_res;
         res_type finite_res;
+        res_type nextafter_res;
 
         simd_basic_math_tester(const std::string& n);
     };
@@ -49,6 +51,7 @@ namespace xsimd
     {
         lhs_input.resize(N);
         rhs_input.resize(N);
+        from_input.resize(N);
         fmod_res.resize(N);
         remainder_res.resize(N);
         fdim_res.resize(N);
@@ -56,12 +59,14 @@ namespace xsimd
         clip_res.resize(N);
         inf_res.resize(N);
         finite_res.resize(N);
+        nextafter_res.resize(N);
         clip_lo = 0.5;
         clip_hi = 1.;
         for (size_t i = 0; i < N; ++i)
         {
             lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
+            from_input[i] = rhs_input[i] - value_type(1);
             fmod_res[i] = std::fmod(lhs_input[i], rhs_input[i]);
             remainder_res[i] = std::remainder(lhs_input[i], rhs_input[i]);
             fdim_res[i] = std::fdim(lhs_input[i], rhs_input[i]);
@@ -70,6 +75,7 @@ namespace xsimd
             clip_res[i] = tmp < clip_lo ? clip_lo : clip_hi < tmp ? clip_hi : tmp;
             inf_res[i] = T(0.);
             finite_res[i] = T(1.);
+            nextafter_res[i] = std::nextafter(from_input[i], rhs_input[i]);
         }
     }
 
@@ -166,8 +172,17 @@ namespace xsimd
         scalar_cond_res = xsimd::isinf(lhs[0])?0.:1.;
         success &= check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
 
+        topic = "nextafter: ";
+        detail::load_vec(lhs, tester.from_input);
+        detail::load_vec(rhs, tester.rhs_input);
+        vres = nextafter(lhs, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.nextafter_res, out);
+        success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::nextafter(lhs[0], rhs[0]), tester.nextafter_res[0], out);
+
         return success;
-}
+    }
 }
 
 #endif
