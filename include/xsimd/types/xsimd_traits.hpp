@@ -10,6 +10,7 @@
 #define XSIMD_TRAITS_HPP
 
 #include <type_traits>
+#include <complex>
 
 #include "xsimd_types_include.hpp"
 
@@ -52,6 +53,21 @@
 
 namespace xsimd
 {
+
+    namespace detail
+    {
+        // Forward define for later use in this file
+        template <class T>
+        struct is_complex;
+
+        template <class T>
+        struct is_complex<std::complex<T>>;
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec>
+        struct is_complex<xtl::xcomplex<T, T, i3ec>>;
+#endif
+    }
+
 
     template <class T>
     struct simd_traits

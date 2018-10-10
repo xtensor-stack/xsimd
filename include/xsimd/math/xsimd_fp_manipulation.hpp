@@ -9,6 +9,7 @@
 #ifndef XSIMD_FP_MANIPULATION_HPP
 #define XSIMD_FP_MANIPULATION_HPP
 
+#include "xsimd/types/xsimd_base.hpp"
 #include "xsimd_numerical_constant.hpp"
 
 namespace xsimd
