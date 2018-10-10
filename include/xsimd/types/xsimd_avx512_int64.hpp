@@ -108,6 +108,7 @@ namespace xsimd
         using base_type::store_unaligned;
 
         XSIMD_DECLARE_LOAD_STORE_INT64(int64_t, 8);
+        XSIMD_DECLARE_LOAD_STORE_LONG(int64_t, 8);
    };
 
     template <>
@@ -123,6 +124,7 @@ namespace xsimd
         using base_type::store_unaligned;
 
         XSIMD_DECLARE_LOAD_STORE_INT64(uint64_t, 8);
+        XSIMD_DECLARE_LOAD_STORE_LONG(uint64_t, 8);
    };
 
     batch<int64_t, 8> operator<<(const batch<int64_t, 8>& lhs, int32_t rhs);
@@ -213,6 +215,8 @@ namespace xsimd
         this->m_value = _mm512_cvtepu32_epi64(_mm256_loadu_si256((const __m256i *) src));
         return *this;
     }
+
+    XSIMD_DEFINE_LOAD_STORE_LONG(int64_t, 8, 64)
 
     inline batch<int64_t, 8>& batch<int64_t, 8>::load_aligned(const float* src)
     {
@@ -403,6 +407,8 @@ namespace xsimd
         this->m_value = _mm512_cvtepu32_epi64(_mm256_loadu_si256((const __m256i *) src));
         return *this;
     }
+
+    XSIMD_DEFINE_LOAD_STORE_LONG(uint64_t, 8, 64)
 
     inline batch<uint64_t, 8>& batch<uint64_t, 8>::load_aligned(const float* src)
     {

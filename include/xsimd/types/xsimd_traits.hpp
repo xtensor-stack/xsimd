@@ -123,6 +123,20 @@ namespace xsimd
         static constexpr size_t size = simd_traits<type>::size;
     };
 
+#ifdef XSIMD_32_BIT_ABI
+    template <>
+    struct simd_traits<long> : simd_traits<int32_t>
+    {
+    };
+
+    template <>
+    struct revert_simd_traits<batch<long, XSIMD_BATCH_INT32_SIZE>>
+    {
+        using type = long;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+#endif
+
     template <>
     struct simd_traits<int64_t>
     {
@@ -232,6 +246,20 @@ namespace xsimd
         using type = uint32_t;
         static constexpr size_t size = simd_traits<type>::size;
     };
+
+#ifdef XSIMD_32_BIT_ABI
+    template <>
+    struct simd_traits<unsigned long> : simd_traits<uint32_t>
+    {
+    };
+
+    template <>
+    struct revert_simd_traits<batch<unsigned long, XSIMD_BATCH_INT32_SIZE>>
+    {
+        using type = unsigned long;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+#endif
 
     template <>
     struct simd_traits<uint64_t>

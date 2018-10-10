@@ -27,4 +27,10 @@
     #define XSIMD_STACK_ALLOCATION_LIMIT 20000
 #endif
 
+#if defined(__LP64__) || defined(_WIN64)
+    #define XSIMD_64_BIT_ABI
+#else
+    #define XSIMD_32_BIT_ABI
+#endif
+
 #endif

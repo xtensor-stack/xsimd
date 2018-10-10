@@ -101,6 +101,7 @@ namespace xsimd
         using base_type::store_unaligned;
 
         XSIMD_DECLARE_LOAD_STORE_INT32(int32_t, 4);
+        XSIMD_DECLARE_LOAD_STORE_LONG(int32_t, 4);
     };
 
     template <>
@@ -116,6 +117,7 @@ namespace xsimd
         using base_type::store_unaligned;
 
         XSIMD_DECLARE_LOAD_STORE_INT32(uint32_t, 4);
+        XSIMD_DECLARE_LOAD_STORE_LONG(uint32_t, 4);
     };
 
     batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
@@ -237,6 +239,7 @@ namespace xsimd
     SSE_DEFINE_LOAD_STORE_INT32(int32_t, uint8_t)
     SSE_DEFINE_LOAD_STORE_INT32(int32_t, int16_t)
     SSE_DEFINE_LOAD_STORE_INT32(int32_t, uint16_t)
+    XSIMD_DEFINE_LOAD_STORE_LONG(int32_t, 4, 16)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 4, int64_t, 16)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 4, uint64_t, 16)
 
@@ -298,6 +301,7 @@ namespace xsimd
     SSE_DEFINE_LOAD_STORE_INT32(uint32_t, uint8_t)
     SSE_DEFINE_LOAD_STORE_INT32(uint32_t, int16_t)
     SSE_DEFINE_LOAD_STORE_INT32(uint32_t, uint16_t)
+    XSIMD_DEFINE_LOAD_STORE_LONG(uint32_t, 4, 16)
     XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, int64_t, 16)
     XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, uint64_t, 16)
     XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, float, 16)

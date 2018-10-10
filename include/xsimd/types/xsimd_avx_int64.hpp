@@ -103,6 +103,7 @@ namespace xsimd
         using base_type::store_unaligned;
 
         XSIMD_DECLARE_LOAD_STORE_INT64(int64_t, 4);
+        XSIMD_DECLARE_LOAD_STORE_LONG(int64_t, 4);
     };
 
     template <>
@@ -251,6 +252,7 @@ namespace xsimd
     AVX_DEFINE_LOAD_STORE_INT64(int64_t, uint8_t)
     AVX_DEFINE_LOAD_STORE_INT64(int64_t, int16_t)
     AVX_DEFINE_LOAD_STORE_INT64(int64_t, uint16_t)
+    XSIMD_DEFINE_LOAD_STORE_LONG(int64_t, 4, 32)
     XSIMD_DEFINE_LOAD_STORE(int64_t, 4, float, 32)
     XSIMD_DEFINE_LOAD_STORE(int64_t, 4, double, 32)
 
