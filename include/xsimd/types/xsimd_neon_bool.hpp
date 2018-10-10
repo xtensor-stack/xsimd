@@ -13,53 +13,92 @@
 
 #define EXPAND(...) __VA_ARGS__
 
-#define CASE(i, op)              \
-    case i: return op(lhs, i);   \
+#define CASE(op, i)                   \
+    case i: return op(lhs, i);
 
-#define REPEAT_8(op, addx)       \
-    CASE( 1 + addx, EXPAND(op)); \
-    CASE( 2 + addx, EXPAND(op)); \
-    CASE( 3 + addx, EXPAND(op)); \
-    CASE( 4 + addx, EXPAND(op)); \
-    CASE( 5 + addx, EXPAND(op)); \
-    CASE( 6 + addx, EXPAND(op)); \
-    CASE( 7 + addx, EXPAND(op)); \
+#define XSIMD_REPEAT_8_0(op, addx)    \
+    CASE(EXPAND(op), 1 + addx);       \
+    CASE(EXPAND(op), 2 + addx);       \
+    CASE(EXPAND(op), 3 + addx);       \
+    CASE(EXPAND(op), 4 + addx);       \
+    CASE(EXPAND(op), 5 + addx);       \
+    CASE(EXPAND(op), 6 + addx);       \
+    CASE(EXPAND(op), 7 + addx);
 
-#define REPEAT_32(op, addx)      \
-    CASE( 1 + addx, EXPAND(op)); \
-    CASE( 2 + addx, EXPAND(op)); \
-    CASE( 3 + addx, EXPAND(op)); \
-    CASE( 4 + addx, EXPAND(op)); \
-    CASE( 5 + addx, EXPAND(op)); \
-    CASE( 6 + addx, EXPAND(op)); \
-    CASE( 7 + addx, EXPAND(op)); \
-    CASE( 8 + addx, EXPAND(op)); \
-    CASE( 9 + addx, EXPAND(op)); \
-    CASE(10 + addx, EXPAND(op)); \
-    CASE(11 + addx, EXPAND(op)); \
-    CASE(12 + addx, EXPAND(op)); \
-    CASE(13 + addx, EXPAND(op)); \
-    CASE(14 + addx, EXPAND(op)); \
-    CASE(15 + addx, EXPAND(op)); \
-    CASE(16 + addx, EXPAND(op)); \
-    CASE(17 + addx, EXPAND(op)); \
-    CASE(18 + addx, EXPAND(op)); \
-    CASE(19 + addx, EXPAND(op)); \
-    CASE(20 + addx, EXPAND(op)); \
-    CASE(21 + addx, EXPAND(op)); \
-    CASE(22 + addx, EXPAND(op)); \
-    CASE(23 + addx, EXPAND(op)); \
-    CASE(24 + addx, EXPAND(op)); \
-    CASE(25 + addx, EXPAND(op)); \
-    CASE(26 + addx, EXPAND(op)); \
-    CASE(27 + addx, EXPAND(op)); \
-    CASE(28 + addx, EXPAND(op)); \
-    CASE(29 + addx, EXPAND(op)); \
-    CASE(30 + addx, EXPAND(op)); \
-    CASE(31 + addx, EXPAND(op)); \
+#define XSIMD_REPEAT_8_N(op, addx)    \
+    CASE(EXPAND(op), 0 + addx);       \
+    XSIMD_REPEAT_8_0(op, addx);
+
+#define XSIMD_REPEAT_8(op)            \
+    XSIMD_REPEAT_8_0(op, 0);
+
+#define XSIMD_REPEAT_16_0(op, addx)   \
+    XSIMD_REPEAT_8_0(op, 0 + addx);   \
+    XSIMD_REPEAT_8_N(op, 8 + addx);
+
+#define XSIMD_REPEAT_16_N(op, addx)   \
+    XSIMD_REPEAT_8_N(op, 0 + addx);   \
+    XSIMD_REPEAT_8_N(op, 8 + addx);
+
+#define XSIMD_REPEAT_16(op)           \
+    XSIMD_REPEAT_16_0(op, 0);
+
+#define XSIMD_REPEAT_32_0(op, addx)   \
+    XSIMD_REPEAT_16_0(op, 0 + addx);  \
+    XSIMD_REPEAT_16_N(op, 16 + addx);
+
+#define XSIMD_REPEAT_32_N(op, addx)   \
+    XSIMD_REPEAT_16_N(op, 0 + addx);  \
+    XSIMD_REPEAT_16_N(op, 16 + addx);
+
+#define XSIMD_REPEAT_32(op)           \
+    XSIMD_REPEAT_32_0(op, 0);
+
+#define XSIMD_REPEAT_64(op)           \
+    XSIMD_REPEAT_32_0(op, 0);         \
+    XSIMD_REPEAT_32_N(op, 32);
 
 namespace xsimd
 {
+    /********************
+     * batch_bool<T, 8> *
+     ********************/
+
+    template <class T>
+    struct simd_batch_traits<batch_bool<T, 8>>
+    {
+        using value_type = T;
+        static constexpr std::size_t size = 8;
+        using batch_type = batch<T, 8>;
+        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+    };
+
+    template <class T>
+    class batch_bool<T, 8> : public simd_batch_bool<batch_bool<T, 8>>
+    {
+    public:
+
+        using simd_type = uint16x8_t;
+
+        batch_bool();
+        explicit batch_bool(bool b);
+        batch_bool(bool b0, bool b1, bool b2, bool b3,
+                   bool b4, bool b5, bool b6, bool b7);
+        batch_bool(const simd_type& rhs);
+        template <class V>
+        batch_bool(const batch_bool<V, 8>& rhs);
+
+        batch_bool& operator=(const simd_type& rhs);
+
+        operator simd_type() const;
+
+        bool operator[](std::size_t index) const;
+
+    private:
+
+        simd_type m_value;
+    };
+
     /********************
      * batch_bool<T, 4> *
      ********************/
@@ -178,6 +217,126 @@ namespace xsimd
     };
 
     /***********************************
+     * batch_bool<T, 8> implementation *
+     ***********************************/
+
+    template <class T>
+    inline batch_bool<T, 8>::batch_bool()
+    {
+    }
+
+    template <class T>
+    inline batch_bool<T, 8>::batch_bool(bool b)
+        : m_value(vdupq_n_u16(
+            static_cast<uint16_t>(-(int)b))
+        )
+    {
+    }
+
+    template <class T>
+    inline batch_bool<T, 8>::batch_bool(bool b0, bool b1, bool b2, bool b3,
+                                        bool b4, bool b5, bool b6, bool b7)
+        : m_value{
+            static_cast<uint16_t>(-int(b0)),
+            static_cast<uint16_t>(-int(b1)),
+            static_cast<uint16_t>(-int(b2)),
+            static_cast<uint16_t>(-int(b3)),
+            static_cast<uint16_t>(-int(b4)),
+            static_cast<uint16_t>(-int(b5)),
+            static_cast<uint16_t>(-int(b6)),
+            static_cast<uint16_t>(-int(b7))}
+    {
+    }
+
+    template <class T>
+    inline batch_bool<T, 8>::batch_bool(const simd_type& rhs)
+        : m_value(rhs)
+    {
+    }
+
+    template <class T>
+    template <class V>
+    inline batch_bool<T, 8>::batch_bool(const batch_bool<V, 8>& rhs)
+        : m_value(static_cast<simd_type>(rhs))
+    {
+    }
+
+    template <class T>
+    inline batch_bool<T, 8>& batch_bool<T, 8>::operator=(const simd_type& rhs)
+    {
+        m_value = rhs;
+        return *this;
+    }
+
+    template <class T>
+    inline batch_bool<T, 8>::operator uint16x8_t() const
+    {
+        return m_value;
+    }
+
+    template <class T>
+    inline bool batch_bool<T, 8>::operator[](std::size_t index) const
+    {
+        return static_cast<bool>(m_value[index]);
+    }
+
+    namespace detail
+    {
+        template <class T>
+        struct batch_bool_kernel<T, 8>
+        {
+            using batch_type = batch_bool<T, 8>;
+
+            static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vandq_u16(lhs, rhs);
+            }
+
+            static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vorrq_u16(lhs, rhs);
+            }
+
+            static batch_type bitwise_xor(const batch_type& lhs, const batch_type& rhs)
+            {
+                return veorq_u16(lhs, rhs);
+            }
+
+            static batch_type bitwise_not(const batch_type& rhs)
+            {
+                return vmvnq_u16(rhs);
+            }
+
+            static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vbicq_u16(lhs, rhs);
+            }
+
+            static batch_type equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vceqq_u16(lhs, rhs);
+            }
+
+            static batch_type not_equal(const batch_type& lhs, const batch_type& rhs)
+            {
+                return veorq_u16(lhs, rhs);
+            }
+
+            static bool all(const batch_type& rhs)
+            {
+                uint16x4_t tmp = vand_u16(vget_low_u16(rhs), vget_high_u16(rhs));
+                return vget_lane_u16(vpmin_u16(tmp, tmp), 0) != 0;
+            }
+
+            static bool any(const batch_type& rhs)
+            {
+                uint16x4_t tmp = vorr_u16(vget_low_u16(rhs), vget_high_u16(rhs));
+                return vget_lane_u16(vpmax_u16(tmp, tmp), 0);
+            }
+        };
+    }
+
+    /***********************************
      * batch_bool<T, 4> implementation *
      ***********************************/
 
@@ -195,12 +354,12 @@ namespace xsimd
     }
 
     template <class T>
-    inline batch_bool<T, 4>::batch_bool(bool b1, bool b2, bool b3, bool b4)
+    inline batch_bool<T, 4>::batch_bool(bool b0, bool b1, bool b2, bool b3)
         : m_value{
+            static_cast<uint32_t>(-int(b0)),
             static_cast<uint32_t>(-int(b1)),
             static_cast<uint32_t>(-int(b2)),
-            static_cast<uint32_t>(-int(b3)),
-            static_cast<uint32_t>(-int(b4))}
+            static_cast<uint32_t>(-int(b3))}
     {
     }
 

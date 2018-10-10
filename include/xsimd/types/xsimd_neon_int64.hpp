@@ -564,9 +564,7 @@ namespace xsimd
             switch(n)
             {
                 case 0: return lhs;
-                REPEAT_32(vshlq_n_s64, 0);
-                REPEAT_32(vshlq_n_s64, 31);
-                case 63: return vshlq_n_s64(lhs, 63); break;
+                XSIMD_REPEAT_64(vshlq_n_s64);
                 default: break;
             }
             return batch<int64_t, 2>(int64_t(0));
@@ -577,9 +575,7 @@ namespace xsimd
             switch(n)
             {
                 case 0: return lhs;
-                REPEAT_32(vshrq_n_s64, 0);
-                REPEAT_32(vshrq_n_s64, 31);
-                case 63: return vshrq_n_s64(lhs, 63); break;
+                XSIMD_REPEAT_64(vshrq_n_s64);
                 default: break;
             }
             return batch<int64_t, 2>(int64_t(0));

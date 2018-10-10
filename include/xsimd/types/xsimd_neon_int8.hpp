@@ -376,7 +376,7 @@ namespace xsimd
             switch(n)
             {
                 case 0: return lhs;
-                REPEAT_8(vshlq_n_s8, 0);
+                XSIMD_REPEAT_8(vshlq_n_s8);
                 default: break;
             }
             return batch<int8_t, 16>(int8_t(0));
@@ -387,7 +387,7 @@ namespace xsimd
             switch(n)
             {
                 case 0: return lhs;
-                REPEAT_8(vshrq_n_s8, 0);
+                XSIMD_REPEAT_8(vshrq_n_s8);
                 default: break;
             }
             return batch<int8_t, 16>(int8_t(0));
