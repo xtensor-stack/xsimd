@@ -84,6 +84,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_int64.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_uint8.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_uint32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_complex_base.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_fallback.hpp
