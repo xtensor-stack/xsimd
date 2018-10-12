@@ -13,6 +13,7 @@
 
 #include "xsimd_base.hpp"
 #include "xsimd_neon_bool.hpp"
+#include "xsimd_neon_utils.hpp"
 
 namespace xsimd
 {
@@ -203,27 +204,6 @@ namespace xsimd
     namespace detail
     {
 
-#define XSIMD_INLINE_UNROLL_OP(op, i)  \
-    static_cast<int8_t>(lhs[i] op rhs[i])
-
-#define XSIMD_INLINE_UNROLL_OP_16(op)  \
-    XSIMD_INLINE_UNROLL_OP(op, 0),     \
-    XSIMD_INLINE_UNROLL_OP(op, 1),     \
-    XSIMD_INLINE_UNROLL_OP(op, 2),     \
-    XSIMD_INLINE_UNROLL_OP(op, 3),     \
-    XSIMD_INLINE_UNROLL_OP(op, 4),     \
-    XSIMD_INLINE_UNROLL_OP(op, 5),     \
-    XSIMD_INLINE_UNROLL_OP(op, 6),     \
-    XSIMD_INLINE_UNROLL_OP(op, 7),     \
-    XSIMD_INLINE_UNROLL_OP(op, 8),     \
-    XSIMD_INLINE_UNROLL_OP(op, 9),     \
-    XSIMD_INLINE_UNROLL_OP(op, 10),    \
-    XSIMD_INLINE_UNROLL_OP(op, 11),    \
-    XSIMD_INLINE_UNROLL_OP(op, 12),    \
-    XSIMD_INLINE_UNROLL_OP(op, 13),    \
-    XSIMD_INLINE_UNROLL_OP(op, 14),    \
-    XSIMD_INLINE_UNROLL_OP(op, 15)     \
-
         template <>
         struct batch_kernel<int8_t, 16>
         {
@@ -253,19 +233,18 @@ namespace xsimd
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
             {
-                return int8x16_t{
-                    XSIMD_INLINE_UNROLL_OP_16(/)
-                };
+                return neon_detail::unroll_op<16, int8x16_t, int8_t>([&lhs, &rhs] (std::size_t idx) {
+                    return lhs[idx] / rhs[idx];
+                });
             }
 
             static batch_type mod(const batch_type& lhs, const batch_type& rhs)
             {
-                return int8x16_t{
-                    XSIMD_INLINE_UNROLL_OP_16(%)
-                };
+                return neon_detail::unroll_op<16, int8x16_t, int8_t>([&lhs, &rhs] (std::size_t idx) {
+                    return lhs[idx] % rhs[idx];
+                });
             }
-#undef XSIMD_INLINE_UNROLL_OP
-#undef XSIMD_INLINE_UNROLL_OP_16
+
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
             {
                 return vceqq_s8(lhs, rhs);

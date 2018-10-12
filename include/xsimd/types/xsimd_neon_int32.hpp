@@ -13,6 +13,7 @@
 
 #include "xsimd_base.hpp"
 #include "xsimd_neon_bool.hpp"
+#include "xsimd_neon_utils.hpp"
 
 namespace xsimd
 {
@@ -421,19 +422,17 @@ namespace xsimd
 #if defined(XSIMD_FAST_INTEGER_DIVISION)
                 return vcvtq_s32_f32(vcvtq_f32_s32(lhs) / vcvtq_f32_s32(rhs));
 #else
-                return int32x4_t{
-                    lhs[0] / rhs[0], lhs[1] / rhs[1],
-                    lhs[2] / rhs[2], lhs[3] / rhs[3]
-                };
+                return neon_detail::unroll_op<4, int32x4_t, int32_t>([&lhs, &rhs] (std::size_t idx) {
+                    return lhs[idx] / rhs[idx];
+                });
 #endif
             }
 
             static batch_type mod(const batch_type& lhs, const batch_type& rhs)
             {
-                return int32x4_t{
-                    lhs[0] % rhs[0], lhs[1] % rhs[1],
-                    lhs[2] % rhs[2], lhs[3] % rhs[3]
-                };
+                return neon_detail::unroll_op<4, int32x4_t, int32_t>([&lhs, &rhs] (std::size_t idx) {
+                    return lhs[idx] % rhs[idx];
+                });
             }
 
             static batch_bool_type eq(const batch_type& lhs, const batch_type& rhs)
