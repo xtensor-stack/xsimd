@@ -46,6 +46,7 @@ namespace xsimd
         operator simd_type() const;
 
         XSIMD_DECLARE_LOAD_STORE_ALL(double, 2);
+        XSIMD_DECLARE_LOAD_STORE_LONG(double, 2);
 
         using base_type::load_aligned;
         using base_type::load_unaligned;
@@ -210,6 +211,8 @@ namespace xsimd
     {
         return load_aligned(d);
     }
+
+    XSIMD_DEFINE_LOAD_STORE_LONG(double, 2, 16)
 
     inline batch<double, 2>& batch<double, 2>::load_aligned(const float* d)
     {

@@ -12,11 +12,9 @@
 #include <numeric>
 #include <limits>
 
+#include "xsimd/xsimd.hpp"
 #include "xsimd_test_utils.hpp"
 #include "xsimd_tester.hpp"
-
-#include "xsimd/types/xsimd_traits.hpp"
-#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
@@ -1613,6 +1611,10 @@ namespace xsimd
         using uint32_vector = std::vector<uint32_t, aligned_allocator<uint32_t, A>>;
         using int64_vector = std::vector<int64_t, aligned_allocator<int64_t, A>>;
         using uint64_vector = std::vector<uint64_t, aligned_allocator<uint64_t, A>>;
+#ifdef XSIMD_32_BIT_ABI
+        using long_vector = std::vector<long, aligned_allocator<long, A>>;
+        using ulong_vector = std::vector<unsigned long, aligned_allocator<unsigned long, A>>;
+#endif
         using float_vector = std::vector<float, aligned_allocator<float, A>>;
         using double_vector = std::vector<double, aligned_allocator<double, A>>;
 
@@ -1639,6 +1641,13 @@ namespace xsimd
         uint64_vector ui64_vec2;
         float_vector f_vec2;
         double_vector d_vec2;
+
+#ifdef XSIMD_32_BIT_ABI
+        long_vector long_vec;
+        ulong_vector ulong_vec;
+        long_vector long_vec2;
+        ulong_vector ulong_vec2;
+#endif
 
         simd_load_store_tester(const std::string& n);
     };
@@ -1671,6 +1680,18 @@ namespace xsimd
         std::iota(ui64_vec2.begin(), ui64_vec2.end(), uint64_t(1));
         std::iota(f_vec2.begin(), f_vec2.end(), float(1));
         std::iota(d_vec2.begin(), d_vec2.end(), double(1));
+
+#ifdef XSIMD_32_BIT_ABI
+        using ulong = unsigned long;
+        long_vec.resize(2 * N);
+        ulong_vec.resize(2 * N);
+        long_vec2.resize(N);
+        ulong_vec2.resize(N);
+        std::iota(long_vec.begin(), long_vec.end(), long(1));
+        std::iota(ulong_vec.begin(), ulong_vec.end(), ulong(1));
+        std::iota(long_vec2.begin(), long_vec2.end(), long(1));
+        std::iota(ulong_vec2.begin(), ulong_vec2.end(), ulong(1));
+#endif
     }
 
     /*************
@@ -1722,6 +1743,17 @@ namespace xsimd
         uint64_vector ui64vres2(double_batch::size);
         float_vector fvres2(double_batch::size);
         double_vector dvres2(double_batch::size);
+
+#ifdef XSIMD_32_BIT_ABI
+        using long_vector = typename T::long_vector;
+        using ulong_vector = typename T::ulong_vector;
+
+        long_vector longvres(float_batch::size);
+        ulong_vector ulongvres(float_batch::size);
+
+        long_vector longvres2(double_batch::size);
+        ulong_vector ulongvres2(double_batch::size);
+#endif
 
         bool success = true;
         bool tmp_success = true;
@@ -1784,6 +1816,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
+#ifdef XSIMD_32_BIT_ABI
+        topic = "load long    -> float  : ";
+        detail::load_vec(fbres, tester.long_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+
+        topic = "load ulong   -> float  : ";
+        detail::load_vec(fbres, tester.ulong_vec);
+        detail::store_vec(fbres, fvres);
+        tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
+        success = tmp_success && success;
+#endif
+
         topic = "load double  -> float  : ";
         detail::load_vec(fbres, tester.d_vec);
         detail::store_vec(fbres, fvres);
@@ -1838,6 +1884,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
+#ifdef XSIMD_32_BIT_ABI
+        topic = "load long    -> double : ";
+        detail::load_vec(dbres, tester.long_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load ulong   -> double : ";
+        detail::load_vec(dbres, tester.ulong_vec);
+        detail::store_vec(dbres, dvres2);
+        tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
+        success = tmp_success && success;
+#endif
+
         topic = "load float   -> double : ";
         detail::load_vec(dbres, tester.f_vec);
         detail::store_vec(dbres, dvres2);
@@ -1879,6 +1939,21 @@ namespace xsimd
         detail::store_vec(i32bres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
+
+#ifdef XSIMD_32_BIT_ABI
+        topic = "load long    -> int32  : ";
+        detail::load_vec(i32bres, tester.long_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+        topic = "load ulong   -> int32  : ";
+        detail::load_vec(i32bres, tester.ulong_vec);
+        detail::store_vec(i32bres, i32vres);
+        tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
+        success = tmp_success && success;
+
+#endif
 
         topic = "load float   -> int32  : ";
         detail::load_vec(i32bres, tester.f_vec);
@@ -1927,6 +2002,21 @@ namespace xsimd
         detail::store_vec(i64bres, i64vres2);
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
+
+#ifdef XSIMD_32_BIT_ABI
+        topic = "load long    -> int64  : ";
+        detail::load_vec(i64bres, tester.long_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+        topic = "load ulong   -> int64  : ";
+        detail::load_vec(i64bres, tester.ulong_vec);
+        detail::store_vec(i64bres, i64vres2);
+        tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
+        success = tmp_success && success;
+
+#endif
 
         topic = "load float   -> int64  : ";
         detail::load_vec(i64bres, tester.f_vec);
@@ -1994,6 +2084,16 @@ namespace xsimd
         float_vector fvres2(dsize);
         double_vector dvres2(dsize);
 
+#ifdef XSIMD_32_BIT_ABI
+        using long_vector = typename T::long_vector;
+        using ulong_vector = typename T::ulong_vector;
+
+        long_vector longvres(fsize);
+        ulong_vector ulongvres(fsize);
+
+        long_vector longvres2(dsize);
+        ulong_vector ulongvres2(dsize);
+#endif
         bool success = true;
         bool tmp_success = true;
 
@@ -2059,6 +2159,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, ui64vres, tester.ui64_vec, out);
         success = tmp_success && success;
 
+#ifdef XSIMD_32_BIT_ABI
+        topic = "store float  -> long   : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, longvres);
+        tmp_success = check_almost_equal(topic, longvres, tester.long_vec, out);
+        success = tmp_success && success;
+
+        topic = "store float  -> ulong  : ";
+        detail::load_vec(fbres, tester.f_vec);
+        detail::store_vec(fbres, ulongvres);
+        tmp_success = check_almost_equal(topic, ulongvres, tester.ulong_vec, out);
+        success = tmp_success && success;
+#endif
+
         topic = "store float  -> double : ";
         detail::load_vec(fbres, tester.f_vec);
         detail::store_vec(fbres, dvres);
@@ -2117,6 +2231,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, ui64vres2, tester.ui64_vec2, out);
         success = tmp_success && success;
 
+#ifdef XSIMD_32_BIT_ABI
+        topic = "store double -> long   : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, longvres2);
+        tmp_success = check_almost_equal(topic, longvres2, tester.long_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store double -> ulong  : ";
+        detail::load_vec(dbres, tester.d_vec);
+        detail::store_vec(dbres, ulongvres2);
+        tmp_success = check_almost_equal(topic, ulongvres2, tester.ulong_vec2, out);
+        success = tmp_success && success;
+#endif
+
         topic = "store double -> float  : ";
         detail::load_vec(dbres, tester.d_vec);
         detail::store_vec(dbres, fvres2);
@@ -2169,6 +2297,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, ui64vres, tester.ui64_vec, out);
         success = tmp_success && success;
 
+#ifdef XSIMD_32_BIT_ABI
+        topic = "store int32  -> long   : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, longvres);
+        tmp_success = check_almost_equal(topic, longvres, tester.long_vec, out);
+        success = tmp_success && success;
+
+        topic = "store int32  -> ulong  : ";
+        detail::load_vec(i32bres, tester.i32_vec);
+        detail::store_vec(i32bres, ulongvres);
+        tmp_success = check_almost_equal(topic, ulongvres, tester.ulong_vec, out);
+        success = tmp_success && success;
+#endif
+
         topic = "store int32  -> float  : ";
         detail::load_vec(i32bres, tester.i32_vec);
         detail::store_vec(i32bres, i32vres);
@@ -2220,6 +2362,20 @@ namespace xsimd
         detail::store_vec(i64bres, ui32vres2);
         tmp_success = check_almost_equal(topic, ui32vres2, tester.ui32_vec2, out);
         success = tmp_success && success;
+
+#ifdef XSIMD_32_BIT_ABI
+        topic = "store int64  -> long   : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, longvres2);
+        tmp_success = check_almost_equal(topic, longvres2, tester.long_vec2, out);
+        success = tmp_success && success;
+
+        topic = "store int64  -> ulong  : ";
+        detail::load_vec(i64bres, tester.i64_vec);
+        detail::store_vec(i64bres, ulongvres2);
+        tmp_success = check_almost_equal(topic, ulongvres2, tester.ulong_vec2, out);
+        success = tmp_success && success;
+#endif
 
         topic = "store int64  -> float  : ";
         detail::load_vec(i64bres, tester.i64_vec);

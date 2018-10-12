@@ -80,6 +80,7 @@ namespace xsimd
         operator __m128d() const;
 
         XSIMD_DECLARE_LOAD_STORE_ALL(double, 2);
+        XSIMD_DECLARE_LOAD_STORE_LONG(double, 2);
 
         using base_type::load_aligned;
         using base_type::load_unaligned;
@@ -314,6 +315,7 @@ namespace xsimd
     XSIMD_DEFINE_LOAD_STORE(double, 2, uint32_t, 16)
     XSIMD_DEFINE_LOAD_STORE(double, 2, int64_t, 16)
     XSIMD_DEFINE_LOAD_STORE(double, 2, uint64_t, 16)
+    XSIMD_DEFINE_LOAD_STORE_LONG(double, 2, 16)
     XSIMD_DEFINE_LOAD_STORE(double, 2, float, 16)
 
     inline batch<double, 2>& batch<double, 2>::load_aligned(const double* src)

@@ -20,6 +20,8 @@
 #include <typeinfo>
 #include <vector>
 
+#include "xsimd/config/xsimd_config.hpp"
+
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
 #include "xtl/xcomplex.hpp"
 #endif
@@ -88,6 +90,13 @@ namespace xsimd
     {
         return val;
     }
+
+#ifdef XSIMD_32_BIT_ABI
+    inline unsigned long uabs(unsigned long val)
+    {
+        return val;
+    }
+#endif
 
     template <class T>
     inline std::string value_type_name()

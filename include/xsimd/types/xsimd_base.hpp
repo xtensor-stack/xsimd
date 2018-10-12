@@ -418,6 +418,66 @@ namespace xsimd
         return store_aligned(dst);                                             \
     }
 
+#ifdef XSIMD_32_BIT_ABI
+
+#define XSIMD_DECLARE_LOAD_STORE_LONG(TYPE, N)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, long);                                   \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, unsigned long)                           \
+
+    namespace detail
+    {
+        template <class T>
+        struct get_int_type;
+
+        template <>
+        struct get_int_type<long>
+        {
+            using type = int32_t;
+        };
+
+        template <>
+        struct get_int_type<unsigned long>
+        {
+            using type = uint32_t;
+        };
+
+        template <class T>
+        using get_int_type_t = typename get_int_type<T>::type;
+    }
+
+#define XSIMD_DEFINE_LOAD_STORE_LONG_IMPL(TYPE, N, CVT_TYPE, ALIGNMENT)        \
+    inline batch<TYPE, N>& batch<TYPE, N>::load_aligned(const CVT_TYPE* src)   \
+    {                                                                          \
+        using int_type = detail::get_int_type_t<CVT_TYPE>;                     \
+        return this->load_aligned(reinterpret_cast<const int_type*>(src));     \
+    }                                                                          \
+    inline batch<TYPE, N>& batch<TYPE, N>::load_unaligned(const CVT_TYPE* src) \
+    {                                                                          \
+        using int_type = detail::get_int_type_t<CVT_TYPE>;                     \
+        return this->load_unaligned(reinterpret_cast<const int_type*>(src));   \
+    }                                                                          \
+    inline void batch<TYPE, N>::store_aligned(CVT_TYPE* dst) const             \
+    {                                                                          \
+        using int_type = detail::get_int_type_t<CVT_TYPE>;                     \
+        this->store_aligned(reinterpret_cast<int_type*>(dst));                 \
+    }                                                                          \
+    inline void batch<TYPE, N>::store_unaligned(CVT_TYPE* dst) const           \
+    {                                                                          \
+        using int_type = detail::get_int_type_t<CVT_TYPE>;                     \
+        this->store_unaligned(reinterpret_cast<int_type*>(dst));               \
+    }                                                                          \
+
+#define XSIMD_DEFINE_LOAD_STORE_LONG(TYPE, N, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE_LONG_IMPL(TYPE, N, long, ALIGNMENT)                \
+    XSIMD_DEFINE_LOAD_STORE_LONG_IMPL(TYPE, N, unsigned long, ALIGNMENT)       \
+
+#else
+
+#define XSIMD_DECLARE_LOAD_STORE_LONG(TYPE, N)
+#define XSIMD_DEFINE_LOAD_STORE_LONG(TYPE, N, ALIGNMENT)
+
+#endif // XSIMD_32_BIT_ABI
+
 #define XSIMD_DECLARE_LOAD_STORE_INT8(TYPE, N)                                 \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t);                                \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t);                               \

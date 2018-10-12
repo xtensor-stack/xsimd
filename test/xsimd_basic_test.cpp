@@ -13,9 +13,6 @@
 
 #include "gtest/gtest.h"
 
-#include "xsimd/memory/xsimd_aligned_allocator.hpp"
-#include "xsimd/types/xsimd_types_include.hpp"
-
 #include "xsimd_basic_test.hpp"
 #include "xsimd_complex_basic_test.hpp"
 

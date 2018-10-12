@@ -10,6 +10,7 @@
 #define XSIMD_AVX_COMPLEX_HPP
 
 #include <complex>
+#include <tuple>
 #include <utility>
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
