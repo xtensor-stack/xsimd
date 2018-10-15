@@ -675,6 +675,13 @@ TEST(xsimd, neon_int64_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, neon_uint64_basic)
+{
+    std::ofstream out("log/neon_uint64_basic.log", std::ios_base::out);
+    bool res = xsimd::test_simd_int<uint64_t, 2, 32>(out, "neon uint64");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_complex_float_basic)
 {
     std::ofstream out("log/neon_complex_float_basic.log", std::ios_base::out);
