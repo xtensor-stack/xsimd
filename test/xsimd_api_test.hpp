@@ -15,6 +15,108 @@
 
 namespace xsimd
 {
+    /*********************
+     * load_store tester *
+     *********************/
+
+    template <std::size_t N, std::size_t A>
+    struct simd_api_load_store_tester
+    {
+        using int32_batch = batch<int32_t, N * 2>;
+        using int64_batch = batch<int64_t, N>;
+        using float_batch = batch<float, N * 2>;
+        using double_batch = batch<double, N>;
+
+        using int8_vector = std::vector<int8_t, aligned_allocator<int8_t, A>>;
+        using uint8_vector = std::vector<uint8_t, aligned_allocator<uint8_t, A>>;
+        using int16_vector = std::vector<int16_t, aligned_allocator<int16_t, A>>;
+        using uint16_vector = std::vector<uint16_t, aligned_allocator<uint16_t, A>>;
+        using int32_vector = std::vector<int32_t, aligned_allocator<int32_t, A>>;
+        using uint32_vector = std::vector<uint32_t, aligned_allocator<uint32_t, A>>;
+        using int64_vector = std::vector<int64_t, aligned_allocator<int64_t, A>>;
+        using uint64_vector = std::vector<uint64_t, aligned_allocator<uint64_t, A>>;
+#ifdef XSIMD_32_BIT_ABI
+        using long_vector = std::vector<long, aligned_allocator<long, A>>;
+        using ulong_vector = std::vector<unsigned long, aligned_allocator<unsigned long, A>>;
+#endif
+        using float_vector = std::vector<float, aligned_allocator<float, A>>;
+        using double_vector = std::vector<double, aligned_allocator<double, A>>;
+
+        std::string name;
+
+        int8_vector i8_vec;
+        uint8_vector ui8_vec;
+        int16_vector i16_vec;
+        uint16_vector ui16_vec;
+        int32_vector i32_vec;
+        uint32_vector ui32_vec;
+        int64_vector i64_vec;
+        uint64_vector ui64_vec;
+        float_vector f_vec;
+        double_vector d_vec;
+
+        int8_vector i8_vec2;
+        uint8_vector ui8_vec2;
+        int16_vector i16_vec2;
+        uint16_vector ui16_vec2;
+        int32_vector i32_vec2;
+        uint32_vector ui32_vec2;
+        int64_vector i64_vec2;
+        uint64_vector ui64_vec2;
+        float_vector f_vec2;
+        double_vector d_vec2;
+
+#ifdef XSIMD_32_BIT_ABI
+        long_vector long_vec;
+        ulong_vector ulong_vec;
+        long_vector long_vec2;
+        ulong_vector ulong_vec2;
+#endif
+
+        simd_api_load_store_tester(const std::string& n);
+    };
+
+    template <std::size_t N, std::size_t A>
+    inline simd_api_load_store_tester<N, A>::simd_api_load_store_tester(const std::string& n)
+        : name(n),
+          i8_vec(16 * N), ui8_vec(16 * N), i16_vec(16 * N), ui16_vec(16 * N),
+          i32_vec(2 * N), ui32_vec(2 * N), i64_vec(2 * N), ui64_vec(2 * N), f_vec(2 * N), d_vec(2 * N),
+          i8_vec2(8 * N), ui8_vec2(8 * N), i16_vec2(8 * N), ui16_vec2(8 * N),
+          i32_vec2(N), ui32_vec2(N), i64_vec2(N), ui64_vec2(N), f_vec2(N), d_vec2(N)
+    {
+        std::iota(i8_vec.begin(), i8_vec.end(), int8_t(1));
+        std::iota(ui8_vec.begin(), ui8_vec.end(), uint8_t(1));
+        std::iota(i16_vec.begin(), i16_vec.end(), int16_t(1));
+        std::iota(ui16_vec.begin(), ui16_vec.end(), uint16_t(1));
+        std::iota(i32_vec.begin(), i32_vec.end(), int32_t(1));
+        std::iota(ui32_vec.begin(), ui32_vec.end(), uint32_t(1));
+        std::iota(i64_vec.begin(), i64_vec.end(), int64_t(1));
+        std::iota(ui64_vec.begin(), ui64_vec.end(), uint64_t(1));
+        std::iota(f_vec.begin(), f_vec.end(), float(1));
+        std::iota(d_vec.begin(), d_vec.end(), double(1));
+        std::iota(i8_vec2.begin(), i8_vec2.end(), int8_t(1));
+        std::iota(ui8_vec2.begin(), ui8_vec2.end(), uint8_t(1));
+        std::iota(i16_vec2.begin(), i16_vec2.end(), int16_t(1));
+        std::iota(ui16_vec2.begin(), ui16_vec2.end(), uint16_t(1));
+        std::iota(i32_vec2.begin(), i32_vec2.end(), int32_t(1));
+        std::iota(ui32_vec2.begin(), ui32_vec2.end(), uint32_t(1));
+        std::iota(i64_vec2.begin(), i64_vec2.end(), int64_t(1));
+        std::iota(ui64_vec2.begin(), ui64_vec2.end(), uint64_t(1));
+        std::iota(f_vec2.begin(), f_vec2.end(), float(1));
+        std::iota(d_vec2.begin(), d_vec2.end(), double(1));
+
+#ifdef XSIMD_32_BIT_ABI
+        using ulong = unsigned long;
+        long_vec.resize(2 * N);
+        ulong_vec.resize(2 * N);
+        long_vec2.resize(N);
+        ulong_vec2.resize(N);
+        std::iota(long_vec.begin(), long_vec.end(), long(1));
+        std::iota(ulong_vec.begin(), ulong_vec.end(), ulong(1));
+        std::iota(long_vec2.begin(), long_vec2.end(), long(1));
+        std::iota(ulong_vec2.begin(), ulong_vec2.end(), ulong(1));
+#endif
+    }
 
     /*************
      * load test *
@@ -84,7 +186,7 @@ namespace xsimd
         store_simd(fvres.data(), fbres, aligned_mode());
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
-        
+
         topic = "loadu int32  -> float  : ";
         fbres = load_simd<int32_t, float>(tester.i32_vec.data(), unaligned_mode());
         store_simd(fvres.data(), fbres, unaligned_mode());
@@ -423,7 +525,7 @@ namespace xsimd
         store_simd(fvres.data(), fbres, aligned_mode());
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
-        
+
         topic = "storeu float  -> float  : ";
         fbres = load_simd<float>(tester.f_vec.data(), unaligned_mode());
         store_simd(fvres.data(), fbres, unaligned_mode());

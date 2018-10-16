@@ -53,20 +53,12 @@ namespace xsimd
         return test_simd_cast(out, tester);
     }
 
-    template <size_t N, size_t A>
-    bool test_simd_load(std::ostream& out, const std::string& name)
+    template <class T, size_t N, size_t A>
+    bool test_simd_load_store(std::ostream& out, const std::string& name)
     {
-        simd_load_store_tester<N, A> tester(name);
-        return test_simd_load(out, tester);
+        simd_load_store_tester<T, N, A> tester(name);
+        return test_simd_load_store(out, tester);
     }
-
-    template <size_t N, size_t A>
-    bool test_simd_store(std::ostream& out, const std::string& name)
-    {
-        simd_load_store_tester<N, A> tester(name);
-        return test_simd_store(out, tester);
-    }
-
 
     template <class T, size_t N, size_t A>
     bool test_complex_simd_load_store(std::ostream& out, const std::string& name)
@@ -150,10 +142,24 @@ TEST(xsimd, sse_int8_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, sse_int8_load_store)
+{
+    std::ofstream out("log/sse_int8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int8_t, 16, 16>(out, "sse int8");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, sse_uint8_basic)
 {
     std::ofstream out("log/sse_uint8_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint8_t, 16, 16>(out, "sse uint8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_uint8_load_store)
+{
+    std::ofstream out("log/sse_uint8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint8_t, 16, 16>(out, "sse uint8");
     EXPECT_TRUE(res);
 }
 
@@ -164,10 +170,24 @@ TEST(xsimd, sse_int16_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, sse_int16_load_store)
+{
+    std::ofstream out("log/sse_int16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int16_t, 8, 16>(out, "sse int16");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, sse_uint16_basic)
 {
     std::ofstream out("log/sse_uint16_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint16_t, 8, 16>(out, "sse uint16");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_uint16_load_store)
+{
+    std::ofstream out("log/sse_uint16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint16_t, 8, 16>(out, "sse uint16");
     EXPECT_TRUE(res);
 }
 
@@ -178,10 +198,24 @@ TEST(xsimd, sse_int32_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, sse_int32_load_store)
+{
+    std::ofstream out("log/sse_int32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int32_t, 4, 16>(out, "sse int32");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, sse_uint32_basic)
 {
     std::ofstream out("log/sse_uint32_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint32_t, 4, 16>(out, "sse uint32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_uint32_load_store)
+{
+    std::ofstream out("log/sse_uint32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint32_t, 4, 16>(out, "sse uint32");
     EXPECT_TRUE(res);
 }
 
@@ -192,10 +226,24 @@ TEST(xsimd, sse_int64_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, sse_int64_load_store)
+{
+    std::ofstream out("log/sse_int64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int64_t, 2, 16>(out, "sse int64");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, sse_uint64_basic)
 {
     std::ofstream out("log/sse_uint64_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint64_t, 2, 16>(out, "sse uint64");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_uint64_load_store)
+{
+    std::ofstream out("log/sse_uint64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint64_t, 2, 16>(out, "sse uint64");
     EXPECT_TRUE(res);
 }
 
@@ -240,20 +288,6 @@ TEST(xsimd, sse_cast)
 {
     std::ofstream out("log/sse_cast.log", std::ios_base::out);
     bool res = xsimd::test_simd_cast<2, 16>(out, "sse cast");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, sse_load)
-{
-    std::ofstream out("log/sse_load.log", std::ios_base::out);
-    bool res = xsimd::test_simd_load<2, 16>(out, "sse load");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, sse_store)
-{
-    std::ofstream out("log/sse_store.log", std::ios_base::out);
-    bool res = xsimd::test_simd_store<2, 16>(out, "sse store");
     EXPECT_TRUE(res);
 }
 
@@ -314,10 +348,24 @@ TEST(xsimd, avx_int8_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx_int8_load_store)
+{
+    std::ofstream out("log/avx_int8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int8_t, 32, 32>(out, "avx int8");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx_uint8_basic)
 {
     std::ofstream out("log/avx_uint8_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint8_t, 32, 32>(out, "avx uint8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_uint8_load_store)
+{
+    std::ofstream out("log/avx_uint8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint8_t, 32, 32>(out, "avx uint8");
     EXPECT_TRUE(res);
 }
 
@@ -328,10 +376,24 @@ TEST(xsimd, avx_int16_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx_int16_load_store)
+{
+    std::ofstream out("log/avx_int16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int16_t, 16, 32>(out, "avx int16");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx_uint16_basic)
 {
     std::ofstream out("log/avx_uint16_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint16_t, 16, 32>(out, "avx uint16");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_uint16_load_store)
+{
+    std::ofstream out("log/avx_uint16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint16_t, 16, 32>(out, "avx uint16");
     EXPECT_TRUE(res);
 }
 
@@ -342,10 +404,24 @@ TEST(xsimd, avx_int32_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx_int32_load_store)
+{
+    std::ofstream out("log/avx_int32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int32_t, 8, 32>(out, "avx int32");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx_uint32_basic)
 {
     std::ofstream out("log/avx_uint32_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint32_t, 8, 32>(out, "avx uint32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_uint32_load_store)
+{
+    std::ofstream out("log/avx_uint32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint32_t, 8, 32>(out, "avx uint32");
     EXPECT_TRUE(res);
 }
 
@@ -356,10 +432,24 @@ TEST(xsimd, avx_int64_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx_int64_load_store)
+{
+    std::ofstream out("log/avx_int64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int64_t, 4, 32>(out, "avx int64");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx_uint64_basic)
 {
     std::ofstream out("log/avx_uint64_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint64_t, 4, 32>(out, "avx uint64");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_uint64_load_store)
+{
+    std::ofstream out("log/avx_uint64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint64_t, 4, 32>(out, "avx uint64");
     EXPECT_TRUE(res);
 }
 
@@ -404,19 +494,6 @@ TEST(xsimd, avx_cast)
 {
     std::ofstream out("log/avx_cast.log", std::ios_base::out);
     bool res = xsimd::test_simd_cast<4, 32>(out, "avx cast");
-    EXPECT_TRUE(res);
-}
-TEST(xsimd, avx_load)
-{
-    std::ofstream out("log/avx_load.log", std::ios_base::out);
-    bool res = xsimd::test_simd_load<4, 32>(out, "avx load");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, avx_store)
-{
-    std::ofstream out("log/avx_store.log", std::ios_base::out);
-    bool res = xsimd::test_simd_store<4, 32>(out, "avx store");
     EXPECT_TRUE(res);
 }
 
@@ -477,10 +554,24 @@ TEST(xsimd, avx512_int8_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx512_int8_load_store)
+{
+    std::ofstream out("log/avx512_int8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int8_t, 64, 64>(out, "avx512 int8");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_uint8_basic)
 {
     std::ofstream out("log/avx512_uint8_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint8_t, 64, 64>(out, "avx512 uint8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_uint8_load_store)
+{
+    std::ofstream out("log/avx512_uint8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint8_t, 64, 64>(out, "avx512 uint8");
     EXPECT_TRUE(res);
 }
 
@@ -491,10 +582,24 @@ TEST(xsimd, avx512_int16_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx512_int16_load_store)
+{
+    std::ofstream out("log/avx512_int16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int16_t, 32, 64>(out, "avx512 int16");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_uint16_basic)
 {
     std::ofstream out("log/avx512_uint16_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint16_t, 32, 64>(out, "avx512 uint16");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_uint16_load_store)
+{
+    std::ofstream out("log/avx512_uint16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint16_t, 32, 64>(out, "avx512 uint16");
     EXPECT_TRUE(res);
 }
 
@@ -505,10 +610,24 @@ TEST(xsimd, avx512_int32_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx512_int32_load_store)
+{
+    std::ofstream out("log/avx512_int32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int32_t, 16, 64>(out, "avx512 int32");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_uint32_basic)
 {
     std::ofstream out("log/avx512_uint32_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint32_t, 16, 64>(out, "avx512 uint32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_uint32_load_store)
+{
+    std::ofstream out("log/avx512_uint32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint32_t, 16, 64>(out, "avx512 uint32");
     EXPECT_TRUE(res);
 }
 
@@ -519,10 +638,24 @@ TEST(xsimd, avx512_int64_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, avx512_int64_load_store)
+{
+    std::ofstream out("log/avx512_int64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int64_t, 8, 64>(out, "avx512 int64");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_uint64_basic)
 {
     std::ofstream out("log/avx512_uint64_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint64_t, 8, 64>(out, "avx512 uint64");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_uint64_load_store)
+{
+    std::ofstream out("log/avx512_uint64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint64_t, 8, 64>(out, "avx512 uint64");
     EXPECT_TRUE(res);
 }
 
@@ -567,19 +700,6 @@ TEST(xsimd, avx512_cast)
 {
     std::ofstream out("log/avx512_cast.log", std::ios_base::out);
     bool res = xsimd::test_simd_cast<8, 64>(out, "avx512 cast");
-    EXPECT_TRUE(res);
-}
-TEST(xsimd, avx512_load)
-{
-    std::ofstream out("log/avx512_load.log", std::ios_base::out);
-    bool res = xsimd::test_simd_load<8, 64>(out, "avx512 load");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, avx512_store)
-{
-    std::ofstream out("log/avx512_store.log", std::ios_base::out);
-    bool res = xsimd::test_simd_store<8, 64>(out, "avx512 store");
     EXPECT_TRUE(res);
 }
 
@@ -633,10 +753,24 @@ TEST(xsimd, neon_int8_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, neon_int8_load_store)
+{
+    std::ofstream out("log/neon_int8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int8_t, 16, 32>(out, "neon int8");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_uint8_basic)
 {
     std::ofstream out("log/neon_uint8_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint8_t, 16, 32>(out, "neon uint8");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_uint8_load_store)
+{
+    std::ofstream out("log/neon_uint8_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint8_t, 16, 32>(out, "neon uint8");
     EXPECT_TRUE(res);
 }
 
@@ -647,10 +781,24 @@ TEST(xsimd, neon_int16_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, neon_int16_load_store)
+{
+    std::ofstream out("log/neon_int16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int16_t, 8, 32>(out, "neon int16");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_uint16_basic)
 {
     std::ofstream out("log/neon_uint16_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint16_t, 8, 32>(out, "neon uint16");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_uint16_load_store)
+{
+    std::ofstream out("log/neon_uint16_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint16_t, 8, 32>(out, "neon uint16");
     EXPECT_TRUE(res);
 }
 
@@ -661,10 +809,24 @@ TEST(xsimd, neon_int32_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, neon_int32_load_store)
+{
+    std::ofstream out("log/neon_int32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int32_t, 4, 32>(out, "neon int32");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_uint32_basic)
 {
     std::ofstream out("log/neon_uint32_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint32_t, 4, 32>(out, "neon uint32");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_uint32_load_store)
+{
+    std::ofstream out("log/neon_uint32_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint32_t, 4, 32>(out, "neon uint32");
     EXPECT_TRUE(res);
 }
 
@@ -675,10 +837,24 @@ TEST(xsimd, neon_int64_basic)
     EXPECT_TRUE(res);
 }
 
+TEST(xsimd, neon_int64_load_store)
+{
+    std::ofstream out("log/neon_int64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<int64_t, 2, 32>(out, "neon int64");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_uint64_basic)
 {
     std::ofstream out("log/neon_uint64_basic.log", std::ios_base::out);
     bool res = xsimd::test_simd_int<uint64_t, 2, 32>(out, "neon uint64");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_uint64_load_store)
+{
+    std::ofstream out("log/neon_uint64_load_store.log", std::ios_base::out);
+    bool res = xsimd::test_simd_load_store<uint64_t, 2, 32>(out, "neon uint64");
     EXPECT_TRUE(res);
 }
 
@@ -733,20 +909,6 @@ TEST(xsimd, neon_cast)
 {
     std::ofstream out("log/neon_cast.log", std::ios_base::out);
     bool res = xsimd::test_simd_cast<2, 16>(out, "neon cast");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, neon_load)
-{
-    std::ofstream out("log/neon_load.log", std::ios_base::out);
-    bool res = xsimd::test_simd_load<2, 16>(out, "neon load");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, neon_store)
-{
-    std::ofstream out("log/neon_store.log", std::ios_base::out);
-    bool res = xsimd::test_simd_store<2, 16>(out, "neon store");
     EXPECT_TRUE(res);
 }
 
@@ -857,20 +1019,6 @@ TEST(xsimd, fallback_cast)
 {
     std::ofstream out("log/fallback_cast.log", std::ios_base::out);
     bool res = xsimd::test_simd_cast<3, 32>(out, "fallback cast");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, fallback_load)
-{
-    std::ofstream out("log/fallback_load.log", std::ios_base::out);
-    bool res = xsimd::test_simd_load<3, 32>(out, "fallback load");
-    EXPECT_TRUE(res);
-}
-
-TEST(xsimd, fallback_store)
-{
-    std::ofstream out("log/fallback_store.log", std::ios_base::out);
-    bool res = xsimd::test_simd_store<3, 32>(out, "fallback store");
     EXPECT_TRUE(res);
 }
 
