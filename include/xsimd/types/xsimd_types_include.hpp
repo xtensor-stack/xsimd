@@ -63,6 +63,7 @@
 #include "xsimd_neon_int32.hpp"
 #include "xsimd_neon_uint32.hpp"
 #include "xsimd_neon_int64.hpp"
+#include "xsimd_neon_uint64.hpp"
 #include "xsimd_neon_complex.hpp"
 #endif
 
