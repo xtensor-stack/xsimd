@@ -549,7 +549,7 @@ namespace xsimd
     template <typename T, std::size_t N>
     template <typename... Args, typename Enable>
     inline batch<T, N>::batch(Args... exactly_N_scalars)
-        : m_value{ exactly_N_scalars... }
+        : m_value{ static_cast<T>(exactly_N_scalars)... }
     {
     }
 
