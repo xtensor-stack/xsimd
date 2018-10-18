@@ -197,7 +197,7 @@ namespace xsimd
 
         simd_batch(simd_batch&&) = default;
         simd_batch& operator=(simd_batch&&) = default;
-        
+
         using char_itype = typename std::conditional<std::is_signed<char>::value, int8_t, uint8_t>::type;
     };
 
@@ -317,7 +317,7 @@ namespace xsimd
     X fnms(const simd_batch<X>& x, const simd_batch<X>& y, const simd_batch<X>& z);
 
     template <class X>
-    typename simd_batch_traits<X>::value_type 
+    typename simd_batch_traits<X>::value_type
     hadd(const simd_batch<X>& rhs);
 
     template <class X>
@@ -528,6 +528,16 @@ namespace xsimd
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
 
+#define XSIMD_DEFINE_LOAD_STORE_INT32(TYPE, N, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int8_t, ALIGNMENT);                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint8_t, ALIGNMENT);                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int16_t, ALIGNMENT);                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint16_t, ALIGNMENT);                     \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int64_t, ALIGNMENT);                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint64_t, ALIGNMENT);                     \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, float, ALIGNMENT);                        \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, double, ALIGNMENT)
+
 #define XSIMD_DECLARE_LOAD_STORE_INT64(TYPE, N)                                \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t);                                 \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t);                                \
@@ -537,6 +547,16 @@ namespace xsimd
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t);                               \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
+
+#define XSIMD_DEFINE_LOAD_STORE_INT64(TYPE, N, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int8_t, ALIGNMENT);                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint8_t, ALIGNMENT);                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int16_t, ALIGNMENT);                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint16_t, ALIGNMENT);                     \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int32_t, ALIGNMENT);                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint32_t, ALIGNMENT);                     \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, float, ALIGNMENT);                        \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, double, ALIGNMENT)
 
 #define XSIMD_DECLARE_LOAD_STORE_ALL(TYPE, N)                                  \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t);                                 \
@@ -1176,7 +1196,7 @@ namespace xsimd
         using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
         return kernel::neg(rhs());
     }
-    
+
     /**
      * @ingroup simd_batch_arithmetic
      *
@@ -1227,7 +1247,7 @@ namespace xsimd
     {
         return X(lhs) + rhs();
     }
-    
+
     /**
      * @ingroup simd_batch_arithmetic
      *
@@ -1278,7 +1298,7 @@ namespace xsimd
     {
         return X(lhs) - rhs();
     }
-    
+
     /**
      * @ingroup simd_batch_arithmetic
      *
@@ -1329,7 +1349,7 @@ namespace xsimd
     {
         return X(lhs) * rhs();
     }
-    
+
     /**
      * @ingroup simd_batch_arithmetic
      *
@@ -1570,7 +1590,7 @@ namespace xsimd
         using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
         return kernel::bitwise_or(lhs(), rhs());
     }
-    
+
     /**
      * @ingroup simd_batch_bitwise
      *
@@ -1630,7 +1650,7 @@ namespace xsimd
     {
         return rhs() == X(0);
     }
-    
+
     /**
      * Returns the smaller values of the batches \c lhs and \c rhs.
      * @param lhs a batch of integer or floating point values.
@@ -1686,7 +1706,7 @@ namespace xsimd
         using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
         return kernel::fmax(lhs(), rhs());
     }
-    
+
     /**
      * Computes the absolute values of each scalar in the batch \c rhs.
      * @param rhs batch of integer or floating point values.

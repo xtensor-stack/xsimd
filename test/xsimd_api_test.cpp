@@ -17,14 +17,14 @@ namespace xsimd
     template <size_t N, size_t A>
     bool test_api_load(std::ostream& out, const std::string& name)
     {
-        simd_load_store_tester<N, A> tester(name);
+        simd_api_load_store_tester<N, A> tester(name);
         return test_simd_api_load(out, tester);
     }
 
     template <size_t N, size_t A>
     bool test_api_store(std::ostream& out, const std::string& name)
     {
-        simd_load_store_tester<N, A> tester(name);
+        simd_api_load_store_tester<N, A> tester(name);
         return test_simd_api_store(out, tester);
     }
 
