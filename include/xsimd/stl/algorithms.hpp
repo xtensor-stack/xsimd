@@ -37,7 +37,7 @@ namespace xsimd
 
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                batch_type batch(&first[i], xsimd::aligned_mode{});
+                batch_type batch = xsimd::load_aligned(&first[i]);
                 xsimd::store_aligned(&out_first[i], f(batch));
             }
 
@@ -55,7 +55,7 @@ namespace xsimd
 
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                batch_type batch(&first[i], xsimd::aligned_mode{});
+                batch_type batch = xsimd::load_aligned(&first[i]);
                 xsimd::store_unaligned(&out_first[i], f(batch));
             }
 
@@ -94,8 +94,8 @@ namespace xsimd
                                                                                 \
             for (std::size_t i = align_begin_1; i < align_end; i += simd_size)  \
             {                                                                   \
-                batch_type batch_1(&first_1[i], xsimd::A1{});                   \
-                batch_type batch_2(&first_2[i], xsimd::A2{});                   \
+                batch_type batch_1 = xsimd::A1(&first_1[i]);                    \
+                batch_type batch_2 = xsimd::A2(&first_2[i]);                    \
                 xsimd::A3(&out_first[i], f(batch_1, batch_2));                  \
             }                                                                   \
                                                                                 \
@@ -106,19 +106,21 @@ namespace xsimd
 
         if (align_begin_1 == out_align && align_begin_1 == align_begin_2)
         {
-            XSIMD_LOOP_MACRO(aligned_mode, aligned_mode, store_aligned);
+            XSIMD_LOOP_MACRO(load_aligned, load_aligned, store_aligned);
         }
         else if (align_begin_1 == out_align && align_begin_1 != align_begin_2)
         {
-            XSIMD_LOOP_MACRO(aligned_mode, unaligned_mode, store_aligned);
+            XSIMD_LOOP_MACRO(load_aligned, load_unaligned, store_aligned);
         }
         else if (align_begin_1 != out_align && align_begin_1 == align_begin_2)
         {
-            XSIMD_LOOP_MACRO(aligned_mode, aligned_mode, store_unaligned);
+            XSIMD_LOOP_MACRO(load_aligned, load_aligned, store_unaligned);
         }
         else if (align_begin_1 != out_align && align_begin_1 != align_begin_2)
         {
-            XSIMD_LOOP_MACRO(aligned_mode, unaligned_mode, store_unaligned);
+            XSIMD_LOOP_MACRO(load_aligned, load_unaligned, store_unaligned);
         }
+
+        #undef XSIMD_LOOP_MACRO
     }
 }
