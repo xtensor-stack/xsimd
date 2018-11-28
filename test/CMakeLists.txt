@@ -103,6 +103,7 @@ set(XSIMD_TESTS
     main.cpp
     xsimd_api_test.hpp
     xsimd_api_test.cpp
+    xsimd_algorithms.cpp
     xsimd_basic_test.hpp
     xsimd_basic_test.cpp
     xsimd_basic_math_test.hpp
