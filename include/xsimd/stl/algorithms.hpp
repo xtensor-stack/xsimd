@@ -35,9 +35,10 @@ namespace xsimd
                 out_first[i] = f(first[i]);
             }
 
+            batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                batch_type batch = xsimd::load_aligned(&first[i]);
+                xsimd::load_aligned(&first[i], batch);
                 xsimd::store_aligned(&out_first[i], f(batch));
             }
 
@@ -53,9 +54,10 @@ namespace xsimd
                 out_first[i] = f(first[i]);
             }
 
+            batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                batch_type batch = xsimd::load_aligned(&first[i]);
+                xsimd::load_aligned(&first[i], batch);
                 xsimd::store_unaligned(&out_first[i], f(batch));
             }
 
@@ -92,10 +94,11 @@ namespace xsimd
                 out_first[i] = f(first_1[i], first_2[i]);                       \
             }                                                                   \
                                                                                 \
+            batch_type batch_1, batch_2;                                        \
             for (std::size_t i = align_begin_1; i < align_end; i += simd_size)  \
             {                                                                   \
-                batch_type batch_1 = xsimd::A1(&first_1[i]);                    \
-                batch_type batch_2 = xsimd::A2(&first_2[i]);                    \
+                xsimd::A1(&first_1[i], batch_1);                                \
+                xsimd::A2(&first_2[i], batch_2);                                \
                 xsimd::A3(&out_first[i], f(batch_1, batch_2));                  \
             }                                                                   \
                                                                                 \
