@@ -342,7 +342,7 @@ namespace xsimd
 
             inline static void load_unaligned(const T* src, V& dst)
             {
-                return dst.load_unaligned(src);
+                dst.load_unaligned(src);
             }
 
             inline static void store_aligned(T* dst, const V& src)
