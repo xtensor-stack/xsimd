@@ -9,7 +9,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "xsimd/stl/algorithms.hpp"
+#include "xsimd/xsimd.hpp"
 
 #include "gtest/gtest.h"
 
