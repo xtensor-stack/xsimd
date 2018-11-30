@@ -1869,6 +1869,14 @@ namespace xsimd
         return kernel::select(cond(), a(), b());
     }
 
+    template <int mask, class X>
+    inline X select(const simd_batch<X>& a, const simd_batch<X>& b)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::template compile_time_select<mask>(a(), b());
+    }
+
     /**
      * Determines if the scalars in the given batch \c x are NaN values.
      * @param x batch of floating point values.

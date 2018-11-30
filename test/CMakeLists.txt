@@ -46,11 +46,11 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
     elseif(NOT WIN32)
-        CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
+        CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
         if (ENABLE_XTL_COMPLEX)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++14")
-        elseif (HAS_CPP11_FLAG)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++11")
+        elseif (HAS_CPP14_FLAG)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -march=${TARGET_ARCH} -Wunused-parameter -Wextra -Wreorder -std=c++14")
         else()
             message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
         endif()
@@ -101,41 +101,42 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(XSIMD_TESTS
     main.cpp
-    xsimd_api_test.hpp
-    xsimd_api_test.cpp
-    xsimd_algorithms.cpp
-    xsimd_basic_test.hpp
-    xsimd_basic_test.cpp
-    xsimd_basic_math_test.hpp
-    xsimd_basic_math_test.cpp
-    xsimd_complex_basic_test.hpp
-    xsimd_complex_tester.hpp
-    xsimd_error_gamma_test.hpp
-    xsimd_error_gamma_test.cpp
-    xsimd_exponential_test.hpp
-    xsimd_exponential_test.cpp
-    xsimd_cexponential_test.hpp
-    xsimd_cexponential_test.cpp
-    xsimd_chyperbolic_test.hpp
-    xsimd_chyperbolic_test.cpp
-    xsimd_cpower_test.hpp
-    xsimd_cpower_test.cpp
-    xsimd_ctrigonometric_test.hpp
-    xsimd_ctrigonometric_test.cpp
-    xsimd_fp_manipulation_test.hpp
-    xsimd_fp_manipulation_test.cpp
-    xsimd_hyperbolic_test.hpp
-    xsimd_hyperbolic_test.cpp
-    xsimd_interface_test.cpp
-    xsimd_memory_test.cpp
-    xsimd_power_test.hpp
-    xsimd_power_test.cpp
-    xsimd_rounding_test.hpp
-    xsimd_rounding_test.cpp
-    xsimd_tester.hpp
-    xsimd_test_utils.hpp
-    xsimd_trigonometric_test.hpp
-    xsimd_trigonometric_test.cpp
+    # xsimd_api_test.hpp
+    # xsimd_api_test.cpp
+    # xsimd_algorithms.cpp
+    xsimd_select.cpp
+    # xsimd_basic_test.hpp
+    # xsimd_basic_test.cpp
+    # xsimd_basic_math_test.hpp
+    # xsimd_basic_math_test.cpp
+    # xsimd_complex_basic_test.hpp
+    # xsimd_complex_tester.hpp
+    # xsimd_error_gamma_test.hpp
+    # xsimd_error_gamma_test.cpp
+    # xsimd_exponential_test.hpp
+    # xsimd_exponential_test.cpp
+    # xsimd_cexponential_test.hpp
+    # xsimd_cexponential_test.cpp
+    # xsimd_chyperbolic_test.hpp
+    # xsimd_chyperbolic_test.cpp
+    # xsimd_cpower_test.hpp
+    # xsimd_cpower_test.cpp
+    # xsimd_ctrigonometric_test.hpp
+    # xsimd_ctrigonometric_test.cpp
+    # xsimd_fp_manipulation_test.hpp
+    # xsimd_fp_manipulation_test.cpp
+    # xsimd_hyperbolic_test.hpp
+    # xsimd_hyperbolic_test.cpp
+    # xsimd_interface_test.cpp
+    # xsimd_memory_test.cpp
+    # xsimd_power_test.hpp
+    # xsimd_power_test.cpp
+    # xsimd_rounding_test.hpp
+    # xsimd_rounding_test.cpp
+    # xsimd_tester.hpp
+    # xsimd_test_utils.hpp
+    # xsimd_trigonometric_test.hpp
+    # xsimd_trigonometric_test.cpp
 )
 
 set(XSIMD_TARGET test_xsimd)

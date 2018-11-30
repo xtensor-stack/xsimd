@@ -667,6 +667,12 @@ namespace xsimd
                 return _mm256_blendv_ps(b, a, cond);
             }
 
+            template <int mask>
+            static batch_type compile_time_select(const batch_type& a, const batch_type& b)
+            {
+                return _mm256_blend_ps(a, b, bit_reverse(static_cast<uint8_t>(mask)));
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 return _mm256_cmp_ps(x, x, _CMP_UNORD_Q);

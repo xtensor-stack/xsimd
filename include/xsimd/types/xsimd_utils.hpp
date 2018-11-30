@@ -359,6 +359,24 @@ namespace xsimd
         template <typename T, std::size_t N, typename... Args>
         using is_array_initializer_t = typename is_array_initializer<T, N, Args...>::type;
     }
+
+    constexpr uint8_t bit_reverse(uint8_t b)
+    {
+        // magic bit fiddling byte reverse http://graphics.stanford.edu/~seander/bithacks.html
+        return ((b * 0x0802LU & 0x22110LU) | (b * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;
+    }
+
+    constexpr uint16_t bit_reverse(uint16_t s)
+    {
+        union uint16_bs_u { uint16_t x; uint8_t bs[2]; } z = { s };
+        z.bs[0] = bit_reverse(z.bs[0]);
+        z.bs[1] = bit_reverse(z.bs[1]);
+        // manual swap
+        uint8_t tmp = z.bs[0];
+        z.bs[0] = z.bs[1];
+        z.bs[1] = tmp;
+        return z.x;
+    }
 }
 
 #endif
