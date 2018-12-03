@@ -6,7 +6,7 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include "xsimd/xsimd.hpp"
+#include "xsimd/memory/xsimd_load_store.hpp"
 
 namespace xsimd
 {
