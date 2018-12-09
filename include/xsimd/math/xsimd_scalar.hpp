@@ -151,8 +151,9 @@ namespace xsimd
     }
 
     template <class T0, class T1>
-    inline typename std::enable_if<std::is_floating_point<T1>::value, T0>::type
+    inline auto
     pow(const T0& t0, const T1& t1)
+        -> typename std::enable_if<std::is_scalar<T0>::value && std::is_floating_point<T1>::value, decltype(std::pow(t0, t1))>::type
     {
         return std::pow(t0, t1);
     }
