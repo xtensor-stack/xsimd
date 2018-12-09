@@ -42,6 +42,7 @@ namespace xsimd
 
         value_type extract_res;
         res_type minus_res;
+        res_type plus_res;
         res_type add_vv_res;
         res_type add_vs_res;
         res_type add_sv_res;
@@ -89,6 +90,7 @@ namespace xsimd
         rhs.resize(N);
         mix_lhs_rhs.resize(N);
         minus_res.resize(N);
+        plus_res.resize(N);
         add_vv_res.resize(N);
         add_vs_res.resize(N);
         add_sv_res.resize(N);
@@ -125,6 +127,7 @@ namespace xsimd
             rhs[i] = value_type(10.2) / (i + 2) + value_type(0.25);
             extract_res = lhs[1];
             minus_res[i] = -lhs[i];
+            plus_res[i] = +lhs[i];
             add_vv_res[i] = lhs[i] + rhs[i];
             add_vs_res[i] = lhs[i] + s;
             add_sv_res[i] = s + rhs[i];
@@ -183,6 +186,7 @@ namespace xsimd
 
         value_type extract_res;
         res_type minus_res;
+        res_type plus_res;
         res_type add_vv_res;
         res_type add_vs_res;
         res_type add_sv_res;
@@ -230,6 +234,7 @@ namespace xsimd
         rhs.resize(N);
         mix_lhs_rhs.resize(N);
         minus_res.resize(N);
+        plus_res.resize(N);
         add_vv_res.resize(N);
         add_vs_res.resize(N);
         add_sv_res.resize(N);
@@ -269,6 +274,7 @@ namespace xsimd
             rhs[i] = value_type(4) + value_type(i);
             extract_res = lhs[1];
             minus_res[i] = -lhs[i];
+            plus_res[i] = +lhs[i];
             add_vv_res[i] = lhs[i] + rhs[i];
             add_vs_res[i] = lhs[i] + s;
             add_sv_res[i] = s + rhs[i];
@@ -685,6 +691,12 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.minus_res, out);
         success = success && tmp_success;
 
+        topic = "unary operator+          : ";
+        vres = +lhs;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.plus_res, out);
+        success = success && tmp_success;
+
         topic = "operator+=(simd, simd)   : ";
         vres = lhs;
         vres += rhs;
@@ -1047,6 +1059,12 @@ namespace xsimd
         vres = -lhs;
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.minus_res, out);
+        success = success && tmp_success;
+
+        topic = "unary operator+          : ";
+        vres = +lhs;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.plus_res, out);
         success = success && tmp_success;
 
         topic = "operator+=(simd, simd)   : ";
