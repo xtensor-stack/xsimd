@@ -82,8 +82,8 @@ namespace xsimd
 
         operator __m256() const;
 
-        XSIMD_DECLARE_LOAD_STORE_ALL(float, 8);
-        XSIMD_DECLARE_LOAD_STORE_LONG(float, 8);
+        XSIMD_DECLARE_LOAD_STORE_ALL(float, 8)
+        XSIMD_DECLARE_LOAD_STORE_LONG(float, 8)
 
         using base_type::load_aligned;
         using base_type::load_unaligned;

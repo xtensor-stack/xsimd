@@ -55,8 +55,8 @@ namespace xsimd
 
         operator simd_type() const;
 
-        XSIMD_DECLARE_LOAD_STORE_ALL(uint32_t, 4);
-        XSIMD_DECLARE_LOAD_STORE_LONG(uint32_t, 4);
+        XSIMD_DECLARE_LOAD_STORE_ALL(uint32_t, 4)
+        XSIMD_DECLARE_LOAD_STORE_LONG(uint32_t, 4)
 
         using base_type::load_aligned;
         using base_type::load_unaligned;
@@ -119,8 +119,8 @@ namespace xsimd
         return *this;
     }
 
-    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, int8_t, XSIMD_DEFAULT_ALIGNMENT);
-    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, uint8_t, XSIMD_DEFAULT_ALIGNMENT);
+    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, int8_t, XSIMD_DEFAULT_ALIGNMENT)
+    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, uint8_t, XSIMD_DEFAULT_ALIGNMENT)
 
     inline batch<uint32_t, 4>& batch<uint32_t, 4>::load_aligned(const int16_t* src)
     {
@@ -168,9 +168,9 @@ namespace xsimd
         return load_aligned(src);
     }
 
-    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, int64_t, XSIMD_DEFAULT_ALIGNMENT);
-    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, uint64_t, XSIMD_DEFAULT_ALIGNMENT);
-    XSIMD_DEFINE_LOAD_STORE_LONG(uint32_t, 4, 64);
+    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, int64_t, XSIMD_DEFAULT_ALIGNMENT)
+    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, uint64_t, XSIMD_DEFAULT_ALIGNMENT)
+    XSIMD_DEFINE_LOAD_STORE_LONG(uint32_t, 4, 64)
 
     inline batch<uint32_t, 4>& batch<uint32_t, 4>::load_aligned(const float* src)
     {

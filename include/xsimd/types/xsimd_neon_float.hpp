@@ -49,8 +49,8 @@ namespace xsimd
 
         operator simd_type() const;
 
-        XSIMD_DECLARE_LOAD_STORE_ALL(float, 4);
-        XSIMD_DECLARE_LOAD_STORE_LONG(float, 4);
+        XSIMD_DECLARE_LOAD_STORE_ALL(float, 4)
+        XSIMD_DECLARE_LOAD_STORE_LONG(float, 4)
 
         using base_type::load_aligned;
         using base_type::load_unaligned;

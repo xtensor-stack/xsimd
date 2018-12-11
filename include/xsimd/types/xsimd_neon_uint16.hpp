@@ -72,8 +72,8 @@ namespace xsimd
         using base_type::store_aligned;
         using base_type::store_unaligned;
 
-        XSIMD_DECLARE_LOAD_STORE_INT16(uint16_t, 8);
-        XSIMD_DECLARE_LOAD_STORE_LONG(uint16_t, 8);
+        XSIMD_DECLARE_LOAD_STORE_INT16(uint16_t, 8)
+        XSIMD_DECLARE_LOAD_STORE_LONG(uint16_t, 8)
 
         uint16_t operator[](std::size_t index) const;
 

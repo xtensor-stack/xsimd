@@ -390,7 +390,7 @@ namespace xsimd
     batch<TYPE, N>& load_aligned(const CVT_TYPE*);                             \
     batch<TYPE, N>& load_unaligned(const CVT_TYPE*);                           \
     void store_aligned(CVT_TYPE* dst) const;                                   \
-    void store_unaligned(CVT_TYPE* dst) const
+    void store_unaligned(CVT_TYPE* dst) const;
 
 #define XSIMD_DEFINE_LOAD_STORE(TYPE, N, CVT_TYPE, ALIGNMENT)                  \
     inline batch<TYPE, N>& batch<TYPE, N>::load_aligned(const CVT_TYPE* src)   \
@@ -421,7 +421,7 @@ namespace xsimd
 #ifdef XSIMD_32_BIT_ABI
 
 #define XSIMD_DECLARE_LOAD_STORE_LONG(TYPE, N)                                 \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, long);                                   \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, long)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, unsigned long)                           \
 
     namespace detail
@@ -479,13 +479,13 @@ namespace xsimd
 #endif // XSIMD_32_BIT_ABI
 
 #define XSIMD_DECLARE_LOAD_STORE_INT8(TYPE, N)                                 \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
 
 #define XSIMD_DEFINE_LOAD_STORE_INT8(TYPE, N, ALIGNMENT)                       \
@@ -499,13 +499,13 @@ namespace xsimd
     XSIMD_DEFINE_LOAD_STORE(TYPE, N, double, ALIGNMENT)
 
 #define XSIMD_DECLARE_LOAD_STORE_INT16(TYPE, N)                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t);                                 \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t)                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
 
 #define XSIMD_DEFINE_LOAD_STORE_INT16(TYPE, N, ALIGNMENT)                      \
@@ -519,55 +519,55 @@ namespace xsimd
     XSIMD_DEFINE_LOAD_STORE(TYPE, N, double, ALIGNMENT)
 
 #define XSIMD_DECLARE_LOAD_STORE_INT32(TYPE, N)                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t);                                 \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t)                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
 
 #define XSIMD_DEFINE_LOAD_STORE_INT32(TYPE, N, ALIGNMENT)                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int8_t, ALIGNMENT);                       \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint8_t, ALIGNMENT);                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int16_t, ALIGNMENT);                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint16_t, ALIGNMENT);                     \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int64_t, ALIGNMENT);                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint64_t, ALIGNMENT);                     \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, float, ALIGNMENT);                        \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int8_t, ALIGNMENT)                        \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint8_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int16_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint16_t, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int64_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint64_t, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, float, ALIGNMENT)                         \
     XSIMD_DEFINE_LOAD_STORE(TYPE, N, double, ALIGNMENT)
 
 #define XSIMD_DECLARE_LOAD_STORE_INT64(TYPE, N)                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t);                                 \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t)                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
 
 #define XSIMD_DEFINE_LOAD_STORE_INT64(TYPE, N, ALIGNMENT)                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int8_t, ALIGNMENT);                       \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint8_t, ALIGNMENT);                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int16_t, ALIGNMENT);                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint16_t, ALIGNMENT);                     \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int32_t, ALIGNMENT);                      \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint32_t, ALIGNMENT);                     \
-    XSIMD_DEFINE_LOAD_STORE(TYPE, N, float, ALIGNMENT);                        \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int8_t, ALIGNMENT)                        \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint8_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int16_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint16_t, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, int32_t, ALIGNMENT)                       \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, uint32_t, ALIGNMENT)                      \
+    XSIMD_DEFINE_LOAD_STORE(TYPE, N, float, ALIGNMENT)                         \
     XSIMD_DEFINE_LOAD_STORE(TYPE, N, double, ALIGNMENT)
 
 #define XSIMD_DECLARE_LOAD_STORE_ALL(TYPE, N)                                  \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t);                                 \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t);                                \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t);                               \
-    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float);                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int8_t)                                  \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint8_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int16_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint16_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int32_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint32_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, int64_t)                                 \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t)                                \
+    XSIMD_DECLARE_LOAD_STORE(TYPE, N, float)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
 
     /**********************************
