@@ -100,8 +100,8 @@ namespace xsimd
         using base_class::store_aligned;
         using base_class::store_unaligned;
 
-        XSIMD_DECLARE_LOAD_STORE_INT16(int16_t, 16);
-        XSIMD_DECLARE_LOAD_STORE_LONG(int16_t, 16);
+        XSIMD_DECLARE_LOAD_STORE_INT16(int16_t, 16)
+        XSIMD_DECLARE_LOAD_STORE_LONG(int16_t, 16)
     };
 
     template <>
@@ -116,8 +116,8 @@ namespace xsimd
         using base_class::store_aligned;
         using base_class::store_unaligned;
 
-        XSIMD_DECLARE_LOAD_STORE_INT16(uint16_t, 16);
-        XSIMD_DECLARE_LOAD_STORE_LONG(uint16_t, 16);
+        XSIMD_DECLARE_LOAD_STORE_INT16(uint16_t, 16)
+        XSIMD_DECLARE_LOAD_STORE_LONG(uint16_t, 16)
     };
 
     /*************************************

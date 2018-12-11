@@ -112,7 +112,7 @@ namespace xsimd
 
         operator std::array<T, N>() const;
 
-        XSIMD_DECLARE_LOAD_STORE_ALL(T, N);
+        XSIMD_DECLARE_LOAD_STORE_ALL(T, N)
 
         using base_type::load_aligned;
         using base_type::load_unaligned;
