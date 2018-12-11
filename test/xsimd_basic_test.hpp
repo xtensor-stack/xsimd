@@ -638,6 +638,7 @@ namespace xsimd
         vector_type rhs;
         vector_type mix_lhs_rhs;
         vector_type vres;
+        vector_bool_type bres;
         res_type res(tester_type::size);
         value_type s = tester.s;
         bool success = true;
@@ -913,6 +914,20 @@ namespace xsimd
         tmp_success = !all_res_false && all_res_true;
         success = success && tmp_success;
         success = success && test_simd_bool(vector_type(0.), out);
+
+        #define XSIMD_TEST_COMPARISON( OPERATOR ) \
+            topic = "operator" #OPERATOR "(simd, simd)  : "; \
+            bres = lhs OPERATOR rhs; \
+            for(std::size_t i=0;i<T::size;++i ) \
+                success &= ( lhs[ i ] OPERATOR rhs[ i ] ) == bres[ i ]
+        XSIMD_TEST_COMPARISON( <  );
+        XSIMD_TEST_COMPARISON( >  );
+        XSIMD_TEST_COMPARISON( <= );
+        XSIMD_TEST_COMPARISON( <= );
+        XSIMD_TEST_COMPARISON( == );
+        XSIMD_TEST_COMPARISON( != );
+        #undef XSIMD_TEST_COMPARISON
+
         return success;
     }
 
