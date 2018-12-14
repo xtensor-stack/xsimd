@@ -132,9 +132,7 @@ namespace xsimd
 
     inline bool batch_bool<double, 4>::operator[](std::size_t index) const
     {
-        alignas(32) double x[4];
-        _mm256_store_pd(x, m_value);
-        return static_cast<bool>(x[index & 3]);
+        return reinterpret_cast<const std::uint64_t*>(&m_value)[index & 3];
     }
 
     namespace detail
