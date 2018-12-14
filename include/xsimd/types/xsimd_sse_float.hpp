@@ -130,7 +130,7 @@ namespace xsimd
 
     inline bool batch_bool<float, 4>::operator[](std::size_t index) const
     {
-        return reinterpret_cast<const std::uint32_t*>(&m_value)[index & 3];
+        return _mm_extract_epi32(_mm_castps_si128(m_value), index & 3);
     }
 
     namespace detail
