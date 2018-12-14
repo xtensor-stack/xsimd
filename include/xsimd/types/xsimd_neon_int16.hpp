@@ -162,7 +162,7 @@ namespace xsimd
 
     inline batch<int16_t, 8>& batch<int16_t, 8>::load_aligned(const uint16_t* src)
     {
-        m_value = vld1q_u16(src);
+        m_value = vreinterpretq_s16_u16(vld1q_u16(src));
         return *this;
     }
 
@@ -183,7 +183,7 @@ namespace xsimd
 
     inline void batch<int16_t, 8>::store_aligned(uint16_t* dst) const
     {
-        vst1q_u16(dst, m_value);
+        vst1q_u16(dst, vreinterpretq_u16_s16(m_value));
     }
 
     inline void batch<int16_t, 8>::store_unaligned(uint16_t* dst) const
@@ -387,7 +387,7 @@ namespace xsimd
 
     inline batch<int16_t, 8> operator<<(const batch<int16_t, 8>& lhs, const batch<int16_t, 8>& rhs)
     {
-        return vshlq_s8(lhs, rhs);
+        return vshlq_s16(lhs, rhs);
     }
 }
 

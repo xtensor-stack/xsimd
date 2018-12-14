@@ -133,7 +133,7 @@ namespace xsimd
 
     inline batch<uint16_t, 8>& batch<uint16_t, 8>::load_aligned(const int16_t* src)
     {
-        m_value = vld1q_s16(src);
+        m_value = vreinterpretq_u16_s16(vld1q_s16(src));
         return *this;
     }
 
@@ -156,7 +156,7 @@ namespace xsimd
 
     inline void batch<uint16_t, 8>::store_aligned(int16_t* dst) const
     {
-        vst1q_s16(dst, m_value);
+        vst1q_s16(dst, vreinterpretq_s16_u16(m_value));
     }
 
     inline void batch<uint16_t, 8>::store_unaligned(int16_t* dst) const
@@ -316,7 +316,7 @@ namespace xsimd
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
                 return vaddvq_u16(rhs);
 #else
-                int16x4_t tmp = vpadd_u16(vget_low_u16(rhs), vget_high_u16(rhs));
+                uint16x4_t tmp = vpadd_u16(vget_low_u16(rhs), vget_high_u16(rhs));
                 value_type res = 0;
                 for (std::size_t i = 0; i < 4; ++i)
                 {
