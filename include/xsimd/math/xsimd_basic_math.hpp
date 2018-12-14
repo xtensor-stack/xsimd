@@ -18,39 +18,44 @@ namespace xsimd
      * Basic operations *
      ********************/
 
-    template <class T, std::size_t N>
-    batch<T, N> fmod(const batch<T, N>& x, const batch<T, N>& y);
+    template <class B>
+    batch_type_t<B> fmod(const simd_base<B>& x, const simd_base<B>& y);
 
-    template <class T, std::size_t N>
-    batch<T, N> remainder(const batch<T, N>& x, const batch<T, N>& y);
+    template <class B>
+    batch_type_t<B> remainder(const simd_base<B>& x, const simd_base<B>& y);
 
-    template <class T, std::size_t N>
-    batch<T, N> fdim(const batch<T, N>& x, const batch<T, N>& y);
+    template <class B>
+    batch_type_t<B> fdim(const simd_base<B>& x, const simd_base<B>& y);
 
-    template <class T, std::size_t N>
-    batch<T, N> clip(const batch<T, N>& x, const batch<T, N>& lo, const batch<T, N>& hi);
+    template <class B>
+    batch_type_t<B> clip(const simd_base<B>& x, const simd_base<B>& lo, const simd_base<B>& hi);
 
-    template <class T, std::size_t N>
-    batch<T, N> nextafter(const batch<T, N>& from, const batch<T, N>& to);
+    template <class X, class Y>
+    batch_type_t<X> nextafter(const simd_base<X>& from, const simd_base<Y>& to);
 
     /****************************
      * Classification functions *
      ****************************/
 
-    template <class T, std::size_t N>
-    batch_bool<T, N> isfinite(const batch<T, N>& x);
+    template <class B>
+    typename simd_batch_traits<B>::batch_bool_type
+    isfinite(const simd_base<B>& x);
 
-    template <class T, std::size_t N>
-    batch_bool<T, N> isinf(const batch<T, N>& x);
+    template <class B>
+    typename simd_batch_traits<B>::batch_bool_type
+    isinf(const simd_base<B>& x);
 
-    template <class T, std::size_t N>
-    batch_bool<T, N> is_flint(const batch<T, N>& x);
+    template <class B>
+    typename simd_batch_traits<B>::batch_bool_type
+    is_flint(const simd_base<B>& x);
 
-    template <class T, std::size_t N>
-    batch_bool<T, N> is_odd(const batch<T, N>& x);
+    template <class B>
+    typename simd_batch_traits<B>::batch_bool_type
+    is_odd(const simd_base<B>& x);
 
-    template <class T, std::size_t N>
-    batch_bool<T, N> is_even(const batch<T, N>& x);
+    template <class B>
+    typename simd_batch_traits<B>::batch_bool_type
+    is_even(const simd_base<B>& x);
 
     /***********************************
      * Basic operations implementation *
@@ -66,8 +71,8 @@ namespace xsimd
      * @param y batch of floating point values.
      * @return the floating-point remainder of the division.
      */
-    template <class T, std::size_t N>
-    inline batch<T, N> fmod(const batch<T, N>& x, const batch<T, N>& y)
+    template <class B>
+    inline batch_type_t<B> fmod(const simd_base<B>& x, const simd_base<B>& y)
     {
         return fnma(trunc(x / y), y, x);
     }
@@ -84,8 +89,8 @@ namespace xsimd
      * @param y batch of floating point values.
      * @return the IEEE remainder remainder of the floating point division.
      */
-    template <class T, std::size_t N>
-    inline batch<T, N> remainder(const batch<T, N>& x, const batch<T, N>& y)
+    template <class B>
+    inline batch_type_t<B> remainder(const simd_base<B>& x, const simd_base<B>& y)
     {
         return fnma(nearbyint(x / y), y, x);
     }
@@ -97,10 +102,10 @@ namespace xsimd
      * @param y batch of floating point values.
      * @return the positive difference.
      */
-    template <class T, std::size_t N>
-    inline batch<T, N> fdim(const batch<T, N>& x, const batch<T, N>& y)
+    template <class B>
+    inline batch_type_t<B> fdim(const simd_base<B>& x, const simd_base<B>& y)
     {
-        return fmax(batch<T, N>(0.), x - y);
+        return fmax(batch_type_t<B>(0.), x - y);
     }
 
     /**
@@ -110,12 +115,14 @@ namespace xsimd
      * @param hi batch of floating point values.
      * @return the result of the clipping.
      */
-    template <class T, std::size_t N>
-    inline batch<T, N> clip(const batch<T, N>& x, const batch<T, N>& lo, const batch<T, N>& hi)
+    template <class B>
+    inline batch_type_t<B> clip(const simd_base<B>& x, const simd_base<B>& lo, const simd_base<B>& hi)
     {
         return min(hi, max(x, lo));
     }
-    template <class T>
+
+    // TODO move scalar version?
+    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
     inline T clip(const T& x, const T& lo, const T& hi)
     {
         return std::min(hi, std::max(x, lo));
@@ -179,15 +186,15 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> nextafter(const batch<T, N>& from, const batch<T, N>& to)
+    template <class X, class Y>
+    inline batch_type_t<X> nextafter(const simd_base<X>& from, const simd_base<Y>& to)
     {
-        using kernel = detail::nextafter_kernel<T, N>;
+        using kernel = detail::nextafter_kernel<typename batch_type_t<X>::value_type, batch_type_t<X>::size>;
         return select(from == to,
                       from,
                       select(to > from,
-                             kernel::next(from),
-                             kernel::prev(from)));
+                             kernel::next(from()),
+                             kernel::prev(from())));
     }
 
     /*******************************************
@@ -200,10 +207,11 @@ namespace xsimd
      * @param x batch of floating point values.
      * @return a batch of booleans.
      */
-    template <class T, std::size_t N>
-    inline batch_bool<T, N> isfinite(const batch<T, N>& x)
+    template <class B>
+    inline typename simd_batch_traits<B>::batch_bool_type
+    isfinite(const simd_base<B>& x)
     {
-        return (x - x) == batch<T, N>(0.);
+        return (x - x) == batch_type_t<B>(0.);
     }
 
     /**
@@ -212,30 +220,34 @@ namespace xsimd
      * @param x batch of floating point values.
      * @return a batch of booleans.
      */
-    template <class T, std::size_t N>
-    inline batch_bool<T, N> isinf(const batch<T, N>& x)
+    template <class B>
+    inline typename simd_batch_traits<B>::batch_bool_type
+    isinf(const simd_base<B>& x)
     {
-        return abs(x) == infinity<batch<T, N>>();
+        return abs(x) == infinity<batch_type_t<B>>();
     }
 
-    template <class T, std::size_t N>
-    inline batch_bool<T, N> is_flint(const batch<T, N>& x)
+    template <class B>
+    inline typename simd_batch_traits<B>::batch_bool_type
+    is_flint(const simd_base<B>& x)
     {
-        using b_type = batch<T, N>;
-        b_type frac = select(isnan(x - x), nan<b_type>(), x - trunc(x));
+        using b_type = batch_type_t<B>;
+        b_type frac = select(xsimd::isnan(x - x), nan<b_type>(), x - trunc(x));
         return frac == b_type(0.);
     }
 
-    template <class T, std::size_t N>
-    inline batch_bool<T, N> is_odd(const batch<T, N>& x)
+    template <class B>
+    inline typename simd_batch_traits<B>::batch_bool_type
+    is_odd(const simd_base<B>& x)
     {
-        return is_even(x - batch<T, N>(1.));
+        return is_even(x - batch_type_t<B>(1.));
     }
 
-    template <class T, std::size_t N>
-    inline batch_bool<T, N> is_even(const batch<T, N>& x)
+    template <class B>
+    inline typename simd_batch_traits<B>::batch_bool_type
+    is_even(const simd_base<B>& x)
     {
-        return is_flint(x * batch<T, N>(0.5));
+        return is_flint(x * batch_type_t<B>(0.5));
     }
 }
 

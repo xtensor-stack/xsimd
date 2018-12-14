@@ -128,6 +128,15 @@ namespace xsimd
 #endif
     }
 
+    template <class X>
+    class simd_complex_batch;
+
+    template <class X>
+    struct simd_batch_inner_types<simd_complex_batch<X>>
+    {
+        using batch_reference = const X&;
+    };
+
     /**
      * @class simd_complex_batch
      * @brief Base class for batch complex numbers.
@@ -145,9 +154,11 @@ namespace xsimd
      */
     template <class X>
     class simd_complex_batch
+        : public simd_base<simd_complex_batch<X>>
     {
     public:
 
+        using batch_type = X;
         using value_type = typename simd_batch_traits<X>::value_type;
         static constexpr std::size_t size = simd_batch_traits<X>::size;
         using real_batch = typename simd_batch_traits<X>::real_batch;
@@ -158,6 +169,14 @@ namespace xsimd
         explicit simd_complex_batch(const real_value_type& v);
         explicit simd_complex_batch(const real_batch& re);
         simd_complex_batch(const real_batch& re, const real_batch& im);
+
+        const X& get() const {
+            return (*this)();
+        }
+
+        X& get() {
+            return (*this)();
+        }
 
         real_batch& real();
         real_batch& imag();

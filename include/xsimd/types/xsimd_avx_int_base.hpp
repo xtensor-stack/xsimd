@@ -168,7 +168,8 @@ namespace xsimd
     template <class T, std::size_t N>
     template <class... Args, class>
     inline avx_int_batch_bool<T, N>::avx_int_batch_bool(Args... args)
-        : m_value(avx_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{}, -static_cast<T>(static_cast<bool>(args))...))
+        : m_value(avx_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{},
+                                       static_cast<T>(args ? typename std::make_signed<T>::type{-1} : 0)...))
     {
     }
 

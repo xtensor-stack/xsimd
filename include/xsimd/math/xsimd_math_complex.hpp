@@ -10,6 +10,7 @@
 #define XSIMD_MATH_COMPLEX_HPP
 
 #include "../types/xsimd_complex_base.hpp"
+#include "xsimd_basic_math.hpp"
 #include "xsimd_exponential.hpp"
 #include "xsimd_hyperbolic.hpp"
 #include "xsimd_logarithm.hpp"
@@ -385,7 +386,7 @@ namespace xsimd
             b_type winf(infinity<r_type>(), infinity<r_type>());
             r_type wreal = sin(2 * z.real()) / d;
             r_type wimag = sinh(2 * z.imag());
-            b_type wres = select(isinf(wimag), b_type(wreal, r_type(1.)), b_type(wreal, wimag / d));
+            b_type wres = select(xsimd::isinf(wimag), b_type(wreal, r_type(1.)), b_type(wreal, wimag / d));
             return select(d == r_type(0.), winf, wres);
         }
 
@@ -861,7 +862,7 @@ namespace xsimd
     inline X proj(const simd_complex_batch<X>& rhs)
     {
         using real_batch = typename simd_batch_traits<X>::real_batch;
-        auto cond = isinf(rhs.real()) || isinf(rhs.imag());
+        auto cond = xsimd::isinf(rhs.real()) || xsimd::isinf(rhs.imag());
         return select(cond, X(infinity<real_batch>(), copysign(real_batch(0.), rhs.imag())), rhs);
     }
 }
