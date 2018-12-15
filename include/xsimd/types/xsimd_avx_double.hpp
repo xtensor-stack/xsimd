@@ -132,7 +132,9 @@ namespace xsimd
 
     inline bool batch_bool<double, 4>::operator[](std::size_t index) const
     {
-        return reinterpret_cast<const std::uint64_t*>(&m_value)[index & 3];
+        double v = reinterpret_cast<const double*>(&m_value)[index & 3];
+        std::uint64_t r = reinterpret_cast<std::uint64_t&>(v);
+        return (bool)r;
     }
 
     namespace detail
