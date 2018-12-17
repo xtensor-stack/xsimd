@@ -317,7 +317,43 @@ namespace xsimd
 
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
                 return { lhs[0] * rhs[0], lhs[1] * rhs[1] };
+#else
+                /*
+                 * Clang 7 and GCC 8 both generate highly inefficient code here for
+                 * ARMv7. They will repeatedly extract and reinsert lanes.
+                 * While bug reports have been opened, for now, this is an efficient
+                 * workaround.
+                 *
+                 * It is unknown if there is a benefit for aarch64 (I do not have
+                 * a device), but I presume it would be lower considering aarch64
+                 * has a native uint64_t multiply.
+                 *
+                 * Effective code:
+                 *
+                 *     uint32x2_t lhs_lo = lhs & 0xFFFFFFFF;
+                 *     uint32x2_t lhs_hi = lhs >> 32;
+                 *     uint32x2_t rhs_lo = rhs & 0xFFFFFFFF;
+                 *     uint32x2_t rhs_hi = rhs >> 32;
+                 *
+                 *     uint64x2_t result   = (uint64x2_t)lhs_hi * (uint64x2_t)rhs_lo;
+                 *                result  += (uint64x2_t)lhs_lo * (uint64x2_t)rhs_hi;
+                 *                result <<= 32;
+                 *                result  += (uint64x2_t)lhs_lo * (uint64x2_t)rhs_lo;
+                 *     return result;
+                 */
+                uint32x2_t lhs_lo = vmovn_u64   (lhs);
+                uint32x2_t lhs_hi = vshrn_n_u64 (lhs,    32);
+                uint32x2_t rhs_lo = vmovn_u64   (rhs);
+                uint32x2_t rhs_hi = vshrn_n_u64 (rhs,    32);
+
+                uint64x2_t result = vmull_u32   (lhs_hi, rhs_lo);
+                           result = vmlal_u32   (result, lhs_lo, rhs_hi);
+                           result = vshlq_n_u64 (result, 32);
+                           result = vmlal_u32   (result, lhs_lo, rhs_lo);
+                return result;
+#endif
             }
 
             static batch_type div(const batch_type& lhs, const batch_type& rhs)
