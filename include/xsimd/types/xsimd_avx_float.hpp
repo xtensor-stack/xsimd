@@ -11,6 +11,7 @@
 
 #include "xsimd_base.hpp"
 #include "xsimd_int_conversion.hpp"
+#include <array>
 
 namespace xsimd
 {
@@ -45,7 +46,8 @@ namespace xsimd
         bool operator[](std::size_t index) const;
 
     private:
-        union storage_t {
+        union storage_t
+        {
             std::array<std::uint32_t, 8> arr;
             __m256                       reg;
         };
@@ -111,20 +113,20 @@ namespace xsimd
 
     inline batch_bool<float, 8>::batch_bool(bool b)
     {
-        m_value.reg=_mm256_castsi256_ps(_mm256_set1_epi32(-(int)b));
+        m_value.reg = _mm256_castsi256_ps(_mm256_set1_epi32(-(int)b));
     }
 
     inline batch_bool<float, 8>::batch_bool(bool b0, bool b1, bool b2, bool b3,
                                             bool b4, bool b5, bool b6, bool b7)
     {
-        m_value.reg=_mm256_castsi256_ps(
+        m_value.reg = _mm256_castsi256_ps(
               _mm256_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3,
                                 -(int)b4, -(int)b5, -(int)b6, -(int)b7));
     }
 
     inline batch_bool<float, 8>::batch_bool(const __m256& rhs)
     {
-        m_value.reg=rhs;
+        m_value.reg = rhs;
     }
 
     inline batch_bool<float, 8>& batch_bool<float, 8>::operator=(const __m256& rhs)

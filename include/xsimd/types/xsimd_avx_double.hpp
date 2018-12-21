@@ -10,6 +10,7 @@
 #define XSIMD_AVX_DOUBLE_HPP
 
 #include "xsimd_base.hpp"
+#include <array>
 
 namespace xsimd
 {
@@ -43,7 +44,8 @@ namespace xsimd
         bool operator[](std::size_t index) const;
 
     private:
-        union storage_t {
+        union storage_t
+        {
             std::array<std::uint64_t, 4> arr;
             __m256d                      reg;
         };
@@ -108,19 +110,19 @@ namespace xsimd
 
     inline batch_bool<double, 4>::batch_bool(bool b)
     {
-        m_value.reg=_mm256_castsi256_pd(_mm256_set1_epi32(-(int)b));
+        m_value.reg = _mm256_castsi256_pd(_mm256_set1_epi32(-(int)b));
     }
 
     inline batch_bool<double, 4>::batch_bool(bool b0, bool b1, bool b2, bool b3)
     {
-        m_value.reg=_mm256_castsi256_pd(
+        m_value.reg = _mm256_castsi256_pd(
                     _mm256_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1,
                                       -(int)b2, -(int)b2, -(int)b3, -(int)b3));
     }
 
     inline batch_bool<double, 4>::batch_bool(const __m256d& rhs)
     {
-        m_value.reg=rhs;
+        m_value.reg = rhs;
     }
 
     inline batch_bool<double, 4>& batch_bool<double, 4>::operator=(const __m256d& rhs)

@@ -10,6 +10,7 @@
 #define XSIMD_SSE_DOUBLE_HPP
 
 #include "xsimd_base.hpp"
+#include <array>
 
 namespace xsimd
 {
@@ -44,7 +45,8 @@ namespace xsimd
 
     private:
 
-        union storage_t {
+        union storage_t
+        {
             std::array<std::uint64_t, 2> arr;
             __m128d                      reg;
         };
@@ -109,17 +111,17 @@ namespace xsimd
 
     inline batch_bool<double, 2>::batch_bool(bool b)
     {
-        m_value.reg=_mm_castsi128_pd(_mm_set1_epi32(-(int)b));
+        m_value.reg = _mm_castsi128_pd(_mm_set1_epi32(-(int)b));
     }
 
     inline batch_bool<double, 2>::batch_bool(bool b0, bool b1)
     {
-        m_value.reg=_mm_castsi128_pd(_mm_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1));
+        m_value.reg = _mm_castsi128_pd(_mm_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1));
     }
 
     inline batch_bool<double, 2>::batch_bool(const __m128d& rhs)
     {
-        m_value.reg=rhs;
+        m_value.reg = rhs;
     }
 
     inline batch_bool<double, 2>& batch_bool<double, 2>::operator=(const __m128d& rhs)

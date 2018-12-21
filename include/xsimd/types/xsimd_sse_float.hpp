@@ -10,6 +10,7 @@
 #define XSIMD_SSE_FLOAT_HPP
 
 #include "xsimd_base.hpp"
+#include <array>
 
 namespace xsimd
 {
@@ -43,7 +44,8 @@ namespace xsimd
         bool operator[](std::size_t index) const;
 
     private:
-        union storage_t {
+        union storage_t
+        {
             std::array<std::uint32_t, 4> arr;
             __m128                       reg;
         };
@@ -108,17 +110,17 @@ namespace xsimd
 
     inline batch_bool<float, 4>::batch_bool(bool b)
     {
-        m_value.reg=_mm_castsi128_ps(_mm_set1_epi32(-(int)b));
+        m_value.reg = _mm_castsi128_ps(_mm_set1_epi32(-(int)b));
     }
 
     inline batch_bool<float, 4>::batch_bool(bool b0, bool b1, bool b2, bool b3)
     {
-        m_value.reg=_mm_castsi128_ps(_mm_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3));
+        m_value.reg = _mm_castsi128_ps(_mm_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3));
     }
 
     inline batch_bool<float, 4>::batch_bool(const __m128& rhs)
     {
-        m_value.reg=rhs;
+        m_value.reg = rhs;
     }
 
     inline batch_bool<float, 4>& batch_bool<float, 4>::operator=(const __m128& rhs)
