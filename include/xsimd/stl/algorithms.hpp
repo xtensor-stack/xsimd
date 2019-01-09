@@ -126,4 +126,63 @@ namespace xsimd
 
         #undef XSIMD_LOOP_MACRO
     }
+
+
+    // TODO: Remove this once we drop C++11 support
+    namespace detail
+    {
+        struct plus
+        {
+            template <class X, class Y>
+            auto operator()(X&& x, Y&& y) -> decltype(x + y) { return x + y; }
+        };
+    }
+
+
+    template <class Iterator1, class Iterator2, class Init, class BinaryFunction = detail::plus>
+    Init reduce(Iterator1 first, Iterator2 last, Init init, BinaryFunction&& binfun = detail::plus{})
+    {
+        using value_type = typename std::decay<decltype(*first)>::type;
+        using traits = simd_traits<value_type>;
+        using batch_type = typename traits::type;
+
+        std::size_t size = static_cast<std::size_t>(std::distance(first, last));
+        constexpr std::size_t simd_size = traits::size;
+
+        const auto* const ptr_begin = &(*first);
+
+        std::size_t align_begin = xsimd::get_alignment_offset(ptr_begin, size, simd_size);
+        std::size_t align_end = align_begin + ((size - align_begin) & ~(simd_size - 1));
+
+        // reduce initial unaligned part
+        for (std::size_t i = 0; i < align_begin; ++i)
+        {
+            init = binfun(init, first[i]);
+        }
+
+        // reduce aligned part
+        batch_type batch_init, batch;
+        auto ptr = ptr_begin + align_begin;
+        xsimd::load_aligned(ptr, batch_init);
+        ptr += simd_size;
+        for (auto const end = ptr_begin + align_end; ptr < end; ptr += simd_size)
+        {
+            xsimd::load_aligned(ptr, batch);
+            batch_init = binfun(batch_init, batch);
+        }
+
+        // reduce across batch
+        alignas(batch_type) std::array<value_type, simd_size> arr;
+        xsimd::store_aligned(arr.data(), batch_init);
+        for (auto x : arr) init = binfun(init, x);
+
+        // reduce final unaligned part
+        for (std::size_t i = align_end; i < size; ++i)
+        {
+            init = binfun(init, first[i]);
+        }
+
+        return init;
+    }
+
 }
