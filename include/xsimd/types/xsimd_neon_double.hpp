@@ -258,7 +258,7 @@ namespace xsimd
         uint32x2_t tmp2 = vcvtn_u32_f32(tmp);
         uint32x4_t tmp3 = vcombine_u32(tmp2, vdup_n_u32(0));
         uint16x4_t tmp4 = vmovn_u32(tmp3);
-        uint16x8_t tmp5 = vcombine_u16(tmp4, vdup_n_s16(0));
+        uint16x8_t tmp5 = vcombine_u16(tmp4, vdup_n_u16(0));
         uint8x8_t tmp6 = vmovn_u16(tmp5);
         vst1_u8((uint8_t*)dst, tmp6);
     }
