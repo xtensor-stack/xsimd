@@ -166,6 +166,8 @@ install:
         cmake -DBUILD_TESTS=ON -DENABLE_XTL_COMPLEX=ON . ;
       elif [[ "$AVX512" == 1 ]] ; then
         conda install gcc_linux-64 gxx_linux-64;
+        # beautifulsoup4-4.7.1 depends on soupsieve which is broken
+        conda install -c conda-forge beautifulsoup4==4.6.3
         sh install_sde.sh ;
         export PATH="$HOME/miniconda/bin:$PATH" ;
         export CC=x86_64-conda_cos6-linux-gnu-gcc CXX=x86_64-conda_cos6-linux-gnu-g++ ;
