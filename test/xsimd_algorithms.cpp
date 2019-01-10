@@ -168,5 +168,5 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
     auto const begin = vec.begin();
     auto const end = vec.end();
 
-    EXPECT_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+    EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
 }
