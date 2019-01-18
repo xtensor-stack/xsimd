@@ -87,7 +87,7 @@ if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-                     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build)
+                     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build EXCLUDE_FROM_ALL)
 
     set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
     set(GTEST_BOTH_LIBRARIES  gtest_main gtest)
@@ -138,12 +138,11 @@ set(XSIMD_TESTS
     xsimd_trigonometric_test.cpp
 )
 
-set(XSIMD_TARGET test_xsimd)
-add_executable(${XSIMD_TARGET} EXCLUDE_FROM_ALL ${XSIMD_TESTS} ${XSIMD_HEADERS})
-target_link_libraries(${XSIMD_TARGET} xsimd ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+add_executable(test_xsimd EXCLUDE_FROM_ALL ${XSIMD_TESTS} ${XSIMD_HEADERS})
+target_link_libraries(test_xsimd xsimd ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if (CROSS_COMPILE_ARM)
-    add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS ${XSIMD_TARGET})
+    add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS test_xsimd)
 else()
-    add_custom_target(xtest COMMAND test_xsimd DEPENDS ${XSIMD_TARGET})
+    add_custom_target(xtest COMMAND test_xsimd DEPENDS test_xsimd)
 endif()
