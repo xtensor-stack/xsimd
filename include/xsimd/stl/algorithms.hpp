@@ -6,6 +6,9 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#ifndef XSIMD_ALGORITHMS_HPP
+#define XSIMD_ALGORITHMS_HPP
+
 #include "xsimd/memory/xsimd_load_store.hpp"
 
 namespace xsimd
@@ -186,3 +189,5 @@ namespace xsimd
     }
 
 }
+
+#endif
