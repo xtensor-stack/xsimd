@@ -130,7 +130,16 @@ endif()
 
 if(BUILD_TESTS)
     add_subdirectory(test)
+endif()
+
+OPTION(BUILD_BENCHMARK "xsimd benchmarks" OFF)
+if(BUILD_BENCHMARK)
     add_subdirectory(benchmark)
+endif()
+
+OPTION(BUILD_EXAMPLES "xsimd examples" OFF)
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 # Installation
