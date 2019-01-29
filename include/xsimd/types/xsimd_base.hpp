@@ -10,8 +10,13 @@
 #define XSIMD_BASE_HPP
 
 #include <cstddef>
+#include <complex>
 #include <ostream>
 #include <type_traits>
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+#include "xtl/xcomplex.hpp"
+#endif
 
 #include "../memory/xsimd_alignment.hpp"
 #include "xsimd_utils.hpp"
@@ -50,6 +55,32 @@ namespace xsimd
 
     template <class T>
     using batch_type_t = typename T::batch_type;
+
+    namespace detail
+    {
+        template <class X>
+        struct get_real_batch_type
+        {
+            using batch_type = batch_type_t<X>;
+        };
+
+        template <class T, std::size_t N>
+        struct get_real_batch_type<batch<std::complex<T>, N>>
+        {
+            using batch_type = typename batch<std::complex<T>, N>::real_batch;
+        };
+
+        #ifdef XSIMD_ENABLE_XTL_COMPLEX
+            template <class T, bool i3ec, std::size_t N>
+            struct get_real_batch_type<batch<xtl::xcomplex<T, T, i3ec>, N>>
+            {
+                using batch_type = typename batch<xtl::xcomplex<T, T, i3ec>, N>::real_batch;
+            };
+        #endif
+    }
+
+    template <class T>
+    using real_batch_type_t = typename detail::get_real_batch_type<typename T::batch_type>::batch_type;
 
     template <class B>
     class simd_base
@@ -355,7 +386,7 @@ namespace xsimd
     batch_type_t<X> fmax(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
     template <class X>
-    batch_type_t<X> abs(const simd_base<X>& rhs);
+    real_batch_type_t<X> abs(const simd_base<X>& rhs);
 
     template <class X>
     batch_type_t<X> fabs(const simd_base<X>& rhs);
@@ -782,7 +813,7 @@ namespace xsimd
     {
         using value_type = typename simd_batch_traits<X>::value_type;
         using kernel = detail::batch_bool_kernel<value_type, simd_batch_traits<X>::size>;
-        return kernel::bitwise_andnot(rhs());
+        return kernel::bitwise_andnot(lhs(), rhs());
     }
 
     /**
@@ -1710,7 +1741,7 @@ namespace xsimd
      * @return the asbolute values of \c rhs.
      */
     template <class X>
-    inline batch_type_t<X> abs(const simd_base<X>& rhs)
+    inline real_batch_type_t<X> abs(const simd_base<X>& rhs)
     {
         using value_type = typename simd_batch_traits<X>::value_type;
         using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;

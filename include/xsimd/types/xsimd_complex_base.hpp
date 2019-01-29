@@ -137,6 +137,12 @@ namespace xsimd
         using batch_reference = const X&;
     };
 
+    template <class X>
+    struct simd_batch_traits<simd_complex_batch<X>>
+        : public simd_batch_traits<X>
+    {
+    };
+
     /**
      * @class simd_complex_batch
      * @brief Base class for batch complex numbers.
