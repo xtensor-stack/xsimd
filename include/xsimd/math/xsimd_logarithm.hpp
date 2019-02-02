@@ -95,7 +95,7 @@ namespace xsimd
                 B hfsq = B(0.5) * f * f;
                 B dk = to_float(k);
                 B r = fma(dk, log_2hi<B>(), fma(s, (hfsq + R), dk * log_2lo<B>()) - hfsq + f);
-#ifndef XSIMD_NO_INIFINITIES
+#ifndef XSIMD_NO_INFINITIES
                 B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
 #else
                 B zz = select(isnez, r, minusinfinity<B>());
@@ -447,7 +447,7 @@ namespace xsimd
 #ifndef XSIMD_NO_INFINITIES
                 B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
 #else
-                B z = select(isnez, r, minusinfinity<B>());
+                B zz = select(isnez, r, minusinfinity<B>());
 #endif
                 return select(!(a >= B(0.)), nan<B>(), zz);
             }
