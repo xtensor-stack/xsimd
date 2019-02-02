@@ -140,6 +140,7 @@ set(XSIMD_TESTS
 
 add_executable(test_xsimd EXCLUDE_FROM_ALL ${XSIMD_TESTS} ${XSIMD_HEADERS})
 target_link_libraries(test_xsimd xsimd ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(test_xsimd PRIVATE ${XSIMD_INCLUDE_DIR})
 
 if (CROSS_COMPILE_ARM)
     add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS test_xsimd)
