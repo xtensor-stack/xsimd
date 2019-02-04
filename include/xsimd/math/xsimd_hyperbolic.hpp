@@ -19,56 +19,56 @@
 namespace xsimd
 {
 
-    template <class T, std::size_t N>
-    batch<T, N> average(const batch<T, N>& x1, const batch<T, N>& x2);
+    template <class B>
+    batch_type_t<B> average(const simd_base<B>& x1, const simd_base<B>& x2);
 
     /**
      * Computes the hyperbolic sine of the batch \c x.
      * @param x batch of floating point values.
      * @return the hyperbolic sine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> sinh(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> sinh(const simd_base<B>& x);
 
     /**
      * Computes the hyperbolic cosine of the batch \c x.
      * @param x batch of floating point values.
      * @return the hyperbolic cosine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> cosh(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> cosh(const simd_base<B>& x);
 
     /**
      * Computes the hyperbolic tangent of the batch \c x.
      * @param x batch of floating point values.
      * @return the hyperbolic tangent of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> tanh(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> tanh(const simd_base<B>& x);
 
     /**
      * Computes the inverse hyperbolic sine of the batch \c x.
      * @param x batch of floating point values.
      * @return the inverse hyperbolic sine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> asinh(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> asinh(const simd_base<B>& x);
 
     /**
      * Computes the inverse hyperbolic cosine of the batch \c x.
      * @param x batch of floating point values.
      * @return the inverse hyperbolic cosine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> acosh(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> acosh(const simd_base<B>& x);
 
     /**
      * Computes the inverse hyperbolic tangent of the batch \c x.
      * @param x batch of floating point values.
      * @return the inverse hyperbolic tangent of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> atanh(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> atanh(const simd_base<B>& x);
 
     /***************************
      * average  implementation *
@@ -105,10 +105,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> average(const batch<T, N>& x1, const batch<T, N>& x2)
+    template <class B>
+    inline batch_type_t<B> average(const simd_base<B>& x1, const simd_base<B>& x2)
     {
-        return detail::average_impl<batch<T, N>>::compute(x1, x2);
+        return detail::average_impl<batch_type_t<B>>::compute(x1(), x2());
     }
 
     /***********************
@@ -204,10 +204,10 @@ namespace xsimd
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-    template <class T, std::size_t N>
-    inline batch<T, N> sinh(const batch<T, N>& a)
+    template <class B>
+    inline batch_type_t<B> sinh(const simd_base<B>& a)
     {
-        return detail::sinh_kernel<batch<T, N>>::compute(a);
+        return detail::sinh_kernel<batch_type_t<B>>::compute(a());
     }
 
     /***********************
@@ -242,10 +242,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> cosh(const batch<T, N>& a)
+    template <class B>
+    inline batch_type_t<B> cosh(const simd_base<B>& a)
     {
-        return detail::cosh_kernel<batch<T, N>>::compute(a);
+        return detail::cosh_kernel<batch_type_t<B>>::compute(a());
     }
 
     /***********************
@@ -357,10 +357,10 @@ namespace xsimd
      * ====================================================
      */
 
-    template <class T, std::size_t N>
-    inline batch<T, N> tanh(const batch<T, N>& a)
+    template <class B>
+    inline batch_type_t<B> tanh(const simd_base<B>& a)
     {
-        return detail::tanh_kernel<batch<T, N>>::compute(a);
+        return detail::tanh_kernel<batch_type_t<B>>::compute(a());
     }
 
     /***********************
@@ -406,7 +406,7 @@ namespace xsimd
                 }
                 B tmp = select(x > oneosqrteps<B>(), x, average(x, hypot(B(1.), x)));
 #ifndef XSIMD_NO_NANS
-                return select(isnan(a), nan<B>(), select(lthalf, z, log(tmp) + log_2<B>()) ^ bts);
+                return select(xsimd::isnan(a), nan<B>(), select(lthalf, z, log(tmp) + log_2<B>()) ^ bts);
 #else
                 return select(lthalf, z, log(tmp) + log_2<B>()) ^ bts;
 #endif
@@ -431,10 +431,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> asinh(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> asinh(const simd_base<B>& x)
     {
-        return detail::asinh_kernel<batch<T, N>>::compute(x);
+        return detail::asinh_kernel<batch_type_t<B>>::compute(x());
     }
 
     /************************
@@ -468,10 +468,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> acosh(const batch<T, N>& a)
+    template <class B>
+    inline batch_type_t<B> acosh(const simd_base<B>& a)
     {
-        return detail::acosh_kernel<batch<T, N>>::compute(a);
+        return detail::acosh_kernel<batch_type_t<B>>::compute(a());
     }
 
     /************************
@@ -506,10 +506,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> atanh(const batch<T, N>& a)
+    template <class B>
+    inline batch_type_t<B> atanh(const simd_base<B>& a)
     {
-        return detail::atanh_kernel<batch<T, N>>::compute(a);
+        return detail::atanh_kernel<batch_type_t<B>>::compute(a());
     }
 }
 

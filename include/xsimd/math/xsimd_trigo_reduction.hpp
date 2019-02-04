@@ -20,8 +20,8 @@
 namespace xsimd
 {
 
-    template <class T, std::size_t N>
-    batch<T, N> quadrant(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> quadrant(const simd_base<B>& x);
 
     namespace detail
     {
@@ -284,10 +284,11 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> quadrant(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> quadrant(const simd_base<B>& x)
     {
-        return detail::quadrant_impl<batch<T, N>, T>::compute(x);
+        using b_type = batch_type_t<B>;
+        return detail::quadrant_impl<b_type, typename b_type::value_type>::compute(x());
     }
 }
 

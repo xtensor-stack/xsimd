@@ -27,16 +27,21 @@ namespace xsimd
      * @param y batch of floating point values.
      * @return \c x raised to the power \c y.
      */
-    template <class T, std::size_t N>
-    batch<T, N> pow(const batch<T, N>& x, const batch<T, N>& y);
+    template <class B>
+    batch_type_t<B> pow(const simd_base<B>& x, const simd_base<B>& y);
+
+    // integer specialization
+    template <class B, class T1>
+    inline typename std::enable_if<std::is_integral<T1>::value, batch_type_t<B>>::type
+    pow(const simd_base<B>& t0, const T1& t1);
 
     /**
      * Computes the cubic root of the batch \c x.
      * @param x batch of floating point values.
      * @return the cubic root of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> cbrt(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> cbrt(const simd_base<B>& x);
 
     /**
      * Computes the square root of the sum of the squares of the batches
@@ -45,8 +50,8 @@ namespace xsimd
      * @param y batch of floating point values.
      * @return the square root of the sum of the squares of \c x and \c y.
      */
-    template <class T, std::size_t N>
-    batch<T, N> hypot(const batch<T, N>& x, const batch<T, N>& y);
+    template <class B>
+    batch_type_t<B> hypot(const simd_base<B>& x, const simd_base<B>& y);
 
     /**********************
      * pow implementation *
@@ -73,7 +78,7 @@ namespace xsimd
                 auto negx = x < b_type(0.);
                 b_type z = exp(y * log(abs(x)));
                 z = select(is_odd(y) && negx, -z, z);
-                auto invalid = negx && !(is_flint(y) || isinf(y));
+                auto invalid = negx && !(is_flint(y) || xsimd::isinf(y));
                 return select(invalid, nan<b_type>(), z);
             }
         };
@@ -104,17 +109,17 @@ namespace xsimd
       }
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> pow(const batch<T, N>& x, const batch<T, N>& y)
+    template <class B>
+    inline batch_type_t<B> pow(const simd_base<B>& x, const simd_base<B>& y)
     {
-        return detail::pow_kernel<batch<T, N>>::compute(x, y);
+        return detail::pow_kernel<batch_type_t<B>>::compute(x(), y());
     }
 
-    template <class T0, std::size_t N, class T1>
-    inline typename std::enable_if<std::is_integral<T1>::value, batch<T0, N>>::type
-    pow(const batch<T0, N>& t0, const T1& t1)
+    template <class B, class T1>
+    inline typename std::enable_if<std::is_integral<T1>::value, batch_type_t<B>>::type
+    pow(const simd_base<B>& t0, const T1& t1)
     {
-        return detail::ipow(t0, t1);
+        return detail::ipow(t0(), t1);
     }
 
     /***********************
@@ -178,7 +183,7 @@ namespace xsimd
                 x = x | bitofsign(a);
 #endif
 #ifndef XSIMD_NO_INFINITIES
-                return select(a == B(0.) || isinf(a), a, x);
+                return select(a == B(0.) || xsimd::isinf(a), a, x);
 #else
                 return select(a == B(0.), a, x);
 #endif
@@ -228,7 +233,7 @@ namespace xsimd
                 x = x | bitofsign(a);
 #endif
 #ifndef XSIMD_NO_INFINITIES
-                return select(a == B(0.) || isinf(a), a, x);
+                return select(a == B(0.) || xsimd::isinf(a), a, x);
 #else
                 return select(a == B(0.), a, x);
 #endif
@@ -236,20 +241,20 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> cbrt(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> cbrt(const simd_base<B>& x)
     {
-        return detail::cbrt_kernel<batch<T, N>>::compute(x);
+        return detail::cbrt_kernel<batch_type_t<B>>::compute(x());
     }
 
     /************************
      * hypot implementation *
      ************************/
 
-    template <class T, std::size_t N>
-    inline batch<T, N> hypot(const batch<T, N>& x, const batch<T, N>& y)
+    template <class B>
+    inline batch_type_t<B> hypot(const simd_base<B>& x, const simd_base<B>& y)
     {
-        return sqrt(fma(x, x, y * y));
+        return sqrt(fma(x(), x(), y() * y()));
     }
 }
 

@@ -10,6 +10,7 @@
 #define XSIMD_MATH_COMPLEX_HPP
 
 #include "../types/xsimd_complex_base.hpp"
+#include "xsimd_basic_math.hpp"
 #include "xsimd_exponential.hpp"
 #include "xsimd_hyperbolic.hpp"
 #include "xsimd_logarithm.hpp"
@@ -19,23 +20,16 @@
 namespace xsimd
 {
     template <class X>
-    typename X::real_batch abs(const simd_complex_batch<X>& z);
+    typename batch_type_t<X>::real_batch arg(const simd_base<X>& z);
 
     template <class X>
-    typename X::real_batch arg(const simd_complex_batch<X>& z);
+    batch_type_t<X> conj(const simd_base<X>& z);
 
     template <class X>
-    X conj(const simd_complex_batch<X>& z);
+    typename batch_type_t<X>::real_batch norm(const simd_base<X>& rhs);
 
     template <class X>
-    X sqrt(const simd_complex_batch<X>& z);
-
-    template <class X>
-    typename simd_batch_traits<X>::real_value_type
-    norm(const simd_complex_batch<X>& rhs);
-
-    template <class X>
-    X proj(const simd_complex_batch<X>& rhs);
+    batch_type_t<X> proj(const simd_base<X>& rhs);
 
     namespace detail
     {
@@ -385,7 +379,7 @@ namespace xsimd
             b_type winf(infinity<r_type>(), infinity<r_type>());
             r_type wreal = sin(2 * z.real()) / d;
             r_type wimag = sinh(2 * z.imag());
-            b_type wres = select(isinf(wimag), b_type(wreal, r_type(1.)), b_type(wreal, wimag / d));
+            b_type wres = select(xsimd::isinf(wimag), b_type(wreal, r_type(1.)), b_type(wreal, wimag / d));
             return select(d == r_type(0.), winf, wres);
         }
 
@@ -766,24 +760,6 @@ namespace xsimd
 #endif
     }
 
-    template <class X>
-    inline typename X::real_batch abs(const simd_complex_batch<X>& z)
-    {
-        return hypot(z.real(), z.imag());
-    }
-
-    template <class X>
-    inline typename X::real_batch arg(const simd_complex_batch<X>& z)
-    {
-        return atan2(z.imag(), z.real());
-    }
-
-    template <class X>
-    inline X conj(const simd_complex_batch<X>& z)
-    {
-        return X(z.real(), -z.imag());
-    }
-
     namespace detail
     {
         template <class T>
@@ -817,52 +793,93 @@ namespace xsimd
         }
     }
 
-    template <class X>
-    inline X sqrt(const simd_complex_batch<X>& z)
+    namespace detail
     {
-        using real_batch = typename X::real_batch;
-        using rvt = typename real_batch::value_type;
-        real_batch x = z.real();
-        real_batch y = z.imag();
-        real_batch sqrt_x = sqrt(fabs(x));
-        real_batch sqrt_hy = sqrt(0.5 * fabs(y));
-        auto cond = (fabs(x) > real_batch(4.) || fabs(y) > real_batch(4.));
-        x = select(cond, x * 0.25, x * detail::csqrt_scale_factor<rvt>());
-        y = select(cond, y * 0.25, y * detail::csqrt_scale_factor<rvt>());
-        real_batch scale = select(cond, real_batch(2.), real_batch(detail::csqrt_scale<rvt>()));
-        real_batch r = abs(X(x, y));
+        template <class T, std::size_t N>
+        struct complex_batch_kernel
+        {
+            using batch_type = batch<T, N>;
+            using real_batch = typename batch_type::real_batch;
 
-        auto condxp = x > real_batch(0.);
-        real_batch t0 = select(condxp, sqrt(0.5 * (r + x)), sqrt(0.5 * (r - x)));
-        real_batch r0 = scale * fabs((0.5 * y) / t0);
-        t0 *= scale;
-        real_batch t = select(condxp, t0, r0);
-        r = select(condxp, r0, t0);
-        X resg = select(y < real_batch(0.), X(t, -r), X(t, r));
-        real_batch ze(0.);
+            static real_batch abs(const batch_type& z)
+            {
+                return hypot(z.real(), z.imag());
+            }
 
-        return select(y == ze,
-                      select(x == ze,
-                             X(ze, ze),
-                             select(x < ze, X(ze, sqrt_x), X(sqrt_x, ze))),
-                      select(x == ze,
-                             select(y > ze, X(sqrt_hy, sqrt_hy), X(sqrt_hy, -sqrt_hy)),
-                             resg));
+            static batch_type sqrt(const batch_type& z)
+            {
+                using rvt = typename real_batch::value_type;
+                real_batch x = z.real();
+                real_batch y = z.imag();
+                real_batch sqrt_x = xsimd::sqrt(fabs(x));
+                real_batch sqrt_hy = xsimd::sqrt(0.5 * fabs(y));
+                auto cond = (fabs(x) > real_batch(4.) || fabs(y) > real_batch(4.));
+                x = select(cond, x * 0.25, x * detail::csqrt_scale_factor<rvt>());
+                y = select(cond, y * 0.25, y * detail::csqrt_scale_factor<rvt>());
+                real_batch scale = select(cond, real_batch(2.), real_batch(detail::csqrt_scale<rvt>()));
+                real_batch r = abs(batch_type(x, y));
+
+                auto condxp = x > real_batch(0.);
+                real_batch t0 = select(condxp, xsimd::sqrt(0.5 * (r + x)), xsimd::sqrt(0.5 * (r - x)));
+                real_batch r0 = scale * fabs((0.5 * y) / t0);
+                t0 *= scale;
+                real_batch t = select(condxp, t0, r0);
+                r = select(condxp, r0, t0);
+                batch_type resg = select(y < real_batch(0.), batch_type(t, -r), batch_type(t, r));
+                real_batch ze(0.);
+
+                return select(y == ze,
+                              select(x == ze,
+                                     batch_type(ze, ze),
+                                     select(x < ze, batch_type(ze, sqrt_x), batch_type(sqrt_x, ze))),
+                              select(x == ze,
+                                     select(y > ze, batch_type(sqrt_hy, sqrt_hy), batch_type(sqrt_hy, -sqrt_hy)),
+                                     resg));
+            }
+        };
+
+        template <class T, std::size_t N>
+        struct batch_kernel<std::complex<T>, N>
+             : public complex_batch_kernel<std::complex<T>, N>
+        {
+        };
+
+        #ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec, std::size_t N>
+        struct batch_kernel<xtl::xcomplex<T, T, i3ec>, N>
+             : public complex_batch_kernel<xtl::xcomplex<T, T, i3ec>, N>
+        {
+        };
+        #endif
+    }
+
+
+    template <class X>
+    inline typename batch_type_t<X>::real_batch arg(const simd_base<X>& z)
+    {
+        return atan2(z().imag(), z().real());
     }
 
     template <class X>
-    inline typename simd_batch_traits<X>::real_batch
-    norm(const simd_complex_batch<X>& rhs)
+    inline batch_type_t<X> conj(const simd_base<X>& z)
     {
-        return rhs.real() * rhs.real() + rhs.imag() * rhs.imag();
+        return X(z().real(), -z().imag());
     }
 
     template <class X>
-    inline X proj(const simd_complex_batch<X>& rhs)
+    inline typename batch_type_t<X>::real_batch
+    norm(const simd_base<X>& rhs)
     {
+        return rhs().real() * rhs().real() + rhs().imag() * rhs().imag();
+    }
+
+    template <class X>
+    inline batch_type_t<X> proj(const simd_base<X>& rhs)
+    {
+        using batch_type = batch_type_t<X>;
         using real_batch = typename simd_batch_traits<X>::real_batch;
-        auto cond = isinf(rhs.real()) || isinf(rhs.imag());
-        return select(cond, X(infinity<real_batch>(), copysign(real_batch(0.), rhs.imag())), rhs);
+        auto cond = xsimd::isinf(rhs().real()) || xsimd::isinf(rhs().imag());
+        return select(cond, batch_type(infinity<real_batch>(), copysign(real_batch(0.), rhs().imag())), rhs());
     }
 }
 

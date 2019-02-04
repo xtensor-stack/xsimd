@@ -18,32 +18,32 @@ namespace xsimd
      * @param x batch of floating point values.
      * @return the natural logarithm of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> log(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> log(const simd_base<B>& x);
 
     /**
      * Computes the base 2 logarithm of the batch \c x.
      * @param x batch of floating point values.
      * @return the base 2 logarithm of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> log2(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> log2(const simd_base<B>& x);
 
     /**
      * Computes the base 10 logarithm of the batch \c x.
      * @param x batch of floating point values.
      * @return the base 10 logarithm of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> log10(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> log10(const simd_base<B>& x);
 
     /**
      * Computes the natural logarithm of one plus the batch \c x.
      * @param x batch of floating point values.
      * @return the natural logarithm of one plus \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> log1p(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> log1p(const simd_base<B>& x);
 
     /**********************
      * log implementation *
@@ -165,11 +165,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> log(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> log(const simd_base<B>& x)
     {
-        using b_type = batch<T, N>;
-        return detail::log_kernel<b_type, T>::compute(x);
+        return detail::log_kernel<batch_type_t<B>>::compute(x());
     }
 
     /***********************
@@ -301,11 +300,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> log2(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> log2(const simd_base<B>& x)
     {
-        using b_type = batch<T, N>;
-        return detail::log2_kernel<b_type, T>::compute(x);
+        return detail::log2_kernel<batch_type_t<B>>::compute(x());
     }
 
     /************************
@@ -454,11 +452,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> log10(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> log10(const simd_base<B>& x)
     {
-        using b_type = batch<T, N>;
-        return detail::log10_kernel<b_type, T>::compute(x);
+        return detail::log10_kernel<batch_type_t<B>>::compute(x());
     }
 
     /************************
@@ -563,11 +560,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> log1p(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> log1p(const simd_base<B>& x)
     {
-        using b_type = batch<T, N>;
-        return detail::log1p_kernel<b_type, T>::compute(x);
+        return detail::log1p_kernel<batch_type_t<B>>::compute(x());
     }
 }
 

@@ -170,3 +170,57 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
 
     EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
 }
+
+TEST(xsimd, iterator)
+{
+    std::vector<float, xsimd::aligned_allocator<float, XSIMD_DEFAULT_ALIGNMENT>> a(10 * 16, 0.2);
+    std::vector<float, xsimd::aligned_allocator<float, XSIMD_DEFAULT_ALIGNMENT>> b(1000, 2.);
+    std::vector<float, xsimd::aligned_allocator<float, XSIMD_DEFAULT_ALIGNMENT>> c(1000, 3.);
+
+    std::iota(a.begin(), a.end(), 0.f);
+    std::vector<float> a_cpy(a.begin(), a.end());
+
+    using batch_type = typename xsimd::simd_traits<float>::type;
+    auto begin = xsimd::aligned_iterator<batch_type>(&a[0]);
+    auto end = xsimd::aligned_iterator<batch_type>(&a[0] + a.size());
+ 
+    for (; begin != end; ++begin)
+    {
+        *begin = *begin / 2.f;
+    }
+
+    for (auto& el : a_cpy)
+    {
+        el /= 2.f;
+    }
+
+    for (auto& el : a_cpy) { std::cout << el << ", "; }
+    for (auto& el : a) { std::cout << el << ", "; }
+    EXPECT_TRUE(a.size() == a_cpy.size() && std::equal(a.begin(), a.end(), a_cpy.begin()));
+
+    begin = xsimd::aligned_iterator<batch_type>(&a[0]);
+    *begin = sin(*begin);
+
+    for (std::size_t i = 0; i < batch_type::size; ++i)
+    {
+        EXPECT_NEAR(a[i], sinf(a_cpy[i]), 1e-6);
+    }
+
+#ifdef XSIMD_BATCH_DOUBLE_SIZE
+    std::vector<std::complex<double>, xsimd::aligned_allocator<std::complex<double>, XSIMD_DEFAULT_ALIGNMENT>> ca(10 * 16, std::complex<double>(0.2));
+    using cbatch_type = typename xsimd::simd_traits<std::complex<double>>::type;
+    auto cbegin = xsimd::aligned_iterator<cbatch_type>(&ca[0]);
+    auto cend = xsimd::aligned_iterator<cbatch_type>(&ca[0] + a.size());
+
+    for (; cbegin != cend; ++cbegin)
+    {
+        *cbegin = (*cbegin + std::complex<double>(0, .3)) / 2.;
+    }
+
+    cbegin = xsimd::aligned_iterator<cbatch_type>(&ca[0]);
+    *cbegin = sin(*cbegin);
+    *cbegin = sqrt(*cbegin);
+    auto real_part = abs(*(cbegin));
+#endif
+
+}

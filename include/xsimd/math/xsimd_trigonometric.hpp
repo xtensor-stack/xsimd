@@ -21,16 +21,16 @@ namespace xsimd
      * @param x batch of floating point values.
      * @return the sine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> sin(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> sin(const simd_base<B>& x);
 
     /**
      * Computes the cosine of the batch \c x.
      * @param x batch of floating point values.
      * @return the cosine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> cos(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> cos(const simd_base<B>& x);
 
     /**
      * Computes the sine and the cosine of the batch \c x. This method is faster
@@ -39,40 +39,40 @@ namespace xsimd
      * @param si the sine of x.
      * @param co the cosine of x.
      */
-    template <class T, std::size_t N>
-    void sincos(const batch<T, N>& x, batch<T, N>& si, batch<T, N>& co);
+    template <class B>
+    void sincos(const simd_base<B>& x, batch_type_t<B>& si, batch_type_t<B>& co);
 
     /**
      * Computes the tangent of the batch \c x.
      * @param x batch of floating point values.
      * @return the tangent of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> tan(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> tan(const simd_base<B>& x);
 
     /**
      * Computes the arc sine of the batch \c x.
      * @param x batch of floating point values.
      * @return the arc sine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> asin(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> asin(const simd_base<B>& x);
 
     /**
      * Computes the arc cosine of the batch \c x.
      * @param x batch of floating point values.
      * @return the arc cosine of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> acos(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> acos(const simd_base<B>& x);
 
     /**
      * Computes the arc tangent of the batch \c x.
      * @param x batch of floating point values.
      * @return the arc tangent of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> atan(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> atan(const simd_base<B>& x);
 
     /**
      * Computes the arc tangent of the batch \c x/y, using the signs of the
@@ -81,8 +81,8 @@ namespace xsimd
      * @param y batch of floating point values.
      * @return the arc tangent of \c x/y.
      */
-    template <class T, std::size_t N>
-    batch<T, N> atan2(const batch<T, N>& y, const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> atan2(const simd_base<B>& y, const simd_base<B>& x);
 
     namespace detail
     {
@@ -162,52 +162,52 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> sin(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> sin(const simd_base<B>& x)
     {
-        return detail::trigo_kernel<batch<T, N>>::sin(x);
+        return detail::trigo_kernel<batch_type_t<B>>::sin(x());
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> cos(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> cos(const simd_base<B>& x)
     {
-        return detail::trigo_kernel<batch<T, N>>::cos(x);
+        return detail::trigo_kernel<batch_type_t<B>>::cos(x());
     }
 
-    template <class T, std::size_t N>
-    inline void sincos(const batch<T, N>& x, batch<T, N>& si, batch<T, N>& co)
+    template <class B>
+    inline void sincos(const simd_base<B>& x, batch_type_t<B>& si, batch_type_t<B>& co)
     {
-        detail::trigo_kernel<batch<T, N>>::sincos(x, si, co);
+        detail::trigo_kernel<batch_type_t<B>>::sincos(x(), si, co);
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> tan(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> tan(const simd_base<B>& x)
     {
-        return detail::trigo_kernel<batch<T, N>>::tan(x);
+        return detail::trigo_kernel<batch_type_t<B>>::tan(x());
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> asin(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> asin(const simd_base<B>& x)
     {
-        return detail::invtrigo_kernel<batch<T, N>>::asin(x);
+        return detail::invtrigo_kernel<batch_type_t<B>>::asin(x());
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> acos(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> acos(const simd_base<B>& x)
     {
-        return detail::invtrigo_kernel<batch<T, N>>::acos(x);
+        return detail::invtrigo_kernel<batch_type_t<B>>::acos(x());
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> atan(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> atan(const simd_base<B>& x)
     {
-        return detail::invtrigo_kernel<batch<T, N>>::atan(x);
+        return detail::invtrigo_kernel<batch_type_t<B>>::atan(x());
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> atan2(const batch<T, N>& y, const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> atan2(const simd_base<B>& y, const simd_base<B>& x)
     {
-        return detail::invtrigo_kernel<batch<T, N>>::atan2(y, x);
+        return detail::invtrigo_kernel<batch_type_t<B>>::atan2(y(), x());
     }
 }
 

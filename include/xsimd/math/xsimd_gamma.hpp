@@ -22,16 +22,16 @@ namespace xsimd
      * @param x batch of floating point values.
      * @return the gamma function of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> tgamma(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> tgamma(const simd_base<B>& x);
 
     /**
      * Computes the natural logarithm of the gamma function of the batch \c x.
      * @param x batch of floating point values.
      * @return the natural logarithm of the gamma function of \c x.
      */
-    template <class T, std::size_t N>
-    batch<T, N> lgamma(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> lgamma(const simd_base<B>& x);
 
     /*************************
      * tgamma implementation *
@@ -127,7 +127,7 @@ namespace xsimd
             y = select(test, y, y * v);
             y *= sqrt_2pi<B>() * w;
 #ifndef XSIMD_NO_INFINITIES
-            y = select(isinf(x), x, y);
+            y = select(xsimd::isinf(x), x, y);
 #endif
             return select(x > stirlinglargelim, infinity<B>(), y);
         }
@@ -263,7 +263,7 @@ namespace xsimd
         {
             auto nan_result = (a < B(0.) && is_flint(a));
 #ifndef XSIMD_NO_INVALIDS
-            nan_result = isnan(a) || nan_result;
+            nan_result = xsimd::isnan(a) || nan_result;
 #endif
             B q = abs(a);
             auto test = (a < B(-33.));
@@ -280,10 +280,10 @@ namespace xsimd
         }
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> tgamma(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> tgamma(const simd_base<B>& x)
     {
-        return detail::tgamma_impl(x);
+        return detail::tgamma_impl(x());
     }
 
     /*************************
@@ -597,10 +597,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> lgamma(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> lgamma(const simd_base<B>& x)
     {
-        return detail::lgamma_impl<batch<T, N>>::compute(x);
+        return detail::lgamma_impl<batch_type_t<B>>::compute(x());
     }
 }
 

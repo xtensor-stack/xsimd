@@ -16,31 +16,30 @@
 namespace xsimd
 {
 
-    template <class T, std::size_t N>
-    batch<T, N> bitofsign(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> bitofsign(const simd_base<B>& x);
 
-    template <class T, std::size_t N>
-    batch<T, N> copysign(const batch<T, N>& x1, const batch<T, N>& x2);
+    template <class B>
+    batch_type_t<B> copysign(const simd_base<B>& x1, const simd_base<B>& x2);
 
-    template <class T, std::size_t N>
-    batch<T, N> sign(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> sign(const simd_base<B>& x);
 
-    template <class T, std::size_t N>
-    batch<T, N> signnz(const batch<T, N>& x);
+    template <class B>
+    batch_type_t<B> signnz(const simd_base<B>& x);
 
     /**************************
      * fp_sign implementation *
      **************************/
 
-    template <class T, std::size_t N>
-    inline batch<T, N> bitofsign(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> bitofsign(const simd_base<B>& x)
     {
-        using btype = batch<T, N>;
-        return x & minuszero<btype>();
+        return x() & minuszero<batch_type_t<B>>();
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> copysign(const batch<T, N>& x1, const batch<T, N>& x2)
+    template <class B>
+    inline batch_type_t<B> copysign(const simd_base<B>& x1, const simd_base<B>& x2)
     {
         return abs(x1) | bitofsign(x2);
     }
@@ -79,16 +78,16 @@ namespace xsimd
 #ifdef XSIMD_NO_NANS
                 return r;
 #else
-                return select(isnan(a), nan<B>(), r);
+                return select(xsimd::isnan(a), nan<B>(), r);
 #endif
             }
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> sign(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> sign(const simd_base<B>& x)
     {
-        return detail::sign_impl<batch<T, N>>::compute(x);
+        return detail::sign_impl<batch_type_t<B>>::compute(x());
     }
 
     /*************************
@@ -122,7 +121,7 @@ namespace xsimd
             static inline B compute(const B& x)
             {
 #ifndef XSIMD_NO_NANS
-                return select(isnan(x), nan<B>(), B(1.) | (signmask<B>() & x));
+                return select(xsimd::isnan(x), nan<B>(), B(1.) | (signmask<B>() & x));
 #else
                 return B(1.) | (signmask<B>() & x);
 #endif
@@ -130,10 +129,10 @@ namespace xsimd
         };
     }
 
-    template <class T, std::size_t N>
-    inline batch<T, N> signnz(const batch<T, N>& x)
+    template <class B>
+    inline batch_type_t<B> signnz(const simd_base<B>& x)
     {
-        return detail::signnz_impl<batch<T, N>>::compute(x);
+        return detail::signnz_impl<batch_type_t<B>>::compute(x());
     }
 }
 
