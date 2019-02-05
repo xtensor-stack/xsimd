@@ -9,7 +9,6 @@ Wrapper types
 
 .. toctree::
 
-   xsimd_base_bool
    xsimd_base
    xsimd_batch_bool
    xsimd_batch

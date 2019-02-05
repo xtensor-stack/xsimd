@@ -24,24 +24,29 @@ namespace xsimd
     struct simd_batch_inner_types<batch_proxy<X>>
     {
         using batch_reference = X;
+        using const_batch_reference = X;
     };
 
     /**
      * Aligned proxy that iterators can dereference to
      */
     template <class B>
-    class batch_proxy
-        : public simd_base<batch_proxy<B>>
+    class batch_proxy : public simd_base<batch_proxy<B>>
     {
     public:
 
         using self_type = batch_proxy<B>;
+        using base_type = simd_type<self_type>;
+        using batch_reference = typename base_type::batch_reference;
+        using const_batch_reference = typename base_type::const_batch_reference;
         using batch_type = B;
         using value_type = typename B::value_type;
         using pointer = value_type*;
 
         batch_proxy(pointer ptr);
-        batch_type get() const;
+
+        batch_reference get();
+        const_batch_reference get() const;
 
         self_type& set(const batch_type& rhs);
         self_type& set(const self_type& rhs);
@@ -110,7 +115,13 @@ namespace xsimd
     }
 
     template <class B>
-    inline auto batch_proxy<B>::get() const -> batch_type
+    inline auto batch_proxy<B>::get() -> batch_reference
+    {
+        return batch_type(*this);
+    }
+
+    template <class B>
+    inline auto batch_proxy<B>::get() const -> const_batch_reference
     {
         return batch_type(*this);
     }
