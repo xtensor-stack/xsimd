@@ -42,15 +42,10 @@ namespace xsimd
     struct simd_batch_traits;
 
     template <class X>
-    class simd_batch;
-
-    template <class X>
-    struct simd_batch_inner_types;
-
-    template <class X>
-    struct simd_batch_inner_types<simd_batch<X>>
+    struct simd_batch_inner_types
     {
-        using batch_reference = const X&;
+        using batch_reference = X&;
+        using const_batch_reference = const X&;
     };
 
     template <class T>
@@ -81,29 +76,6 @@ namespace xsimd
 
     template <class T>
     using real_batch_type_t = typename detail::get_real_batch_type<typename T::batch_type>::batch_type;
-
-    template <class B>
-    class simd_base
-    {
-    public:
-        using derived_class = B;
-        using batch_reference = typename simd_batch_inner_types<B>::batch_reference;
-
-        batch_reference operator()() const
-        {
-            return this->derived_cast().get();
-        }
-
-        B& derived_cast()
-        {
-            return *reinterpret_cast<B*>(this);
-        }
-
-        const B& derived_cast() const
-        {
-            return *reinterpret_cast<const B*>(this);
-        }
-    };
 
     /*******************
      * simd_batch_bool *
@@ -200,15 +172,41 @@ namespace xsimd
     template <class X>
     std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs);
 
+
+    /*************
+     * simd_base *
+     *************/
+
+    /**
+     * @class simd_base
+     * @brief Base class for batches and batch proxies.
+     *
+     * The simd_base class is the base class for all classes
+     * representing a batch or a batch proxy. It provides very few
+     * methods, so concrete batches usually inherit from intermediate
+     * classes.
+     *
+     * @tparam X The most derived type
+     */
+    template <class X>
+    class simd_base
+    {
+    public:
+
+        using derived_class = X;
+        using batch_reference = typename simd_batch_inner_types<X>::batch_reference;
+        using const_batch_reference = typename simd_batch_inner_types<X>::const_batch_reference;
+
+        batch_reference operator()();
+        const_batch_reference operator()() const;
+
+        X& derived_cast();
+        const X& derived_cast() const;
+    };
+
     /**************
      * simd_batch *
      **************/
-
-    template <class X>
-    struct simd_batch_traits<simd_batch<X>>
-        : public simd_batch_traits<X>
-    {
-    };
 
     /**
      * @class simd_batch
@@ -223,19 +221,16 @@ namespace xsimd
      * @sa simd_batch_bool
      */
     template <class X>
-    class simd_batch
-        : public simd_base<simd_batch<X>>
+    class simd_batch : public simd_base<X>
     {
     public:
 
+        using base_type = simd_base<X>;
+        using batch_reference = typename base_type::batch_reference;
+        using const_batch_reference = typename base_type::const_batch_reference;
         using batch_type = X;
         using value_type = typename simd_batch_traits<X>::value_type;
         static constexpr std::size_t size = simd_batch_traits<X>::size;
-
-        const batch_type& get() const
-        {
-            return (*this)();
-        }
 
         X& operator+=(const X& rhs);
         X& operator+=(const value_type& rhs);
@@ -259,16 +254,17 @@ namespace xsimd
         X& operator--();
         X& operator--(int);
 
-        X& operator()();
-        const X& operator()() const;
-
         X& load_aligned(const char* src);
         X& load_unaligned(const char* src);
 
         void store_aligned(char* dst) const;
         void store_unaligned(char* dst) const;
 
+        batch_reference get();
+        const_batch_reference get() const;
+
     protected:
+
         simd_batch() = default;
         ~simd_batch() = default;
 
@@ -1024,6 +1020,51 @@ namespace xsimd
         return out;
     }
 
+    /****************************
+     * simd_base implementation *
+     ****************************/
+
+    /**
+     * @name Static downcast functions
+     */
+    //@{
+    /**
+     * Returns a reference to the batch type used for computation. 
+     */
+    template <class X>
+    inline auto simd_base<X>::operator()() -> batch_reference
+    {
+        return derived_cast().get();
+    }
+
+    /**
+     * Returns a constant reference to the batch type used for computation. 
+     */
+    template <class X>
+    inline auto simd_base<X>::operator()() const -> const_batch_reference
+    {
+        return derived_cast().get();
+    }
+
+    /**
+     * Returns a reference to the actual derived type of simd_base.
+     */
+    template <class X>
+    inline X& simd_base<X>::derived_cast()
+    {
+        return *static_cast<X*>(this);
+    }
+
+    /**
+     * Returns a constant reference to the actual derived type of simd_base.
+     */
+    template <class X>
+    inline const X& simd_base<X>::derived_cast() const
+    {
+        return *static_cast<const X*>(this);
+    }
+    //@}
+
     /*****************************
      * simd_batch implementation *
      *****************************/
@@ -1220,29 +1261,6 @@ namespace xsimd
     }
     //@}
 
-    /**
-     * @name Static downcast functions
-     */
-    //@{
-    /**
-     * Returns a reference to the actual derived type of the simd_batch_bool.
-     */
-    template <class X>
-    inline X& simd_batch<X>::operator()()
-    {
-        return *static_cast<X*>(this);
-    }
-
-    /**
-     * Returns a constant reference to the actual derived type of the simd_batch_bool.
-     */
-    template <class X>
-    inline const X& simd_batch<X>::operator()() const
-    {
-        return *static_cast<const X*>(this);
-    }
-    //@}
-
     template <class X>
     inline X& simd_batch<X>::load_aligned(const char* src)
     {
@@ -1267,6 +1285,18 @@ namespace xsimd
         return (*this)().store_unaligned(reinterpret_cast<char_itype*>(dst));
     }
 
+    template <class X>
+    inline auto simd_batch<X>::get() -> batch_reference
+    {
+        return this->derived_cast();
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::get() const -> const_batch_reference
+    {
+        return this->derived_cast();
+    }
+    
     /**
      * @defgroup simd_batch_arithmetic Arithmetic operators
      */
