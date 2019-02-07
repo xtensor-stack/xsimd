@@ -37,6 +37,8 @@ namespace xsimd
         bool_proxy<T> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
+        __m128i get_value() const;
+
     private:
 
         union
@@ -214,6 +216,12 @@ namespace xsimd
     inline bool sse_int_batch_bool<T, N>::operator[](std::size_t index) const
     {
         return static_cast<bool>(m_array[index & (N - 1)]);
+    }
+
+    template <class T, std::size_t N>
+    inline __m128i sse_int_batch_bool<T, N>::get_value() const
+    {
+        return m_value;
     }
 
     namespace detail

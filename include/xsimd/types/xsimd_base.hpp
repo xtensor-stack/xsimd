@@ -197,7 +197,6 @@ namespace xsimd
     template <class X>
     std::ostream& operator<<(std::ostream& out, const simd_batch_bool<X>& rhs);
 
-
     /*************
      * simd_base *
      *************/
@@ -493,6 +492,9 @@ namespace xsimd
     template <class B, std::size_t N = simd_batch_traits<B>::size>
     B bitwise_cast(const batch<int64_t, N>& x);
 
+    template <class T, std::size_t N>
+    batch<T, N> bitwise_cast(const batch_bool<T, N>& src);
+
     /****************
      * helper macro *
      ****************/
@@ -680,6 +682,34 @@ namespace xsimd
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t)                                \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, float)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
+
+#define XSIMD_DEFINE_BITWISE_CAST(TYPE, N)                                     \
+    inline batch<TYPE, N> bitwise_cast(const batch_bool<TYPE, N>& src)         \
+    {                                                                          \
+        TYPE z(0);                                                             \
+        return select(src, batch<TYPE, N>(~z), batch<TYPE, N>(z));             \
+    }
+
+#define XSIMD_DEFINE_BITWISE_CAST_FLOAT(TYPE, N)                               \
+    inline batch<TYPE, N> bitwise_cast(const batch_bool<TYPE, N>& src)         \
+    {                                                                          \
+        TYPE z0(0), z1(0);                                                     \
+        using int_type = as_unsigned_integer_t<TYPE>;                          \
+        *reinterpret_cast<int_type*>(&z1) = ~int_type(0);                      \
+        return select(src, batch<TYPE, N>(z1), batch<TYPE ,N>(z0));            \
+    }
+
+#define XSIMD_DEFINE_BITWISE_CAST_ALL(NMIN)                                    \
+    XSIMD_DEFINE_BITWISE_CAST_FLOAT(double, NMIN)                              \
+    XSIMD_DEFINE_BITWISE_CAST_FLOAT(float, NMIN * 2)                           \
+    XSIMD_DEFINE_BITWISE_CAST(int64_t, NMIN)                                   \
+    XSIMD_DEFINE_BITWISE_CAST(uint64_t, NMIN)                                  \
+    XSIMD_DEFINE_BITWISE_CAST(int32_t, NMIN * 2)                               \
+    XSIMD_DEFINE_BITWISE_CAST(uint32_t, NMIN * 2)                              \
+    XSIMD_DEFINE_BITWISE_CAST(int16_t, NMIN * 4)                               \
+    XSIMD_DEFINE_BITWISE_CAST(uint16_t, NMIN * 4)                              \
+    XSIMD_DEFINE_BITWISE_CAST(int8_t, NMIN * 8)                                \
+    XSIMD_DEFINE_BITWISE_CAST(uint8_t, NMIN * 8)
 
     /*****************************
      * bool_proxy implementation *
@@ -2056,27 +2086,33 @@ namespace xsimd
      *****************************************/
 
     template <class B, std::size_t N>
-    B bitwise_cast(const batch<float, N>& x)
+    inline B bitwise_cast(const batch<float, N>& x)
     {
         return bitwise_cast_impl<batch<float, N>, B>::run(x);
     }
 
     template <class B, std::size_t N>
-    B bitwise_cast(const batch<double, N>& x)
+    inline B bitwise_cast(const batch<double, N>& x)
     {
         return bitwise_cast_impl<batch<double, N>, B>::run(x);
     }
 
     template <class B, std::size_t N>
-    B bitwise_cast(const batch<int32_t, N>& x)
+    inline B bitwise_cast(const batch<int32_t, N>& x)
     {
         return bitwise_cast_impl<batch<int32_t, N>, B>::run(x);
     }
 
     template <class B, std::size_t N>
-    B bitwise_cast(const batch<int64_t, N>& x)
+    inline B bitwise_cast(const batch<int64_t, N>& x)
     {
         return bitwise_cast_impl<batch<int64_t, N>, B>::run(x);
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N> bitwise_cast(const batch_bool<T, N>& src)
+    {
+        return batch<T, N>(src.get_value());
     }
 }
 

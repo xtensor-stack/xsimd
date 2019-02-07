@@ -194,8 +194,6 @@ TEST(xsimd, iterator)
         el /= 2.f;
     }
 
-    for (auto& el : a_cpy) { std::cout << el << ", "; }
-    for (auto& el : a) { std::cout << el << ", "; }
     EXPECT_TRUE(a.size() == a_cpy.size() && std::equal(a.begin(), a.end(), a_cpy.begin()));
 
     begin = xsimd::aligned_iterator<batch_type>(&a[0]);

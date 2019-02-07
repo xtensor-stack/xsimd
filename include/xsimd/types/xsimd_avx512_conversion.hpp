@@ -13,6 +13,8 @@
 #include "xsimd_avx512_float.hpp"
 #include "xsimd_avx512_int32.hpp"
 #include "xsimd_avx512_int64.hpp"
+#include "xsimd_avx512_int16.hpp"
+#include "xsimd_avx512_int8.hpp"
 
 namespace xsimd
 {
@@ -35,6 +37,12 @@ namespace xsimd
     batch_bool<int64_t, 8> bool_cast(const batch_bool<double, 8>& x);
     batch_bool<float, 16> bool_cast(const batch_bool<int32_t, 16>& x);
     batch_bool<double, 8> bool_cast(const batch_bool<int64_t, 8>& x);
+
+    /*******************************
+     * bitwise_cast implementation *
+     *******************************/
+
+    XSIMD_DEFINE_BITWISE_CAST_ALL(8)
 
     /***************************************
      * conversion functions implementation *
