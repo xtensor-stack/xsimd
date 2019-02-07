@@ -96,11 +96,16 @@ namespace xsimd
         using base_type::store_aligned;
         using base_type::store_unaligned;
 
-        float operator[](std::size_t index) const;
+        float& operator[](std::size_t index);
+        const float& operator[](std::size_t index) const;
 
     private:
 
-        __m256 m_value;
+        union
+        {
+            __m256 m_value;
+            float m_array[8];
+        };
     };
 
     /***************************************
@@ -456,11 +461,14 @@ namespace xsimd
         store_aligned(dst);
     }
 
-    inline float batch<float, 8>::operator[](std::size_t index) const
+    inline float& batch<float, 8>::operator[](std::size_t index)
     {
-        alignas(32) float x[8];
-        store_aligned(x);
-        return x[index & 7];
+        return m_array[index];
+    }
+
+    inline const float& batch<float, 8>::operator[](std::size_t index) const
+    {
+        return m_array[index];
     }
 
     namespace detail

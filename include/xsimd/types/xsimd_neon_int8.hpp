@@ -78,11 +78,16 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_INT8(int8_t, 16)
         XSIMD_DECLARE_LOAD_STORE_LONG(int8_t, 16)
 
-        int8_t operator[](std::size_t index) const;
+        int8_t& operator[](std::size_t index);
+        const int8_t& operator[](std::size_t index) const;
 
     private:
 
-        simd_type m_value;
+        union
+        {
+            simd_type m_value;
+            int8_t m_array[16];
+        };
     };
 
     batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, int8_t rhs);
@@ -198,9 +203,14 @@ namespace xsimd
         return m_value;
     }
 
-    inline int8_t batch<int8_t, 16>::operator[](std::size_t index) const
+    inline int8_t& batch<int8_t, 16>::operator[](std::size_t index)
     {
-        return m_value[index];
+        return m_array[index];
+    }
+
+    inline const int8_t& batch<int8_t, 16>::operator[](std::size_t index) const
+    {
+        return m_array[index];
     }
 
     namespace detail

@@ -92,11 +92,16 @@ namespace xsimd
         using base_type::store_aligned;
         using base_type::store_unaligned;
 
-        T operator[](std::size_t index) const;
+        T& operator[](std::size_t index);
+        const T& operator[](std::size_t index) const;
 
     protected:
 
-        __m256i m_value;
+        union
+        {
+            __m256i m_value;
+            T m_array[N];
+        };
     };
 
     namespace avx_detail
@@ -420,13 +425,16 @@ namespace xsimd
         _mm256_storeu_si256((__m256i*) dst, m_value);
     }
 
+    template <class T, std::size_t N>
+    inline T& avx_int_batch<T, N>::operator[](std::size_t index)
+    {
+        return m_array[index];
+    }
 
     template <class T, std::size_t N>
-    inline T avx_int_batch<T, N>::operator[](std::size_t index) const
+    inline const T& avx_int_batch<T, N>::operator[](std::size_t index) const
     {
-        alignas(32) T x[N];
-        store_aligned(x);
-        return x[index & (N - 1)];
+        return m_array[index];
     }
 
     namespace detail
