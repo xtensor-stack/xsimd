@@ -77,6 +77,31 @@ namespace xsimd
     template <class T>
     using real_batch_type_t = typename detail::get_real_batch_type<typename T::batch_type>::batch_type;
 
+    /**************
+     * bool_proxy *
+     **************/
+
+    template <class T>
+    class bool_proxy
+    {
+    public:
+
+        bool_proxy(T& ref);
+        
+        bool_proxy(const bool_proxy&) = default;
+        bool_proxy& operator=(const bool_proxy&) = default;
+
+        bool_proxy(bool_proxy&&) = default;
+        bool_proxy& operator=(bool_proxy&&) = default;
+
+        bool_proxy& operator=(bool rhs);
+        operator bool() const;
+
+    private:
+
+        T& m_ref;
+    };
+
     /*******************
      * simd_batch_bool *
      *******************/
@@ -655,6 +680,29 @@ namespace xsimd
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, uint64_t)                                \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, float)                                   \
     XSIMD_DECLARE_LOAD_STORE(TYPE, N, double)
+
+    /*****************************
+     * bool_proxy implementation *
+     *****************************/
+
+    template <class T>
+    inline bool_proxy<T>::bool_proxy(T& ref)
+        : m_ref(ref)
+    {
+    }
+
+    template <class T>
+    inline bool_proxy<T>& bool_proxy<T>::operator=(bool rhs)
+    {
+        m_ref = static_cast<T>(rhs);
+        return *this;
+    }
+
+    template <class T>
+    inline bool_proxy<T>::operator bool() const
+    {
+        return static_cast<bool>(m_ref);
+    }
 
     /**********************************
      * simd_batch_bool implementation *

@@ -92,11 +92,16 @@ namespace xsimd
 
         operator simd_type() const;
 
+        bool_proxy<uint16_t> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
     private:
 
-        simd_type m_value;
+        union
+        {
+            simd_type m_value;
+            uint16_t m_array[8];
+        };
     };
 
     /********************
@@ -130,11 +135,16 @@ namespace xsimd
 
         operator simd_type() const;
 
+        bool_proxy<uint32_t> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
     private:
 
-        simd_type m_value;
+        union
+        {
+            simd_type m_value;
+            uint32_t m_array[4];
+        };
     };
 
     /********************
@@ -168,11 +178,16 @@ namespace xsimd
 
         operator simd_type() const;
 
+        bool_proxy<uint64_t> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
     private:
 
-        simd_type m_value;
+        union
+        {
+            simd_type m_value;
+            uint64_t m_array[2];
+        };
     };
 
     /*********************
@@ -209,11 +224,16 @@ namespace xsimd
 
         operator simd_type() const;
 
+        bool_proxy<uint8_t> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
     private:
 
-        simd_type m_value;
+        union
+        {
+            simd_type m_value;
+            uint8_t m_array[16];
+        };
     };
 
     /***********************************
@@ -275,9 +295,15 @@ namespace xsimd
     }
 
     template <class T>
+    inline bool_proxy<uint16_t> batch_bool<T, 8>::operator[](std::size_t index)
+    {
+        return bool_proxy<uint16_t>(m_array[index]);
+    }
+
+    template <class T>
     inline bool batch_bool<T, 8>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_value[index]);
+        return static_cast<bool>(m_array[index]);
     }
 
     namespace detail
@@ -390,9 +416,15 @@ namespace xsimd
     }
 
     template <class T>
+    inline bool_proxy<uint32_t> batch_bool<T, 4>::operator[](std::size_t index)
+    {
+        return bool_proxy<uint32_t>(m_array[index]);
+    }
+
+    template <class T>
     inline bool batch_bool<T, 4>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_value[index]);
+        return static_cast<bool>(m_array[index]);
     }
 
     namespace detail
@@ -520,9 +552,15 @@ namespace xsimd
     }
 
     template <class T>
+    inline bool_proxy<uint8_t> batch_bool<T, 16>::operator[](std::size_t index)
+    {
+        return bool_proxy<uint8_t>(m_array[index]);
+    }
+
+    template <class T>
     inline bool batch_bool<T, 16>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_value[index]);
+        return static_cast<bool>(m_array[index]);
     }
 
     namespace detail
@@ -631,9 +669,15 @@ namespace xsimd
     }
 
     template <class T>
+    inline bool_proxy<uint64_t> batch_bool<T, 2>::operator[](std::size_t index)
+    {
+        return bool_proxy<uint64_t>(m_array[index]);
+    }
+
+    template <class T>
     inline bool batch_bool<T, 2>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_value[index]);
+        return static_cast<bool>(m_array[index]);
     }
 
     namespace detail
