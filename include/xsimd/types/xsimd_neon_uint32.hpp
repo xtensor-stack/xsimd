@@ -286,12 +286,12 @@ namespace xsimd
 
     inline uint32_t& batch<uint32_t, 4>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & 3];
     }
 
     inline const uint32_t& batch<uint32_t, 4>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & 3];
     }
 
     namespace detail

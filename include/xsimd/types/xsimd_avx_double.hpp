@@ -143,12 +143,12 @@ namespace xsimd
 
     inline bool_proxy<double> batch_bool<double, 4>::operator[](std::size_t index)
     {
-        return bool_proxy<double>(m_array[index]);
+        return bool_proxy<double>(m_array[index & 3]);
     }
 
     inline bool batch_bool<double, 4>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_array[index]);
+        return static_cast<bool>(m_array[index & 3]);
     }
 
     namespace detail
@@ -440,12 +440,12 @@ namespace xsimd
 
     inline double& batch<double, 4>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & 3];
     }
 
     inline const double& batch<double, 4>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & 3];
     }
 
     namespace detail

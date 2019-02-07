@@ -297,13 +297,13 @@ namespace xsimd
     template <class T>
     inline bool_proxy<uint16_t> batch_bool<T, 8>::operator[](std::size_t index)
     {
-        return bool_proxy<uint16_t>(m_array[index]);
+        return bool_proxy<uint16_t>(m_array[index & 7]);
     }
 
     template <class T>
     inline bool batch_bool<T, 8>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_array[index]);
+        return static_cast<bool>(m_array[index & 7]);
     }
 
     namespace detail
@@ -418,13 +418,13 @@ namespace xsimd
     template <class T>
     inline bool_proxy<uint32_t> batch_bool<T, 4>::operator[](std::size_t index)
     {
-        return bool_proxy<uint32_t>(m_array[index]);
+        return bool_proxy<uint32_t>(m_array[index & 3]);
     }
 
     template <class T>
     inline bool batch_bool<T, 4>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_array[index]);
+        return static_cast<bool>(m_array[index & 3]);
     }
 
     namespace detail
@@ -554,13 +554,13 @@ namespace xsimd
     template <class T>
     inline bool_proxy<uint8_t> batch_bool<T, 16>::operator[](std::size_t index)
     {
-        return bool_proxy<uint8_t>(m_array[index]);
+        return bool_proxy<uint8_t>(m_array[index & 15]);
     }
 
     template <class T>
     inline bool batch_bool<T, 16>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_array[index]);
+        return static_cast<bool>(m_array[index & 15]);
     }
 
     namespace detail
@@ -671,13 +671,13 @@ namespace xsimd
     template <class T>
     inline bool_proxy<uint64_t> batch_bool<T, 2>::operator[](std::size_t index)
     {
-        return bool_proxy<uint64_t>(m_array[index]);
+        return bool_proxy<uint64_t>(m_array[index & 1]);
     }
 
     template <class T>
     inline bool batch_bool<T, 2>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_array[index]);
+        return static_cast<bool>(m_array[index & 1]);
     }
 
     namespace detail

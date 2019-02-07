@@ -188,13 +188,15 @@ namespace xsimd
     template <class MASK, class T>
     inline bool_mask_proxy<MASK> batch_bool_avx512<MASK, T>::operator[](std::size_t idx)
     {
-        return bool_mask_proxy<MASK>(m_value, idx);
+        std::size_t s = simd_batch_traits<T>::size - 1;
+        return bool_mask_proxy<MASK>(m_value, idx & s);
     };
 
     template <class MASK, class T>
     inline bool batch_bool_avx512<MASK, T>::operator[](std::size_t idx) const
     {
-        return (m_value & (1 << idx)) != 0;
+        std::size_t s = simd_batch_traits<T>::size - 1;
+        return (m_value & (1 << (idx & s))) != 0;
     }
 
     namespace detail
@@ -324,13 +326,13 @@ namespace xsimd
     template <class T, std::size_t N>
     inline bool_proxy<T> avx512_fallback_batch_bool<T, N>::operator[](std::size_t idx)
     {
-        return bool_proxy<T>(m_array[idx]);
+        return bool_proxy<T>(m_array[idx & (N - 1)]);
     }
 
     template <class T, std::size_t N>
     inline bool avx512_fallback_batch_bool<T, N>::operator[](std::size_t idx) const
     {
-        return static_cast<bool>(m_array[idx]);
+        return static_cast<bool>(m_array[idx & (N - 1)]);
     }
 
     namespace detail

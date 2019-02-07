@@ -207,13 +207,13 @@ namespace xsimd
     template <class T, std::size_t N>
     inline bool_proxy<T> sse_int_batch_bool<T, N>::operator[](std::size_t index)
     {
-        return bool_proxy<T>(m_array[index]);
+        return bool_proxy<T>(m_array[index & (N - 1)]);
     }
 
     template <class T, std::size_t N>
     inline bool sse_int_batch_bool<T, N>::operator[](std::size_t index) const
     {
-        return static_cast<bool>(m_array[index]);
+        return static_cast<bool>(m_array[index & (N - 1)]);
     }
 
     namespace detail
@@ -404,13 +404,13 @@ namespace xsimd
     template <class T, std::size_t N>
     inline T& sse_int_batch<T, N>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & (N - 1)];
     }
 
     template <class T, std::size_t N>
     inline const T& sse_int_batch<T, N>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & (N - 1)];
     }
 
     namespace detail

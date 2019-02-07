@@ -187,12 +187,12 @@ namespace xsimd
 
     inline uint8_t& batch<uint8_t, 16>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & 15];
     }
 
     inline const uint8_t& batch<uint8_t, 16>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & 15];
     }
 
     namespace detail
