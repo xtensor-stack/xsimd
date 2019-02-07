@@ -656,9 +656,6 @@ namespace xsimd
         out << dash << name_shift << '-' << shift << dash << std::endl
             << std::endl;
 
-        /*using return_type1 = simd_return_type<vector_type, vector_type>;
-        using return_type2 = simd_return_type<vector_type, vector_bool_type>;
-        using return_type3 = simd_return_type<vector_bool_type, vector_bool_type>;*/
         using return_type1 = simd_return_type<value_type, value_type, vector_type::size>;
         using return_type2 = simd_return_type<bool, value_type, vector_type::size>;
         success = success && std::is_same<return_type1, vector_type>::value;
@@ -669,6 +666,10 @@ namespace xsimd
         value_type es = lhs[1];
         tmp_success = check_almost_equal(topic, es, tester.extract_res, out);
         success = success && tmp_success;
+        value_type nvalue = value_type(2);
+        lhs[1] = nvalue;
+        tmp_success = check_almost_equal(topic, lhs[1], nvalue, out);
+        lhs[1] = es;
 
         topic = "load/store aligned       : ";
         detail::load_vec(lhs, tester.lhs);

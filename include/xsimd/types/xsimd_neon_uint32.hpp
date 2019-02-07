@@ -63,11 +63,16 @@ namespace xsimd
         using base_type::store_aligned;
         using base_type::store_unaligned;
 
-        uint32_t operator[](std::size_t index) const;
+        uint32_t& operator[](std::size_t index);
+        const uint32_t& operator[](std::size_t index) const;
 
     private:
 
-        simd_type m_value;
+        union
+        {
+            simd_type m_value;
+            uint32_t m_array[4];
+        };
     };
 
     batch<uint32_t, 4> operator<<(const batch<uint32_t, 4>& lhs, int32_t rhs);
@@ -279,9 +284,14 @@ namespace xsimd
         return m_value;
     }
 
-    inline uint32_t batch<uint32_t, 4>::operator[](std::size_t index) const
+    inline uint32_t& batch<uint32_t, 4>::operator[](std::size_t index)
     {
-        return m_value[index];
+        return m_array[index];
+    }
+
+    inline const uint32_t& batch<uint32_t, 4>::operator[](std::size_t index) const
+    {
+        return m_array[index];
     }
 
     namespace detail
