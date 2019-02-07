@@ -47,11 +47,16 @@ namespace xsimd
 
         operator __m256i() const;
 
+        bool_proxy<T> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
     private:
 
-        __m256i m_value;
+        union
+        {
+            __m256i m_value;
+            T m_array[N];
+        };
     };
 
     template <class T, std::size_t N>
@@ -198,11 +203,15 @@ namespace xsimd
     }
 
     template <class T, std::size_t N>
+    inline bool_proxy<T> avx_int_batch_bool<T, N>::operator[](std::size_t index)
+    {
+        return bool_proxy<T>(m_array[index]);
+    }
+
+    template <class T, std::size_t N>
     inline bool avx_int_batch_bool<T, N>::operator[](std::size_t index) const
     {
-        alignas(32) T x[N];
-        _mm256_store_si256((__m256i*)x, m_value);
-        return static_cast<bool>(x[index & (N - 1)]);
+        return static_cast<bool>(m_array[index]);
     }
 
     namespace detail

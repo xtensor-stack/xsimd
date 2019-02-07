@@ -929,6 +929,9 @@ namespace xsimd
         XSIMD_TEST_COMPARISON( != );
         #undef XSIMD_TEST_COMPARISON
 
+        bres[0] = false;
+        success = !bool(bres[0]) && tmp_success;
+
         return success;
     }
 

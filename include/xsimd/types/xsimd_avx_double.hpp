@@ -41,16 +41,16 @@ namespace xsimd
 
         operator __m256d() const;
 
+        bool_proxy<double> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
     private:
-        union storage_t
-        {
-            std::array<std::uint64_t, 4> arr;
-            __m256d                      reg;
-        };
 
-        storage_t m_value;
+        union
+        {
+            __m256d m_value;
+            double m_array[4];
+        };
     };
 
     /********************
@@ -115,35 +115,40 @@ namespace xsimd
 
     inline batch_bool<double, 4>::batch_bool(bool b)
     {
-        m_value.reg = _mm256_castsi256_pd(_mm256_set1_epi32(-(int)b));
+        m_value = _mm256_castsi256_pd(_mm256_set1_epi32(-(int)b));
     }
 
     inline batch_bool<double, 4>::batch_bool(bool b0, bool b1, bool b2, bool b3)
     {
-        m_value.reg = _mm256_castsi256_pd(
+        m_value = _mm256_castsi256_pd(
                     _mm256_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1,
                                       -(int)b2, -(int)b2, -(int)b3, -(int)b3));
     }
 
     inline batch_bool<double, 4>::batch_bool(const __m256d& rhs)
     {
-        m_value.reg = rhs;
+        m_value = rhs;
     }
 
     inline batch_bool<double, 4>& batch_bool<double, 4>::operator=(const __m256d& rhs)
     {
-        m_value.reg = rhs;
+        m_value = rhs;
         return *this;
     }
 
     inline batch_bool<double, 4>::operator __m256d() const
     {
-        return m_value.reg;
+        return m_value;
+    }
+
+    inline bool_proxy<double> batch_bool<double, 4>::operator[](std::size_t index)
+    {
+        return bool_proxy<double>(m_array[index]);
     }
 
     inline bool batch_bool<double, 4>::operator[](std::size_t index) const
     {
-        return bool(m_value.arr[index & 3]);
+        return static_cast<bool>(m_array[index]);
     }
 
     namespace detail
