@@ -375,12 +375,12 @@ namespace xsimd
 
     inline float& batch<float, 16>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & 15];
     }
 
     inline const float& batch<float, 16>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & 15];
     }
 
     namespace detail

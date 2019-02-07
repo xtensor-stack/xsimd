@@ -393,12 +393,12 @@ namespace xsimd
 
     inline double& batch<double, 2>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & 1];
     }
 
     inline const double& batch<double, 2>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & 1];
     }
 
     namespace detail

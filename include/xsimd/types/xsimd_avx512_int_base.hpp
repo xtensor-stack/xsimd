@@ -278,13 +278,13 @@ namespace xsimd
     template <class T, std::size_t N>
     inline T& avx512_int_batch<T, N>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & (N - 1)];
     }
 
     template <class T, std::size_t N>
     inline const T& avx512_int_batch<T, N>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & (N - 1)];
     }
 
     namespace avx512_detail

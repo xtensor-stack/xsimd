@@ -420,12 +420,12 @@ namespace xsimd
 
     inline float& batch<float, 4>::operator[](std::size_t index)
     {
-        return m_array[index];
+        return m_array[index & 3];
     }
 
     inline const float& batch<float, 4>::operator[](std::size_t index) const
     {
-        return m_array[index];
+        return m_array[index & 3];
     }
 
     namespace detail
