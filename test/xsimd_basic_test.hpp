@@ -930,8 +930,24 @@ namespace xsimd
         #undef XSIMD_TEST_COMPARISON
 
         bres[0] = false;
-        success = !bool(bres[0]) && tmp_success;
+        tmp_success = !bool(bres[0]);
+        success = success && tmp_success;
+        bres[0] = true;
+        tmp_success = bool(bres[0]);
+        success = success && tmp_success;
 
+        bres = vector_bool_type(false);
+        vres = bitwise_cast(bres);
+        bres = vres == vector_type(value_type(0));
+        tmp_success = all(bres);
+        success = success && tmp_success;
+
+        bres = vector_bool_type(true);
+        vres = bitwise_cast(bres);
+        bres = (~vres) == vector_type(value_type(0));
+        tmp_success = all(bres);
+        success = success && tmp_success;
+        
         return success;
     }
 
@@ -1057,6 +1073,10 @@ namespace xsimd
         value_type es = lhs[1];
         tmp_success = check_almost_equal(topic, es, tester.extract_res, out);
         success = success && tmp_success;
+        value_type nvalue = value_type(2);
+        lhs[1] = nvalue;
+        tmp_success = check_almost_equal(topic, lhs[1], nvalue, out);
+        lhs[1] = es;
 
         topic = "load/store aligned       : ";
         detail::load_vec(lhs, tester.lhs);
@@ -1294,7 +1314,27 @@ namespace xsimd
         bool all_res_true = all(all_check_true);
         tmp_success = !all_res_false && all_res_true;
         success = success && tmp_success;
+        
+        auto bres = (lhs == lhs);
+        bres[0] = false;
+        tmp_success = !bool(bres[0]);
+        success = success && tmp_success;
+        bres[0] = true;
+        tmp_success = bool(bres[0]);
+        success = success && tmp_success;
 
+        bres = vector_bool_type(false);
+        vres = bitwise_cast(bres);
+        bres = vres == vector_type(value_type(0));
+        tmp_success = all(bres);
+        success = success && tmp_success;
+
+        bres = vector_bool_type(true);
+        vres = bitwise_cast(bres);
+        bres = ~vres == vector_type(value_type(0));
+        tmp_success = all(bres);
+        success = success && tmp_success;
+        
         success = success && test_simd_int_shift(vector_type(value_type(0)), out);
         success = success && test_simd_bool(vector_type(value_type(0)), out);
         success = success && test_char_loading<vector_type::size>(value_type(), out);

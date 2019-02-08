@@ -13,9 +13,15 @@
 #include "xsimd_neon_float.hpp"
 #include "xsimd_neon_int32.hpp"
 #include "xsimd_neon_int64.hpp"
+#include "xsimd_neon_int16.hpp"
+#include "xsimd_neon_int8.hpp"
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
     #include "xsimd_neon_double.hpp"
 #endif
+#include "xsimd_neon_uint32.hpp"
+#include "xsimd_neon_uint64.hpp"
+#include "xsimd_neon_uint16.hpp"
+#include "xsimd_neon_uint8.hpp"
 
 namespace xsimd
 {
@@ -44,6 +50,23 @@ namespace xsimd
     batch_bool<double, 2> bool_cast(const batch_bool<int64_t, 2>& x);
 #endif
 
+    /*******************************
+     * bitwise_cast implementation *
+     *******************************/
+
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+    XSIMD_DEFINE_BITWISE_CAST_FLOAT(double, 2)
+#endif
+    XSIMD_DEFINE_BITWISE_CAST_FLOAT(float, 4)
+    XSIMD_DEFINE_BITWISE_CAST(int64_t, 2)
+    XSIMD_DEFINE_BITWISE_CAST(uint64_t, 2)
+    XSIMD_DEFINE_BITWISE_CAST(int32_t, 4)
+    XSIMD_DEFINE_BITWISE_CAST(uint32_t, 4)
+    XSIMD_DEFINE_BITWISE_CAST(int16_t, 8)
+    XSIMD_DEFINE_BITWISE_CAST(uint16_t, 8)
+    XSIMD_DEFINE_BITWISE_CAST(int8_t, 16)
+    XSIMD_DEFINE_BITWISE_CAST(uint8_t, 16)
+    
     /***************************************
      * conversion functions implementation *
      ***************************************/

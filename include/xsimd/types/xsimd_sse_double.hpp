@@ -44,6 +44,8 @@ namespace xsimd
         bool_proxy<double> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
+        __m128d get_value() const;
+
     private:
 
         union
@@ -147,6 +149,11 @@ namespace xsimd
     inline bool batch_bool<double, 2>::operator[](std::size_t index) const
     {
         return static_cast<bool>(m_array[index & 1]);
+    }
+
+    inline __m128d batch_bool<double, 2>::get_value() const
+    {
+        return m_value;
     }
 
     namespace detail

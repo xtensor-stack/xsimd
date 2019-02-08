@@ -46,6 +46,8 @@ namespace xsimd
         bool_proxy<float> operator[](std::size_t index);
         bool operator[](std::size_t index) const;
 
+        __m256 get_value() const;
+
     private:
 
         union
@@ -153,6 +155,11 @@ namespace xsimd
     inline bool batch_bool<float, 8>::operator[](std::size_t index) const
     {
         return static_cast<bool>(m_array[index & 7]);
+    }
+
+    inline __m256 batch_bool<float, 8>::get_value() const
+    {
+        return m_value;
     }
 
     namespace detail

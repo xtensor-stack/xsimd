@@ -113,14 +113,14 @@ namespace xsimd
     template <class MASK>
     inline bool_mask_proxy<MASK>::operator bool() const
     {
-        return (m_ref & (1 << m_idx)) != 0;
+        return ((m_ref >> m_idx) & 1) != 0;
     }
 
     template <class MASK>
     inline bool_mask_proxy<MASK>& bool_mask_proxy<MASK>::operator=(bool rhs)
     {
-        MASK tmp = static_cast<MASK>(rhs) << m_idx;
-        m_ref = m_ref & tmp;
+        MASK tmp = static_cast<MASK>(rhs);
+        m_ref ^= (-tmp ^ m_ref) & (1 << m_idx);
         return *this;
     }
 

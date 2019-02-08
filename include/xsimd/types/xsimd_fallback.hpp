@@ -68,6 +68,8 @@ namespace xsimd
         const bool& operator[](std::size_t index) const;
         bool& operator[](std::size_t index);
 
+        const std::array<bool, N>& get_value() const;
+
     private:
 
         std::array<bool, N> m_value;
@@ -103,6 +105,9 @@ namespace xsimd
             typename Enable = typename detail::is_array_initializer<T, N, Args...>::type
         >
         batch(Args... exactly_N_scalars);
+
+        // Constructor from value_type of batch_bool
+        batch(const std::array<bool, N>& src);
 
         explicit batch(const T* src);
         batch(const T* src, aligned_mode);
@@ -469,6 +474,12 @@ namespace xsimd
         return m_value[index];
     }
 
+    template <typename T, std::size_t N>
+    inline const std::array<bool, N>& batch_bool<T, N>::get_value() const
+    {
+        return m_value;
+    }
+
     namespace detail
     {
         template <class T, std::size_t N>
@@ -551,6 +562,42 @@ namespace xsimd
     inline batch<T, N>::batch(Args... exactly_N_scalars)
         : m_value{ static_cast<T>(exactly_N_scalars)... }
     {
+    }
+
+    namespace detail
+    {
+        template <bool integral>
+        struct all_bits
+        {
+            template <class T>
+            static T get(T)
+            {
+                return ~T(0);
+            }
+        };
+
+        template <>
+        struct all_bits<false>
+        {
+            template <class T>
+            static T get(T)
+            {
+                T res(0);
+                using int_type = as_unsigned_integer_t<T>;
+                *reinterpret_cast<int_type*>(&res) = ~int_type(0);
+                return res;
+            }
+        };
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>::batch(const std::array<bool, N>& src)
+    {
+        using all_bits = detail::all_bits<std::is_integral<T>::value>;
+        for(std::size_t i = 0; i < N; ++i)
+        {
+            m_value[i] = src[i] ? all_bits::get(T(0)) : T(0);
+        }
     }
 
     template <typename T, std::size_t N>

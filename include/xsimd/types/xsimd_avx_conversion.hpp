@@ -35,7 +35,7 @@ namespace xsimd
     batch_bool<int64_t, 4> bool_cast(const batch_bool<double, 4>& x);
     batch_bool<float, 8> bool_cast(const batch_bool<int32_t, 8>& x);
     batch_bool<double, 4> bool_cast(const batch_bool<int64_t, 4>& x);
-
+    
     /***************************************
      * conversion functions implementation *
      ***************************************/
