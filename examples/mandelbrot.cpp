@@ -73,7 +73,7 @@ namespace xsimd {
           z_re = c_re + new_re;
           z_im = c_im + new_im;
 
-          vi = xsimd::select(*reinterpret_cast<batch_bool<int, N>*>(&active), vi + 1, vi);
+          vi = select(bool_cast(active), vi + 1, vi);
       }
 
       return vi;
@@ -112,8 +112,8 @@ namespace xsimd {
               // implement masked store!
               // xsimd::store_aligned(result, output + base_index, active);
               batch<int, N> prev_data(output + base_index);
-              xsimd::select(*reinterpret_cast<batch_bool<int, N>*>(&active), result, prev_data)
-                  .store_aligned(output + base_index);
+              select(bool_cast(active), result, prev_data)
+                    .store_aligned(output + base_index);
           }
       }
   }
