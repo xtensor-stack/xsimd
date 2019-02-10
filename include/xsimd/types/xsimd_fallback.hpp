@@ -86,6 +86,7 @@ namespace xsimd
         static constexpr std::size_t size = N;
         using batch_bool_type = batch_bool<T, N>;
         static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        using storage_type = std::array<T, N>;
     };
 
     template <typename T, std::size_t N>
@@ -95,6 +96,7 @@ namespace xsimd
 
         using self_type = batch<T, N>;
         using base_type = simd_batch<self_type>;
+        using storage_type = typename base_type::storage_type;
 
         batch();
         explicit batch(T f);
@@ -124,17 +126,12 @@ namespace xsimd
         using base_type::store_aligned;
         using base_type::store_unaligned;
 
-        const T& operator[](std::size_t index) const;
-        T& operator[](std::size_t index);
-
     private:
 
         template<typename U>
         batch& load_unaligned_impl(const U* src);
         template<typename U>
         void store_unaligned_impl(U* src) const;
-
-        std::array<T, N> m_value;
     };
 
     template <typename T, std::size_t N>
@@ -553,14 +550,14 @@ namespace xsimd
 
     template <typename T, std::size_t N>
     inline batch<T, N>::batch(T f)
-        : m_value(detail::array_from_scalar<T, N>(f))
+        : base_type(detail::array_from_scalar<T, N>(f))
     {
     }
 
     template <typename T, std::size_t N>
     template <typename... Args, typename Enable>
     inline batch<T, N>::batch(Args... exactly_N_scalars)
-        : m_value{ static_cast<T>(exactly_N_scalars)... }
+        : base_type(storage_type{ static_cast<T>(exactly_N_scalars)... })
     {
     }
 
@@ -596,7 +593,7 @@ namespace xsimd
         using all_bits = detail::all_bits<std::is_integral<T>::value>;
         for(std::size_t i = 0; i < N; ++i)
         {
-            m_value[i] = src[i] ? all_bits::get(T(0)) : T(0);
+            this->m_value[i] = src[i] ? all_bits::get(T(0)) : T(0);
         }
     }
 
@@ -614,27 +611,27 @@ namespace xsimd
 
     template <typename T, std::size_t N>
     inline batch<T, N>::batch(const T* src, unaligned_mode)
-        : m_value(detail::array_from_pointer<T, N>(src))
+        : base_type(detail::array_from_pointer<T, N>(src))
     {
     }
 
     template <typename T, std::size_t N>
     inline batch<T, N>::batch(const std::array<T, N>& rhs)
-        : m_value(rhs)
+        : base_type(rhs)
     {
     }
 
     template <typename T, std::size_t N>
     inline batch<T, N>& batch<T, N>::operator=(const std::array<T, N>& rhs)
     {
-        m_value = rhs;
+        this->m_value = rhs;
         return *this;
     }
 
     template <typename T, std::size_t N>
     inline batch<T, N>::operator std::array<T, N>() const
     {
-        return m_value;
+        return this->m_value;
     }
 
 #define FALLBACK_DEFINE_LOAD_STORE(TYPE)                             \
@@ -673,23 +670,12 @@ namespace xsimd
 #undef FALLBACK_DEFINE_LOAD_STORE
 
     template <typename T, std::size_t N>
-    inline const T& batch<T, N>::operator[](std::size_t index) const
-    {
-        return m_value[index];
-    }
-
-    template <typename T, std::size_t N>
-    inline T& batch<T, N>::operator[](std::size_t index)
-    {
-        return m_value[index];
-    }
-
-    template <typename T, std::size_t N>
     template <typename U>
     inline batch<T, N>& batch<T, N>::load_unaligned_impl(const U* src)
     {
-        for(std::size_t i = 0; i < N; ++i) {
-            m_value[i] = static_cast<T>(src[i]);
+        for(std::size_t i = 0; i < N; ++i)
+        {
+            this->m_value[i] = static_cast<T>(src[i]);
         }
         return *this;
     }
@@ -698,8 +684,9 @@ namespace xsimd
     template <typename U>
     inline void batch<T, N>::store_unaligned_impl(U* dst) const
     {
-        for(std::size_t i = 0; i < N; ++i) {
-            dst[i] = static_cast<U>(m_value[i]);
+        for(std::size_t i = 0; i < N; ++i)
+        {
+            dst[i] = static_cast<U>(this->m_value[i]);
         }
     }
 
