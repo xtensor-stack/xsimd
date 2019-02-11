@@ -29,16 +29,16 @@ namespace xsimd
         static constexpr std::size_t size = 8;
         using batch_bool_type = batch_bool<int16_t, 8>;
         static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        using storage_type = int16x8_t;
     };
 
     template <>
     class batch<int16_t, 8> : public simd_batch<batch<int16_t, 8>>
     {
-        using simd_type = int16x8_t;
-
     public:
 
         using base_type = simd_batch<batch<int16_t, 8>>;
+        using storage_type = typename base_type::storage_type;
 
         batch();
         explicit batch(int16_t d);
@@ -54,10 +54,10 @@ namespace xsimd
         batch(const char* src, aligned_mode);
         batch(const char* src, unaligned_mode);
 
-        batch(const simd_type& rhs);
-        batch& operator=(const simd_type& rhs);
+        batch(const storage_type& rhs);
+        batch& operator=(const storage_type& rhs);
 
-        operator simd_type() const;
+        operator storage_type() const;
 
         batch& load_aligned(const int16_t* src);
         batch& load_unaligned(const int16_t* src);
@@ -78,17 +78,6 @@ namespace xsimd
 
         XSIMD_DECLARE_LOAD_STORE_INT16(int16_t, 8)
         XSIMD_DECLARE_LOAD_STORE_LONG(int16_t, 8)
-
-        int16_t& operator[](std::size_t index);
-        const int16_t& operator[](std::size_t index) const;
-
-    private:
-
-        union
-        {
-            simd_type m_value;
-            int16_t m_array[8];
-        };
     };
 
     batch<int16_t, 8> operator<<(const batch<int16_t, 8>& lhs, int16_t rhs);
@@ -103,18 +92,18 @@ namespace xsimd
     }
 
     inline batch<int16_t, 8>::batch(int16_t d)
-        : m_value(vdupq_n_s16(d))
+        : base_type(vdupq_n_s16(d))
     {
     }
 
     template <class... Args, class>
     inline batch<int16_t, 8>::batch(Args... args)
-        : m_value{static_cast<int16_t>(args)...}
+        : base_type(storage_type{static_cast<int16_t>(args)...})
     {
     }
 
     inline batch<int16_t, 8>::batch(const int16_t* d)
-        : m_value(vld1q_s16(d))
+        : base_type(vld1q_s16(d))
     {
     }
 
@@ -143,20 +132,20 @@ namespace xsimd
     {
     }
 
-    inline batch<int16_t, 8>::batch(const simd_type& rhs)
-        : m_value(rhs)
+    inline batch<int16_t, 8>::batch(const storage_type& rhs)
+        : base_type(rhs)
     {
     }
 
-    inline batch<int16_t, 8>& batch<int16_t, 8>::operator=(const simd_type& rhs)
+    inline batch<int16_t, 8>& batch<int16_t, 8>::operator=(const storage_type& rhs)
     {
-        m_value = rhs;
+        this->m_value = rhs;
         return *this;
     }
 
     inline batch<int16_t, 8>& batch<int16_t, 8>::load_aligned(const int16_t* src)
     {
-        m_value = vld1q_s16(src);
+        this->m_value = vld1q_s16(src);
         return *this;
     }
 
@@ -167,7 +156,7 @@ namespace xsimd
 
     inline batch<int16_t, 8>& batch<int16_t, 8>::load_aligned(const uint16_t* src)
     {
-        m_value = vreinterpretq_s16_u16(vld1q_u16(src));
+        this->m_value = vreinterpretq_s16_u16(vld1q_u16(src));
         return *this;
     }
 
@@ -178,7 +167,7 @@ namespace xsimd
 
     inline void batch<int16_t, 8>::store_aligned(int16_t* dst) const
     {
-        vst1q_s16(dst, m_value);
+        vst1q_s16(dst, this->m_value);
     }
 
     inline void batch<int16_t, 8>::store_unaligned(int16_t* dst) const
@@ -188,7 +177,7 @@ namespace xsimd
 
     inline void batch<int16_t, 8>::store_aligned(uint16_t* dst) const
     {
-        vst1q_u16(dst, vreinterpretq_u16_s16(m_value));
+        vst1q_u16(dst, vreinterpretq_u16_s16(this->m_value));
     }
 
     inline void batch<int16_t, 8>::store_unaligned(uint16_t* dst) const
@@ -201,17 +190,7 @@ namespace xsimd
 
     inline batch<int16_t, 8>::operator int16x8_t() const
     {
-        return m_value;
-    }
-
-    inline int16_t& batch<int16_t, 8>::operator[](std::size_t index)
-    {
-        return m_array[index & 7];
-    }
-
-    inline const int16_t& batch<int16_t, 8>::operator[](std::size_t index) const
-    {
-        return m_array[index & 7];
+        return this->m_value;
     }
 
     namespace detail

@@ -67,17 +67,6 @@ namespace xsimd
         using base_type::load_unaligned;
         using base_type::store_aligned;
         using base_type::store_unaligned;
-
-        T& operator[](std::size_t index);
-        const T& operator[](std::size_t index) const;
-
-    protected:
-
-        union
-        {
-            __m512i m_value;
-            T m_array[N];
-        };
     };
 
     /***********************************
@@ -175,116 +164,104 @@ namespace xsimd
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>::avx512_int_batch(T i)
-        : m_value(avx512_detail::int_set(std::integral_constant<std::size_t, sizeof(T)>{}, i))
+        : base_type(avx512_detail::int_set(std::integral_constant<std::size_t, sizeof(T)>{}, i))
     {
     }
 
     template <class T, std::size_t N>
     template <class... Args, class>
     inline avx512_int_batch<T, N>::avx512_int_batch(Args... args)
-        : m_value(avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{}, args...))
+        : base_type(avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{}, args...))
     {
     }
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>::avx512_int_batch(const T* src)
-        : m_value(_mm512_loadu_si512((__m512i const*) src))
+        : base_type(_mm512_loadu_si512((__m512i const*) src))
     {
     }
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>::avx512_int_batch(const T* src, aligned_mode)
-        : m_value(_mm512_load_si512((__m512i const*) src))
+        : base_type(_mm512_load_si512((__m512i const*) src))
     {
     }
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>::avx512_int_batch(const T* src, unaligned_mode)
-        : m_value(_mm512_loadu_si512((__m512i const*) src))
+        : base_type(_mm512_loadu_si512((__m512i const*) src))
     {
     }
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>::avx512_int_batch(const __m512i& rhs)
-        : m_value(rhs)
+        : base_type(rhs)
     {
     }
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>& avx512_int_batch<T, N>::operator=(const __m512i& rhs)
     {
-        m_value = rhs;
+        this->m_value = rhs;
         return *this;
     }
 
     template <class T, std::size_t N>
     inline avx512_int_batch<T, N>::operator __m512i() const
     {
-        return m_value;
+        return this->m_value;
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>& avx512_int_batch<T, N>::load_aligned(const T* src)
     {
-        m_value = _mm512_load_si512((__m512i const*) src);
+        this->m_value = _mm512_load_si512((__m512i const*) src);
         return (*this)();
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>& avx512_int_batch<T, N>::load_unaligned(const T* src)
     {
-        m_value = _mm512_loadu_si512((__m512i const*) src);
+        this->m_value = _mm512_loadu_si512((__m512i const*) src);
         return (*this)();
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>& avx512_int_batch<T, N>::load_aligned(const flipped_sign_type_t<T>* src)
     {
-        m_value = _mm512_load_si512((__m512i const*) src);
+        this->m_value = _mm512_load_si512((__m512i const*) src);
         return (*this)();
     }
 
     template <class T, std::size_t N>
     inline batch<T, N>& avx512_int_batch<T, N>::load_unaligned(const flipped_sign_type_t<T>* src)
     {
-        m_value = _mm512_loadu_si512((__m512i const*) src);
+        this->m_value = _mm512_loadu_si512((__m512i const*) src);
         return (*this)();
     }
 
     template <class T, std::size_t N>
     inline void avx512_int_batch<T, N>::store_aligned(T* dst) const
     {
-        _mm512_store_si512(dst, m_value);
+        _mm512_store_si512(dst, this->m_value);
     }
 
     template <class T, std::size_t N>
     inline void avx512_int_batch<T, N>::store_unaligned(T* dst) const
     {
-        _mm512_storeu_si512(dst, m_value);
+        _mm512_storeu_si512(dst, this->m_value);
     }
 
     template <class T, std::size_t N>
     inline void avx512_int_batch<T, N>::store_aligned(flipped_sign_type_t<T>* dst) const
     {
-        _mm512_store_si512(dst, m_value);
+        _mm512_store_si512(dst, this->m_value);
     }
 
     template <class T, std::size_t N>
     inline void avx512_int_batch<T, N>::store_unaligned(flipped_sign_type_t<T>* dst) const
     {
-        _mm512_storeu_si512(dst, m_value);
-    }
-
-    template <class T, std::size_t N>
-    inline T& avx512_int_batch<T, N>::operator[](std::size_t index)
-    {
-        return m_array[index & (N - 1)];
-    }
-
-    template <class T, std::size_t N>
-    inline const T& avx512_int_batch<T, N>::operator[](std::size_t index) const
-    {
-        return m_array[index & (N - 1)];
+        _mm512_storeu_si512(dst, this->m_value);
     }
 
     namespace avx512_detail
