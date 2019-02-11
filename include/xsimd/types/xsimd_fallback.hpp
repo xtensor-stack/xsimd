@@ -126,6 +126,9 @@ namespace xsimd
         using base_type::store_aligned;
         using base_type::store_unaligned;
 
+        T& operator[](std::size_t index);
+        const T& operator[](std::size_t index) const;
+
     private:
 
         template<typename U>
@@ -688,6 +691,18 @@ namespace xsimd
         {
             dst[i] = static_cast<U>(this->m_value[i]);
         }
+    }
+
+    template <typename T, std::size_t N>
+    inline T& batch<T, N>::operator[](std::size_t index)
+    {
+        return this->m_value[index % base_type::size];
+    }
+
+    template <typename T, std::size_t N>
+    inline const T& batch<T, N>::operator[](std::size_t index) const
+    {
+        return this->m_value[index % base_type::size];
     }
 
     namespace detail
