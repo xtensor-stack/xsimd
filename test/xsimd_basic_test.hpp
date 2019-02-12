@@ -948,6 +948,30 @@ namespace xsimd
         tmp_success = all(bres);
         success = success && tmp_success;
         
+        topic = "iterator                 : ";
+        auto lhs_iter = lhs.begin();
+        auto lhs_citer = lhs.cbegin();
+        std::size_t idx = 0;
+        while(lhs_iter != lhs.end() || lhs_citer != lhs.cend() && tmp_success)
+        {
+            tmp_success = check_almost_equal(topic, *lhs_iter, lhs[idx], out);
+            tmp_success = check_almost_equal(topic, *lhs_citer, lhs[idx], out) && tmp_success;
+            ++lhs_iter, ++lhs_citer, ++idx;
+        }
+        success = success && tmp_success;
+
+        topic = "reverse iterator         : ";
+        auto lhs_riter = lhs.rbegin();
+        auto lhs_criter = lhs.crbegin();
+        size_t ridx = vector_type::size;
+        while(lhs_riter != lhs.rend() || lhs_criter != lhs.crend() && tmp_success)
+        {
+            --ridx;
+            tmp_success = check_almost_equal(topic, *lhs_riter, lhs[ridx], out);
+            tmp_success = check_almost_equal(topic, *lhs_criter, lhs[ridx], out) && tmp_success;
+            ++lhs_riter, ++lhs_criter;
+        }
+        success = success && tmp_success;
         return success;
     }
 
