@@ -11,6 +11,7 @@
 
 #include <cstddef>
 #include <complex>
+#include <iterator>
 #include <ostream>
 #include <type_traits>
 
@@ -129,6 +130,11 @@ namespace xsimd
         static constexpr std::size_t size = simd_batch_traits<X>::size;
         using storage_type = typename simd_batch_traits<X>::storage_type;
 
+        using iterator = value_type*;
+        using const_iterator = const value_type*;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
         X& operator+=(const X& rhs);
         X& operator+=(const value_type& rhs);
 
@@ -162,6 +168,20 @@ namespace xsimd
 
         value_type& operator[](std::size_t index);
         const value_type& operator[](std::size_t index) const;
+
+        iterator begin();
+        iterator end();
+        const_iterator begin() const;
+        const_iterator end() const;
+        const_iterator cbegin() const;
+        const_iterator cend() const;
+
+        reverse_iterator rbegin();
+        reverse_iterator rend();
+        const_reverse_iterator rbegin() const;
+        const_reverse_iterator rend() const;
+        const_reverse_iterator crbegin() const;
+        const_reverse_iterator crend() const;
 
     protected:
 
@@ -803,6 +823,78 @@ namespace xsimd
     inline auto simd_batch<X>::operator[](std::size_t index) const -> const value_type&
     {
         return m_array[index & (size - 1)];
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::begin() -> iterator
+    {
+        return m_array;
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::end() -> iterator
+    {
+        return m_array + size;
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::begin() const -> const_iterator
+    {
+        return cbegin();
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::end() const -> const_iterator
+    {
+        return cend();
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::cbegin() const -> const_iterator
+    {
+        return m_array;
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::cend() const -> const_iterator
+    {
+        return m_array + size;
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::rbegin() -> reverse_iterator
+    {
+        return reverse_iterator(end());
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::rend() -> reverse_iterator
+    {
+        return reverse_iterator(begin());
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::rbegin() const -> const_reverse_iterator
+    {
+        return crbegin();
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::rend() const -> const_reverse_iterator
+    {
+        return crend();
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::crbegin() const -> const_reverse_iterator
+    {
+        return const_reverse_iterator(end());
+    }
+
+    template <class X>
+    inline auto simd_batch<X>::crend() const -> const_reverse_iterator
+    {
+        return const_reverse_iterator(begin());
     }
 
 #define XSIMD_UNARY_OP(OP, FUNC)                                                                   \
