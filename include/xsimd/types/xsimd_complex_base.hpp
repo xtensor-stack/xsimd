@@ -108,26 +108,6 @@ namespace xsimd
     };
 #endif
 
-    namespace detail
-    {
-        template <class T>
-        struct is_complex : std::false_type
-        {
-        };
-
-        template <class T>
-        struct is_complex<std::complex<T>> : std::true_type
-        {
-        };
-
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-        template <class T, bool i3ec>
-        struct is_complex<xtl::xcomplex<T, T, i3ec>> : std::true_type
-        {
-        };
-#endif
-    }
-
     /**
      * @class simd_complex_batch
      * @brief Base class for batch complex numbers.
