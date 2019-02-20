@@ -9,8 +9,13 @@
 #ifndef XSIMD_UTILS_HPP
 #define XSIMD_UTILS_HPP
 
+#include <complex>
 #include <cstdint>
 #include <type_traits>
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+#include "xtl/xcomplex.hpp"
+#endif
 
 namespace xsimd
 {
@@ -359,6 +364,37 @@ namespace xsimd
         template <typename T, std::size_t N, typename... Args>
         using is_array_initializer_t = typename is_array_initializer<T, N, Args...>::type;
     }
+
+    /**************
+     * is_complex *
+     **************/
+
+    // This is used in both xsimd_complex_base.hpp and xsimd_traits.hpp
+    // However xsimd_traits.hpp indirectly includes xsimd_complex_base.hpp
+    // so we cannot define is_complex in xsimd_traits.hpp. Besides, if
+    // no file defining batches is included, we still need this definition
+    // in xsimd_traits.hpp, so let's define it here.
+
+    namespace detail
+    {
+        template <class T>
+        struct is_complex : std::false_type
+        {
+        };
+
+        template <class T>
+        struct is_complex<std::complex<T>> : std::true_type
+        {
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, bool i3ec>
+        struct is_complex<xtl::xcomplex<T, T, i3ec>> : std::true_type
+        {
+        };
+#endif
+    }
+
 }
 
 #endif
