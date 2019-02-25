@@ -71,7 +71,7 @@
 	#if defined(XSIMD_ENABLE_FALLBACK)
 		#warning "No SIMD instructions enabled, using fallback mode."
 	#else
-		#error "Please compile with SIMD instructions enabled or activate the fallback mode. (e.g. for x86 -march=native or for ARM -mfpu=neon)"
+		#warning "Please compile with SIMD instructions enabled or activate the fallback mode. (e.g. for x86 -march=native or for ARM -mfpu=neon)"
 	#endif
 #endif
 
