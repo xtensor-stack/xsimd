@@ -990,7 +990,7 @@ namespace xsimd
     template <class X>
     inline batch_type_t<X> operator-(const simd_base<X>& rhs);
 
-    XSIMD_UNARY_OP(-, neg);
+    XSIMD_UNARY_OP(-, neg)
 
     /**
      * @ingroup simd_batch_arithmetic
@@ -1046,7 +1046,7 @@ namespace xsimd
     template <class X>
     batch_type_t<X> operator+(const typename simd_batch_traits<X>::value_type& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_OP(+, add);
+    XSIMD_BINARY_OP(+, add)
 
     /**
      * @ingroup simd_batch_arithmetic
@@ -1213,7 +1213,7 @@ namespace xsimd
     template <class X>
     batch_type_t<X> operator%(const typename simd_batch_traits<X>::value_type& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_OP(%, mod);
+    XSIMD_BINARY_OP(%, mod)
 
     /**
      * @defgroup simd_batch_comparison Comparison operators
@@ -1231,7 +1231,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator==(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP(==, eq);
+    XSIMD_BINARY_BOOL_OP(==, eq)
 
     /**
      * @ingroup simd_batch_comparison
@@ -1245,7 +1245,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator!=(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP(!=, neq);
+    XSIMD_BINARY_BOOL_OP(!=, neq)
 
     /**
      * @ingroup simd_batch_comparison
@@ -1259,7 +1259,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator<(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP(<, lt);
+    XSIMD_BINARY_BOOL_OP(<, lt)
 
     /**
      * @ingroup simd_batch_comparison
@@ -1273,7 +1273,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator<=(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP(<=, lte);
+    XSIMD_BINARY_BOOL_OP(<=, lte)
 
     /**
      * @ingroup simd_batch_comparison
@@ -1288,7 +1288,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator>(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP_DERIVED(>, rhs() < lhs());
+    XSIMD_BINARY_BOOL_OP_DERIVED(>, rhs() < lhs())
 
     /**
      * @ingroup simd_batch_comparison
@@ -1303,7 +1303,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator>=(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP_DERIVED(>=, rhs() <= lhs());
+    XSIMD_BINARY_BOOL_OP_DERIVED(>=, rhs() <= lhs())
 
     /**
      * @defgroup simd_batch_bitwise Bitwise operators
@@ -1320,7 +1320,7 @@ namespace xsimd
     template <class X, class Y>
     inline batch_type_t<X> operator&(const simd_base<X>& lhs, const simd_base<Y>& rhs);
 
-    XSIMD_BINARY_OP(&, bitwise_and);
+    XSIMD_BINARY_OP(&, bitwise_and)
 
     /**
      * @ingroup simd_batch_bitwise
@@ -1333,7 +1333,7 @@ namespace xsimd
     template <class X, class Y>
     inline batch_type_t<X> operator|(const simd_base<X>& lhs, const simd_base<Y>& rhs);
 
-    XSIMD_BINARY_OP(|, bitwise_or);
+    XSIMD_BINARY_OP(|, bitwise_or)
 
     /**
      * @ingroup simd_batch_bitwise
@@ -1346,7 +1346,7 @@ namespace xsimd
     template <class X, class Y>
     inline batch_type_t<X> operator^(const simd_base<X>& lhs, const simd_base<Y>& rhs);
 
-    XSIMD_BINARY_OP(^, bitwise_xor);
+    XSIMD_BINARY_OP(^, bitwise_xor)
 
     /**
      * @ingroup simd_batch_bitwise
@@ -1358,7 +1358,7 @@ namespace xsimd
     template <class X>
     batch_type_t<X> operator~(const simd_base<X>& rhs);
 
-    XSIMD_UNARY_OP(~, bitwise_not);
+    XSIMD_UNARY_OP(~, bitwise_not)
 
     /**
      * @ingroup simd_batch_bitwise
