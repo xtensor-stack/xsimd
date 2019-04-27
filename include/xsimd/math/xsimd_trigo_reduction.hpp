@@ -90,7 +90,7 @@ namespace xsimd
         /*
          * ====================================================
          * copyright 2016 NumScale SAS
-         * 
+         *
          * Distributed under the Boost Software License, Version 1.0.
          * (See copy at http://boost.org/LICENSE_1_0.txt)
          * ====================================================
@@ -101,25 +101,25 @@ namespace xsimd
             static inline B cos_eval(const B& z)
             {
                 B y = horner<B,
-                             0x3fe0000000000000ll,
-                             0xbfa5555555555551ll,
-                             0x3f56c16c16c15d47ll,
-                             0xbefa01a019ddbcd9ll,
-                             0x3e927e4f8e06d9a5ll,
-                             0xbe21eea7c1e514d4ll,
-                             0x3da8ff831ad9b219ll>(z);
+                             0x3fe0000000000000ull,
+                             0xbfa5555555555551ull,
+                             0x3f56c16c16c15d47ull,
+                             0xbefa01a019ddbcd9ull,
+                             0x3e927e4f8e06d9a5ull,
+                             0xbe21eea7c1e514d4ull,
+                             0x3da8ff831ad9b219ull>(z);
                 return B(1.) - y * z;
             }
 
             static inline B sin_eval(const B& z, const B& x)
             {
                 B y = horner<B,
-                             0xbfc5555555555548ll,
-                             0x3f8111111110f7d0ll,
-                             0xbf2a01a019bfdf03ll,
-                             0x3ec71de3567d4896ll,
-                             0xbe5ae5e5a9291691ll,
-                             0x3de5d8fd1fcf0ec1ll>(z);
+                             0xbfc5555555555548ull,
+                             0x3f8111111110f7d0ull,
+                             0xbf2a01a019bfdf03ull,
+                             0x3ec71de3567d4896ull,
+                             0xbe5ae5e5a9291691ull,
+                             0x3de5d8fd1fcf0ec1ull>(z);
                 return fma(y * z, x, x);
             }
 
@@ -127,14 +127,14 @@ namespace xsimd
             {
                 B zz = z * z;
                 B num = horner<B,
-                               0xc1711fead3299176ll,
-                               0x413199eca5fc9dddll,
-                               0xc0c992d8d24f3f38ll>(zz);
+                               0xc1711fead3299176ull,
+                               0x413199eca5fc9dddull,
+                               0xc0c992d8d24f3f38ull>(zz);
                 B den = horner1<B,
-                                0xc189afe03cbe5a31ll,
-                                0x4177d98fc2ead8efll,
-                                0xc13427bc582abc96ll,
-                                0x40cab8a5eeb36572ll>(zz);
+                                0xc189afe03cbe5a31ull,
+                                0x4177d98fc2ead8efull,
+                                0xc13427bc582abc96ull,
+                                0x40cab8a5eeb36572ull>(zz);
                 return fma(z, (zz * (num / den)), z);
             }
 

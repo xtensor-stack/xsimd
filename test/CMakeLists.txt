@@ -63,6 +63,11 @@ if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang AND WIN32) # We are using clang-cl
+    add_compile_options(/EHsc /MP /bigobj /arch:AVX2)
+    set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
+endif()
+
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     if(DOWNLOAD_GTEST)
         # Download and unpack googletest at configure time
