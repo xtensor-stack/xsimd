@@ -64,6 +64,7 @@ namespace xsimd
         res_type div_rvv_res;
         res_type div_vrs_res;
         res_type div_rsv_res;
+        res_type conj_res;
         real_res_type norm_res;
         res_type proj_res;
         value_type hadd_res;
@@ -77,6 +78,8 @@ namespace xsimd
     {
         using std::norm;
         using std::proj;
+        using std::conj;
+
         lhs.resize(N);
         rhs.resize(N);
         mix_lhs_rhs.resize(N);
@@ -109,6 +112,7 @@ namespace xsimd
         div_rvv_res.resize(N);
         div_vrs_res.resize(N);
         div_rsv_res.resize(N);
+        conj_res.resize(N);
         norm_res.resize(N);
         proj_res.resize(N);
 
@@ -149,6 +153,7 @@ namespace xsimd
             div_rvv_res[i] = lhs[i].real() / rhs[i];
             div_vrs_res[i] = lhs[i] / s.real();
             div_rsv_res[i] = s.real() / rhs[i];
+            conj_res[i] = conj(lhs[i]);
             norm_res[i] = norm(lhs[i]);
             proj_res[i] = proj(lhs[i]);
             hadd_res += lhs[i];
@@ -493,7 +498,7 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.div_rvv_res, out);
         success = success && tmp_success;
 
-        topic = "operator/(simd, reals)   : ";
+        topic = "operator/(simd, real)    : ";
         vres = lhs / s.real();
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.div_vrs_res, out);
@@ -503,6 +508,12 @@ namespace xsimd
         vres = s.real() / rhs;
         tester.store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.div_rsv_res, out);
+        success = success && tmp_success;
+
+        topic = "conj(simd)               : ";
+        vres = xsimd::conj(lhs);
+        tester.store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.conj_res, out);
         success = success && tmp_success;
 
         topic = "norm(simd)               : ";
