@@ -2,6 +2,7 @@
 
 [![Travis](https://travis-ci.org/QuantStack/xsimd.svg?branch=master)](https://travis-ci.org/QuantStack/xsimd)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/unk39xhu0wxmiif7?svg=true)](https://ci.appveyor.com/project/QuantStack/xsimd)
+[![Azure](https://dev.azure.com/robertodr/xismd/_apis/build/status/robertodr.xsimd?branchName=master)](https://dev.azure.com/robertodr/xismd/_build/latest?definitionId=7&branchName=master)[![Build Status](https://dev.azure.com/robertodr/xismd/_apis/build/status/robertodr.xsimd?branchName=master)](https://dev.azure.com/robertodr/xismd/_build/latest?definitionId=7&branchName=master)
 [![Documentation Status](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -178,7 +179,7 @@ While doxygen must be installed separately, you can install breathe by typing
 
 ```bash
 pip install breathe
-``` 
+```
 
 Breathe can also be installed with `conda`
 

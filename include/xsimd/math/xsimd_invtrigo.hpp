@@ -90,16 +90,16 @@ namespace xsimd
                 B ct1 = B(detail::caster64_t(int64_t(0x3fe4000000000000)).f);
                 B zz1 = B(1.) - x;
                 B vp = zz1 * horner<B,
-                                    0x403c896240f3081dll,
-                                    0xc03991aaac01ab68ll,
-                                    0x401bdff5baf33e6all,
-                                    0xbfe2079259f9290fll,
-                                    0x3f684fc3988e9f08ll>(zz1) /
+                                    0x403c896240f3081dull,
+                                    0xc03991aaac01ab68ull,
+                                    0x401bdff5baf33e6aull,
+                                    0xbfe2079259f9290full,
+                                    0x3f684fc3988e9f08ull>(zz1) /
                     horner1<B,
-                            0x40756709b0b644bell,
-                            0xc077fe08959063eell,
-                            0x40626219af6a7f42ll,
-                            0xc035f2a2b6bf5d8cll>(zz1);
+                            0x40756709b0b644beull,
+                            0xc077fe08959063eeull,
+                            0x40626219af6a7f42ull,
+                            0xc035f2a2b6bf5d8cull>(zz1);
                 zz1 = sqrt(zz1 + zz1);
                 B z = pio4<B>() - zz1;
                 zz1 = fms(zz1, vp, pio_2lo<B>());
@@ -107,18 +107,18 @@ namespace xsimd
                 zz1 = z + pio4<B>();
                 B zz2 = a * a;
                 z = zz2 * horner<B,
-                                 0xc020656c06ceafd5ll,
-                                 0x40339007da779259ll,
-                                 0xc0304331de27907bll,
-                                 0x4015c74b178a2dd9ll,
-                                 0xbfe34341333e5c16ll,
-                                 0x3f716b9b0bd48ad3ll>(zz2) /
+                                 0xc020656c06ceafd5ull,
+                                 0x40339007da779259ull,
+                                 0xc0304331de27907bull,
+                                 0x4015c74b178a2dd9ull,
+                                 0xbfe34341333e5c16ull,
+                                 0x3f716b9b0bd48ad3ull>(zz2) /
                     horner1<B,
-                            0xc04898220a3607acll,
-                            0x4061705684ffbf9dll,
-                            0xc06265bb6d3576d7ll,
-                            0x40519fc025fe9054ll,
-                            0xc02d7b590b5e0eabll>(zz2);
+                            0xc04898220a3607acull,
+                            0x4061705684ffbf9dull,
+                            0xc06265bb6d3576d7ull,
+                            0x40519fc025fe9054ull,
+                            0xc02d7b590b5e0eabull>(zz2);
                 zz2 = fma(x, z, x);
                 return select(x > B(1.), nan<B>(),
                               select(small_cond, x,
@@ -136,17 +136,17 @@ namespace xsimd
                 xx = select(flag2, (x - B(1.)) / (x + B(1.)), xx);
                 B z = xx * xx;
                 z *= horner<B,
-                            0xc0503669fd28ec8ell,
-                            0xc05eb8bf2d05ba25ll,
-                            0xc052c08c36880273ll,
-                            0xc03028545b6b807all,
-                            0xbfec007fa1f72594ll>(z) /
+                            0xc0503669fd28ec8eull,
+                            0xc05eb8bf2d05ba25ull,
+                            0xc052c08c36880273ull,
+                            0xc03028545b6b807aull,
+                            0xbfec007fa1f72594ull>(z) /
                     horner1<B,
-                            0x4068519efbbd62ecll,
-                            0x407e563f13b049eall,
-                            0x407b0e18d2e2be3bll,
-                            0x4064a0dd43b8fa25ll,
-                            0x4038dbc45b14603cll>(z);
+                            0x4068519efbbd62ecull,
+                            0x407e563f13b049eaull,
+                            0x407b0e18d2e2be3bull,
+                            0x4064a0dd43b8fa25ull,
+                            0x4038dbc45b14603cull>(z);
                 z = fma(xx, z, xx);
                 z = select(flag2, z + pio_4lo<B>(), z);
                 z = z + select(flag1, B(0.), pio_2lo<B>());
