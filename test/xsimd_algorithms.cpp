@@ -109,17 +109,17 @@ TEST(xsimd, unary_transform)
     std::fill(ca.begin(), ca.end(), -1); // erase
 }
 
-
-
 class xsimd_reduce : public ::testing::Test
 {
 public:
     using aligned_vec_t = std::vector<double, xsimd::aligned_allocator<double, XSIMD_DEFAULT_ALIGNMENT>>;
 
     static constexpr std::size_t num_elements = 4 * xsimd::simd_traits<double>::size;
+    static constexpr std::size_t small_num = xsimd::simd_traits<double>::size - 1;
 
-    aligned_vec_t  vec = aligned_vec_t(num_elements, 123.);
-    double         init = 1337.;
+    aligned_vec_t vec = aligned_vec_t(num_elements, 123.);
+    aligned_vec_t small_vec = aligned_vec_t(small_num, 42.); 
+    double        init = 1337.;
 
     struct multiply
     {
@@ -137,6 +137,14 @@ TEST_F(xsimd_reduce, unaligned_begin_unaligned_end)
     auto const end = std::prev(vec.end());
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
+
+    if(small_vec.size() > 1)
+    {
+        auto const sbegin = std::next(small_vec.begin());
+        auto const send = std::prev(small_vec.end());
+
+        EXPECT_EQ(std::accumulate(sbegin, send, init), xsimd::reduce(sbegin, send, init));
+    }
 }
 
 TEST_F(xsimd_reduce, unaligned_begin_aligned_end)
@@ -145,6 +153,14 @@ TEST_F(xsimd_reduce, unaligned_begin_aligned_end)
     auto const end = vec.end();
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
+
+    if(small_vec.size() > 1)
+    {
+        auto const sbegin = std::next(small_vec.begin());
+        auto const send = small_vec.end();
+
+        EXPECT_EQ(std::accumulate(sbegin, send, init), xsimd::reduce(sbegin, send, init));
+    }
 }
 
 TEST_F(xsimd_reduce, aligned_begin_unaligned_end)
@@ -153,6 +169,14 @@ TEST_F(xsimd_reduce, aligned_begin_unaligned_end)
     auto const end = std::prev(vec.end());
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
+
+    if(small_vec.size() > 1)
+    {
+        auto const sbegin = small_vec.begin();
+        auto const send = std::prev(small_vec.end());
+
+        EXPECT_EQ(std::accumulate(sbegin, send, init), xsimd::reduce(sbegin, send, init));
+    }
 }
 
 TEST_F(xsimd_reduce, aligned_begin_aligned_end)
@@ -161,6 +185,14 @@ TEST_F(xsimd_reduce, aligned_begin_aligned_end)
     auto const end = vec.end();
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
+
+    if(small_vec.size() > 1)
+    {
+        auto const sbegin = small_vec.begin();
+        auto const send = small_vec.end();
+
+        EXPECT_EQ(std::accumulate(sbegin, send, init), xsimd::reduce(sbegin, send, init));
+    }
 }
 
 TEST_F(xsimd_reduce, using_custom_binary_function)
@@ -169,6 +201,14 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
     auto const end = vec.end();
 
     EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+
+    if(small_vec.size() > 1)
+    {
+        auto const sbegin = small_vec.begin();
+        auto const send = small_vec.end();
+
+        EXPECT_DOUBLE_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+    }
 }
 
 TEST(xsimd, iterator)

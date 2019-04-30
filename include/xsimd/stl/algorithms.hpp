@@ -150,6 +150,15 @@ namespace xsimd
         std::size_t size = static_cast<std::size_t>(std::distance(first, last));
         constexpr std::size_t simd_size = traits::size;
 
+        if(size < simd_size)
+        {
+            while(first != last)
+            {
+                init = binfun(init, *first++);
+            }
+            return init;
+        }
+
         const auto* const ptr_begin = &(*first);
 
         std::size_t align_begin = xsimd::get_alignment_offset(ptr_begin, size, simd_size);
