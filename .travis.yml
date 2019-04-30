@@ -186,7 +186,7 @@ script:
         fi
       elif [[ "$AVX512" == 1 ]] ; then
         uname -m ;
-        ../intel-sde-downloader/sde-external-8.33.0-2019-02-07-lin/sde64 -cnl -- ./test_xsimd ;
+        ../intel-sde-downloader/sde-external-8.35.0-2019-03-11-lin/sde64 -cnl -- ./test_xsimd ;
       else
         ./test_xsimd;
       fi
