@@ -606,13 +606,13 @@ namespace xsimd
                 return _mm_cvtsd_f64(_mm256_extractf128_pd(tmp, 0));
             }
 
-            static batch_type haddp(const simd_batch<batch_type>* row)
+            static batch_type haddp(const batch_type* row)
             {
                 // row = (a,b,c,d)
                 // tmp0 = (a0+a1, b0+b1, a2+a3, b2+b3)
-                __m256d tmp0 = _mm256_hadd_pd(row[0](), row[1]());
+                __m256d tmp0 = _mm256_hadd_pd(row[0], row[1]);
                 // tmp1 = (c0+c1, d0+d1, c2+c3, d2+d3)
-                __m256d tmp1 = _mm256_hadd_pd(row[2](), row[3]());
+                __m256d tmp1 = _mm256_hadd_pd(row[2], row[3]);
                 // tmp2 = (a0+a1, b0+b1, c2+c3, d2+d3)
                 __m256d tmp2 = _mm256_blend_pd(tmp0, tmp1, 0b1100);
                 // tmp1 = (a2+a3, b2+b3, c2+c3, d2+d3)

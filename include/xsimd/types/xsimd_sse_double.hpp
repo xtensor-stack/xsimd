@@ -579,13 +579,13 @@ namespace xsimd
                 return _mm_cvtsd_f64(tmp0);
             }
 
-            static batch_type haddp(const simd_batch<batch_type>* row)
+            static batch_type haddp(const batch_type* row)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
-                return _mm_hadd_pd(row[0](), row[1]());
+                return _mm_hadd_pd(row[0], row[1]);
 #else
-                return _mm_add_pd(_mm_unpacklo_pd(row[0](), row[1]()),
-                    _mm_unpackhi_pd(row[0](), row[1]()));
+                return _mm_add_pd(_mm_unpacklo_pd(row[0], row[1]),
+                    _mm_unpackhi_pd(row[0], row[1]));
 #endif
             }
 
