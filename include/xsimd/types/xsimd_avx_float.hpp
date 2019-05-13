@@ -640,20 +640,20 @@ namespace xsimd
                 return _mm_cvtss_f32(_mm256_extractf128_ps(tmp, 0));
             }
 
-            static batch_type haddp(const simd_batch<batch_type>* row)
+            static batch_type haddp(const batch_type* row)
             {
                 // row = (a,b,c,d,e,f,g,h)
                 // tmp0 = (a0+a1, a2+a3, b0+b1, b2+b3, a4+a5, a6+a7, b4+b5, b6+b7)
-                __m256 tmp0 = _mm256_hadd_ps(row[0](), row[1]());
+                __m256 tmp0 = _mm256_hadd_ps(row[0], row[1]);
                 // tmp1 = (c0+c1, c2+c3, d1+d2, d2+d3, c4+c5, c6+c7, d4+d5, d6+d7)
-                __m256 tmp1 = _mm256_hadd_ps(row[2](), row[3]());
+                __m256 tmp1 = _mm256_hadd_ps(row[2], row[3]);
                 // tmp1 = (a0+a1+a2+a3, b0+b1+b2+b3, c0+c1+c2+c3, d0+d1+d2+d3,
                 // a4+a5+a6+a7, b4+b5+b6+b7, c4+c5+c6+c7, d4+d5+d6+d7)
                 tmp1 = _mm256_hadd_ps(tmp0, tmp1);
                 // tmp0 = (e0+e1, e2+e3, f0+f1, f2+f3, e4+e5, e6+e7, f4+f5, f6+f7)
-                tmp0 = _mm256_hadd_ps(row[4](), row[5]());
+                tmp0 = _mm256_hadd_ps(row[4], row[5]);
                 // tmp2 = (g0+g1, g2+g3, h0+h1, h2+h3, g4+g5, g6+g7, h4+h5, h6+h7)
-                __m256 tmp2 = _mm256_hadd_ps(row[6](), row[7]());
+                __m256 tmp2 = _mm256_hadd_ps(row[6], row[7]);
                 // tmp2 = (e0+e1+e2+e3, f0+f1+f2+f3, g0+g1+g2+g3, h0+h1+h2+h3,
                 // e4+e5+e6+e7, f4+f5+f6+f7, g4+g5+g6+g7, h4+h5+h6+h7)
                 tmp2 = _mm256_hadd_ps(tmp0, tmp2);

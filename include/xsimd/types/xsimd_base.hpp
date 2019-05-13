@@ -25,6 +25,9 @@
 
 namespace xsimd
 {
+    template <class X>
+    class simd_base;
+
     template <class T, size_t N>
     class batch;
 
@@ -69,6 +72,17 @@ namespace xsimd
 
     template <class T>
     using real_batch_type_t = typename detail::get_real_batch_type<typename T::batch_type>::batch_type;
+
+    namespace detail
+    {
+        template <class X>
+        struct is_simd_type : std::is_base_of<simd_base<X>, X>
+        {
+        };
+    }
+
+    template <class X>
+    using enable_if_simd_t = typename std::enable_if<detail::is_simd_type<X>::value, batch_type_t<X>>::type;
 
     /*************
      * simd_base *
@@ -250,7 +264,7 @@ namespace xsimd
     hadd(const simd_base<X>& rhs);
 
     template <class X>
-    batch_type_t<X> haddp(const simd_base<X>* row);
+    enable_if_simd_t<X> haddp(const X* row);
 
     template <class X>
     batch_type_t<X> select(const typename simd_batch_traits<X>::batch_bool_type& cond, const simd_base<X>& a, const simd_base<X>& b);
@@ -1575,7 +1589,7 @@ namespace xsimd
      * @return the result of the reduction.
      */
     template <class X>
-    inline batch_type_t<X> haddp(const simd_batch<X>* row)
+    enable_if_simd_t<X> haddp(const X* row)
     {
         using value_type = typename simd_batch_traits<X>::value_type;
         using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;

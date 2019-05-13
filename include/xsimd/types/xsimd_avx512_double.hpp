@@ -483,7 +483,7 @@ namespace xsimd
                 return xsimd::hadd(batch<double, 4>(res1));
             }
 
-            static batch_type haddp(const simd_batch<batch_type>* row)
+            static batch_type haddp(const batch_type* row)
             {
 #define step1(I, a, b)                                                   \
         batch<double, 8> res ## I;                                           \
@@ -493,10 +493,10 @@ namespace xsimd
             res ## I = (tmp1 + tmp2);                                        \
         }                                                                    \
 
-                step1(1, row[0](), row[2]());
-                step1(2, row[4](), row[6]());
-                step1(3, row[1](), row[3]());
-                step1(4, row[5](), row[7]());
+                step1(1, row[0], row[2]);
+                step1(2, row[4], row[6]);
+                step1(3, row[1], row[3]);
+                step1(4, row[5], row[7]);
 
 #undef step1
 

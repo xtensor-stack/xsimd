@@ -71,6 +71,7 @@ namespace xsimd
         res_type fnms_res;
         res_type sqrt_res;
         value_type hadd_res;
+        res_type haddp_res;
 
         simd_basic_tester(const std::string& name);
     };
@@ -118,6 +119,7 @@ namespace xsimd
         fnma_res.resize(N);
         fnms_res.resize(N);
         sqrt_res.resize(N);
+        haddp_res.resize(N);
 
         s = value_type(1.4);
         hadd_res = value_type(0);
@@ -160,6 +162,14 @@ namespace xsimd
             fnms_res[i] = -lhs[i] * rhs[i] - rhs[i];
             sqrt_res[i] = sqrt(lhs[i]);
             hadd_res += lhs[i];
+            for(size_t j = 0; j < base_type::size; j += 2)
+            {
+                haddp_res[j] += lhs[i];
+                if(j + 1 < base_type::size)
+                {
+                    haddp_res[j + 1] += rhs[i];
+                }
+            }
         }
         for (size_t i = 0; i < N / 2; ++i)
         {
@@ -641,6 +651,7 @@ namespace xsimd
         vector_bool_type bres;
         res_type res(tester_type::size);
         value_type s = tester.s;
+        vector_type haddp_input[tester_type::size];
         bool success = true;
         bool tmp_success = true;
 
@@ -897,6 +908,20 @@ namespace xsimd
         topic = "hadd(simd)               : ";
         value_type sres = hadd(lhs);
         tmp_success = check_almost_equal(topic, sres, tester.hadd_res, out);
+        success = success && tmp_success;
+
+        topic = "haddp(simd)              : ";
+        for(size_t i = 0; i < tester_type::size; i += 2)
+        {
+            haddp_input[i] = lhs;
+            if(i + 1 < tester_type::size)
+            {
+                haddp_input[i+1] = rhs;
+            }
+        }
+        vres = haddp(haddp_input);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.haddp_res, out);
         success = success && tmp_success;
 
         topic = "any                      : ";
