@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 }
 ```
 
-Do not forget to enable AVX extension when building the example. With gcc of clang, this is done with `-march=native` flag,
+Do not forget to enable AVX extension when building the example. With gcc or clang, this is done with the `-march=native` flag,
 on MSVC you have to pass the `/arch:AVX` option.
 
 This example outputs:
