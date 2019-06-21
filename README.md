@@ -88,9 +88,10 @@ endif()
 
 include(CheckCXXCompilerFlag)
 
+# Not necessary if not using Conan #
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
-
+####################################
 set(CMAKE_CXX_STANDARD 14)
 
 CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
@@ -108,6 +109,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 find_package(OpenMP REQUIRED)
 
 add_executable(example example.cpp)
+
+# ${CONAN_LIBS} not needed if not using Conan
 target_link_libraries(example ${CONAN_LIBS} ${OpenMP_CXX_LIBRARIES})
 ```
 
