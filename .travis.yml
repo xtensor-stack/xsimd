@@ -25,6 +25,14 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-6
+      env: COMPILER=gcc GCC=6 FORCE_NO_INSTR_SET=1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
       env: COMPILER=gcc GCC=6 ENABLE_XTL_COMPLEX=1
     - os: linux
       addons:
@@ -174,6 +182,9 @@ install:
         cmake . -DDOWNLOAD_GTEST=ON -DTARGET_ARCH=skylake-avx512 -DCMAKE_INSTALL_PREFIX=$HOME/miniconda -DDOWNLOAD_GTEST=ON ;
       else
         cmake . -DDOWNLOAD_GTEST=ON ;
+      fi
+    - if [[ "$FORCE_NO_INSTR_SET" == 1 ]] ; then
+        cmake . -DDOWNLOAD_GTEST=ON -DXSIMD_FORCE_X86_INSTR_SET=0 ;
       fi
     - make -j2 test_xsimd
     - cd test

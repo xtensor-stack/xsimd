@@ -170,7 +170,9 @@
  * PPC INSTRUCTION SET *
  ***********************/
 
-#define XSIMD_PPC_VMX_VERSION XSIMD_VERSION_NUMBER(1, 0, 0)
+// We haven't implemented any support for PPC, so we should
+// not enable detection for this instructoin set
+/*#define XSIMD_PPC_VMX_VERSION XSIMD_VERSION_NUMBER(1, 0, 0)
 #define XSIMD_PPC_VSX_VERSION XSIMD_VERSION_NUMBER(1, 1, 0)
 #define XSIMD_PPC_QPX_VERSION XSIMD_VERSION_NUMBER(2, 0, 0)
 
@@ -190,7 +192,7 @@
     #define XSIMD_PPC_INSTR_SET XSIMD_VERSION_NUMBER_NOT_AVAILABLE
 #else
     #define XSIMD_PPC_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
-#endif
+#endif*/
 
 /***********************
  * ARM INSTRUCTION SET *
@@ -250,7 +252,7 @@
 
 #if !defined(XSIMD_INSTR_SET)
     #define XSIMD_INSTR_SET XSIMD_VERSION_NUMBER_NOT_AVAILABLE
-#else
+#elif XSIMD_INSTR_SET != XSIMD_VERSION_NUMBER_NOT_AVAILABLE
     #define XSIMD_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
 #endif
 

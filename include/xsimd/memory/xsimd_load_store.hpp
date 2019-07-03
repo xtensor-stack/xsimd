@@ -598,7 +598,7 @@ namespace xsimd
     {
     }
 
-#if defined(XSIMD_X86_INSTR_SET_AVAILABLE)
+#if XSIMD_X86_INSTR_SET > XSIMD_INSTR_SET_NOT_AVAILABLE
 
     template <>
     inline void prefetch<int32_t>(const int32_t* address)

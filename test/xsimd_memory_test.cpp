@@ -11,6 +11,8 @@
 
 #include "gtest/gtest.h"
 
+#ifdef XSIMD_INSTR_SET_AVAILABLE
+
 #include "xsimd/memory/xsimd_alignment.hpp"
 
 namespace xsimd
@@ -31,3 +33,4 @@ namespace xsimd
         EXPECT_TRUE((std::is_same<mock_align, unaligned_mode>::value));
     }
 }
+#endif // XSIMD_INSTR_SET_AVAILABLE

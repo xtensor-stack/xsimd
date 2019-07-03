@@ -11,6 +11,8 @@
 
 #include "gtest/gtest.h"
 
+#ifdef XSIMD_INSTR_SET_AVAILABLE
+
 #include "xsimd/math/xsimd_trigonometric.hpp"
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
 #include "xsimd/types/xsimd_types_include.hpp"
@@ -106,3 +108,4 @@ TEST(xsimd, fallback_double_trigonometric)
     EXPECT_TRUE(res);
 }
 #endif
+#endif // XSIMD_INSTR_SET_AVAILABLE
