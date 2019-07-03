@@ -32,12 +32,20 @@ struct unary_functor
     }
 };
 
+#ifdef XSIMD_DEFAULT_ALIGNMENT
+template <class T>
+using test_allocator_type = xsimd::aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>;
+#else
+template <class T>
+using test_allocator_type = std::allocator<T>;
+#endif
+
 TEST(xsimd, binary_transform)
 {
     std::vector<double> expected(93);
 
     std::vector<double> a(93, 123), b(93, 123), c(93);
-    std::vector<double, xsimd::aligned_allocator<double, XSIMD_DEFAULT_ALIGNMENT>> aa(93, 123), ba(93, 123), ca(93);
+    std::vector<double, test_allocator_type<double>> aa(93, 123), ba(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), b.begin(), expected.begin(),
                     binary_functor{});
@@ -83,7 +91,7 @@ TEST(xsimd, unary_transform)
 {
     std::vector<double> expected(93);
     std::vector<double> a(93, 123), c(93);
-    std::vector<double, xsimd::aligned_allocator<double, XSIMD_DEFAULT_ALIGNMENT>> aa(93, 123), ca(93);
+    std::vector<double, test_allocator_type<double>> aa(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), expected.begin(),
                    unary_functor{});
@@ -112,7 +120,7 @@ TEST(xsimd, unary_transform)
 class xsimd_reduce : public ::testing::Test
 {
 public:
-    using aligned_vec_t = std::vector<double, xsimd::aligned_allocator<double, XSIMD_DEFAULT_ALIGNMENT>>;
+    using aligned_vec_t = std::vector<double, test_allocator_type<double>>;
 
     static constexpr std::size_t num_elements = 4 * xsimd::simd_traits<double>::size;
     static constexpr std::size_t small_num = xsimd::simd_traits<double>::size - 1;
@@ -211,11 +219,10 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
     }
 }
 
+#if XSIMD_X86_INSTR_SET > XSIMD_VERSION_NUMBER_NOT_AVAILABLE || XSIMD_ARM_INSTR_SET > XSIMD_VERSION_NUMBER_NOT_AVAILABLE
 TEST(xsimd, iterator)
 {
-    std::vector<float, xsimd::aligned_allocator<float, XSIMD_DEFAULT_ALIGNMENT>> a(10 * 16, 0.2);
-    std::vector<float, xsimd::aligned_allocator<float, XSIMD_DEFAULT_ALIGNMENT>> b(1000, 2.);
-    std::vector<float, xsimd::aligned_allocator<float, XSIMD_DEFAULT_ALIGNMENT>> c(1000, 3.);
+    std::vector<float, test_allocator_type<float>> a(10 * 16, 0.2), b(1000, 2.), c(1000, 3.);
 
     std::iota(a.begin(), a.end(), 0.f);
     std::vector<float> a_cpy(a.begin(), a.end());
@@ -245,7 +252,7 @@ TEST(xsimd, iterator)
     }
 
 #ifdef XSIMD_BATCH_DOUBLE_SIZE
-    std::vector<std::complex<double>, xsimd::aligned_allocator<std::complex<double>, XSIMD_DEFAULT_ALIGNMENT>> ca(10 * 16, std::complex<double>(0.2));
+    std::vector<std::complex<double>, test_allocator_type<std::complex<double>>> ca(10 * 16, std::complex<double>(0.2));
     using cbatch_type = typename xsimd::simd_traits<std::complex<double>>::type;
     auto cbegin = xsimd::aligned_iterator<cbatch_type>(&ca[0]);
     auto cend = xsimd::aligned_iterator<cbatch_type>(&ca[0] + a.size());
@@ -262,3 +269,4 @@ TEST(xsimd, iterator)
 #endif
 
 }
+#endif

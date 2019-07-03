@@ -67,7 +67,7 @@
 #include "xsimd_neon_complex.hpp"
 #endif
 
-#if XSIMD_ARM_INSTR_SET == XSIMD_VERSION_NUMBER_NOT_AVAILABLE && XSIMD_X86_INSTR_SET == XSIMD_VERSION_NUMBER_NOT_AVAILABLE
+#if !defined(XSIMD_INSTR_SET_AVAILABLE)
 	#if defined(XSIMD_ENABLE_FALLBACK)
 		#warning "No SIMD instructions set detected, using fallback mode."
 	#else

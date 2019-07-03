@@ -12,6 +12,8 @@
 
 #include "gtest/gtest.h"
 
+#ifdef XSIMD_INSTR_SET_AVAILABLE
+
 #include "xsimd/xsimd.hpp"
 
 namespace xsimd
@@ -109,3 +111,4 @@ namespace xsimd
         EXPECT_EQ(t.ivec, t.ires);
     }
 }
+#endif // XSIMD_INSTR_SET_AVAILABLE

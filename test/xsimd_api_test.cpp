@@ -36,7 +36,7 @@ namespace xsimd
     }
 }
 
-#if XSIMD_X86_INSTR_SET_AVAILABLE > XSIMD_VERSION_NUMBER_NOT_AVAILABLE
+#if XSIMD_X86_INSTR_SET > XSIMD_VERSION_NUMBER_NOT_AVAILABLE
 TEST(xsimd, complex_return_type)
 {
     using cf_type = std::complex<float>;
