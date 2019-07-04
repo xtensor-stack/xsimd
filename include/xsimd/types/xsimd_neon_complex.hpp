@@ -155,7 +155,7 @@ namespace xsimd
 
     inline auto batch<std::complex<float>, 4>::load_unaligned(const std::complex<double>* src) -> self_type&
     {
-        return load_unaligned(src);
+        return load_aligned(src);
     }
 
     inline void batch<std::complex<float>, 4>::store_aligned(std::complex<float>* dst) const

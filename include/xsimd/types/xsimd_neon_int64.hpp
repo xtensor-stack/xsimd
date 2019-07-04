@@ -176,7 +176,7 @@ namespace xsimd
 
     inline batch<int64_t, 2>& batch<int64_t, 2>::load_unaligned(const float* src)
     {
-        return load_unaligned(src);
+        return load_aligned(src);
     }
 
     inline batch<int64_t, 2>& batch<int64_t, 2>::load_aligned(const double* src)
