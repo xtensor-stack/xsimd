@@ -36,6 +36,7 @@ namespace xsimd
     using std::exp2;
     using std::exp;
     using std::expm1;
+    using std::fabs;
     using std::fdim;
     using std::fmax;
     using std::fmin;

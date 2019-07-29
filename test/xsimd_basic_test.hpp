@@ -65,6 +65,7 @@ namespace xsimd
         res_type min_res;
         res_type max_res;
         res_type abs_res;
+        res_type fabs_res;
         res_type fma_res;
         res_type fms_res;
         res_type fnma_res;
@@ -84,6 +85,7 @@ namespace xsimd
         using std::min;
         using std::max;
         using std::abs;
+        using std::fabs;
         using std::sqrt;
         using std::fma;
 
@@ -114,6 +116,7 @@ namespace xsimd
         min_res.resize(N);
         max_res.resize(N);
         abs_res.resize(N);
+        fabs_res.resize(N);
         fma_res.resize(N);
         fms_res.resize(N);
         fnma_res.resize(N);
@@ -152,6 +155,7 @@ namespace xsimd
             min_res[i] = min(lhs[i], rhs[i]);
             max_res[i] = max(lhs[i], rhs[i]);
             abs_res[i] = abs(lhs[i]);
+            fabs_res[i] = fabs(lhs[i]);
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_FMA4_VERSION
             fma_res[i] = fma(lhs[i], rhs[i], rhs[i]);
 #else
@@ -872,6 +876,13 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.abs_res, out);
         success = success && tmp_success;
         success &= check_almost_equal(topic, xsimd::abs(tester.lhs[0]), tester.abs_res[0], out);
+
+        topic = "fabs(simd)                : ";
+        vres = fabs(lhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.fabs_res, out);
+        success = success && tmp_success;
+        success &= check_almost_equal(topic, xsimd::fabs(tester.lhs[0]), tester.fabs_res[0], out);
 
         topic = "sqrt(simd)               : ";
         vres = sqrt(lhs);
