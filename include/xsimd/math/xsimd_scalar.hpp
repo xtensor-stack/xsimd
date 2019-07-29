@@ -36,6 +36,7 @@ namespace xsimd
     using std::exp2;
     using std::exp;
     using std::expm1;
+    using std::fabs;
     using std::fdim;
     using std::fmax;
     using std::fmin;
@@ -48,6 +49,7 @@ namespace xsimd
     using std::log1p;
     using std::log2;
     using std::log;
+    using std::modf;
     using std::nearbyint;
     using std::nextafter;
     using std::proj;
