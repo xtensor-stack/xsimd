@@ -49,6 +49,7 @@ namespace xsimd
     using std::log1p;
     using std::log2;
     using std::log;
+    using std::modf;
     using std::nearbyint;
     using std::nextafter;
     using std::proj;
