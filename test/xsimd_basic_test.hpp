@@ -452,6 +452,7 @@ namespace xsimd
             auto r3 = xsimd::min(a, c);
 
             EXPECT_TRUE(stored_equal(r1, {2, 3}));
+            EXPECT_TRUE(stored_equal(r2, {1, 3}));
             EXPECT_TRUE(stored_equal(r3, {1, 3}));
 
             auto r4 = a < b; // test lt
@@ -477,6 +478,7 @@ namespace xsimd
             auto r3 = xsimd::min(a, c);
 
             EXPECT_TRUE(stored_equal(r1, {2, 3, 2, 3}));
+            EXPECT_TRUE(stored_equal(r2, {1, 3, 1, 1}));
             EXPECT_TRUE(stored_equal(r3, {1, 3, 1, 1}));
 
             auto r4 = a < b; // test lt
@@ -508,6 +510,10 @@ namespace xsimd
             auto r3 = xsimd::min(a, c);
             auto r4 = a < b; // test lt
 
+            EXPECT_TRUE(stored_equal(r1, {2, 3, 2, 3, 2, 3, 3, 3}));
+            EXPECT_TRUE(stored_equal(r2, {1, 3, 1, 3, 1, 1, 3, 3}));
+            EXPECT_TRUE(stored_equal(r3, {1, 3, 1, 3, 1, 1, 2, 3}));
+
             BB e4(1,0,1,0, 1,1,0,0);
             EXPECT_TRUE(xsimd::all(r4 == e4));
         }
@@ -537,6 +543,10 @@ namespace xsimd
             auto r5 = a == c;
             auto r6 = a != c;
 
+            EXPECT_TRUE(stored_equal(r1, {2, 3, 2, 3, 2, 3, 3, 3, 3, 3, 2, max, max, 2}));
+            EXPECT_TRUE(stored_equal(r2, {1, 3, 1, 3, 1, 3, 3, 3, 3, 3, min, max, max, min}));
+            EXPECT_TRUE(stored_equal(r3, {1, 2, 1, 2, 1, 2, 2, 2, 2, 2, min, 2, 2, min}));
+
             BB e4(1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1);
             EXPECT_TRUE(xsimd::all(r4 == e4));
 
@@ -564,6 +574,10 @@ namespace xsimd
             auto r2 = xsimd::abs(a);
             auto r3 = xsimd::min(a, b);
             auto r4 = a < b; // test lt
+
+            EXPECT_TRUE(stored_equal(r2, {2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 3,3,3,3, 2,max,max,2}));
+            EXPECT_TRUE(stored_equal(r2, {1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 3,3,3,3, min,max,max,min}));
+            EXPECT_TRUE(stored_equal(r2, {1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 2,2,2,2, min,2,2,min}));
 
             BB e4(1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1);
             EXPECT_TRUE(xsimd::all(r4 == e4));
