@@ -94,6 +94,20 @@ namespace xsimd
     }
 #endif
 
+#ifdef XSIMD_ENABLE_NUMPY_COMPLEX
+    template <class T>
+    bool isnan(std::complex<T> var)
+    {
+        return std::isnan(std::real(var)) || std::isnan(std::imag(var));
+    }
+
+    template <class T>
+    bool isinf(std::complex<T> var)
+    {
+        return std::isinf(std::real(var)) || std::isinf(std::imag(var));
+    }
+#endif
+
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     using xtl::abs;
     using xtl::norm;

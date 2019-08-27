@@ -26,22 +26,9 @@
 #include "xtl/xcomplex.hpp"
 #endif
 
-// define some overloads here as complex version does not exist in std::
-// and integer version does not exist for msvc
+// define some overloads here as integer version does not exist for msvc
 
 namespace utils {
-
-    template <class T>
-    inline bool isinf(const std::complex<T>& c)
-    {
-        return std::isinf(std::real(c)) || std::isinf(std::imag(c));
-    }
-
-    template <class T>
-    inline bool isnan(const std::complex<T>& c)
-    {
-        return std::isnan(std::real(c)) || std::isnan(std::imag(c));
-    }
 
     template <class T>
     inline typename std::enable_if<!std::is_integral<T>::value, bool>::type isinf(const T& c)
