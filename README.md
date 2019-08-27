@@ -71,8 +71,8 @@ cmake
 A package for xsimd is available on the Spack package manager.
 
 ```bash
-    spack install xsimd
-    spack load xsimd
+spack install xsimd
+spack load xsimd
 ```
 
 ### Install from sources
