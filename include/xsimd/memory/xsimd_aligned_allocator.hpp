@@ -69,7 +69,7 @@ namespace xsimd
         pointer address(reference) noexcept;
         const_pointer address(const_reference) const noexcept;
 
-        pointer allocate(size_type n, typename std::allocator<void>::const_pointer hint = 0);
+        pointer allocate(size_type n, const void* hint = 0);
         void deallocate(pointer p, size_type n);
 
         size_type max_size() const noexcept;
@@ -169,8 +169,7 @@ namespace xsimd
      */
     template <class T, size_t A>
     inline auto
-    aligned_allocator<T, A>::allocate(size_type n,
-            typename std::allocator<void>::const_pointer) -> pointer
+    aligned_allocator<T, A>::allocate(size_type n, const void*) -> pointer
     {
         pointer res = reinterpret_cast<pointer>(aligned_malloc(sizeof(T) * n, A));
         if (res == nullptr)
