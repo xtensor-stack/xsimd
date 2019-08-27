@@ -36,6 +36,21 @@ A package for xsimd is available on the conda package manager.
 
     conda install -c conda-forge xsimd 
 
+Using the Conan package
+-----------------------
+
+If you are using Conan to manage your dependencies, merely add `xsimd/x.y.z@omaralvarez/public-conan` to your requires, where x.y.z
+is the release version you want to use. Please file issues in [conan-xsimd](https://github.com/omaralvarez/conan-xsimd) if you
+experience problems with the packages. Sample `conanfile.txt`:
+
+.. code::
+
+    [requires]
+    xsimd/7.2.3@omaralvarez/public-conan
+
+    [generators]
+    cmake
+
 .. image:: spack.svg
 
 Using the Spack package

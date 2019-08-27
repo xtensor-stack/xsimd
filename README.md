@@ -39,9 +39,24 @@ ARM          | ARMv7, ARMv8
 
 ## Installation
 
-### Package managers
+Although `xsimd` is a header-only library, we provide standardized means to install it, with package managers or with cmake.
 
-If you are using Conan to manage your dependencies, merely add `xsimd/x.y.z@omaralvarez/public-conan` to your requires, where x.y.z is the release version you want to use. Please file issues in [conan-xsimd](https://github.com/omaralvarez/conan-xsimd) if you experience problems with the packages. Sample `conanfile.txt`:
+Besides the xsimd headers, all these methods place the `CMake` project configuration file in the right location so that
+third-party projects can use cmake's `find_package` to locate xsimd headers.
+
+### Install with conda
+
+A package for xsimd is available on the conda package manager.
+
+```bash
+conda install -c conda-forge xsimd
+```
+
+### Install with Conan
+
+If you are using Conan to manage your dependencies, merely add `xsimd/x.y.z@omaralvarez/public-conan` to your requires, where x.y.z
+is the release version you want to use. Please file issues in [conan-xsimd](https://github.com/omaralvarez/conan-xsimd) if you
+experience problems with the packages. Sample `conanfile.txt`:
 
 ```
 [requires]
@@ -51,17 +66,18 @@ xsimd/7.2.3@omaralvarez/public-conan
 cmake
 ```
 
-We also provide a package for the conda package manager:
+### Install with Spack
+
+A package for xsimd is available on the Spack package manager.
 
 ```bash
-conda install -c conda-forge xsimd
+    spack install xsimd
+    spack load xsimd
 ```
 
 ### Install from sources
 
-`xsimd` is a header-only library. 
-
-You can directly install it from the sources:
+You can directly install it from the sources with cmake:
 
 ```bash
 cmake -D CMAKE_INSTALL_PREFIX=your_install_prefix
