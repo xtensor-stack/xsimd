@@ -109,6 +109,36 @@ namespace xsimd
     };
 
     template <>
+    struct simd_traits<int16_t>
+    {
+        using type = batch<int16_t, XSIMD_BATCH_INT16_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
+        static constexpr size_t size = type::size;
+    };
+
+    template <>
+    struct revert_simd_traits<batch<int16_t, XSIMD_BATCH_INT16_SIZE>>
+    {
+        using type = int16_t;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+
+    template <>
+    struct simd_traits<uint16_t>
+    {
+        using type = batch<uint16_t, XSIMD_BATCH_INT16_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
+        static constexpr size_t size = type::size;
+    };
+
+    template <>
+    struct revert_simd_traits<batch<uint16_t, XSIMD_BATCH_INT16_SIZE>>
+    {
+        using type = uint16_t;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+
+    template <>
     struct simd_traits<int32_t>
     {
         using type = batch<int32_t, XSIMD_BATCH_INT32_SIZE>;
@@ -123,6 +153,22 @@ namespace xsimd
         static constexpr size_t size = simd_traits<type>::size;
     };
 
+    template <>
+    struct simd_traits<uint32_t>
+    {
+        using type = batch<uint32_t, XSIMD_BATCH_INT32_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
+        static constexpr size_t size = type::size;
+    };
+
+    template <>
+    struct revert_simd_traits<batch<uint32_t, XSIMD_BATCH_INT32_SIZE>>
+    {
+        using type = uint32_t;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+
+// On some architectures long is a different type from int32_t or int64_t
 #ifdef XSIMD_32_BIT_ABI
     template <>
     struct simd_traits<long> : simd_traits<int32_t>
@@ -135,7 +181,19 @@ namespace xsimd
         using type = long;
         static constexpr size_t size = simd_traits<type>::size;
     };
-#endif
+
+    template <>
+    struct simd_traits<unsigned long> : simd_traits<uint32_t>
+    {
+    };
+
+    template <>
+    struct revert_simd_traits<batch<unsigned long, XSIMD_BATCH_INT32_SIZE>>
+    {
+        using type = unsigned long;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+#endif // XSIMD_32_BIT_ABI
 
     template <>
     struct simd_traits<int64_t>
@@ -149,6 +207,21 @@ namespace xsimd
     struct revert_simd_traits<batch<int64_t, XSIMD_BATCH_INT64_SIZE>>
     {
         using type = int64_t;
+        static constexpr size_t size = simd_traits<type>::size;
+    };
+
+    template <>
+    struct simd_traits<uint64_t>
+    {
+        using type = batch<uint64_t, XSIMD_BATCH_INT64_SIZE>;
+        using bool_type = simd_batch_traits<type>::batch_bool_type;
+        static constexpr size_t size = type::size;
+    };
+
+    template <>
+    struct revert_simd_traits<batch<uint64_t, XSIMD_BATCH_INT64_SIZE>>
+    {
+        using type = uint64_t;
         static constexpr size_t size = simd_traits<type>::size;
     };
 
@@ -197,85 +270,8 @@ namespace xsimd
         using type = xtl::xcomplex<float, float, i3ec>;
         static constexpr size_t size = simd_traits<type>::size;
     };
-#endif
-#endif
-
-// TODO remove when we've implemented these types for AVX512 / ARM NEON!
-#ifdef XSIMD_BATCH_INT16_SIZE
-    template <>
-    struct simd_traits<int16_t>
-    {
-        using type = batch<int16_t, XSIMD_BATCH_INT16_SIZE>;
-        using bool_type = simd_batch_traits<type>::batch_bool_type;
-        static constexpr size_t size = type::size;
-    };
-
-    template <>
-    struct revert_simd_traits<batch<int16_t, XSIMD_BATCH_INT16_SIZE>>
-    {
-        using type = int16_t;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-
-    template <>
-    struct simd_traits<uint16_t>
-    {
-        using type = batch<uint16_t, XSIMD_BATCH_INT16_SIZE>;
-        using bool_type = simd_batch_traits<type>::batch_bool_type;
-        static constexpr size_t size = type::size;
-    };
-
-    template <>
-    struct revert_simd_traits<batch<uint16_t, XSIMD_BATCH_INT16_SIZE>>
-    {
-        using type = uint16_t;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-
-    template <>
-    struct simd_traits<uint32_t>
-    {
-        using type = batch<uint32_t, XSIMD_BATCH_INT32_SIZE>;
-        using bool_type = simd_batch_traits<type>::batch_bool_type;
-        static constexpr size_t size = type::size;
-    };
-
-    template <>
-    struct revert_simd_traits<batch<uint32_t, XSIMD_BATCH_INT32_SIZE>>
-    {
-        using type = uint32_t;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-
-#ifdef XSIMD_32_BIT_ABI
-    template <>
-    struct simd_traits<unsigned long> : simd_traits<uint32_t>
-    {
-    };
-
-    template <>
-    struct revert_simd_traits<batch<unsigned long, XSIMD_BATCH_INT32_SIZE>>
-    {
-        using type = unsigned long;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-#endif
-
-    template <>
-    struct simd_traits<uint64_t>
-    {
-        using type = batch<uint64_t, XSIMD_BATCH_INT64_SIZE>;
-        using bool_type = simd_batch_traits<type>::batch_bool_type;
-        static constexpr size_t size = type::size;
-    };
-
-    template <>
-    struct revert_simd_traits<batch<uint64_t, XSIMD_BATCH_INT64_SIZE>>
-    {
-        using type = uint64_t;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-#endif
+#endif // XSIMD_ENABLE_XTL_COMPLEX
+#endif // XSIMD_BATCH_FLOAT_SIZE
 
 #ifdef XSIMD_BATCH_DOUBLE_SIZE
     template <>
@@ -323,8 +319,8 @@ namespace xsimd
         using type = xtl::xcomplex<double, double, i3ec>;
         static constexpr size_t size = simd_traits<type>::size;
     };
-#endif
-#endif
+#endif // XSIMD_ENABLE_XTL_COMPLEX
+#endif // XSIMD_BATCH_DOUBLE_SIZE
 
     /********************
      * simd_return_type *
@@ -386,7 +382,7 @@ namespace xsimd
             : std::enable_if<simd_condition<T1, T2>::value, batch<xtl::xcomplex<T2, T2, i3ec>, N>>
         {
         };
-#endif
+#endif // XSIMD_ENABLE_XTL_COMPLEX
     }
 
     template <class T1, class T2, std::size_t N = simd_traits<T2>::size>
@@ -425,7 +421,7 @@ namespace xsimd
     struct is_batch_complex<batch<xtl::xcomplex<T, T, i3ec>, N>> : std::true_type
     {
     };
-#endif
+#endif //XSIMD_ENABLE_XTL_COMPLEX
 
 }
 
