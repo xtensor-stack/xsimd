@@ -340,8 +340,10 @@ namespace xsimd
                 std::is_same<T1, uint8_t>::value ||
                 std::is_same<T1, int16_t>::value ||
                 std::is_same<T1, uint16_t>::value ||
-                std::is_same<T1, int64_t>::value ||
                 std::is_same<T1, int32_t>::value ||
+                std::is_same<T1, uint32_t>::value ||
+                std::is_same<T1, int64_t>::value ||
+                std::is_same<T1, uint64_t>::value ||
                 std::is_same<T1, char>::value ||
                 detail::is_complex<T1>::value;
         };
