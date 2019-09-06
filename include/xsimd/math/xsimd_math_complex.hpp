@@ -20,13 +20,19 @@
 namespace xsimd
 {
     template <class X>
-    typename batch_type_t<X>::real_batch arg(const simd_base<X>& z);
+    real_batch_type_t<X> real(const simd_base<X>& z);
+
+    template <class X>
+    real_batch_type_t<X> imag(const simd_base<X>& z);
+
+    template <class X>
+    real_batch_type_t<X> arg(const simd_base<X>& z);
 
     template <class X>
     batch_type_t<X> conj(const simd_base<X>& z);
 
     template <class X>
-    typename batch_type_t<X>::real_batch norm(const simd_base<X>& rhs);
+    real_batch_type_t<X> norm(const simd_base<X>& rhs);
 
     template <class X>
     batch_type_t<X> proj(const simd_base<X>& rhs);
@@ -853,11 +859,61 @@ namespace xsimd
         #endif
     }
 
+    namespace detail
+    {
+        template <class B, bool is_complex>
+        struct real_imag_kernel
+        {
+            using return_type = typename B::real_batch;
+
+            static return_type real(const B& z)
+            {
+                return z.real();
+            }
+
+            static return_type imag(const B& z)
+            {
+                return z.imag();
+            }
+        };
+
+        template <class B>
+        struct real_imag_kernel<B, false>
+        {
+            using return_type = B;
+
+            static return_type real(const B& z)
+            {
+                return z;
+            }
+
+            static return_type imag(const B& z)
+            {
+                return B(typename B::value_type(0));
+            }
+        };
+    }
 
     template <class X>
-    inline typename batch_type_t<X>::real_batch arg(const simd_base<X>& z)
+    inline real_batch_type_t<X> real(const simd_base<X>& z)
     {
-        return atan2(z().imag(), z().real());
+        using batch_type = batch_type_t<X>;
+        constexpr bool is_cplx = detail::is_complex<typename batch_type::value_type>::value;
+        return detail::real_imag_kernel<batch_type, is_cplx>::real(z());
+    }
+
+    template <class X>
+    inline real_batch_type_t<X> imag(const simd_base<X>& z)
+    {
+        using batch_type = batch_type_t<X>;
+        constexpr bool is_cplx = detail::is_complex<typename batch_type::value_type>::value;
+        return detail::real_imag_kernel<batch_type, is_cplx>::imag(z());
+    }
+
+    template <class X>
+    inline real_batch_type_t<X> arg(const simd_base<X>& z)
+    {
+        return atan2(imag(z), real(z));
     }
 
     template <class X>
@@ -867,10 +923,9 @@ namespace xsimd
     }
 
     template <class X>
-    inline typename batch_type_t<X>::real_batch
-    norm(const simd_base<X>& rhs)
+    inline real_batch_type_t<X> norm(const simd_base<X>& rhs)
     {
-        return rhs().real() * rhs().real() + rhs().imag() * rhs().imag();
+        return real(rhs) * real(rhs) + imag(rhs) * imag(rhs);
     }
 
     template <class X>
