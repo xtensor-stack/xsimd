@@ -1731,6 +1731,37 @@ namespace xsimd
     {
         return batch<T, N>(src.get_value());
     }
+
+
+    /***********************************
+     * Workaround for Clang on Windows *
+     ***********************************/
+
+#if defined(_WIN32) && defined(__clang__)
+    /**
+     * On Windows, the return type of fma is the promote type of its
+     * arguments if they are integral or floating point types, float
+     * otherwise. The implementation does not rely on SFINAE to
+     * remove it from the overload resolution set when the argument
+     * types are neither integral types nor floating point type.
+     *
+     * The fma overload defined xsimd accepts simd_base<batch<T, N>>
+     * arguments, not batch<T, N>. Thus a call to this latter is not
+     * more specialized than a call to the STL overload, which is
+     * considered. Since there is no mean to convert batch<double, 2>
+     * to float for instance, this results in a compilation error.
+     */
+
+    template <class T, std::size_t N>
+    inline batch<T, N> fma(const batch<T, N>& a, const batch<T, N>& b, const batch<T, N>& c)
+    {
+        using base_type = simd_base<batch<T, N>>;
+        const base_type& sba = a;
+        const base_type& sbb = b;
+        const base_type& sbc = c;
+        return fma(sba, sbb, sbc);
+    }
+#endif
 }
 
 #endif
