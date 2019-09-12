@@ -805,6 +805,7 @@ namespace xsimd
         struct complex_batch_kernel
         {
             using batch_type = batch<T, N>;
+            using batch_bool_type = typename simd_batch_traits<batch_type>::batch_bool_type;
             using real_batch = typename batch_type::real_batch;
 
             static real_batch abs(const batch_type& z)
@@ -841,6 +842,11 @@ namespace xsimd
                               select(x == ze,
                                      select(y > ze, batch_type(sqrt_hy, sqrt_hy), batch_type(sqrt_hy, -sqrt_hy)),
                                      resg));
+            }
+
+            static batch_bool_type isnan(const batch_type& z)
+            {
+                return batch_bool_type(xsimd::isnan(z.real()) || xsimd::isnan(z.imag()));
             }
         };
 

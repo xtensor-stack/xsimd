@@ -984,6 +984,13 @@ namespace xsimd
         tmp_success = all(bres);
         success = success && tmp_success;
         
+        topic = "not                      : ";
+        vres = !lhs;
+        for(std::size_t i = 0; i < T::size; ++i)
+        {
+            success = success && !lhs[i] == vres[i];
+        }
+
         topic = "iterator                 : ";
         auto lhs_iter = lhs.begin();
         auto lhs_citer = lhs.cbegin();

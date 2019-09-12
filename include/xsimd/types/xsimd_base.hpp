@@ -1400,8 +1400,9 @@ namespace xsimd
     inline typename simd_batch_traits<X>::batch_bool_type
     operator!(const simd_base<X>& rhs)
     {
-        using b_type = typename simd_batch_traits<X>::batch_type;
-        return rhs() == b_type(0);
+        using b_type = typename X::batch_type;
+        using value_type = typename simd_batch_traits<b_type>::value_type;
+        return rhs() == b_type(value_type(0));
     }
 
     /**
