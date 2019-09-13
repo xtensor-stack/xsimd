@@ -83,6 +83,22 @@ namespace xsimd
         X& operator()();
         const X& operator()() const;
 
+        X& load_aligned(const bool* src);
+        X& load_unaligned(const bool* src);
+
+        void store_aligned(bool* dst) const;
+        void store_unaligned(bool* dst) const;
+
+        template <class P>
+        X& load_aligned(const P& src);
+        template <class P>
+        X& load_unaligned(const P& src);
+        
+        template <class P>
+        void store_aligned(P& dst) const;
+        template <class P>
+        void store_unaligned(P& dst) const;
+
     protected:
 
         simd_batch_bool() = default;
@@ -93,6 +109,14 @@ namespace xsimd
 
         simd_batch_bool(simd_batch_bool&&) = default;
         simd_batch_bool& operator=(simd_batch_bool&&) = default;
+
+    private:
+
+        template <class P, std::size_t... I>
+        X& load_impl(detail::index_sequence<I...>, const P& src);
+
+        template <class P>
+        void store_impl(P& dst) const;
     };
 
     template <class X>
@@ -236,6 +260,75 @@ namespace xsimd
         return *static_cast<const X*>(this);
     }
     //@}
+    
+    template <class X>
+    inline X& simd_batch_bool<X>::load_aligned(const bool* src)
+    {
+        return load_impl(detail::make_index_sequence<size>(), src);
+    }
+
+    template <class X>
+    inline X& simd_batch_bool<X>::load_unaligned(const bool* src)
+    {
+        return load_aligned(src);
+    }
+
+    template <class X>
+    inline void simd_batch_bool<X>::store_aligned(bool* dst) const
+    {
+        store_impl(dst);
+    }
+
+    template <class X>
+    inline void simd_batch_bool<X>::store_unaligned(bool* dst) const
+    {
+        store_impl(dst);
+    }
+
+    template <class X>
+    template <class P>
+    inline X& simd_batch_bool<X>::load_aligned(const P& src)
+    {
+        return load_impl(detail::make_index_sequence<size>(), src);
+    }
+
+    template <class X>
+    template <class P>
+    inline X& simd_batch_bool<X>::load_unaligned(const P& src)
+    {
+        return load_aligned(src);
+    }   
+
+    template <class X>
+    template <class P>
+    inline void simd_batch_bool<X>::store_aligned(P& dst) const
+    {
+        store_impl(dst);
+    }
+
+    template <class X>
+    template <class P>
+    inline void simd_batch_bool<X>::store_unaligned(P& dst) const
+    {
+        store_impl(dst);
+    }
+    
+    template <class X>
+    template <class P, std::size_t... I>
+    inline X& simd_batch_bool<X>::load_impl(detail::index_sequence<I...>, const P& src)
+    {
+        return (*this)().load_values(src[I]...);
+    }
+
+    template <class X>
+    template <class P>
+    inline void simd_batch_bool<X>::store_impl(P& dst) const
+    {
+        for(std::size_t i = 0; i < size; ++i)
+        {
+            dst[i] = (*this)()[i];
+        }
+    }
 
     /**
     * @defgroup simd_batch_bool_bitwise Bitwise functions

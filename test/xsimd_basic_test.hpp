@@ -340,6 +340,10 @@ namespace xsimd
         type half = type(0, 1);
         type ihalf = type(1, 0);
         type interspersed = type(0, 1);
+
+        using vector_type = std::array<bool, 2>;
+        vector_type vhalf = {{ false, true }};
+        vector_type vihalf = {{ true, false }};
     };
 
     template <class T, std::size_t N>
@@ -352,6 +356,10 @@ namespace xsimd
         type half = type(0, 0, 0, 0, 0, 1, 1, 1, 1, 1);
         type ihalf = type(1, 1, 1, 1, 1, 0, 0, 0, 0, 0);
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+
+        using vector_type = std::array<bool, 10>;
+        vector_type vhalf = {{ false, false, false, false, false, true, true, true, true, true }};
+        vector_type vihalf = {{ true, true, true, true, true, false, false, false, false, false }};
     };
 
     template <class T>
@@ -364,6 +372,10 @@ namespace xsimd
         type half = type(0, 0, 1, 1);
         type ihalf = type(1, 1, 0, 0);
         type interspersed = type(0, 1, 0, 1);
+
+        using vector_type = std::array<bool, 4>;
+        vector_type vhalf = {{ false, false, true, true }};
+        vector_type vihalf = {{ true, true, false, false }};
     };
 
     template <class T>
@@ -375,6 +387,10 @@ namespace xsimd
         type half = type(0, 0, 0, 0, 1, 1, 1, 1);
         type ihalf = type(1, 1, 1, 1, 0, 0, 0, 0);
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1);
+
+        using vector_type = std::array<bool, 8>;
+        vector_type vhalf = {{ false, false, false, false, true, true, true, true }};
+        vector_type vihalf = {{ true, true, true, true, false, false, false, false }};
     };
 
     template <class T>
@@ -386,6 +402,10 @@ namespace xsimd
         type half = type(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1);
         type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+
+        using vector_type = std::array<bool, 16>;
+        vector_type vhalf = {{ false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true }};
+        vector_type vihalf = {{ true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false }};
     };
 
     template <class T>
@@ -397,6 +417,12 @@ namespace xsimd
         type half = type(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+
+        using vector_type = std::array<bool, 32>;
+        vector_type vhalf = {{ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+                              true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true }};
+        vector_type vihalf = {{ true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                               false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }};
     };
 
     template <class T>
@@ -408,6 +434,16 @@ namespace xsimd
         type half = type (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+
+        using vector_type = std::array<bool, 64>;
+        vector_type vhalf = {{ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+                              false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+                              true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                              true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true }};
+        vector_type vihalf = {{ true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                               true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                               false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+                               false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }};
     };
 
     template <class T>
@@ -614,19 +650,99 @@ namespace xsimd
         auto bool_g = get_bool<typename simd_batch_traits<batch<I, N>>::batch_bool_type>{};
         success = success && all(bool_g.half != bool_g.ihalf);
         if (!success)
-            stream  << "test_simd_bool != failed.";
+            stream  << "test_simd_bool != failed." << std::endl;
         success = success && all(bool_g.half == !bool_g.ihalf);
         if (!success)
-            stream  << "test_simd_bool ! failed.";
+            stream  << "test_simd_bool ! failed." << std::endl;
         success = success && all(bool_g.half == ~bool_g.ihalf);
         if (!success)
-            stream  << "test_simd_bool ~ failed.";
+            stream  << "test_simd_bool ~ failed." << std::endl;
         success = success && all((bool_g.half | bool_g.ihalf) == bool_g.all_true);
         if (!success)
-            stream  << "test_simd_bool | failed.";
+            stream  << "test_simd_bool | failed." << std::endl;
         success = success && all((bool_g.half & bool_g.ihalf) == bool_g.all_false);
         if (!success)
-            stream  << "test_simd_bool & failed.";
+            stream  << "test_simd_bool & failed." << std::endl;
+        return success;
+    }
+
+    namespace detail
+    {
+        template <class I, std::size_t N, class S>
+        bool test_simd_bool_buffer_impl(const std::array<I, N>& vhalf, const std::array<I, N>& vihalf, S& stream)
+        {
+            bool success = true;
+            batch_bool<I, N> lhs, rhs, res;
+            std::array<I, N> vres;
+
+            detail::load_vec(lhs, vhalf);
+            detail::load_vec(rhs, vihalf);
+
+            res = lhs && rhs;
+            detail::store_vec(res, vres);
+            success = success && (std::count(vres.cbegin(), vres.cend(), false) ==  N);
+            if(!success)
+                stream << "test_simd_bool_buffer && failed." << std::endl;
+
+            res = lhs || rhs;
+            detail::store_vec(res, vres);
+            success = success && (std::count(vres.cbegin(), vres.cend(), true) == N);
+            if(!success)
+                stream << "test_simd_bool_buffer || failed." << std::endl;
+
+            return success;
+        }
+    }
+
+#if defined(XSIMD_ENABLE_FALLBACK)
+    template <class I, class S>
+    bool test_simd_bool_buffer(const batch<I, 7>&, S& stream)
+    {
+        bool success = true;
+        std::array<bool, 7> vhalf = {{ false, false, false, false, true, true, true }};
+        std::array<bool, 7> vihalf = {{ true, true, true, true, false, false, false }};
+
+        return detail::test_simd_bool_buffer_impl(vhalf, vihalf, stream);
+    }
+
+    template <class I, class S>
+    bool test_simd_bool_buffer(const batch<I, 3>&, S& stream)
+    {
+        bool success = true;
+        std::array<bool, 3> vhalf = {{ false, false, true }};
+        std::array<bool, 3> vihalf = {{ true, true, false }};
+
+        return detail::test_simd_bool_buffer_impl(vhalf, vihalf, stream);
+    }
+#endif
+
+    template <class I, std::size_t N, class S>
+    bool test_simd_bool_buffer(const batch<I, N>&, S& stream)
+    {
+        bool success = true;
+        using batch_bool_type = typename simd_batch_traits<batch<I, N>>::batch_bool_type;
+        using bool_getter = get_bool<batch_bool_type>;
+        using vector_type = typename bool_getter::vector_type;
+
+        bool_getter bool_g;
+        batch_bool<I, N> lhs, rhs, res;
+        vector_type vres;
+
+        detail::load_vec(lhs, bool_g.vhalf);
+        detail::load_vec(rhs, bool_g.vihalf);
+
+        res = lhs && rhs;
+        detail::store_vec(res, vres);
+        success = success && (std::count(vres.cbegin(), vres.cend(), false) ==  N);
+        if(!success)
+            stream << "test_simd_bool_buffer && failed." << std::endl;
+
+        res = lhs || rhs;
+        detail::store_vec(res, vres);
+        success = success && (std::count(vres.cbegin(), vres.cend(), true) == N);
+        if(!success)
+            stream << "test_simd_bool_buffer || failed." << std::endl;
+
         return success;
     }
 
@@ -951,6 +1067,7 @@ namespace xsimd
         tmp_success = !all_res_false && all_res_true;
         success = success && tmp_success;
         success = success && test_simd_bool(vector_type(0.), out);
+        success = success && test_simd_bool_buffer(vector_type(0.), out);
 
         #define XSIMD_TEST_COMPARISON( OPERATOR ) \
             topic = "operator" #OPERATOR "(simd, simd)  : "; \
@@ -1404,6 +1521,7 @@ namespace xsimd
         
         success = success && test_simd_int_shift(vector_type(value_type(0)), out);
         success = success && test_simd_bool(vector_type(value_type(0)), out);
+        success = success && test_simd_bool_buffer(vector_type(value_type(0)), out);
         success = success && test_char_loading<vector_type::size>(value_type(), out);
         test_more_int<vector_type>{}.run();
         return success;

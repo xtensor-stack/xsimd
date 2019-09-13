@@ -64,8 +64,30 @@ namespace xsimd
 
         operator MASK() const;
 
+        batch_bool_avx512& load_aligned(const bool* src);
+        batch_bool_avx512& load_unaligned(const bool* src);
+
+        void store_aligned(bool* dst) const;
+        void store_unaligned(bool* dst) const;
+
+        template <class P>
+        batch_bool_avx512& load_aligned(const P& src);
+        template <class P>
+        batch_bool_avx512& load_unaligned(const P& src);
+        
+        template <class P>
+        void store_aligned(P& dst) const;
+        template <class P>
+        void store_unaligned(P& dst) const;
+
     private:
 
+        template <class P>
+        batch_bool_avx512& load_impl(const P& src);
+
+        template <class P>
+        void store_impl(P& dst) const;
+        
         MASK m_value;
     };
 
@@ -93,11 +115,16 @@ namespace xsimd
 
     private:
 
+        template <class... Args>
+        batch_bool<T, N>& load_values(Args... b);
+
         union
         {
             __m512i m_value;
             T m_array[N];
         };
+
+        friend class simd_batch_bool<batch_bool<T, N>>;
     };
 
     /**********************************
@@ -197,6 +224,81 @@ namespace xsimd
     {
         std::size_t s = simd_batch_traits<T>::size - 1;
         return (m_value & (1 << (idx & s))) != 0;
+    }
+    
+    template <class MASK, class T>
+    inline batch_bool_avx512<MASK, T>& batch_bool_avx512<MASK, T>::load_aligned(const bool* src)
+    {
+        return load_impl(detail::make_index_sequence<sizeof(MASK) * 8>(), src);
+    }
+
+    template <class MASK, class T>
+    inline batch_bool_avx512<MASK, T>& batch_bool_avx512<MASK, T>::load_unaligned(const bool* src)
+    {
+        return load_aligned(src);
+    }
+
+    template <class MASK, class T>
+    inline void batch_bool_avx512<MASK, T>::store_aligned(bool* dst) const
+    {
+        store_impl(dst);
+    }
+
+    template <class MASK, class T>
+    inline void batch_bool_avx512<MASK, T>::store_unaligned(bool* dst) const
+    {
+        store_impl(dst);
+    }
+
+    template <class MASK, class T>
+    template <class P>
+    inline batch_bool_avx512<MASK, T>& batch_bool_avx512<MASK, T>::load_aligned(const P& src)
+    {
+        return load_impl(detail::make_index_sequence<sizeof(MASK) * 8>(), src);
+    }
+
+    template <class MASK, class T>
+    template <class P>
+    inline batch_bool_avx512<MASK, T>& batch_bool_avx512<MASK, T>::load_unaligned(const P& src)
+    {
+        return load_aligned(src);
+    }
+        
+    template <class MASK, class T>
+    template <class P>
+    inline void batch_bool_avx512<MASK, T>::store_aligned(P& dst) const
+    {
+        store_impl(dst);
+    }
+
+    template <class MASK, class T>
+    template <class P>
+    inline void batch_bool_avx512<MASK, T>::store_unaligned(P& dst) const
+    {
+        store_impl(dst);
+    }
+    
+    template <class MASK, class T>
+    template <class P>
+    inline batch_bool_avx512<MASK, T>& batch_bool_avx512<MASK, T>::load_impl(const P& src)
+    {
+        MASK tmp(false);
+        for(std::size_t i = 0; i  < sizeof(MASK) * 8; ++i)
+        {
+            tmp |= MASK(src[i] << i);
+        }
+        m_value = tmp;
+        return *this;
+    }
+
+    template <class MASK, class T>
+    template <class P>
+    inline void batch_bool_avx512<MASK, T>::store_impl(P& dst) const
+    {
+        for(std::size_t i = 0; i < sizeof(MASK) * 8; ++i)
+        {
+            dst[i] = (*this)[i];
+        }
     }
 
     namespace detail
@@ -335,6 +437,15 @@ namespace xsimd
         return static_cast<bool>(m_array[idx & (N - 1)]);
     }
 
+    template <class T, std::size_t N>
+    template <class... Args>
+    inline batch_bool<T, N>& avx512_fallback_batch_bool<T, N>::load_values(Args... b)
+    {
+        m_value = avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(int8_t)>{},
+                                          static_cast<int8_t>(-static_cast<bool>(b))...);
+        return (*this)();
+    }
+    
     namespace detail
     {
         template <class T, std::size_t N>

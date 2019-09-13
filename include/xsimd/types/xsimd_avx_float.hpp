@@ -50,11 +50,16 @@ namespace xsimd
 
     private:
 
+        batch_bool<float, 8>& load_values(bool b0, bool b1, bool b2, bool b3,
+                                          bool b4, bool b5, bool b6, bool b7);
+
         union
         {
             __m256 m_value;
             float m_array[8];
         };
+
+        friend class simd_batch_bool<batch_bool<float, 8>>;
     };
 
     /*******************
@@ -150,6 +155,15 @@ namespace xsimd
     inline __m256 batch_bool<float, 8>::get_value() const
     {
         return m_value;
+    }
+
+    inline batch_bool<float, 8>& batch_bool<float, 8>::load_values(bool b0, bool b1, bool b2, bool b3,
+                                                                   bool b4, bool b5, bool b6, bool b7)
+    {
+        m_value = _mm256_castsi256_ps(
+              _mm256_setr_epi32(-(int)b0, -(int)b1, -(int)b2, -(int)b3,
+                                -(int)b4, -(int)b5, -(int)b6, -(int)b7));
+        return *this;
     }
 
     namespace detail
