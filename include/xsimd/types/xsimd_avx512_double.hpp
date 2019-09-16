@@ -30,8 +30,7 @@ namespace xsimd
 
     template <>
     class batch_bool<double, 8> : 
-        public batch_bool_avx512<__mmask8, batch_bool<double, 8>>,
-        public simd_batch_bool<batch_bool<double, 8>>
+        public batch_bool_avx512<__mmask8, batch_bool<double, 8>>
     {
     public:
         using base_class = batch_bool_avx512<__mmask8, batch_bool<double, 8>>;
@@ -77,6 +76,9 @@ namespace xsimd
         batch(const double* src, unaligned_mode);
         batch(const __m512d& rhs);
         batch& operator=(const __m512d& rhs);
+
+        batch(const batch_bool<double, 8>& rhs);
+        batch& operator=(const batch_bool<double, 8>& rhs);
 
         operator __m512d() const;
 
@@ -526,6 +528,17 @@ namespace xsimd
                 return _mm512_cmp_pd_mask(x, x, _CMP_UNORD_Q);
             }
         };
+    }
+
+    inline batch<double, 8>::batch(const batch_bool<double, 8>& rhs)
+        : base_type(detail::batch_kernel<double, 8>::select(rhs, batch(double(1)), batch(double(0))))
+    {
+    }
+
+    inline batch<double, 8>& batch<double, 8>::operator=(const batch_bool<double, 8>& rhs)
+    {
+        this->m_value = detail::batch_kernel<double, 8>::select(rhs, batch(double(1)), batch(double(0)));
+        return *this;
     }
 }
 

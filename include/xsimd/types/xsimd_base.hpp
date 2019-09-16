@@ -520,7 +520,7 @@ namespace xsimd
     inline batch<TYPE, N> bitwise_cast(const batch_bool<TYPE, N>& src)         \
     {                                                                          \
         TYPE z(0);                                                             \
-        return select(src, batch<TYPE, N>(~z), batch<TYPE, N>(z));             \
+        return select(src, batch<TYPE, N>(TYPE(~z)), batch<TYPE, N>(z));       \
     }
 
 #define XSIMD_DEFINE_BITWISE_CAST_FLOAT(TYPE, N)                               \
