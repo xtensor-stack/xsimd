@@ -20,7 +20,7 @@ operators as for single values. It also provides accelerated implementation of c
 You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the [The C++ Scientist](http://johanmabille.github.io/blog/archives/).
 The mathematical functions are a lightweight implementation of the algorithms used in [boost.SIMD](https://github.com/NumScale/boost.simd).
 
-`xsimd` requires a C++14 compliant compiler. The following C++ compilers are supported:
+`xsimd` requires a C++11 compliant compiler. The following C++ compilers are supported:
 
 Compiler                | Version
 ------------------------|-------------------------------
