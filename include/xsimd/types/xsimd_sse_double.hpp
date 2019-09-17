@@ -48,11 +48,15 @@ namespace xsimd
 
     private:
 
+        batch_bool<double, 2>& load_values(bool b0, bool b1);
+
         union
         {
             __m128d m_value;
             double m_array[2];
         };
+
+        friend class simd_batch_bool<batch_bool<double, 2>>;
     };
 
     /********************
@@ -144,6 +148,12 @@ namespace xsimd
     inline __m128d batch_bool<double, 2>::get_value() const
     {
         return m_value;
+    }
+
+    inline batch_bool<double, 2>& batch_bool<double, 2>::load_values(bool b0, bool b1)
+    {
+        m_value = _mm_castsi128_pd(_mm_setr_epi32(-(int)b0, -(int)b0, -(int)b1, -(int)b1));
+        return *this;
     }
 
     namespace detail

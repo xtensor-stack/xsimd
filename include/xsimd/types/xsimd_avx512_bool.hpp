@@ -45,8 +45,8 @@ namespace xsimd
      * batch_bool_avx512 *
      *********************/
 
-    template <class MASK, class T>
-    class batch_bool_avx512
+    template <class MASK, class B>
+    class batch_bool_avx512 : public simd_batch_bool<B>
     {
     public:
 
@@ -66,7 +66,14 @@ namespace xsimd
 
     private:
 
+        B& load_array(const std::array<bool, sizeof(MASK) * 8>& src);
+
+        template <class... Args>
+        B& load_values(Args... args);
+
         MASK m_value;
+
+        friend class simd_batch_bool<B>;
     };
 
     /******************************
@@ -93,11 +100,16 @@ namespace xsimd
 
     private:
 
+        template <class... Args>
+        batch_bool<T, N>& load_values(Args... b);
+
         union
         {
             __m512i m_value;
             T m_array[N];
         };
+
+        friend class simd_batch_bool<batch_bool<T, N>>;
     };
 
     /**********************************
@@ -113,14 +125,14 @@ namespace xsimd
     template <class MASK>
     inline bool_mask_proxy<MASK>::operator bool() const
     {
-        return ((m_ref >> m_idx) & 1) != 0;
+        return ((m_ref >> m_idx) & MASK(1)) != 0;
     }
 
     template <class MASK>
     inline bool_mask_proxy<MASK>& bool_mask_proxy<MASK>::operator=(bool rhs)
     {
         MASK tmp = static_cast<MASK>(rhs);
-        m_ref ^= (-tmp ^ m_ref) & (1 << m_idx);
+        m_ref ^= (-tmp ^ m_ref) & (MASK(1) << m_idx);
         return *this;
     }
 
@@ -190,44 +202,36 @@ namespace xsimd
     {
         std::size_t s = simd_batch_traits<T>::size - 1;
         return bool_mask_proxy<MASK>(m_value, idx & s);
-    };
+    }
 
     template <class MASK, class T>
     inline bool batch_bool_avx512<MASK, T>::operator[](std::size_t idx) const
     {
         std::size_t s = simd_batch_traits<T>::size - 1;
-        return (m_value & (1 << (idx & s))) != 0;
+        return (m_value & (MASK(1) << (idx & s))) != 0;
+    }
+    
+    template <class MASK, class T>
+    inline T& batch_bool_avx512<MASK, T>::load_array(const std::array<bool, sizeof(MASK) * 8>& src)
+    {
+        MASK tmp(false);
+        for(std::size_t i = 0; i  < sizeof(MASK) * 8; ++i)
+        {
+            tmp |= MASK(src[i]) << i;
+        }
+        m_value = tmp;
+        return (*this)();
     }
 
+    template <class MASK, class T>
+    template <class... Args>
+    inline T& batch_bool_avx512<MASK, T>::load_values(Args... b)
+    {
+        return load_array({b...});
+    }
+    
     namespace detail
     {
-        template <std::size_t N>
-        struct mask_type;
-
-        template <>
-        struct mask_type<8>
-        {
-            using type = __mmask8;
-        };
-
-        template <>
-        struct mask_type<16>
-        {
-            using type = __mmask16;
-        };
-
-        template <>
-        struct mask_type<32>
-        {
-            using type = __mmask32;
-        };
-
-        template <>
-        struct mask_type<64>
-        {
-            using type = __mmask64;
-        };
-
         template <class T, std::size_t N>
         struct batch_bool_kernel_avx512
         {
@@ -335,6 +339,15 @@ namespace xsimd
         return static_cast<bool>(m_array[idx & (N - 1)]);
     }
 
+    template <class T, std::size_t N>
+    template <class... Args>
+    inline batch_bool<T, N>& avx512_fallback_batch_bool<T, N>::load_values(Args... b)
+    {
+        m_value = avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(int8_t)>{},
+                                          static_cast<int8_t>(-static_cast<bool>(b))...);
+        return (*this)();
+    }
+    
     namespace detail
     {
         template <class T, std::size_t N>
