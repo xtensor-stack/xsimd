@@ -1073,7 +1073,12 @@ namespace xsimd
             topic = "operator" #OPERATOR "(simd, simd)  : "; \
             bres = lhs OPERATOR rhs; \
             for(std::size_t i=0;i<T::size;++i ) \
-                success &= ( lhs[ i ] OPERATOR rhs[ i ] ) == bres[ i ]
+                success &= ( lhs[ i ] OPERATOR rhs[ i ] ) == bres[ i ]; \
+            topic = "operator" #OPERATOR "(simd, scalar): "; \
+            bres = lhs OPERATOR s; \
+            for(std::size_t i=0;i<T::size;++i ) \
+                success &= ( lhs[ i ] OPERATOR s ) == bres[ i ] \
+
         XSIMD_TEST_COMPARISON( <  );
         XSIMD_TEST_COMPARISON( >  );
         XSIMD_TEST_COMPARISON( <= );
