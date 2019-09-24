@@ -967,26 +967,26 @@ namespace xsimd
         return lhs() OP batch_type_t<X>(rhs);                                                      \
     }
 
-#define XSIMD_BINARY_BOOL_OP_DERIVED(OP, FUNC)                                                     \
+#define XSIMD_BINARY_BOOL_OP_DERIVED(OP, BASE_OP)                                                  \
     template <class X>                                                                             \
     inline typename simd_batch_traits<X>::batch_bool_type operator OP(const simd_base<X>& lhs,     \
                                                                       const simd_base<X>& rhs)     \
     {                                                                                              \
-        return FUNC;                                                                               \
+        return rhs() BASE_OP lhs();                                                                \
     }                                                                                              \
                                                                                                    \
     template <class X>                                                                             \
     inline typename simd_batch_traits<X>::batch_bool_type operator OP(                             \
         const typename simd_batch_traits<X>::value_type& lhs, const simd_base<X>& rhs)             \
     {                                                                                              \
-        return FUNC;                                                                               \
+        return rhs() BASE_OP batch_type_t<X>(lhs);                                                 \
     }                                                                                              \
                                                                                                    \
     template <class X>                                                                             \
     inline typename simd_batch_traits<X>::batch_bool_type operator OP(                             \
         const simd_base<X>& lhs, const typename simd_batch_traits<X>::value_type& rhs)             \
     {                                                                                              \
-        return FUNC;                                                                               \
+        return batch_type_t<X>(rhs) BASE_OP lhs();                                                 \
     }
 
     /**
@@ -1302,7 +1302,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator>(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP_DERIVED(>, rhs() < lhs())
+    XSIMD_BINARY_BOOL_OP_DERIVED(>, <)
 
     /**
      * @ingroup simd_batch_comparison
@@ -1317,7 +1317,7 @@ namespace xsimd
     typename simd_batch_traits<X>::batch_bool_type
     operator>=(const simd_base<X>& lhs, const simd_base<X>& rhs);
 
-    XSIMD_BINARY_BOOL_OP_DERIVED(>=, rhs() <= lhs())
+    XSIMD_BINARY_BOOL_OP_DERIVED(>=, <=)
 
     /**
      * @defgroup simd_batch_bitwise Bitwise operators
