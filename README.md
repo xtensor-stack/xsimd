@@ -1,8 +1,8 @@
 # ![xsimd](docs/source/xsimd.svg)
 
-[![Travis](https://travis-ci.org/QuantStack/xsimd.svg?branch=master)](https://travis-ci.org/QuantStack/xsimd)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/unk39xhu0wxmiif7?svg=true)](https://ci.appveyor.com/project/QuantStack/xsimd)
-[![Azure](https://dev.azure.com/johanmabille/johanmabille/_apis/build/status/QuantStack.xsimd?branchName=master)](https://dev.azure.com/johanmabille/johanmabille/_build/latest?definitionId=2&branchName=master)
+[![Travis](https://travis-ci.org/xtensor-stack/xsimd.svg?branch=master)](https://travis-ci.org/xtensor-stack/xsimd)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/wori7my48os31nu0?svg=true)](https://ci.appveyor.com/project/xtensor-stack/xsimd)
+[![Azure](https://dev.azure.com/xtensor-stack/xtensor-stack/_apis/build/status/xtensor-stack.xsimd?branchName=master)](https://dev.azure.com/xtensor-stack/xtensor-stack/_build/latest?definitionId=3&branchName=master)
 [![Documentation Status](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
