@@ -895,7 +895,7 @@ namespace xsimd
                 return z;
             }
 
-            static return_type imag(const B& z)
+            static return_type imag(const B&)
             {
                 return B(typename B::value_type(0));
             }
