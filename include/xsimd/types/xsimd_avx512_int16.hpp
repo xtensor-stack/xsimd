@@ -318,8 +318,8 @@ namespace xsimd
                 XSIMD_SPLIT_AVX512(a);
                 XSIMD_SPLIT_AVX512(b);
 
-                auto res_lo = _mm256_blendv_epi16(b_low, a_low, cond_low);
-                auto res_hi = _mm256_blendv_epi16(b_high, a_high, cond_high);
+                auto res_lo = _mm256_blend_epi16(b_low, a_low, cond_low);
+                auto res_hi = _mm256_blend_epi16(b_high, a_high, cond_high);
 
                 XSIMD_RETURN_MERGED_AVX(res_lo, res_hi);
             #endif
