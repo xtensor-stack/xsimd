@@ -312,7 +312,11 @@ namespace xsimd
             static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_mask_blend_epi16(cond, b, a);
+                // Some compilers are not happy with passing directly a and b to the intrinsics
+                // See https://github.com/xtensor-stack/xsimd/issues/315
+                __m512i ma = a;
+                __m512i mb = b;
+                return _mm512_mask_blend_epi16(cond, mb, ma);
             #else
                 XSIMD_SPLIT_AVX512(cond);
                 XSIMD_SPLIT_AVX512(a);
