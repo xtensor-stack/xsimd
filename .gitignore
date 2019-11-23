@@ -1,3 +1,6 @@
+# Generated pkg-config files
+*.pc
+
 # Compiled Object files
 *.slo
 *.lo
