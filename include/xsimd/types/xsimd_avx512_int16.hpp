@@ -91,11 +91,11 @@ namespace xsimd
     };
 
     template <>
-    class batch_bool<uint16_t, 32> : public avx512_fallback_batch_bool<int16_t, 32>
+    class batch_bool<uint16_t, 32> : public avx512_fallback_batch_bool<uint16_t, 32>
     {
     public:
 
-        using base_class = avx512_fallback_batch_bool<int16_t, 32>;
+        using base_class = avx512_fallback_batch_bool<uint16_t, 32>;
         using base_class::base_class;
     };
 
@@ -110,7 +110,7 @@ namespace xsimd
 
         template <>
         struct batch_bool_kernel<uint16_t, 32>
-            : avx512_fallback_batch_bool_kernel<int16_t, 32>
+            : avx512_fallback_batch_bool_kernel<uint16_t, 32>
         {
         };
     }
