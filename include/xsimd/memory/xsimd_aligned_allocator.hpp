@@ -283,7 +283,7 @@ namespace xsimd
         {
             void* res = 0;
             void* ptr = malloc(size + alignment);
-            if (ptr != 0)
+            if (ptr != 0 && alignment != 0)
             {
                 res = reinterpret_cast<void*>(
                     (reinterpret_cast<size_t>(ptr) & ~(size_t(alignment - 1))) +
