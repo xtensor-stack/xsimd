@@ -114,7 +114,7 @@ target_include_directories(xsimd INTERFACE
     $<BUILD_INTERFACE:${XSIMD_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include>)
 
-target_compile_features(xsimd INTERFACE cxx_std_14)
+target_compile_features(xsimd INTERFACE cxx_std_11)
 
 OPTION(ENABLE_FALLBACK "build tests/benchmarks with fallback implementation" OFF)
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
