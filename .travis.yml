@@ -1,5 +1,5 @@
 language: cpp
-dist: trusty
+dist: xenial
 matrix:
   include:
     - os: linux
@@ -55,46 +55,45 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - clang-3.9
-            - g++-arm-linux-gnueabi
-            - g++-multilib
-            - gcc-multilib
+            - clang-4.0
+            - g++-4.9-arm-linux-gnueabi
+            - g++-4.9-multilib
+            - gcc-4.9-multilib
             - qemu
             - qemu-system-arm
-      env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1 ARM_ARCH_DIR=arm-linux-gnueabi GCC_VER=4.7.3 ARM_SETTINGS="armv7-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
+      env: COMPILER=clang CLANG=4.0 CROSS_COMPILE=1 ARM_ARCH_DIR=arm-linux-gnueabi GCC_VER=4.9.3 ARM_SETTINGS="armv7-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
     - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - clang-3.9
-            - g++-arm-linux-gnueabi
-            - g++-multilib
-            - gcc-multilib
+            - clang-4.0
+            - g++-4.9-arm-linux-gnueabi
+            - g++-4.9-multilib
+            - gcc-4.9-multilib
             - qemu
             - qemu-system-arm
-      env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1 ARM_ARCH_DIR=arm-linux-gnueabi GCC_VER=4.7.3 ARM_SETTINGS="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
+      env: COMPILER=clang CLANG=4.0 CROSS_COMPILE=1 ARM_ARCH_DIR=arm-linux-gnueabi GCC_VER=4.9.3 ARM_SETTINGS="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
     - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - clang-3.9
-            - g++-4.8-aarch64-linux-gnu
-            - gcc-4.8-aarch64-linux-gnu
-            - g++-4.8-multilib
-            - gcc-4.8-multilib
+            - clang-4.0
+            - g++-4.9-aarch64-linux-gnu
+            - gcc-4.9-aarch64-linux-gnu
+            - g++-4.9-multilib
+            - gcc-4.9-multilib
             - qemu
             - qemu-system-arm
-      env: COMPILER=clang CLANG=3.9 CROSS_COMPILE=1 ARM_ARCH_DIR=aarch64-linux-gnu GCC_VER=4.8.4 ARM_SETTINGS="armv8-a -target aarch64-linux-gnueabi"
+      env: COMPILER=clang CLANG=4.0 CROSS_COMPILE=1 ARM_ARCH_DIR=aarch64-linux-gnu GCC_VER=4.9.3 ARM_SETTINGS="armv8-a -target aarch64-linux-gnueabi"
     - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
           packages:
             - g++-4.9
             - clang-4.0
@@ -104,7 +103,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-xenial-5.0
           packages:
             - g++-4.9
             - clang-5.0
@@ -114,7 +113,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+            - llvm-toolchain-xenial-6.0
           packages:
             - clang-6.0
       env: COMPILER=clang CLANG=6.0
@@ -143,6 +142,7 @@ install:
     # Define the version of miniconda to download
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
         MINCONDA_OS=$MINCONDA_LINUX;
+        cat /proc/cpuinfo;
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         MINCONDA_OS=$MINCONDA_OSX;
       fi
@@ -184,7 +184,7 @@ install:
         cmake . -DDOWNLOAD_GTEST=ON ;
       fi
     - if [[ "$FORCE_NO_INSTR_SET" == 1 ]] ; then
-        cmake . -DDOWNLOAD_GTEST=ON -DXSIMD_FORCE_X86_INSTR_SET=0 ;
+        cmake . -DDOWNLOAD_GTEST=ON -DXSIMD_FORCE_X86_INSTR_SET=0 -DXSIMD_FORCE_X86_AMD_INSTR_SET=0 ;
       fi
     - make -j2 test_xsimd
     - cd test
