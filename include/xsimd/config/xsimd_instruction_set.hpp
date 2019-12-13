@@ -103,7 +103,8 @@
     #define XSIMD_X86_INSTR_SET XSIMD_X86_MIC_VERSION
 #endif
 
-#if !defined(XSIMD_X86_INSTR_SET) && defined(__AVX512__) || defined(__KNCNI__) || defined(__AVX512F__)
+#if !defined(XSIMD_X86_INSTR_SET) && defined(__AVX512__) || defined(__KNCNI__) || defined(__AVX512F__) \
+    && !defined(__AVX512ER__)
     #define XSIMD_X86_INSTR_SET XSIMD_X86_AVX512_VERSION
 #endif
 
