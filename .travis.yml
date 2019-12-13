@@ -48,7 +48,14 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-      env: AVX512=1
+      env: AVX512=1 AVX512BW=1
+    - os: linux
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+      env: AVX512=1 AVX512ER=1
     - os: linux
       addons:
         apt:
@@ -179,7 +186,11 @@ install:
         export PATH="$HOME/miniconda/bin:$PATH" ;
         export CC=x86_64-conda_cos6-linux-gnu-gcc CXX=x86_64-conda_cos6-linux-gnu-g++ ;
         which $CXX ;
-        cmake . -DDOWNLOAD_GTEST=ON -DTARGET_ARCH=skylake-avx512 -DCMAKE_INSTALL_PREFIX=$HOME/miniconda -DDOWNLOAD_GTEST=ON ;
+        if [[ "$AVX512BW" == 1 ]] ; then
+          cmake . -DDOWNLOAD_GTEST=ON -DTARGET_ARCH=skylake-avx512 -DCMAKE_INSTALL_PREFIX=$HOME/miniconda -DDOWNLOAD_GTEST=ON ;
+        else
+          cmake . -DDOWNLOAD_GTEST=ON -DTARGET_ARCH=knl -DCMAKE_INSTALL_PREFIX=$HOME/miniconda -DDOWNLOAD_GTEST=ON ;
+        fi
       else
         cmake . -DDOWNLOAD_GTEST=ON ;
       fi
@@ -195,9 +206,12 @@ script:
         else
           qemu-arm -L /usr/arm-linux-gnueabi/ ./test_xsimd ;
         fi
-      elif [[ "$AVX512" == 1 ]] ; then
+      elif [[ "$AVX512BW" == 1 ]] ; then
         uname -m ;
         ../intel-sde-downloader/sde-external-8.35.0-2019-03-11-lin/sde64 -cnl -- ./test_xsimd ;
+      elif [[ "$AVX512ER" == 1 ]] ; then
+        uname -m ;
+        ../intel-sde-downloader/sde-external-8.35.0-2019-03-11-lin/sde64 -knl -- ./test_xsimd ;
       else
         ./test_xsimd;
       fi
