@@ -365,7 +365,7 @@ namespace xsimd
         real_batch get_complex_high() const;
         real_batch get_complex_low() const;
 
-        friend class simd_complex_batch<batch<std::complex<double>, 8>>;
+        friend class simd_complex_batch<batch<xtl::xcomplex<double, double, i3ec>, 8>>;
     };
 
     /********************************************
