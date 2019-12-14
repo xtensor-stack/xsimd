@@ -686,7 +686,7 @@ TEST(xsimd, avx512_xtl_xcomplex_float_basic)
 TEST(xsimd, avx512_xtl_xcomplex_double_basic)
 {
     std::ofstream out("log/avx512_xtl_xcomplex_double_basic.log", std::ios_base::out);
-    bool res = xsimd::test_simd_complex<xtl::xcomplex<double>, 16, 64>(out, "avx512 xtl xcomplex double");
+    bool res = xsimd::test_simd_complex<xtl::xcomplex<double>, 8, 64>(out, "avx512 xtl xcomplex double");
     EXPECT_TRUE(res);
 }
 #endif
