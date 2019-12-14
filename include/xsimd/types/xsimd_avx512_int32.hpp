@@ -352,42 +352,48 @@ namespace xsimd
         };
     }
 
-    inline batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs)
+#ifdef __GNUC__
+#define XSIMD_FORCE_INLINE inline __attribute__((__always_inline__))
+#else
+#define XSIMD_FORCE_INLINE inline
+#endif
+
+    XSIMD_FORCE_INLINE batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs)
     {
         return _mm512_slli_epi32(lhs, rhs);
     }
 
-    inline batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs)
+    XSIMD_FORCE_INLINE batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs)
     {
         return _mm512_srli_epi32(lhs, rhs);
     }
 
-    inline batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
+    XSIMD_FORCE_INLINE batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
     {
         return _mm512_sllv_epi32(lhs, rhs);
     }
 
-    inline batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
+    XSIMD_FORCE_INLINE batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
     {
         return _mm512_srlv_epi32(lhs, rhs);
     }
 
-    inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, int32_t rhs)
+    XSIMD_FORCE_INLINE batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, int32_t rhs)
     {
         return _mm512_slli_epi32(lhs, rhs);
     }
 
-    inline batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, int32_t rhs)
+    XSIMD_FORCE_INLINE batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, int32_t rhs)
     {
         return _mm512_srli_epi32(lhs, rhs);
     }
 
-    inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
+    XSIMD_FORCE_INLINE batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
     {
         return _mm512_sllv_epi32(lhs, rhs);
     }
 
-    inline batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
+    XSIMD_FORCE_INLINE batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
     {
         return _mm512_srlv_epi32(lhs, rhs);
     }
