@@ -103,7 +103,10 @@
     #define XSIMD_X86_INSTR_SET XSIMD_X86_MIC_VERSION
 #endif
 
-#if !defined(XSIMD_X86_INSTR_SET) && defined(__AVX512__) || defined(__KNCNI__) || defined(__AVX512F__)
+// AVX512 instructions are supported starting with gcc 6
+// see https://www.gnu.org/software/gcc/gcc-6/changes.html
+#if !defined(XSIMD_X86_INSTR_SET) && (defined(__AVX512__) || defined(__KNCNI__) || defined(__AVX512F__)\
+    && (!defined(__GNUC__) || __GNUC__ >= 6))
     #define XSIMD_X86_INSTR_SET XSIMD_X86_AVX512_VERSION
 #endif
 
