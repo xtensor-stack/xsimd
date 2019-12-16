@@ -943,6 +943,107 @@ namespace xsimd
 
         return success;
     }
+
+    /**************
+     * set tester *
+     **************/
+
+    template <class T>
+    struct simd_api_set_tester
+    {
+        using batch_type = typename simd_traits<T>::type;
+        using batch_bool_type = typename simd_traits<T>::bool_type;
+        static constexpr size_t N = simd_traits<T>::size;
+        using value_type = T;
+
+        std::string name;
+        T res;
+        bool bool_res;
+
+        simd_api_set_tester(const std::string& n);
+
+        bool check_res(const batch_type& v) const;
+        bool check_bool_res(const batch_bool_type& v) const;
+    };
+
+    template <class T>
+    inline simd_api_set_tester<T>::simd_api_set_tester(const std::string& n)
+        : name(n)
+        , res(value_type(1))
+        , bool_res(true)
+    {
+    }
+
+    template <class T>
+    inline bool simd_api_set_tester<T>::check_res(const batch_type& v) const
+    {
+        bool ret = true;
+        for(std::size_t i = 0; i < N; ++i)
+        {
+            ret = ret && (v[i] == res);
+        }
+        return ret;
+    }
+
+    template <class T>
+    inline bool simd_api_set_tester<T>::check_bool_res(const batch_bool_type& v) const
+    {
+        bool ret = true;
+        for(size_t i = 0; i < N; ++i)
+        {
+            ret = ret && (v[i] == bool_res);
+        }
+        return ret;
+    }
+
+    template <class T>
+    inline bool test_simd_api_set_impl(std::ostream& out, const T& tester)
+    {
+        bool success = true;
+        bool tmp_success = true;
+
+        auto tmp = set_simd(tester.res);
+        tmp_success = tester.check_res(tmp);
+        out << tester.name << " - set     : " << tmp_success;
+        success = success && tmp_success;
+
+        tmp_success = tester.check_bool_res(set_simd<bool, typename T::value_type>(tester.bool_res));
+        out << tester.name << " - set bool: " << tmp_success;
+        success = success && tmp_success;
+
+        return tmp_success;
+    }
+
+#ifdef XSIMD_BATCH_DOUBLE_SIZE
+    inline bool test_simd_api_set(std::ostream& out, const std::string& instr_name)
+    {
+        bool success = true;
+        bool tmp_success = true;
+
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<uint8_t>(instr_name + " uint8_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<int8_t>(instr_name + " int8_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<uint16_t>(instr_name + " uint16_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<int16_t>(instr_name + " int8_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<uint32_t>(instr_name + " uint32_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<int32_t>(instr_name + " int32_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<uint64_t>(instr_name + " uint64_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<int64_t>(instr_name + " int64_t"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<float>(instr_name + " float"));
+        success = success && tmp_success;
+        tmp_success = test_simd_api_set_impl(out, simd_api_set_tester<double>(instr_name + " double"));
+        success = success && tmp_success;
+
+        return success;
+    }
+#endif
 }
 
 #endif
