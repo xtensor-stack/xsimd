@@ -1143,7 +1143,7 @@ namespace xsimd
     }
 
     template <class I, std::size_t N, class S>
-    bool test_simd_int_shift(const batch<I, N>& /*empty*/, S& stream)
+    bool test_simd_int_shift(const batch<I, N>& /*empty*/, S& /*stream*/)
     {
         int32_t size = static_cast<int32_t>(sizeof(I) * 8);
         bool success = true;

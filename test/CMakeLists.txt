@@ -108,6 +108,7 @@ find_package(Threads)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 
+if (FALSE)
 set(XSIMD_TESTS
     main.cpp
     xsimd_api_test.hpp
@@ -145,6 +146,13 @@ set(XSIMD_TESTS
     xsimd_test_utils.hpp
     xsimd_trigonometric_test.hpp
     xsimd_trigonometric_test.cpp
+)
+endif()
+
+set(XSIMD_TESTS
+    main.cpp
+    xsimd_basic_test.hpp
+    xsimd_basic_test.cpp
 )
 
 add_executable(test_xsimd EXCLUDE_FROM_ALL ${XSIMD_TESTS} ${XSIMD_HEADERS})
