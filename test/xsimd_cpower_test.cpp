@@ -112,12 +112,14 @@ TEST(xsimd, avx512_complex_double_power)
 }
 
 #if XSIMD_ENABLE_XTL_COMPLEX
+#if DEBUG_FLOAT_ACCURACY
 TEST(xsimd, avx512_xtl_xcomplex_float_power)
 {
     std::ofstream out("log/avx512_xtl_xcomplex_float_power.log", std::ios_base::out);
     bool res = xsimd::test_cpower<xtl::xcomplex<float>, 16, 64>(out, "avx512 xtl xcomplex float");
     EXPECT_TRUE(res);
 }
+#endif
 
 TEST(xsimd, avx512_xtl_xcomplex_double_power)
 {
