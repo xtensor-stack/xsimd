@@ -40,8 +40,8 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
-      env: COMPILER=gcc GCC=6 ENABLE_FALLBACK=1 ENABLE_XTL_COMPLEX=1
+            - g++-7
+      env: COMPILER=gcc GCC=7 ENABLE_FALLBACK=1 ENABLE_XTL_COMPLEX=1
     - os: linux
       sudo: required
       addons:
@@ -197,7 +197,7 @@ script:
         fi
       elif [[ "$AVX512" == 1 ]] ; then
         uname -m ;
-        ../intel-sde-downloader/sde-external-8.35.0-2019-03-11-lin/sde64 -cnl -- ./test_xsimd ;
+        ../intel-sde-downloader/sde-external-8.35.0-2019-03-11-lin/sde64 -skx -- ./test_xsimd ;
       else
         ./test_xsimd;
       fi

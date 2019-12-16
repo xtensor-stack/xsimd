@@ -354,12 +354,16 @@ namespace xsimd
 
     inline batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs)
     {
-        return _mm512_slli_epi32(lhs, rhs);
+        // _mm512_slli_epi32 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_sllv_epi32(lhs, batch<int32_t, 16>(rhs));
     }
 
     inline batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs)
     {
-        return _mm512_srli_epi32(lhs, rhs);
+        // _mm512_srli_epi32 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_srlv_epi32(lhs, batch<int32_t, 16>(rhs));
     }
 
     inline batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
@@ -374,12 +378,16 @@ namespace xsimd
 
     inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, int32_t rhs)
     {
-        return _mm512_slli_epi32(lhs, rhs);
+        // _mm512_slli_epi32 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_sllv_epi32(lhs, batch<uint32_t, 16>(rhs));
     }
 
     inline batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, int32_t rhs)
     {
-        return _mm512_srli_epi32(lhs, rhs);
+        // _mm512_srli_epi32 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_srlv_epi32(lhs, batch<int32_t, 16>(rhs));
     }
 
     inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)

@@ -409,12 +409,16 @@ namespace xsimd
 
     inline batch<int64_t, 8> operator<<(const batch<int64_t, 8>& lhs, int32_t rhs)
     {
-        return _mm512_slli_epi64(lhs, rhs);
+        // _mm512_slli_epi64 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_sllv_epi64(lhs, batch<int64_t, 8>(rhs));
     }
 
     inline batch<int64_t, 8> operator>>(const batch<int64_t, 8>& lhs, int32_t rhs)
     {
-        return _mm512_srli_epi64(lhs, rhs);
+        // _mm512_srli_epi64 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_srlv_epi64(lhs, batch<int64_t, 8>(rhs));
     }
 
     inline batch<int64_t, 8> operator<<(const batch<int64_t, 8>& lhs, const batch<int64_t, 8>& rhs)
@@ -429,12 +433,16 @@ namespace xsimd
 
     inline batch<uint64_t, 8> operator<<(const batch<uint64_t, 8>& lhs, int32_t rhs)
     {
-        return _mm512_slli_epi64(lhs, rhs);
+        // _mm512_slli_epi64 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_sllv_epi64(lhs, batch<uint64_t, 8>(rhs));
     }
 
     inline batch<uint64_t, 8> operator>>(const batch<uint64_t, 8>& lhs, int32_t rhs)
     {
-        return _mm512_srli_epi64(lhs, rhs);
+        // _mm512_srli_epi64 expects its last argument to be known at compile time,
+        // which cannot be guaranteed here.
+        return _mm512_srlv_epi64(lhs, batch<uint64_t, 8>(rhs));
     }
 
     inline batch<uint64_t, 8> operator<<(const batch<uint64_t, 8>& lhs, const batch<int64_t, 8>& rhs)
