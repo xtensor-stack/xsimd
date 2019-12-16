@@ -141,6 +141,12 @@ namespace xsimd
     };
 
     template <>
+    struct simd_traits<char>
+        : std::conditional<std::is_signed<char>::value, simd_traits<int8_t>, simd_traits<uint8_t>>::type
+    {
+    };
+
+    template <>
     struct simd_traits<int32_t>
     {
         using type = batch<int32_t, XSIMD_BATCH_INT32_SIZE>;
@@ -353,6 +359,13 @@ namespace xsimd
         template <class T1, class T2, std::size_t N>
         struct simd_return_type_impl
             : std::enable_if<simd_condition<T1, T2>::value, batch<T2, N>>
+        {
+        };
+        template <std::size_t N>
+        struct simd_return_type_impl<char, char, N>
+            : std::conditional<std::is_signed<char>::value,
+                               simd_return_type_impl<int8_t, int8_t, N>,
+                               simd_return_type_impl<uint8_t, uint8_t, N>>::type
         {
         };
 
