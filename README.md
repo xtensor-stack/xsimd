@@ -26,7 +26,7 @@ Compiler                | Version
 ------------------------|-------------------------------
 Microsoft Visual Studio | MSVC 2015 update 2 and above
 g++                     | 4.9 and above
-clang                   | 3.7 and above
+clang                   | 4.0 and above
 
 The following SIMD instruction set extensions are supported:
 
