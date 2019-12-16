@@ -40,8 +40,8 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
-      env: COMPILER=gcc GCC=6 ENABLE_FALLBACK=1 ENABLE_XTL_COMPLEX=1
+            - g++-7
+      env: COMPILER=gcc GCC=7 ENABLE_FALLBACK=1 ENABLE_XTL_COMPLEX=1
     - os: linux
       sudo: required
       addons:
