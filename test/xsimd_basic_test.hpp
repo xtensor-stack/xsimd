@@ -1478,12 +1478,12 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.fnms_res, out);
         success = success && tmp_success;
 
-        /*topic = "shift left(simd, int)    : ";
+        topic = "shift left(simd, int)    : ";
         vres = lhs << tester.sh_nb;
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.sl_res, out);
         success = success && tmp_success;
-
+/*
         topic = "shift right(simd, int)   : ";
         vres = lhs >> tester.sh_nb;
         detail::store_vec(vres, res);
