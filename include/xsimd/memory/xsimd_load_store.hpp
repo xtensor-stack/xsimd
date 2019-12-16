@@ -358,7 +358,10 @@ namespace xsimd
         {
             inline static V set_simd(const T& value)
             {
-                using value_type = typename V::value_type;
+                using batch_value_type = typename V::value_type;
+                using value_type = typename std::conditional<std::is_same<T, bool>::value,
+                                                             bool,
+                                                             batch_value_type>::type;
                 return V(value_type(value));
             }
 

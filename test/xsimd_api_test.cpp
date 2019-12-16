@@ -92,4 +92,14 @@ TEST(xsimd, complex_double_api)
     bool res = xsimd::test_complex_api<std::complex<double>, XSIMD_BATCH_DOUBLE_SIZE, XSIMD_DEFAULT_ALIGNMENT>(out, "xsimd complex double api");
     EXPECT_TRUE(res);
 }
+
+#ifdef XSIMD_BATCH_DOUBLE_SIZE
+TEST(xsimd, api_set)
+{
+    std::ofstream out("log/xsimd_set_api.log", std::ios_base::out);
+    bool res = xsimd::test_simd_api_set(out, "xsimd api set");
+    EXPECT_TRUE(res);
+}
+#endif
+
 #endif
