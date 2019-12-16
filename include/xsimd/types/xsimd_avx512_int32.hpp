@@ -358,14 +358,9 @@ namespace xsimd
 #define XSIMD_FORCE_INLINE inline
 #endif
 
-    XSIMD_FORCE_INLINE batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs)
+    /*XSIMD_FORCE_INLINE batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs)
     {
-        //return _mm512_slli_epi32(lhs, rhs);
-        __m512i tmp = lhs;
-        return (__m512i) __builtin_ia32_pslldi512_mask ((__v16si) tmp, rhs,
-						        (__v16si)
-						        _mm512_undefined_epi32 (),
-						        (__mmask8) -1);
+        return _mm512_slli_epi32(lhs, rhs);
     }
 
     XSIMD_FORCE_INLINE batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs)
@@ -401,7 +396,7 @@ namespace xsimd
     XSIMD_FORCE_INLINE batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
     {
         return _mm512_srlv_epi32(lhs, rhs);
-    }
+    }*/
 }
 
 #endif
