@@ -415,9 +415,22 @@ namespace xsimd
             static batch_bool_type lt(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-                return _mm256_cmpgt_epi32(rhs, lhs);
+                auto xor_lhs = _mm256_xor_si256(lhs, _mm256_set1_epi32(std::numeric_limits<int32_t>::lowest()));
+                auto xor_rhs = _mm256_xor_si256(rhs, _mm256_set1_epi32(std::numeric_limits<int32_t>::lowest()));
+                return _mm256_cmpgt_epi32(xor_rhs, xor_lhs);
 #else
-                XSIMD_APPLY_SSE_FUNCTION(_mm_cmpgt_epi32, rhs, lhs);
+                // Note we could also use _mm256_xor_ps here but it might be slower
+                // as it would go to the floating point device
+                XSIMD_SPLIT_AVX(lhs);
+                XSIMD_SPLIT_AVX(rhs);
+                auto xer = _mm_set1_epi32(std::numeric_limits<int32_t>::lowest());
+                lhs_low  = _mm_xor_si128(lhs_low,  xer);
+                lhs_high = _mm_xor_si128(lhs_high, xer);
+                rhs_low  = _mm_xor_si128(rhs_low,  xer);
+                rhs_high = _mm_xor_si128(rhs_high, xer);
+                __m128i res_low =  _mm_cmpgt_epi32(rhs_low,  lhs_low);
+                __m128i res_high = _mm_cmpgt_epi32(rhs_high, lhs_high);
+                XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
             }
 
