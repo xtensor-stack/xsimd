@@ -1190,6 +1190,21 @@ namespace xsimd
         return true;
     }
 
+    template <class vector_type, class value_type>
+    bool test_lt_underflow()
+    {
+        // underflow for unsigned integers
+        vector_type test_negative_compare = vector_type(5) - 6;
+        if (std::is_unsigned<value_type>::value)
+        {
+            return !xsimd::any(test_negative_compare < 1);
+        }
+        else
+        {
+            return xsimd::all(test_negative_compare < 1);
+        }
+    }
+
     template <std::size_t N, class S>
     bool test_char_loading(int8_t /**/, S& stream)
     {
@@ -1530,6 +1545,8 @@ namespace xsimd
         success = success && test_simd_bool(vector_type(value_type(0)), out);
         success = success && test_simd_bool_buffer(vector_type(value_type(0)), out);
         success = success && test_char_loading<vector_type::size>(value_type(), out);
+        success = success && test_lt_underflow<vector_type, value_type>();
+
         test_more_int<vector_type>{}.run();
         return success;
     }
