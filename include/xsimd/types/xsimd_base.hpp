@@ -1200,6 +1200,61 @@ namespace xsimd
 
     XSIMD_BINARY_OP(+, add)
 
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the saturate sum of the batch \c lhs and the batch \c rhs.
+     * \c lhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the saturated addition.
+     * @param rhs batch involved in the saturated addition.
+     * @return the result of the saturated addition.
+     */                 
+    template <class X>                                                                    
+    inline batch_type_t<X> sadd(const simd_base<X>& lhs, const simd_base<X>& rhs)           
+    {                                                                                              
+        using value_type = typename simd_batch_traits<X>::value_type;                              
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;               
+        return kernel::sadd(lhs(), rhs());                                                         
+    }                                                                                              
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the saturate sum of the scalar \c lhs and the batch \c rhs. Equivalent to the
+     * saturated sum of two batches where all the values of the first one are initialized to
+     * \c lhs.
+     * @tparam X the actual type of batch.
+     * @param lhs scalar involved in the saturated addition.
+     * @param rhs batch involved in the saturated addition.
+     * @return the result of the saturated addition.
+     */                                                                                               
+    template <class X>                                                                             
+    inline batch_type_t<X> sadd(const typename simd_batch_traits<X>::value_type& lhs,       
+                                       const simd_base<X>& rhs)                                    
+    {                                                                                              
+        return sadd(batch_type_t<X>(lhs),rhs());                                                      
+    }                                                                                              
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the saturate sum of the batch \c lhs and the scalar \c rhs. Equivalent to the
+     * saturated sum of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the saturated addition.
+     * @param rhs scalar involved in the saturated addition.
+     * @return the result of the saturated addition.
+     */                                                                                                     
+    template <class X>                                                                             
+    inline batch_type_t<X> sadd(const simd_base<X>& lhs,                                    
+                                       const typename simd_batch_traits<X>::value_type& rhs)       
+    {                                                                                              
+        return sadd(lhs(),batch_type_t<X>(rhs));                                                      
+    }
+
     /**
      * @ingroup simd_batch_arithmetic
      *
@@ -1241,6 +1296,60 @@ namespace xsimd
     batch_type_t<X> operator-(const typename simd_batch_traits<X>::value_type& lhs, const simd_base<X>& rhs);
 
     XSIMD_BINARY_OP(-, sub)
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the saturate difference of the batch \c lhs and the batch \c rhs.
+     * \c lhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the saturated difference.
+     * @param rhs batch involved in the saturated difference.
+     * @return the result of the saturated difference.
+     */                 
+    template <class X>                                                                    
+    inline batch_type_t<X> ssub(const simd_base<X>& lhs, const simd_base<X>& rhs)           
+    {                                                                                              
+        using value_type = typename simd_batch_traits<X>::value_type;                              
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;               
+        return kernel::ssub(lhs(), rhs());                                                         
+    }                                                                                              
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the saturate difference of the scalar \c lhs and the batch \c rhs. Equivalent to the
+     * saturated sum of two batches where all the values of the first one are initialized to
+     * \c lhs.
+     * @tparam X the actual type of batch.
+     * @param lhs scalar involved in the saturated difference.
+     * @param rhs batch involved in the saturated difference.
+     * @return the result of the saturated difference.
+     */                                                                                               
+    template <class X>                                                                             
+    inline batch_type_t<X> ssub(const typename simd_batch_traits<X>::value_type& lhs,       
+                                       const simd_base<X>& rhs)                                    
+    {                                                                                              
+        return ssub(batch_type_t<X>(lhs),rhs());                                                      
+    }                                                                                              
+
+    /**
+     * @ingroup simd_batch_arithmetic
+     *
+     * Computes the saturate difference of the batch \c lhs and the scalar \c rhs. Equivalent to the
+     * saturated difference of two batches where all the values of the second one are initialized to
+     * \c rhs.
+     * @tparam X the actual type of batch.
+     * @param lhs batch involved in the saturated difference.
+     * @param rhs scalar involved in the saturated difference.
+     * @return the result of the saturated difference.
+     */                                                                                                     
+    template <class X>                                                                             
+    inline batch_type_t<X> ssub(const simd_base<X>& lhs,                                    
+                                       const typename simd_batch_traits<X>::value_type& rhs)       
+    {                                                                                              
+        return ssub(lhs(),batch_type_t<X>(rhs));                                                      
+    }
 
     /**
      * @ingroup simd_batch_arithmetic

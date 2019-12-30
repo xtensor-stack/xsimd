@@ -317,6 +317,15 @@ namespace xsimd
                 return vsubq_u32(lhs, rhs);
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vqaddq_u32(lhs, rhs);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vqsubq_u32(lhs, rhs);
+            }
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return vmulq_u32(lhs, rhs);

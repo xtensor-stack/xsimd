@@ -234,6 +234,45 @@ namespace xsimd
                 return _mm512_sub_epi64(lhs, rhs);
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                /* origin: /nsimd/include/nsimd/x86/avx512_knl/adds.h */
+                /*
+                * ====================================================
+                * Copyright (c) 2019 Agenium Scale
+                *
+                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
+                * ====================================================
+                */
+                //todo bench againt unrroled loop
+                //todo factorize int32_t uint32_t
+                using ubatch_type = batch<uint64_t, 8>;
+                ubatch_type ux = (ubatch_type)(lhs);
+                const ubatch_type uy = (ubatch_type)(rhs);
+                const ubatch_type res = _mm512_add_epi64(ux, uy);
+
+                const ubatch_type vmax = _mm512_set1_epi64(std::numeric_limits<int64_t>::max());
+                const ubatch_type shr = _mm512_srl_epi64(ux, _mm_set1_epi32(sizeof(int64_t) * std::numeric_limits<unsigned char>::digits));
+                ux = _mm512_add_epi64(shr, vmax);
+
+                const ubatch_type xor_ux_uy = _mm512_xor_si512(ux, uy);
+                const ubatch_type xor_uy_res = _mm512_xor_si512(uy, res);
+                const ubatch_type not_xor_uy_res = _mm512_andnot_si512(xor_uy_res, _mm512_set1_epi8(-1));
+
+                const ubatch_type u_orb = _mm512_or_si512(xor_ux_uy, not_xor_uy_res);
+                const batch_type i_orb = (batch_type)u_orb;
+
+                const batch_type zeros = _mm512_set1_epi64(0);
+                __mmask8 gteq_to_zero = _mm512_cmp_epi64_mask(zeros, i_orb, _MM_CMPINT_NLT);
+
+                return _mm512_mask_blend_epi64(gteq_to_zero, ux, res);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return sadd(lhs, neg(rhs));
+            }
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm512_mullo_epi64(lhs, rhs);
@@ -418,6 +457,64 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
                 return rhs;
+            }
+
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                /* origin: /nsimd/include/nsimd/x86/avx512_knl/adds.h */
+                /*
+                * ====================================================
+                * Copyright (c) 2019 Agenium Scale
+                *
+                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
+                * ====================================================
+                */
+                //todo bench againt unrroled loop
+                //todo factorize int32_t uint32_t
+                using ubatch_type = batch<uint64_t, 8>;
+                ubatch_type ux = (ubatch_type)(lhs);
+                const ubatch_type uy = (ubatch_type)(rhs);
+                const ubatch_type res = _mm512_add_epi64(ux, uy);
+
+                const ubatch_type vmax = _mm512_set1_epi64(std::numeric_limits<uint64_t>::max());
+                const ubatch_type shr = _mm512_srl_epi64(ux, _mm_set1_epi32(sizeof(int64_t) * std::numeric_limits<unsigned char>::digits));
+                ux = _mm512_add_epi64(shr, vmax);
+
+                const ubatch_type xor_ux_uy = _mm512_xor_si512(ux, uy);
+                const ubatch_type xor_uy_res = _mm512_xor_si512(uy, res);
+                const ubatch_type not_xor_uy_res = _mm512_andnot_si512(xor_uy_res, _mm512_set1_epi8(-1));
+
+                const ubatch_type u_orb = _mm512_or_si512(xor_ux_uy, not_xor_uy_res);
+                const batch_type i_orb = (batch_type)u_orb;
+
+                const batch_type zeros = _mm512_set1_epi64(0);
+                __mmask8 gteq_to_zero = _mm512_cmp_epi64_mask(zeros, i_orb, _MM_CMPINT_NLT);
+
+                return _mm512_mask_blend_epi64(gteq_to_zero, ux, res);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                using ubatch_type = batch<uint64_t, 8>;
+                ubatch_type ux = (ubatch_type)(lhs);
+                const ubatch_type uy = (ubatch_type)(rhs);
+                const ubatch_type res = _mm512_sub_epi64(ux, uy);
+
+                const ubatch_type vmin = _mm512_set1_epi64(std::numeric_limits<uint64_t>::lowest());
+                const ubatch_type shr = _mm512_srl_epi64(ux, _mm_set1_epi32(sizeof(int64_t) * std::numeric_limits<unsigned char>::digits));
+                ux = _mm512_sub_epi64(shr, vmin);
+
+                const ubatch_type xor_ux_uy = _mm512_xor_si512(ux, uy);
+                const ubatch_type xor_uy_res = _mm512_xor_si512(uy, res);
+                const ubatch_type not_xor_uy_res = _mm512_andnot_si512(xor_uy_res, _mm512_set1_epi8(-1));
+
+                const ubatch_type u_orb = _mm512_or_si512(xor_ux_uy, not_xor_uy_res);
+                const batch_type i_orb = (batch_type)u_orb;
+
+                const batch_type zeros = _mm512_set1_epi64(0);
+                __mmask8 gteq_to_zero = _mm512_cmp_epi64_mask(zeros, i_orb, _MM_CMPINT_NLT);
+
+                return _mm512_mask_blend_epi64(gteq_to_zero, ux, res);
             }
         };
     }

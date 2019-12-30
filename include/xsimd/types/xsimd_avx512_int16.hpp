@@ -243,6 +243,24 @@ namespace xsimd
             #endif
             }
 
+            static batch_type sadd(const batch_type &lhs, const batch_type &rhs)
+            {
+            #if defined(XSIMD_AVX512BW_AVAILABLE)
+                return _mm512_adds_epi16(lhs, rhs);
+            #else
+                XSIMD_APPLY_AVX2_FUNCTION_INT16(sadd, lhs, rhs);
+            #endif
+            }
+
+            static batch_type ssub(const batch_type &lhs, const batch_type &rhs)
+            {
+            #if defined(XSIMD_AVX512BW_AVAILABLE)
+                return _mm512_subs_epi16(lhs, rhs);
+            #else
+                XSIMD_APPLY_AVX2_FUNCTION_INT16(ssub, lhs, rhs);
+            #endif
+            }
+            
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
             #if defined(XSIMD_AVX512BW_AVAILABLE)
@@ -464,6 +482,24 @@ namespace xsimd
                 return _mm512_cmple_epu16_mask(lhs, rhs);
             #else
                 XSIMD_APPLY_AVX2_FUNCTION_INT16(lte, lhs, rhs);
+            #endif
+            }
+            
+            static batch_type sadd(const batch_type &lhs, const batch_type &rhs)
+            {
+            #if defined(XSIMD_AVX512BW_AVAILABLE)
+                return _mm512_adds_epu16(lhs, rhs);
+            #else
+                XSIMD_APPLY_AVX2_FUNCTION_UINT16(sadd, lhs, rhs);
+            #endif
+            }
+
+            static batch_type ssub(const batch_type &lhs, const batch_type &rhs)
+            {
+            #if defined(XSIMD_AVX512BW_AVAILABLE)
+                return _mm512_subs_epu16(lhs, rhs);
+            #else
+                XSIMD_APPLY_AVX2_FUNCTION_UINT16(ssub, lhs, rhs);
             #endif
             }
         };
