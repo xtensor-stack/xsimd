@@ -192,6 +192,24 @@ namespace xsimd
 #endif
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+                return _mm256_adds_epi8(lhs, rhs);
+#else
+                XSIMD_APPLY_SSE_FUNCTION(_mm_adds_epi8, lhs, rhs);
+#endif
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+                return _mm256_subs_epi8(lhs, rhs);
+#else
+                XSIMD_APPLY_SSE_FUNCTION(_mm_subs_epi8, lhs, rhs);
+#endif
+            }
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
@@ -397,6 +415,24 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
                 return rhs;
+            }
+
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+                return _mm256_adds_epu8(lhs, rhs);
+#else
+                XSIMD_APPLY_SSE_FUNCTION(_mm_adds_epu8, lhs, rhs);
+#endif
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+                return _mm256_subs_epu8(lhs, rhs);
+#else
+                XSIMD_APPLY_SSE_FUNCTION(_mm_subs_epu8, lhs, rhs);
+#endif
             }
         };
     }

@@ -391,6 +391,16 @@ namespace xsimd
                 return _mm512_sub_ps(lhs, rhs);
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                return add(lhs, rhs); //do something for inf ?
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return sub(lhs, rhs); //do something for inf ?
+            }
+            
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm512_mul_ps(lhs, rhs);

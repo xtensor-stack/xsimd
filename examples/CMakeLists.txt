@@ -21,7 +21,24 @@ include_directories(${XSIMD_INCLUDE_DIR})
 message(STATUS "Forcing examples build type to Release")
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 
-set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native -fopenmp -std=c++14")
+if(WIN32)
+    if(MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP /bigobj")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+        set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
+        if(MSVC_VERSION GREATER_EQUAL MSVC14)
+            add_definitions(-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+            #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_WARNINGS /D\"_SECURE_SCL=0\" /D\"_HAS_ITERATOR_DEBUGGING=0\"")
+        endif()
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES Clang AND WIN32) # We are using clang-cl
+        add_compile_options(/EHsc /MP /bigobj /arch:AVX2)
+        set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
+    endif()
+else()
+    set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native -fopenmp -std=c++14")
+endif()
 
 add_executable(mandelbrot EXCLUDE_FROM_ALL mandelbrot.cpp ${XSIMD_HEADERS})
 

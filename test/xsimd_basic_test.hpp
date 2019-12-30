@@ -45,12 +45,23 @@ namespace xsimd
         value_type extract_res;
         res_type minus_res;
         res_type plus_res;
+        
         res_type add_vv_res;
         res_type add_vs_res;
         res_type add_sv_res;
+
         res_type sub_vv_res;
         res_type sub_vs_res;
         res_type sub_sv_res;
+
+        res_type sadd_vv_res;
+        res_type sadd_vs_res;
+        res_type sadd_sv_res;
+        
+        res_type ssub_vv_res;
+        res_type ssub_vs_res;
+        res_type ssub_sv_res;
+
         res_type mul_vv_res;
         res_type mul_vs_res;
         res_type mul_sv_res;
@@ -79,7 +90,6 @@ namespace xsimd
         simd_basic_tester(const std::string& name);
     };
 
-
     template <class T, size_t N, size_t A>
     simd_basic_tester<T, N, A>::simd_basic_tester(const std::string& n)
         : name(n)
@@ -102,6 +112,12 @@ namespace xsimd
         sub_vv_res.resize(N);
         sub_vs_res.resize(N);
         sub_sv_res.resize(N);
+        sadd_vv_res.resize(N);
+        sadd_vs_res.resize(N);
+        sadd_sv_res.resize(N);
+        ssub_vv_res.resize(N);
+        ssub_vs_res.resize(N);
+        ssub_sv_res.resize(N);
         mul_vv_res.resize(N);
         mul_vs_res.resize(N);
         mul_sv_res.resize(N);
@@ -141,6 +157,12 @@ namespace xsimd
             sub_vv_res[i] = lhs[i] - rhs[i];
             sub_vs_res[i] = lhs[i] - s;
             sub_sv_res[i] = s - rhs[i];
+            sadd_vv_res[i] = saturated_add_scalar(lhs[i] ,rhs[i]);
+            sadd_vs_res[i] = saturated_add_scalar(lhs[i], s);
+            sadd_sv_res[i] = saturated_add_scalar(s,rhs[i]);
+            ssub_vv_res[i] = saturated_sub_scalar(lhs[i], rhs[i]);
+            ssub_vs_res[i] = saturated_sub_scalar(lhs[i], s);
+            ssub_sv_res[i] = saturated_sub_scalar(s,rhs[i]);
             mul_vv_res[i] = lhs[i] * rhs[i];
             mul_vs_res[i] = lhs[i] * s;
             mul_sv_res[i] = s * rhs[i];
@@ -209,6 +231,12 @@ namespace xsimd
         res_type sub_vv_res;
         res_type sub_vs_res;
         res_type sub_sv_res;
+        res_type sadd_vv_res;
+        res_type sadd_vs_res;
+        res_type sadd_sv_res;
+        res_type ssub_vv_res;
+        res_type ssub_vs_res;
+        res_type ssub_sv_res;
         res_type mul_vv_res;
         res_type mul_vs_res;
         res_type mul_sv_res;
@@ -257,6 +285,12 @@ namespace xsimd
         sub_vv_res.resize(N);
         sub_vs_res.resize(N);
         sub_sv_res.resize(N);
+        sadd_vv_res.resize(N);
+        sadd_vs_res.resize(N);
+        sadd_sv_res.resize(N);
+        ssub_vv_res.resize(N);
+        ssub_vs_res.resize(N);
+        ssub_sv_res.resize(N);
         mul_vv_res.resize(N);
         mul_vs_res.resize(N);
         mul_sv_res.resize(N);
@@ -297,6 +331,12 @@ namespace xsimd
             sub_vv_res[i] = lhs[i] - rhs[i];
             sub_vs_res[i] = lhs[i] - s;
             sub_sv_res[i] = s - rhs[i];
+            sadd_vv_res[i] = saturated_add_scalar(lhs[i] ,rhs[i]);
+            sadd_vs_res[i] = saturated_add_scalar(lhs[i], s);
+            sadd_sv_res[i] = saturated_add_scalar(s,rhs[i]);
+            ssub_vv_res[i] = saturated_sub_scalar(lhs[i],rhs[i]);
+            ssub_vs_res[i] = saturated_sub_scalar(lhs[i],s);
+            ssub_sv_res[i] = saturated_sub_scalar(s,rhs[i]);
             mul_vv_res[i] = lhs[i] * rhs[i];
             mul_vs_res[i] = lhs[i] * s;
             mul_sv_res[i] = s * rhs[i];
@@ -906,6 +946,24 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.add_sv_res, out);
         success = success && tmp_success;
 
+        topic = "sadd(simd, simd)    : "; //TODO add overflow test
+        vres = sadd(lhs,rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sadd_vv_res, out);
+        success = success && tmp_success;
+
+        topic = "sadd(simd, scalar)  : ";
+        vres = sadd(lhs, s);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sadd_vs_res, out); //NOCOMMIT
+        success = success && tmp_success;
+
+        topic = "sadd(scalar, simd)  : ";
+        vres = sadd(s, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sadd_sv_res, out);
+        success = success && tmp_success;
+
         topic = "operator-(simd, simd)    : ";
         vres = lhs - rhs;
         detail::store_vec(vres, res);
@@ -924,6 +982,24 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.sub_sv_res, out);
         success = success && tmp_success;
 
+        topic = "ssub(simd, simd)    : "; //TODO add underflow test
+        vres = ssub(lhs , rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.ssub_vv_res, out);
+        success = success && tmp_success;
+
+        topic = "ssub(simd, scalar)  : ";
+        vres = ssub(lhs , s);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.ssub_vs_res, out);
+        success = success && tmp_success;
+
+        topic = "ssub(scalar, simd)  : ";
+        vres = ssub(s,rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.ssub_sv_res, out);
+        success = success && tmp_success;
+       
         topic = "operator*(simd, simd)    : ";
         vres = lhs * rhs;
         detail::store_vec(vres, res);
@@ -1326,6 +1402,7 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.add_vs_res, out);
         success = success && tmp_success;
 
+      
         topic = "operator-=(simd, simd)   : ";
         vres = lhs;
         vres -= rhs;
@@ -1340,6 +1417,43 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.sub_vs_res, out);
         success = success && tmp_success;
 
+
+        topic = "sadd(simd, simd)    : "; //TODO add overflow test
+        vres = sadd(lhs,rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sadd_vv_res, out);
+        success = success && tmp_success;
+
+        topic = "sadd(simd, scalar)  : ";
+        vres = sadd(lhs, s);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sadd_vs_res, out);
+        success = success && tmp_success;
+
+        topic = "sadd(scalar, simd)  : ";
+        vres = sadd(s, rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sadd_sv_res, out);
+        success = success && tmp_success;
+
+        topic = "ssub(simd, simd)    : "; //TODO add underflow test
+        vres = ssub(lhs , rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.ssub_vv_res, out);
+        success = success && tmp_success;
+
+        topic = "ssub(simd, scalar)  : ";
+        vres = ssub(lhs , s);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.ssub_vs_res, out);
+        success = success && tmp_success;
+
+        topic = "ssub(scalar, simd)  : ";
+        vres = ssub(s,rhs);
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.ssub_sv_res, out);
+        success = success && tmp_success;
+       
         topic = "operator*=(simd, simd)   : ";
         vres = lhs;
         vres *= rhs;

@@ -175,6 +175,45 @@ namespace xsimd
                 return _mm512_sub_epi32(lhs, rhs);
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                /* origin: /nsimd/include/nsimd/x86/avx512_knl/adds.h */
+                /*
+                * ====================================================
+                * Copyright (c) 2019 Agenium Scale
+                *
+                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
+                * ====================================================
+                */
+                //todo bench againt unrroled loop
+                //todo factorize int32_t uint32_t
+                using ubatch_type = batch<uint32_t, 16>;
+                ubatch_type ux = (ubatch_type)(lhs);
+                const ubatch_type uy = (ubatch_type)(rhs);
+                const ubatch_type res = _mm512_add_epi32(ux, uy);
+
+                const ubatch_type vmax = _mm512_set1_epi32(std::numeric_limits<int32_t>::max());
+                const ubatch_type shr = _mm512_srl_epi32(ux, _mm_set1_epi32(sizeof(int32_t) * std::numeric_limits<unsigned char>::digits));
+                ux = _mm512_add_epi32(shr, vmax);
+
+                const ubatch_type xor_ux_uy = _mm512_xor_si512(ux, uy);
+                const ubatch_type xor_uy_res = _mm512_xor_si512(uy, res);
+                const ubatch_type not_xor_uy_res = _mm512_andnot_si512(xor_uy_res, _mm512_set1_epi8(-1));
+
+                const ubatch_type u_orb = _mm512_or_si512(xor_ux_uy, not_xor_uy_res);
+                const batch_type i_orb = (batch_type)u_orb;
+
+                const batch_type zeros = _mm512_set1_epi32(0);
+                __mmask16 gteq_to_zero = _mm512_cmp_epi32_mask(zeros, i_orb, _MM_CMPINT_NLT);
+
+                return _mm512_mask_blend_epi32(gteq_to_zero, ux, res);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return sadd(lhs, neg(rhs));
+            }
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm512_mullo_epi32(lhs, rhs);
@@ -348,6 +387,43 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
                 return rhs;
+            }
+
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                /* origin: /nsimd/include/nsimd/x86/avx512_skylake/adds.h */
+                /*
+                * ====================================================
+                * Copyright (c) 2019 Agenium Scale
+                *
+                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
+                * ====================================================
+                */
+                //todo bench againt unrroled loop
+                //todo factorize int32_t uint32_t
+                const auto ures = _mm512_add_epi32(lhs, rhs);
+                const auto umax = _mm512_set1_epi32(std::numeric_limits<uint32_t>::max());
+                const auto is_overflow = _mm512_cmp_epu32_mask(_mm512_add_epi32(lhs, umax), _mm512_add_epi32(ures, umax), _MM_CMPINT_NLE);
+                return _mm512_mask_blend_epi32(is_overflow, umax, ures);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                /* origin: /nsimd/include/nsimd/x86/avx512_skylake/subs.h */
+                /*
+                * ====================================================
+                * Copyright (c) 2019 Agenium Scale
+                *
+                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
+                * ====================================================
+                */
+                //todo bench againt unrroled loop
+                //todo factorize int32_t uint32_t
+                const auto ures = _mm512_sub_epi32(lhs, rhs);
+                const auto cte = _mm512_set1_epi32(std::numeric_limits<uint32_t>::max());
+                const auto is_underflow = _mm512_cmp_epu32_mask(_mm512_add_epi32(rhs, cte), _mm512_add_epi32(lhs, cte), _MM_CMPINT_NLE);
+                const auto umin = _mm512_set1_epi32(std::numeric_limits<uint32_t>::lowest());
+                return _mm512_mask_blend_epi32(is_underflow,umin, ures);
             }
         };
     }

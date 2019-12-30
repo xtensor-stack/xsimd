@@ -754,6 +754,16 @@ namespace xsimd
                 XSIMD_FALLBACK_BINARY_OP(batch, -, lhs, rhs)
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(saturated_add_scalar, lhs, rhs)
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(saturated_sub_scalar, lhs, rhs)
+            }
+            
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 XSIMD_FALLBACK_BINARY_OP(batch, *, lhs, rhs)
