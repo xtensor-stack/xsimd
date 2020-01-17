@@ -9,6 +9,12 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-9
+            - g++-9-aarch64-linux-gnu
+            - gcc-9-aarch64-linux-gnu
+            - g++-9-multilib
+            - gcc-9-multilib
+            - qemu
+            - qemu-system-arm
       env: COMPILER=gcc GCC=9 CROSS_COMPILE=1 ARM_ARCH_DIR=aarch64-linux-gnu GCC_VER=4.9.3 ARM_SETTINGS="armv8-a -target aarch64-linux-gnueabi"
     - os: linux
       addons:
