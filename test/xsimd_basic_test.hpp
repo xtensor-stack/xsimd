@@ -75,6 +75,8 @@ namespace xsimd
         res_type sqrt_res;
         value_type hadd_res;
         res_type haddp_res;
+        res_type false_res;
+        res_type true_res;
 
         simd_basic_tester(const std::string& name);
     };
@@ -125,6 +127,8 @@ namespace xsimd
         fnms_res.resize(N);
         sqrt_res.resize(N);
         haddp_res.resize(N);
+        false_res.resize(N);
+        true_res.resize(N);
 
         s = value_type(1.4);
         hadd_res = value_type(0);
@@ -176,6 +180,8 @@ namespace xsimd
                     haddp_res[j + 1] += rhs[i];
                 }
             }
+            false_res[i] = value_type(0);
+            true_res[i] = value_type(1);
         }
         for (size_t i = 0; i < N / 2; ++i)
         {
@@ -233,6 +239,8 @@ namespace xsimd
         value_type hadd_res;
         res_type sl_res;
         res_type sr_res;
+        res_type false_res;
+        res_type true_res;
 
         simd_int_basic_tester(const std::string& name);
     };
@@ -280,6 +288,8 @@ namespace xsimd
         fnms_res.resize(N);
         sl_res.resize(N);
         sr_res.resize(N);
+        false_res.resize(N);
+        true_res.resize(N);
 
         s = value_type(1.4);
         sh_nb = 3;
@@ -321,6 +331,8 @@ namespace xsimd
             hadd_res += lhs[i];
             sl_res[i] = lhs[i] << sh_nb;
             sr_res[i] = lhs[i] >> sh_nb;
+            false_res[i] = value_type(0);
+            true_res[i] = value_type(1);
         }
 
         for (size_t i = 0; i < N / 2; ++i)
@@ -1053,6 +1065,20 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.haddp_res, out);
         success = success && tmp_success;
 
+        topic = "conversion from true     : ";
+        vector_bool_type tbt(true);
+        vres = tbt;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.true_res, out);
+        success = success && tmp_success;
+
+        topic = "conversion from false    : ";
+        vector_bool_type fbt(false);
+        vres = fbt;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.false_res, out);
+        success = success && tmp_success;
+
         topic = "any                      : ";
         auto any_check_false = (lhs != lhs);
         bool any_res_false = any(any_check_false);
@@ -1504,6 +1530,20 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.sr_res, out);
         success = success && tmp_success;
+
+        /*topic = "conversion from true     : ";
+        vector_bool_type tbt(true);
+        vres = tbt;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.true_res, out);
+        success = success && tmp_success;
+
+        topic = "conversion from false    : ";
+        vector_bool_type fbt(false);
+        vres = fbt;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.false_res, out);
+        success = success && tmp_success;*/
 
         topic = "any                      : ";
         auto any_check_false = (lhs != lhs);
