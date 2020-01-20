@@ -38,6 +38,7 @@ namespace xsimd
         using self_type = batch<int64_t, 2>;
         using base_type = simd_batch<self_type>;
         using storage_type = typename base_type::storage_type;
+        using batch_bool_type = typename base_type::batch_bool_type;
 
         batch();
         explicit batch(int64_t src);
@@ -51,6 +52,9 @@ namespace xsimd
 
         batch(const storage_type& rhs);
         batch& operator=(const storage_type& rhs);
+
+        batch(const batch_bool_type& rhs);
+        batch& operator=(const batch_bool_type& rhs);
 
         operator storage_type() const;
 
@@ -109,6 +113,17 @@ namespace xsimd
     inline batch<int64_t, 2>& batch<int64_t, 2>::operator=(const storage_type& rhs)
     {
         this->m_value = rhs;
+        return *this;
+    }
+
+    inline batch<int64_t, 2>::batch(const batch_bool_type& rhs)
+        : base_type(vandq_s64(rhs, batch(1)))
+    {
+    }
+
+    inline batch<int64_t, 2>& batch<int64_t, 2>::operator=(const batch_bool_type& rhs)
+    {
+        this->m_value = vandq_s64(rhs, batch(1));
         return *this;
     }
 

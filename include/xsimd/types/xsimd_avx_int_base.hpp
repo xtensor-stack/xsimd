@@ -74,6 +74,7 @@ namespace xsimd
     public:
 
         using base_type = simd_batch<batch<T, N>>;
+        using batch_bool_type = typename base_type::batch_bool_type;
 
         avx_int_batch();
         explicit avx_int_batch(T i);
@@ -85,7 +86,10 @@ namespace xsimd
         avx_int_batch(const T* src, aligned_mode);
         avx_int_batch(const T* src, unaligned_mode);
         avx_int_batch(const __m256i& rhs);
-        avx_int_batch& operator=(const __m256i& rhs);
+        avx_int_batch(const batch_bool_type& rhs);
+
+        batch<T, N>& operator=(const __m256i& rhs);
+        batch<T, N>& operator=(const batch_bool_type& rhs);
 
         operator __m256i() const;
 
@@ -382,11 +386,36 @@ namespace xsimd
     {
     }
 
+    namespace detail
+    {
+        inline __m256i bitwise_and_impl(__m256i lhs, __m256i rhs)
+        {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+            return _mm256_and_si256(lhs, rhs);
+#else
+            XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
+#endif
+        }
+    }
+
     template <class T, std::size_t N>
-    inline avx_int_batch<T, N>& avx_int_batch<T, N>::operator=(const __m256i& rhs)
+    inline avx_int_batch<T, N>::avx_int_batch(const batch_bool_type& rhs)
+        : base_type(detail::bitwise_and_impl(rhs, batch<T, N>(1)))
+    {
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N>& avx_int_batch<T, N>::operator=(const __m256i& rhs)
     {
         this->m_value = rhs;
-        return *this;
+        return (*this)();
+    }
+
+    template <class T, std::size_t N>
+    inline batch<T, N>& avx_int_batch<T, N>::operator=(const batch_bool_type& rhs)
+    {
+        this->m_value = detail::bitwise_and_impl(rhs, batch<T, N>(1));
+        return (*this)();
     }
 
     template <class T, std::size_t N>
@@ -469,11 +498,7 @@ namespace xsimd
 
             static batch_type bitwise_and(const batch_type& lhs, const batch_type& rhs)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-                return _mm256_and_si256(lhs, rhs);
-#else
-                XSIMD_APPLY_SSE_FUNCTION(_mm_and_si128, lhs, rhs);
-#endif
+                return detail::bitwise_and_impl(lhs, rhs);
             }
 
             static batch_type bitwise_or(const batch_type& lhs, const batch_type& rhs)

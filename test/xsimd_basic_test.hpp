@@ -1531,7 +1531,7 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, res, tester.sr_res, out);
         success = success && tmp_success;
 
-        /*topic = "conversion from true     : ";
+        topic = "conversion from true     : ";
         vector_bool_type tbt(true);
         vres = tbt;
         detail::store_vec(vres, res);
@@ -1543,7 +1543,7 @@ namespace xsimd
         vres = fbt;
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.false_res, out);
-        success = success && tmp_success;*/
+        success = success && tmp_success;
 
         topic = "any                      : ";
         auto any_check_false = (lhs != lhs);
