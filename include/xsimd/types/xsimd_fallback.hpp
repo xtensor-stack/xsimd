@@ -104,6 +104,7 @@ namespace xsimd
         using self_type = batch<T, N>;
         using base_type = simd_batch<self_type>;
         using storage_type = typename base_type::storage_type;
+        using batch_bool_type = typename base_type::batch_bool_type;
 
         batch();
         explicit batch(T f);
@@ -122,8 +123,10 @@ namespace xsimd
         batch(const T* src, aligned_mode);
         batch(const T* src, unaligned_mode);
         batch(const std::array<T, N>& rhs);
+        batch(const batch_bool_type& rhs);
         batch& operator=(const std::array<T, N>& rhs);
         batch& operator=(const std::array<bool, N>& rhs);
+        batch& operator=(const batch_bool_type&);
 
         operator std::array<T, N>() const;
 
@@ -641,6 +644,13 @@ namespace xsimd
     }
 
     template <typename T, std::size_t N>
+    inline batch<T, N>::batch(const batch_bool_type& rhs)
+    {
+        std::transform(rhs.get_value().cbegin(), rhs.get_value().cend(), this->m_value.begin(),
+                       [](bool b) -> T { return b ? T(1) : T(0); });
+    }
+
+    template <typename T, std::size_t N>
     inline batch<T, N>& batch<T, N>::operator=(const std::array<T, N>& rhs)
     {
         this->m_value = rhs;
@@ -653,6 +663,14 @@ namespace xsimd
         using all_bits = detail::all_bits<std::is_integral<T>::value>;
         std::transform(rhs.cbegin(), rhs.cend(), this->m_value.begin(),
                        [](bool b) -> T { return b ? all_bits::get(T(0)) : T(0); });
+        return *this;
+    }
+
+    template <typename T, std::size_t N>
+    inline batch<T, N>& batch<T, N>::operator=(const batch_bool_type& rhs)
+    {
+        std::transform(rhs.get_value().cbegin(), rhs.get_value().cend(), this->m_value.begin(),
+                       [](bool b) -> T { return b ? T(1) : T(0); });
         return *this;
     }
 

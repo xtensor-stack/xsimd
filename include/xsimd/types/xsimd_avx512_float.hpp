@@ -76,8 +76,10 @@ namespace xsimd
         batch(float i0, float i1,  float i2,  float i3,  float i4,  float i5,  float i6,  float i7,
               float i8, float i9, float i10, float i11, float i12, float i13, float i14, float i15);
         explicit batch(const float* src);
+
         batch(const float* src, aligned_mode);
         batch(const float* src, unaligned_mode);
+        
         batch(const __m512& rhs);
         batch& operator=(const __m512& rhs);
 

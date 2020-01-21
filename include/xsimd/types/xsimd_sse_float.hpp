@@ -82,16 +82,22 @@ namespace xsimd
 
         using self_type = batch<float, 4>;
         using base_type = simd_batch<self_type>;
+        using batch_bool_type = typename base_type::batch_bool_type;
 
         batch();
         explicit batch(float f);
         batch(float f0, float f1, float f2, float f3);
         explicit batch(const float* src);
+
         batch(const float* src, aligned_mode);
         batch(const float* src, unaligned_mode);
+        
         batch(const __m128& rhs);
         batch& operator=(const __m128& rhs);
-
+        
+        batch(const batch_bool_type& rhs);
+        batch& operator=(const batch_bool_type& rhs);
+        
         operator __m128() const;
 
         XSIMD_DECLARE_LOAD_STORE_ALL(float, 4)
@@ -129,6 +135,17 @@ namespace xsimd
     inline batch_bool<float, 4>& batch_bool<float, 4>::operator=(const __m128& rhs)
     {
         m_value = rhs;
+        return *this;
+    }
+
+    inline batch<float, 4>::batch(const batch_bool_type& rhs)
+        : base_type(_mm_and_ps(rhs, batch(1.f)))
+    {
+    }
+
+    inline batch<float, 4>& batch<float, 4>::operator=(const batch_bool_type& rhs)
+    {
+        this->m_value = _mm_and_ps(rhs, batch(1.f));
         return *this;
     }
 

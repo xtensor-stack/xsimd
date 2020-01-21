@@ -145,6 +145,7 @@ namespace xsimd
         using value_type = typename simd_batch_traits<X>::value_type;
         static constexpr std::size_t size = simd_batch_traits<X>::size;
         using storage_type = typename simd_batch_traits<X>::storage_type;
+        using batch_bool_type = typename simd_batch_traits<X>::batch_bool_type;
 
         using iterator = value_type*;
         using const_iterator = const value_type*;
