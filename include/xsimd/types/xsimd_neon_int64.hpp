@@ -116,14 +116,22 @@ namespace xsimd
         return *this;
     }
 
+    namespace detail
+    {
+        inline int64x2_t init_from_bool(uint64x2_t a)
+        {
+            return vandq_s64(reinterpret_cast<int64x2_t>(a), vdupq_n_s64(1));
+        }
+    }
+
     inline batch<int64_t, 2>::batch(const batch_bool_type& rhs)
-        : base_type(vandq_s64(rhs, batch(1)))
+        : base_type(detail::init_from_bool(rhs))
     {
     }
 
     inline batch<int64_t, 2>& batch<int64_t, 2>::operator=(const batch_bool_type& rhs)
     {
-        this->m_value = vandq_s64(rhs, batch(1));
+        this->m_value = detail::init_from_bool(rhs);
         return *this;
     }
 
