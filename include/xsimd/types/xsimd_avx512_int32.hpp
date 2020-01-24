@@ -404,7 +404,7 @@ namespace xsimd
                 const auto ures = _mm512_add_epi32(lhs, rhs);
                 const auto umax = _mm512_set1_epi32(std::numeric_limits<uint32_t>::max());
                 const auto is_overflow = _mm512_cmp_epu32_mask(_mm512_add_epi32(lhs, umax), _mm512_add_epi32(ures, umax), _MM_CMPINT_NLE);
-                return _mm512_mask_blend_epi32(is_overflow, umax, ures);
+                return _mm512_mask_blend_epi32(is_overflow, ures, umax);
             }
 
             static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
@@ -423,7 +423,7 @@ namespace xsimd
                 const auto cte = _mm512_set1_epi32(std::numeric_limits<uint32_t>::max());
                 const auto is_underflow = _mm512_cmp_epu32_mask(_mm512_add_epi32(rhs, cte), _mm512_add_epi32(lhs, cte), _MM_CMPINT_NLE);
                 const auto umin = _mm512_set1_epi32(std::numeric_limits<uint32_t>::lowest());
-                return _mm512_mask_blend_epi32(is_underflow,umin, ures);
+                return _mm512_mask_blend_epi32(is_underflow, ures, umin);
             }
         };
     }
