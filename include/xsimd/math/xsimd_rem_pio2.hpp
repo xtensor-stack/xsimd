@@ -638,4 +638,5 @@ namespace xsimd
 #undef GET_HIGH_WORD
 #undef HIGH_WORD_IDX
 #undef LOW_WORD_IDX
+#undef ONCE0
 }
