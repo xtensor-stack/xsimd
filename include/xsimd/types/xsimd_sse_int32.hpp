@@ -478,7 +478,7 @@ namespace xsimd
 
     inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs)
     {
-        return _mm_srli_epi32(lhs, rhs);
+        return _mm_srai_epi32(lhs, rhs);
     }
 
     inline batch<uint32_t, 4> operator<<(const batch<uint32_t, 4>& lhs, int32_t rhs)

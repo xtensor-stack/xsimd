@@ -110,6 +110,10 @@
     #define XSIMD_X86_INSTR_SET XSIMD_X86_AVX512_VERSION
 #endif
 
+#if defined(__AVX512VL__)
+    #define XSIMD_AVX512VL_AVAILABLE 1
+#endif
+
 #if defined(__AVX512BW__)
     #define XSIMD_AVX512BW_AVAILABLE 1
 #endif

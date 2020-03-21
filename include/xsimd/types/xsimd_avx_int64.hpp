@@ -491,13 +491,12 @@ namespace xsimd
 
     inline batch<int64_t, 4> operator>>(const batch<int64_t, 4>& lhs, int32_t rhs)
     {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_srli_epi64(lhs, rhs);
+#if defined(XSIMD_AVX512VL_AVAILABLE)
+        return _mm256_srai_epi64(lhs, rhs);
 #else
-        XSIMD_SPLIT_AVX(lhs);
-        __m128i res_low = _mm_srli_epi64(lhs_low, rhs);
-        __m128i res_high = _mm_srli_epi64(lhs_high, rhs);
-        XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+        return avx_detail::shift_impl([](int64_t val, int32_t rhs) {
+            return val >> rhs;
+        }, lhs, rhs);
 #endif
     }
 
