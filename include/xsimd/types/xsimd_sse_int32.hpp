@@ -124,11 +124,6 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_LONG(uint32_t, 4)
     };
 
-    batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
-    batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs);
-    batch<uint32_t, 4> operator<<(const batch<uint32_t, 4>& lhs, int32_t rhs);
-    batch<uint32_t, 4> operator>>(const batch<uint32_t, 4>& lhs, int32_t rhs);
-
     /************************************
      * batch<int32_t, 4> implementation *
      ************************************/
@@ -481,6 +476,24 @@ namespace xsimd
         return _mm_srai_epi32(lhs, rhs);
     }
 
+    inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm_sllv_epi32(lhs, rhs);
+#else
+        return sse_detail::shift_impl([](int32_t lhs, int32_t s) { return lhs << s; }, lhs, rhs);
+#endif
+    }
+
+    inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm_srav_epi32(lhs, rhs);
+#else
+        return sse_detail::shift_impl([](int32_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
+#endif
+    }
+
     inline batch<uint32_t, 4> operator<<(const batch<uint32_t, 4>& lhs, int32_t rhs)
     {
         return _mm_slli_epi32(lhs, rhs);
@@ -489,6 +502,24 @@ namespace xsimd
     inline batch<uint32_t, 4> operator>>(const batch<uint32_t, 4>& lhs, int32_t rhs)
     {
         return _mm_srli_epi32(lhs, rhs);
+    }
+
+    inline batch<uint32_t, 4> operator<<(const batch<uint32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm_sllv_epi32(lhs, rhs);
+#else
+        return sse_detail::shift_impl([](uint32_t lhs, int32_t s) { return lhs << s; }, lhs, rhs);
+#endif
+    }
+
+    inline batch<uint32_t, 4> operator>>(const batch<uint32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm_srlv_epi32(lhs, rhs);
+#else
+        return sse_detail::shift_impl([](uint32_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
+#endif
     }
 }
 

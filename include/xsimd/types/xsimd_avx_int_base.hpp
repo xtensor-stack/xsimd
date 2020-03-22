@@ -16,7 +16,7 @@
 namespace xsimd
 {
 
-#if XSIMD_X86_INSTR_SET < XSIMD_X86_AVX2_VERSION
+#if XSIMD_X86_INSTR_SET < XSIMD_X86_AVX512_VERSION
 
 #define XSIMD_SPLIT_AVX(avx_name)                              \
     __m128i avx_name##_low = _mm256_castsi256_si128(avx_name); \
@@ -32,6 +32,7 @@ namespace xsimd
     __m128i res_low = func(avx_lhs##_low, avx_rhs##_low);    \
     __m128i res_high = func(avx_lhs##_high, avx_rhs##_high); \
     XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+
 #endif
 
     template <class T, std::size_t N>
@@ -571,6 +572,19 @@ namespace xsimd
             lhs.store_aligned(&tmp_lhs[0]);
             unroller<N>([&](std::size_t i) {
                 tmp_res[i] = f(tmp_lhs[i], rhs);
+            });
+            return batch<T, N>(tmp_res, aligned_mode());
+        }
+
+        template <class F, class T, class S, std::size_t N>
+        inline batch<T, N> shift_impl(F&& f, const batch<T, N>& lhs, const batch<S, N>& rhs)
+        {
+            alignas(32) T tmp_lhs[N], tmp_res[N];
+            alignas(32) S tmp_rhs[N];
+            lhs.store_aligned(&tmp_lhs[0]);
+            rhs.store_aligned(&tmp_rhs[0]);
+            unroller<N>([&](std::size_t i) {
+              tmp_res[i] = f(tmp_lhs[i], tmp_rhs[i]);
             });
             return batch<T, N>(tmp_res, aligned_mode());
         }

@@ -164,6 +164,10 @@
     #define XSIMD_X86_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
 #endif
 
+#if __GNUC__ == 6 && __GNUC_MINOR__ == 4
+    #define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
+#endif
+
 /***************************
  * X86_AMD INSTRUCTION SET *
  ***************************/

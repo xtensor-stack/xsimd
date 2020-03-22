@@ -67,10 +67,6 @@ namespace xsimd
         using base_type::store_unaligned;
     };
 
-    batch<uint64_t, 2> operator<<(const batch<uint64_t, 2>& lhs, int64_t rhs);
-    batch<uint64_t, 2> operator>>(const batch<uint64_t, 2>& lhs, int64_t rhs);
-    batch<uint64_t, 2> operator<<(const batch<uint64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
-
     /************************************
     * batch<uint64_t, 2> implementation *
     *************************************/
@@ -485,7 +481,7 @@ namespace xsimd
             }
         };
 
-        inline batch<uint64_t, 2> shift_left(const batch<uint64_t, 2>& lhs, const int n)
+        inline batch<uint64_t, 2> shift_left(const batch<uint64_t, 2>& lhs, int32_t n)
         {
             switch(n)
             {
@@ -496,7 +492,7 @@ namespace xsimd
             return batch<uint64_t, 2>(uint64_t(0));
         }
 
-        inline batch<uint64_t, 2> shift_right(const batch<uint64_t, 2>& lhs, const int n)
+        inline batch<uint64_t, 2> shift_right(const batch<uint64_t, 2>& lhs, int32_t n)
         {
             switch(n)
             {
@@ -508,12 +504,12 @@ namespace xsimd
         }
     }
 
-    inline batch<uint64_t, 2> operator<<(const batch<uint64_t, 2>& lhs, int64_t rhs)
+    inline batch<uint64_t, 2> operator<<(const batch<uint64_t, 2>& lhs, int32_t rhs)
     {
         return detail::shift_left(lhs, rhs);
     }
 
-    inline batch<uint64_t, 2> operator>>(const batch<uint64_t, 2>& lhs, int64_t rhs)
+    inline batch<uint64_t, 2> operator>>(const batch<uint64_t, 2>& lhs, int32_t rhs)
     {
         return detail::shift_right(lhs, rhs);
     }
@@ -521,6 +517,11 @@ namespace xsimd
     inline batch<uint64_t, 2> operator<<(const batch<uint64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
         return vshlq_u64(lhs, rhs);
+    }
+
+    inline batch<uint64_t, 2> operator>>(const batch<uint64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
+    {
+        return vshlq_u64(lhs, vnegq_s64(rhs));
     }
 }
 
