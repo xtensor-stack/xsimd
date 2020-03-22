@@ -109,9 +109,6 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_LONG(int32_t, 8)
    };
 
-    batch<int32_t, 8> operator<<(const batch<int32_t, 8>& lhs, int32_t rhs);
-    batch<int32_t, 8> operator>>(const batch<int32_t, 8>& lhs, int32_t rhs);
-
     template <>
     class batch<uint32_t, 8> : public avx_int_batch<uint32_t, 8>
     {
@@ -127,9 +124,6 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_INT32(uint32_t, 8)
         XSIMD_DECLARE_LOAD_STORE_LONG(uint32_t, 8)
     };
-
-    batch<uint32_t, 8> operator<<(const batch<uint32_t, 8>& lhs, int32_t rhs);
-    batch<uint32_t, 8> operator>>(const batch<uint32_t, 8>& lhs, int32_t rhs);
 
     /************************************
      * batch<int32_t, 8> implementation *
@@ -521,6 +515,24 @@ namespace xsimd
 #endif
     }
 
+    inline batch<int32_t, 8> operator<<(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_sllv_epi32(lhs, rhs);
+#else
+        return avx_detail::shift_impl([](int32_t lhs, int32_t s) { return lhs << s; }, lhs, rhs);
+#endif
+    }
+
+    inline batch<int32_t, 8> operator>>(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_srav_epi32(lhs, rhs);
+#else
+        return avx_detail::shift_impl([](int32_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
+#endif
+    }
+
     inline batch<uint32_t, 8> operator<<(const batch<uint32_t, 8>& lhs, int32_t rhs)
     {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
@@ -542,6 +554,24 @@ namespace xsimd
         __m128i res_low = _mm_srli_epi32(lhs_low, rhs);
         __m128i res_high = _mm_srli_epi32(lhs_high, rhs);
         XSIMD_RETURN_MERGED_SSE(res_low, res_high);
+#endif
+    }
+
+    inline batch<uint32_t, 8> operator<<(const batch<uint32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_sllv_epi32(lhs, rhs);
+#else
+        return avx_detail::shift_impl([](uint32_t lhs, int32_t s) { return lhs << s; }, lhs, rhs);
+#endif
+    }
+
+    inline batch<uint32_t, 8> operator>>(const batch<uint32_t, 8>& lhs, const batch<int32_t, 8>& rhs)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+        return _mm256_srlv_epi32(lhs, rhs);
+#else
+        return avx_detail::shift_impl([](uint32_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
 #endif
     }
 }

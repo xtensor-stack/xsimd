@@ -128,15 +128,6 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_LONG(uint32_t, 16)
     };
 
-    batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs);
-    batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs);
-    batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
-    batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
-    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, int32_t rhs);
-    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, int32_t rhs);
-    batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
-    batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs);
-
     /*************************************
      * batch<int32_t, 16> implementation *
      *************************************/
@@ -354,16 +345,20 @@ namespace xsimd
 
     inline batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, int32_t rhs)
     {
-        // _mm512_slli_epi32 expects its last argument to be known at compile time,
-        // which cannot be guaranteed here.
-        return _mm512_sllv_epi32(lhs, batch<int32_t, 16>(rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        return _mm512_sllv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        return _mm512_slli_epi32(lhs, rhs);
+#endif
     }
 
     inline batch<int32_t, 16> operator>>(const batch<int32_t, 16>& lhs, int32_t rhs)
     {
-        // _mm512_srai_epi32 expects its last argument to be known at compile time,
-        // which cannot be guaranteed here.
-        return _mm512_srav_epi32(lhs, batch<int32_t, 16>(rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        return _mm512_srav_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        return _mm512_srai_epi32(lhs, rhs);
+#endif
     }
 
     inline batch<int32_t, 16> operator<<(const batch<int32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
@@ -378,16 +373,20 @@ namespace xsimd
 
     inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, int32_t rhs)
     {
-        // _mm512_slli_epi32 expects its last argument to be known at compile time,
-        // which cannot be guaranteed here.
-        return _mm512_sllv_epi32(lhs, batch<uint32_t, 16>(rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        return _mm512_sllv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        return _mm512_slli_epi32(lhs, rhs);
+#endif
     }
 
     inline batch<uint32_t, 16> operator>>(const batch<uint32_t, 16>& lhs, int32_t rhs)
     {
-        // _mm512_srli_epi32 expects its last argument to be known at compile time,
-        // which cannot be guaranteed here.
-        return _mm512_srlv_epi32(lhs, batch<int32_t, 16>(rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        return _mm512_srlv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        return _mm512_srli_epi32(lhs, rhs);
+#endif
     }
 
     inline batch<uint32_t, 16> operator<<(const batch<uint32_t, 16>& lhs, const batch<int32_t, 16>& rhs)
