@@ -67,10 +67,6 @@ namespace xsimd
         using base_type::store_unaligned;
     };
 
-    batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int64_t rhs);
-    batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int64_t rhs);
-    batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs);
-
     /***********************************
     * batch<int64_t, 2> implementation *
     ************************************/
@@ -471,7 +467,7 @@ namespace xsimd
 
     namespace detail
     {
-        inline batch<int64_t, 2> shift_left(const batch<int64_t, 2>& lhs, const int n)
+        inline batch<int64_t, 2> shift_left(const batch<int64_t, 2>& lhs, int32_t n)
         {
             switch(n)
             {
@@ -482,7 +478,7 @@ namespace xsimd
             return batch<int64_t, 2>(int64_t(0));
         }
 
-        inline batch<int64_t, 2> shift_right(const batch<int64_t, 2>& lhs, const int n)
+        inline batch<int64_t, 2> shift_right(const batch<int64_t, 2>& lhs, int32_t n)
         {
             switch(n)
             {
@@ -494,12 +490,12 @@ namespace xsimd
         }
     }
 
-    inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int64_t rhs)
+    inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, int32_t rhs)
     {
         return detail::shift_left(lhs, rhs);
     }
 
-    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int64_t rhs)
+    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int32_t rhs)
     {
         return detail::shift_right(lhs, rhs);
     }
@@ -507,6 +503,15 @@ namespace xsimd
     inline batch<int64_t, 2> operator<<(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
     {
         return vshlq_s64(lhs, rhs);
+    }
+
+    inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, const batch<int64_t, 2>& rhs)
+    {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+        return vshlq_s64(lhs, vnegq_s64(rhs));
+#else
+        return batch<int64_t, 2>(lhs[0] >> rhs[0], lhs[1] >> rhs[1]);
+#endif
     }
 }
 

@@ -15,6 +15,7 @@
 #include <numeric>
 #include <random>
 #include <limits>
+#include <climits>
 
 #include "xsimd/xsimd.hpp"
 #include "xsimd_test_utils.hpp"
@@ -197,6 +198,9 @@ namespace xsimd
         using vector_type = typename base_type::vector_type;
         using value_type = typename base_type::value_type;
         using res_type = typename base_type::res_type;
+        using signed_value_type = typename std::make_signed<value_type>::type;
+        using signed_vector_type = batch<signed_value_type, N>;
+        using signed_res_type = std::vector<signed_value_type, aligned_allocator<signed_value_type, A>>;
 
         std::string name;
 
@@ -205,6 +209,7 @@ namespace xsimd
         res_type lhs;
         res_type rhs;
         res_type mix_lhs_rhs;
+        signed_res_type shift;
 
         value_type extract_res;
         res_type minus_res;
@@ -237,8 +242,10 @@ namespace xsimd
         res_type fnma_res;
         res_type fnms_res;
         value_type hadd_res;
-        res_type sl_res;
-        res_type sr_res;
+        res_type sl_s_res;
+        res_type sl_v_res;
+        res_type sr_s_res;
+        res_type sr_v_res;
         res_type false_res;
         res_type true_res;
 
@@ -257,6 +264,7 @@ namespace xsimd
         lhs.resize(N);
         rhs.resize(N);
         mix_lhs_rhs.resize(N);
+        shift.resize(N);
         minus_res.resize(N);
         plus_res.resize(N);
         add_vv_res.resize(N);
@@ -286,8 +294,10 @@ namespace xsimd
         fms_res.resize(N);
         fnma_res.resize(N);
         fnms_res.resize(N);
-        sl_res.resize(N);
-        sr_res.resize(N);
+        sl_s_res.resize(N);
+        sl_v_res.resize(N);
+        sr_s_res.resize(N);
+        sr_v_res.resize(N);
         false_res.resize(N);
         true_res.resize(N);
 
@@ -298,7 +308,8 @@ namespace xsimd
         {
             bool negative_lhs = std::is_signed<T>::value && (i % 2 == 1);
             lhs[i] = value_type(i) * (negative_lhs ? -10 : 10);
-            rhs[i] = value_type(4) + value_type(i);
+            rhs[i] = value_type(i) + value_type(4);
+            shift[i] = signed_value_type(i) % (CHAR_BIT * sizeof(value_type));
             extract_res = lhs[1];
             minus_res[i] = -lhs[i];
             plus_res[i] = +lhs[i];
@@ -330,8 +341,10 @@ namespace xsimd
             fnma_res[i] = -lhs[i] * rhs[i] + rhs[i];
             fnms_res[i] = -lhs[i] * rhs[i] - rhs[i];
             hadd_res += lhs[i];
-            sl_res[i] = lhs[i] << sh_nb;
-            sr_res[i] = lhs[i] >> sh_nb;
+            sl_s_res[i] = lhs[i] << sh_nb;
+            sl_v_res[i] = lhs[i] << shift[i];
+            sr_s_res[i] = lhs[i] >> sh_nb;
+            sr_v_res[i] = lhs[i] >> shift[i];
             false_res[i] = value_type(0);
             true_res[i] = value_type(1);
         }
@@ -1273,6 +1286,9 @@ namespace xsimd
         using vector_type = typename tester_type::vector_type;
         using value_type = typename tester_type::value_type;
         using res_type = typename tester_type::res_type;
+        using signed_vector_type = typename tester_type::signed_vector_type;
+        using signed_value_type = typename tester_type::signed_value_type;
+        using signed_res_type = typename tester_type::signed_res_type;
 
         using vector_bool_type = typename simd_batch_traits<vector_type>::batch_bool_type;
         using bool_traits = simd_batch_traits<vector_bool_type>;
@@ -1283,6 +1299,7 @@ namespace xsimd
         vector_type lhs;
         vector_type rhs;
         vector_type mix_lhs_rhs;
+        signed_vector_type shift;
         vector_type vres;
         res_type res(tester_type::size);
         value_type s = tester.s;
@@ -1290,15 +1307,15 @@ namespace xsimd
         bool tmp_success = true;
 
         std::string val_type = value_type_name<vector_type>();
-        std::string shift = std::string(val_type.size(), '-');
+        std::string val_type_shift = std::string(val_type.size(), '-');
         std::string name = tester.name;
         std::string name_shift = std::string(name.size(), '-');
         std::string dash(8, '-');
         std::string space(8, ' ');
 
-        out << dash << name_shift << '-' << shift << dash << std::endl;
+        out << dash << name_shift << '-' << val_type_shift << dash << std::endl;
         out << space << name << " " << val_type << std::endl;
-        out << dash << name_shift << '-' << shift << dash << std::endl
+        out << dash << name_shift << '-' << val_type_shift << dash << std::endl
             << std::endl;
 
         std::string topic = "operator[]               : ";
@@ -1326,6 +1343,7 @@ namespace xsimd
         detail::load_vec(lhs, tester.lhs);
         detail::load_vec(rhs, tester.rhs);
         detail::load_vec(mix_lhs_rhs, tester.mix_lhs_rhs);
+        detail::load_vec(shift, tester.shift);
 
         topic = "unary operator-          : ";
         vres = -lhs;
@@ -1523,13 +1541,25 @@ namespace xsimd
         topic = "shift left(simd, int)    : ";
         vres = lhs << tester.sh_nb;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(topic, res, tester.sl_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sl_s_res, out);
+        success = success && tmp_success;
+
+        topic = "shift left(simd, simd)    : ";
+        vres = lhs << shift;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sl_v_res, out);
         success = success && tmp_success;
 
         topic = "shift right(simd, int)   : ";
         vres = lhs >> tester.sh_nb;
         detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(topic, res, tester.sr_res, out);
+        tmp_success = check_almost_equal(topic, res, tester.sr_s_res, out);
+        success = success && tmp_success;
+
+        topic = "shift right(simd, simd)   : ";
+        vres = lhs >> shift;
+        detail::store_vec(vres, res);
+        tmp_success = check_almost_equal(topic, res, tester.sr_v_res, out);
         success = success && tmp_success;
 
         topic = "conversion from true     : ";

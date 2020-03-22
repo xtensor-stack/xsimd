@@ -328,6 +328,19 @@ namespace xsimd
             });
             return batch<T, N>(tmp_res, aligned_mode());
         }
+
+        template <class F, class T, class S, std::size_t N>
+        inline batch<T, N> shift_impl(F&& f, const batch<T, N>& lhs, const batch<S, N>& rhs)
+        {
+            alignas(64) T tmp_lhs[N], tmp_res[N];
+            alignas(64) S tmp_rhs[N];
+            lhs.store_aligned(&tmp_lhs[0]);
+            rhs.store_aligned(&tmp_rhs[0]);
+            unroller<N>([&](std::size_t i) {
+              tmp_res[i] = f(tmp_lhs[i], tmp_rhs[i]);
+            });
+            return batch<T, N>(tmp_res, aligned_mode());
+        }
     }
 }
 
