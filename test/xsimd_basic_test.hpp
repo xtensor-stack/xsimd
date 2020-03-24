@@ -296,7 +296,8 @@ namespace xsimd
         hadd_res = value_type(0);
         for (size_t i = 0; i < N; ++i)
         {
-            lhs[i] = value_type(i) * 10;
+            bool negative_lhs = std::is_signed<T>::value && (i % 2 == 1);
+            lhs[i] = value_type(i) * (negative_lhs ? -10 : 10);
             rhs[i] = value_type(4) + value_type(i);
             extract_res = lhs[1];
             minus_res[i] = -lhs[i];

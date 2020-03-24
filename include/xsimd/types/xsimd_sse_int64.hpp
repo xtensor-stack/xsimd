@@ -417,7 +417,11 @@ namespace xsimd
 
     inline batch<int64_t, 2> operator>>(const batch<int64_t, 2>& lhs, int32_t rhs)
     {
-        return _mm_srli_epi64(lhs, rhs);
+#if defined(XSIMD_AVX512VL_AVAILABLE)
+        return _mm_srai_epi64(lhs, rhs);
+#else
+        return sse_detail::shift_impl([](int64_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
+#endif
     }
 
     inline batch<uint64_t, 2> operator<<(const batch<uint64_t, 2>& lhs, int32_t rhs)
