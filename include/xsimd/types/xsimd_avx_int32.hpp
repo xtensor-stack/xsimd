@@ -289,11 +289,11 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-                return _mm256_sign_epi32(rhs, rhs);
+                return _mm256_abs_epi32(rhs);
 #else
                 XSIMD_SPLIT_AVX(rhs);
-                __m128i res_low = _mm_sign_epi32(rhs_low, rhs_low);
-                __m128i res_high = _mm_sign_epi32(rhs_high, rhs_high);
+                __m128i res_low = _mm_abs_epi32(rhs_low);
+                __m128i res_high = _mm_abs_epi32(rhs_high);
                 XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
             }

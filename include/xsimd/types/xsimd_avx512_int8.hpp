@@ -338,7 +338,14 @@ namespace xsimd
         {
             static batch_type abs(const batch_type& rhs)
             {
+            #if defined(XSIMD_AVX512BW_AVAILABLE)
                 return _mm512_abs_epi8(rhs);
+            #else
+                XSIMD_SPLIT_AVX512(rhs);
+                __m256i res_low = _mm256_abs_epi8(rhs_low);
+                __m256i res_high = _mm256_abs_epi8(rhs_high);
+                XSIMD_RETURN_MERGED_AVX(res_low, res_high);
+            #endif
             }
 
             static batch_type min(const batch_type& lhs, const batch_type& rhs)

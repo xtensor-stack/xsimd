@@ -424,7 +424,7 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
-                return _mm_sign_epi32(rhs, rhs);
+                return _mm_abs_epi32(rhs);
 #else
                 __m128i sign = _mm_srai_epi32(rhs, 31);
                 __m128i inv = _mm_xor_si128(rhs, sign);

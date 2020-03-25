@@ -231,7 +231,6 @@ namespace xsimd
 
             static batch_type max(const batch_type& lhs, const batch_type& rhs)
             {
-
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
                 return _mm_max_epi8(lhs, rhs);
 #else
@@ -244,7 +243,7 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
-                return _mm_sign_epi8(rhs, rhs);
+                return _mm_abs_epi8(rhs);
 #else
                 __m128i neg = _mm_sub_epi8(_mm_setzero_si128(), rhs);
                 return _mm_min_epu8(rhs, neg);

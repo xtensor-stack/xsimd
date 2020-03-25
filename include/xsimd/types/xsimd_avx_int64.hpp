@@ -260,7 +260,9 @@ namespace xsimd
 
             static batch_type abs(const batch_type& rhs)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+#if defined(XSIMD_AVX512VL_AVAILABLE)
+                return _mm256_abs_epi64(rhs);
+#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
                 __m256i sign = _mm256_cmpgt_epi64(_mm256_setzero_si256(), rhs);
                 __m256i inv = _mm256_xor_si256(rhs, sign);
                 return _mm256_sub_epi64(inv, sign);
