@@ -305,8 +305,8 @@ namespace xsimd
     template <class T, std::size_t N>
     template <class... Args, class>
     inline avx512_fallback_batch_bool<T, N>::avx512_fallback_batch_bool(Args... args)
-        : m_value(avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(int8_t)>{},
-                  static_cast<int8_t>(-static_cast<bool>(args))...))
+        : m_value(avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{},
+                  static_cast<T>(-static_cast<bool>(args))...))
     {
     }
 
@@ -345,8 +345,8 @@ namespace xsimd
     template <class... Args>
     inline batch_bool<T, N>& avx512_fallback_batch_bool<T, N>::load_values(Args... b)
     {
-        m_value = avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(int8_t)>{},
-                                          static_cast<int8_t>(-static_cast<bool>(b))...);
+        m_value = avx512_detail::int_init(std::integral_constant<std::size_t, sizeof(T)>{},
+                                          static_cast<T>(-static_cast<bool>(b))...);
         return (*this)();
     }
     
