@@ -370,6 +370,9 @@ namespace xsimd
 
             static batch_type abs(const batch_type& rhs)
             {
+#if defined(XSIMD_AVX512VL_AVAILABLE)
+                return _mm_abs_epi64(rhs);
+#else
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_2_VERSION
                 __m128i sign = _mm_cmpgt_epi64(_mm_setzero_si128(), rhs);
 #else
@@ -378,6 +381,7 @@ namespace xsimd
 #endif
                 __m128i inv = _mm_xor_si128(rhs, sign);
                 return _mm_sub_epi64(inv, sign);
+#endif
             }
         };
 
