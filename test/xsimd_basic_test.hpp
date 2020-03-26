@@ -1731,12 +1731,467 @@ namespace xsimd
         return success;
     }
 
-    /***************
-     * cast tester *
-     ***************/
+    /*********************
+     * batch cast tester *
+     *********************/
 
     template <std::size_t N, std::size_t A>
-    struct simd_cast_tester
+    struct simd_batch_cast_tester
+    {
+        using int8_batch = batch<int8_t, N * 8>;
+        using uint8_batch = batch<uint8_t, N * 8>;
+        using int16_batch = batch<int16_t, N * 4>;
+        using uint16_batch = batch<uint16_t, N * 4>;
+        using int32_batch = batch<int32_t, N * 2>;
+        using uint32_batch = batch<uint32_t, N * 2>;
+        using int64_batch = batch<int64_t, N>;
+        using uint64_batch = batch<uint64_t, N>;
+        using float_batch = batch<float, N * 2>;
+        using double_batch = batch<double, N>;
+
+        static constexpr std::size_t Alignment = A;
+
+        std::string name;
+
+        std::vector<uint64_t> test_values;
+
+        simd_batch_cast_tester(const std::string& n);
+
+        template <class B_in, class B_out>
+        bool run_test(std::ostream& out, const std::string& topic, uint64_t test_value);
+    };
+
+    template <std::size_t N, std::size_t A>
+    inline simd_batch_cast_tester<N, A>::simd_batch_cast_tester(const std::string& n)
+        : name(n), test_values()
+    {
+        test_values.emplace_back(0);
+        test_values.emplace_back(0x01);
+        test_values.emplace_back(0x7f);
+        test_values.emplace_back(0x80);
+        test_values.emplace_back(0xff);
+        test_values.emplace_back(0x0100);
+        test_values.emplace_back(0x7fff);
+        test_values.emplace_back(0x8000);
+        test_values.emplace_back(0xffff);
+        test_values.emplace_back(0x00010000);
+        test_values.emplace_back(0x7fffffff);
+        test_values.emplace_back(0x80000000);
+        test_values.emplace_back(0xffffffff);
+        test_values.emplace_back(0x0000000100000000);
+        test_values.emplace_back(0x7fffffffffffffff);
+        test_values.emplace_back(0x8000000000000000);
+        test_values.emplace_back(0xffffffffffffffff);
+    }
+
+    template <std::size_t N, std::size_t A>
+    template <class B_in, class B_out>
+    inline bool simd_batch_cast_tester<N, A>::run_test(std::ostream& out, const std::string& topic, uint64_t test_value)
+    {
+        using T_in = typename B_in::value_type;
+        using T_out = typename B_out::value_type;
+        static constexpr std::size_t N_common = B_in::size < B_out::size ? B_in::size : B_out::size;
+        using B_common_in = batch<T_in, N_common>;
+        using B_common_out = batch<T_out, N_common>;
+
+        T_in in_test_value = static_cast<T_in>(test_value);
+        if (in_test_value <= std::numeric_limits<T_out>::max() && in_test_value >= std::numeric_limits<T_out>::min())
+        {
+            B_common_out res = batch_cast<T_out>(B_common_in(in_test_value));
+            return check_almost_equal(topic, res[0], static_cast<T_out>(in_test_value), out);
+        }
+        return true;
+    }
+
+    /*********************
+     * bitwise cast test *
+     *********************/
+
+    template <class T>
+    inline bool test_simd_batch_cast(std::ostream& out, T& tester)
+    {
+        using int8_batch = typename T::int8_batch;
+        using uint8_batch = typename T::uint8_batch;
+        using int16_batch = typename T::int16_batch;
+        using uint16_batch = typename T::uint16_batch;
+        using int32_batch = typename T::int32_batch;
+        using uint32_batch = typename T::uint32_batch;
+        using int64_batch = typename T::int64_batch;
+        using uint64_batch = typename T::uint64_batch;
+        using float_batch = typename T::float_batch;
+        using double_batch = typename T::double_batch;
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
+
+        for (const auto& test_value : tester.test_values)
+        {
+            std::string topic = "batch cast int8   -> int8   : ";
+            success &= tester.template run_test<int8_batch, int8_batch>(out, topic, test_value);
+
+            topic = "batch cast int8   -> uint8  : ";
+            success &= tester.template run_test<int8_batch, uint8_batch>(out, topic, test_value);
+
+            topic = "batch cast uint8  -> int8   : ";
+            success &= tester.template run_test<uint8_batch, int8_batch>(out, topic, test_value);
+
+            topic = "batch cast uint8  -> uint8  : ";
+            success &= tester.template run_test<uint8_batch, uint8_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> int16  : ";
+            success &= tester.template run_test<int16_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> uint16 : ";
+            success &= tester.template run_test<int16_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> int16  : ";
+            success &= tester.template run_test<uint16_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> uint16 : ";
+            success &= tester.template run_test<uint16_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> int32  : ";
+            success &= tester.template run_test<int32_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> uint32 : ";
+            success &= tester.template run_test<int32_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> float  : ";
+            success &= tester.template run_test<int32_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> int32  : ";
+            success &= tester.template run_test<uint32_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> uint32 : ";
+            success &= tester.template run_test<uint32_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> float  : ";
+            success &= tester.template run_test<uint32_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> int64  : ";
+            success &= tester.template run_test<int64_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> uint64 : ";
+            success &= tester.template run_test<int64_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> double : ";
+            success &= tester.template run_test<int64_batch, double_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> int64  : ";
+            success &= tester.template run_test<uint64_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> uint64 : ";
+            success &= tester.template run_test<uint64_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> double : ";
+            success &= tester.template run_test<uint64_batch, double_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> int32  : ";
+            success &= tester.template run_test<float_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> uint32 : ";
+            success &= tester.template run_test<float_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> float  : ";
+            success &= tester.template run_test<float_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> int64  : ";
+            success &= tester.template run_test<double_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> uint64 : ";
+            success &= tester.template run_test<double_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> double : ";
+            success &= tester.template run_test<double_batch, double_batch>(out, topic, test_value);
+        }
+
+        return success;
+    }
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+    template <class T>
+    inline typename std::enable_if<T::Alignment >= 32, bool>::type test_simd_batch_cast_sizeshift1(std::ostream& out, T& tester)
+    {
+        using int8_batch = typename T::int8_batch;
+        using uint8_batch = typename T::uint8_batch;
+        using int16_batch = typename T::int16_batch;
+        using uint16_batch = typename T::uint16_batch;
+        using int32_batch = typename T::int32_batch;
+        using uint32_batch = typename T::uint32_batch;
+        using int64_batch = typename T::int64_batch;
+        using uint64_batch = typename T::uint64_batch;
+        using float_batch = typename T::float_batch;
+        using double_batch = typename T::double_batch;
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
+
+        for (const auto& test_value : tester.test_values)
+        {
+            std::string topic = "batch cast int8   -> int16  : ";
+            success &= tester.template run_test<int8_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast int8   -> uint16 : ";
+            success &= tester.template run_test<int8_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint8  -> int16  : ";
+            success &= tester.template run_test<uint8_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint8  -> uint16 : ";
+            success &= tester.template run_test<uint8_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> int8   : ";
+            success &= tester.template run_test<int16_batch, int8_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> uint8  : ";
+            success &= tester.template run_test<int16_batch, uint8_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> int32  : ";
+            success &= tester.template run_test<int16_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> uint32 : ";
+            success &= tester.template run_test<int16_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> float  : ";
+            success &= tester.template run_test<int16_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> int8   : ";
+            success &= tester.template run_test<uint16_batch, int8_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> uint8  : ";
+            success &= tester.template run_test<uint16_batch, uint8_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> int32  : ";
+            success &= tester.template run_test<uint16_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> uint32 : ";
+            success &= tester.template run_test<uint16_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> float  : ";
+            success &= tester.template run_test<uint16_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> int16  : ";
+            success &= tester.template run_test<int32_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> uint16 : ";
+            success &= tester.template run_test<int32_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> int64  : ";
+            success &= tester.template run_test<int32_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> uint64 : ";
+            success &= tester.template run_test<int32_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> double : ";
+            success &= tester.template run_test<int32_batch, double_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> int8   : ";
+            success &= tester.template run_test<uint32_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> uint8  : ";
+            success &= tester.template run_test<uint32_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> int32  : ";
+            success &= tester.template run_test<uint32_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> uint32 : ";
+            success &= tester.template run_test<uint32_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> double : ";
+            success &= tester.template run_test<uint32_batch, double_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> int32  : ";
+            success &= tester.template run_test<int64_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> uint32 : ";
+            success &= tester.template run_test<int64_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> float  : ";
+            success &= tester.template run_test<int64_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> int32  : ";
+            success &= tester.template run_test<uint64_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> uint32 : ";
+            success &= tester.template run_test<uint64_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> float  : ";
+            success &= tester.template run_test<uint64_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> int16  : ";
+            success &= tester.template run_test<float_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> uint16 : ";
+            success &= tester.template run_test<float_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> int64  : ";
+            success &= tester.template run_test<float_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> uint64 : ";
+            success &= tester.template run_test<float_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> double : ";
+            success &= tester.template run_test<float_batch, double_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> int32  : ";
+            success &= tester.template run_test<double_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> uint32 : ";
+            success &= tester.template run_test<double_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> float  : ";
+            success &= tester.template run_test<double_batch, float_batch>(out, topic, test_value);
+        }
+
+        return success;
+    }
+
+    template <class T>
+    inline typename std::enable_if<T::Alignment < 32, bool>::type test_simd_batch_cast_sizeshift1(std::ostream&, T&)
+    {
+        return true;
+    }
+#endif
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+    template <class T>
+    inline typename std::enable_if<T::Alignment >= 64, bool>::type test_simd_batch_cast_sizeshift2(std::ostream& out, T& tester)
+    {
+        using int8_batch = typename T::int8_batch;
+        using uint8_batch = typename T::uint8_batch;
+        using int16_batch = typename T::int16_batch;
+        using uint16_batch = typename T::uint16_batch;
+        using int32_batch = typename T::int32_batch;
+        using uint32_batch = typename T::uint32_batch;
+        using int64_batch = typename T::int64_batch;
+        using uint64_batch = typename T::uint64_batch;
+        using float_batch = typename T::float_batch;
+        using double_batch = typename T::double_batch;
+
+        bool success = true;
+        bool tmp_success = true;
+
+        std::string name = tester.name;
+        std::string name_shift = std::string(name.size(), '-');
+        std::string dash(8, '-');
+        std::string space(8, ' ');
+
+        out << dash << name_shift << dash << std::endl;
+        out << space << name << space << std::endl;
+        out << dash << name_shift << dash << std::endl
+            << std::endl;
+
+        for (const auto& test_value : tester.test_values)
+        {
+            std::string topic = "batch cast int8   -> int32  : ";
+            success &= tester.template run_test<int8_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast int8   -> uint32 : ";
+            success &= tester.template run_test<int8_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast int8   -> float  : ";
+            success &= tester.template run_test<int8_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast uint8  -> int32  : ";
+            success &= tester.template run_test<uint8_batch, int32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint8  -> uint32 : ";
+            success &= tester.template run_test<uint8_batch, uint32_batch>(out, topic, test_value);
+
+            topic = "batch cast uint8  -> float  : ";
+            success &= tester.template run_test<uint8_batch, float_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> int64  : ";
+            success &= tester.template run_test<int16_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> uint64 : ";
+            success &= tester.template run_test<int16_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast int16  -> double : ";
+            success &= tester.template run_test<int16_batch, double_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> int64  : ";
+            success &= tester.template run_test<uint16_batch, int64_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> uint64 : ";
+            success &= tester.template run_test<uint16_batch, uint64_batch>(out, topic, test_value);
+
+            topic = "batch cast uint16 -> double  : ";
+            success &= tester.template run_test<uint16_batch, double_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> int8   : ";
+            success &= tester.template run_test<int32_batch, int8_batch>(out, topic, test_value);
+
+            topic = "batch cast int32  -> uint8  : ";
+            success &= tester.template run_test<int32_batch, uint8_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> int8   : ";
+            success &= tester.template run_test<uint32_batch, int8_batch>(out, topic, test_value);
+
+            topic = "batch cast uint32 -> uint8  : ";
+            success &= tester.template run_test<uint32_batch, uint8_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> int16  : ";
+            success &= tester.template run_test<int64_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast int64  -> uint16 : ";
+            success &= tester.template run_test<int64_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> int16  : ";
+            success &= tester.template run_test<uint64_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast uint64 -> uint16 : ";
+            success &= tester.template run_test<uint64_batch, uint16_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> int8   : ";
+            success &= tester.template run_test<float_batch, int8_batch>(out, topic, test_value);
+
+            topic = "batch cast float  -> uint8  : ";
+            success &= tester.template run_test<float_batch, uint8_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> int16  : ";
+            success &= tester.template run_test<double_batch, int16_batch>(out, topic, test_value);
+
+            topic = "batch cast double -> uint16 : ";
+            success &= tester.template run_test<double_batch, uint16_batch>(out, topic, test_value);
+        }
+
+        return success;
+    }
+
+    template <class T>
+    inline typename std::enable_if<T::Alignment < 64, bool>::type test_simd_batch_cast_sizeshift2(std::ostream&, T&)
+    {
+        return true;
+    }
+#endif
+
+    /***********************
+     * bitwise cast tester *
+     ***********************/
+
+    template <std::size_t N, std::size_t A>
+    struct simd_bitwise_cast_tester
     {
         using int32_batch = batch<int32_t, N * 2>;
         using int64_batch = batch<int64_t, N>;
@@ -1766,7 +2221,7 @@ namespace xsimd
         double_vector i64tod_res;
         double_vector ftod_res;
 
-        simd_cast_tester(const std::string& n);
+        simd_bitwise_cast_tester(const std::string& n);
     };
 
     namespace detail
@@ -1780,7 +2235,7 @@ namespace xsimd
     }
 
     template <std::size_t N, std::size_t A>
-    inline simd_cast_tester<N, A>::simd_cast_tester(const std::string& n)
+    inline simd_bitwise_cast_tester<N, A>::simd_bitwise_cast_tester(const std::string& n)
         : name(n), i32_input(2), i64_input(2), f_input(3.), d_input(2.5e17),
           ftoi32_res(2 * N), dtoi32_res(2 * N), ftoi64_res(N), dtoi64_res(N),
           i32tof_res(2 * N), i64tof_res(2 * N), dtof_res(2 * N),
@@ -1819,12 +2274,12 @@ namespace xsimd
         }
     }
 
-    /*************
-     * cast test *
-     *************/
+    /*********************
+     * bitwise cast test *
+     *********************/
 
     template <class T>
-    inline bool test_simd_cast(std::ostream& out, T& tester)
+    inline bool test_simd_bitwise_cast(std::ostream& out, T& tester)
     {
         using int32_batch = typename T::int32_batch;
         using int64_batch = typename T::int64_batch;
@@ -1857,61 +2312,61 @@ namespace xsimd
         out << dash << name_shift << dash << std::endl
             << std::endl;
 
-        std::string topic = "cast int32  -> float  : ";
+        std::string topic = "bitwise cast int32  -> float  : ";
         fbres = bitwise_cast<float_batch>(tester.i32_input);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(topic, fvres, tester.i32tof_res, out);
         success = success && tmp_success;
 
-        topic = "cast int32  -> double : ";
+        topic = "bitwise cast int32  -> double : ";
         dbres = bitwise_cast<double_batch>(tester.i32_input);
         detail::store_vec(dbres, dvres);
         tmp_success = check_almost_equal(topic, dvres, tester.i32tod_res, out);
         success = success && tmp_success;
 
-        topic = "cast int64  -> float  : ";
+        topic = "bitwise cast int64  -> float  : ";
         fbres = bitwise_cast<float_batch>(tester.i64_input);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(topic, fvres, tester.i64tof_res, out);
         success = success && tmp_success;
 
-        topic = "cast int64  -> double : ";
+        topic = "bitwise cast int64  -> double : ";
         dbres = bitwise_cast<double_batch>(tester.i64_input);
         detail::store_vec(dbres, dvres);
         tmp_success = check_almost_equal(topic, dvres, tester.i64tod_res, out);
         success = success && tmp_success;
 
-        topic = "cast float  -> int32  : ";
+        topic = "bitwise cast float  -> int32  : ";
         i32bres = bitwise_cast<int32_batch>(tester.f_input);
         detail::store_vec(i32bres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.ftoi32_res, out);
         success = success && tmp_success;
 
-        topic = "cast float  -> int64  : ";
+        topic = "bitwise cast float  -> int64  : ";
         i64bres = bitwise_cast<int64_batch>(tester.f_input);
         detail::store_vec(i64bres, i64vres);
         tmp_success = check_almost_equal(topic, i64vres, tester.ftoi64_res, out);
         success = success && tmp_success;
 
-        topic = "cast float  -> double : ";
+        topic = "bitwise cast float  -> double : ";
         dbres = bitwise_cast<double_batch>(tester.f_input);
         detail::store_vec(dbres, dvres);
         tmp_success = check_almost_equal(topic, dvres, tester.ftod_res, out);
         success = success && tmp_success;
 
-        topic = "cast double -> int32  : ";
+        topic = "bitwise cast double -> int32  : ";
         i32bres = bitwise_cast<int32_batch>(tester.d_input);
         detail::store_vec(i32bres, i32vres);
         tmp_success = check_almost_equal(topic, i32vres, tester.dtoi32_res, out);
         success = success && tmp_success;
 
-        topic = "cast double -> int64  : ";
+        topic = "bitwise cast double -> int64  : ";
         i64bres = bitwise_cast<int64_batch>(tester.d_input);
         detail::store_vec(i64bres, i64vres);
         tmp_success = check_almost_equal(topic, i64vres, tester.dtoi64_res, out);
         success = success && tmp_success;
 
-        topic = "cast double -> float  : ";
+        topic = "bitwise cast double -> float  : ";
         fbres = bitwise_cast<float_batch>(tester.d_input);
         detail::store_vec(fbres, fvres);
         tmp_success = check_almost_equal(topic, fvres, tester.dtof_res, out);

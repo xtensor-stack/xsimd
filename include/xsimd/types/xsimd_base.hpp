@@ -296,10 +296,73 @@ namespace xsimd
     batch<T, N> operator>>(const batch<T, N>& lhs, const batch<T, N>& rhs);
 
     /**************************
+     * batch cast functions *
+     **************************/
+
+    // Provides a static_cast from batch<T_in, N> to batch<T_out, N>
+    template <class T_in, class T_out, std::size_t N>
+    struct batch_cast_impl
+    {
+        template <std::size_t... I>
+        static inline batch<T_out, N> run_impl(const batch<T_in, N>& x, detail::index_sequence<I...>)
+        {
+            return batch<T_out, N>(static_cast<T_out>(x[I])...);
+        }
+
+    public:
+        static inline batch<T_out, N> run(const batch<T_in, N>& x)
+        {
+            return run_impl(x, detail::make_index_sequence<N>{});
+        }
+    };
+
+    template <class T, std::size_t N>
+    struct batch_cast_impl<T, T, N>
+    {
+        static inline batch<T, N> run(const batch<T, N>& x)
+        {
+            return x;
+        }
+    };
+
+    // Shorthand for defining an intrinsic-based batch_cast implementation
+    #define XSIMD_BATCH_CAST_INTRINSIC(T_IN, T_OUT, N, INTRINSIC)               \
+        template <>                                                             \
+        struct batch_cast_impl<T_IN, T_OUT, N>                                  \
+        {                                                                       \
+            static inline batch<T_OUT, N> run(const batch<T_IN, N>& x)          \
+            {                                                                   \
+                return INTRINSIC(x);                                            \
+            }                                                                   \
+        };
+
+    // Shorthand for defining an intrinsic-based batch_cast implementation that requires 2 intrinsics
+    #define XSIMD_BATCH_CAST_INTRINSIC2(T_IN, T_OUT, N, INTRINSIC1, INTRINSIC2) \
+        template <>                                                             \
+        struct batch_cast_impl<T_IN, T_OUT, N>                                  \
+        {                                                                       \
+            static inline batch<T_OUT, N> run(const batch<T_IN, N>& x)          \
+            {                                                                   \
+                return INTRINSIC2(INTRINSIC1(x));                               \
+            }                                                                   \
+        };
+
+    // Shorthand for defining an implicit batch_cast implementation
+    #define XSIMD_BATCH_CAST_IMPLICIT(T_IN, T_OUT, N)                           \
+        template <>                                                             \
+        struct batch_cast_impl<T_IN, T_OUT, N>                                  \
+        {                                                                       \
+            static inline batch<T_OUT, N> run(const batch<T_IN, N>& x)          \
+            {                                                                   \
+                return batch<T_OUT, N>(x);                                      \
+            }                                                                   \
+        };
+
+    /**************************
      * bitwise cast functions *
      **************************/
 
-    // Provides a reinterpret_case from batch<T_in, N_in> to batch<T_out, N_out>
+    // Provides a reinterpret_cast from batch<T_in, N_in> to batch<T_out, N_out>
     template <class B_in, class B_out>
     struct bitwise_cast_impl;
 
@@ -1700,6 +1763,16 @@ namespace xsimd
     inline batch<T, N> operator>>(const batch<T, N>& lhs, const batch<T, N>& rhs)
     {
         GENERIC_OPERATOR_IMPLEMENTATION(>>);
+    }
+
+    /*****************************************
+     * batch cast functions implementation *
+     *****************************************/
+
+    template <class T_out, class T_in, std::size_t N>
+    inline batch<T_out, N> batch_cast(const batch<T_in, N>& x)
+    {
+        return batch_cast_impl<T_in, T_out, N>::run(x);
     }
 
     /*****************************************

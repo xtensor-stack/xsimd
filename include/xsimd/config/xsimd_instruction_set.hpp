@@ -114,6 +114,10 @@
     #define XSIMD_AVX512VL_AVAILABLE 1
 #endif
 
+#if defined(__AVX512DQ__)
+    #define XSIMD_AVX512DQ_AVAILABLE 1
+#endif
+
 #if defined(__AVX512BW__)
     #define XSIMD_AVX512BW_AVAILABLE 1
 #endif
