@@ -1753,40 +1753,94 @@ namespace xsimd
 
         std::string name;
 
-        std::vector<uint64_t> test_values;
+        std::vector<uint64_t> int_test_values;
+        std::vector<float> float_test_values;
+        std::vector<double> double_test_values;
 
         simd_batch_cast_tester(const std::string& n);
 
-        template <class B_in, class B_out>
-        bool run_test(std::ostream& out, const std::string& topic, uint64_t test_value);
+        template <class B_in, class B_out, class T>
+        bool run_test(std::ostream& out, const std::string& topic, T test_value);
     };
 
     template <std::size_t N, std::size_t A>
     inline simd_batch_cast_tester<N, A>::simd_batch_cast_tester(const std::string& n)
-        : name(n), test_values()
+        : name(n), int_test_values(), float_test_values(), double_test_values()
     {
-        test_values.emplace_back(0);
-        test_values.emplace_back(0x01);
-        test_values.emplace_back(0x7f);
-        test_values.emplace_back(0x80);
-        test_values.emplace_back(0xff);
-        test_values.emplace_back(0x0100);
-        test_values.emplace_back(0x7fff);
-        test_values.emplace_back(0x8000);
-        test_values.emplace_back(0xffff);
-        test_values.emplace_back(0x00010000);
-        test_values.emplace_back(0x7fffffff);
-        test_values.emplace_back(0x80000000);
-        test_values.emplace_back(0xffffffff);
-        test_values.emplace_back(0x0000000100000000);
-        test_values.emplace_back(0x7fffffffffffffff);
-        test_values.emplace_back(0x8000000000000000);
-        test_values.emplace_back(0xffffffffffffffff);
+        int_test_values = {
+            0,
+            0x01,
+            0x7f,
+            0x80,
+            0xff,
+            0x0100,
+            0x7fff,
+            0x8000,
+            0xffff,
+            0x00010000,
+            0x7fffffff,
+            0x80000000,
+            0xffffffff,
+            0x0000000100000000,
+            0x7fffffffffffffff,
+            0x8000000000000000,
+            0xffffffffffffffff
+        };
+
+        float_test_values = {
+            0.0f,
+            1.0f,
+            -1.0f,
+            127.0f,
+            128.0f,
+            -128.0f,
+            255.0f,
+            256.0f,
+            -256.0f,
+            32767.0f,
+            32768.0f,
+            -32768.0f,
+            65535.0f,
+            65536.0f,
+            -65536.0f,
+            2147483647.0f,
+            2147483648.0f,
+            -2147483648.0f,
+            4294967167.0f
+        };
+
+        double_test_values = {
+            0.0,
+            1.0,
+            -1.0,
+            127.0,
+            128.0,
+            -128.0,
+            255.0,
+            256.0,
+            -256.0,
+            32767.0,
+            32768.0,
+            -32768.0,
+            65535.0,
+            65536.0,
+            -65536.0,
+            2147483647.0,
+            2147483648.0,
+            -2147483648.0,
+            4294967295.0,
+            4294967296.0,
+            -4294967296.0,
+            9223372036854775807.0,
+            9223372036854775808.0,
+            -9223372036854775808.0,
+            18446744073709550591.0
+        };
     }
 
     template <std::size_t N, std::size_t A>
-    template <class B_in, class B_out>
-    inline bool simd_batch_cast_tester<N, A>::run_test(std::ostream& out, const std::string& topic, uint64_t test_value)
+    template <class B_in, class B_out, class T>
+    inline bool simd_batch_cast_tester<N, A>::run_test(std::ostream& out, const std::string& topic, T test_value)
     {
         using T_in = typename B_in::value_type;
         using T_out = typename B_out::value_type;
@@ -1795,7 +1849,7 @@ namespace xsimd
         using B_common_out = batch<T_out, N_common>;
 
         T_in in_test_value = static_cast<T_in>(test_value);
-        if (in_test_value <= std::numeric_limits<T_out>::max() && in_test_value >= std::numeric_limits<T_out>::min())
+        if (is_convertible<T_out>(in_test_value))
         {
             B_common_out res = batch_cast<T_out>(B_common_in(in_test_value));
             return check_almost_equal(topic, res[0], static_cast<T_out>(in_test_value), out);
@@ -1822,7 +1876,6 @@ namespace xsimd
         using double_batch = typename T::double_batch;
 
         bool success = true;
-        bool tmp_success = true;
 
         std::string name = tester.name;
         std::string name_shift = std::string(name.size(), '-');
@@ -1834,7 +1887,7 @@ namespace xsimd
         out << dash << name_shift << dash << std::endl
             << std::endl;
 
-        for (const auto& test_value : tester.test_values)
+        for (const auto& test_value : tester.int_test_values)
         {
             std::string topic = "batch cast int8   -> int8   : ";
             success &= tester.template run_test<int8_batch, int8_batch>(out, topic, test_value);
@@ -1895,8 +1948,11 @@ namespace xsimd
 
             topic = "batch cast uint64 -> double : ";
             success &= tester.template run_test<uint64_batch, double_batch>(out, topic, test_value);
+        }
 
-            topic = "batch cast float  -> int32  : ";
+        for (const auto& test_value : tester.float_test_values)
+        {
+            std::string topic = "batch cast float  -> int32  : ";
             success &= tester.template run_test<float_batch, int32_batch>(out, topic, test_value);
 
             topic = "batch cast float  -> uint32 : ";
@@ -1904,8 +1960,11 @@ namespace xsimd
 
             topic = "batch cast float  -> float  : ";
             success &= tester.template run_test<float_batch, float_batch>(out, topic, test_value);
+        }
 
-            topic = "batch cast double -> int64  : ";
+        for (const auto& test_value : tester.double_test_values)
+        {
+            std::string topic = "batch cast double -> int64  : ";
             success &= tester.template run_test<double_batch, int64_batch>(out, topic, test_value);
 
             topic = "batch cast double -> uint64 : ";
@@ -1934,7 +1993,6 @@ namespace xsimd
         using double_batch = typename T::double_batch;
 
         bool success = true;
-        bool tmp_success = true;
 
         std::string name = tester.name;
         std::string name_shift = std::string(name.size(), '-');
@@ -1946,7 +2004,7 @@ namespace xsimd
         out << dash << name_shift << dash << std::endl
             << std::endl;
 
-        for (const auto& test_value : tester.test_values)
+        for (const auto& test_value : tester.int_test_values)
         {
             std::string topic = "batch cast int8   -> int16  : ";
             success &= tester.template run_test<int8_batch, int16_batch>(out, topic, test_value);
@@ -2037,8 +2095,11 @@ namespace xsimd
 
             topic = "batch cast uint64 -> float  : ";
             success &= tester.template run_test<uint64_batch, float_batch>(out, topic, test_value);
+        }
 
-            topic = "batch cast float  -> int16  : ";
+        for (const auto& test_value : tester.float_test_values)
+        {
+            std::string topic = "batch cast float  -> int16  : ";
             success &= tester.template run_test<float_batch, int16_batch>(out, topic, test_value);
 
             topic = "batch cast float  -> uint16 : ";
@@ -2052,8 +2113,11 @@ namespace xsimd
 
             topic = "batch cast float  -> double : ";
             success &= tester.template run_test<float_batch, double_batch>(out, topic, test_value);
+        }
 
-            topic = "batch cast double -> int32  : ";
+        for (const auto& test_value : tester.double_test_values)
+        {
+            std::string topic = "batch cast double -> int32  : ";
             success &= tester.template run_test<double_batch, int32_batch>(out, topic, test_value);
 
             topic = "batch cast double -> uint32 : ";
@@ -2089,7 +2153,6 @@ namespace xsimd
         using double_batch = typename T::double_batch;
 
         bool success = true;
-        bool tmp_success = true;
 
         std::string name = tester.name;
         std::string name_shift = std::string(name.size(), '-');
@@ -2101,7 +2164,7 @@ namespace xsimd
         out << dash << name_shift << dash << std::endl
             << std::endl;
 
-        for (const auto& test_value : tester.test_values)
+        for (const auto& test_value : tester.int_test_values)
         {
             std::string topic = "batch cast int8   -> int32  : ";
             success &= tester.template run_test<int8_batch, int32_batch>(out, topic, test_value);
@@ -2162,14 +2225,20 @@ namespace xsimd
 
             topic = "batch cast uint64 -> uint16 : ";
             success &= tester.template run_test<uint64_batch, uint16_batch>(out, topic, test_value);
+        }
 
-            topic = "batch cast float  -> int8   : ";
+        for (const auto& test_value : tester.float_test_values)
+        {
+            std::string topic = "batch cast float  -> int8   : ";
             success &= tester.template run_test<float_batch, int8_batch>(out, topic, test_value);
 
             topic = "batch cast float  -> uint8  : ";
             success &= tester.template run_test<float_batch, uint8_batch>(out, topic, test_value);
+        }
 
-            topic = "batch cast double -> int16  : ";
+        for (const auto& test_value : tester.double_test_values)
+        {
+            std::string topic = "batch cast double -> int16  : ";
             success &= tester.template run_test<double_batch, int16_batch>(out, topic, test_value);
 
             topic = "batch cast double -> uint16 : ";
