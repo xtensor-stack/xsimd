@@ -295,6 +295,44 @@ namespace xsimd
             return false;
         }
     }
+
+    template <class T_out, class T_in>
+    inline typename std::enable_if<std::is_unsigned<T_in>::value && std::is_integral<T_out>::value, bool>::type
+    is_convertible(T_in value)
+    {
+        return static_cast<uint64_t>(value) <= static_cast<uint64_t>(std::numeric_limits<T_out>::max());
+    }
+
+    template <class T_out, class T_in>
+    inline typename std::enable_if<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_integral<T_out>::value && std::is_signed<T_out>::value, bool>::type
+    is_convertible(T_in value)
+    {
+        int64_t signed_value = static_cast<int64_t>(value);
+        return signed_value <= static_cast<int64_t>(std::numeric_limits<T_out>::max()) &&
+               signed_value >= static_cast<int64_t>(std::numeric_limits<T_out>::lowest());
+    }
+
+    template <class T_out, class T_in>
+    inline typename std::enable_if<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_unsigned<T_out>::value, bool>::type
+    is_convertible(T_in value)
+    {
+        return value >= 0 && is_convertible<T_out>(static_cast<uint64_t>(value));
+    }
+
+    template <class T_out, class T_in>
+    inline typename std::enable_if<std::is_floating_point<T_in>::value && std::is_integral<T_out>::value, bool>::type
+    is_convertible(T_in value)
+    {
+        return value <= static_cast<T_in>(std::numeric_limits<T_out>::max()) &&
+               value >= static_cast<T_in>(std::numeric_limits<T_out>::lowest());
+    }
+
+    template <class T_out, class T_in>
+    inline typename std::enable_if<std::is_floating_point<T_out>::value, bool>::type
+    is_convertible(T_in)
+    {
+        return true;
+    }
 }
 
 #endif

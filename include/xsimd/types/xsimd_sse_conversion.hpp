@@ -13,6 +13,8 @@
 
 #include "xsimd_sse_double.hpp"
 #include "xsimd_sse_float.hpp"
+#include "xsimd_sse_int8.hpp"
+#include "xsimd_sse_int16.hpp"
 #include "xsimd_sse_int32.hpp"
 #include "xsimd_sse_int64.hpp"
 
@@ -49,9 +51,11 @@ namespace xsimd
 
     inline batch<int64_t, 2> to_int(const batch<double, 2>& x)
     {
-        using batch_int = batch<int64_t, 2>;
-        __m128i tmp = _mm_cvttpd_epi32(x);
-        return _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(int64_t(0)));
+#if defined(XSIMD_AVX512VL_AVAILABLE) & defined(XSIMD_AVX512DQ_AVAILABLE)
+        return _mm_cvttpd_epi64(x);
+#else
+        return batch<int64_t, 2>(static_cast<int64_t>(x[0]), static_cast<int64_t>(x[1]));
+#endif
     }
 
     inline batch<float, 4> to_float(const batch<int32_t, 4>& x)
@@ -61,8 +65,37 @@ namespace xsimd
 
     inline batch<double, 2> to_float(const batch<int64_t, 2>& x)
     {
+#if defined(XSIMD_AVX512VL_AVAILABLE) & defined(XSIMD_AVX512DQ_AVAILABLE)
+        return _mm_cvtepi64_pd(x);
+#else
         return batch<double, 2>(static_cast<double>(x[0]), static_cast<double>(x[1]));
+#endif
     }
+
+    /*****************************************
+     * batch cast functions implementation *
+     *****************************************/
+
+    XSIMD_BATCH_CAST_IMPLICIT(int8_t, uint8_t, 16);
+    XSIMD_BATCH_CAST_IMPLICIT(uint8_t, int8_t, 16);
+    XSIMD_BATCH_CAST_IMPLICIT(int16_t, uint16_t, 8);
+    XSIMD_BATCH_CAST_IMPLICIT(uint16_t, int16_t, 8);
+    XSIMD_BATCH_CAST_IMPLICIT(int32_t, uint32_t, 4);
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, float, 4, _mm_cvtepi32_ps);
+    XSIMD_BATCH_CAST_IMPLICIT(uint32_t, int32_t, 4);
+    XSIMD_BATCH_CAST_IMPLICIT(int64_t, uint64_t, 2);
+    XSIMD_BATCH_CAST_IMPLICIT(uint64_t, int64_t, 2);
+    XSIMD_BATCH_CAST_INTRINSIC(float, int32_t, 4, _mm_cvttps_epi32);
+#if defined(XSIMD_AVX512VL_AVAILABLE)
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 4, _mm_cvtepu32_ps);
+    XSIMD_BATCH_CAST_INTRINSIC(float, uint32_t, 4, _mm_cvttps_epu32);
+#if defined(XSIMD_AVX512DQ_AVAILABLE)
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, double, 2, _mm_cvtepi64_pd);
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, double, 2, _mm_cvtepu64_pd);
+    XSIMD_BATCH_CAST_INTRINSIC(double, int64_t, 2, _mm_cvttpd_epi64);
+    XSIMD_BATCH_CAST_INTRINSIC(double, uint64_t, 2, _mm_cvttpd_epu64);
+#endif
+#endif
 
     /**************************
      * boolean cast functions *

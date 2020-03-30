@@ -49,10 +49,25 @@ namespace xsimd
     }
 
     template <size_t N, size_t A>
-    bool test_simd_cast(std::ostream& out, const std::string& name)
+    bool test_simd_batch_cast(std::ostream& out, const std::string& name)
     {
-        simd_cast_tester<N, A> tester(name);
-        return test_simd_cast(out, tester);
+        simd_batch_cast_tester<N, A> tester(name);
+        bool res = true;
+        res &= test_simd_batch_cast(out, tester);
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+        res &= test_simd_batch_cast_sizeshift1(out, tester);
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+        res &= test_simd_batch_cast_sizeshift2(out, tester);
+#endif
+        return res;
+    }
+
+    template <size_t N, size_t A>
+    bool test_simd_bitwise_cast(std::ostream& out, const std::string& name)
+    {
+        simd_bitwise_cast_tester<N, A> tester(name);
+        return test_simd_bitwise_cast(out, tester);
     }
 
     template <class T, size_t N, size_t A>
@@ -286,10 +301,17 @@ TEST(xsimd, sse_conversion)
     EXPECT_TRUE(res);
 }
 
-TEST(xsimd, sse_cast)
+TEST(xsimd, sse_batch_cast)
 {
-    std::ofstream out("log/sse_cast.log", std::ios_base::out);
-    bool res = xsimd::test_simd_cast<2, 16>(out, "sse cast");
+    std::ofstream out("log/sse_batch_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_batch_cast<2, 16>(out, "sse batch cast");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, sse_bitwise_cast)
+{
+    std::ofstream out("log/sse_bitwise_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_bitwise_cast<2, 16>(out, "sse bitwise cast");
     EXPECT_TRUE(res);
 }
 
@@ -492,10 +514,17 @@ TEST(xsimd, avx_conversion)
     EXPECT_TRUE(res);
 }
 
-TEST(xsimd, avx_cast)
+TEST(xsimd, avx_batch_cast)
 {
-    std::ofstream out("log/avx_cast.log", std::ios_base::out);
-    bool res = xsimd::test_simd_cast<4, 32>(out, "avx cast");
+    std::ofstream out("log/avx_batch_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_batch_cast<4, 32>(out, "avx batch cast");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx_bitwise_cast)
+{
+    std::ofstream out("log/avx_bitwise_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_bitwise_cast<4, 32>(out, "avx bitwise cast");
     EXPECT_TRUE(res);
 }
 
@@ -698,10 +727,17 @@ TEST(xsimd, avx512_conversion)
     EXPECT_TRUE(res);
 }
 
-TEST(xsimd, avx512_cast)
+TEST(xsimd, avx512_batch_cast)
 {
-    std::ofstream out("log/avx512_cast.log", std::ios_base::out);
-    bool res = xsimd::test_simd_cast<8, 64>(out, "avx512 cast");
+    std::ofstream out("log/avx512_batch_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_batch_cast<8, 64>(out, "avx512 batch cast");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, avx512_bitwise_cast)
+{
+    std::ofstream out("log/avx512_bitwise_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_bitwise_cast<8, 64>(out, "avx512 bitwise cast");
     EXPECT_TRUE(res);
 }
 
@@ -907,10 +943,17 @@ TEST(xsimd, neon_conversion)
     EXPECT_TRUE(res);
 }
 
-TEST(xsimd, neon_cast)
+TEST(xsimd, neon_batch_cast)
 {
-    std::ofstream out("log/neon_cast.log", std::ios_base::out);
-    bool res = xsimd::test_simd_cast<2, 16>(out, "neon cast");
+    std::ofstream out("log/neon_batch_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_batch_cast<2, 16>(out, "neon batch cast");
+    EXPECT_TRUE(res);
+}
+
+TEST(xsimd, neon_bitwise_cast)
+{
+    std::ofstream out("log/neon_bitwise_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_bitwise_cast<2, 16>(out, "neon bitwise cast");
     EXPECT_TRUE(res);
 }
 
@@ -1017,10 +1060,10 @@ TEST(xsimd, fallback_conversion)
     EXPECT_TRUE(res);
 }
 
-TEST(xsimd, fallback_cast)
+TEST(xsimd, fallback_bitwise_cast)
 {
-    std::ofstream out("log/fallback_cast.log", std::ios_base::out);
-    bool res = xsimd::test_simd_cast<3, 32>(out, "fallback cast");
+    std::ofstream out("log/fallback_bitwise_cast.log", std::ios_base::out);
+    bool res = xsimd::test_simd_bitwise_cast<3, 32>(out, "fallback bitwise cast");
     EXPECT_TRUE(res);
 }
 

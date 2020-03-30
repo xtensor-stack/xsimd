@@ -13,6 +13,8 @@
 
 #include "xsimd_avx_double.hpp"
 #include "xsimd_avx_float.hpp"
+#include "xsimd_avx_int8.hpp"
+#include "xsimd_avx_int16.hpp"
 #include "xsimd_avx_int32.hpp"
 #include "xsimd_avx_int64.hpp"
 
@@ -49,15 +51,13 @@ namespace xsimd
 
     inline batch<int64_t, 4> to_int(const batch<double, 4>& x)
     {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-        return _mm256_cvtepi32_epi64(_mm256_cvttpd_epi32(x));
+#if defined(XSIMD_AVX512VL_AVAILABLE) & defined(XSIMD_AVX512DQ_AVAILABLE)
+        return _mm256_cvttpd_epi64(x);
 #else
-        using batch_int = batch<int32_t, 4>;
-        __m128i tmp = _mm256_cvttpd_epi32(x);
-        __m128i res_low = _mm_unpacklo_epi32(tmp, batch_int(tmp) < batch_int(0));
-        __m128i res_high = _mm_unpackhi_epi32(tmp, batch_int(tmp) < batch_int(0));
-        __m256i result = _mm256_castsi128_si256(res_low);
-        return _mm256_insertf128_si256(result, res_high, 1);
+        return batch<int64_t, 4>(static_cast<int64_t>(x[0]),
+                                 static_cast<int64_t>(x[1]),
+                                 static_cast<int64_t>(x[2]),
+                                 static_cast<int64_t>(x[3]));
 #endif
     }
 
@@ -68,11 +68,82 @@ namespace xsimd
 
     inline batch<double, 4> to_float(const batch<int64_t, 4>& x)
     {
+#if defined(XSIMD_AVX512VL_AVAILABLE) & defined(XSIMD_AVX512DQ_AVAILABLE)
+        return _mm256_cvtepi64_pd(x);
+#else
         return batch<double, 4>(static_cast<double>(x[0]),
                                 static_cast<double>(x[1]),
                                 static_cast<double>(x[2]),
                                 static_cast<double>(x[3]));
+#endif
     }
+
+    /*****************************************
+     * batch cast functions implementation *
+     *****************************************/
+
+    XSIMD_BATCH_CAST_IMPLICIT(int8_t, uint8_t, 32);
+    XSIMD_BATCH_CAST_IMPLICIT(uint8_t, int8_t, 32);
+    XSIMD_BATCH_CAST_IMPLICIT(int16_t, uint16_t, 16);
+    XSIMD_BATCH_CAST_IMPLICIT(uint16_t, int16_t, 16);
+    XSIMD_BATCH_CAST_IMPLICIT(int32_t, uint32_t, 8);
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, float, 8, _mm256_cvtepi32_ps);
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, double, 4, _mm256_cvtepi32_pd);
+    XSIMD_BATCH_CAST_IMPLICIT(uint32_t, int32_t, 8);
+    XSIMD_BATCH_CAST_IMPLICIT(int64_t, uint64_t, 4);
+    XSIMD_BATCH_CAST_IMPLICIT(uint64_t, int64_t, 4);
+    XSIMD_BATCH_CAST_INTRINSIC(float, int32_t, 8, _mm256_cvttps_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC(float, double, 4, _mm256_cvtps_pd);
+    XSIMD_BATCH_CAST_INTRINSIC(double, int32_t, 4, _mm256_cvttpd_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC(double, float, 4, _mm256_cvtpd_ps);
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
+    XSIMD_BATCH_CAST_INTRINSIC(int8_t, int16_t, 16, _mm256_cvtepi8_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(int8_t, uint16_t, 16, _mm256_cvtepi8_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(uint8_t, int16_t, 16, _mm256_cvtepu8_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(uint8_t, uint16_t, 16, _mm256_cvtepu8_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(int16_t, int32_t, 8, _mm256_cvtepi16_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC(int16_t, uint32_t, 8, _mm256_cvtepi16_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC2(int16_t, float, 8, _mm256_cvtepi16_epi32, _mm256_cvtepi32_ps);
+    XSIMD_BATCH_CAST_INTRINSIC(uint16_t, int32_t, 8, _mm256_cvtepu16_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC(uint16_t, uint32_t, 8, _mm256_cvtepu16_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC2(uint16_t, float, 8, _mm256_cvtepu16_epi32, _mm256_cvtepi32_ps);
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, int64_t, 4, _mm256_cvtepi32_epi64);
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, uint64_t, 4, _mm256_cvtepi32_epi64);
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, int64_t, 4, _mm256_cvtepu32_epi64);
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, uint64_t, 4, _mm256_cvtepu32_epi64);
+#endif
+#if defined(XSIMD_AVX512VL_AVAILABLE)
+    #if defined(XSIMD_AVX512BW_AVAILABLE)
+    XSIMD_BATCH_CAST_INTRINSIC(int16_t, int8_t, 16, _mm256_cvtepi16_epi8);
+    XSIMD_BATCH_CAST_INTRINSIC(int16_t, uint8_t, 16, _mm256_cvtepi16_epi8);
+    XSIMD_BATCH_CAST_INTRINSIC(uint16_t, int8_t, 16, _mm256_cvtepi16_epi8);
+    XSIMD_BATCH_CAST_INTRINSIC(uint16_t, uint8_t, 16, _mm256_cvtepi16_epi8);
+#endif
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, int16_t, 8, _mm256_cvtepi32_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, uint16_t, 8, _mm256_cvtepi32_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, int16_t, 8, _mm256_cvtepi32_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, uint16_t, 8, _mm256_cvtepi32_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 8, _mm256_cvtepu32_ps);
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, double, 4, _mm256_cvtepu32_pd);
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, int32_t, 4, _mm256_cvtepi64_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, uint32_t, 4, _mm256_cvtepi64_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, int32_t, 4, _mm256_cvtepi64_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, uint32_t, 4, _mm256_cvtepi64_epi32);
+    XSIMD_BATCH_CAST_INTRINSIC2(float, int16_t, 8, _mm256_cvttps_epi32, _mm256_cvtepi32_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC2(float, uint16_t, 8, _mm256_cvttps_epi32, _mm256_cvtepi32_epi16);
+    XSIMD_BATCH_CAST_INTRINSIC(float, uint32_t, 8, _mm256_cvttps_epu32);
+    XSIMD_BATCH_CAST_INTRINSIC(double, uint32_t, 4, _mm256_cvttpd_epu32);
+#if defined(XSIMD_AVX512DQ_AVAILABLE)
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, float, 4, _mm256_cvtepi64_ps);
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, double, 4, _mm256_cvtepi64_pd);
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, float, 4, _mm256_cvtepu64_ps);
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, double, 4, _mm256_cvtepu64_pd);
+    XSIMD_BATCH_CAST_INTRINSIC(float, int64_t, 4, _mm256_cvttps_epi64);
+    XSIMD_BATCH_CAST_INTRINSIC(float, uint64_t, 4, _mm256_cvttps_epu64);
+    XSIMD_BATCH_CAST_INTRINSIC(double, int64_t, 4, _mm256_cvttpd_epi64);
+    XSIMD_BATCH_CAST_INTRINSIC(double, uint64_t, 4, _mm256_cvttpd_epu64);
+#endif
+#endif
 
     /**************************
      * boolean cast functions *
