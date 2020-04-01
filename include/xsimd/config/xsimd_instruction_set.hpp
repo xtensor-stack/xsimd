@@ -108,18 +108,22 @@
 #if !defined(XSIMD_X86_INSTR_SET) && (defined(__AVX512__) || defined(__KNCNI__) || defined(__AVX512F__)\
     && (!defined(__GNUC__) || __GNUC__ >= 6))
     #define XSIMD_X86_INSTR_SET XSIMD_X86_AVX512_VERSION
-#endif
 
-#if defined(__AVX512VL__)
-    #define XSIMD_AVX512VL_AVAILABLE 1
-#endif
+    #if defined(__AVX512VL__)
+        #define XSIMD_AVX512VL_AVAILABLE 1
+    #endif
 
-#if defined(__AVX512DQ__)
-    #define XSIMD_AVX512DQ_AVAILABLE 1
-#endif
+    #if defined(__AVX512DQ__)
+        #define XSIMD_AVX512DQ_AVAILABLE 1
+    #endif
 
-#if defined(__AVX512BW__)
-    #define XSIMD_AVX512BW_AVAILABLE 1
+    #if defined(__AVX512BW__)
+        #define XSIMD_AVX512BW_AVAILABLE 1
+    #endif
+
+    #if __GNUC__ == 6
+        #define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
+    #endif
 #endif
 
 #if !defined(XSIMD_X86_INSTR_SET) && defined(__AVX2__)
@@ -162,10 +166,6 @@
     #define XSIMD_X86_INSTR_SET XSIMD_VERSION_NUMBER_NOT_AVAILABLE
 #else
     #define XSIMD_X86_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
-#endif
-
-#if __GNUC__ == 6 && __GNUC_MINOR__ == 4
-    #define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
 #endif
 
 /***************************

@@ -493,14 +493,12 @@ namespace xsimd
 
     inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs)
     {
-//        return detail::shift_left(lhs, rhs);
-        return vshlq_n_s32(lhs, rhs);
+        return detail::shift_left(lhs, rhs);
     }
 
     inline batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs)
     {
-//        return detail::shift_right(lhs, rhs);
-        return vshrq_n_s32(lhs, rhs);
+        return detail::shift_right(lhs, rhs);
     }
 
     inline batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs)
