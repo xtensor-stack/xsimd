@@ -465,7 +465,12 @@ namespace xsimd
 
     inline batch<int8_t, 64> operator<<(const batch<int8_t, 64>& lhs, int32_t rhs)
     {
-        return _mm512_and_si512(_mm512_set1_epi8(0xFF << rhs), _mm512_slli_epi32(lhs, rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        __m512i tmp = _mm512_sllv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        __m512i tmp = _mm512_slli_epi32(lhs, rhs);
+#endif
+        return _mm512_and_si512(_mm512_set1_epi8(0xFF << rhs), tmp);
     }
 
     inline batch<int8_t, 64> operator>>(const batch<int8_t, 64>& lhs, int32_t rhs)
@@ -501,12 +506,22 @@ namespace xsimd
 
     inline batch<uint8_t, 64> operator<<(const batch<uint8_t, 64>& lhs, int32_t rhs)
     {
-        return _mm512_and_si512(_mm512_set1_epi8(0xFF << rhs), _mm512_slli_epi32(lhs, rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        __m512i tmp = _mm512_sllv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        __m512i tmp = _mm512_slli_epi32(lhs, rhs);
+#endif
+        return _mm512_and_si512(_mm512_set1_epi8(0xFF << rhs), tmp);
     }
 
     inline batch<uint8_t, 64> operator>>(const batch<uint8_t, 64>& lhs, int32_t rhs)
     {
-        return _mm512_and_si512(_mm512_set1_epi8(0xFF >> rhs), _mm512_srli_epi32(lhs, rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        __m512i tmp = _mm512_srlv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        __m512i tmp = _mm512_srli_epi32(lhs, rhs);
+#endif
+        return _mm512_and_si512(_mm512_set1_epi8(0xFF >> rhs), tmp);
     }
 
     inline batch<uint8_t, 64> operator<<(const batch<uint8_t, 64>& lhs, const batch<int8_t, 64>& rhs)

@@ -470,7 +470,12 @@ namespace xsimd
         return _mm512_slli_epi16(lhs, rhs);
 #endif
 #else
-        return _mm512_and_si512(_mm512_set1_epi16(0xFFFF << rhs), _mm512_slli_epi32(lhs, rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        __m512i tmp = _mm512_sllv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        __m512i tmp = _mm512_slli_epi32(lhs, rhs);
+#endif
+        return _mm512_and_si512(_mm512_set1_epi16(0xFFFF << rhs), tmp);
 #endif
     }
 
@@ -517,7 +522,12 @@ namespace xsimd
         return _mm512_slli_epi16(lhs, rhs);
 #endif
 #else
-        return _mm512_and_si512(_mm512_set1_epi16(0xFFFF << rhs), _mm512_slli_epi32(lhs, rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        __m512i tmp = _mm512_sllv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        __m512i tmp = _mm512_slli_epi32(lhs, rhs);
+#endif
+        return _mm512_and_si512(_mm512_set1_epi16(0xFFFF << rhs), tmp);
 #endif
     }
 
@@ -530,7 +540,12 @@ namespace xsimd
         return _mm512_srli_epi16(lhs, rhs);
 #endif
 #else
-        return _mm512_and_si512(_mm512_set1_epi16(0xFFFF >> rhs), _mm512_srli_epi32(lhs, rhs));
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        __m512i tmp = _mm512_srlv_epi32(lhs, _mm512_set1_epi32(rhs));
+#else
+        __m512i tmp = _mm512_srli_epi32(lhs, rhs);
+#endif
+        return _mm512_and_si512(_mm512_set1_epi16(0xFFFF >> rhs), tmp);
 #endif
     }
 
