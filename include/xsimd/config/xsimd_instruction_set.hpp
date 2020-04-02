@@ -121,7 +121,7 @@
         #define XSIMD_AVX512BW_AVAILABLE 1
     #endif
 
-    #if __GNUC__ == 6 && __GNUC_MINOR__ == 4
+    #if __GNUC__ == 6
         #define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
     #endif
 #endif
