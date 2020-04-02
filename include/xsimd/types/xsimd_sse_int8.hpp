@@ -145,8 +145,12 @@ namespace xsimd
 
     batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, int32_t rhs);
     batch<int8_t, 16> operator>>(const batch<int8_t, 16>& lhs, int32_t rhs);
+    batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
+    batch<int8_t, 16> operator>>(const batch<int8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
     batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, int32_t rhs);
     batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, int32_t rhs);
+    batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
+    batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
 
     /************************************
      * batch<int8_t, 16> implementation *
@@ -291,12 +295,25 @@ namespace xsimd
 
     inline batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, int32_t rhs)
     {
-        return sse_detail::shift_impl([](int8_t lhs, int32_t s) { return lhs << s; }, lhs, rhs);
+        return _mm_and_si128(_mm_set1_epi8(0xFF << rhs), _mm_slli_epi32(lhs, rhs));
     }
 
     inline batch<int8_t, 16> operator>>(const batch<int8_t, 16>& lhs, int32_t rhs)
     {
-        return sse_detail::shift_impl([](int8_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
+        __m128i sign_mask = _mm_set1_epi16((0xFF00 >> rhs) & 0x00FF);
+        __m128i cmp_is_negative = _mm_cmpgt_epi8(_mm_setzero_si128(), lhs);
+        __m128i res = _mm_srai_epi16(lhs, rhs);
+        return _mm_or_si128(_mm_and_si128(sign_mask, cmp_is_negative), _mm_andnot_si128(sign_mask, res));
+    }
+
+    inline batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, const batch<int8_t, 16>& rhs)
+    {
+        return sse_detail::shift_impl([](int8_t lhs, int8_t s) { return lhs << s; }, lhs, rhs);
+    }
+
+    inline batch<int8_t, 16> operator>>(const batch<int8_t, 16>& lhs, const batch<int8_t, 16>& rhs)
+    {
+        return sse_detail::shift_impl([](int8_t lhs, int8_t s) { return lhs >> s; }, lhs, rhs);
     }
 
     XSIMD_DEFINE_LOAD_STORE_INT8(uint8_t, 16, 16)
@@ -304,12 +321,22 @@ namespace xsimd
 
     inline batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, int32_t rhs)
     {
-        return sse_detail::shift_impl([](uint8_t lhs, int32_t s) { return lhs << s; }, lhs, rhs);
+        return _mm_and_si128(_mm_set1_epi8(0xFF << rhs), _mm_slli_epi32(lhs, rhs));
     }
 
     inline batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, int32_t rhs)
     {
-        return sse_detail::shift_impl([](uint8_t lhs, int32_t s) { return lhs >> s; }, lhs, rhs);
+        return _mm_and_si128(_mm_set1_epi8(0xFF >> rhs), _mm_srli_epi32(lhs, rhs));
+    }
+
+    inline batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs)
+    {
+        return sse_detail::shift_impl([](uint8_t lhs, int8_t s) { return lhs << s; }, lhs, rhs);
+    }
+
+    inline batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs)
+    {
+        return sse_detail::shift_impl([](uint8_t lhs, int8_t s) { return lhs >> s; }, lhs, rhs);
     }
 }
 

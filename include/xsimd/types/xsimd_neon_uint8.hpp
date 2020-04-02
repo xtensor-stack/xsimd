@@ -81,8 +81,10 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_LONG(uint8_t, 16)
     };
 
-    batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, uint8_t rhs);
-    batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, uint8_t rhs);
+    batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, int32_t rhs);
+    batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, int32_t rhs);
+    batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
+    batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
 
     /************************************
      * batch<int8_t, 16> implementation *
@@ -340,7 +342,7 @@ namespace xsimd
 
     namespace detail
     {
-        inline batch<uint8_t, 16> shift_left(const batch<uint8_t, 16>& lhs, const int n)
+        inline batch<uint8_t, 16> shift_left(const batch<uint8_t, 16>& lhs, int32_t n)
         {
             switch(n)
             {
@@ -351,7 +353,7 @@ namespace xsimd
             return batch<uint8_t, 16>(uint8_t(0));
         }
 
-        inline batch<uint8_t, 16> shift_right(const batch<uint8_t, 16>& lhs, const int n)
+        inline batch<uint8_t, 16> shift_right(const batch<uint8_t, 16>& lhs, int32_t n)
         {
             switch(n)
             {
@@ -363,21 +365,25 @@ namespace xsimd
         }
     }
 
-    inline batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, uint8_t rhs)
+    inline batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, int32_t rhs)
     {
         return detail::shift_left(lhs, rhs);
     }
 
-    inline batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, uint8_t rhs)
+    inline batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, int32_t rhs)
     {
         return detail::shift_right(lhs, rhs);
     }
 
-    inline batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, const batch<uint8_t, 16>& rhs)
+    inline batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs)
     {
-        return vshlq_u8(lhs, vreinterpretq_s8_u8(rhs));
+        return vshlq_u8(lhs, rhs);
     }
 
+    inline batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs)
+    {
+        return vshlq_u8(lhs, vnegq_s8(rhs));
+    }
 }
 
 #endif
