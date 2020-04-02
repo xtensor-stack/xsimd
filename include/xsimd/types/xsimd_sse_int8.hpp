@@ -143,6 +143,15 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_LONG(uint8_t, 16)
     };
 
+    batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, int32_t rhs);
+    batch<int8_t, 16> operator>>(const batch<int8_t, 16>& lhs, int32_t rhs);
+    batch<int8_t, 16> operator<<(const batch<int8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
+    batch<int8_t, 16> operator>>(const batch<int8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
+    batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, int32_t rhs);
+    batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, int32_t rhs);
+    batch<uint8_t, 16> operator<<(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
+    batch<uint8_t, 16> operator>>(const batch<uint8_t, 16>& lhs, const batch<int8_t, 16>& rhs);
+
     /************************************
      * batch<int8_t, 16> implementation *
      ************************************/

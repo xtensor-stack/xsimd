@@ -70,6 +70,11 @@ namespace xsimd
         using base_type::store_unaligned;
     };
 
+    batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, int32_t rhs);
+    batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, int32_t rhs);
+    batch<int32_t, 4> operator<<(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
+    batch<int32_t, 4> operator>>(const batch<int32_t, 4>& lhs, const batch<int32_t, 4>& rhs);
+
     /************************************
      * batch<int32_t, 4> implementation *
      ************************************/

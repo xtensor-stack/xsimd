@@ -107,7 +107,7 @@ namespace xsimd
 
         XSIMD_DECLARE_LOAD_STORE_INT32(int32_t, 8)
         XSIMD_DECLARE_LOAD_STORE_LONG(int32_t, 8)
-   };
+    };
 
     template <>
     class batch<uint32_t, 8> : public avx_int_batch<uint32_t, 8>
@@ -124,6 +124,15 @@ namespace xsimd
         XSIMD_DECLARE_LOAD_STORE_INT32(uint32_t, 8)
         XSIMD_DECLARE_LOAD_STORE_LONG(uint32_t, 8)
     };
+
+    batch<int32_t, 8> operator<<(const batch<int32_t, 8>& lhs, int32_t rhs);
+    batch<int32_t, 8> operator>>(const batch<int32_t, 8>& lhs, int32_t rhs);
+    batch<int32_t, 8> operator<<(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<int32_t, 8> operator>>(const batch<int32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<uint32_t, 8> operator<<(const batch<uint32_t, 8>& lhs, int32_t rhs);
+    batch<uint32_t, 8> operator>>(const batch<uint32_t, 8>& lhs, int32_t rhs);
+    batch<uint32_t, 8> operator<<(const batch<uint32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
+    batch<uint32_t, 8> operator>>(const batch<uint32_t, 8>& lhs, const batch<int32_t, 8>& rhs);
 
     /************************************
      * batch<int32_t, 8> implementation *
