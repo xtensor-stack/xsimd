@@ -11,7 +11,7 @@
 #ifndef XSIMD_ALGORITHMS_HPP
 #define XSIMD_ALGORITHMS_HPP
 
-#include "xsimd/memory/xsimd_load_store.hpp"
+#include "../memory/xsimd_load_store.hpp"
 
 namespace xsimd
 {
