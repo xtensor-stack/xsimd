@@ -11,8 +11,8 @@
 #ifndef XSIMD_LOAD_STORE_HPP
 #define XSIMD_LOAD_STORE_HPP
 
-#include "xsimd/config/xsimd_config.hpp"
-#include "xsimd/types/xsimd_traits.hpp"
+#include "../config/xsimd_config.hpp"
+#include "../types/xsimd_traits.hpp"
 
 namespace xsimd
 {
