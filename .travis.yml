@@ -174,7 +174,6 @@ install:
         cmake -DDOWNLOAD_GTEST=ON -DENABLE_XTL_COMPLEX=ON . ;
       elif [[ "$AVX512" == 1 ]] ; then
         conda install gcc_linux-64 gxx_linux-64 ;
-        conda install -c conda-forge beautifulsoup4==4.6.3 ;
         sh install_sde.sh ;
         export PATH="$HOME/miniconda/bin:$PATH" ;
         export CC=x86_64-conda_cos6-linux-gnu-gcc CXX=x86_64-conda_cos6-linux-gnu-g++ ;
@@ -197,7 +196,7 @@ script:
         fi
       elif [[ "$AVX512" == 1 ]] ; then
         uname -m ;
-        ../intel-sde-downloader/sde-external-8.35.0-2019-03-11-lin/sde64 -skx -- ./test_xsimd ;
+        ../sde-external-8.50.0-2020-03-26-lin/sde64 -skx -- ./test_xsimd ;
       else
         ./test_xsimd;
       fi
