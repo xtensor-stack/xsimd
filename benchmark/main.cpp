@@ -75,6 +75,23 @@ void benchmark_rounding()
     xsimd::run_benchmark_1op(xsimd::rint_fn(), std::cout, size, 100);
 }
 
+#ifdef XSIMD_POLY_BENCHMARKS
+void benchmark_poly_evaluation()
+{
+    std::size_t size = 20000;
+    xsimd::run_benchmark_1op(xsimd::horner_5_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::estrin_5_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::horner_10_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::estrin_10_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::horner_12_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::estrin_12_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::horner_14_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::estrin_14_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::horner_16_fn(), std::cout, size, 1000);
+    xsimd::run_benchmark_1op(xsimd::estrin_16_fn(), std::cout, size, 1000);
+}
+#endif
+
 void benchmark_basic_math()
 {
     std::size_t size = 20000;
@@ -101,6 +118,9 @@ int main(int argc, char* argv[])
         {"power", {"power", benchmark_power}},
         {"basic_math", {"basic math", benchmark_basic_math}},
         {"rounding", {"rounding", benchmark_rounding}},
+#ifdef XSIMD_POLY_BENCHMARKS
+        {"utils", {"polynomial evaluation", benchmark_poly_evaluation}},
+#endif
     };
 
     if (argc > 1)

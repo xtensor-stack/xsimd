@@ -137,6 +137,8 @@ set(XSIMD_TESTS
     xsimd_hyperbolic_test.cpp
     xsimd_interface_test.cpp
     xsimd_memory_test.cpp
+    xsimd_poly_evaluation_test.cpp
+    xsimd_poly_evaluation_test.hpp
     xsimd_power_test.hpp
     xsimd_power_test.cpp
     xsimd_rounding_test.hpp

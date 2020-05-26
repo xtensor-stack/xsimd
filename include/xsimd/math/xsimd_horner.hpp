@@ -12,19 +12,10 @@
 #define XSIMD_HORNER_HPP
 
 #include "../types/xsimd_types_include.hpp"
+#include "xsimd_estrin.hpp"
 
 namespace xsimd
 {
-
-    namespace detail
-    {
-        template <class T, uint64_t c>
-        inline T coef() noexcept
-        {
-            using value_type = typename T::value_type;
-            return T(caster_t<value_type>(as_unsigned_integer_t<value_type>(c)).f);
-        }
-    }
 
     /**********
      * horner *

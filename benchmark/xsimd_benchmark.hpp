@@ -326,8 +326,10 @@ namespace xsimd
             break;
         }
 
+#ifndef XSIMD_POLY_BENCHMARKS
         duration_type t_float_scalar = benchmark_scalar(f, f_lhs, f_res, iter);
         duration_type t_double_scalar = benchmark_scalar(f, d_lhs, d_res, iter);
+#endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
         duration_type t_float_sse = benchmark_simd<batch<float, 4>>(f, f_lhs, f_res, iter);
@@ -356,7 +358,9 @@ namespace xsimd
 
         out << "============================" << std::endl;
         out << f.name() << std::endl;
+#ifndef XSIMD_POLY_BENCHMARKS
         out << "scalar float   : " << t_float_scalar.count() << "ms" << std::endl;
+#endif
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
         out << "sse float      : " << t_float_sse.count() << "ms" << std::endl;
         out << "sse float unr  : " << t_float_sse_u.count() << "ms" << std::endl;
@@ -373,7 +377,9 @@ namespace xsimd
         out << "flbk float     : " << t_float_fallback.count() << "ms" << std::endl;
         out << "flbk float unr : " << t_float_fallback_u.count() << "ms" << std::endl;
 #endif
+#ifndef XSIMD_POLY_BENCHMARKS
         out << "scalar double  : " << t_double_scalar.count() << "ms" << std::endl;
+#endif
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
         out << "sse double     : " << t_double_sse.count() << "ms" << std::endl;
         out << "sse double unr : " << t_double_sse_u.count() << "ms" << std::endl;
@@ -566,6 +572,13 @@ namespace xsimd
         inline std::string name() const { return #FN; }\
     }
 
+#define DEFINE_FUNCTOR_1OP_TEMPLATE(FN, N, ...)\
+    struct FN##_##N##_fn {\
+        template <class T>\
+        inline T operator()(const T& x) const { using xsimd::FN; return FN<T, __VA_ARGS__>(x); }\
+        inline std::string name() const { return #FN " " #N ; }\
+    }
+
 #define DEFINE_FUNCTOR_2OP(FN)\
     struct FN##_fn{\
         template <class T>\
@@ -629,6 +642,19 @@ DEFINE_FUNCTOR_1OP(isinf);
 DEFINE_FUNCTOR_1OP(is_flint);
 DEFINE_FUNCTOR_1OP(is_odd);
 DEFINE_FUNCTOR_1OP(is_even);
+#endif
+
+#ifdef XSIMD_POLY_BENCHMARKS
+DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 5, 1, 2, 3, 4, 5);
+DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 5, 1, 2, 3, 4, 5);
+DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
 #endif
 
 }
