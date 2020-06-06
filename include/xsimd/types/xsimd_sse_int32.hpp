@@ -243,6 +243,7 @@ namespace xsimd
         store_aligned(dst);                                                    \
     }
 
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, bool, 16)
     SSE_DEFINE_LOAD_STORE_INT32(int32_t, int8_t)
     SSE_DEFINE_LOAD_STORE_INT32(int32_t, uint8_t)
     SSE_DEFINE_LOAD_STORE_INT32(int32_t, int16_t)
@@ -305,6 +306,7 @@ namespace xsimd
         _mm_storeu_pd(dst + 2, tmp2);
     }
 
+    XSIMD_DEFINE_LOAD_STORE(uint32_t, 4, bool, 16)
     SSE_DEFINE_LOAD_STORE_INT32(uint32_t, int8_t)
     SSE_DEFINE_LOAD_STORE_INT32(uint32_t, uint8_t)
     SSE_DEFINE_LOAD_STORE_INT32(uint32_t, int16_t)

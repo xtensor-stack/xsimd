@@ -136,6 +136,8 @@ namespace xsimd
         return load_aligned(src);
     }
 
+    XSIMD_DEFINE_LOAD_STORE(float, 4, bool, XSIMD_DEFAULT_ALIGNMENT)
+
     inline batch<float, 4>& batch<float, 4>::load_aligned(const uint8_t* src)
     {
         uint8x8_t tmp = vld1_u8((const uint8_t*)src);

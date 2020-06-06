@@ -160,6 +160,7 @@ namespace xsimd
         _mm256_storeu_ps(dst, _mm256_cvtepi32_ps(this->m_value));
     }
 
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 8, bool, 32)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 8, int8_t, 32)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 8, uint8_t, 32)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 8, int16_t, 32)
