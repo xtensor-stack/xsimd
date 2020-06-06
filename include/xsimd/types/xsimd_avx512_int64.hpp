@@ -163,6 +163,7 @@ namespace xsimd
         _mm512_storeu_pd(dst, _mm512_cvtepi64_pd(this->m_value));
     }
 
+    XSIMD_DEFINE_LOAD_STORE(int64_t, 8, bool, 64)
     XSIMD_DEFINE_LOAD_STORE(int64_t, 8, int8_t, 64)
     XSIMD_DEFINE_LOAD_STORE(int64_t, 8, uint8_t, 64)
     XSIMD_DEFINE_LOAD_STORE(int64_t, 8, int16_t, 64)
@@ -198,6 +199,7 @@ namespace xsimd
         _mm512_storeu_pd(dst, _mm512_cvtepu64_pd(this->m_value));
     }
 
+    XSIMD_DEFINE_LOAD_STORE(uint64_t, 8, bool, 64)
     XSIMD_DEFINE_LOAD_STORE(uint64_t, 8, int8_t, 64)
     XSIMD_DEFINE_LOAD_STORE(uint64_t, 8, uint8_t, 64)
     XSIMD_DEFINE_LOAD_STORE(uint64_t, 8, int16_t, 64)

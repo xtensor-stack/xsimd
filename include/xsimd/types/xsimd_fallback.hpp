@@ -702,6 +702,7 @@ namespace xsimd
         this->store_unaligned_impl(dst);                             \
     }
 
+    FALLBACK_DEFINE_LOAD_STORE(bool)
     FALLBACK_DEFINE_LOAD_STORE(int8_t)
     FALLBACK_DEFINE_LOAD_STORE(uint8_t)
     FALLBACK_DEFINE_LOAD_STORE(int16_t)

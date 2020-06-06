@@ -278,6 +278,8 @@ namespace xsimd
         return this->m_value;
     }
 
+    XSIMD_DEFINE_LOAD_STORE(float, 4, bool, 16)
+
     inline batch<float, 4>& batch<float, 4>::load_aligned(const int8_t* src)
     {
         __m128i tmp = _mm_loadl_epi64((const __m128i*)src);

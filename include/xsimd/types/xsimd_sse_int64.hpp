@@ -246,6 +246,7 @@ namespace xsimd
         store_aligned(dst);                                                    \
     }
 
+    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, bool, 16)
     SSE_DEFINE_LOAD_STORE_INT64(int64_t, int8_t)
     SSE_DEFINE_LOAD_STORE_INT64(int64_t, uint8_t)
     SSE_DEFINE_LOAD_STORE_INT64(int64_t, int16_t)
@@ -256,6 +257,7 @@ namespace xsimd
     XSIMD_DEFINE_LOAD_STORE(int64_t, 2, float, 16)
     XSIMD_DEFINE_LOAD_STORE(int64_t, 2, double, 16)
 
+    XSIMD_DEFINE_LOAD_STORE(uint64_t, 2, bool, 16)
     SSE_DEFINE_LOAD_STORE_INT64(uint64_t, int8_t)
     SSE_DEFINE_LOAD_STORE_INT64(uint64_t, uint8_t)
     SSE_DEFINE_LOAD_STORE_INT64(uint64_t, int16_t)

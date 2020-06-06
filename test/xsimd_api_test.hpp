@@ -77,6 +77,8 @@ namespace xsimd
         long_vector long_vec2;
         ulong_vector ulong_vec2;
 #endif
+        bool bool_vec[16 * N];
+        bool bool_vec2[8 * N];
 
         simd_api_load_store_tester(const std::string& n);
     };
@@ -123,6 +125,15 @@ namespace xsimd
         std::iota(long_vec2.begin(), long_vec2.end(), long(1));
         std::iota(ulong_vec2.begin(), ulong_vec2.end(), ulong(1));
 #endif
+        for (size_t i = 0; i < 8 * N; i += 2)
+        {
+            bool_vec[i] = true;
+            bool_vec[i+1] = false;
+            bool_vec2[i] = true;
+            bool_vec2[i+1] = false;
+            bool_vec[8*N + i] = true;
+            bool_vec[8*N + i+1] = false;
+        }
     }
 
     /*************
@@ -263,6 +274,14 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, fvres, tester.f_vec, out);
         success = tmp_success && success;
 
+        topic = "load bool    -> float  : ";
+        fbres = load_simd<bool, float>(tester.bool_vec, aligned_mode());
+        store_simd(fvres.data(), fbres, aligned_mode());
+
+        topic = "loadu bool   -> float  : ";
+        fbres = load_simd<bool, float>(tester.bool_vec, aligned_mode());
+        store_simd(fvres.data(), fbres, aligned_mode());
+        
         // double
 
         topic = "load float   -> double : ";
@@ -349,6 +368,14 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, dvres2, tester.d_vec2, out);
         success = tmp_success && success;
 
+        topic = "load bool    -> double : ";
+        dbres = load_simd<bool, double>(tester.bool_vec, aligned_mode());
+        store_simd(dvres2.data(), dbres, aligned_mode());
+
+        topic = "loadu bool   -> double : ";
+        dbres = load_simd<bool, double>(tester.bool_vec, aligned_mode());
+        store_simd(dvres2.data(), dbres, aligned_mode());
+        
         // int32
 
         topic = "load float   -> int32  : ";
@@ -434,6 +461,14 @@ namespace xsimd
         store_simd(i32vres.data(), i32bres, unaligned_mode());
         tmp_success = check_almost_equal(topic, i32vres, tester.i32_vec, out);
         success = tmp_success && success;
+
+        topic = "load bool    -> int32  : ";
+        i32bres = load_simd<bool, int32_t>(tester.bool_vec, aligned_mode());
+        store_simd(i32vres.data(), i32bres, aligned_mode());
+
+        topic = "loadu bool   -> int32  : ";
+        i32bres = load_simd<bool, int32_t>(tester.bool_vec, unaligned_mode());
+        store_simd(i32vres.data(), i32bres, unaligned_mode());
 
         // int64
 
@@ -521,6 +556,14 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, i64vres2, tester.i64_vec2, out);
         success = tmp_success && success;
 
+        topic = "load bool    -> int64  : ";
+        i64bres = load_simd<bool, int64_t>(tester.bool_vec, aligned_mode());
+        store_simd(i64vres2.data(), i64bres, aligned_mode());
+
+        topic = "loadu bool   -> int64  : ";
+        i64bres = load_simd<bool, int64_t>(tester.bool_vec, unaligned_mode());
+        store_simd(i64vres2.data(), i64bres, unaligned_mode());
+
         return success;
     }
 
@@ -557,6 +600,7 @@ namespace xsimd
         char_vector ccvres(fsize * 8);
         int8_vector cvres(fsize * 8);
         uint8_vector ucvres(fsize * 8);
+        bool bvres[fsize * 8];
 
         int32_vector i32vres2(dsize);
         int64_vector i64vres2(dsize);
@@ -565,6 +609,7 @@ namespace xsimd
         char_vector ccvres2(dsize * 8, char(0));
         int8_vector cvres2(dsize * 8, int8_t(0));
         uint8_vector ucvres2(dsize * 8, uint8_t(0));
+        bool bvres2[dsize * 8];
 
         bool success = true;
         bool tmp_success = true;
@@ -671,6 +716,14 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, ucvres, tester.ui8_vec, out);
         success = tmp_success && success;
 
+        topic = "store float   -> bool   : ";
+        fbres = load_simd<float>(tester.f_vec.data(), aligned_mode());
+        store_simd<bool, float>(bvres, fbres, aligned_mode());
+
+        topic = "storeu float  -> bool   : ";
+        fbres = load_simd<float>(tester.f_vec.data(), unaligned_mode());
+        store_simd<bool, float>(bvres, fbres, unaligned_mode());
+
         // double
 
         topic = "store double  -> float  : ";
@@ -763,6 +816,14 @@ namespace xsimd
         tmp_success = check_almost_equal(topic, ucvres2, tester.ui8_vec2, out);
         success = tmp_success && success;
 
+        topic = "store double  -> bool   : ";
+        dbres = load_simd<double>(tester.d_vec.data(), aligned_mode());
+        store_simd<bool, double>(bvres2, dbres, aligned_mode());
+
+        topic = "storeu double -> bool   : ";
+        dbres = load_simd<double>(tester.d_vec.data(), unaligned_mode());
+        store_simd<bool, double>(bvres2, dbres, unaligned_mode());
+
         // int32
 
         topic = "store int32   -> float  : ";
@@ -840,6 +901,14 @@ namespace xsimd
         std::copy(tester.ui8_vec.cbegin() + fsize, tester.ui8_vec.cend(), ucvres.begin() + fsize);
         tmp_success = check_almost_equal(topic, ucvres, tester.ui8_vec, out);
         success = tmp_success && success;
+
+        topic = "store int32   -> bool   : ";
+        i32bres = load_simd<int32_t>(tester.i32_vec.data(), aligned_mode());
+        store_simd<bool, int32_t>(bvres, i32bres, aligned_mode());
+
+        topic = "storeu int32  -> bool   : ";
+        i32bres = load_simd<int32_t>(tester.i32_vec.data(), unaligned_mode());
+        store_simd<bool, int32_t>(bvres, i32bres, unaligned_mode());
 
         // int64
 
@@ -932,6 +1001,14 @@ namespace xsimd
         std::copy(tester.ui8_vec2.cbegin() + dsize, tester.ui8_vec2.cend(), ucvres2.begin() + dsize);
         tmp_success = check_almost_equal(topic, ucvres2, tester.ui8_vec2, out);
         success = tmp_success && success;
+
+        topic = "store int64   -> bool     : ";
+        i64bres = load_simd<int64_t>(tester.i64_vec.data(), aligned_mode());
+        store_simd<bool, int64_t>(bvres2, i64bres, aligned_mode());
+
+        topic = "storeu int64  -> bool     : ";
+        i64bres = load_simd<int64_t>(tester.i64_vec.data(), unaligned_mode());
+        store_simd<bool, int64_t>(bvres2, i64bres, unaligned_mode());
 
         return success;
     }

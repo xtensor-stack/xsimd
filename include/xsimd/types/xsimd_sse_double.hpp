@@ -293,6 +293,8 @@ namespace xsimd
         return *this;
     }
 
+    XSIMD_DEFINE_LOAD_STORE(double, 2, bool, 16)
+
     inline batch<double, 2>& batch<double, 2>::load_unaligned(const int8_t* src)
     {
         return load_aligned(src);

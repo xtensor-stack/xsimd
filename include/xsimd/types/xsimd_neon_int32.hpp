@@ -139,6 +139,7 @@ namespace xsimd
         return *this;
     }
 
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, bool, XSIMD_DEFAULT_ALIGNMENT)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 4, int8_t, XSIMD_DEFAULT_ALIGNMENT)
     XSIMD_DEFINE_LOAD_STORE(int32_t, 4, uint8_t, XSIMD_DEFAULT_ALIGNMENT)
 
