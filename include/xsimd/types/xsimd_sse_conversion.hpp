@@ -76,24 +76,24 @@ namespace xsimd
      * batch cast functions implementation *
      *****************************************/
 
-    XSIMD_BATCH_CAST_IMPLICIT(int8_t, uint8_t, 16);
-    XSIMD_BATCH_CAST_IMPLICIT(uint8_t, int8_t, 16);
-    XSIMD_BATCH_CAST_IMPLICIT(int16_t, uint16_t, 8);
-    XSIMD_BATCH_CAST_IMPLICIT(uint16_t, int16_t, 8);
-    XSIMD_BATCH_CAST_IMPLICIT(int32_t, uint32_t, 4);
-    XSIMD_BATCH_CAST_INTRINSIC(int32_t, float, 4, _mm_cvtepi32_ps);
-    XSIMD_BATCH_CAST_IMPLICIT(uint32_t, int32_t, 4);
-    XSIMD_BATCH_CAST_IMPLICIT(int64_t, uint64_t, 2);
-    XSIMD_BATCH_CAST_IMPLICIT(uint64_t, int64_t, 2);
-    XSIMD_BATCH_CAST_INTRINSIC(float, int32_t, 4, _mm_cvttps_epi32);
+    XSIMD_BATCH_CAST_IMPLICIT(int8_t, uint8_t, 16)
+    XSIMD_BATCH_CAST_IMPLICIT(uint8_t, int8_t, 16)
+    XSIMD_BATCH_CAST_IMPLICIT(int16_t, uint16_t, 8)
+    XSIMD_BATCH_CAST_IMPLICIT(uint16_t, int16_t, 8)
+    XSIMD_BATCH_CAST_IMPLICIT(int32_t, uint32_t, 4)
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, float, 4, _mm_cvtepi32_ps)
+    XSIMD_BATCH_CAST_IMPLICIT(uint32_t, int32_t, 4)
+    XSIMD_BATCH_CAST_IMPLICIT(int64_t, uint64_t, 2)
+    XSIMD_BATCH_CAST_IMPLICIT(uint64_t, int64_t, 2)
+    XSIMD_BATCH_CAST_INTRINSIC(float, int32_t, 4, _mm_cvttps_epi32)
 #if defined(XSIMD_AVX512VL_AVAILABLE)
-    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 4, _mm_cvtepu32_ps);
-    XSIMD_BATCH_CAST_INTRINSIC(float, uint32_t, 4, _mm_cvttps_epu32);
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 4, _mm_cvtepu32_ps)
+    XSIMD_BATCH_CAST_INTRINSIC(float, uint32_t, 4, _mm_cvttps_epu32)
 #if defined(XSIMD_AVX512DQ_AVAILABLE)
-    XSIMD_BATCH_CAST_INTRINSIC(int64_t, double, 2, _mm_cvtepi64_pd);
-    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, double, 2, _mm_cvtepu64_pd);
-    XSIMD_BATCH_CAST_INTRINSIC(double, int64_t, 2, _mm_cvttpd_epi64);
-    XSIMD_BATCH_CAST_INTRINSIC(double, uint64_t, 2, _mm_cvttpd_epu64);
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, double, 2, _mm_cvtepi64_pd)
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, double, 2, _mm_cvtepu64_pd)
+    XSIMD_BATCH_CAST_INTRINSIC(double, int64_t, 2, _mm_cvttpd_epi64)
+    XSIMD_BATCH_CAST_INTRINSIC(double, uint64_t, 2, _mm_cvttpd_epu64)
 #endif
 #endif
 
