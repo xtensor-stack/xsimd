@@ -11,6 +11,8 @@
 #ifndef XSIMD_ESTRIN_HPP
 #define XSIMD_ESTRIN_HPP
 
+#include <tuple>
+
 #include "../types/xsimd_types_include.hpp"
 
 namespace xsimd
