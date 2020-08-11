@@ -61,14 +61,14 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     endif()
 endif()
 
-if(MSVC)
+if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP /bigobj")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
     set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang AND WIN32) # We are using clang-cl
-    add_compile_options(/EHsc /MP /bigobj /arch:AVX2)
+    add_compile_options(/EHsc /bigobj)
     set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
 endif()
 
@@ -93,6 +93,8 @@ if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
         message(FATAL_ERROR "Build step for googletest failed: ${result}")
     endif()
 
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
