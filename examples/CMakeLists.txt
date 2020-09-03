@@ -27,6 +27,6 @@ endif()
 
 set(CMAKE_CXX_FLAGS "-O3 -march=native -mtune=native -fopenmp -std=c++14")
 
-add_executable(mandelbrot EXCLUDE_FROM_ALL mandelbrot.cpp ${XSIMD_HEADERS})
+add_executable(mandelbrot mandelbrot.cpp ${XSIMD_HEADERS})
 
 add_custom_target(xmandelbrot COMMAND mandelbrot DEPENDS mandelbrot)
