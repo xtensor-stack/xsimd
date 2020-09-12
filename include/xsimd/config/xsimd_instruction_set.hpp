@@ -245,8 +245,10 @@
         #endif
     #elif __ARM_ARCH >= 7
         #define XSIMD_ARM_INSTR_SET XSIMD_ARM7_NEON_VERSION
+    #elif defined(XSIMD_ENABLE_FALLBACK)
+        #warning "NEON instruction set not supported, using fallback mode."
     #else
-        static_assert("NEON instruction set not supported.", false);
+        static_assert(false, "NEON instruction set not supported.");
     #endif
 #endif
 
