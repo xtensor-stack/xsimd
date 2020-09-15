@@ -280,7 +280,7 @@ namespace xsimd
 #if defined(XSIMD_AVX512VL_AVAILABLE) && defined(XSIMD_AVX512BW_AVAILABLE)
         return _mm_sllv_epi16(lhs, rhs);
 #else
-        return sse_detail::shift_impl([](int16_t lhs, int16_t s) { return lhs << s; }, lhs, rhs);
+        return sse_detail::shift_impl([](int16_t alhs, int16_t s) { return alhs << s; }, lhs, rhs);
 #endif
     }
 
@@ -289,7 +289,7 @@ namespace xsimd
 #if defined(XSIMD_AVX512VL_AVAILABLE) && defined(XSIMD_AVX512BW_AVAILABLE)
         return _mm_srav_epi16(lhs, rhs);
 #else
-        return sse_detail::shift_impl([](int16_t lhs, int16_t s) { return lhs >> s; }, lhs, rhs);
+        return sse_detail::shift_impl([](int16_t alhs, int16_t s) { return alhs >> s; }, lhs, rhs);
 #endif
     }
 
@@ -311,7 +311,7 @@ namespace xsimd
 #if defined(XSIMD_AVX512VL_AVAILABLE) && defined(XSIMD_AVX512BW_AVAILABLE)
         return _mm_sllv_epi16(lhs, rhs);
 #else
-        return sse_detail::shift_impl([](uint16_t lhs, int16_t s) { return lhs << s; }, lhs, rhs);
+        return sse_detail::shift_impl([](uint16_t alhs, int16_t s) { return alhs << s; }, lhs, rhs);
 #endif
     }
 
@@ -320,7 +320,7 @@ namespace xsimd
 #if defined(XSIMD_AVX512VL_AVAILABLE) && defined(XSIMD_AVX512BW_AVAILABLE)
         return _mm_srlv_epi16(lhs, rhs);
 #else
-        return sse_detail::shift_impl([](uint16_t lhs, int16_t s) { return lhs >> s; }, lhs, rhs);
+        return sse_detail::shift_impl([](uint16_t alhs, int16_t s) { return alhs >> s; }, lhs, rhs);
 #endif
     }
 }

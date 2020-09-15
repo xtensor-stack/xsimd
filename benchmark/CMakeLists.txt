@@ -17,21 +17,30 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIR})
 endif ()
 
-message(STATUS "Forcing tests build type to Release")
-set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Setting tests build type to Release")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+else()
+    message(STATUS "Tests build type is ${CMAKE_BUILD_TYPE}")
+endif()
 
 include(CheckCXXCompilerFlag)
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder -Wconversion")
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
+    if(NOT CMAKE_CXX_FLAGS MATCHES "-march")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+    endif()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder -Wconversion")
 
-    if (HAS_CPP11_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    else()
-        message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
+    if(NOT MSVC)
+        CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
+        if (HAS_CPP11_FLAG)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        else()
+            message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
+        endif()
     endif()
 endif()
 
@@ -54,6 +63,6 @@ set(XSIMD_BENCHMARK
 )
 
 set(XSIMD_BENCHMARK_TARGET benchmark_xsimd)
-add_executable(${XSIMD_BENCHMARK_TARGET} EXCLUDE_FROM_ALL ${XSIMD_BENCHMARK} ${XSIMD_HEADERS})
+add_executable(${XSIMD_BENCHMARK_TARGET} ${XSIMD_BENCHMARK} ${XSIMD_HEADERS})
 
 add_custom_target(xbenchmark COMMAND benchmark_xsimd DEPENDS ${XSIMD_BENCHMARK_TARGET})
