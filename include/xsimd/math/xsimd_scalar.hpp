@@ -40,6 +40,7 @@ namespace xsimd
     using std::expm1;
     using std::fabs;
     using std::fdim;
+    using std::fma;
     using std::fmax;
     using std::fmin;
     using std::floor;
@@ -348,11 +349,29 @@ namespace xsimd
         return (self.real() > other.real()) ? (self) : (self.real() == other.real() ? (self.imag() > other.imag() ? self : other) : other);
     }
 
-    template <class T>
-    inline typename std::enable_if<std::is_scalar<T>::value, T>::type fma(const T& a, const T& b, const T& c)
+    namespace detail
     {
-        return std::fma(a, b, c);
+        template <class C>
+        inline C fma_complex_scalar_impl(const C& a, const C& b, const C& c)
+        {
+            return C( std::fma(a.imag(), b.imag(), -std::fma(a.real(), b.real(), c.real()))
+                                 , std::fma(a.imag(), b.real(),  std::fma(a.real(), b.imag(), c.imag())));
+        }
     }
+
+    template <class T>
+    inline std::complex<T> fma(const std::complex<T>& a, const std::complex<T>& b, const std::complex<T>& c)
+    {
+        return detail::fma_complex_scalar_impl(a, b, c);
+    }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> fma(const xtl::xcomplex<T, T, i3ec>& a, const xtl::xcomplex<T, T, i3ec>& b, const xtl::xcomplex<T, T, i3ec>& c)
+    {
+        return detail::fma_complex_scalar_impl(a, b, c);
+    }
+#endif
 
     inline void sincos(float val, float&s, float& c)
     {

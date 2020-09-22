@@ -815,6 +815,13 @@ namespace xsimd
                 return hypot(z.real(), z.imag());
             }
 
+            static batch_type fma(const batch_type& a, const batch_type& b, const batch_type& c)
+            {
+                real_batch r1 = a.real()*b.real() - a.imag()*b.imag() + c.real();
+                real_batch i1 = a.real()*b.imag() + a.imag()*b.real() + c.imag();
+                return batch_type(r1, i1);
+            }
+
             static batch_type sqrt(const batch_type& z)
             {
                 using rvt = typename real_batch::value_type;
