@@ -267,7 +267,7 @@ namespace xsimd
             static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-                return _mm256_blend_epi16(b, a, cond);
+                return _mm256_blendv_epi8(b, a, cond);
 #else
                 XSIMD_SPLIT_AVX(cond);
                 XSIMD_SPLIT_AVX(a);
