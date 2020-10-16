@@ -28,7 +28,7 @@ namespace xsimd
      * @ingroup data_transfer
      * Returns a batch with all values initialized to \c value.
      * @param value the scalar used to initialize the batch.
-     * @return the batch wrapping the highest available instruction set. 
+     * @return the batch wrapping the highest available instruction set.
      */
     template <class T1, class T2 = T1>
     simd_return_type<T1, T2> set_simd(const T1& value);
@@ -38,7 +38,7 @@ namespace xsimd
      * Loads the memory array pointed to by \c src into a batch and returns it.
      * \c src is required to be aligned.
      * @param src the pointer to the memory array to load.
-     * @return the batch wrapping the highest available instruction set. 
+     * @return the batch wrapping the highest available instruction set.
      */
     template <class T1, class T2 = T1>
     simd_return_type<T1, T2> load_aligned(const T1* src);
@@ -340,13 +340,13 @@ namespace xsimd
     void store_simd(T1* real_dst, T1* imag_dst, const simd_type<T2>& src, unaligned_mode);
 
     // Prefetch
-    
+
     template <class T>
     void prefetch(const T* address);
 
 
     /***************************
-     * detail implementation 
+     * detail implementation
      ***************************/
 
     namespace detail
@@ -667,7 +667,7 @@ namespace xsimd
     {
     }
 
-#if XSIMD_X86_INSTR_SET > XSIMD_INSTR_SET_NOT_AVAILABLE
+#if XSIMD_X86_INSTR_SET > XSIMD_VERSION_NUMBER_NOT_AVAILABLE
 
     template <>
     inline void prefetch<int32_t>(const int32_t* address)
