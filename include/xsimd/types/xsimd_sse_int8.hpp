@@ -12,6 +12,7 @@
 #define XSIMD_SSE_INT8_HPP
 
 #include <cstdint>
+#include <limits>
 
 #include "xsimd_base.hpp"
 #include "xsimd_sse_int_base.hpp"
