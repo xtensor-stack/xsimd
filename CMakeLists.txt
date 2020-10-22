@@ -136,6 +136,7 @@ if(ENABLE_XTL_COMPLEX)
 endif()
 
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(test)
 endif()
 
@@ -192,4 +193,3 @@ configure_file(${PROJECT_NAME}.pc.in
                 @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
-

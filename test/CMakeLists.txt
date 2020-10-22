@@ -13,6 +13,8 @@ cmake_minimum_required(VERSION 3.1)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     project(xsimd-test)
 
+    enable_testing()
+
     find_package(xsimd REQUIRED CONFIG)
     set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIRS})
 endif ()
@@ -104,14 +106,17 @@ if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     endif()
 
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    
+
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                      ${CMAKE_CURRENT_BINARY_DIR}/googletest-build EXCLUDE_FROM_ALL)
 
     set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
-    set(GTEST_BOTH_LIBRARIES  gtest_main gtest)
+    add_library(GTest::GTest INTERFACE IMPORTED)
+    target_link_libraries(GTest::GTest INTERFACE gtest)
+    add_library(GTest::Main INTERFACE IMPORTED)
+    target_link_libraries(GTest::Main INTERFACE gtest_main)
 else()
     find_package(GTest REQUIRED)
 endif()
@@ -162,8 +167,9 @@ set(XSIMD_TESTS
 )
 
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})
-target_link_libraries(test_xsimd xsimd ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test_xsimd xsimd GTest::GTest GTest::Main ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(test_xsimd PRIVATE ${XSIMD_INCLUDE_DIR})
+add_test(NAME test_xsimd COMMAND test_xsimd)
 
 if(DEFINED XSIMD_FORCE_X86_INSTR_SET)
     message("Forcing XSIMD_FORCE_X86_INSTR_SET to ${XSIMD_FORCE_X86_INSTR_SET}")
