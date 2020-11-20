@@ -13,6 +13,8 @@
 
 #include "gtest/gtest.h"
 
+#include "xsimd/config/xsimd_instruction_set.hpp"
+
 #ifdef XSIMD_INSTR_SET_AVAILABLE
 
 #include "xsimd/math/xsimd_fp_manipulation.hpp"
