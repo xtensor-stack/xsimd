@@ -237,7 +237,7 @@ namespace xsimd
             using batch_type = batch<T, N>;
             using batch_bool_type = typename simd_batch_traits<batch_type>::batch_bool_type;
 
-            static inline batch_bool_type run(const batch_type& x)
+            static inline batch_bool_type run(const batch_type&)
             {
                 return batch_bool_type(false);
             }
