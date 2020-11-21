@@ -75,24 +75,45 @@ namespace xsimd
 #else
     // Windows defines catch all templates
     template <class T>
-    typename std::enable_if<std::is_scalar<T>::value, bool>::type
+    typename std::enable_if<std::is_floating_point<T>::value, bool>::type
     isfinite(T var)
     {
         return std::isfinite(var);
     }
 
     template <class T>
-    typename std::enable_if<std::is_scalar<T>::value, bool>::type
+    typename std::enable_if<std::is_integral<T>::value, bool>::type
+    isfinite(T var)
+    {
+        return isfinite(double(var));
+    }
+
+    template <class T>
+    typename std::enable_if<std::is_floating_point<T>::value, bool>::type
     isinf(T var)
     {
         return std::isinf(var);
     }
 
     template <class T>
-    typename std::enable_if<std::is_scalar<T>::value, bool>::type
+    typename std::enable_if<std::is_integral<T>::value, bool>::type
+    isinf(T var)
+    {
+        return isinf(double(var));
+    }
+
+    template <class T>
+    typename std::enable_if<std::is_floating_point<T>::value, bool>::type
     isnan(T var)
     {
         return std::isnan(var);
+    }
+
+    template <class T>
+    typename std::enable_if<std::is_integral<T>::value, bool>::type
+    isnan(T var)
+    {
+        return isnan(double(var));
     }
 #endif
 

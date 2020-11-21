@@ -216,6 +216,34 @@ namespace xsimd
         return (x - x) == batch_type_t<B>(0.);
     }
 
+    namespace detail
+    {
+        template <class T, std::size_t N, bool is_int = std::is_integral<T>::value>
+        struct isinf_kernel
+        {
+            using batch_type = batch<T, N>;
+            using batch_bool_type = typename simd_batch_traits<batch_type>::batch_bool_type;
+
+            static inline batch_bool_type run(const batch_type& x)
+            {
+                return  abs(x) == ::xsimd::infinity<batch_type_t<batch_type>>();
+            }
+        };
+
+        template <class T, std::size_t N>
+        struct isinf_kernel<T, N, true>
+        {
+
+            using batch_type = batch<T, N>;
+            using batch_bool_type = typename simd_batch_traits<batch_type>::batch_bool_type;
+
+            static inline batch_bool_type run(const batch_type& x)
+            {
+                return batch_bool_type(false);
+            }
+        };
+    }
+
     /**
      * Determines if the scalars in the given batch \c x are positive
      * or negative infinity.
@@ -226,7 +254,9 @@ namespace xsimd
     inline typename simd_batch_traits<B>::batch_bool_type
     isinf(const simd_base<B>& x)
     {
-        return abs(x) == infinity<batch_type_t<B>>();
+        using kernel_type = detail::isinf_kernel<typename batch_type_t<B>::value_type, batch_type_t<B>::size>;
+        return kernel_type::run(x());
+        //return abs(x) == infinity<batch_type_t<B>>();
     }
 
     template <class B>
