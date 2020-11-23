@@ -13,6 +13,7 @@
 
 #include "xsimd_numerical_constant.hpp"
 #include "xsimd_rounding.hpp"
+#include "../types/xsimd_traits.hpp"
 
 namespace xsimd
 {
@@ -63,6 +64,126 @@ namespace xsimd
      * Basic operations implementation *
      ***********************************/
 
+    namespace detail
+    {
+
+        template <class T>
+        struct get_batch_value_type
+        {
+            using type = T;
+        };
+
+        template <class T, std::size_t N>
+        struct get_batch_value_type<batch<T, N>>
+        {
+            using type = T;
+        };
+
+        template <class B>
+        using get_batch_value_type_t = typename get_batch_value_type<B>::type;
+
+        template <class B, bool is_int = std::is_integral<get_batch_value_type_t<B>>::value>
+        struct remainder_kernel
+        {
+            using batch_type = B;
+            using size_type = std::size_t;
+            static constexpr size_type double_size = batch_type::size;
+
+            static inline batch_type fmod(const batch_type& x, const batch_type& y)
+            {
+                return fnma(trunc(x / y), y, x);
+            }
+
+            static inline batch_type remainder(const batch_type& x, const batch_type& y)
+            {
+                return fnma(nearbyint(x / y), y, x);
+            }
+
+            template <class IB>
+            static inline batch_type to_double(const IB& b, size_type offset)
+            {
+                batch_type res;
+                for (size_type i = 0; i < double_size; ++i)
+                {
+                    res[i] = b[i + offset];
+                }
+                return res;
+            }
+
+            template <class IB>
+            static inline void to_int(const batch_type& src, IB& dst, size_type offset)
+            {
+                for (size_type i = 0; i < double_size; ++i)
+                {
+                    dst[i + offset] = src[i];
+                }
+            }
+        };
+
+        template <>
+        struct remainder_kernel<double, false>
+        {
+            using size_type = std::size_t;
+            static inline double fmod(double x, double y)
+            {
+                return std::fmod(x, y);
+            }
+
+            static inline double remainder(double x, double y)
+            {
+                return std::remainder(x, y);
+            }
+
+            template <class IB>
+            static inline double to_double(const IB& b, size_type offset)
+            {
+                double res = b[offset];
+                return res;
+            }
+
+            template <class IB>
+            static inline void to_int(double src, IB& dst, size_type offset)
+            {
+                dst[offset] = src;
+            }
+        };
+
+        template <class B>
+        struct remainder_kernel<B, true>
+        {
+            using batch_type = B;
+            using double_batch = typename simd_traits<double>::type;
+            using double_kernel = remainder_kernel<double_batch>;
+            using size_type = std::size_t;
+            static constexpr size_type int_size = B::size;
+            static constexpr size_type double_size = simd_traits<double>::size;
+
+            static inline batch_type fmod(const batch_type& x, const batch_type& y)
+            {
+                batch_type res;
+                for (size_type i = 0; i < int_size; i += double_size)
+                {
+                    double_batch tmp = double_kernel::fmod(double_kernel::to_double(x, i),
+                                                           double_kernel::to_double(y, i));
+                    double_kernel::to_int(tmp, res, i);
+                }
+                return res;
+            }
+
+            static inline batch_type remainder(const batch_type& x, const batch_type& y)
+            {
+                batch_type res;
+                for (size_type i = 0; i < int_size; i += double_size)
+                {
+                    double_batch tmp = double_kernel::remainder(double_kernel::to_double(x, i),
+                                                                double_kernel::to_double(y, i));
+                    double_kernel::to_int(tmp, res, i);
+                }
+                return res;
+            }
+        };
+    }
+
     /**
      * @brief Computes the floating-point remainder of the division operation \c x/y.
      *
@@ -76,7 +197,7 @@ namespace xsimd
     template <class B>
     inline batch_type_t<B> fmod(const simd_base<B>& x, const simd_base<B>& y)
     {
-        return fnma(trunc(x / y), y, x);
+        return detail::remainder_kernel<B>::fmod(x(), y());
     }
 
     /**
@@ -94,7 +215,7 @@ namespace xsimd
     template <class B>
     inline batch_type_t<B> remainder(const simd_base<B>& x, const simd_base<B>& y)
     {
-        return fnma(nearbyint(x / y), y, x);
+        return detail::remainder_kernel<B>::remainder(x(), y());
     }
 
     /**
@@ -139,16 +260,12 @@ namespace xsimd
 
             static inline batch_type next(const batch_type& b) noexcept
             {
-                return select(b != maxvalue<batch_type>(),
-                              b + T(1),
-                              b);
+                return b;
             }
 
             static inline batch_type prev(const batch_type& b) noexcept
             {
-                select(b != minvalue<batch_type>(),
-                       b - T(1),
-                       b);
+                return b;
             }
         };
 

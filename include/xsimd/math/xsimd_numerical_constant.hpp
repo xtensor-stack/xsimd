@@ -297,6 +297,32 @@ namespace xsimd
             }
         };
 
+        template <class T>
+        struct minvalue_common
+        {
+            static constexpr T get_value() noexcept
+            {
+                return std::numeric_limits<T>::min();
+            }
+        };
+
+        template <>
+        struct minvalue_impl<int8_t> : minvalue_common<int8_t> {};
+        template <>
+        struct minvalue_impl<uint8_t> : minvalue_common<uint8_t> {};
+        template <>
+        struct minvalue_impl<int16_t> : minvalue_common<int16_t> {};
+        template <>
+        struct minvalue_impl<uint16_t> : minvalue_common<uint16_t> {};
+        template <>
+        struct minvalue_impl<int32_t> : minvalue_common<int32_t> {};
+        template <>
+        struct minvalue_impl<uint32_t> : minvalue_common<uint32_t> {};
+        template <>
+        struct minvalue_impl<int64_t> : minvalue_common<int64_t> {};
+        template <>
+        struct minvalue_impl<uint64_t> : minvalue_common<uint64_t> {};
+
         template <>
         struct minvalue_impl<float>
         {
