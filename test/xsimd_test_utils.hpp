@@ -232,12 +232,50 @@ namespace xsimd
         return os;
     }
 
-    template <class T>
-    inline bool check_almost_equal(const std::string& topic, const T& res, const T& ref, std::ostream& out)
+    namespace detail
+    {
+        template <class T1, class T2>
+        struct almost_equal_checker
+        {
+            static bool run_scalar(const T1& res, const T2& ref)
+            {
+                return almost_equal_checker<T1, T1>::run_scalar(res, T1(ref));
+            }
+
+            template <class A1, class A2>
+            static bool run_vector(const std::vector<T1, A1>& res,
+                                   const std::vector<T2, A2>& ref)
+            {
+                std::vector<T1, A1> new_ref(ref.size());
+                std::transform(ref.cbegin(), ref.end(), new_ref.begin(),
+                               [](const T2& v) { return static_cast<T1>(v); });
+                return almost_equal_checker<T1, T1>::run_vector(res, new_ref);
+            }
+        };
+
+        template <class T>
+        struct almost_equal_checker<T, T>
+        {
+            static bool run_scalar(const T& res, const T& ref)
+            {
+                return scalar_comparison<T>::run(res, ref);
+            }
+
+            template <class A>
+            static bool run_vector(const std::vector<T, A>& res,
+                                   const std::vector<T, A>& ref)
+            {
+                return vector_comparison(res, ref);
+            }
+        };
+    };
+
+    template <class T1, class T2>
+    inline bool check_almost_equal(const std::string& topic, const T1& res, const T2& ref, std::ostream& out)
     {
         out << topic;
         out << std::setprecision(20);
-        if (scalar_comparison<T>::run(res, ref))
+        if (detail::almost_equal_checker<T1, T2>::run_scalar(res, ref))
         {
             out << "OK" << std::endl;
             return true;
@@ -255,12 +293,15 @@ namespace xsimd
 
 #define PRINT_COUT
 
-    template <class T, class A>
-    inline bool check_almost_equal(const std::string& topic, const std::vector<T, A>& res, const std::vector<T, A>& ref, std::ostream& out)
+    template <class T1, class A1, class T2, class A2>
+    inline bool check_almost_equal(const std::string& topic,
+                                   const std::vector<T1, A1>& res,
+                                   const std::vector<T2, A2>& ref,
+                                   std::ostream& out)
     {
         out << topic;
         out << std::setprecision(20);
-        int comp = vector_comparison(res, ref);
+        int comp = detail::almost_equal_checker<T1, T2>::run_vector(res, ref);
         if (comp == 0)
         {
             out << "OK" << std::endl;

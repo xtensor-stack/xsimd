@@ -66,8 +66,8 @@ namespace xsimd
         clip_hi = 1.;
         for (size_t i = 0; i < N; ++i)
         {
-            lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
-            rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
+            lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25)) + 1.;
+            rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25) + 1.;
             from_input[i] = rhs_input[i] - value_type(1);
             fmod_res[i] = std::fmod(lhs_input[i], rhs_input[i]);
             remainder_res[i] = std::remainder(lhs_input[i], rhs_input[i]);
@@ -79,6 +79,76 @@ namespace xsimd
             finite_res[i] = T(1.);
             nextafter_res[i] = std::nextafter(from_input[i], rhs_input[i]);
         }
+    }
+
+    namespace detail
+    {
+        template <class T, bool is_int = std::is_integral<typename T::value_type>::value>
+        struct infinity_tester
+        {
+            using tester_type = T;
+            using vector_type = typename T::vector_type;
+            using res_type = typename T::res_type;
+
+            static inline bool isfinite(std::ostream& out,
+                                        const std::string& topic,
+                                        tester_type& tester,
+                                        res_type& res)
+            {
+                vector_type lhs = infinity<vector_type>();
+                vector_type vres = select(xsimd::isfinite(lhs), vector_type(1.), vector_type(0.));
+                detail::store_vec(vres, res);
+                bool success = check_almost_equal(topic, res, tester.inf_res, out);
+                typename res_type::value_type scalar_cond_res = xsimd::isfinite(lhs[0])?1.:0.;
+                success &= check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
+                return success;
+            }
+
+            static inline bool isinf(std::ostream& out,
+                                     const std::string& topic,
+                                     tester_type& tester,
+                                     res_type& res)
+
+            {
+                vector_type lhs = infinity<vector_type>();
+                vector_type vres = select(xsimd::isinf(lhs), vector_type(0.), vector_type(1.));
+                detail::store_vec(vres, res);
+                bool success = check_almost_equal(topic, res, tester.inf_res, out);
+                typename res_type::value_type scalar_cond_res = xsimd::isinf(lhs[0])?0.:1.;
+                success &= check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
+                return success;
+            }
+        };
+
+        template <class T>
+        struct infinity_tester<T, true>
+        {
+            using tester_type = T;
+            using vector_type = typename T::vector_type;
+            using res_type = typename T::res_type;
+
+            static inline bool isfinite(std::ostream& out,
+                                        const std::string& topic,
+                                        tester_type& tester,
+                                        res_type&)
+            {
+                vector_type lhs(1.);
+                typename res_type::value_type scalar_cond_res = xsimd::isfinite(lhs[0])?0.:1.;
+                bool success = check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
+                return true;
+            }
+
+            static inline bool isinf(std::ostream& out,
+                                     const std::string& topic,
+                                     tester_type& tester,
+                                     res_type&)
+            {   
+                vector_type lhs(1.);
+                typename res_type::value_type scalar_cond_res = xsimd::isfinite(lhs[0])?1.:0.;
+                bool success = check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
+                return true;
+            }
+        };
     }
 
     template <class T>
@@ -152,13 +222,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.finite_res, out);
         success = success && tmp_success;
-        lhs = infinity<vector_type>();
-        vres = select(isfinite(lhs), vector_type(1.), vector_type(0.));
-        detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(topic, res, tester.inf_res, out);
-        success = success && tmp_success;
-        scalar_cond_res = xsimd::isfinite(lhs[0])?1.:0.;
-        success &= check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
+        success = success && detail::infinity_tester<T>::isfinite(out, topic, tester, res);
 
         topic = "isinf    : ";
         lhs = vector_type(12.);
@@ -166,14 +230,7 @@ namespace xsimd
         detail::store_vec(vres, res);
         tmp_success = check_almost_equal(topic, res, tester.finite_res, out);
         success = success && tmp_success;
-        lhs = infinity<vector_type>();
-        vres = select(isinf(lhs), vector_type(0.), vector_type(1.));
-        detail::store_vec(vres, res);
-        tmp_success = check_almost_equal(topic, res, tester.inf_res, out);
-        success = success && tmp_success;
-        scalar_cond_res = xsimd::isinf(lhs[0])?0.:1.;
-        success &= check_almost_equal(topic, scalar_cond_res, tester.inf_res[0], out);
-
+        
         topic = "nextafter: ";
         detail::load_vec(lhs, tester.from_input);
         detail::load_vec(rhs, tester.rhs_input);
