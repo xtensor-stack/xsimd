@@ -16,7 +16,7 @@ Hyperbolic functions
    :project: xsimd
 
 .. _tanh-function-reference:
-.. doxygenfunction:: tanh(const batch<T, N>&)
+.. doxygenfunction:: tanh(const simd_base<B>&)
    :project: xsimd
 
 .. _asinh-func-ref:

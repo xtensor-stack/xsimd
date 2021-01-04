@@ -4,4 +4,4 @@ channels:
   - conda-forge
 
 dependencies:
-  - breathe==4.16.0
+  - breathe==4.25.1
