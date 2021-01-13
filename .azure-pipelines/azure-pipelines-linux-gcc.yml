@@ -1,0 +1,43 @@
+jobs:
+  - job: 'Linux_1'
+    strategy:
+      matrix:
+        gcc_4:
+          gcc_version: '4.9'
+        gcc_5:
+          gcc_version: '5'
+        gcc_6_force_no_instr_set:
+          gcc_version: '6'
+          force_no_instr_set: 1
+        gcc_6_enable_xtl_complex:
+          gcc_version: '6'
+          enable_xtl_complex: 1
+        gcc_7_avx512:
+          gcc_version: '7'
+          avx512: 1
+        gcc_8_enable_fallback:
+          gcc_version: '8'
+          enable_xtl_complex: 1
+          enable_fallback: 1
+        gcc_9:
+          gcc_version: '9'
+    pool:
+      vmImage: ubuntu-16.04
+    variables:
+      CC: gcc-$(gcc_version)
+      CXX: g++-$(gcc_version)
+    timeoutInMinutes: 30
+    steps:
+
+      - script: |
+          if [[ $(gcc_version) == '4.9' || $(gcc_version) == '6' ]]; then
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+            sudo apt-get update
+            sudo apt-get --no-install-suggests --no-install-recommends install g++-$(gcc_version)
+          fi
+        displayName: Install build toolchain
+          
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+
+      - template: unix-build.yml
