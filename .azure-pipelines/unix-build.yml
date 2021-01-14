@@ -19,6 +19,13 @@ steps:
       source activate xsimd
       mkdir build
       cd build
+      if [[ $(cross_compile) == 1 ]]; then
+        if [[ $(arm_arch_dir) == 'aarch64-linux-gnu' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCROSS_COMPILE_ARM=ON -DARM_ARCH_DIRECTORY=$(arm_arch_dir) -DARM_GCC_VER=4.9.3 -DTARGET_ARCH=$(arm_arch_target) -DCMAKE_LINKER=/usr/bin/aarch64-linux-gnu-ld";
+        else
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCROSS_COMPILE_ARM=ON -DARM_ARCH_DIRECTORY=$(arm_arch_dir) -DARM_GCC_VER=4.9.3 -DTARGET_ARCH=$(arm_arch_target)";
+        fi
+      fi
       if [[ $(enable_xtl_complex) == 1 ]]; then
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_XTL_COMPLEX=ON";
       fi
@@ -46,6 +53,14 @@ steps:
       source activate xsimd
       if [[ $(avx512) == 1 ]]; then
         ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd ;
+      elif [[ $(cross_compile) == 1 ]]; then
+        echo $(arm_arch_dir);
+        if [[ $(arm_arch_dir) == 'aarch64-linux-gnu' ]]; then
+          ls /usr/aarch64-linux-gnu/ ;
+          qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./test_xsimd ;
+        else
+          qemu-arm -L /usr/arm-linux-gnueabi/ ./test_xsimd ;
+        fi
       else
         ./test_xsimd
       fi

@@ -1,0 +1,67 @@
+jobs:
+  - job: 'Linux_0'
+    strategy:
+      matrix:
+        clang_4_armv7:
+          llvm_version: '4.0'
+          cross_compile: 1
+          arm_arch_dir: 'arm-linux-gnueabi'
+          arm_arch_target: 'armv7-a'
+        clang_4_armv8:
+          llvm_version: '4.0'
+          cross_compile: 1
+          arm_arch_dir: 'arm-linux-gnueabi'
+          arm_arch_target: 'armv8-a'
+        #clang_4_aarch64:
+        #  llvm_version: '4.0'
+        #  cross_compile: 1
+        #  arm_arch_dir: 'aarch64-linux-gnu'
+        #  arm_arch_target: 'armv8-a'
+        clang_5:
+          llvm_version: '5.0'
+        clang_6:
+          llvm_version: '6.0'
+        clang_7:
+          llvm_version: '7'
+        clang_8:
+          llvm_version: '8'
+        clang_9:
+          llvm_version: '9'
+        clang_10:
+          llvm_version: '10'
+    pool:
+      vmImage: ubuntu-16.04
+    variables:
+      CC: clang-$(llvm_version)
+      CXX: clang++-$(llvm_version)
+    timeoutInMinutes: 30
+    steps:
+      - script: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          if [[ $(llvm_version) == '4.0' || $(llvm_version) == '5.0' ]]; then
+            sudo apt-get update
+            sudo apt-get --no-install-suggests --no-install-recommends install clang-$(llvm_version)
+            if [[ $(cross_compile) == 1 ]]; then
+              if [[ $(arm_arch_dir) == 'aarch64-linux-gnu' ]]; then
+                sudo apt-get --no-install-suggests --no-install-recommends install g++-4.9-aarch64-linux-gnu gcc-4.9-aarch64-linux-gnu
+              else
+                sudo apt-get --no-install-suggests --no-install-recommends install g++-4.9-arm-linux-gnueabi
+              fi
+              sudo apt-get --no-install-suggests --no-install-recommends install g++-4.9-multilib gcc-4.9-multilib
+              sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-arm
+            else
+              sudo apt-get --no-install-suggests --no-install-recommends install gcc-4.9
+            fi
+          else
+            LLVM_VERSION=$(llvm_version)
+            get -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+            sudo add-apt-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-$LLVM_VERSION main"
+            sudo apt-get update
+            sudo apt-get --no-install-suggests --no-install-recommends install clang-$(llvm_version)
+          fi
+        displayName: Install build toolchain
+
+      - bash: echo "##vso[task.prependpath]$CONDA/bin"
+        displayName: Add conda to PATH
+
+      - template: unix-build.yml
