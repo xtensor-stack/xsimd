@@ -12,6 +12,7 @@
 #define XSIMD_BASE_HPP
 
 #include <cstddef>
+#include <cstring>
 #include <complex>
 #include <iterator>
 #include <ostream>
@@ -603,7 +604,8 @@ namespace xsimd
     {                                                                          \
         TYPE z0(0), z1(0);                                                     \
         using int_type = as_unsigned_integer_t<TYPE>;                          \
-        *reinterpret_cast<int_type*>(&z1) = ~int_type(0);                      \
+        int_type value(~int_type(0));                                          \
+        std::memcpy(&z1, &value, sizeof(int_type));                            \
         return select(src, batch<TYPE, N>(z1), batch<TYPE ,N>(z0));            \
     }
 
