@@ -13,6 +13,7 @@
 
 #include <complex>
 #include <cstddef>
+#include <limits>
 #include <ostream>
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
