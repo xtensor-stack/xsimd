@@ -386,14 +386,26 @@ namespace xsimd
 
             static bool all(const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vminvq_u16(rhs) != 0;
+#else
                 uint16x4_t tmp = vand_u16(vget_low_u16(rhs), vget_high_u16(rhs));
-                return vget_lane_u16(vpmin_u16(tmp, tmp), 0) != 0;
+                tmp = vpmin_u16(tmp, tmp);
+                tmp = vpmin_u16(tmp, tmp);
+                return vget_lane_u16(tmp, 0) != 0;
+#endif
             }
 
             static bool any(const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vmaxvq_u16(rhs) != 0;
+#else
                 uint16x4_t tmp = vorr_u16(vget_low_u16(rhs), vget_high_u16(rhs));
-                return vget_lane_u16(vpmax_u16(tmp, tmp), 0);
+                tmp = vpmax_u16(tmp, tmp);
+                tmp = vpmax_u16(tmp, tmp);
+                return vget_lane_u16(tmp, 0);
+#endif
             }
         };
     }
@@ -517,14 +529,22 @@ namespace xsimd
 
             static bool all(const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vminvq_u32(rhs) != 0;
+#else
                 uint32x2_t tmp = vand_u32(vget_low_u32(rhs), vget_high_u32(rhs));
                 return vget_lane_u32(vpmin_u32(tmp, tmp), 0) != 0;
+#endif
             }
 
             static bool any(const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vmaxvq_u32(rhs) != 0;
+#else
                 uint32x2_t tmp = vorr_u32(vget_low_u32(rhs), vget_high_u32(rhs));
                 return vget_lane_u32(vpmax_u32(tmp, tmp), 0);
+#endif
             }
         };
     }
@@ -678,14 +698,28 @@ namespace xsimd
 
             static bool all(const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vminvq_u8(rhs) != 0;
+#else
                 uint8x8_t tmp = vand_u8(vget_low_u8(rhs), vget_high_u8(rhs));
-                return vget_lane_u8(vpmin_u8(tmp, tmp), 0) != 0;
+                tmp = vpmin_u8(tmp, tmp);
+                tmp = vpmin_u8(tmp, tmp);
+                tmp = vpmin_u8(tmp, tmp);
+                return vget_lane_u8(tmp, 0) != 0;
+#endif
             }
 
             static bool any(const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vmaxvq_u8(rhs) != 0;
+#else
                 uint8x8_t tmp = vorr_u8(vget_low_u8(rhs), vget_high_u8(rhs));
-                return vget_lane_u8(vpmax_u8(tmp, tmp), 0);
+                tmp = vpmax_u8(tmp, tmp);
+                tmp = vpmax_u8(tmp, tmp);
+                tmp = vpmax_u8(tmp, tmp);
+                return vget_lane_u8(tmp, 0);
+#endif
             }
         };
     }
