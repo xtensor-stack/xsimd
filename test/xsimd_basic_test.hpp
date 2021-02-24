@@ -12,10 +12,12 @@
 #define XSIMD_BASIC_TEST_HPP
 
 #include <algorithm>
+#include <functional>
 #include <numeric>
 #include <random>
 #include <limits>
 #include <climits>
+#include <vector>
 
 #include "xsimd/xsimd.hpp"
 #include "xsimd_test_utils.hpp"
@@ -356,11 +358,45 @@ namespace xsimd
         }
     }
 
+
+    template <class T, std::size_t N>
+    struct get_bool_base {
+        using vector_type = std::array<bool, N>;
+
+        std::vector<vector_type> almost_all_false() {
+            std::vector<vector_type> vectors;
+            vectors.reserve(N);
+            for (size_t i = 0; i < N; ++i) {
+                vector_type v;
+                v.fill(false);
+                v[i] = true;
+                vectors.push_back(std::move(v));
+            }
+            return vectors;
+        }
+
+        std::vector<vector_type> almost_all_true() {
+            auto vectors = almost_all_false();
+            flip(vectors);
+            return vectors;
+        }
+
+        void flip(vector_type& vec) {
+            std::transform(vec.begin(), vec.end(), vec.begin(), std::logical_not<bool>{});
+        }
+
+        void flip(std::vector<vector_type>& vectors) {
+            for (auto& vec : vectors) {
+                flip(vec);
+            }
+        }
+    };
+
     template <class T>
     struct get_bool;
 
     template <class T>
-    struct get_bool<batch_bool<T, 2>>
+    struct get_bool<batch_bool<T, 2>> : public get_bool_base<T, 2>
     {
         using type = batch_bool<T, 2>;
         type all_true = type(true);
@@ -375,7 +411,7 @@ namespace xsimd
     };
 
     template <class T, std::size_t N>
-    struct get_bool<batch_bool<T, N>>
+    struct get_bool<batch_bool<T, N>> : public get_bool_base<T, N>
     {
         // Expect this to be the fallback
         using type = batch_bool<T, 10>;
@@ -391,7 +427,7 @@ namespace xsimd
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 4>>
+    struct get_bool<batch_bool<T, 4>> : public get_bool_base<T, 4>
     {
         using type = batch_bool<T, 4>;
 
@@ -407,7 +443,7 @@ namespace xsimd
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 8>>
+    struct get_bool<batch_bool<T, 8>> : public get_bool_base<T, 8>
     {
         using type = batch_bool<T, 8>;
         type all_true = type(true);
@@ -422,7 +458,7 @@ namespace xsimd
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 16>>
+    struct get_bool<batch_bool<T, 16>> : public get_bool_base<T, 16>
     {
         using type = batch_bool<T, 16>;
         type all_true = type(true);
@@ -437,7 +473,7 @@ namespace xsimd
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 32>>
+    struct get_bool<batch_bool<T, 32>> : public get_bool_base<T, 32>
     {
         using type = batch_bool<T, 32>;
         type all_true = type(true);
@@ -454,7 +490,7 @@ namespace xsimd
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 64>>
+    struct get_bool<batch_bool<T, 64>> : public get_bool_base<T, 64>
     {
         using type = batch_bool<T, 64>;
         type all_true = type(true);
@@ -674,8 +710,10 @@ namespace xsimd
     template <class I, std::size_t N, class S>
     bool test_simd_bool(const batch<I, N>& /*empty*/, S& stream)
     {
+        using type = typename simd_batch_traits<batch<I, N>>::batch_bool_type;
+
         bool success = true;
-        auto bool_g = get_bool<typename simd_batch_traits<batch<I, N>>::batch_bool_type>{};
+        auto bool_g = get_bool<type>{};
         success = success && all(bool_g.half != bool_g.ihalf);
         if (!success)
             stream  << "test_simd_bool != failed." << std::endl;
@@ -692,6 +730,35 @@ namespace xsimd
         if (!success)
             stream  << "test_simd_bool & failed." << std::endl;
         return success;
+    }
+
+    template <class I, std::size_t N, class S>
+    bool test_simd_int_bool(const batch<I, N>& /*empty*/, S& stream)
+    {
+        using type = typename simd_batch_traits<batch<I, N>>::batch_bool_type;
+
+        bool success_any = true;
+        bool success_all = true;
+        auto bool_g = get_bool<type>{};
+
+        // Reductions
+        for (const auto vec : bool_g.almost_all_false()) {
+            type b;
+            detail::load_vec(b, vec);
+            success_any = success_any && any(b);
+            success_all = success_all && !all(b);
+        }
+        for (const auto vec : bool_g.almost_all_true()) {
+            type b;
+            detail::load_vec(b, vec);
+            success_any = success_any && any(b);
+            success_all = success_all && !all(b);
+        }
+        if (!success_any)
+            stream  << "test_simd_int_bool any() failed." << std::endl;
+        if (!success_all)
+            stream  << "test_simd_int_bool all() failed." << std::endl;
+        return success_any && success_all;
     }
 
     namespace detail
@@ -1614,6 +1681,7 @@ namespace xsimd
         
         success = success && test_simd_int_shift(vector_type(value_type(0)), out);
         success = success && test_simd_bool(vector_type(value_type(0)), out);
+        success = success && test_simd_int_bool(vector_type(value_type(0)), out);
         success = success && test_simd_bool_buffer(vector_type(value_type(0)), out);
         success = success && test_char_loading<vector_type::size>(value_type(), out);
         success = success && test_lt_underflow<vector_type, value_type>();
