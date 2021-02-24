@@ -15,6 +15,7 @@
 
 #include "xsimd_base.hpp"
 #include "xsimd_neon_bool.hpp"
+#include "xsimd_neon_int_base.hpp"
 #include "xsimd_neon_utils.hpp"
 
 namespace xsimd
@@ -198,6 +199,7 @@ namespace xsimd
 
         template <>
         struct batch_kernel<uint8_t, 16>
+            : neon_int_kernel_base<batch<uint8_t, 16>>
         {
             using batch_type = batch<uint8_t, 16>;
             using value_type = uint8_t;
@@ -295,26 +297,6 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
                 return rhs;
-            }
-
-            static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return x * y + z;
-            }
-
-            static batch_type fms(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return x * y - z;
-            }
-
-            static batch_type fnma(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return -x * y + z;
-            }
-
-            static batch_type fnms(const batch_type& x, const batch_type& y, const batch_type& z)
-            {
-                return -x * y - z;
             }
 
             // Not implemented yet

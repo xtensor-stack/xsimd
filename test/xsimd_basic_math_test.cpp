@@ -102,6 +102,13 @@ TEST(xsimd, avx512_double_basic_math)
 #endif
 
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+TEST(xsimd, neon_int_basic_math)
+{
+    std::ofstream out("log/neon_int_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<int, 4, 16>(out, "neon int");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_float_basic_math)
 {
     std::ofstream out("log/neon_float_basic_math.log", std::ios_base::out);
