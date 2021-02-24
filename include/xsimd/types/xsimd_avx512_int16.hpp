@@ -207,6 +207,7 @@ namespace xsimd
     {
         template <class T>
         struct avx512_int16_batch_kernel
+            : avx512_int_kernel_base<batch<T, 32>>
         {
             using batch_type = batch<T, 32>;
             using value_type = T;

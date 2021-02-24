@@ -492,6 +492,21 @@ namespace xsimd
                 return _mm_andnot_si128(lhs, rhs);
             }
 
+            static batch_type fmin(const batch_type& lhs, const batch_type& rhs)
+            {
+                return min(lhs, rhs);
+            }
+
+            static batch_type fmax(const batch_type& lhs, const batch_type& rhs)
+            {
+                return max(lhs, rhs);
+            }
+
+            static batch_type fabs(const batch_type& rhs)
+            {
+                return abs(rhs);
+            }
+
             static batch_type fma(const batch_type& x, const batch_type& y, const batch_type& z)
             {
                 return x * y + z;

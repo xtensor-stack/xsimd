@@ -33,6 +33,13 @@ namespace xsimd
 }
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+TEST(xsimd, sse_int32_basic_math)
+{
+    std::ofstream out("log/sse_int32_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<int32_t, 4, 16>(out, "sse int32_t");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, sse_float_basic_math)
 {
     std::ofstream out("log/sse_float_basic_math.log", std::ios_base::out);
@@ -49,6 +56,13 @@ TEST(xsimd, sse_double_basic_math)
 #endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+TEST(xsimd, avx_int32_basic_math)
+{
+    std::ofstream out("log/avx_int32_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<int32_t, 8, 32>(out, "avx int32_t");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx_float_basic_math)
 {
     std::ofstream out("log/avx_float_basic_math.log", std::ios_base::out);
@@ -65,6 +79,13 @@ TEST(xsimd, avx_double_basic_math)
 #endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+TEST(xsimd, avx512_int32_basic_math)
+{
+    std::ofstream out("log/avx512_int32_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<int32_t, 16, 64>(out, "avx512 int32_t");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_float_basic_math)
 {
     std::ofstream out("log/avx512_float_basic_math.log", std::ios_base::out);
@@ -81,6 +102,13 @@ TEST(xsimd, avx512_double_basic_math)
 #endif
 
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+TEST(xsimd, neon_int_basic_math)
+{
+    std::ofstream out("log/neon_int_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<int, 4, 16>(out, "neon int");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, neon_float_basic_math)
 {
     std::ofstream out("log/neon_float_basic_math.log", std::ios_base::out);
