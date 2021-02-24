@@ -79,6 +79,13 @@ TEST(xsimd, avx_double_basic_math)
 #endif
 
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+TEST(xsimd, avx512_int32_basic_math)
+{
+    std::ofstream out("log/avx512_int32_basic_math.log", std::ios_base::out);
+    bool res = xsimd::test_basic_math<int32_t, 16, 64>(out, "avx512 int32_t");
+    EXPECT_TRUE(res);
+}
+
 TEST(xsimd, avx512_float_basic_math)
 {
     std::ofstream out("log/avx512_float_basic_math.log", std::ios_base::out);

@@ -316,6 +316,30 @@ namespace xsimd
         _mm512_storeu_si512(dst, this->m_value);
     }
 
+    namespace detail
+    {
+        template <class B>
+        struct avx512_int_kernel_base
+        {
+            using batch_type = B;
+
+            static batch_type fmin(const batch_type& lhs, const batch_type& rhs)
+            {
+                return min(lhs, rhs);
+            }
+
+            static batch_type fmax(const batch_type& lhs, const batch_type& rhs)
+            {
+                return max(lhs, rhs);
+            }
+
+            static batch_type fabs(const batch_type& rhs)
+            {
+                return abs(rhs);
+            }
+        };
+    }
+
     namespace avx512_detail
     {
         template <class F, class T, std::size_t N>
