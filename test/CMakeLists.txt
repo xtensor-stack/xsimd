@@ -142,7 +142,9 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(XSIMD_TESTS
     main.cpp
-    xsimd_api_test.hpp
+    test_batch.cpp
+    test_utils.hpp
+    #[[    xsimd_api_test.hpp
     xsimd_api_test.cpp
     xsimd_algorithms.cpp
     xsimd_basic_test.hpp
@@ -178,7 +180,7 @@ set(XSIMD_TESTS
     xsimd_tester.hpp
     xsimd_test_utils.hpp
     xsimd_trigonometric_test.hpp
-    xsimd_trigonometric_test.cpp
+    xsimd_trigonometric_test.cpp]]
 )
 
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})
