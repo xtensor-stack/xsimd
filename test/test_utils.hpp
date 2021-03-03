@@ -241,6 +241,32 @@ namespace detail
         }
     };
 
+    template <class T>
+    testing::AssertionResult expect_scalar_near(const char* lhs_expression,
+                                                const char* rhs_expression,
+                                                const T& lhs,
+                                                const T& rhs)
+    {
+        if (scalar_comparison<T>::run(lhs, rhs))
+        {
+            return testing::AssertionSuccess();
+        }
+
+        std::stringstream lhs_ss;
+        lhs_ss << std::setprecision(std::numeric_limits<T>::digits10 + 2)
+               << lhs;
+
+        std::stringstream rhs_ss;
+        rhs_ss << std::setprecision(std::numeric_limits<T>::digits10 + 2)
+               << rhs;
+
+        return testing::internal::EqFailure(lhs_expression,
+                                            rhs_expression,
+                                            lhs_ss.str(),
+                                            rhs_ss.str(),
+                                            false);
+    }
+
     template <class T, size_t N>
     testing::AssertionResult expect_array_near(const char* lhs_expression,
                                                const char* rhs_expression,
@@ -300,9 +326,43 @@ namespace detail
         lhs.store_unaligned(tmp.data());
         return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
     }
+
+    template <class T, size_t N>
+    testing::AssertionResult expect_batch_near(const char* lhs_expression,
+                                               const char* rhs_expression,
+                                               const ::xsimd::batch_bool<T, N>& lhs,
+                                               const std::array<bool, N>& rhs)
+    {
+        std::array<bool, N> tmp;
+        lhs.store_unaligned(tmp.data());
+        return expect_array_near(lhs_expression, rhs_expression, tmp, rhs);
+    }
+
+    template <class T, size_t N>
+    testing::AssertionResult expect_batch_near(const char* lhs_expression,
+                                               const char* rhs_expression,
+                                               const std::array<bool, N>& lhs,
+                                               const ::xsimd::batch_bool<T, N>& rhs)
+    {
+        std::array<bool, N> tmp;
+        rhs.store_unaligned(tmp.data());
+        return expect_array_near(lhs_expression, rhs_expression, lhs, tmp);
+    }
+
+    template <class T, size_t N>
+    testing::AssertionResult expect_batch_near(const char* lhs_expression,
+                                               const char* rhs_expression,
+                                               const ::xsimd::batch_bool<T, N>& lhs,
+                                               const ::xsimd::batch_bool<T, N>& rhs)
+    {
+        std::array<bool, N> tmp;
+        lhs.store_unaligned(tmp.data());
+        return expect_array_near(lhs_expression, rhs_expression, tmp, rhs);
+    }
 }
 
 #define EXPECT_BATCH_EQ(b1, b2) EXPECT_PRED_FORMAT2(detail::expect_batch_near, b1, b2)
+#define EXPECT_SCALAR_EQ(s1, s2) EXPECT_PRED_FORMAT2(detail::expect_scalar_near, s1, s2)
 
 namespace xsimd
 {
