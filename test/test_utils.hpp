@@ -533,11 +533,34 @@ namespace xsimd
 #endif
                                 >;
 
+    using batch_int32_type_list = mpl::type_list<
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+                                    batch<int32_t, 4>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+                                    ,
+                                    batch<int32_t, 8>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+                                    ,
+                                    batch<int32_t, 16>
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+                                    batch<int32_t, 4>
+#endif
+#if defined(XSIMD_ENABLE_FALLBACK)
+                                    ,
+                                    batch<int32_t, 7>
+#endif
+    >;
+
+    using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
     using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
 }
 
 using batch_int_types = to_testing_types<xsimd::batch_int_type_list>;
 using batch_float_types = to_testing_types<xsimd::batch_float_type_list>;
+using batch_math_types = to_testing_types<xsimd::batch_math_type_list>;
 using batch_types = to_testing_types<xsimd::batch_type_list>;
 
 #endif // XXSIMD_TEST_UTILS_HPP
