@@ -13,6 +13,7 @@
 #include <limits>
 #include <sstream>
 #include <type_traits>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -381,6 +382,32 @@ namespace detail
         std::array<bool, N> tmp;
         lhs.store_unaligned(tmp.data());
         return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
+    }
+
+    template <class T, class A>
+    size_t get_nb_diff(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
+    {
+        size_t res = 0;
+        for (size_t i = 0; i < lhs.size(); ++i)
+        {
+            if (!scalar_comparison<T>::run(lhs[i], rhs[i]))
+            {
+                ++res;
+            }
+        }
+        return res;
+    }
+
+    template <class B, class S>
+    void load_batch(B& b, const S& src, size_t i = 0)
+    {
+        b.load_unaligned(&src[i]);
+    }
+
+    template <class B, class D>
+    void store_batch(const B& b, D& dst, size_t i = 0)
+    {
+        b.store_unaligned(&dst[i]);
     }
 }
 
