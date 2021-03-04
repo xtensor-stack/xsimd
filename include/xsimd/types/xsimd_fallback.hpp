@@ -523,12 +523,12 @@ namespace xsimd
 
             static batch_type bitwise_not(const batch_type& rhs)
             {
-                XSIMD_FALLBACK_UNARY_OP(batch_bool, ~, rhs)
+                XSIMD_FALLBACK_UNARY_OP(batch_bool, !, rhs)
             }
 
             static batch_type bitwise_andnot(const batch_type& lhs, const batch_type& rhs)
             {
-                XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, (~(lhs[i] & rhs[i])))
+                XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, (!(lhs[i] & rhs[i])))
             }
 
             static batch_type equal(const batch_type& lhs, const batch_type& rhs)

@@ -143,6 +143,9 @@ include_directories(${GTEST_INCLUDE_DIRS})
 set(XSIMD_TESTS
     main.cpp
     test_batch.cpp
+    test_batch_bool.cpp
+    test_batch_float.cpp
+    test_batch_int.cpp
     test_utils.hpp
     #[[    xsimd_api_test.hpp
     xsimd_api_test.cpp

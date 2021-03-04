@@ -364,8 +364,9 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), rhs.begin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return std::fma(l, r, r); });
-            batch_type res = fma(batch_lhs(), batch_rhs(), batch_rhs());
+                            [](const value_type& l, const value_type& r) { return l * r + r; });
+            // Warning: ADL seems to not work correctly on Windows, thus the full qualified call
+            batch_type res = xsimd::fma(batch_lhs(), batch_rhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fma");
         }
         // fms
@@ -412,14 +413,6 @@ protected:
             batch_type res = fabs(batch_lhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fabs");
         }
-        // sqrt
-        /*{
-            array_type expected;
-            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
-                            [](const value_type& l) { return std::sqrt(l); });
-            batch_type res = sqrt(batch_lhs());
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("sqrt");
-        }*/
     }
 
     void test_horizontal_operations() const
@@ -430,33 +423,6 @@ protected:
             value_type res = hadd(batch_lhs());
             EXPECT_SCALAR_EQ(res, expected) << print_function_name("hadd");
         }
-        // haddp
-        /*{
-            batch_type haddp_input[size];
-            for(size_t i = 0; i < size; i += 2)
-            {
-                haddp_input[i] = batch_lhs();
-                if(i + 1 < size)
-                {
-                    haddp_input[i+1] = batch_rhs();
-                }
-            }
-            array_type expected;
-            std::fill(expected.cbegin(), expected.cend(), value_type(0));
-            for(size_t i = 0; i < size; i += 2)
-            {
-                for(size_t j = 0; j < size; j += 2)
-                {
-                    expected[j] += lhs[i];
-                    if(j + 1 < size)
-                    {
-                        expected[j + 1] += rhs[i];
-                    }
-                }
-            }
-            auto res = haddp(haddp_input);
-            EXPECT_EQ(res, expected) << print_function_name("haddp");
-        }*/
     }
 
     void test_boolean_conversions() const
@@ -571,88 +537,65 @@ private:
     }
 };
 
-TYPED_TEST_SUITE_P(batch_test);
+TYPED_TEST_SUITE(batch_test, batch_types, simd_test_names);
 
-TYPED_TEST_P(batch_test, load_store)
+TYPED_TEST(batch_test, load_store)
 {
     this->test_load_store();
 }
 
-TYPED_TEST_P(batch_test, constructors)
+TYPED_TEST(batch_test, constructors)
 {
     this->test_constructors();
 }
 
-TYPED_TEST_P(batch_test, access_operator)
+TYPED_TEST(batch_test, access_operator)
 {
     this->test_access_operator();
 }
 
-TYPED_TEST_P(batch_test, arithmetic)
+TYPED_TEST(batch_test, arithmetic)
 {
     this->test_arithmetic();
 }
 
-TYPED_TEST_P(batch_test, computed_assignment)
+TYPED_TEST(batch_test, computed_assignment)
 {
     this->test_computed_assignment();
 }
 
-TYPED_TEST_P(batch_test, comparison)
+TYPED_TEST(batch_test, comparison)
 {
     this->test_comparison();
 }
 
-TYPED_TEST_P(batch_test, min_max)
+TYPED_TEST(batch_test, min_max)
 {
     this->test_min_max();
 }
 
-TYPED_TEST_P(batch_test, fused_operations)
+TYPED_TEST(batch_test, fused_operations)
 {
     this->test_fused_operations();
 }
 
-TYPED_TEST_P(batch_test, abs)
+TYPED_TEST(batch_test, abs)
 {
     this->test_abs();
 }
 
-TYPED_TEST_P(batch_test, horizontal_operations)
+TYPED_TEST(batch_test, horizontal_operations)
 {
     this->test_horizontal_operations();
 }
 
-TYPED_TEST_P(batch_test, boolean_conversions)
+TYPED_TEST(batch_test, boolean_conversions)
 {
     this->test_boolean_conversions();
 }
 
-TYPED_TEST_P(batch_test, iterator)
+TYPED_TEST(batch_test, iterator)
 {
     this-> test_iterator();
 }
 
-REGISTER_TYPED_TEST_SUITE_P(
-    batch_test,
-    load_store,
-    constructors,
-    access_operator,
-    arithmetic,
-    computed_assignment,
-    comparison,
-    min_max,
-    fused_operations,
-    abs,
-    horizontal_operations,
-    boolean_conversions,
-    iterator
-);
-
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-INSTANTIATE_TYPED_TEST_SUITE_P(sse,
-                               batch_test,
-                               sse_types,
-                               simd_test_names);
-#endif

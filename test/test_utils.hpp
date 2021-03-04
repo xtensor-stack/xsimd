@@ -9,6 +9,7 @@
 ****************************************************************************/
 
 #include <array>
+#include <climits>
 #include <limits>
 #include <sstream>
 #include <type_traits>
@@ -32,16 +33,35 @@ public:
     static std::string GetName(int)
     {
         using value_type = typename T::value_type;
-        if (std::is_same<value_type, uint8_t>::value) { return "uint8_t"; }
-        if (std::is_same<value_type, int8_t>::value) { return "int8_t"; }
-        if (std::is_same<value_type, uint16_t>::value) { return "uint16_t"; }
-        if (std::is_same<value_type, int16_t>::value) { return "int16_t"; }
-        if (std::is_same<value_type, uint32_t>::value) { return "uint32_t"; }
-        if (std::is_same<value_type, int32_t>::value) { return "int32_t"; }
-        if (std::is_same<value_type, uint64_t>::value) { return "uint64_t"; }
-        if (std::is_same<value_type, int64_t>::value) { return "int64_t"; }
-        if (std::is_same<value_type, float>::value) { return "float"; }
-        if (std::is_same<value_type, double>::value) { return "double"; }
+        std::string prefix;
+        size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
+        if (register_size == size_t(128))
+        {
+            prefix = "sse_";
+        }
+        else if (register_size == size_t(256))
+        {
+            prefix = "avx_";
+        }
+        else if (register_size == size_t(512))
+        {
+            prefix = "avx512_";
+        }
+        else
+        {
+            prefix = "fallback_";
+        }
+
+        if (std::is_same<value_type, uint8_t>::value) { return prefix + "uint8_t"; }
+        if (std::is_same<value_type, int8_t>::value) { return prefix + "int8_t"; }
+        if (std::is_same<value_type, uint16_t>::value) { return prefix + "uint16_t"; }
+        if (std::is_same<value_type, int16_t>::value) { return prefix + "int16_t"; }
+        if (std::is_same<value_type, uint32_t>::value) { return prefix + "uint32_t"; }
+        if (std::is_same<value_type, int32_t>::value) { return prefix + "int32_t"; }
+        if (std::is_same<value_type, uint64_t>::value) { return prefix + "uint64_t"; }
+        if (std::is_same<value_type, int64_t>::value) { return prefix + "int64_t"; }
+        if (std::is_same<value_type, float>::value) { return prefix + "float"; }
+        if (std::is_same<value_type, double>::value) { return prefix + "double"; }
     }
 };
 
@@ -357,12 +377,12 @@ namespace detail
     {
         std::array<bool, N> tmp;
         lhs.store_unaligned(tmp.data());
-        return expect_array_near(lhs_expression, rhs_expression, tmp, rhs);
+        return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
     }
 }
 
-#define EXPECT_BATCH_EQ(b1, b2) EXPECT_PRED_FORMAT2(detail::expect_batch_near, b1, b2)
-#define EXPECT_SCALAR_EQ(s1, s2) EXPECT_PRED_FORMAT2(detail::expect_scalar_near, s1, s2)
+#define EXPECT_BATCH_EQ(b1, b2) EXPECT_PRED_FORMAT2(::detail::expect_batch_near, b1, b2)
+#define EXPECT_SCALAR_EQ(s1, s2) EXPECT_PRED_FORMAT2(::detail::expect_scalar_near, s1, s2)
 
 namespace xsimd
 {
@@ -429,32 +449,76 @@ namespace xsimd
 template <class T>
 using to_testing_types = xsimd::mpl::cast_t<T, testing::Types>;
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
 namespace xsimd
 {
-    using sse_int_type_list = mpl::type_list<
-                                   batch<uint8_t, 16>,
-                                   batch<int8_t, 16>,
-                                   batch<uint16_t, 8>,
-                                   batch<int16_t, 8>,
-                                   batch<uint32_t, 4>,
-                                   batch<int32_t, 4>,
-                                   batch<uint64_t, 2>,
-                                   batch<int64_t, 2>
+    using batch_int_type_list = mpl::type_list<
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+                                    batch<uint8_t, 16>,
+                                    batch<int8_t, 16>,
+                                    batch<uint16_t, 8>,
+                                    batch<int16_t, 8>,
+                                    batch<uint32_t, 4>,
+                                    batch<int32_t, 4>,
+                                    batch<uint64_t, 2>,
+                                    batch<int64_t, 2>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+                                    ,
+                                    batch<uint8_t, 32>,
+                                    batch<int8_t, 32>,
+                                    batch<uint16_t, 16>,
+                                    batch<int16_t, 16>,
+                                    batch<uint32_t, 8>,
+                                    batch<int32_t, 8>,
+                                    batch<uint64_t, 4>,
+                                    batch<int64_t, 4>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+                                    ,
+                                    batch<uint8_t, 64>,
+                                    batch<int8_t, 64>,
+                                    batch<uint16_t, 32>,
+                                    batch<int16_t, 32>,
+                                    batch<uint32_t, 16>,
+                                    batch<int32_t, 16>,
+                                    batch<uint64_t, 8>,
+                                    batch<int64_t, 8>
+#endif
+#if defined(XSIMD_ENABLE_FALLBACK)
+                                    ,
+                                    batch<int32_t, 7>,
+                                    batch<int64_t, 3>
+#endif
                               >;
 
-    using sse_float_type_list = mpl::type_list<
-                                    batch<float, 4>,
-                                    batch<double, 2>
+    using batch_float_type_list = mpl::type_list<
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+                                     batch<float, 4>,
+                                     batch<double, 2>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+                                     ,
+                                     batch<float, 8>,
+                                     batch<double, 4>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+                                     ,
+                                     batch<float, 16>,
+                                     batch<double, 8>
+#endif
+#if defined(XSIMD_ENABLE_FALLBACK)
+                                     ,
+                                     batch<float, 7>,
+                                     batch<double, 3>
+#endif
                                 >;
 
-    using sse_type_list = mpl::concatenate_t<sse_int_type_list, sse_float_type_list>;
+    using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
 }
 
-using sse_int_types = to_testing_types<xsimd::sse_int_type_list>;
-using sse_float_types = to_testing_types<xsimd::sse_float_type_list>;
-using sse_types = to_testing_types<xsimd::sse_type_list>;
-#endif
+using batch_int_types = to_testing_types<xsimd::batch_int_type_list>;
+using batch_float_types = to_testing_types<xsimd::batch_float_type_list>;
+using batch_types = to_testing_types<xsimd::batch_type_list>;
 
 #endif // XXSIMD_TEST_UTILS_HPP
 
