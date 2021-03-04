@@ -33,7 +33,8 @@ public:
     static std::string GetName(int)
     {
         using value_type = typename T::value_type;
-        std::string prefix;
+        std::string prefix = "fallback_";
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
         size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
         if (register_size == size_t(128))
         {
@@ -47,11 +48,13 @@ public:
         {
             prefix = "avx512_";
         }
-        else
+#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+        size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
+        if (register_size == size_t(128))
         {
-            prefix = "fallback_";
+            prefix = "arm_";
         }
-
+#endif
         if (std::is_same<value_type, uint8_t>::value) { return prefix + "uint8_t"; }
         if (std::is_same<value_type, int8_t>::value) { return prefix + "int8_t"; }
         if (std::is_same<value_type, uint16_t>::value) { return prefix + "uint16_t"; }
@@ -484,6 +487,16 @@ namespace xsimd
                                     batch<uint64_t, 8>,
                                     batch<int64_t, 8>
 #endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+                                    batch<uint8_t, 16>,
+                                    batch<int8_t, 16>,
+                                    batch<uint16_t, 8>,
+                                    batch<int16_t, 8>,
+                                    batch<uint32_t, 4>,
+                                    batch<int32_t, 4>,
+                                    batch<uint64_t, 2>,
+                                    batch<int64_t, 2>
+#endif
 #if defined(XSIMD_ENABLE_FALLBACK)
                                     ,
                                     batch<int32_t, 7>,
@@ -505,6 +518,13 @@ namespace xsimd
                                      ,
                                      batch<float, 16>,
                                      batch<double, 8>
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+                                     batch<float, 4>
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                                     ,
+                                     batch<double, 2>
 #endif
 #if defined(XSIMD_ENABLE_FALLBACK)
                                      ,
