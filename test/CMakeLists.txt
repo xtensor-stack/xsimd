@@ -153,6 +153,7 @@ set(XSIMD_TESTS
     test_hyperbolic.cpp
     test_interface.cpp
     test_memory.cpp
+    test_poly_evaluation.cpp
     test_utils.hpp
     #[[    xsimd_api_test.hpp
     xsimd_api_test.cpp
