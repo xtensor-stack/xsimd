@@ -151,6 +151,7 @@ set(XSIMD_TESTS
     test_exponential.cpp
     test_fp_manipulation.cpp
     test_hyperbolic.cpp
+    test_interface.cpp
     test_utils.hpp
     #[[    xsimd_api_test.hpp
     xsimd_api_test.cpp
