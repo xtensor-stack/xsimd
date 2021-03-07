@@ -149,7 +149,6 @@ private:
     }
 };
 
-
 TYPED_TEST_SUITE(basic_math_test, batch_math_types, simd_test_names);
 
 TYPED_TEST(basic_math_test, basic_functions)
