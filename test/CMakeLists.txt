@@ -154,6 +154,8 @@ set(XSIMD_TESTS
     test_interface.cpp
     test_memory.cpp
     test_poly_evaluation.cpp
+    test_power.cpp
+    test_rounding.cpp
     test_utils.hpp
     #[[    xsimd_api_test.hpp
     xsimd_api_test.cpp

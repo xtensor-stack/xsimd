@@ -384,18 +384,31 @@ namespace detail
         return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
     }
 
-    template <class T, class A>
-    size_t get_nb_diff(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
+    template <class It>
+    size_t get_nb_diff(It lhs_begin, It lhs_end, It rhs_begin)
     {
         size_t res = 0;
-        for (size_t i = 0; i < lhs.size(); ++i)
+        using value_type = typename std::iterator_traits<It>::value_type;
+        while (lhs_begin != lhs_end)
         {
-            if (!scalar_comparison<T>::run(lhs[i], rhs[i]))
+            if (!scalar_comparison<value_type>::run(*lhs_begin++, *rhs_begin++))
             {
                 ++res;
             }
         }
         return res;
+    }
+
+    template <class T, class A>
+    size_t get_nb_diff(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
+    {
+        return get_nb_diff(lhs.begin(), lhs.end(), rhs.begin());
+    }
+
+    template <class T, size_t N>
+    size_t get_nb_diff(const std::array<T, N>& lhs, const std::array<T, N>& rhs)
+    {
+        return get_nb_diff(lhs.begin(), lhs.end(), rhs.begin());
     }
 
     template <class B, class S>
