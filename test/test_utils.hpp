@@ -66,6 +66,14 @@ public:
         if (std::is_same<value_type, int64_t>::value) { return prefix + "int64_t"; }
         if (std::is_same<value_type, float>::value) { return prefix + "float"; }
         if (std::is_same<value_type, double>::value) { return prefix + "double"; }
+        if (std::is_same<value_type, std::complex<float>>::value) { return prefix + "complex<float>"; }
+        if (std::is_same<value_type, std::complex<double>>::value) { return prefix + "complex<double>"; }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        if (std::is_same<value_type, xtl::xcomplex<float>>::value) { return prefix + "xcomplex<float>"; }
+        if (std::is_same<value_type, xtl::xcomplex<double>>::value) { return prefix + "xcomplex<double>"; }
+#endif
+
+        return prefix + "unknow_type";
     }
 };
 
@@ -250,6 +258,19 @@ namespace detail
                 real_comparison::run(lhs.imag(), rhs.imag());
         }
     };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    struct scalar_comparison<xtl::xcomplex<T, T, i3ec>>
+    {
+        static bool run(const xtl::xcomplex<T, T, i3ec>& lhs, const xtl::xcomplex<T, T, i3ec>& rhs)
+        {
+            using real_comparison = scalar_comparison<T>;
+            return real_comparison::run(lhs.real(), rhs.real()) &&
+                real_comparison::run(lhs.imag(), rhs.imag());
+        }
+    };
+#endif
 
     template <class T, size_t N>
     struct vector_comparison
@@ -594,12 +615,60 @@ namespace xsimd
 #endif
     >;
 
+    using batch_complex_type_list = mpl::type_list<
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+                                    batch<std::complex<float>, 4>,
+                                    batch<std::complex<double>, 2>
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+                                    ,
+                                    batch<xtl::xcomplex<float>, 4>,
+                                    batch<xtl::xcomplex<double>, 2>
+#endif
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+                                    ,
+                                    batch<std::complex<float>, 8>,
+                                    batch<std::complex<double>, 4>
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+                                    ,
+                                    batch<xtl::xcomplex<float>, 8>,
+                                    batch<xtl::xcomplex<double>, 4>
+#endif
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+                                    ,
+                                    batch<std::complex<float>, 16>,
+                                    batch<std::complex<double>, 8>
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+                                    ,
+                                    batch<xtl::xcomplex<float>, 16>,
+                                    batch<xtl::xcomplex<double>, 8>
+#endif
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+                                     batch<std::complex<float>, 4>
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+                                     ,
+                                     batch<xtl::xcomplex<float>, 4>
+#endif
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                                     ,
+                                     batch<std::complex<double, 2>
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+                                     ,
+                                     batch<xtl::xcomplex<double>, 2>
+#endif
+#endif
+    >;
+
     using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
     using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
 }
 
 using batch_int_types = to_testing_types<xsimd::batch_int_type_list>;
 using batch_float_types = to_testing_types<xsimd::batch_float_type_list>;
+using batch_complex_types = to_testing_types<xsimd::batch_complex_type_list>;
 using batch_math_types = to_testing_types<xsimd::batch_math_type_list>;
 using batch_types = to_testing_types<xsimd::batch_type_list>;
 
