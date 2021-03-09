@@ -272,14 +272,15 @@ namespace detail
     };
 #endif
 
-    template <class T, size_t N>
+    template <class V>
     struct vector_comparison
     {
-        static bool run(const std::array<T, N>& lhs, const std::array<T, N>& rhs)
+        static bool run(const V& lhs, const V& rhs)
         {
-            for (size_t i = 0; i < N; ++i)
+            using value_type = typename V::value_type;
+            for (size_t i = 0; i < lhs.size(); ++i)
             {
-                if (!scalar_comparison<T>::run(lhs[i], rhs[i]))
+                if (!scalar_comparison<value_type>::run(lhs[i], rhs[i]))
                     return false;
             }
             return true;
@@ -312,23 +313,24 @@ namespace detail
                                             false);
     }
 
-    template <class T, size_t N>
-    testing::AssertionResult expect_array_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const std::array<T, N>& lhs,
-                                               const std::array<T, N>& rhs)
+    template <class V>
+    testing::AssertionResult expect_container_near(const char* lhs_expression,
+                                                   const char* rhs_expression,
+                                                   const V& lhs,
+                                                   const V& rhs)
     {
-        if (vector_comparison<T, N>::run(lhs, rhs))
+        if (vector_comparison<V>::run(lhs, rhs))
         {
             return testing::AssertionSuccess();
         }
 
+        using value_type = typename V::value_type;
         std::stringstream lhs_ss;
-        lhs_ss << std::setprecision(std::numeric_limits<T>::digits10 + 2);
+        lhs_ss << std::setprecision(std::numeric_limits<value_type>::digits10 + 2);
         testing::internal::PrintTo(lhs, &lhs_ss);
 
         std::stringstream rhs_ss;
-        rhs_ss << std::setprecision(std::numeric_limits<T>::digits10 + 2);
+        rhs_ss << std::setprecision(std::numeric_limits<value_type>::digits10 + 2);
         testing::internal::PrintTo(rhs, &rhs_ss);
 
         return testing::internal::EqFailure(lhs_expression,
@@ -336,6 +338,24 @@ namespace detail
                                             lhs_ss.str(),
                                             rhs_ss.str(),
                                             false);
+    }
+
+    template <class T, size_t N>
+    testing::AssertionResult expect_array_near(const char* lhs_expression,
+                                               const char* rhs_expression,
+                                               const std::array<T, N>& lhs,
+                                               const std::array<T, N>& rhs)
+    {
+        return expect_container_near(lhs_expression, rhs_expression, lhs, rhs);
+    }
+
+    template <class T, class A>
+    testing::AssertionResult expect_vector_near(const char* lhs_expression,
+                                                const char* rhs_expression,
+                                                const std::vector<T, A>& lhs,
+                                                const std::vector<T, A>& rhs)
+    {
+        return expect_container_near(lhs_expression, rhs_expression, lhs, rhs);
     }
 
     template <class T, size_t N>
@@ -447,6 +467,7 @@ namespace detail
 
 #define EXPECT_BATCH_EQ(b1, b2) EXPECT_PRED_FORMAT2(::detail::expect_batch_near, b1, b2)
 #define EXPECT_SCALAR_EQ(s1, s2) EXPECT_PRED_FORMAT2(::detail::expect_scalar_near, s1, s2)
+#define EXPECT_VECTOR_EQ(v1, v2) EXPECT_PRED_FORMAT2(::detail::expect_vector_near, v1, v2)
 
 namespace xsimd
 {
