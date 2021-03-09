@@ -150,6 +150,7 @@ set(XSIMD_TESTS
     test_batch_int.cpp
     test_complex_exponential.cpp
     test_complex_hyperbolic.cpp
+    test_complex_power.cpp
     test_complex_trigonometric.cpp
     test_error_gamma.cpp
     test_exponential.cpp
