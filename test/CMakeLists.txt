@@ -149,6 +149,7 @@ set(XSIMD_TESTS
     test_batch_float.cpp
     test_batch_int.cpp
     test_complex_exponential.cpp
+    test_complex_hyperbolic.cpp
     test_error_gamma.cpp
     test_exponential.cpp
     test_fp_manipulation.cpp
