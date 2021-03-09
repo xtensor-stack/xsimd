@@ -435,13 +435,13 @@ namespace detail
     template <class B, class S>
     void load_batch(B& b, const S& src, size_t i = 0)
     {
-        b.load_unaligned(&src[i]);
+        b.load_unaligned(src.data() + i);
     }
 
     template <class B, class D>
     void store_batch(const B& b, D& dst, size_t i = 0)
     {
-        b.store_unaligned(&dst[i]);
+        b.store_unaligned(dst.data() + i);
     }
 }
 
