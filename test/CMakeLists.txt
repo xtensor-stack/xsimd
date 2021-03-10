@@ -149,6 +149,7 @@ set(XSIMD_TESTS
     test_batch_complex.cpp
     test_batch_float.cpp
     test_batch_int.cpp
+    test_bitwise_cast.cpp
     test_complex_exponential.cpp
     test_complex_hyperbolic.cpp
     test_complex_power.cpp

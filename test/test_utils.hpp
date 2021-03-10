@@ -693,5 +693,60 @@ using batch_complex_types = to_testing_types<xsimd::batch_complex_type_list>;
 using batch_math_types = to_testing_types<xsimd::batch_math_type_list>;
 using batch_types = to_testing_types<xsimd::batch_type_list>;
 
+
+/********************
+ * conversion utils *
+ ********************/
+
+template <size_t N, size_t A>
+struct conversion_param
+{
+    static constexpr size_t size = N;
+    static constexpr size_t alignment = A;
+};
+
+class conversion_test_names
+{
+public:
+
+    template <class T>
+    static std::string GetName(int)
+    {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+        if (T::size == 2) { return "sse"; }
+        if (T::size == 4) { return "avx"; }
+        if (T::size == 8) { return "avx512";}
+        return "fallback";
+#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+        if (T::size == 2) { return "neon"; }
+        return "fallback";
+#else
+        return "fallback";
+#endif
+    }
+};
+
+using conversion_type_list = xsimd::mpl::type_list<
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+                               conversion_param<2, 16>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+                               ,
+                               conversion_param<4, 32>
+#endif
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+                               ,
+                               conversion_param<8, 64>
+#endif
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                               conversion_param<2, 16>
+#endif
+#if defined(XSIMD_ENABLE_FALLBACK)
+                               ,
+                               conversion_param<3, 32>
+#endif
+                               >;
+using conversion_types = to_testing_types<conversion_type_list>;
+
 #endif // XXSIMD_TEST_UTILS_HPP
 

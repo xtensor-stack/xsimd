@@ -10,34 +10,6 @@
 
 #include "test_utils.hpp"
 
-template <size_t N, size_t A>
-struct conversion_param
-{
-    static constexpr size_t size = N;
-    static constexpr size_t alignment = A;
-};
-
-class conversion_test_names
-{
-public:
-
-    template <class T>
-    static std::string GetName(int)
-    {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        if (T::size == 2) { return "sse"; }
-        if (T::size == 4) { return "avx"; }
-        if (T::size == 8) { return "avx512";}
-        return "fallback";
-#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-        if (T::size == 2) { return "neon"; }
-        return "fallback";
-#else
-        return "fallback";
-#endif
-    }
-};
-
 template <class CP>
 class conversion_test : public testing::Test
 {
@@ -56,14 +28,14 @@ protected:
     using float_vector = std::vector<float, xsimd::aligned_allocator<float, A>>;
     using double_vector = std::vector<double, xsimd::aligned_allocator<double, A>>;
 
-    int32_batch i32pos;
+    /*int32_batch i32pos;
     int32_batch i32neg;
     int64_batch i64pos;
     int64_batch i64neg;
     float_batch fpos;
     float_batch fneg;
     double_batch dpos;
-    double_batch dneg;
+    double_batch dneg;*/
 
     int32_vector fposres;
     int32_vector fnegres;
@@ -87,9 +59,7 @@ protected:
         int32_vector fvres(int32_batch::size);
         {
             int32_batch fbres = to_int(fpos);
-            std::cout << "coincoin" << std::endl;
             fbres.store_aligned(fvres.data());
-            std::cout << "coincoin" << std::endl;
             EXPECT_VECTOR_EQ(fvres, fposres) << print_function_name("to_int(positive float)");
         }
         {
@@ -147,28 +117,6 @@ protected:
         }
     }
 };
-
-using conversion_type_list = xsimd::mpl::type_list<
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                               conversion_param<2, 16>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                               ,
-                               conversion_param<4, 32>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                               ,
-                               conversion_param<8, 64>
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-                               conversion_param<2, 16>
-#endif
-#if defined(XSIMD_ENABLE_FALLBACK)
-                               ,
-                               conversion_param<3, 32>
-#endif
-                               >;
-using conversion_types = to_testing_types<conversion_type_list>;
 
 TYPED_TEST_SUITE(conversion_test, conversion_types, conversion_test_names);
 
