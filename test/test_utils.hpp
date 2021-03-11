@@ -19,8 +19,8 @@
 
 #include "xsimd/xsimd.hpp"
 
-#ifndef XXSIMD_TEST_UTILS_HPP
-#define XXSIMD_TEST_UTILS_HPP
+#ifndef XSIMD_TEST_UTILS_HPP
+#define XSIMD_TEST_UTILS_HPP
 
 /*******************
  * Pretty printers *
