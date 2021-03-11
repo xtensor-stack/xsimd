@@ -8,13 +8,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include <fstream>
-#include <iostream>
 #include <numeric>
-
-#include "xsimd/xsimd.hpp"
-
-#include "gtest/gtest.h"
+#include "test_utils.hpp"
 
 struct binary_functor
 {
@@ -42,7 +37,7 @@ template <class T>
 using test_allocator_type = std::allocator<T>;
 #endif
 
-TEST(xsimd, binary_transform)
+TEST(algorithms, binary_transform)
 {
     std::vector<double> expected(93);
 
@@ -89,7 +84,7 @@ TEST(xsimd, binary_transform)
 }
 
 
-TEST(xsimd, unary_transform)
+TEST(algorithms, unary_transform)
 {
     std::vector<double> expected(93);
     std::vector<double> a(93, 123), c(93);
@@ -222,7 +217,7 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
 }
 
 #if XSIMD_X86_INSTR_SET > XSIMD_VERSION_NUMBER_NOT_AVAILABLE || XSIMD_ARM_INSTR_SET > XSIMD_VERSION_NUMBER_NOT_AVAILABLE
-TEST(xsimd, iterator)
+TEST(algorithms, iterator)
 {
     std::vector<float, test_allocator_type<float>> a(10 * 16, 0.2), b(1000, 2.), c(1000, 3.);
 

@@ -213,6 +213,9 @@ namespace xsimd
     };
 
     template <class X>
+    X operator+(const simd_complex_batch<X>& rhs);
+
+    template <class X>
     X operator-(const simd_complex_batch<X>& rhs);
 
     template <class X>
@@ -876,6 +879,20 @@ namespace xsimd
     /**
      * @defgroup simd_complex_batch_arithmetic Arithmetic operators
      */
+
+    /**
+     * @ingroup simd_complex_batch_arithmetic
+     *
+     * No-op on \c rhs.
+     * @tparam X the actual type of batch.
+     * @param rhs batch involved in the operation.
+     * @return the opposite of \c rhs.
+     */
+    template <class X>
+    inline X operator+(const simd_complex_batch<X>& rhs)
+    {
+        return rhs();
+    }
 
     /**
      * @ingroup simd_complex_batch_arithmetic

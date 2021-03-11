@@ -142,7 +142,33 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(XSIMD_TESTS
     main.cpp
-    xsimd_api_test.hpp
+    test_algorithms.cpp
+    test_api.cpp
+    test_basic_math.cpp
+    test_batch.cpp
+    test_batch_bool.cpp
+    test_batch_cast.cpp
+    test_batch_complex.cpp
+    test_batch_float.cpp
+    test_batch_int.cpp
+    test_bitwise_cast.cpp
+    test_complex_exponential.cpp
+    test_complex_hyperbolic.cpp
+    test_complex_power.cpp
+    test_complex_trigonometric.cpp
+    test_conversion.cpp
+    test_error_gamma.cpp
+    test_exponential.cpp
+    test_fp_manipulation.cpp
+    test_hyperbolic.cpp
+    test_load_store.cpp
+    test_memory.cpp
+    test_poly_evaluation.cpp
+    test_power.cpp
+    test_rounding.cpp
+    test_trigonometric.cpp
+    test_utils.hpp
+    #[[    xsimd_api_test.hpp
     xsimd_api_test.cpp
     xsimd_algorithms.cpp
     xsimd_basic_test.hpp
@@ -178,7 +204,7 @@ set(XSIMD_TESTS
     xsimd_tester.hpp
     xsimd_test_utils.hpp
     xsimd_trigonometric_test.hpp
-    xsimd_trigonometric_test.cpp
+    xsimd_trigonometric_test.cpp]]
 )
 
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})
