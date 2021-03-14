@@ -500,7 +500,7 @@ namespace xsimd
 #if defined(XSIMD_AVX512VL_AVAILABLE)
         return _mm256_srai_epi64(lhs, rhs);
 #else
-        return avx_detail::shift_impl([](int64_t val, int32_t rhs) { return val >> rhs; }, lhs, rhs);
+        return avx_detail::shift_impl([](int64_t val, int32_t s) { return val >> s; }, lhs, rhs);
 #endif
     }
 
@@ -509,7 +509,7 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_sllv_epi64(lhs, rhs);
 #else
-        return avx_detail::shift_impl([](int64_t val, int64_t rhs) { return val << rhs; }, lhs, rhs);
+        return avx_detail::shift_impl([](int64_t val, int64_t s) { return val << s; }, lhs, rhs);
 #endif
     }
 
@@ -518,7 +518,7 @@ namespace xsimd
 #if defined(XSIMD_AVX512VL_AVAILABLE)
         return _mm256_srav_epi64(lhs, rhs);
 #else
-        return avx_detail::shift_impl([](int64_t val, int64_t rhs) { return val >> rhs; }, lhs, rhs);
+        return avx_detail::shift_impl([](int64_t val, int64_t s) { return val >> s; }, lhs, rhs);
 #endif
     }
 
@@ -551,7 +551,7 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_sllv_epi64(lhs, rhs);
 #else
-        return avx_detail::shift_impl([](uint64_t val, int64_t rhs) { return val << rhs; }, lhs, rhs);
+        return avx_detail::shift_impl([](uint64_t val, int64_t s) { return val << s; }, lhs, rhs);
 #endif
     }
 
@@ -560,7 +560,7 @@ namespace xsimd
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
         return _mm256_srlv_epi64(lhs, rhs);
 #else
-        return avx_detail::shift_impl([](uint64_t val, int64_t rhs) { return val >> rhs; }, lhs, rhs);
+        return avx_detail::shift_impl([](uint64_t val, int64_t s) { return val >> s; }, lhs, rhs);
 #endif
     }
 }
