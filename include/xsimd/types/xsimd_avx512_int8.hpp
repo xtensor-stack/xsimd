@@ -497,18 +497,18 @@ namespace xsimd
 #endif
         return _mm512_or_si512(cmp_sign_mask, _mm512_andnot_si512(sign_mask, res));
 #else
-        return avx512_detail::shift_impl([](int8_t val, int32_t rhs) { return val >> rhs; }, lhs, rhs);
+        return avx512_detail::shift_impl([](int8_t val, int32_t s) { return val >> s; }, lhs, rhs);
 #endif
     }
 
     inline batch<int8_t, 64> operator<<(const batch<int8_t, 64>& lhs, const batch<int8_t, 64>& rhs)
     {
-        return avx512_detail::shift_impl([](int8_t val, int8_t rhs) { return val << rhs; }, lhs, rhs);
+        return avx512_detail::shift_impl([](int8_t val, int8_t s) { return val << s; }, lhs, rhs);
     }
 
     inline batch<int8_t, 64> operator>>(const batch<int8_t, 64>& lhs, const batch<int8_t, 64>& rhs)
     {
-        return avx512_detail::shift_impl([](int8_t val, int8_t rhs) { return val >> rhs; }, lhs, rhs);
+        return avx512_detail::shift_impl([](int8_t val, int8_t s) { return val >> s; }, lhs, rhs);
     }
 
     XSIMD_DEFINE_LOAD_STORE_INT8(int8_t, 64, 64)
@@ -536,12 +536,12 @@ namespace xsimd
 
     inline batch<uint8_t, 64> operator<<(const batch<uint8_t, 64>& lhs, const batch<int8_t, 64>& rhs)
     {
-        return avx512_detail::shift_impl([](uint8_t val, int8_t rhs) { return val << rhs; }, lhs, rhs);
+        return avx512_detail::shift_impl([](uint8_t val, int8_t s) { return val << s; }, lhs, rhs);
     }
 
     inline batch<uint8_t, 64> operator>>(const batch<uint8_t, 64>& lhs, const batch<int8_t, 64>& rhs)
     {
-        return avx512_detail::shift_impl([](uint8_t val, int8_t rhs) { return val >> rhs; }, lhs, rhs);
+        return avx512_detail::shift_impl([](uint8_t val, int8_t s) { return val >> s; }, lhs, rhs);
     }
 
     XSIMD_DEFINE_LOAD_STORE_INT8(uint8_t, 64, 64)
