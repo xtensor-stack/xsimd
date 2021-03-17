@@ -675,7 +675,7 @@ namespace xsimd
 #endif
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
                                      ,
-                                     batch<std::complex<double, 2>
+                                     batch<std::complex<double>, 2>
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
                                      ,
                                      batch<xtl::xcomplex<double>, 2>
