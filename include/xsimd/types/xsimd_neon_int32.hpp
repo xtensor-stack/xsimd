@@ -424,6 +424,16 @@ namespace xsimd
             {
                 return vbslq_s32(cond, a, b);
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vzip1q_s32(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vzip2q_s32(lhs, rhs);
+            }
         };
     }
 

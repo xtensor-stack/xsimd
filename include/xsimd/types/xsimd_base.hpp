@@ -283,6 +283,12 @@ namespace xsimd
     batch_type_t<X> select(const typename simd_batch_traits<X>::batch_bool_type& cond, const simd_base<X>& a, const simd_base<X>& b);
 
     template <class X>
+    batch_type_t<X> zip_lo(const simd_base<X>& lhs, const simd_base<X>& rhs);
+
+    template <class X>
+    batch_type_t<X> zip_hi(const simd_base<X>& lhs, const simd_base<X>& rhs);
+
+    template <class X>
     typename simd_batch_traits<X>::batch_bool_type
     isnan(const simd_base<X>& x);
 
@@ -1775,6 +1781,36 @@ namespace xsimd
         using value_type = typename simd_batch_traits<X>::value_type;
         using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
         return kernel::select(cond, a(), b());
+    }
+
+    /**
+     * Unpack and interleave data from the LOW half of batches \c lhs and \c rhs.
+     * Store the results in the Return value.
+     * @param lhs a batch of integer or floating point or double precision values.
+     * @param rhs a batch of integer or floating point or double precision values.
+     * @return a batch of the low part of shuffled values.
+     */
+    template <class X>
+    inline batch_type_t<X> zip_lo(const simd_base<X>& lhs, const simd_base<X>& rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::zip_lo(lhs(), rhs());
+    }
+
+    /**
+     * Unpack and interleave data from the HIGH half of batches \c lhs and \c rhs.
+     * Store the results in the Return value.
+     * @param lhs a batch of integer or floating point or double precision values.
+     * @param rhs a batch of integer or floating point or double precision values.
+     * @return a batch of the high part of shuffled values.
+     */
+    template <class X>
+    inline batch_type_t<X> zip_hi(const simd_base<X>& lhs, const simd_base<X>& rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::zip_hi(lhs(), rhs());
     }
 
     /**
