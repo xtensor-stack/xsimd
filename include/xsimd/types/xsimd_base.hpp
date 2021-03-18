@@ -153,6 +153,14 @@ namespace xsimd
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+        static X broadcast(value_type v);
+
+        template <class T>
+        static X from_unaligned(T* src);
+
+        template <class T>
+        static X from_aligned(T* src);
+
         X& operator+=(const X& rhs);
         X& operator+=(const value_type& rhs);
 
@@ -676,6 +684,52 @@ namespace xsimd
     {
     }
 
+    /**
+     * @name Static builders
+     */
+    //@{
+    /**
+     * Creates a batch from the single value \c v.
+     * @param v the value used to initialize the batch
+     * @return a new batch instance
+     */
+    template <class X>
+    inline X simd_batch<X>::broadcast(value_type v)
+    {
+        return X(v);
+    }
+
+    /**
+     * Creates a batch from the buffer \c src. The
+     * memory does not need to be aligned.
+     * @param src the memory buffer to read
+     * @return a new batch instance
+     */
+    template <class X>
+    template <class T>
+    inline X simd_batch<X>::from_unaligned(T* src)
+    {
+        X res;
+        res.load_unaligned(src);
+        return res;
+    }
+
+    /**
+     * Creates a batch from the buffer \c src. The
+     * memory needs to be aligned.
+     * @param src the memory buffer to read
+     * @return a new batch instance
+     */
+    template <class X>
+    template <class T>
+    inline X simd_batch<X>::from_aligned(T* src)
+    {
+        X res;
+        res.load_aligned(src);
+        return res;
+    }
+    //@}
+    
     /**
      * @name Arithmetic computed assignment
      */
