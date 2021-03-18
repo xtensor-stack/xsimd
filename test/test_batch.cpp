@@ -62,6 +62,30 @@ protected:
         EXPECT_EQ(b1, lhs) << print_function_name("batch(value_type*)");
     }
 
+    void test_static_builders() const
+    {
+        {
+            array_type expected;
+            std::fill(expected.begin(), expected.end(), value_type(2));
+
+            auto res = batch_type::broadcast(value_type(2));
+            EXPECT_EQ(res, expected) << print_function_name("batch::broadcast");
+        }
+        {
+            array_type res;
+            auto b = batch_type::from_unaligned(lhs.data());
+            b.store_unaligned(res.data());
+            EXPECT_EQ(res, lhs) << print_function_name("batch::from_unaligned");
+        }
+        {
+            alignas(XSIMD_DEFAULT_ALIGNMENT) array_type arhs(this->rhs);
+            alignas(XSIMD_DEFAULT_ALIGNMENT) array_type ares;
+            auto b = batch_type::from_aligned(arhs.data());
+            b.store_aligned(ares.data());
+            EXPECT_EQ(ares, rhs) << print_function_name("batch::from_aligned");
+        }
+    }
+
     void test_access_operator() const
     {
         batch_type res = batch_lhs();
@@ -547,6 +571,11 @@ TYPED_TEST(batch_test, load_store)
 TYPED_TEST(batch_test, constructors)
 {
     this->test_constructors();
+}
+
+TYPED_TEST(batch_test, static_builders)
+{
+    this->test_static_builders();
 }
 
 TYPED_TEST(batch_test, access_operator)
