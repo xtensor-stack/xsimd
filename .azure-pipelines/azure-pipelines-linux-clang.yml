@@ -12,11 +12,11 @@ jobs:
           cross_compile: 1
           arm_arch_dir: 'arm-linux-gnueabi'
           arm_arch_target: 'armv8-a'
-        #clang_4_aarch64:
-        #  llvm_version: '4.0'
-        #  cross_compile: 1
-        #  arm_arch_dir: 'aarch64-linux-gnu'
-        #  arm_arch_target: 'armv8-a'
+        clang_4_aarch64:
+          llvm_version: '4.0'
+          cross_compile: 1
+          arm_arch_dir: 'aarch64-linux-gnu'
+          arm_arch_target: 'armv8-a'
         clang_5:
           llvm_version: '5.0'
         clang_6:
