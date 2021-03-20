@@ -114,43 +114,62 @@ namespace xsimd
 
     namespace avx512_detail
     {
-        template<class Tup, std::size_t... Is>
-        __m512i revert_args_set_epi8(Tup&& t, detail::index_sequence<Is...>)
+        inline __m512i int_init(std::integral_constant<std::size_t, 1>,
+                         int8_t t0, int8_t t1, int8_t t2, int8_t t3,
+                         int8_t t4, int8_t t5, int8_t t6, int8_t t7,
+                         int8_t t8, int8_t t9, int8_t t10, int8_t t11,
+                         int8_t t12, int8_t t13, int8_t t14, int8_t t15,
+                         int8_t t16, int8_t t17, int8_t t18, int8_t t19,
+                         int8_t t20, int8_t t21, int8_t t22, int8_t t23,
+                         int8_t t24, int8_t t25, int8_t t26, int8_t t27,
+                         int8_t t28, int8_t t29, int8_t t30, int8_t t31,
+                         int8_t t32, int8_t t33, int8_t t34, int8_t t35,
+                         int8_t t36, int8_t t37, int8_t t38, int8_t t39,
+                         int8_t t40, int8_t t41, int8_t t42, int8_t t43,
+                         int8_t t44, int8_t t45, int8_t t46, int8_t t47,
+                         int8_t t48, int8_t t49, int8_t t50, int8_t t51,
+                         int8_t t52, int8_t t53, int8_t t54, int8_t t55,
+                         int8_t t56, int8_t t57, int8_t t58, int8_t t59,
+                         int8_t t60, int8_t t61, int8_t t62, int8_t t63)
         {
-            // funny, this instruction is not yet implemented in clang or gcc (will come in future versions)
 #if defined(__clang__) || __GNUC__
             return __extension__ (__m512i)(__v64qi)
             {
-                static_cast<char>(std::get<Is>(std::forward<Tup>(t)))...
+              t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15,
+              t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31,
+              t32, t33, t34, t35, t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47,
+              t48, t49, t50, t51, t52, t53, t54, t55, t56, t57, t58, t59, t60, t61, t62, t63
             };
 #else
-            return _mm512_set_epi8(static_cast<char>(std::get<Is>(std::forward<Tup>(t)))...);
+            return _mm512_set_epi8(
+              t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15,
+              t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31,
+              t32, t33, t34, t35, t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47,
+              t48, t49, t50, t51, t52, t53, t54, t55, t56, t57, t58, t59, t60, t61, t62, t63);
 #endif
         }
 
-        template<class Tup, std::size_t... Is>
-        __m512i revert_args_set_epi16(Tup&& t, detail::index_sequence<Is...>)
+        inline __m512i int_init(std::integral_constant<std::size_t, 2>,
+                         int16_t t0, int16_t t1, int16_t t2, int16_t t3,
+                         int16_t t4, int16_t t5, int16_t t6, int16_t t7,
+                         int16_t t8, int16_t t9, int16_t t10, int16_t t11,
+                         int16_t t12, int16_t t13, int16_t t14, int16_t t15,
+                         int16_t t16, int16_t t17, int16_t t18, int16_t t19,
+                         int16_t t20, int16_t t21, int16_t t22, int16_t t23,
+                         int16_t t24, int16_t t25, int16_t t26, int16_t t27,
+                         int16_t t28, int16_t t29, int16_t t30, int16_t t31)
         {
 #if defined(__clang__) || __GNUC__
             return __extension__ (__m512i)(__v32hi)
             {
-                static_cast<short>(std::get<Is>(std::forward<Tup>(t)))...
+              t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15,
+              t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31
             };
 #else
-            return _mm512_set_epi16(static_cast<short>(std::get<Is>(std::forward<Tup>(t)))...);
+            return _mm512_set_epi16(
+              t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15,
+              t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31);
 #endif
-        }
-
-        template <class... Args>
-        __m512i int_init(std::integral_constant<std::size_t, 1>, Args... args)
-        {
-            return revert_args_set_epi8(std::forward_as_tuple(args...), detail::make_index_sequence<sizeof...(Args)>{});
-        }
-
-        template <class... Args>
-        __m512i int_init(std::integral_constant<std::size_t, 2>, Args... args)
-        {
-            return revert_args_set_epi16(std::forward_as_tuple(args...), detail::make_index_sequence<sizeof...(Args)>{});
         }
 
         inline __m512i int_init(std::integral_constant<std::size_t, 4>,
