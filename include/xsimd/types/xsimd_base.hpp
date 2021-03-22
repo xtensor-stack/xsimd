@@ -25,6 +25,7 @@
 #include "../memory/xsimd_alignment.hpp"
 #include "xsimd_utils.hpp"
 #include "xsimd_base_bool.hpp"
+#include "xsimd_base_constant.hpp"
 
 namespace xsimd
 {
@@ -212,7 +213,7 @@ namespace xsimd
         simd_batch(simd_batch&&) = default;
         simd_batch& operator=(simd_batch&&) = default;
 
-        simd_batch(storage_type value);
+        constexpr simd_batch(storage_type value);
 
         using char_itype =
             typename std::conditional<std::is_signed<char>::value, int8_t, uint8_t>::type;
@@ -671,7 +672,7 @@ namespace xsimd
      *****************************/
 
     template <class X>
-    inline simd_batch<X>::simd_batch(storage_type value)
+    constexpr inline simd_batch<X>::simd_batch(storage_type value)
         : m_value(value)
     {
     }
@@ -1698,6 +1699,28 @@ namespace xsimd
         using value_type = typename simd_batch_traits<X>::value_type;
         using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
         return kernel::select(cond(), a(), b());
+    }
+
+    /**
+     * @ingroup simd_batch_miscellaneous
+     *
+     * Ternary operator for batches: selects values from the batches \c a or \c b
+     * depending on the boolean values in the constant batch \c cond. Equivalent to
+     * \code{.cpp}
+     * for(std::size_t i = 0; i < N; ++i)
+     *     res[i] = cond[i] ? a[i] : b[i];
+     * \endcode
+     * @param cond constant batch condition.
+     * @param a batch values for truthy condition.
+     * @param b batch value for falsy condition.
+     * @return the result of the selection.
+     */
+    template <class X, bool... Masks>
+    inline batch_type_t<X> select(const batch_bool_constant<typename simd_batch_traits<X>::value_type, Masks...>& cond, const simd_base<X>& a, const simd_base<X>& b)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::select(cond, a(), b());
     }
 
     /**

@@ -152,6 +152,7 @@ set(XSIMD_TESTS
     test_batch_float.cpp
     test_batch_int.cpp
     test_bitwise_cast.cpp
+    test_constant_batch.cpp
     test_complex_exponential.cpp
     test_complex_hyperbolic.cpp
     test_complex_power.cpp
@@ -166,6 +167,7 @@ set(XSIMD_TESTS
     test_poly_evaluation.cpp
     test_power.cpp
     test_rounding.cpp
+    test_select.cpp
     test_trigonometric.cpp
     test_utils.hpp
     #[[    xsimd_api_test.hpp

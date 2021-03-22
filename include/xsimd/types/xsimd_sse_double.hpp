@@ -629,6 +629,17 @@ namespace xsimd
 #endif
             }
 
+            template<bool... Values>
+            static batch_type select(const batch_bool_constant<value_type, Values...>& cond, const batch_type& a, const batch_type& b)
+            {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
+                constexpr int mask = batch_bool_constant<value_type, Values...>::mask();
+                return _mm_blend_pd(b, a, mask);
+#else
+                return select(cond(), a, b);
+#endif
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 return _mm_cmpunord_pd(x, x);

@@ -658,6 +658,13 @@ namespace xsimd
                 return _mm256_blendv_pd(b, a, cond);
             }
 
+            template<bool... Values>
+            static batch_type select(const batch_bool_constant<value_type, Values...>&, const batch_type& a, const batch_type& b)
+            {
+                constexpr int mask = batch_bool_constant<value_type, Values...>::mask();
+                return _mm256_blend_pd(b, a, mask);
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 return _mm256_cmp_pd(x, x, _CMP_UNORD_Q);
