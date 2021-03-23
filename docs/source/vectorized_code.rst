@@ -87,7 +87,7 @@ Using the auto detection mechanism does not require a lot of change:
             b_type bvec = xsimd::load_unaligned(&b[i]);
             b_type rvec = (avec + bvec) / 2;
             xsimd::store_unaligned(&res[i], rvec);
-            // or rvec.store_unalined(&res[i]);
+            // or rvec.store_unaligned(&res[i]);
         }
         // Remaining part that cannot be vectorize
         for(std::size_t i = vec_size; i < size; ++i)
@@ -128,7 +128,7 @@ with STL containers. Let's change the previous code so it can take advantage of 
             b_type bvec = xsimd::load_aligned(&b[i]);
             b_type rvec = (avec + bvec) / 2;
             xsimd::store_unaligned(&res[i], rvec);
-            // or rvec.store_unalined(&res[i]);
+            // or rvec.store_unaligned(&res[i]);
         }
         // Remaining part that cannot be vectorize
         for(std::size_t i = vec_size; i < size; ++i)
