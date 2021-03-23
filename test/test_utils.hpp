@@ -133,28 +133,36 @@ namespace detail
         }
     }
 
+    inline unsigned char uabs(unsigned char val)
+    {
+        return val;
+    }
+
+    inline unsigned short uabs(unsigned short val)
+    {
+        return val;
+    }
+
+    inline unsigned int uabs(unsigned int val)
+    {
+        return val;
+    }
+
+    inline unsigned long uabs(unsigned long val)
+    {
+        return val;
+    }
+
+    inline unsigned long long uabs(unsigned long long val)
+    {
+        return val;
+    }
+
     template <class T>
     inline T uabs(T val)
     {
         return std::abs(val);
     }
-
-    inline uint32_t uabs(uint32_t val)
-    {
-        return val;
-    }
-
-    inline uint64_t uabs(uint64_t val)
-    {
-        return val;
-    }
-
-#ifdef XSIMD_32_BIT_ABI
-    inline unsigned long uabs(unsigned long val)
-    {
-        return val;
-    }
-#endif
 
     template <class T>
     bool check_is_small(const T& value, const T& tolerance)
@@ -170,9 +178,9 @@ namespace detail
         {
             return (std::numeric_limits<T>::max)();
         }
-        if (lhs == static_cast<T>(0) ||
-            rhs > static_cast<T>(1) &&
-                lhs < rhs * (std::numeric_limits<T>::min)())
+        if ((lhs == static_cast<T>(0)) ||
+            (rhs > static_cast<T>(1) &&
+                lhs < rhs * (std::numeric_limits<T>::min)()))
         {
             return static_cast<T>(0);
         }

@@ -30,6 +30,8 @@ include(CheckCXXCompilerFlag)
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
+OPTION(XSIMD_ENABLE_WERROR "Turn on -Werror" OFF)
+
 ################
 # ARM SETTINGS #
 ################
@@ -238,4 +240,8 @@ if (CROSS_COMPILE_ARM)
     add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS test_xsimd)
 else()
     add_custom_target(xtest COMMAND test_xsimd DEPENDS test_xsimd)
+endif()
+
+if (XSIMD_ENABLE_WERROR)
+    target_compile_options(test_xsimd PRIVATE -Werror -Wall -DXSIMD_SKIP_ON_WERROR)
 endif()

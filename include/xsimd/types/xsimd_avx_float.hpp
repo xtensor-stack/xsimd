@@ -707,7 +707,7 @@ namespace xsimd
             }
 
             template<bool... Values>
-            static batch_type select(const batch_bool_constant<value_type, Values...>& cond, const batch_type& a, const batch_type& b)
+            static batch_type select(const batch_bool_constant<value_type, Values...>&, const batch_type& a, const batch_type& b)
             {
                 constexpr int mask = batch_bool_constant<value_type, Values...>::mask();
                 return _mm256_blend_ps(b, a, mask);
