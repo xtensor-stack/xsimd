@@ -29,7 +29,7 @@ namespace xsimd
 
         bool operator[](size_t i) const
         {
-            return std::array<value_type, size>{Values...}[i];
+            return std::array<value_type, size>{{Values...}}[i];
         }
         static constexpr int mask()
         {

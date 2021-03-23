@@ -98,8 +98,8 @@ protected:
         }
         // clip
         {
-            value_type clip_lo = 0.5;
-            value_type clip_hi = 1.;
+            value_type clip_lo = static_cast<value_type>(0.5);
+            value_type clip_hi = static_cast<value_type>(1.);
             array_type expected;
             std::transform(clip_input.cbegin(), clip_input.cend(), expected.begin(),
                            [clip_lo, clip_hi](const value_type& l) {

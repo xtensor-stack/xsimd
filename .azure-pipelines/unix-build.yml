@@ -39,7 +39,7 @@ steps:
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXSIMD_FORCE_X86_INSTR_SET=0 -DXSIMD_FORCE_X86_AMD_INSTR_SET=0";
       fi
 
-      cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX $CMAKE_EXTRA_ARGS -DDOWNLOAD_GTEST=ON $(Build.SourcesDirectory)
+      cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX $CMAKE_EXTRA_ARGS -DDOWNLOAD_GTEST=ON -DXSIMD_ENABLE_WERROR=1 $(Build.SourcesDirectory)
     displayName: Configure xsimd
     workingDirectory: $(Build.BinariesDirectory)
 

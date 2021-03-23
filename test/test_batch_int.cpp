@@ -32,7 +32,7 @@ namespace xsimd
 
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
-            std::array<T, 2> maxmin_cmp{max, min};
+            std::array<T, 2> maxmin_cmp{{max, min}};
             B maxmin(max, min);
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
@@ -43,8 +43,8 @@ namespace xsimd
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
 
-            EXPECT_BATCH_EQ(r1, A({2, 3})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, A({1, 3})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A{{2, 3}})) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A{{1, 3}})) << print_function_name("min");
 
             auto r4 = a < b; // test lt
             BB e4(1, 0);
@@ -68,8 +68,8 @@ namespace xsimd
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
 
-            EXPECT_BATCH_EQ(r1, A({2, 3, 2, 3})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, A({1, 3, 1, 1})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A{{2, 3, 2, 3}})) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A{{1, 3, 1, 1}})) << print_function_name("min");
 
             auto r4 = a < b; // test lt
             BB e4(1,0,1,1);
@@ -88,7 +88,7 @@ namespace xsimd
 
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
-            std::array<T, 8> maxmin_cmp{0, 0, max, 0, min, 0, 0, 0};
+            std::array<T, 8> maxmin_cmp{{0, 0, max, 0, min, 0, 0, 0}};
             B maxmin(0, 0, max, 0, min, 0, 0, 0);
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
@@ -99,8 +99,8 @@ namespace xsimd
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
             auto r4 = a < b; // test lt
-            EXPECT_BATCH_EQ(r1, A({2, 3, 2, 3, 2, 3, 3, 3})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, A({1, 3, 1, 3, 1, 1, 2, 3})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A{{2, 3, 2, 3, 2, 3, 3, 3}})) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A{{1, 3, 1, 3, 1, 1, 2, 3}})) << print_function_name("min");
 
             BB e4(1,0,1,0, 1,1,0,0);
             EXPECT_TRUE(xsimd::all(r4 == e4));
@@ -118,7 +118,7 @@ namespace xsimd
 
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
-            std::array<T, 16> maxmin_cmp{0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0};
+            std::array<T, 16> maxmin_cmp{{0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0}};
             B maxmin(0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0);
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
@@ -131,8 +131,8 @@ namespace xsimd
             auto r5 = a == c;
             auto r6 = a != c;
 
-            EXPECT_BATCH_EQ(r1, A({2,3,2,3, 2,3,2,3, 3,3,3,3, 2,max,max,2})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, A({1,2,1,2, 1,2,1,2, 2,2,2,2, min,2,2,min})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A{{2,3,2,3, 2,3,2,3, 3,3,3,3, 2,max,max,2}})) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A{{1,2,1,2, 1,2,1,2, 2,2,2,2, min,2,2,min}})) << print_function_name("min");
 
             BB e4(1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1);
             EXPECT_TRUE(xsimd::all(r4 == e4));
@@ -161,8 +161,8 @@ namespace xsimd
             auto r1 = xsimd::max(a, b);
             auto r3 = xsimd::min(a, b);
             auto r4 = a < b; // test lt
-            EXPECT_BATCH_EQ(r1, A({2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 3,3,3,3, 2,max,max,2})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, A({1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 2,2,2,2, min,2,2,min})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A{{2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 3,3,3,3, 2,max,max,2}})) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A{{1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 2,2,2,2, min,2,2,min}})) << print_function_name("min");
 
             BB e4(1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1);
             EXPECT_TRUE(xsimd::all(r4 == e4));

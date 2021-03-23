@@ -52,34 +52,42 @@
 #ifdef XSIMD_FORCE_X86_INSTR_SET
     #define XSIMD_X86_INSTR_SET XSIMD_FORCE_X86_INSTR_SET
     #define XSIMD_X86_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
-    #ifdef _MSC_VER
-        #pragma message("Warning: Forcing X86 instruction set")
-    #else
-        #warning "Forcing X86 instruction set"
+    #ifndef XSIMD_SKIP_ON_WERROR
+        #ifdef _MSC_VER
+            #pragma message("Warning: Forcing X86 instruction set")
+        #else
+            #warning "Forcing X86 instruction set"
+        #endif
     #endif
 #elif defined(XSIMD_FORCE_X86_AMD_INSTR_SET)
     #define XSIMD_X86_AMD_INSTR_SET XSIMD_FORCE_X86_AMD_INSTR_SET
     #define XSIMD_X86_AMD_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
-    #ifdef _MSC_VER
-        #pragma message("Warning: Forcing X86 AMD instruction set")
-    #else
-        #warning "Forcing X86 AMD instruction set"
+    #ifndef XSIMD_SKIP_ON_WERROR
+        #ifdef _MSC_VER
+            #pragma message("Warning: Forcing X86 AMD instruction set")
+        #else
+            #warning "Forcing X86 AMD instruction set"
+        #endif
     #endif
 #elif defined(XSIMD_FORCE_PPC_INSTR_SET)
     #define XSIMD_PPC_INSTR_SET XSIMD_FORCE_PPC_INSTR_SET
     #define XSIMD_PPC_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
-    #ifdef _MSC_VER
-        #pragma message("Warning: Forcing PPC instruction set")
-    #else
-        #warning "Forcing PPC instruction set"
+    #ifndef XSIMD_SKIP_ON_WERROR
+        #ifdef _MSC_VER
+            #pragma message("Warning: Forcing PPC instruction set")
+        #else
+            #warning "Forcing PPC instruction set"
+        #endif
     #endif
 #elif defined(XSIMD_FORCE_ARM_INSTR_SET)
     #define XSIMD_ARM_INSTR_SET XSIMD_FORCE_ARM_INSTR_SET
     #define XSIMD_ARM_INSTR_SET_AVAILABLE XSIMD_VERSION_NUMBER_AVAILABLE
-    #ifdef _MSC_VER
-        #pragma message("Warning: Forcing ARM instruction set")
-    #else
-        #warning "Forcing ARM instruction set"
+    #ifndef XSIMD_SKIP_ON_WERROR
+        #ifdef _MSC_VER
+            #pragma message("Warning: Forcing ARM instruction set")
+        #else
+            #warning "Forcing ARM instruction set"
+        #endif
     #endif
 #endif
 

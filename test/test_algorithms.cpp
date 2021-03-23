@@ -263,6 +263,7 @@ TEST(algorithms, iterator)
     *cbegin = sin(*cbegin);
     *cbegin = sqrt(*cbegin);
     auto real_part = abs(*(cbegin));
+    (void)real_part;
 #endif
 
 }

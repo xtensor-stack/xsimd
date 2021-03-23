@@ -603,7 +603,8 @@ namespace xsimd
             {
                 T res(0);
                 using int_type = as_unsigned_integer_t<T>;
-                *reinterpret_cast<int_type*>(&res) = ~int_type(0);
+                int_type value(~int_type(0));
+                std::memcpy(&res, &value, sizeof(int_type));
                 return res;
             }
         };
