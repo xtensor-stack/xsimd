@@ -16,11 +16,11 @@ Basic functions
    :project: xsimd
 
 .. _fmod-function-reference:
-.. doxygenfunction:: fmod
+.. doxygenfunction:: fmod(const simd_base<B>&, const simd_base<B>&)
    :project: xsimd
 
 .. _remainder-func-ref:
-.. doxygenfunction:: remainder
+.. doxygenfunction:: remainder(const simd_base<B>&, const simd_base<B>&)
    :project: xsimd
 
 .. _fma-function-reference:
