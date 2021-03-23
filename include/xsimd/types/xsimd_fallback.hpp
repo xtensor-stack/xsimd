@@ -917,6 +917,12 @@ namespace xsimd
                 XSIMD_FALLBACK_MAPPING_LOOP(batch, (cond[i] ? a[i] : b[i]))
             }
 
+            template<bool... Values>
+            static batch_type select(const batch_bool_constant<value_type, Values...>& cond, const batch_type& a, const batch_type& b)
+            {
+                XSIMD_FALLBACK_MAPPING_LOOP(batch, (cond[i] ? a[i] : b[i]))
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, std::isnan(x[i]))
