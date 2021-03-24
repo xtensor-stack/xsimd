@@ -440,6 +440,7 @@ namespace xsimd
                 return vbslq_s64(cond, a, b);
             }
 
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
             static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
             {
                 return vzip1q_s64(lhs, rhs);
@@ -449,6 +450,7 @@ namespace xsimd
             {
                 return vzip2q_s64(lhs, rhs);
             }
+#endif
         };
     }
 

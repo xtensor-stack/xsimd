@@ -416,6 +416,7 @@ namespace xsimd
                 return vbslq_u32(cond, a, b);
             }
 
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
             static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
             {
                 return vzip1q_u32(lhs, rhs);
@@ -425,6 +426,7 @@ namespace xsimd
             {
                 return vzip2q_u32(lhs, rhs);
             }
+#endif
         };
 
         inline batch<uint32_t, 4> shift_left(const batch<uint32_t, 4>& lhs, int32_t n)

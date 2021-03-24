@@ -580,6 +580,7 @@ namespace xsimd
                 return vbslq_f64(cond, a, b);
             }
 
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
             static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
             {
                 return vzip1q_f64(lhs, rhs);
@@ -589,6 +590,7 @@ namespace xsimd
             {
                 return vzip2q_f64(lhs, rhs);
             }
+#endif
 
             static batch_bool_type isnan(const batch_type& x)
             {
