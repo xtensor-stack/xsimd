@@ -95,7 +95,7 @@ namespace xsimd
 
         /**
          * Initializes a batch to the values pointed by \c src; \c src
-         * must be aligned.
+         * does not need to be aligned.
          */
         batch(const T* src, unaligned_mode);
 
