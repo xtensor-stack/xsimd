@@ -815,6 +815,34 @@ namespace xsimd
                 return hypot(z.real(), z.imag());
             }
 
+            static batch_type fma(const batch_type& a, const batch_type& b, const batch_type& c)
+            {
+                real_batch res_r = ::xsimd::fms(a.real(), b.real(), ::xsimd::fms(a.imag(), b.imag(), c.real()));
+                real_batch res_i = ::xsimd::fma(a.real(), b.imag(), ::xsimd::fma(a.imag(), b.real(), c.imag()));
+                return {res_r, res_i};
+            }
+
+            static batch_type fms(const batch_type& a, const batch_type& b, const batch_type& c)
+            {
+                real_batch res_r = ::xsimd::fms(a.real(), b.real(), ::xsimd::fma(a.imag(), b.imag(), c.real()));
+                real_batch res_i = ::xsimd::fma(a.real(), b.imag(), ::xsimd::fms(a.imag(), b.real(), c.imag()));
+                return {res_r, res_i};
+            }
+
+            static batch_type fnma(const batch_type& a, const batch_type& b, const batch_type& c)
+            {
+                real_batch res_r = - ::xsimd::fms(a.real(), b.real(), ::xsimd::fma(a.imag(), b.imag(), c.real()));
+                real_batch res_i = - ::xsimd::fma(a.real(), b.imag(), ::xsimd::fms(a.imag(), b.real(), c.imag()));
+                return {res_r, res_i};
+            }
+
+            static batch_type fnms(const batch_type& a, const batch_type& b, const batch_type& c)
+            {
+                real_batch res_r = - ::xsimd::fms(a.real(), b.real(), ::xsimd::fms(a.imag(), b.imag(), c.real()));
+                real_batch res_i = - ::xsimd::fma(a.real(), b.imag(), ::xsimd::fma(a.imag(), b.real(), c.imag()));
+                return {res_r, res_i};
+            }
+
             static batch_type sqrt(const batch_type& z)
             {
                 using rvt = typename real_batch::value_type;
