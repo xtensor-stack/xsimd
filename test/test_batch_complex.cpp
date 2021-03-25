@@ -468,6 +468,42 @@ protected:
         }
     }
 
+    void test_fused_operations() const
+    {
+        // fma
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.begin(), expected.begin(),
+                            [](const value_type& l, const value_type& r) { return l * r + r; });
+            batch_type res = xsimd::fma(batch_lhs(), batch_rhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("fma");
+        }
+        // fms
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.begin(), expected.begin(),
+                            [](const value_type& l, const value_type& r) { return l * r - r; });
+            batch_type res = fms(batch_lhs(), batch_rhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("fms");
+        }
+        // fnma
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.begin(), expected.begin(),
+                            [](const value_type& l, const value_type& r) { return -l * r + r; });
+            batch_type res = fnma(batch_lhs(), batch_rhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("fnma");
+        }
+        // fnms
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.begin(), expected.begin(),
+                            [](const value_type& l, const value_type& r) { return -l * r - r; });
+            batch_type res = fnms(batch_lhs(), batch_rhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("fnms");
+        }
+    }
+
 private:
 
     batch_type batch_lhs() const
@@ -522,3 +558,7 @@ TYPED_TEST(batch_complex_test, horizontal_operations)
     this->test_horizontal_operations();
 }
 
+TYPED_TEST(batch_complex_test, fused_operations)
+{
+    this->test_fused_operations();
+}

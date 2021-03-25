@@ -375,6 +375,31 @@ namespace xsimd
         return std::fma(a, b, c);
     }
 
+    namespace detail
+    {
+        template <class C>
+        inline C fma_complex_scalar_impl(const C& a, const C& b, const C& c)
+        {
+            return {fms(a.real(), b.real(), fms(a.imag(), b.imag(), c.real())),
+                    fma(a.real(), b.imag(), fma(a.imag(), b.real(), c.imag()))};
+        }
+    }
+
+    template <class T>
+    inline std::complex<T> fma(const std::complex<T>& a, const std::complex<T>& b, const std::complex<T>& c)
+    {
+        return detail::fma_complex_scalar_impl(a, b, c);
+    }
+
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    inline xtl::xcomplex<T, T, i3ec> fma(const xtl::xcomplex<T, T, i3ec>& a, const xtl::xcomplex<T, T, i3ec>& b, const xtl::xcomplex<T, T, i3ec>& c)
+    {
+        return detail::fma_complex_scalar_impl(a, b, c);
+    }
+#endif
+
     inline void sincos(float val, float&s, float& c)
     {
 #if defined(__APPLE__)
