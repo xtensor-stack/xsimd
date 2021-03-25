@@ -440,17 +440,23 @@ namespace xsimd
                 return vbslq_s64(cond, a, b);
             }
 
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
             static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
                 return vzip1q_s64(lhs, rhs);
+#else
+                return vcombine_s64(vget_low_s64(lhs), vget_low_s64(rhs));
+#endif
             }
 
             static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
                 return vzip2q_s64(lhs, rhs);
-            }
+#else
+                return vcombine_s64(vget_high_s64(lhs), vget_high_s64(rhs));
 #endif
+            }
         };
     }
 

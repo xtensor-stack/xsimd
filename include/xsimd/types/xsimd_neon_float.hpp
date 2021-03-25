@@ -639,17 +639,25 @@ namespace xsimd
                 return vbslq_f32(cond, a, b);
             }
 
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
             static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
                 return vzip1q_f32(lhs, rhs);
+#else
+                float32x2x2_t tmp = vzip_f32(vget_low_f32(lhs), vget_low_f32(rhs));
+                return vcombine_f32(tmp.val[0], tmp.val[1]);
+#endif
             }
 
             static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
             {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
                 return vzip2q_f32(lhs, rhs);
-            }
+#else
+                float32x2x2_t tmp = vzip_f32(vget_high_f32(lhs), vget_high_f32(rhs));
+                return vcombine_f32(tmp.val[0], tmp.val[1]);
 #endif
+            }
 
             static batch_bool_type isnan(const batch_type& x)
             {
