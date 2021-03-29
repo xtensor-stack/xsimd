@@ -8,7 +8,7 @@ steps:
         conda install xtl -c conda-forge
       fi
       if [[ $(avx512) == 1 ]]; then
-        conda install gcc_linux-64 gxx_linux-64;
+        #conda install gcc_linux-64 gxx_linux-64;
         sh $(Build.SourcesDirectory)/install_sde.sh;
       fi
     displayName: Install dependencies
