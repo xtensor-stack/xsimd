@@ -7,9 +7,8 @@ steps:
       if [[ $(enable_xtl_complex) == 1 ]]; then
         conda install xtl -c conda-forge
       fi
-      if [[ $(avx512) == 1 ]]; then
-        conda install gcc_linux-64 gxx_linux-64;
-        sh $(Build.SourcesDirectory)/install_sde.sh;
+      if test "x$(avx512)" = "x1" ; then
+        sh $(Build.SourcesDirectory)/install_sde.sh
       fi
     displayName: Install dependencies
     workingDirectory: $(Build.BinariesDirectory)
@@ -33,7 +32,7 @@ steps:
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_FALLBACK=ON";
       fi
       if [[ $(avx512) == 1 ]]; then
-        CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512";
+        CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
       fi
       if [[ $(force_no_instr_set) == 1 ]]; then
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXSIMD_FORCE_X86_INSTR_SET=0 -DXSIMD_FORCE_X86_AMD_INSTR_SET=0";
@@ -52,14 +51,13 @@ steps:
   - script: |
       source activate xsimd
       if [[ $(avx512) == 1 ]]; then
-        ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd ;
+        ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd
       elif [[ $(cross_compile) == 1 ]]; then
         echo $(arm_arch_dir);
         if [[ $(arm_arch_dir) == 'aarch64-linux-gnu' ]]; then
-          ls /usr/aarch64-linux-gnu/ ;
-          qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./test_xsimd ;
+          qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./test_xsimd
         else
-          qemu-arm -L /usr/arm-linux-gnueabi/ ./test_xsimd ;
+          qemu-arm -L /usr/arm-linux-gnueabi/ ./test_xsimd
         fi
       else
         ./test_xsimd
