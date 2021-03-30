@@ -1,6 +1,5 @@
 # ![xsimd](docs/source/xsimd.svg)
 
-[![Travis](https://travis-ci.org/xtensor-stack/xsimd.svg?branch=master)](https://travis-ci.org/xtensor-stack/xsimd)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/wori7my48os31nu0?svg=true)](https://ci.appveyor.com/project/xtensor-stack/xsimd)
 [![Azure](https://dev.azure.com/xtensor-stack/xtensor-stack/_apis/build/status/xtensor-stack.xsimd?branchName=master)](https://dev.azure.com/xtensor-stack/xtensor-stack/_build/latest?definitionId=3&branchName=master)
 [![Documentation Status](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
