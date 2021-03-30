@@ -229,7 +229,7 @@ namespace xsimd
     template <class... Args>
     inline T& batch_bool_avx512<MASK, T>::load_values(Args... b)
     {
-        return load_array({b...});
+        return load_array({{b...}});
     }
     
     namespace detail

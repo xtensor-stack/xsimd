@@ -27,8 +27,9 @@ jobs:
           llvm_version: '8'
         clang_9:
           llvm_version: '9'
-        clang_10:
+        clang_10_avx512:
           llvm_version: '10'
+          avx512: 1
     pool:
       vmImage: ubuntu-16.04
     variables:
