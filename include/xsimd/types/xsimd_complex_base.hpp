@@ -144,7 +144,9 @@ namespace xsimd
         explicit simd_complex_batch(const value_type& v);
         explicit simd_complex_batch(const real_value_type& v);
         explicit simd_complex_batch(const real_batch& re);
+        explicit simd_complex_batch(const real_value_type* v) : simd_complex_batch(real_batch(v)) {}
         simd_complex_batch(const real_batch& re, const real_batch& im);
+        simd_complex_batch(const real_value_type* re, const real_value_type* im) : simd_complex_batch(real_batch(re), real_batch(im)) {}
 
         real_batch& real();
         real_batch& imag();
