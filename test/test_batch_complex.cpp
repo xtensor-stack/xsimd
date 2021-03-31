@@ -113,11 +113,17 @@ protected:
             tmp[i] = value_type(real[i]);
         }
 
-        batch_type b2(real_batch_type(real.data()));
+        batch_type b2(real.data());
         EXPECT_EQ(b2, tmp) << print_function_name("batch(real_batch)");
 
-        batch_type b3(real_batch_type(real.data()), real_batch_type(imag.data()));
+        batch_type b3(real.data(), imag.data());
         EXPECT_EQ(b3, lhs) << print_function_name("batch(real_batch, real_batch)");
+
+        batch_type b4(real_batch_type(real.data()));
+        EXPECT_EQ(b4, tmp) << print_function_name("batch(real_ptr)");
+
+        batch_type b5(real_batch_type(real.data()), real_batch_type(imag.data()));
+        EXPECT_EQ(b5, lhs) << print_function_name("batch(real_ptr, real_ptr)");
     }
 
     void test_access_operator() const
