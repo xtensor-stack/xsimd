@@ -318,6 +318,26 @@ namespace xsimd
             {
                 return vbslq_u16(cond, a, b);
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vzip1q_u16(lhs, rhs);
+#else
+                uint16x4x2_t tmp = vzip_u16(vget_low_u16(lhs), vget_low_u16(rhs));
+                return vcombine_u16(tmp.val[0], tmp.val[1]);
+#endif
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vzip2q_u16(lhs, rhs);
+#else
+                uint16x4x2_t tmp = vzip_u16(vget_high_u16(lhs), vget_high_u16(rhs));
+                return vcombine_u16(tmp.val[0], tmp.val[1]);
+#endif
+            }
         };
     }
 
