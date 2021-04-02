@@ -74,10 +74,6 @@ protected:
             b.store_unaligned(res_real.data(), res_imag.data());
             EXPECT_EQ(res_real, real) << print_function_name("load_unaligned / store_unaligned (real*, real*)");
 
-            //b.load_unaligned(real.data());
-            //b.store_unaligned(res_real.data());
-            //EXPECT_EQ(res_real, real) << print_function_name("load_unaligned / store_unaligned (real*)");
-
             alignas(XSIMD_DEFAULT_ALIGNMENT) real_array_type areal, aimag, ares_real, ares_imag;
             for (size_t i = 0; i < size; ++i)
             {
@@ -87,10 +83,26 @@ protected:
             b.load_aligned(areal.data(), aimag.data());
             b.store_aligned(ares_real.data(), ares_imag.data());
             EXPECT_EQ(ares_real, areal) << print_function_name("load_aligned / store_aligned (real*, real*)");
+        }
+        {
+            real_array_type real, res_real;
+            for (size_t i = 0; i < size; ++i)
+            {
+                real[i] = lhs[i].real();
+            }
+            batch_type b;
+            b.load_unaligned(real.data());
+            b.store_unaligned(res_real.data());
+            EXPECT_EQ(res_real, real) << print_function_name("load_unaligned / store_unaligned (real*)");
 
-            //b.load_aligned(areal.data());
-            //b.store_aligned(ares_real.data());
-            //EXPECT_EQ(ares_real, areal) << print_function_name("load_aligned / store_aligned (real*)");
+            alignas(XSIMD_DEFAULT_ALIGNMENT) real_array_type areal, ares_real;
+            for (size_t i = 0; i < size; ++i)
+            {
+                areal[i] = lhs[i].real();
+            }
+            b.load_aligned(areal.data());
+            b.store_aligned(ares_real.data());
+            EXPECT_EQ(ares_real, areal) << print_function_name("load_aligned / store_aligned (real*)");
         }
     }
 
