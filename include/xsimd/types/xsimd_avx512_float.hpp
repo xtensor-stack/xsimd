@@ -472,8 +472,11 @@ namespace xsimd
 
             static batch_type abs(const batch_type& rhs)
             {
-                return (__m512)(_mm512_and_epi32((__m512i)((__m512)(rhs)),
-                                                 _mm512_set1_epi32(0x7fffffff)));
+                __m512 rhs_asf = (__m512)rhs;
+                __m512i rhs_asi = *reinterpret_cast<__m512i*>(&rhs_asf);
+                __m512i res_asi = _mm512_and_epi32(_mm512_set1_epi32(0x7FFFFFFF),
+                                                   rhs_asi);
+                return *reinterpret_cast<__m512*>(&res_asi);
             }
 
             static batch_type fabs(const batch_type& rhs)
