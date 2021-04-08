@@ -293,7 +293,7 @@ namespace xsimd
             {
                 __m256i tmp1 = _mm512_extracti32x8_epi32(rhs, 0);
                 __m256i tmp2 = _mm512_extracti32x8_epi32(rhs, 1);
-                __m256i res1 = tmp1 + tmp2;
+                __m256i res1 = _mm256_add_epi64(tmp1, tmp2);
                 return xsimd::hadd(batch<int64_t, 4>(res1));
             }
 

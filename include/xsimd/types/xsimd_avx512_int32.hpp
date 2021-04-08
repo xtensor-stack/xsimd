@@ -236,7 +236,7 @@ namespace xsimd
                 // TODO Why not _mm512_reduce_add_...?
                 __m256i tmp1 = _mm512_extracti32x8_epi32(rhs, 0);
                 __m256i tmp2 = _mm512_extracti32x8_epi32(rhs, 1);
-                __m256i res1 = tmp1 + tmp2;
+                __m256i res1 = _mm256_add_epi32(tmp1, tmp2);
                 return xsimd::hadd(batch<int32_t, 8>(res1));
             }
 

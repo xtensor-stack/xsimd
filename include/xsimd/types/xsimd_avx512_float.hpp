@@ -513,7 +513,7 @@ namespace xsimd
             {
                 __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
                 __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
-                __m256 res1 = tmp1 + tmp2;
+                __m256 res1 = _mm256_add_ps(tmp1, tmp2);
                 return xsimd::hadd(batch<float, 8>(res1));
             }
 
@@ -527,7 +527,7 @@ namespace xsimd
         {                                                                                      \
             auto tmp1 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(1, 0, 1, 0));                   \
             auto tmp2 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(3, 2, 3, 2));                   \
-            res ## I = tmp1 + tmp2;                                                            \
+            res ## I = _mm512_add_ps(tmp1, tmp2);                                              \
         }                                                                                      \
 
                 XSIMD_AVX512_HADDP_STEP1(0, row[0], row[2]);
@@ -551,17 +551,17 @@ namespace xsimd
             batch<float, 16> tmp1 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(2, 0, 2, 0));        \
             batch<float, 16> tmp2 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(3, 1, 3, 1));        \
                                                                                                 \
-            batch<float, 16> resx1 = tmp1 + tmp2;                                               \
+            batch<float, 16> resx1 = _mm512_add_ps(tmp1, tmp2);                                               \
                                                                                                 \
             batch<float, 16> tmp3 = _mm512_shuffle_f32x4(c, d, _MM_SHUFFLE(2, 0, 2, 0));        \
             batch<float, 16> tmp4 = _mm512_shuffle_f32x4(c, d, _MM_SHUFFLE(3, 1, 3, 1));        \
                                                                                                 \
-            batch<float, 16> resx2 = tmp3 + tmp4;                                               \
+            batch<float, 16> resx2 = _mm512_add_ps(tmp3, tmp4);                                               \
                                                                                                 \
             batch<float, 16> tmp5 = _mm512_shuffle_ps(resx1, resx2, _MM_SHUFFLE(2, 0, 2, 0));   \
             batch<float, 16> tmp6 = _mm512_shuffle_ps(resx1, resx2, _MM_SHUFFLE(3, 1, 3, 1));   \
                                                                                                 \
-            batch<float, 16> resx3 = tmp5 + tmp6;                                               \
+            batch<float, 16> resx3 = _mm512_add_ps(tmp5, tmp6);                                               \
                                                                                                 \
             halfx ## I  = _mm256_hadd_ps(_mm512_extractf32x8_ps(resx3, 0),                      \
                                          _mm512_extractf32x8_ps(resx3, 1));                     \
