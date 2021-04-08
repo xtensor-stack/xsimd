@@ -579,7 +579,20 @@ namespace xsimd
 
             static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
             {
+            #if !defined(_MSC_VER)
                 return _mm512_mask_blend_ps(cond, b, a);
+            #else
+                __m512i mcondi = _mm512_maskz_broadcastd_epi32 ((__mmask16)cond, _mm_set1_epi32(~0));
+                __m512 mcond = *reinterpret_cast<__m512*>(&mcondi);
+                XSIMD_SPLITPS_AVX512(mcond);
+                XSIMD_SPLITPS_AVX512(a);
+                XSIMD_SPLITPS_AVX512(b);
+
+                auto res_lo = _mm256_blendv_ps(b_low, a_low, mcond_low);
+                auto res_hi = _mm256_blendv_ps(b_high, a_high, mcond_high);
+
+                XSIMD_RETURN_MERGEDPS_AVX(res_lo, res_hi);
+            #endif
             }
 
             static batch_bool_type isnan(const batch_type& x)

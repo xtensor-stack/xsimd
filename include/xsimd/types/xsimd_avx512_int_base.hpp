@@ -18,12 +18,28 @@ namespace xsimd
 {
 
 #define XSIMD_SPLIT_AVX512(avx_name)                                                                  \
-    __m256i avx_name##_low = _mm512_castsi512_si256(avx_name);                                        \
-    __m256i avx_name##_high = _mm512_extracti64x4_epi64(avx_name, 1)                                  \
+    __m256i avx_name##_low = _mm512_castsi512_si256((__m512i)avx_name);                                        \
+    __m256i avx_name##_high = _mm512_extracti64x4_epi64((__m512i)avx_name, 1)                                  \
+
+#define XSIMD_SPLITPS_AVX512(avx_name)                                                                  \
+    __m256 avx_name##_low = _mm512_castps512_ps256((__m512)avx_name);                                        \
+    __m256 avx_name##_high = _mm512_extractf32x8_ps((__m512)avx_name, 1)                                  \
+
+#define XSIMD_SPLITPD_AVX512(avx_name)                                                                  \
+    __m256d avx_name##_low = _mm512_castpd512_pd256((__m512d)avx_name);                                        \
+    __m256d avx_name##_high = _mm512_extractf64x4_pd((__m512d)avx_name, 1)                                  \
 
 #define XSIMD_RETURN_MERGED_AVX(res_low, res_high)                                                    \
     __m512i result = _mm512_castsi256_si512(res_low);                                                 \
     return _mm512_inserti64x4(result, res_high, 1)                                                    \
+
+#define XSIMD_RETURN_MERGEDPS_AVX(res_low, res_high)                                                    \
+    __m512 result = _mm512_castps256_ps512(res_low);                                                 \
+    return _mm512_insertf32x8(result, res_high, 1)                                                    \
+
+#define XSIMD_RETURN_MERGEDPD_AVX(res_low, res_high)                                                    \
+    __m512d result = _mm512_castpd256_pd512(res_low);                                                 \
+    return _mm512_insertf64x4(result, res_high, 1)                                                    \
 
 #define XSIMD_APPLY_AVX2_FUNCTION(N, func, avx_lhs, avx_rhs)                                          \
     XSIMD_SPLIT_AVX512(avx_lhs);                                                                      \
