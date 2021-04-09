@@ -12,10 +12,12 @@ environment:
     - JOB: "AVX2"
       CXXFLAGS: "/arch:AVX2"
       VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+      RUNTEST: ".\\test_xsimd"
     - JOB: "AVX512"
       CXXFLAGS: "/arch:AVX512"
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+      RUNTEST: "ECHO"
 
 init:
   - "ECHO %MINICONDA%"
@@ -35,4 +37,4 @@ install:
   - cd test
 
 build_script:
-  - .\test_xsimd
+  - "%RUNTEST%"
