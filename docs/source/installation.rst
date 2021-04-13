@@ -27,29 +27,14 @@ Besides the xsimd headers, all these methods place the ``cmake`` project configu
 
 .. image:: conda.svg
 
-Using the conda package
------------------------
+Using the conda-forge package
+-----------------------------
 
-A package for xsimd is available on the conda package manager.
-
-.. code::
-
-    conda install -c conda-forge xsimd 
-
-Using the Conan package
------------------------
-
-If you are using Conan to manage your dependencies, merely add `xsimd/x.y.z@omaralvarez/public-conan` to your requires, where x.y.z
-is the release version you want to use. Please file issues in [conan-xsimd](https://github.com/omaralvarez/conan-xsimd) if you
-experience problems with the packages. Sample `conanfile.txt`:
+A package for xsimd is available for the mamba (or conda) package manager.
 
 .. code::
 
-    [requires]
-    xsimd/7.2.3@omaralvarez/public-conan
-
-    [generators]
-    cmake
+    mamba install -c conda-forge xsimd 
 
 .. image:: spack.svg
 
