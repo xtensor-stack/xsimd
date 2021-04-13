@@ -316,19 +316,17 @@ namespace xsimd
 
             static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
             {
-            #if defined(XSIMD_AVX512BW_AVAILABLE)
-                // Some compilers are not happy with passing directly a and b to the intrinsics
-                // See https://github.com/xtensor-stack/xsimd/issues/315
-                __m512i ma = a;
-                __m512i mb = b;
-                return _mm512_mask_blend_epi16(cond, mb, ma);
+            #if defined(XSIMD_AVX512BW_AVAILABLE) && !defined(_MSC_VER)
+                auto res = _mm512_mask_blend_epi16((__mmask32)cond, (__m512i)b, (__m512i)a);
+                return batch_type(res);
             #else
-                XSIMD_SPLIT_AVX512(cond);
+                __m512i mcond = _mm512_maskz_broadcastw_epi16((__mmask32)cond, _mm_set1_epi32(~0));
+                XSIMD_SPLIT_AVX512(mcond);
                 XSIMD_SPLIT_AVX512(a);
                 XSIMD_SPLIT_AVX512(b);
 
-                auto res_lo = _mm256_blendv_epi8(b_low, a_low, cond_low);
-                auto res_hi = _mm256_blendv_epi8(b_high, a_high, cond_high);
+                auto res_lo = _mm256_blendv_epi8(b_low, a_low, mcond_low);
+                auto res_hi = _mm256_blendv_epi8(b_high, a_high, mcond_high);
 
                 XSIMD_RETURN_MERGED_AVX(res_lo, res_hi);
             #endif

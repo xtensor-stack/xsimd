@@ -449,8 +449,11 @@ namespace xsimd
 
             static batch_type abs(const batch_type& rhs)
             {
-                return (__m512d)(_mm512_and_epi64(_mm512_set1_epi64(0x7FFFFFFFFFFFFFFF),
-                                                  (__m512i)((__m512d)(rhs))));
+                __m512d rhs_asd = (__m512d)rhs;
+                __m512i rhs_asi = *reinterpret_cast<__m512i*>(&rhs_asd);
+                __m512i res_asi = _mm512_and_epi64(_mm512_set1_epi64(0x7FFFFFFFFFFFFFFF),
+                                                   rhs_asi);
+                return *reinterpret_cast<__m512d*>(&res_asi);
             }
 
             static batch_type fabs(const batch_type& rhs)
@@ -487,7 +490,7 @@ namespace xsimd
             {
                 __m256d tmp1 = _mm512_extractf64x4_pd(rhs, 1);
                 __m256d tmp2 = _mm512_extractf64x4_pd(rhs, 0);
-                __m256d res1 = tmp1 + tmp2;
+                __m256d res1 = _mm256_add_pd(tmp1, tmp2);
                 return xsimd::hadd(batch<double, 4>(res1));
             }
 
@@ -498,7 +501,7 @@ namespace xsimd
         {                                                                    \
             auto tmp1 = _mm512_shuffle_f64x2(a, b, _MM_SHUFFLE(1, 0, 1, 0)); \
             auto tmp2 = _mm512_shuffle_f64x2(a, b, _MM_SHUFFLE(3, 2, 3, 2)); \
-            res ## I = (tmp1 + tmp2);                                        \
+            res ## I = _mm512_add_pd(tmp1, tmp2);                                        \
         }                                                                    \
 
                 step1(1, row[0], row[2]);
@@ -511,12 +514,12 @@ namespace xsimd
                 batch<double, 8> tmp5 = _mm512_shuffle_f64x2(res1, res2, _MM_SHUFFLE(2, 0, 2, 0));
                 batch<double, 8> tmp6 = _mm512_shuffle_f64x2(res1, res2, _MM_SHUFFLE(3, 1, 3, 1));
 
-                batch<double, 8> resx1 = (tmp5 + tmp6);
+                batch<double, 8> resx1 = _mm512_add_pd(tmp5, tmp6);
 
                 batch<double, 8> tmp7 = _mm512_shuffle_f64x2(res3, res4, _MM_SHUFFLE(2, 0, 2, 0));
                 batch<double, 8> tmp8 = _mm512_shuffle_f64x2(res3, res4, _MM_SHUFFLE(3, 1, 3, 1));
 
-                batch<double, 8> resx2 = (tmp7 + tmp8);
+                batch<double, 8> resx2 = _mm512_add_pd(tmp7, tmp8);
 
                 batch<double, 8> tmpx = _mm512_shuffle_pd(resx1, resx2, 0b00000000);
                 batch<double, 8> tmpy = _mm512_shuffle_pd(resx1, resx2, 0b11111111);

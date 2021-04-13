@@ -329,13 +329,13 @@ namespace xsimd
 
             static inline batch_type ceil(const batch_type& x)
             {
-                auto res = _mm512_ceil_ps(x);
+                auto res = _mm512_roundscale_ps(x, _MM_FROUND_TO_POS_INF);
                 return res;
             }
 
             static inline batch_type floor(const batch_type& x)
             {
-                auto res = _mm512_floor_ps(x);
+                auto res = _mm512_roundscale_ps(x, _MM_FROUND_TO_NEG_INF);
                 return res;
             }
 
@@ -359,13 +359,13 @@ namespace xsimd
 
             static inline batch_type ceil(const batch_type& x)
             {
-                auto res = _mm512_ceil_pd(x);
+                auto res = _mm512_roundscale_pd(x, _MM_FROUND_TO_POS_INF);
                 return res;
             }
 
             static inline batch_type floor(const batch_type& x)
             {
-                auto res = _mm512_floor_pd(x);
+                auto res = _mm512_roundscale_pd(x, _MM_FROUND_TO_NEG_INF);
                 return res;
             }
 

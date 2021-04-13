@@ -87,7 +87,19 @@ namespace xsimd
     XSIMD_BATCH_CAST_IMPLICIT(uint64_t, int64_t, 2)
     XSIMD_BATCH_CAST_INTRINSIC(float, int32_t, 4, _mm_cvttps_epi32)
 #if defined(XSIMD_AVX512VL_AVAILABLE)
+
+#if defined(_MSC_VER)
+    namespace detail {
+        static inline __m128 xsimd_mm_cvtepu32_ps(__m128i a)
+        {
+          return _mm512_castps512_ps128(_mm512_cvtepu32_ps(_mm512_castsi128_si512(a)));
+        }
+    }
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 4, detail::xsimd_mm_cvtepu32_ps)
+#else
     XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 4, _mm_cvtepu32_ps)
+#endif
+
     XSIMD_BATCH_CAST_INTRINSIC(float, uint32_t, 4, _mm_cvttps_epu32)
 #if defined(XSIMD_AVX512DQ_AVAILABLE)
     XSIMD_BATCH_CAST_INTRINSIC(int64_t, double, 2, _mm_cvtepi64_pd)

@@ -472,8 +472,11 @@ namespace xsimd
 
             static batch_type abs(const batch_type& rhs)
             {
-                return (__m512)(_mm512_and_epi32((__m512i)((__m512)(rhs)),
-                                                 _mm512_set1_epi32(0x7fffffff)));
+                __m512 rhs_asf = (__m512)rhs;
+                __m512i rhs_asi = *reinterpret_cast<__m512i*>(&rhs_asf);
+                __m512i res_asi = _mm512_and_epi32(_mm512_set1_epi32(0x7FFFFFFF),
+                                                   rhs_asi);
+                return *reinterpret_cast<__m512*>(&res_asi);
             }
 
             static batch_type fabs(const batch_type& rhs)
@@ -510,7 +513,7 @@ namespace xsimd
             {
                 __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
                 __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
-                __m256 res1 = tmp1 + tmp2;
+                __m256 res1 = _mm256_add_ps(tmp1, tmp2);
                 return xsimd::hadd(batch<float, 8>(res1));
             }
 
@@ -524,7 +527,7 @@ namespace xsimd
         {                                                                                      \
             auto tmp1 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(1, 0, 1, 0));                   \
             auto tmp2 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(3, 2, 3, 2));                   \
-            res ## I = tmp1 + tmp2;                                                            \
+            res ## I = _mm512_add_ps(tmp1, tmp2);                                              \
         }                                                                                      \
 
                 XSIMD_AVX512_HADDP_STEP1(0, row[0], row[2]);
@@ -548,17 +551,17 @@ namespace xsimd
             batch<float, 16> tmp1 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(2, 0, 2, 0));        \
             batch<float, 16> tmp2 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(3, 1, 3, 1));        \
                                                                                                 \
-            batch<float, 16> resx1 = tmp1 + tmp2;                                               \
+            batch<float, 16> resx1 = _mm512_add_ps(tmp1, tmp2);                                               \
                                                                                                 \
             batch<float, 16> tmp3 = _mm512_shuffle_f32x4(c, d, _MM_SHUFFLE(2, 0, 2, 0));        \
             batch<float, 16> tmp4 = _mm512_shuffle_f32x4(c, d, _MM_SHUFFLE(3, 1, 3, 1));        \
                                                                                                 \
-            batch<float, 16> resx2 = tmp3 + tmp4;                                               \
+            batch<float, 16> resx2 = _mm512_add_ps(tmp3, tmp4);                                               \
                                                                                                 \
             batch<float, 16> tmp5 = _mm512_shuffle_ps(resx1, resx2, _MM_SHUFFLE(2, 0, 2, 0));   \
             batch<float, 16> tmp6 = _mm512_shuffle_ps(resx1, resx2, _MM_SHUFFLE(3, 1, 3, 1));   \
                                                                                                 \
-            batch<float, 16> resx3 = tmp5 + tmp6;                                               \
+            batch<float, 16> resx3 = _mm512_add_ps(tmp5, tmp6);                                               \
                                                                                                 \
             halfx ## I  = _mm256_hadd_ps(_mm512_extractf32x8_ps(resx3, 0),                      \
                                          _mm512_extractf32x8_ps(resx3, 1));                     \
@@ -576,7 +579,20 @@ namespace xsimd
 
             static batch_type select(const batch_bool_type& cond, const batch_type& a, const batch_type& b)
             {
+            #if !defined(_MSC_VER)
                 return _mm512_mask_blend_ps(cond, b, a);
+            #else
+                __m512i mcondi = _mm512_maskz_broadcastd_epi32 ((__mmask16)cond, _mm_set1_epi32(~0));
+                __m512 mcond = *reinterpret_cast<__m512*>(&mcondi);
+                XSIMD_SPLITPS_AVX512(mcond);
+                XSIMD_SPLITPS_AVX512(a);
+                XSIMD_SPLITPS_AVX512(b);
+
+                auto res_lo = _mm256_blendv_ps(b_low, a_low, mcond_low);
+                auto res_hi = _mm256_blendv_ps(b_high, a_high, mcond_high);
+
+                XSIMD_RETURN_MERGEDPS_AVX(res_lo, res_hi);
+            #endif
             }
 
             static batch_bool_type isnan(const batch_type& x)

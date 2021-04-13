@@ -123,7 +123,17 @@ namespace xsimd
     XSIMD_BATCH_CAST_INTRINSIC(int32_t, uint16_t, 8, _mm256_cvtepi32_epi16)
     XSIMD_BATCH_CAST_INTRINSIC(uint32_t, int16_t, 8, _mm256_cvtepi32_epi16)
     XSIMD_BATCH_CAST_INTRINSIC(uint32_t, uint16_t, 8, _mm256_cvtepi32_epi16)
+#if defined(_MSC_VER)
+    namespace detail {
+        static inline __m256 xsimd_mm256_cvtepu32_ps(__m256i a)
+        {
+          return _mm512_castps512_ps256(_mm512_cvtepu32_ps(_mm512_castsi256_si512(a)));
+        }
+    }
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 8, detail::xsimd_mm256_cvtepu32_ps)
+#else
     XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 8, _mm256_cvtepu32_ps)
+#endif
     XSIMD_BATCH_CAST_INTRINSIC(uint32_t, double, 4, _mm256_cvtepu32_pd)
     XSIMD_BATCH_CAST_INTRINSIC(int64_t, int32_t, 4, _mm256_cvtepi64_epi32)
     XSIMD_BATCH_CAST_INTRINSIC(int64_t, uint32_t, 4, _mm256_cvtepi64_epi32)
