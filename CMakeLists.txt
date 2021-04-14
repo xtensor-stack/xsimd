@@ -63,6 +63,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int8.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int16.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int64.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_avx_int_base.hpp
@@ -100,6 +101,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_double.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_float.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int8.hpp
+    ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int16.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int32.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int64.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_int_base.hpp
