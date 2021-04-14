@@ -178,6 +178,43 @@ protected:
         }
     }
 
+    void test_saturated_arithmetic() const
+    {
+        // batch + batch
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(), xsimd::sadd<value_type>);
+            batch_type res = xsimd::sadd(batch_lhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("sadd(batch, batch)");
+        }
+        // batch + scalar
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(xsimd::sadd<value_type>, _1, scalar));
+            batch_type lres = xsimd::sadd(batch_lhs(), scalar);
+            EXPECT_BATCH_EQ(lres, expected) << print_function_name("sadd(batch, scalar)");
+            batch_type rres = xsimd::sadd(scalar, batch_lhs());
+            EXPECT_BATCH_EQ(rres, expected) << print_function_name("sadd(scalar, batch)");
+        }
+        // batch - batch
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(), xsimd::ssub<value_type>);
+            batch_type res = xsimd::ssub(batch_lhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("ssub(batch, batch)");
+        }
+        // batch - scalar
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(xsimd::ssub<value_type>, _1, scalar));
+            batch_type lres = xsimd::ssub(batch_lhs(), scalar);
+            EXPECT_BATCH_EQ(lres, expected) << print_function_name("ssub(batch, scalar)");
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(xsimd::ssub<value_type>, scalar, _1));
+            batch_type rres = xsimd::ssub(scalar, batch_lhs());
+            EXPECT_BATCH_EQ(rres, expected) << print_function_name("ssub(scalar, batch)");
+        }
+    }
+
     void test_computed_assignment() const
     {
         // batch += batch
@@ -602,6 +639,11 @@ TYPED_TEST(batch_test, access_operator)
 TYPED_TEST(batch_test, arithmetic)
 {
     this->test_arithmetic();
+}
+
+TYPED_TEST(batch_test, saturated_arithmetic)
+{
+    this->test_saturated_arithmetic();
 }
 
 TYPED_TEST(batch_test, computed_assignment)

@@ -1210,14 +1210,14 @@ namespace xsimd
      * @param lhs batch involved in the saturated addition.
      * @param rhs batch involved in the saturated addition.
      * @return the result of the saturated addition.
-     */                 
-    template <class X>                                                                    
-    inline batch_type_t<X> sadd(const simd_base<X>& lhs, const simd_base<X>& rhs)           
-    {                                                                                              
-        using value_type = typename simd_batch_traits<X>::value_type;                              
-        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;               
-        return kernel::sadd(lhs(), rhs());                                                         
-    }                                                                                              
+     */
+    template <class X>
+    inline batch_type_t<X> sadd(const simd_base<X>& lhs, const simd_base<X>& rhs)
+    {
+        using value_type = typename simd_batch_traits<X>::value_type;
+        using kernel = detail::batch_kernel<value_type, simd_batch_traits<X>::size>;
+        return kernel::sadd(lhs(), rhs());
+    }
 
     /**
      * @ingroup simd_batch_arithmetic
@@ -1229,13 +1229,13 @@ namespace xsimd
      * @param lhs scalar involved in the saturated addition.
      * @param rhs batch involved in the saturated addition.
      * @return the result of the saturated addition.
-     */                                                                                               
-    template <class X>                                                                             
-    inline batch_type_t<X> sadd(const typename simd_batch_traits<X>::value_type& lhs,       
-                                       const simd_base<X>& rhs)                                    
-    {                                                                                              
-        return sadd(batch_type_t<X>(lhs),rhs());                                                      
-    }                                                                                              
+     */
+    template <class X>
+    inline batch_type_t<X> sadd(const typename simd_batch_traits<X>::value_type& lhs,
+                                       const simd_base<X>& rhs)
+    {
+        return sadd(batch_type_t<X>(lhs),rhs());
+    }
 
     /**
      * @ingroup simd_batch_arithmetic
@@ -1247,12 +1247,12 @@ namespace xsimd
      * @param lhs batch involved in the saturated addition.
      * @param rhs scalar involved in the saturated addition.
      * @return the result of the saturated addition.
-     */                                                                                                     
-    template <class X>                                                                             
-    inline batch_type_t<X> sadd(const simd_base<X>& lhs,                                    
-                                       const typename simd_batch_traits<X>::value_type& rhs)       
-    {                                                                                              
-        return sadd(lhs(),batch_type_t<X>(rhs));                                                      
+     */
+    template <class X>
+    inline batch_type_t<X> sadd(const simd_base<X>& lhs,
+                                       const typename simd_batch_traits<X>::value_type& rhs)
+    {
+        return sadd(lhs(),batch_type_t<X>(rhs));
     }
 
     /**

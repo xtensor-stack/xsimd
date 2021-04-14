@@ -397,62 +397,6 @@ namespace xsimd
 #endif
     }
 
-     /***************************
-     * scalar saturated sub add *
-     ****************************/
-    template<typename T>
-    T saturated_add_scalar(const T& lhs, const T& rhs)
-    {
-        T ret;
-
-        if (std::numeric_limits<T>::is_signed)
-        {
-            if ((lhs > 0) && (rhs > std::numeric_limits<T>::max() - lhs)) {
-                ret = std::numeric_limits<T>::max();
-            }
-            else if ((lhs < 0) && (rhs < std::numeric_limits<T>::lowest() - lhs)) {
-                ret = std::numeric_limits<T>::lowest();
-            }
-            else {
-                ret = (T)(lhs + rhs);
-            }
-        }
-        else
-        {
-            if (rhs > std::numeric_limits<T>::max() - lhs) {
-                ret = std::numeric_limits<T>::max();
-            }
-            else {
-                ret = (T)(lhs + rhs);
-            }
-
-        }
-        return ret;
-    }
-
-    template<typename T>
-    T saturated_sub_scalar(const T& lhs, const T& rhs)
-    {
-        T ret;
-
-        if (std::numeric_limits<T>::is_signed)
-        {
-            ret = saturated_add_scalar(lhs, (T)((T)0-rhs));
-        }
-        else
-        {
-            if (lhs < (T)0 + rhs)
-            {
-                ret=std::numeric_limits<T>::lowest();
-            }
-            else
-            {
-                ret=(T)(lhs - rhs);
-            }
-
-        }
-        return ret;
-    }
 
 }
 

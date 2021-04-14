@@ -59,6 +59,14 @@ Basic functions
 .. doxygenfunction:: fdim(const batch<T, N>&, const batch<T, N>&)
    :project: xsimd
 
+.. _sadd-function-reference:
+.. doxygenfunction:: sadd(const simd_base<B>&, const simd_base<B>&)
+   :project: xsimd
+
+.. _ssub-function-reference:
+.. doxygenfunction:: ssub(const simd_base<B>&, const simd_base<B>&)
+   :project: xsimd
+
 .. _clip-function-reference:
 .. doxygenfunction:: clip(const simd_base<B>&, const simd_base<B>&, const simd_base<B>&)
    :project: xsimd

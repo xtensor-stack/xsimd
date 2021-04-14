@@ -38,7 +38,7 @@ namespace xsimd
     public:
 
         bool_proxy(T& ref);
-        
+
         bool_proxy(const bool_proxy&) = default;
         bool_proxy& operator=(const bool_proxy&) = default;
 
@@ -95,7 +95,7 @@ namespace xsimd
         X& load_aligned(const P& src);
         template <class P>
         X& load_unaligned(const P& src);
-        
+
         template <class P>
         void store_aligned(P& dst) const;
         template <class P>

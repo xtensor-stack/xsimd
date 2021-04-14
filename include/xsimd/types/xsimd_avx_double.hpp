@@ -501,7 +501,7 @@ namespace xsimd
             {
                 return sub(lhs,rhs); //FIXME something special for inf ?
             }
-            
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm256_mul_pd(lhs, rhs);

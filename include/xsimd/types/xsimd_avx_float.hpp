@@ -521,7 +521,7 @@ namespace xsimd
             {
                 return _mm256_sub_ps(lhs, rhs);
             }
-            
+
             static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
             {
                 return add(lhs, rhs); //FIXME something special for inf ?

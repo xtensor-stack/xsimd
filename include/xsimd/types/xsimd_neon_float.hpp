@@ -461,7 +461,7 @@ namespace xsimd
             {
                 return sub(lhs, rhs);
             }
-            
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return vmulq_f32(lhs, rhs);

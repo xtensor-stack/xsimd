@@ -222,41 +222,10 @@ namespace xsimd
 
             static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
             {
-                /* origin: /nsimd/include/nsimd/x86/avx2/adds.h */
-                /*
-                * ====================================================
-                * Copyright (c) 2019 Agenium Scale
-                *
-                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
-                * ====================================================
-                */
-                //todo bench againt unrroled loop
-                //todo factorize int32_t uint32_t
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION                
-                using ubatch_type = batch<uint32_t, 8>;
-                ubatch_type ux = (ubatch_type)(lhs);
-                const ubatch_type uy = (ubatch_type)(rhs);
-                const ubatch_type res = _mm256_add_epi32(ux, uy);
-
-                const ubatch_type vmax = _mm256_set1_epi32(std::numeric_limits<int32_t>::max());
-                const ubatch_type shr = _mm256_srl_epi32(ux, _mm_set1_epi32(sizeof(int32_t) * std::numeric_limits<unsigned char>::digits));
-                ux = _mm256_add_epi32(shr, vmax);
-
-                const ubatch_type xor_ux_uy = _mm256_xor_si256(ux, uy);
-                const ubatch_type xor_uy_res = _mm256_xor_si256(uy, res);
-                const ubatch_type not_xor_uy_res = _mm256_andnot_si256(xor_uy_res, _mm256_set1_epi8(-1));
-
-                const ubatch_type u_orb = _mm256_or_si256(xor_ux_uy, not_xor_uy_res);
-                const batch_type i_orb = (batch_type)u_orb;
-
-                const batch_type zeros = _mm256_set1_epi32(0);
-                __m256i gteq_to_zero = _mm256_andnot_si256(_mm256_cmpgt_epi32(zeros, i_orb), _mm256_set1_epi8(-1));
-
-                return _mm256_or_si256(_mm256_and_si256(ux, gteq_to_zero), _mm256_andnot_si256(gteq_to_zero, res));
-#else
-
-                XSIMD_APPLY_SSE_FUNCTION(sse_int32_batch_kernel<int32_t>::sadd, lhs, rhs);
-#endif
+                batch_type mask = rhs >> (8 * sizeof(value_type) - 1);
+                batch_type lhs_pos_branch = min(std::numeric_limits<value_type>::max() - rhs, lhs);
+                batch_type lhs_neg_branch = max(std::numeric_limits<value_type>::min() - rhs, lhs);
+                return rhs + select((typename batch_type::storage_type)mask, lhs_neg_branch, lhs_pos_branch);
             }
 
             static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
@@ -419,46 +388,15 @@ namespace xsimd
 
             static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION                
-                /* origin: /nsimd/include/nsimd/x86/avx2/adds.h */
-                /*
-                * ====================================================
-                * Copyright (c) 2019 Agenium Scale
-                *
-                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
-                * ====================================================
-                */
-                //todo bench againt unrroled loop
-                //todo factorize int32_t uint32_t
-
-
-                const auto ures = _mm256_add_epi32(lhs, rhs);
-                const auto umax = _mm256_set1_epi32(std::numeric_limits<uint32_t>::max());
-                const auto is_overflow = _mm256_cmpgt_epi32(_mm256_add_epi32(lhs, umax), _mm256_add_epi32(ures, umax));
-                return _mm256_blendv_epi8(ures, umax, is_overflow);
-#else
-
-                XSIMD_APPLY_SSE_FUNCTION(sse_int32_batch_kernel<uint32_t>::sadd, lhs, rhs);
-
-#endif
-
+                const auto diffmax = std::numeric_limits<value_type>::max() - lhs;
+                const auto mindiff = min(diffmax, rhs);
+                return lhs + mindiff;
             }
 
             static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION                
-                //return sadd(lhs, neg(rhs)); //not work for unsigned of course
-
-
-                const auto ures = _mm256_sub_epi32(lhs, rhs);
-                const auto cte = _mm256_set1_epi32(std::numeric_limits<uint32_t>::max());
-                const auto is_underflow = _mm256_cmpgt_epi32(_mm256_add_epi32(rhs, cte), _mm256_add_epi32(lhs, cte));
-                const auto umin = _mm256_set1_epi32(std::numeric_limits<uint32_t>::lowest());
-                return _mm256_blendv_epi8(ures, umin, is_underflow);
-#else
-
-                 XSIMD_APPLY_SSE_FUNCTION(sse_int32_batch_kernel<uint32_t>::ssub, lhs, rhs);
-#endif                
+                const auto diff = min(lhs, rhs);
+                return lhs - diff;
             }
 
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)

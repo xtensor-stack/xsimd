@@ -341,35 +341,10 @@ namespace xsimd
 
             static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
             {
-                /* origin: /nsimd/include/nsimd/x86/sse2/adds.h */
-                /*
-                * ====================================================
-                * Copyright (c) 2019 Agenium Scale
-                *
-                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
-                * ====================================================
-                */
-                //todo bench againt unrroled loop
-                //todo factorize int32_t uint32_t
-                batch<uint32_t, 4> ux = (batch<uint32_t, 4>)lhs;
-                const batch<uint32_t, 4> uy = (batch<uint32_t, 4>)rhs;
-                const batch<uint32_t, 4> res = _mm_add_epi32(ux, uy);
-                const batch<uint32_t, 4> vmax = _mm_set1_epi32(std::numeric_limits<int32_t>::max());
-                const batch<uint32_t, 4> shr = _mm_srl_epi32(ux, _mm_set1_epi32(sizeof(int32_t) * std::numeric_limits<unsigned char>::digits));
-                ux = _mm_add_epi32(shr, vmax);
-
-                const batch<uint32_t, 4> xor_ux_uy = _mm_xor_si128(ux, uy);
-                const batch<uint32_t, 4> xor_uy_res = _mm_xor_si128(uy, res);
-                const batch<uint32_t, 4> not_xor_uy_res = _mm_andnot_si128(xor_uy_res, _mm_set1_epi8(-1));
-
-                const batch<uint32_t, 4> u_orb = _mm_or_si128(xor_ux_uy, not_xor_uy_res);
-                const batch_type i_orb = (batch_type)u_orb;
-
-                const batch_type zeros = _mm_set1_epi32(0);
-                __m128i gteq_to_zero = _mm_andnot_si128(_mm_cmpgt_epi32(zeros, i_orb), _mm_set1_epi8(-1));
-
-                return _mm_or_si128(_mm_and_si128(ux, gteq_to_zero),_mm_andnot_si128(gteq_to_zero,res));
-
+                batch_type mask = rhs >> (8 * sizeof(value_type) - 1);
+                batch_type lhs_pos_branch = min(std::numeric_limits<value_type>::max() - rhs, lhs);
+                batch_type lhs_neg_branch = max(std::numeric_limits<value_type>::min() - rhs, lhs);
+                return rhs + select((typename batch_type::storage_type)mask, lhs_neg_branch, lhs_pos_branch);
             }
 
             static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
@@ -526,48 +501,17 @@ namespace xsimd
 
             static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
             {
-                /* origin: /nsimd/include/nsimd/x86/sse2/adds.h */
-                /*
-                * ====================================================
-                * Copyright (c) 2019 Agenium Scale
-                *
-                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
-                * ====================================================
-                */
-
-                const auto ures = _mm_add_epi32(lhs, rhs);
-                const auto umax = _mm_set1_epi32(std::numeric_limits<uint32_t>::max());
-                const auto is_overflow=_mm_cmpgt_epi32(_mm_add_epi32(lhs, umax), _mm_add_epi32(ures, umax));
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-                return _mm_blendv_epi8(ures,umax,is_overflow);                
-#else   
-                return _mm_or_si128(_mm_and_si128(umax, is_overflow), _mm_andnot_si128(is_overflow, ures));
-#endif
+                const auto diffmax = std::numeric_limits<value_type>::max() - lhs;
+                const auto mindiff = min(diffmax, rhs);
+                return lhs + mindiff;
             }
 
             static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
             {
+                const auto diff = min(lhs, rhs);
+                return lhs - diff;
+            }
 
-                /* origin: /nsimd/include/nsimd/x86/sse2/subs.h */
-                /*
-                * =======================================
-                * =============
-                * Copyright (c) 2019 Agenium Scale
-                *
-                * MIT License see https://github.com/agenium-scale/nsimd/blob/master/LICENSE
-                * ====================================================
-                */
-                //todo bench againt unrroled loop
-                const auto ures = _mm_sub_epi32(lhs, rhs);
-                const auto cte = _mm_set1_epi32(std::numeric_limits<uint32_t>::max());
-                const auto is_underflow=_mm_cmpgt_epi32(_mm_add_epi32(rhs, cte), _mm_add_epi32(lhs, cte));
-                const auto umin = _mm_set1_epi32(std::numeric_limits<uint32_t>::lowest());
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
-                return _mm_blendv_epi8(ures, umin, is_underflow);
-#else   
-                return _mm_or_si128(_mm_and_si128(umin, is_underflow), _mm_andnot_si128(is_underflow, ures));
-#endif
-             }
         };
     }
 

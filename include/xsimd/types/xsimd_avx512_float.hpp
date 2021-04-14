@@ -404,7 +404,7 @@ namespace xsimd
             {
                 return sub(lhs, rhs); //do something for inf ?
             }
-            
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm512_mul_ps(lhs, rhs);
