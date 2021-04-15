@@ -356,6 +356,14 @@ protected:
             batch_type res = min(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("min");
         }
+        // min limit case
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                           [](const value_type& , const value_type& r) { return std::min(std::numeric_limits<value_type>::min(), r); });
+            batch_type res = xsimd::min(batch_type(std::numeric_limits<value_type>::min()), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("min limit");
+        }
         // fmin
         {
             array_type expected;
@@ -371,6 +379,14 @@ protected:
                            [](const value_type& l, const value_type& r) { return std::max(l, r); });
             batch_type res = max(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("max");
+        }
+        // max limit case
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                           [](const value_type& , const value_type& r) { return std::max(std::numeric_limits<value_type>::max(), r); });
+            batch_type res = xsimd::max(batch_type(std::numeric_limits<value_type>::max()), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("max limit");
         }
         // fmax
         {
