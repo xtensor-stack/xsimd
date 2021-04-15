@@ -441,18 +441,18 @@ namespace xsimd
             static batch_type min(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-                return _mm256_min_epi32(lhs, rhs);
+                return _mm256_min_epu32(lhs, rhs);
 #else
-                XSIMD_APPLY_SSE_FUNCTION(_mm_min_epi32, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_min_epu32, lhs, rhs);
 #endif
             }
 
             static batch_type max(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-                return _mm256_max_epi32(lhs, rhs);
+                return _mm256_max_epu32(lhs, rhs);
 #else
-                XSIMD_APPLY_SSE_FUNCTION(_mm_max_epi32, lhs, rhs);
+                XSIMD_APPLY_SSE_FUNCTION(_mm_max_epu32, lhs, rhs);
 #endif
             }
 
