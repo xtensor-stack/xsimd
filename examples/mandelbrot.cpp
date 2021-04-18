@@ -228,7 +228,7 @@ int main()
     const float y1            = 1;
     const int maxIters        = 256;
 
-    alignas(64) std::array<int, width * height> buf;
+    static alignas(64) std::array<int, width * height> buf;
 
     auto bencher = pico_bench::Benchmarker<milliseconds>{64, seconds{10}};
 
