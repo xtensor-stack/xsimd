@@ -332,6 +332,17 @@ namespace xsimd
                 XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_unpacklo_epi32(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_unpackhi_epi32(lhs, rhs);
+            }
+
         };
 
         template <>
@@ -498,6 +509,17 @@ namespace xsimd
                 XSIMD_RETURN_MERGED_SSE(res_low, res_high);
 #endif
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_unpacklo_epi32(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_unpackhi_epi32(lhs, rhs);
+            }
+
         };
     }
 

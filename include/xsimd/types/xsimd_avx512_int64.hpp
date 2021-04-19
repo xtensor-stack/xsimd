@@ -313,6 +313,17 @@ namespace xsimd
                 XSIMD_RETURN_MERGED_AVX(res_lo, res_hi);
             #endif
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpacklo_epi64(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpackhi_epi64(lhs, rhs);
+            }
+
         };
 
         template <>

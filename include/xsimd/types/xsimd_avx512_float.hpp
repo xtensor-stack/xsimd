@@ -595,6 +595,16 @@ namespace xsimd
             #endif
             }
 
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpacklo_ps(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpackhi_ps(lhs, rhs);
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 return _mm512_cmp_ps_mask(x, x, _CMP_UNORD_Q);

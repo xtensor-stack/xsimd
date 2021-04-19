@@ -244,6 +244,17 @@ namespace xsimd
             {
                 return _mm512_mask_blend_epi32(cond, b, a);
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpacklo_epi32(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpackhi_epi32(lhs, rhs);
+            }
+
         };
 
         template <>

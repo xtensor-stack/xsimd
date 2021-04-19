@@ -536,6 +536,16 @@ namespace xsimd
             {
                 return _mm512_cmp_pd_mask(x, x, _CMP_UNORD_Q);
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpacklo_pd(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm512_unpackhi_pd(lhs, rhs);
+            }
         };
     }
 

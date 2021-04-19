@@ -713,6 +713,16 @@ namespace xsimd
                 return _mm256_blend_ps(b, a, mask);
             }
 
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_unpacklo_ps(lhs, rhs);
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                return _mm256_unpackhi_ps(lhs, rhs);
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 return _mm256_cmp_ps(x, x, _CMP_UNORD_Q);
