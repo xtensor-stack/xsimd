@@ -62,12 +62,12 @@ class shuffle_128_test : public testing::Test
 
     void shuffle_128_low_high()
     {
-        auto shuffle_base = xsimd::init_shuffle_128_base<value_type, size>{};
+        xsimd::init_shuffle_128_base<value_type, size> shuffle_base;
         auto shuffle_base_vecs = shuffle_base.create_vectors();
-	    auto v_lhs = shuffle_base_vecs[0];
-	    auto v_rhs = shuffle_base_vecs[1];
-	    auto v_exp_lo = shuffle_base_vecs[2];
-	    auto v_exp_hi = shuffle_base_vecs[3];
+        auto v_lhs = shuffle_base_vecs[0];
+        auto v_rhs = shuffle_base_vecs[1];
+        auto v_exp_lo = shuffle_base_vecs[2];
+        auto v_exp_hi = shuffle_base_vecs[3];
 
         B b_lhs, b_rhs, b_exp_lo, b_exp_hi, b_res_lo, b_res_hi;
         b_lhs.load_unaligned(v_lhs.data());

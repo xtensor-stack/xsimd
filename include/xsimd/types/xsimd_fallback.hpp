@@ -928,6 +928,28 @@ namespace xsimd
             {
                 XSIMD_FALLBACK_MAPPING_LOOP(batch_bool, std::isnan(x[i]))
             }
+
+            static batch_type zip_lo(const batch_type& lhs, const batch_type& rhs)
+            {
+                batch_type b_lo;
+                for (std::size_t i = 0, j = 0; i < N/2; ++i, j = j + 2)
+                {
+                    b_lo[j] = lhs[i];
+                    b_lo[j + 1] = rhs[i];
+                }
+                return b_lo;
+            }
+
+            static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
+            {
+                batch_type b_hi;
+                for (std::size_t i = 0, j = 0; i < N/2; ++i, j = j + 2)
+                {
+                    b_hi[j] = lhs[i + N/2];
+                    b_hi[j + 1] = rhs[i+ N/2];
+                }
+                return b_hi;
+            }
         };
     }
 
