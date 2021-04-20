@@ -20,7 +20,7 @@
 #include "xsimd_logarithm.hpp"
 #include "xsimd_power.hpp"
 #include "xsimd_rounding.hpp"
-#include "xsimd_scalar.hpp"
 #include "xsimd_trigonometric.hpp"
+#include "xsimd/types/xsimd_scalar.hpp"
 
 #endif

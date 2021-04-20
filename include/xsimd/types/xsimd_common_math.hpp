@@ -8,8 +8,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSIMD_MATH_UTILS_HPP
-#define XSIMD_MATH_UTILS_HPP
+#ifndef XSIMD_COMMON_MATH_HPP
+#define XSIMD_COMMON_MATH_HPP
 
 #include <limits>
 #include <type_traits>

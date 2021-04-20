@@ -17,8 +17,8 @@
 #include "xsimd_fp_sign.hpp"
 #include "xsimd_horner.hpp"
 #include "xsimd_logarithm.hpp"
-#include "xsimd_math_utils.hpp"
 #include "xsimd_numerical_constant.hpp"
+#include "xsimd/types/xsimd_common_math.hpp"
 
 namespace xsimd
 {

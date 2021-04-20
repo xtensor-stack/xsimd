@@ -16,7 +16,7 @@
 #include <cmath>
 #include <utility>
 
-#include "xsimd/math/xsimd_scalar.hpp"
+#include "xsimd_scalar.hpp"
 
 #include "xsimd_base.hpp"
 #include "xsimd_complex_base.hpp"

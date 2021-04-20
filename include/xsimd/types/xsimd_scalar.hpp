@@ -14,7 +14,7 @@
 #include <cmath>
 #include <limits>
 
-#include "xsimd_math_utils.hpp"
+#include "xsimd_common_math.hpp"
 
 namespace xsimd
 {
