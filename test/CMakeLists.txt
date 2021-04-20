@@ -170,6 +170,7 @@ set(XSIMD_TESTS
     test_power.cpp
     test_rounding.cpp
     test_select.cpp
+    test_shuffle_128.cpp
     test_trigonometric.cpp
     test_utils.hpp
     #[[    xsimd_api_test.hpp
