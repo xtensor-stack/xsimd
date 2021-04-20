@@ -176,6 +176,19 @@ namespace xsimd
                 return _mm512_sub_epi32(lhs, rhs);
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                batch_bool_type mask = _mm512_movepi32_mask(rhs);
+                batch_type lhs_pos_branch = min(std::numeric_limits<value_type>::max() - rhs, lhs);
+                batch_type lhs_neg_branch = max(std::numeric_limits<value_type>::min() - rhs, lhs);
+                return rhs + select(mask, lhs_neg_branch, lhs_pos_branch);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return sadd(lhs, neg(rhs));
+            }
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm512_mullo_epi32(lhs, rhs);
@@ -360,6 +373,19 @@ namespace xsimd
             static batch_type abs(const batch_type& rhs)
             {
                 return rhs;
+            }
+
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                const auto diffmax = batch_type(std::numeric_limits<value_type>::max()) - lhs;
+                const auto mindiff = min(diffmax, rhs);
+                return lhs + mindiff;
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                const auto diff = min(lhs, rhs);
+                return lhs - diff;
             }
         };
     }

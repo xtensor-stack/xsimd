@@ -12,6 +12,9 @@
 #define XSIMD_SCALAR_HPP
 
 #include <cmath>
+#include <limits>
+
+#include "xsimd_common_math.hpp"
 
 namespace xsimd
 {
@@ -207,11 +210,14 @@ namespace xsimd
     }
 #endif
 
+    namespace detail {
+    }
+
     template <class T0, class T1>
     inline typename std::enable_if<std::is_integral<T1>::value, T0>::type
     pow(const T0& t0, const T1& t1)
     {
-      return detail::ipow(t0, t1);
+        return detail::ipow(t0, t1);
     }
 
     template <class T0, class T1>
@@ -226,7 +232,7 @@ namespace xsimd
     inline typename std::enable_if<std::is_integral<T1>::value, std::complex<T0>>::type
     pow(const std::complex<T0>& t0, const T1& t1)
     {
-      return detail::ipow(t0, t1);
+        return detail::ipow(t0, t1);
     }
 
     template <class T0, class T1>
@@ -451,6 +457,58 @@ namespace xsimd
     {
         auto tmp = abs(val);
         return tmp * tmp;
+    }
+
+    template<typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    T sadd(const T& lhs, const T& rhs)
+    {
+        if (std::numeric_limits<T>::is_signed)
+        {
+            if ((lhs > 0) && (rhs > std::numeric_limits<T>::max() - lhs))
+            {
+                return std::numeric_limits<T>::max();
+            }
+            else if ((lhs < 0) && (rhs < std::numeric_limits<T>::lowest() - lhs))
+            {
+                return std::numeric_limits<T>::lowest();
+            }
+            else {
+                return lhs + rhs;
+            }
+        }
+        else
+        {
+            if (rhs > std::numeric_limits<T>::max() - lhs)
+            {
+                return std::numeric_limits<T>::max();
+            }
+            else
+            {
+                return lhs + rhs;
+            }
+
+        }
+    }
+
+    template<typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    T ssub(const T& lhs, const T& rhs)
+    {
+        if (std::numeric_limits<T>::is_signed)
+        {
+            return sadd(lhs, (T)-rhs);
+        }
+        else
+        {
+            if (lhs < rhs)
+            {
+                return std::numeric_limits<T>::lowest();
+            }
+            else
+            {
+                return lhs - rhs;
+            }
+
+        }
     }
 
 }

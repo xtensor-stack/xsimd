@@ -339,6 +339,19 @@ namespace xsimd
                 return _mm_sub_epi32(lhs, rhs);
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                batch_type mask = rhs >> (8 * sizeof(value_type) - 1);
+                batch_type lhs_pos_branch = min(std::numeric_limits<value_type>::max() - rhs, lhs);
+                batch_type lhs_neg_branch = max(std::numeric_limits<value_type>::min() - rhs, lhs);
+                return rhs + select((typename batch_type::storage_type)mask, lhs_neg_branch, lhs_pos_branch);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return sadd(lhs, sub(_mm_setzero_si128(), rhs));
+            }
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE4_1_VERSION
@@ -484,6 +497,21 @@ namespace xsimd
             {
                 return rhs;
             }
+
+
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                const auto diffmax = std::numeric_limits<value_type>::max() - lhs;
+                const auto mindiff = min(diffmax, rhs);
+                return lhs + mindiff;
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                const auto diff = min(lhs, rhs);
+                return lhs - diff;
+            }
+
         };
     }
 

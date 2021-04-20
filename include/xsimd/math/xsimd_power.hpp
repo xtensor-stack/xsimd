@@ -18,6 +18,7 @@
 #include "xsimd_horner.hpp"
 #include "xsimd_logarithm.hpp"
 #include "xsimd_numerical_constant.hpp"
+#include "xsimd/types/xsimd_common_math.hpp"
 
 namespace xsimd
 {
@@ -85,30 +86,6 @@ namespace xsimd
             }
         };
 
-      template <class T0, class T1>
-      inline T0
-      ipow(const T0& t0, const T1& t1)
-      {
-          static_assert(std::is_integral<T1>::value, "second argument must be an integer");
-          T0 a = t0;
-          T1 b = t1;
-          bool const recip = b < 0;
-          T0 r{static_cast<T0>(1)};
-          while (1)
-          {
-              if (b & 1)
-              {
-                  r *= a;
-              }
-              b /= 2;
-              if (b == 0)
-              {
-                  break;
-              }
-              a *= a;
-          }
-          return recip ? 1 / r : r;
-      }
     }
 
     template <class B>

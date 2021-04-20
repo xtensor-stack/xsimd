@@ -325,6 +325,16 @@ namespace xsimd
                 return vsubq_u64(lhs, rhs);
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vqaddq_u64(lhs, rhs);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return vqsubq_u64(lhs, rhs);
+            }
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION

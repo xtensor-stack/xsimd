@@ -16,6 +16,8 @@
 #include <cmath>
 #include <utility>
 
+#include "xsimd_scalar.hpp"
+
 #include "xsimd_base.hpp"
 #include "xsimd_complex_base.hpp"
 #include "xsimd_utils.hpp"
@@ -772,6 +774,16 @@ namespace xsimd
             static batch_type sub(const batch_type& lhs, const batch_type& rhs)
             {
                 XSIMD_FALLBACK_BINARY_OP(batch, -, lhs, rhs)
+            }
+
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(xsimd::sadd, lhs, rhs)
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                XSIMD_FALLBACK_BATCH_BINARY_FUNC(xsimd::ssub, lhs, rhs)
             }
 
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)

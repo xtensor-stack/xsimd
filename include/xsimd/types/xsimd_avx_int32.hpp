@@ -16,6 +16,7 @@
 #include "xsimd_base.hpp"
 #include "xsimd_avx_int_base.hpp"
 #include "xsimd_int_conversion.hpp"
+#include "xsimd_sse_int32.hpp"
 
 namespace xsimd
 {
@@ -219,6 +220,19 @@ namespace xsimd
 #endif
             }
 
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                batch_type mask = rhs >> (8 * sizeof(value_type) - 1);
+                batch_type lhs_pos_branch = min(std::numeric_limits<value_type>::max() - rhs, lhs);
+                batch_type lhs_neg_branch = max(std::numeric_limits<value_type>::min() - rhs, lhs);
+                return rhs + select((typename batch_type::storage_type)mask, lhs_neg_branch, lhs_pos_branch);
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                return sadd(lhs, neg(rhs));
+            }
+
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)
             {
 #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
@@ -381,6 +395,19 @@ namespace xsimd
 #else
                 XSIMD_APPLY_SSE_FUNCTION(_mm_sub_epi32, lhs, rhs);
 #endif
+            }
+
+            static batch_type sadd(const batch_type& lhs, const batch_type& rhs)
+            {
+                const auto diffmax = std::numeric_limits<value_type>::max() - lhs;
+                const auto mindiff = min(diffmax, rhs);
+                return lhs + mindiff;
+            }
+
+            static batch_type ssub(const batch_type& lhs, const batch_type& rhs)
+            {
+                const auto diff = min(lhs, rhs);
+                return lhs - diff;
             }
 
             static batch_type mul(const batch_type& lhs, const batch_type& rhs)

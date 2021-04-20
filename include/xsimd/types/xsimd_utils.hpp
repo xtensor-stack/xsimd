@@ -397,6 +397,7 @@ namespace xsimd
 #endif
     }
 
+
 }
 
 #endif
