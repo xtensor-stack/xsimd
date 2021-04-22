@@ -212,6 +212,12 @@ namespace xsimd
             {
                 return _mm_unpackhi_epi16(lhs, rhs);
             }
+
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+                return _mm_alignr_epi8(rhs, lhs, 2 * n);
+            }
+
         };
 
         template <>

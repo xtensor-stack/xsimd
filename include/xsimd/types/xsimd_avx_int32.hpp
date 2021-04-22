@@ -357,6 +357,11 @@ namespace xsimd
                 return _mm256_unpackhi_epi32(lhs, rhs);
             }
 
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+                return _mm256_alignr_epi32(rhs, lhs, n);
+            }
+
         };
 
         template <>
@@ -545,6 +550,11 @@ namespace xsimd
             static batch_type zip_hi(const batch_type& lhs, const batch_type& rhs)
             {
                 return _mm256_unpackhi_epi32(lhs, rhs);
+            }
+
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+                return _mm256_alignr_epi32(rhs, lhs, n);
             }
 
         };

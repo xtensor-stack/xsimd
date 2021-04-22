@@ -419,6 +419,16 @@ namespace xsimd
             {
                 return _mm_unpackhi_epi32(lhs, rhs);
             }
+
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+                return _mm_alignr_epi32(rhs, lhs, n);
+#else
+                return _mm_alignr_epi8(rhs, lhs, 4 * n);
+#endif
+            }
+
         };
 
         template <>

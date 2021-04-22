@@ -374,6 +374,12 @@ namespace xsimd
                 return vcombine_s16(tmp.val[0], tmp.val[1]);
 #endif
             }
+
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+                return vextq_s16(lhs, rhs, n);
+            }
+
         };
     }
 

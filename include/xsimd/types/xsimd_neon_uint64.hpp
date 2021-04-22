@@ -496,6 +496,11 @@ namespace xsimd
 #endif
             }
 
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+                return vextq_u64(lhs, rhs, n);
+            }
+
         };
 
         inline batch<uint64_t, 2> shift_left(const batch<uint64_t, 2>& lhs, int32_t n)

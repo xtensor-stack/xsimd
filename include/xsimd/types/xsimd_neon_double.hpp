@@ -608,6 +608,15 @@ namespace xsimd
 #endif
             }
 
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
+                return vextq_f64(lhs, rhs, n);
+#else
+                return vcombine_f64(vget_high_f64(lhs), vget_low_f64(rhs));
+#endif
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 return !(x == x);

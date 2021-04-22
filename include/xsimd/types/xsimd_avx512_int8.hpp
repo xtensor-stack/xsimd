@@ -364,6 +364,11 @@ namespace xsimd
                 return _mm512_unpackhi_epi8(lhs, rhs);
             }
 
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+                return _mm512_alignr_epi8(rhs, lhs, n);
+            }
+
         };
 
         template <>

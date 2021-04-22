@@ -669,6 +669,11 @@ namespace xsimd
 #endif
             }
 
+            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            {
+                return vextq_f32(lhs, rhs, n);
+            }
+
             static batch_bool_type isnan(const batch_type& x)
             {
                 return !(x == x);
