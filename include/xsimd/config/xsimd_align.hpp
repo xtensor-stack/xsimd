@@ -57,13 +57,8 @@
 #elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
     #define XSIMD_DEFAULT_ALIGNMENT 16
 #else
-    // some versions of gcc do nos handle alignment set ot 0
-    // see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69089
-    #if __GNUC__ < 7
-        #define XSIMD_DEFAULT_ALIGNMENT 8
-    #else
-        #define XSIMD_DEFAULT_ALIGNMENT 0
-    #endif
+    // Set the default to the requirements of posix_memalign
+    #define XSIMD_DEFAULT_ALIGNMENT sizeof(void*)
 #endif
 
 #endif
