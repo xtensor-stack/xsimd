@@ -12,6 +12,7 @@
 #define XSIMD_ALIGN_HPP
 
 #include "xsimd_instruction_set.hpp"
+#include "xsimd_arch.hpp"
 
 /************************************************
  * Platform checks for aligned malloc functions *
@@ -40,25 +41,6 @@
     #elif defined(_MSC_VER)
         #define XSIMD_ALLOCA _alloca
     #endif
-#endif
-
-/*********************
- * Default alignment *
- *********************/
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-    #define XSIMD_DEFAULT_ALIGNMENT 64
-#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-    #define XSIMD_DEFAULT_ALIGNMENT 32
-#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-    #define XSIMD_DEFAULT_ALIGNMENT 16
-#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-    #define XSIMD_DEFAULT_ALIGNMENT 32
-#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-    #define XSIMD_DEFAULT_ALIGNMENT 16
-#else
-    // Set the default to the requirements of posix_memalign
-    #define XSIMD_DEFAULT_ALIGNMENT sizeof(void*)
 #endif
 
 #endif
