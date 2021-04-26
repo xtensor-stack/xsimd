@@ -539,6 +539,12 @@ namespace xsimd
  * Testing types lists *
  ***********************/
 
+#if XSIMD_X86_INSTR_SET == XSIMD_VERSION_NUMBER_NOT_AVAILABLE && XSIMD_ARM_INSTR_SET == XSIMD_VERSION_NUMBER_NOT_AVAILABLE
+#define XSIMD_FALLBACK_DELIMITER
+#else
+#define XSIMD_FALLBACK_DELIMITER ,
+#endif
+
 template <class T>
 using to_testing_types = xsimd::mpl::cast_t<T, testing::Types>;
 
@@ -588,7 +594,7 @@ namespace xsimd
                                     batch<int64_t, 2>
 #endif
 #if defined(XSIMD_ENABLE_FALLBACK)
-                                    ,
+                                    XSIMD_FALLBACK_DELIMITER
                                     batch<int32_t, 7>,
                                     batch<int64_t, 3>
 #endif
@@ -617,7 +623,7 @@ namespace xsimd
                                      batch<double, 2>
 #endif
 #if defined(XSIMD_ENABLE_FALLBACK)
-                                     ,
+                                     XSIMD_FALLBACK_DELIMITER
                                      batch<float, 7>,
                                      batch<double, 3>
 #endif
@@ -639,7 +645,7 @@ namespace xsimd
                                     batch<int32_t, 4>
 #endif
 #if defined(XSIMD_ENABLE_FALLBACK)
-                                    ,
+                                    XSIMD_FALLBACK_DELIMITER
                                     batch<int32_t, 7>
 #endif
     >;
@@ -750,7 +756,7 @@ using conversion_type_list = xsimd::mpl::type_list<
                                conversion_param<2, 16>
 #endif
 #if defined(XSIMD_ENABLE_FALLBACK)
-                               ,
+                               XSIMD_FALLBACK_DELIMITER
                                conversion_param<3, 32>
 #endif
                                >;
