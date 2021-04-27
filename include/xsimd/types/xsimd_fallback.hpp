@@ -967,7 +967,7 @@ namespace xsimd
             static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
             {
                 batch_type b_concatenate;
-                for (int i = 0 ; i < (N - n); ++i)
+                for (int i = 0 ; i < static_cast<int>(N - n); ++i)
                 {
                     b_concatenate[i] = lhs[i + n];
                     if(i < n)

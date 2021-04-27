@@ -379,10 +379,23 @@ namespace xsimd
 
             static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
             {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#if defined(XSIMD_AVX512VL_AVAILABLE)
                 return _mm_alignr_epi64(rhs, lhs, n);
 #else
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSSE3_VERSION
                 return _mm_alignr_epi8(rhs, lhs, 8 * n);
+#else
+                batch_type b_concatenate;
+                for (int i = 0 ; i < (2 - n); ++i)
+                {
+                    b_concatenate[i] = lhs[i + n];
+                    if(i < n)
+                    {
+                        b_concatenate[2 - 1 - i] = rhs[n - 1 - i];
+                    }
+                }
+                return b_concatenate;
+#endif
 #endif
             }
 
