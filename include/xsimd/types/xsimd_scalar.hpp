@@ -408,9 +408,9 @@ namespace xsimd
 
     inline void sincos(float val, float&s, float& c)
     {
-#if defined(__APPLE__)
+#if XSIMD_HAS_DOUBLE_UNDERLINE_SINCOS
         __sincosf(val, &s, &c);
-#elif defined(_GNU_SOURCE)
+#elif XSIMD_HAS_SINCOS
         ::sincosf(val, &s, &c);
 #else
         s = std::sin(val);
@@ -420,9 +420,9 @@ namespace xsimd
 
     inline void sincos(double val, double&s, double& c)
     {
-#if defined(__APPLE__)
+#if XSIMD_HAS_DOUBLE_UNDERLINE_SINCOS
         __sincos(val, &s, &c);
-#elif defined(_GNU_SOURCE)
+#elif XSIMD_HAS_SINCOS
         ::sincos(val, &s, &c);
 #else
         s = std::sin(val);

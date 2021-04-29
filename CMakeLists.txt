@@ -118,6 +118,37 @@ target_include_directories(xsimd INTERFACE
 
 target_compile_features(xsimd INTERFACE cxx_std_11)
 
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles(
+    "
+    #include <cmath>
+    int main() {
+        { double s, c; ::sincos(0.0, &s, &c); }
+        { float s, c; ::sincosf(0.0f, &s, &c); }
+	return 0;
+    };
+    "
+    HAS_SINCOS)
+
+if(HAS_SINCOS)
+   add_definitions(-DXSIMD_HAS_SINCOS=1)
+endif()
+
+check_cxx_source_compiles(
+    "
+    #include <cmath>
+    int main() {
+        { double s, c; __sincos(0.0, &s, &c); }
+        { float s, c; __sincosf(0.0f, &s, &c); }
+	return 0;
+    };
+    "
+    HAS_DOUBLE_UNDERLINE_SINCOS)
+
+if(HAS_DOUBLE_UNDERLINE_SINCOS)
+   add_definitions(-DXSIMD_HAS_DOUBLE_UNDERLINE_SINCOS=1)
+endif()
+
 OPTION(ENABLE_FALLBACK "build tests/benchmarks with fallback implementation" OFF)
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" OFF)
