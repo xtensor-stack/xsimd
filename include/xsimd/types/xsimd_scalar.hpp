@@ -406,28 +406,86 @@ namespace xsimd
     }
 #endif
 
+    namespace detail
+    {
+#define XSIMD_HASSINCOS_TRAIT(func) \
+        template<class S> \
+        struct has##func \
+        { \
+          template<class T> static auto get(T* ptr) -> decltype(func(std::declval<T>(), std::declval<T*>(), std::declval<T*>()), std::true_type{});\
+          static std::false_type get(...); \
+          static constexpr bool value = decltype(get((S*)nullptr))::value; \
+        }
+
+#define XSIMD_HASSINCOS(func, T) has##func<T>::value
+
+        XSIMD_HASSINCOS_TRAIT(sincos);
+        XSIMD_HASSINCOS_TRAIT(sincosf);
+        XSIMD_HASSINCOS_TRAIT(__sincos);
+        XSIMD_HASSINCOS_TRAIT(__sincosf);
+
+        struct generic_sincosf
+        {
+            template<class T>
+            typename std::enable_if<XSIMD_HASSINCOS(sincosf, T), void>::type
+            operator()(float val, T &s, T &c)
+            {
+                sincosf(val, &s, &c);
+            }
+
+            template<class T>
+            typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && XSIMD_HASSINCOS(__sincosf, T), void>::type
+            operator()(float val, T &s, T &c)
+            {
+                __sincosf(val, &s, &c);
+            }
+
+            template<class T>
+            typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && !XSIMD_HASSINCOS(__sincosf, T), void>::type
+            operator()(float val, T &s, T &c)
+            {
+                s = std::sin(val);
+                c = std::cos(val);
+            }
+        };
+
+        struct generic_sincos
+        {
+            template<class T>
+            typename std::enable_if<XSIMD_HASSINCOS(sincos, T), void>::type
+            operator()(double val, T &s, T &c)
+            {
+                sincos(val, &s, &c);
+            }
+
+            template<class T>
+            typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && XSIMD_HASSINCOS(__sincos, T), void>::type
+            operator()(double val, T &s, T &c)
+            {
+                __sincos(val, &s, &c);
+            }
+
+            template<class T>
+            typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && !XSIMD_HASSINCOS(__sincos, T), void>::type
+            operator()(double val, T &s, T &c)
+            {
+                s = std::sin(val);
+                c = std::cos(val);
+            }
+        };
+
+#undef XSIMD_HASSINCOS_TRAIT
+#undef XSIMD_HASSINCOS
+    }
+
     inline void sincos(float val, float&s, float& c)
     {
-#if defined(__APPLE__)
-        __sincosf(val, &s, &c);
-#elif defined(_GNU_SOURCE)
-        ::sincosf(val, &s, &c);
-#else
-        s = std::sin(val);
-        c = std::cos(val);
-#endif
+        detail::generic_sincosf{}(val, s, c);
     }
 
     inline void sincos(double val, double&s, double& c)
     {
-#if defined(__APPLE__)
-        __sincos(val, &s, &c);
-#elif defined(_GNU_SOURCE)
-        ::sincos(val, &s, &c);
-#else
-        s = std::sin(val);
-        c = std::cos(val);
-#endif
+        detail::generic_sincos{}(val, s, c);
     }
 
     template <class T>
