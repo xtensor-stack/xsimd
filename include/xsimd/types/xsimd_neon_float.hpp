@@ -671,7 +671,13 @@ namespace xsimd
 
             static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
             {
-                return vextq_f32(lhs, rhs, n);
+                switch(n)
+                {
+                    case 0: return lhs;
+                    XSIMD_REPEAT_4(vextq_f32);
+                    default: break;
+                }
+                return batch_type(float(0));
             }
 
             static batch_bool_type isnan(const batch_type& x)

@@ -364,18 +364,26 @@ namespace xsimd
                 return _mm512_unpackhi_epi8(lhs, rhs);
             }
 
-            static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
+            static batch_type extract_pair(const batch_type& v_lhs, const batch_type& v_rhs, const int n)
             {
 #if defined(XSIMD_AVX512BW_AVAILABLE)
-                return _mm512_alignr_epi8(rhs, lhs, n);
+                const batch_type lhs = v_rhs;
+                const batch_type rhs = v_lhs;
+                switch(n)
+                {
+                    case 0: return rhs;
+                    XSIMD_REPEAT_64_v2(_mm512_alignr_epi8);
+                    default: break;
+                }
+                return batch_type(T(0));
 #else
                 batch_type b_concatenate;
                 for (int i = 0 ; i < (64 - n); ++i)
                 {
-                    b_concatenate[i] = lhs[i + n];
+                    b_concatenate[i] = v_lhs[i + n];
                     if(i < n)
                     {
-                        b_concatenate[64 - 1 - i] = rhs[n - 1 - i];
+                        b_concatenate[64 - 1 - i] = v_rhs[n - 1 - i];
                     }
                 }
                 return b_concatenate;

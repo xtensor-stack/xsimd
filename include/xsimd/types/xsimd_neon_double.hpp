@@ -611,7 +611,13 @@ namespace xsimd
             static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
             {
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-                return vextq_f64(lhs, rhs, n);
+                switch(n)
+                {
+                    case 0: return lhs;
+                    XSIMD_REPEAT_2(vextq_f64);
+                    default: break;
+                }
+                return batch_type(double(0));
 #else
                 return vcombine_f64(vget_high_f64(lhs), vget_low_f64(rhs));
 #endif

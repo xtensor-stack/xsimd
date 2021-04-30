@@ -669,18 +669,14 @@ namespace xsimd
             static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
             {
                 batch_type b_concatenate;
+                /* Double: n = [0,1] */
                 if(n)
                 {
                    b_concatenate[0] = lhs[1];
                    b_concatenate[1] = rhs[0];
                    return b_concatenate;
                 }
-                else
-                {
-                   b_concatenate[0] = lhs[0];
-                   b_concatenate[1] = rhs[1];
-                   return b_concatenate;
-                }
+                return lhs;
             }
 
         };

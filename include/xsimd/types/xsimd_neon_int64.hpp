@@ -470,7 +470,13 @@ namespace xsimd
 
             static batch_type extract_pair(const batch_type& lhs, const batch_type& rhs, const int n)
             {
-                return vextq_s64(lhs, rhs, n);
+                switch(n)
+                {
+                    case 0: return lhs;
+                    XSIMD_REPEAT_2(vextq_s64);
+                    default: break;
+                }
+                return batch_type(int64_t(0));
             }
 
         };
