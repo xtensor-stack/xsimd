@@ -56,8 +56,8 @@ protected:
             b.store_unaligned(res.data());
             EXPECT_EQ(res, lhs) << print_function_name("load_unaligned / store_unaligned complex*");
 
-            alignas(XSIMD_DEFAULT_ALIGNMENT) array_type arhs(this->rhs);
-            alignas(XSIMD_DEFAULT_ALIGNMENT) array_type ares;
+            alignas(xsimd::arch::default_::alignment) array_type arhs(this->rhs);
+            alignas(xsimd::arch::default_::alignment) array_type ares;
             b.load_aligned(arhs.data());
             b.store_aligned(ares.data());
             EXPECT_EQ(ares, rhs) << print_function_name("load_aligned / store_aligned complex*");
@@ -74,7 +74,7 @@ protected:
             b.store_unaligned(res_real.data(), res_imag.data());
             EXPECT_EQ(res_real, real) << print_function_name("load_unaligned / store_unaligned (real*, real*)");
 
-            alignas(XSIMD_DEFAULT_ALIGNMENT) real_array_type areal, aimag, ares_real, ares_imag;
+            alignas(xsimd::arch::default_::alignment) real_array_type areal, aimag, ares_real, ares_imag;
             for (size_t i = 0; i < size; ++i)
             {
                 areal[i] = lhs[i].real();
@@ -95,7 +95,7 @@ protected:
             b.store_unaligned(res_real.data());
             EXPECT_EQ(res_real, real) << print_function_name("load_unaligned / store_unaligned (real*)");
 
-            alignas(XSIMD_DEFAULT_ALIGNMENT) real_array_type areal, ares_real;
+            alignas(xsimd::arch::default_::alignment) real_array_type areal, ares_real;
             for (size_t i = 0; i < size; ++i)
             {
                 areal[i] = lhs[i].real();

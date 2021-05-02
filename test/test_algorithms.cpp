@@ -29,13 +29,8 @@ struct unary_functor
     }
 };
 
-#ifdef XSIMD_DEFAULT_ALIGNMENT
 template <class T>
-using test_allocator_type = xsimd::aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>;
-#else
-template <class T>
-using test_allocator_type = std::allocator<T>;
-#endif
+using test_allocator_type = xsimd::aligned_allocator<T>;
 
 TEST(algorithms, binary_transform)
 {

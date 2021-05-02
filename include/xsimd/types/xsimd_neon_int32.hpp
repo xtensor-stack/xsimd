@@ -30,7 +30,7 @@ namespace xsimd
         using value_type = int32_t;
         static constexpr std::size_t size = 4;
         using batch_bool_type = batch_bool<int32_t, 4>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::neon::alignment;
         using storage_type = int32x4_t;
     };
 
@@ -140,9 +140,9 @@ namespace xsimd
         return *this;
     }
 
-    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, bool, XSIMD_DEFAULT_ALIGNMENT)
-    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, int8_t, XSIMD_DEFAULT_ALIGNMENT)
-    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, uint8_t, XSIMD_DEFAULT_ALIGNMENT)
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, bool, arch::neon::alignment)
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, int8_t, arch::neon::alignment)
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, uint8_t, arch::neon::alignment)
 
     inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const int16_t* src)
     {
@@ -190,8 +190,8 @@ namespace xsimd
         return load_aligned(src);
     }
 
-    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, int64_t, XSIMD_DEFAULT_ALIGNMENT)
-    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, uint64_t, XSIMD_DEFAULT_ALIGNMENT)
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, int64_t, arch::neon::alignment)
+    XSIMD_DEFINE_LOAD_STORE(int32_t, 4, uint64_t, arch::neon::alignment)
     XSIMD_DEFINE_LOAD_STORE_LONG(int32_t, 4, 64)
 
     inline batch<int32_t, 4>& batch<int32_t, 4>::load_aligned(const float* src)

@@ -21,8 +21,8 @@ Here is an example that computes the mean of two sets of 4 double floating point
 
     int main(int argc, char* argv[])
     {
-        xs::batch<double, 4> a(1.5, 2.5, 3.5, 4.5);
-        xs::batch<double, 4> b(2.5, 3.5, 4.5, 5.5);
+        xs::avx::batch<double> a(1.5, 2.5, 3.5, 4.5);
+        xs::avx::batch<double> b(2.5, 3.5, 4.5, 5.5);
         auto mean = (a + b) / 2;
         std::cout << mean << std::endl;
         return 0;
@@ -46,7 +46,7 @@ The same computation operating on vectors and using the most performant instruct
     #include "xsimd/xsimd.hpp"
 
     namespace xs = xsimd;
-    using vector_type = std::vector<double, xsimd::aligned_allocator<double, XSIMD_DEFAULT_ALIGNMENT>>;
+    using vector_type = std::vector<double, xsimd::aligned_allocator<double>>;
 
     void mean(const vector_type& a, const vector_type& b, vector_type& res)
     {

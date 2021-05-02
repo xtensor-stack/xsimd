@@ -42,13 +42,11 @@ namespace xsimd
         using type = unaligned_mode;
     };
 
-#if defined(XSIMD_DEFAULT_ALIGNMENT)
     template <class T>
-    struct allocator_alignment<aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>>
+    struct allocator_alignment<aligned_allocator<T>>
     {
         using type = aligned_mode;
     };
-#endif
 
     template <class A>
     using allocator_alignment_t = typename allocator_alignment<A>::type;

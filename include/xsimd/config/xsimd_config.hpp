@@ -12,14 +12,15 @@
 #define XSIMD_CONFIG_HPP
 
 #include "xsimd_align.hpp"
+#include "xsimd_arch.hpp"
 
 #define XSIMD_VERSION_MAJOR 7
 #define XSIMD_VERSION_MINOR 5
 #define XSIMD_VERSION_PATCH 0
 
 #ifndef XSIMD_DEFAULT_ALLOCATOR
-    #if XSIMD_X86_INSTR_SET_AVAILABLE
-        #define XSIMD_DEFAULT_ALLOCATOR(T) xsimd::aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>
+    #if XSIMD_X86_INSTR_SET != XSIMD_VERSION_NUMBER_NOT_AVAILABLE
+        #define XSIMD_DEFAULT_ALLOCATOR(T) xsimd::aligned_allocator<T, xsimd::arch::x86::alignment>
     #else
         #define XSIMD_DEFAULT_ALLOCATOR(T) std::allocator<T>
     #endif

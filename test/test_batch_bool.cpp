@@ -180,8 +180,8 @@ protected:
         b.store_unaligned(res.data());
         EXPECT_EQ(res, ba) << print_function_name("load_unaligned / store_unaligned");
 
-        alignas(XSIMD_DEFAULT_ALIGNMENT) bool_array_type arhs(this->ba);
-        alignas(XSIMD_DEFAULT_ALIGNMENT) bool_array_type ares;
+        alignas(xsimd::arch::default_::alignment) bool_array_type arhs(this->ba);
+        alignas(xsimd::arch::default_::alignment) bool_array_type ares;
         b.load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, arhs) << print_function_name("load_aligned / store_aligned");

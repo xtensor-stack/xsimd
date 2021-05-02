@@ -27,7 +27,7 @@ namespace xsimd
         using value_type = int64_t;
         static constexpr std::size_t size = 2;
         using batch_bool_type = batch_bool<int64_t, 2>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::neon::alignment;
         using storage_type = int64x2_t;
     };
 
@@ -137,11 +137,11 @@ namespace xsimd
         return *this;
     }
 
-    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, bool, XSIMD_DEFAULT_ALIGNMENT)
-    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, int8_t, XSIMD_DEFAULT_ALIGNMENT)
-    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, uint8_t, XSIMD_DEFAULT_ALIGNMENT)
-    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, int16_t, XSIMD_DEFAULT_ALIGNMENT)
-    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, uint16_t, XSIMD_DEFAULT_ALIGNMENT)
+    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, bool, arch::neon::alignment)
+    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, int8_t, arch::neon::alignment)
+    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, uint8_t, arch::neon::alignment)
+    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, int16_t, arch::neon::alignment)
+    XSIMD_DEFINE_LOAD_STORE(int64_t, 2, uint16_t, arch::neon::alignment)
 
     inline batch<int64_t, 2>& batch<int64_t, 2>::load_aligned(const int32_t* src)
     {
