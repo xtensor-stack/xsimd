@@ -46,7 +46,7 @@ namespace xsimd
         using value_type = T;
         static constexpr std::size_t size = N;
         using batch_type = batch<T, N>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::scalar::alignment;
     };
 
     template <typename T, std::size_t N>
@@ -94,7 +94,7 @@ namespace xsimd
         using value_type = T;
         static constexpr std::size_t size = N;
         using batch_bool_type = batch_bool<T, N>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::scalar::alignment;
         using storage_type = std::array<T, N>;
     };
 
@@ -161,7 +161,7 @@ namespace xsimd
 
     template <class T, std::size_t N>
     struct simd_batch_traits<batch_bool<std::complex<T>, N>>
-        : complex_batch_bool_traits<std::complex<T>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+        : complex_batch_bool_traits<std::complex<T>, T, N, arch::scalar::alignment>
     {
     };
 
@@ -195,7 +195,7 @@ namespace xsimd
 
     template <class T, std::size_t N>
     struct simd_batch_traits<batch<std::complex<T>, N>>
-        : complex_batch_traits<std::complex<T>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+        : complex_batch_traits<std::complex<T>, T, N, arch::scalar::alignment>
     {
     };
 
@@ -258,7 +258,7 @@ namespace xsimd
 
     template <class T, std::size_t N, bool i3ec>
     struct simd_batch_traits<batch_bool<xtl::xcomplex<T, T, i3ec>, N>>
-        : complex_batch_bool_traits<xtl::xcomplex<T, T, i3ec>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+        : complex_batch_bool_traits<xtl::xcomplex<T, T, i3ec>, T, N, arch::scalar::alignment>
     {
     };
 
@@ -293,7 +293,7 @@ namespace xsimd
 
     template <class T, std::size_t N, bool i3ec>
     struct simd_batch_traits<batch<xtl::xcomplex<T, T, i3ec>, N>>
-        : complex_batch_traits<xtl::xcomplex<T, T, i3ec>, T, N, XSIMD_DEFAULT_ALIGNMENT>
+        : complex_batch_traits<xtl::xcomplex<T, T, i3ec>, T, N, arch::scalar::alignment>
     {
     };
 

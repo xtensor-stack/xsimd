@@ -32,7 +32,7 @@ namespace xsimd
     using duration_type = std::chrono::duration<double, std::milli>;
 
     template <class T>
-    using bench_vector = std::vector<T, xsimd::aligned_allocator<T, XSIMD_DEFAULT_ALIGNMENT>>;
+    using bench_vector = std::vector<T, xsimd::aligned_allocator<T>>;
 
     template <class T>
     void init_benchmark(bench_vector<T>& lhs, bench_vector<T>& rhs, bench_vector<T>& res, size_t size)

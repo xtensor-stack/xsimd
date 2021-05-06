@@ -44,8 +44,8 @@ protected:
         b.store_unaligned(res.data());
         EXPECT_EQ(res, lhs) << print_function_name("load_unaligned / store_unaligned");
 
-        alignas(XSIMD_DEFAULT_ALIGNMENT) array_type arhs(this->rhs);
-        alignas(XSIMD_DEFAULT_ALIGNMENT) array_type ares;
+        alignas(xsimd::arch::default_::alignment) array_type arhs(this->rhs);
+        alignas(xsimd::arch::default_::alignment) array_type ares;
         b.load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, rhs) << print_function_name("load_aligned / store_aligned");
@@ -78,8 +78,8 @@ protected:
             EXPECT_EQ(res, lhs) << print_function_name("batch::from_unaligned");
         }
         {
-            alignas(XSIMD_DEFAULT_ALIGNMENT) array_type arhs(this->rhs);
-            alignas(XSIMD_DEFAULT_ALIGNMENT) array_type ares;
+            alignas(xsimd::arch::default_::alignment) array_type arhs(this->rhs);
+            alignas(xsimd::arch::default_::alignment) array_type ares;
             auto b = batch_type::from_aligned(arhs.data());
             b.store_aligned(ares.data());
             EXPECT_EQ(ares, rhs) << print_function_name("batch::from_aligned");

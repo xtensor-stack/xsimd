@@ -30,7 +30,7 @@ namespace xsimd
         using value_type = int16_t;
         static constexpr std::size_t size = 8;
         using batch_bool_type = batch_bool<int16_t, 8>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::neon::alignment;
         using storage_type = int16x8_t;
     };
 

@@ -72,7 +72,7 @@ namespace xsimd
         using value_type = T;
         static constexpr std::size_t size = 8;
         using batch_type = batch<T, 8>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::neon::alignment;
     };
 
     template <class T>
@@ -120,7 +120,7 @@ namespace xsimd
         using value_type = T;
         static constexpr std::size_t size = 4;
         using batch_type = batch<T, 4>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::neon::alignment;
     };
 
     template <class T>
@@ -167,7 +167,7 @@ namespace xsimd
         using value_type = T;
         static constexpr std::size_t size = 2;
         using batch_type = batch<T, 2>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::neon::alignment;
     };
 
     template <class T>
@@ -214,7 +214,7 @@ namespace xsimd
         using value_type = T;
         static constexpr std::size_t size = 16;
         using batch_type = batch<T, 16>;
-        static constexpr std::size_t align = XSIMD_DEFAULT_ALIGNMENT;
+        static constexpr std::size_t align = arch::neon::alignment;
     };
 
     template <class T>

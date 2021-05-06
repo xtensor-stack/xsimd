@@ -110,7 +110,7 @@ The same computation operating on vectors and using the most performant instruct
 #include "xsimd/xsimd.hpp"
 
 namespace xs = xsimd;
-using vector_type = std::vector<double, xsimd::aligned_allocator<double, XSIMD_DEFAULT_ALIGNMENT>>;
+using vector_type = std::vector<double, xsimd::aligned_allocator<double>>;
 
 void mean(const vector_type& a, const vector_type& b, vector_type& res)
 {
@@ -142,7 +142,7 @@ the loop from the example becomes:
 #include "xsimd/stl/algorithms.hpp"
 
 namespace xs = xsimd;
-using vector_type = std::vector<double, xsimd::aligned_allocator<double, XSIMD_DEFAULT_ALIGNMENT>>;
+using vector_type = std::vector<double, xsimd::aligned_allocator<double>>;
 
 void mean(const vector_type& a, const vector_type& b, vector_type& res)
 {
