@@ -18,6 +18,10 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat"
       RUNTEST: "ECHO"
+    - JOB: "AVX2"
+      CXXFLAGS: "/arch:AVX2"
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat"
 
 init:
   - "ECHO %MINICONDA%"
