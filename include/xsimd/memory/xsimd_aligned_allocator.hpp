@@ -15,6 +15,7 @@
 #include <memory>
 #include <cstddef>
 #include <stdlib.h>
+#include <cassert>
 
 #include "../config/xsimd_align.hpp"
 
