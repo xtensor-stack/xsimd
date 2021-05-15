@@ -49,6 +49,7 @@ namespace xsimd
             unsigned sse : 1;
             unsigned sse2 : 1;
             unsigned sse3 : 1;
+            unsigned ssse3 : 1;
             unsigned sse4_1 : 1;
             unsigned sse4_2 : 1;
             unsigned sse4a : 1;
@@ -124,6 +125,9 @@ namespace xsimd
 
                 sse3 = regs[2] >> 0 & 1;
                 best_version = std::max(best_version, XSIMD_X86_SSE3_VERSION * sse3);
+
+                ssse3 = regs[2] >> 9 & 1;
+                best_version = std::max(best_version, XSIMD_X86_SSSE3_VERSION * ssse3);
 
                 sse4_1 = regs[2] >> 19 & 1;
                 best_version = std::max(best_version, XSIMD_X86_SSE4_1_VERSION * sse4_1);
@@ -431,7 +435,7 @@ namespace xsimd
             };
         }
 
-        using all_x86 = arch_list<avx512, avx2, fma3, xop, fma4, avx, sse4_2, sse4_1, sse4a, sse3, sse2, sse>;
+        using all_x86 = arch_list<avx512, avx2, fma3, xop, fma4, avx, sse4_2, sse4_1, sse4a, ssse3, sse3, sse2, sse>;
         using all_arm = arch_list<neon64, neon>;
         using all = typename detail::join<all_arm, all_x86, arch_list<scalar>>::type;
 
@@ -476,13 +480,13 @@ namespace xsimd
 
                 public:
 
-                dispatcher(F f) : best_arch(::xsimd::arch::detail::available().best_version), functor(f) {
+                dispatcher(F f) : best_arch(::xsimd::arch::detail::available().best_version), functor(f)
+                {
                 }
 
                 template<class... Tys>
                 auto operator()(Tys&&... args) -> decltype(functor(default_{}, std::forward<Tys>(args)...))
                 {
-                  asm("marker");
                     return walk_archs(ArchList{}, std::forward<Tys>(args)...);
                 }
             };
