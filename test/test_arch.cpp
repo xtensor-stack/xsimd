@@ -9,13 +9,16 @@
 ****************************************************************************/
 
 #include <random>
+#include <numeric>
 
 #include "test_utils.hpp"
 
+#if XSIMD_INSTR_SET != XSIMD_VERSION_NUMBER_NOT_AVAILABLE
+
 static_assert(xsimd::arch::default_::supported, "default arch must be supported");
-static_assert(xsimd::arch::all::contains<xsimd::arch::default_>(), "default arch is a valid arch");
 static_assert(xsimd::arch::supported::contains<xsimd::arch::default_>(), "default arch is supported");
-static_assert(!(xsimd::arch::x86::supported & xsimd::arch::arm::supported), "either x86 or arm, but not both");
+static_assert(xsimd::arch::all::contains<xsimd::arch::default_>(), "default arch is a valid arch");
+static_assert(!(xsimd::arch::x86::supported && xsimd::arch::arm::supported), "either x86 or arm, but not both");
 
 struct check_supported {
   template<class Arch>
@@ -61,7 +64,7 @@ struct sum {
 TEST(arch, dispatcher)
 {
   uint32_t data[17] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
-  uint32_t ref = sum{}(xsimd::arch::scalar{}, data, 17);
+  uint32_t ref = std::accumulate(std::begin(data), std::end(data), 0);
 
   // platform specific
   {
@@ -79,3 +82,18 @@ TEST(arch, dispatcher)
   }
 #endif
 }
+
+#ifdef XSIMD_ENABLE_FALLBACK
+// FIXME: this should be different from fallback
+TEST(arch, scalar)
+{
+  uint32_t data[17] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+  uint32_t ref = std::accumulate(std::begin(data), std::end(data), 0);
+
+  uint32_t res = sum{}(xsimd::arch::scalar{}, data, 17);
+  EXPECT_EQ(ref, res);
+
+}
+#endif
+
+#endif

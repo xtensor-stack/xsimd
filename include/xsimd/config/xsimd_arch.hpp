@@ -302,8 +302,12 @@ namespace xsimd
         struct scalar
         {
             static const int version = XSIMD_VERSION_NUMBER_AVAILABLE;
+#ifdef XSIMD_ENABLE_FALLBACK
             static constexpr bool supported = true;
-            static constexpr bool available() { return true; }
+#else
+            static constexpr bool supported = false;
+#endif
+            static constexpr bool available() { return supported; }
 
             template<class T>
             using batch = xsimd::batch<T, 1>;
