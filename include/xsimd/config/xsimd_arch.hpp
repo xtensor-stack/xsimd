@@ -284,7 +284,7 @@ namespace xsimd
             static bool available() { return detail::available().neon; }
 
             template<class T>
-            using batch = xsimd::batch<T, 512 / ( 8 * sizeof(T))>;
+            using batch = xsimd::batch<T, 128 / ( 8 * sizeof(T))>;
             static constexpr size_t alignment = 16;
         };
 
