@@ -63,7 +63,7 @@ namespace xsimd
             unsigned neon64 : 1;
 
             // version number of the best arch available
-            int best_version;
+            unsigned best_version;
 
 
             supported_arch() {
@@ -169,7 +169,7 @@ namespace xsimd
 
         struct sse
         {
-            static const int version = XSIMD_X86_SSE_VERSION;
+            static const unsigned version = XSIMD_X86_SSE_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().sse; }
 
@@ -180,7 +180,7 @@ namespace xsimd
 
         struct sse2 : sse
         {
-            static const int version = XSIMD_X86_SSE2_VERSION;
+            static const unsigned version = XSIMD_X86_SSE2_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().sse2; }
 
@@ -189,14 +189,14 @@ namespace xsimd
 
         struct sse3 : sse2
         {
-            static const int version = XSIMD_X86_SSE3_VERSION;
+            static const unsigned version = XSIMD_X86_SSE3_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().sse3; }
         };
 
         struct ssse3 : sse2
         {
-            static const int version = XSIMD_X86_SSSE3_VERSION;
+            static const unsigned version = XSIMD_X86_SSSE3_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().ssse3; }
         };
@@ -204,7 +204,7 @@ namespace xsimd
         // Intel specific
         struct sse4_1 : sse3
         {
-            static const int version = XSIMD_X86_SSE4_1_VERSION;
+            static const unsigned version = XSIMD_X86_SSE4_1_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().sse4_1; }
         };
@@ -212,7 +212,7 @@ namespace xsimd
         // Intel specific
         struct sse4_2 : sse4_1
         {
-            static const int version = XSIMD_X86_SSE4_2_VERSION;
+            static const unsigned version = XSIMD_X86_SSE4_2_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().sse4_2; }
         };
@@ -220,14 +220,14 @@ namespace xsimd
         // AMD specific
         struct sse4a : sse3
         {
-            static const int version = XSIMD_X86_AMD_SSE4A_VERSION;
+            static const unsigned version = XSIMD_X86_AMD_SSE4A_VERSION;
             static constexpr bool supported = XSIMD_X86_AMD_INSTR_SET >= version;
             static bool available() { return detail::available().sse4a; }
         };
 
         struct avx
         {
-            static const int version = XSIMD_X86_AVX_VERSION;
+            static const unsigned version = XSIMD_X86_AVX_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().avx; }
 
@@ -238,7 +238,7 @@ namespace xsimd
 
         struct fma3 : avx
         {
-            static const int version = XSIMD_X86_FMA3_VERSION;
+            static const unsigned version = XSIMD_X86_FMA3_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().fma3; }
         };
@@ -246,7 +246,7 @@ namespace xsimd
         // AMD specific (very few old processors)
         struct fma4 : avx
         {
-            static const int version = XSIMD_X86_AMD_FMA4_VERSION;
+            static const unsigned version = XSIMD_X86_AMD_FMA4_VERSION;
             static constexpr bool supported = XSIMD_X86_AMD_INSTR_SET >= version;
             static bool available() { return detail::available().fma4; }
         };
@@ -254,21 +254,21 @@ namespace xsimd
         // AMD specific (very few old processors)
         struct xop : fma4
         {
-            static const int version = XSIMD_X86_AMD_XOP_VERSION;
+            static const unsigned version = XSIMD_X86_AMD_XOP_VERSION;
             static constexpr bool supported = XSIMD_X86_AMD_INSTR_SET >= version;
             static bool available() { return detail::available().xop; }
         };
 
         struct avx2 : avx
         {
-            static const int version = XSIMD_X86_AVX2_VERSION;
+            static const unsigned version = XSIMD_X86_AVX2_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().avx2; }
         };
 
         struct avx512
         {
-            static const int version = XSIMD_X86_AVX512_VERSION;
+            static const unsigned version = XSIMD_X86_AVX512_VERSION;
             static constexpr bool supported = XSIMD_X86_INSTR_SET >= version;
             static bool available() { return detail::available().avx512; }
 
@@ -279,7 +279,7 @@ namespace xsimd
 
         struct neon
         {
-            static const int version = XSIMD_ARM7_NEON_VERSION;
+            static const unsigned version = XSIMD_ARM7_NEON_VERSION;
             static constexpr bool supported = XSIMD_ARM_INSTR_SET >= version;
             static bool available() { return detail::available().neon; }
 
@@ -290,7 +290,7 @@ namespace xsimd
 
         struct neon64
         {
-            static const int version = XSIMD_ARM8_64_NEON_VERSION;
+            static const unsigned version = XSIMD_ARM8_64_NEON_VERSION;
             static constexpr bool supported = XSIMD_ARM_INSTR_SET >= version;
             static bool available() { return detail::available().neon64; }
 
@@ -301,7 +301,7 @@ namespace xsimd
 
         struct scalar
         {
-            static const int version = XSIMD_VERSION_NUMBER_AVAILABLE;
+            static const unsigned version = XSIMD_VERSION_NUMBER_AVAILABLE;
 #ifdef XSIMD_ENABLE_FALLBACK
             static constexpr bool supported = true;
 #else
@@ -316,7 +316,7 @@ namespace xsimd
 
         struct unavailable
         {
-            static const int version = XSIMD_VERSION_NUMBER_NOT_AVAILABLE;
+            static const unsigned version = XSIMD_VERSION_NUMBER_NOT_AVAILABLE;
             static constexpr bool supported = false;
             static constexpr bool available() { return false; }
         };
