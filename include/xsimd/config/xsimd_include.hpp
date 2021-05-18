@@ -34,7 +34,7 @@
     #include <pmmintrin.h>             // SSE3
 #elif XSIMD_X86_INSTR_SET == XSIMD_X86_SSE2_VERSION
     #include <emmintrin.h>             // SSE2
-#elif XSIMD_X8_INSTR_SET == XSIMD_X86_SSE_VERSION
+#elif XSIMD_X86_INSTR_SET == XSIMD_X86_SSE_VERSION
     #include <xmmintrin.h>             // SSE
 #endif // XSIMD_X86_INSTR_SET
 
