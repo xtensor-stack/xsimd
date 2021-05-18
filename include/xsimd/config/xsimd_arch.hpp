@@ -319,6 +319,10 @@ namespace xsimd
             static const unsigned version = XSIMD_VERSION_NUMBER_NOT_AVAILABLE;
             static constexpr bool supported = false;
             static constexpr bool available() { return false; }
+
+            template<class T>
+            using batch = xsimd::batch<T, 1>;
+            static constexpr size_t alignment = sizeof(void*);
         };
 
         namespace detail
