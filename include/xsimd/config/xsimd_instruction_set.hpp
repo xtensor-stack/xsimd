@@ -21,7 +21,7 @@
 // minor number can be in [0, 99]
 // patch number can be in [0, 999999]
 #define XSIMD_VERSION_NUMBER(major, minor, patch) \
-    ((((major) % 100) * 10000000) + (((minor) % 100) * 100000) + ((patch) % 100000))
+    ((((major) % 100u) * 10000000u) + (((minor) % 100u) * 100000u) + ((patch) % 100000u))
 
 #define XSIMD_VERSION_NUMBER_NOT_AVAILABLE \
     XSIMD_VERSION_NUMBER(0, 0, 0)
