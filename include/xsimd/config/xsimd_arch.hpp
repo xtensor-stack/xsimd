@@ -297,8 +297,8 @@ namespace xsimd
             static bool available() { return detail::available().neon64; }
 
             template<class T>
-            using batch = xsimd::batch<T, 512 / ( 8 * sizeof(T))>;
-            static constexpr size_t alignment = 32;
+            using batch = xsimd::batch<T, 128 / ( 8 * sizeof(T))>;
+            static constexpr size_t alignment = 16;
         };
 
         struct scalar

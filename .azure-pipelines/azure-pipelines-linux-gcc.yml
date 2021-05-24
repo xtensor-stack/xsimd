@@ -15,6 +15,11 @@ jobs:
         gcc_7_avx512:
           gcc_version: '7'
           avx512: 1
+        gcc_4_aarch64:
+          cross_compile: 1
+          gcc_version: '4.9'
+          arm_arch_dir: 'aarch64-linux-gnu'
+          arm_arch_target: 'armv8-a'
         gcc_8_enable_fallback:
           gcc_version: '8'
           enable_xtl_complex: 1
@@ -35,8 +40,14 @@ jobs:
             sudo apt-get update
             sudo apt-get --no-install-suggests --no-install-recommends install g++-$(gcc_version)
           fi
+          if [[ $(cross_compile) == 1 ]]; then
+            if [[ $(arm_arch_dir) == 'aarch64-linux-gnu' ]]; then
+              sudo apt-get --no-install-suggests --no-install-recommends install g++-4.9-aarch64-linux-gnu gcc-4.9-aarch64-linux-gnu
+              sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-aarch64
+            fi
+          fi
         displayName: Install build toolchain
-          
+
       - bash: echo "##vso[task.prependpath]$CONDA/bin"
         displayName: Add conda to PATH
 
