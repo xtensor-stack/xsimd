@@ -10,8 +10,13 @@
 
 cmake_minimum_required(VERSION 3.1)
 project(xsimd)
+option(XSIMD_REFACTORING ON)
 
+if(XSIMD_REFACTORING)
+set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include-refactoring)
+else()
 set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+endif()
 
 # Versionning
 # ===========
@@ -30,6 +35,32 @@ message(STATUS "xsimd v${${PROJECT_NAME}_VERSION}")
 # Build
 # =====
 
+if(XSIMD_REFACTORING)
+set(XSIMD_HEADERS
+${XSIMD_INCLUDE_DIR}/xsimd
+${XSIMD_INCLUDE_DIR}/xsimd/config
+${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_arch.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse2_register.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_generic_arch.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_register.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_batch.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_api.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse3_register.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_register.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/isa
+${XSIMD_INCLUDE_DIR}/xsimd/isa/xsimd_generic.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/isa/xsimd_isa.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/isa/xsimd_fma3.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/isa/xsimd_sse.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/isa/xsimd_scalar.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/isa/xsimd_fma4.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/isa/xsimd_sse3.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
+)
+
+else()
 set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_align.hpp
@@ -109,6 +140,7 @@ set(XSIMD_HEADERS
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_types_include.hpp
     ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
 )
+endif()
 
 add_library(xsimd INTERFACE)
 
@@ -139,7 +171,11 @@ endif()
 
 if(BUILD_TESTS)
     enable_testing()
-    add_subdirectory(test)
+    if(XSIMD_REFACTORING)
+        add_subdirectory(test-refactoring)
+    else()
+        add_subdirectory(test)
+    endif()
 endif()
 
 OPTION(BUILD_BENCHMARK "xsimd benchmarks" OFF)
