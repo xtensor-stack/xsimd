@@ -12,9 +12,11 @@ struct batch : types::simd_register<T, A> {
   static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T);
 
   using value_type = T;
+  using arch_type = A;
   using register_type = typename types::simd_register<T, A>::register_type;
   using batch_bool_type = batch_bool<T, A>;
 
+  // constructors
   batch() : types::simd_register<T, A>{} {}
   batch(T val);
   batch(T const* mem);
@@ -24,6 +26,7 @@ struct batch : types::simd_register<T, A> {
 
   static batch broadcast(T val) XSIMD_DEPRECATED("use xsimd::batch(val) instead") { return batch(val); }
 
+  // memory operators
   void store_aligned(T * mem) const;
   void store_unaligned(T * mem) const;
   void load_aligned(T const* mem) { *this = from_aligned(mem); }
@@ -37,10 +40,12 @@ struct batch : types::simd_register<T, A> {
     return buffer[i];
   }
 
+  // unary operators
   batch_bool<T, A> operator!() const;
   batch operator-() const;
   batch operator+() const { return *this; }
 
+  // comparison operators
   batch_bool<T, A> operator==(batch const& other) const;
   batch_bool<T, A> operator!=(batch const& other) const;
   batch_bool<T, A> operator>=(batch const& other) const;
@@ -48,6 +53,8 @@ struct batch : types::simd_register<T, A> {
   batch_bool<T, A> operator>(batch const& other) const;
   batch_bool<T, A> operator<(batch const& other) const;
 
+  // arithmetic operators. They are defined as friend to enable automatic
+  // conversion of parameters from scalar to batch
   friend batch<T, A> operator+(batch<T, A> const& self, batch<T, A> const& other) {
     return batch<T, A>(self) += other;
   }
@@ -65,12 +72,13 @@ struct batch : types::simd_register<T, A> {
     return batch<T, A>(self) &= other;
   }
 
+  // Update operators
   batch<T, A>& operator+=(batch const& other);
   batch<T, A>& operator-=(batch const& other);
   batch<T, A>& operator*=(batch const& other);
   batch<T, A>& operator/=(batch const& other);
-
   batch<T, A>& operator&=(batch const& other);
+
 };
 
 template<class T, class A=default_arch>
@@ -165,6 +173,7 @@ batch<T, A>& batch<T, A>::operator/=(batch<T, A> const& other) { return *this = 
 
 template<class T, class A>
 batch<T, A>& batch<T, A>::operator&=(batch<T, A> const& other) { return *this = kernel::bitwise_and<A>(*this, other, A{}); }
+
 
 // batch_bool implementation
 
