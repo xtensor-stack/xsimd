@@ -175,30 +175,16 @@ void store_unaligned(T* mem, batch<T, A> const& val) {
   return kernel::store_unaligned<A>(mem, val, A{});
 }
 
-template<class T, class A>
-batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other) {
+template<class T, class Tp>
+auto sadd(T const& self, Tp const& other) -> decltype(self + other) {
+  using A = typename decltype(self + other)::arch_type;
   return kernel::sadd<A>(self, other, A{});
 }
-template<class T, class A, class Tp>
-batch<T, A> sadd(batch<T, A> const& self, Tp const& other) {
-  return kernel::sadd<A>(self, batch<T, A>(other), A{});
-}
-template<class T, class A, class Tp>
-batch<T, A> sadd(Tp const& self, batch<T, A> const& other) {
-  return kernel::sadd<A>(batch<T, A>(self), other, A{});
-}
 
-template<class T, class A>
-batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other) {
+template<class T, class Tp>
+auto ssub(T const& self, Tp const& other) -> decltype(self - other) {
+  using A = typename decltype(self - other)::arch_type;
   return kernel::ssub<A>(self, other, A{});
-}
-template<class T, class A, class Tp>
-batch<T, A> ssub(batch<T, A> const& self, Tp const& other) {
-  return kernel::ssub<A>(self, batch<T, A>(other), A{});
-}
-template<class T, class A, class Tp>
-batch<T, A> ssub(Tp const& self, batch<T, A> const& other) {
-  return kernel::ssub<A>(batch<T, A>(self), other, A{});
 }
 
 template<class T, class Tp>
