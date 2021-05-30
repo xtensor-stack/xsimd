@@ -42,6 +42,7 @@ struct batch : types::simd_register<T, A> {
 
   // unary operators
   batch_bool<T, A> operator!() const;
+  batch<T, A> operator~() const;
   batch operator-() const;
   batch operator+() const { return *this; }
 
@@ -137,6 +138,9 @@ batch<T, A> batch<T, A>::from_aligned(T const* mem) {
 
 template<class T, class A>
 batch_bool<T, A> batch<T, A>::operator!() const { return kernel::eq<A>(*this, batch((T)0), A{}); }
+
+template<class T, class A>
+batch<T, A> batch<T, A>::operator~() const { return kernel::bitwise_not<A>(*this, A{}); }
 
 template<class T, class A>
 batch<T, A> batch<T, A>::operator-() const { return kernel::neg<A>(*this, A{}); }
