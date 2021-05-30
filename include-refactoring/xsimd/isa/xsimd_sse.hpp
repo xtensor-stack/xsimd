@@ -230,11 +230,11 @@ namespace xsimd {
     }
 
     // nearbyint
-    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<sse>) {
+    template<class A> batch<float, A> nearbyint(batch<float, A> const& , requires<sse>) {
       //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
       return {};
     }
-    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires<sse>) {
+    template<class A> batch<double, A> nearbyint(batch<double, A> const& , requires<sse>) {
       //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
       return {};
     }
