@@ -199,7 +199,7 @@ protected:
         // batch - batch
         {
             array_type expected;
-            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(), [this](value_type x, value_type y) { return xsimd::ssub(x, y); });
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(), [](value_type x, value_type y) { return xsimd::ssub(x, y); });
             batch_type res = xsimd::ssub(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("ssub(batch, batch)");
         }
