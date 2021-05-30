@@ -186,8 +186,8 @@ batch_bool<T, A> batch_bool<T, A>::operator~() const { return kernel::bitwise_no
 
 template<class T, class A>
 batch_bool<T, A>::batch_bool(bool val) : types::simd_register<T, A>(val?
-    (batch<T, A>(this->data) == batch<T, A>(this->data)):
-    (batch<T, A>(this->data) != batch<T, A>(this->data))) {
+    (batch<T, A>(T(0)) == batch<T, A>(T(0))):
+    (batch<T, A>(T(0)) != batch<T, A>(T(0)))) {
 }
 
 
