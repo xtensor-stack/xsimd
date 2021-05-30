@@ -13,9 +13,7 @@
 
 #include "test_utils.hpp"
 
-#if XSIMD_INSTR_SET != XSIMD_VERSION_NUMBER_NOT_AVAILABLE
-
-static_assert(xsimd::arch::default_::supported, "default arch must be supported");
+static_assert(xsimd::default_arch::supported, "default arch must be supported");
 static_assert(xsimd::arch::supported::contains<xsimd::arch::default_>(), "default arch is supported");
 static_assert(xsimd::arch::all::contains<xsimd::arch::default_>(), "default arch is a valid arch");
 static_assert(!(xsimd::arch::x86::supported && xsimd::arch::arm::supported), "either x86 or arm, but not both");
