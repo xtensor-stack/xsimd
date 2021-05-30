@@ -14,6 +14,8 @@ namespace xsimd {
 
   namespace types {
 
+    XSIMD_DECLARE_SIMD_REGISTER(int, sse, __m128i);
+    XSIMD_DECLARE_SIMD_REGISTER(long int, sse, __m128i);
     XSIMD_DECLARE_SIMD_REGISTER(float, sse, __m128);
     XSIMD_DECLARE_SIMD_REGISTER(double, sse, __m128d);
 
