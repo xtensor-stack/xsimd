@@ -2,7 +2,7 @@
 #define XSIMD_API_HPP
 
 #include "../types/xsimd_batch.hpp"
-#include "../isa/xsimd_isa.hpp"
+#include "../arch/xsimd_isa.hpp"
 
 #include <limits>
 
