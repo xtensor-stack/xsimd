@@ -20,11 +20,31 @@ namespace xsimd {
     }
 
     // add
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> add(batch<T, A> const&, batch<T, A> const&, requires<sse>) {
+      static_assert(std::is_same<A, sse>::value, "unsupported arch / op combination");
+    }
     template<class A> batch<float, A> add(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_add_ps(self, other);
     }
     template<class A> batch<double, A> add(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_add_pd(self, other);
+    }
+
+    // all
+    template<class A> bool all(batch<float, A> const& self, requires<sse>) {
+      return _mm_movemask_ps(self) == 0x0F;
+    }
+    template<class A> bool all(batch<double, A> const& self, requires<sse>) {
+      return _mm_movemask_pd(self) == 0x03;
+    }
+
+    // any
+    template<class A> bool any(batch<float, A> const& self, requires<sse>) {
+      return _mm_movemask_ps(self) != 0;
+    }
+    template<class A> bool any(batch<double, A> const& self, requires<sse>) {
+      return _mm_movemask_pd(self) != 0;
     }
 
     // bitwise_and
@@ -35,6 +55,35 @@ namespace xsimd {
       return _mm_and_pd(self, other);
     }
 
+    // bitwise_cast
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<float, A> bitwise_cast(batch<T, A> const& self, batch<float, A> const &, requires<sse>) {
+      return _mm_castsi128_ps(self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<double, A> bitwise_cast(batch<T, A> const& self, batch<double, A> const &, requires<sse>) {
+      return _mm_castsi128_pd(self);
+    }
+    template<class A, class T, class Tp, class=typename std::enable_if<std::is_integral<typename std::common_type<T, Tp>::type>::value, void>::type>
+    batch<Tp, A> bitwise_cast(batch<T, A> const& self, batch<Tp, A> const &, requires<sse>) {
+      return batch<Tp, A>(self.data);
+    }
+    template<class A>
+    batch<double, A> bitwise_cast(batch<float, A> const& self, batch<double, A> const &, requires<sse>) {
+      return _mm_castps_pd(self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_cast(batch<float, A> const& self, batch<T, A> const &, requires<sse>) {
+      return _mm_castps_si128(self);
+    }
+    template<class A>
+    batch<float, A> bitwise_cast(batch<double, A> const& self, batch<float, A> const &, requires<sse>) {
+      return _mm_castpd_ps(self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_cast(batch<double, A> const& self, batch<T, A> const &, requires<sse>) {
+      return _mm_castpd_si128(self);
+    }
 
     // bitwise_not
     template<class A> batch<float, A> bitwise_not(batch<float, A> const& self, requires<sse>) {
@@ -46,11 +95,21 @@ namespace xsimd {
     }
 
     // broadcast
-    template<class A> batch<float, A> broadcast(float val, requires<sse>) {
-      return _mm_set_ps(val, val, val, val);
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> broadcast(T val, requires<sse>) {
+      switch(sizeof(T)) {
+        case 1: return _mm_set1_epi8(val);
+        case 2: return _mm_set1_epi16(val);
+        case 4: return _mm_set1_epi32(val);
+        default: assert(false && "unsupported"); return {};
+      }
     }
-    template<class A> batch<double, A> broadcast(double val, requires<sse>) {
-      return _mm_set_pd(val, val);
+    template<class A> batch<float, A> broadcast(float val, requires<sse>) {
+      return _mm_set1_ps(val);
+    }
+    template<class A> batch<double, A> broadcast(double, requires<sse>) {
+      assert(false && "unsupported");
+      return {};
     }
 
     // div
@@ -170,6 +229,16 @@ namespace xsimd {
       return _mm_mul_pd(self, other);
     }
 
+    // nearbyint
+    template<class A> batch<float, A> nearbyint(batch<float, A> const& , requires<sse>) {
+      //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
+      return {};
+    }
+    template<class A> batch<double, A> nearbyint(batch<double, A> const& , requires<sse>) {
+      //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
+      return {};
+    }
+
     // neg
     template<class A> batch<float, A> neg(batch<float, A> const& self, requires<sse>) {
       return _mm_xor_ps(self, _mm_castsi128_ps(_mm_set1_epi32(0x80000000)));
@@ -194,6 +263,14 @@ namespace xsimd {
     }
     template<class A> batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_add_pd(self, other); // no saturated arithmetic on floating point numbers
+    }
+
+    // select
+    template<class A> batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires<sse>) {
+      return _mm_or_ps(_mm_and_ps(cond, true_br), _mm_andnot_ps(cond, false_br));
+    }
+    template<class A> batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires<sse>) {
+      return _mm_or_pd(_mm_and_pd(cond, true_br), _mm_andnot_pd(cond, false_br));
     }
 
     // sqrt
@@ -229,6 +306,10 @@ namespace xsimd {
     }
 
     // sub
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> sub(batch<T, A> const&, batch<T, A> const&, requires<sse>) {
+      static_assert(std::is_same<A, sse>::value, "unsupported arch / op combination");
+    }
     template<class A> batch<float, A> sub(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_sub_ps(self, other);
     }

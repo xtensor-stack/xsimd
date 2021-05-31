@@ -4,10 +4,10 @@
 namespace xsimd {
 
 template<class T, class A>
-class batch;
+struct batch;
 
 template<class T, class A>
-class batch_bool;
+struct batch_bool;
 
 namespace types {
 
