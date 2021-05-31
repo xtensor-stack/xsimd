@@ -15,6 +15,7 @@
 #include "xsimd_instruction_set.hpp"
 
 #include <algorithm>
+#include <cstring>
 
 // header for runtime architecture detection {
 #if defined(__ARM_NEON)
