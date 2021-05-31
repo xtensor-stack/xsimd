@@ -10,5 +10,5 @@
 
 #include "types/xsimd_batch.hpp"
 #include "types/xsimd_api.hpp"
-#include "isa/xsimd_scalar.hpp"
+#include "arch/xsimd_scalar.hpp"
 #endif
