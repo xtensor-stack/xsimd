@@ -7,13 +7,19 @@
 
 namespace xsimd {
 
-  struct sse3 : sse2 {};
+  struct sse3 : sse2 {
+    static constexpr bool supported() { return XSIMD_WITH_SSE3; }
+    static constexpr bool available() { return true; }
+    static constexpr unsigned version() { return generic::version(1, 3, 0); }
+  };
 
+#if XSIMD_WITH_SSE3
   namespace types {
 
     XSIMD_DECLARE_SIMD_REGISTER_ALIAS(sse3, sse2);
 
   }
+#endif
 }
 #endif
 

@@ -35,7 +35,7 @@ struct batch : types::simd_register<T, A> {
   static batch from_unaligned(T const* mem) XSIMD_DEPRECATED ("use xsimd::load_unaligned(mem) instead") { return {mem}; }
 
   T operator[](std::size_t i) const {
-    alignas(A::alignment) T buffer[size];
+    alignas(A::alignment()) T buffer[size];
     store_unaligned(&buffer[0]);
     return buffer[i];
   }
@@ -103,7 +103,7 @@ struct batch_bool : types::simd_register<T, A> {
 
 }
 
-#include "../isa/xsimd_isa.hpp"
+#include "../arch/xsimd_isa.hpp"
 
 namespace xsimd {
 
@@ -193,7 +193,7 @@ batch_bool<T, A>::batch_bool(bool val) : types::simd_register<T, A>(val?
 
 template<class T, class A>
 void batch_bool<T, A>::store_aligned(bool* mem) const {
-  alignas(A::alignment) T buffer[size];
+  alignas(A::alignment()) T buffer[size];
   kernel::store_aligned<A>(&buffer[0], *this, A{});
   for(std::size_t i = 0; i < size; ++i)
     mem[i] = bool(buffer[i]);
