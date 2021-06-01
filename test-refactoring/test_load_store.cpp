@@ -19,22 +19,24 @@ protected:
 
     using batch_type = B;
     using value_type = typename B::value_type;
+    template<class T>
+    using allocator = xsimd::aligned_allocator<T, B::arch_type::alignment()>;
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
-    using int8_vector_type = std::vector<int8_t, XSIMD_DEFAULT_ALLOCATOR(int8_t)>;
-    using uint8_vector_type = std::vector<uint8_t, XSIMD_DEFAULT_ALLOCATOR(uint8_t)>;
-    using int16_vector_type = std::vector<int16_t, XSIMD_DEFAULT_ALLOCATOR(int16_t)>;
-    using uint16_vector_type = std::vector<uint16_t, XSIMD_DEFAULT_ALLOCATOR(uint16_t)>;
-    using int32_vector_type = std::vector<int32_t, XSIMD_DEFAULT_ALLOCATOR(int32_t)>;
-    using uint32_vector_type = std::vector<uint32_t, XSIMD_DEFAULT_ALLOCATOR(uint32_t)>;
-    using int64_vector_type = std::vector<int64_t, XSIMD_DEFAULT_ALLOCATOR(int64_t)>;
-    using uint64_vector_type = std::vector<uint64_t, XSIMD_DEFAULT_ALLOCATOR(uint64_t)>;
+    using int8_vector_type = std::vector<int8_t, allocator<int8_t>>;
+    using uint8_vector_type = std::vector<uint8_t, allocator<uint8_t>>;
+    using int16_vector_type = std::vector<int16_t, allocator<int16_t>>;
+    using uint16_vector_type = std::vector<uint16_t, allocator<uint16_t>>;
+    using int32_vector_type = std::vector<int32_t, allocator<int32_t>>;
+    using uint32_vector_type = std::vector<uint32_t, allocator<uint32_t>>;
+    using int64_vector_type = std::vector<int64_t, allocator<int64_t>>;
+    using uint64_vector_type = std::vector<uint64_t, allocator<uint64_t>>;
 #ifdef XSIMD_32_BIT_ABI
-    using long_vector_type = std::vector<long, XSIMD_DEFAULT_ALLOCATOR(long)>;
-    using ulong_vector_type = std::vector<unsigned long, XSIMD_DEFAULT_ALLOCATOR(unsigned long)>;
+    using long_vector_type = std::vector<long, allocator<long>>;
+    using ulong_vector_type = std::vector<unsigned long, allocator<unsigned long>>;
 #endif
-    using float_vector_type = std::vector<float, XSIMD_DEFAULT_ALLOCATOR(float)>;
-    using double_vector_type = std::vector<double, XSIMD_DEFAULT_ALLOCATOR(double)>;
+    using float_vector_type = std::vector<float, allocator<float>>;
+    using double_vector_type = std::vector<double, allocator<double>>;
 
     int8_vector_type i8_vec;
     uint8_vector_type ui8_vec;
@@ -105,7 +107,7 @@ protected:
 #endif
         test_store_impl(f_vec, "load float");
         test_store_impl(d_vec, "load double");
- 
+
     }
 
 private:
@@ -118,11 +120,11 @@ private:
 
         b.load_unaligned(v.data());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " unaligned");
-        
+
         b.load_aligned(v.data());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned");
     }
-    
+
     template <class V>
     void test_store_impl(const V& v, const std::string& name)
     {
@@ -132,7 +134,7 @@ private:
 
         b.store_unaligned(res.data());
         EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " unaligned");
-        
+
         b.store_aligned(res.data());
         EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " aligned");
     }

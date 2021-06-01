@@ -42,6 +42,7 @@ ${XSIMD_INCLUDE_DIR}/xsimd/config
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_cpuid.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_arch.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse2_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_generic_arch.hpp
