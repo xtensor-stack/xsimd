@@ -28,9 +28,28 @@ struct batch : types::simd_register<T, A> {
 
   // memory operators
   void store_aligned(T * mem) const;
+  template<class U>
+  void store_aligned(U * mem) const {
+    alignas(A::alignment()) T buffer[size];
+    store_aligned(&buffer[0]);
+    std::copy(std::begin(buffer), std::end(buffer), mem);
+  }
+
   void store_unaligned(T * mem) const;
+  template<class U>
+  void store_unaligned(U * mem) const {
+    store_aligned(mem);
+  }
+
   void load_aligned(T const* mem) { *this = from_aligned(mem); }
-  void load_unaligned(T const* mem) { *this = from_unaligned(mem); }
+  template<class U>
+  void load_aligned(U const* mem) { return load_unaligned(mem); }
+  template<class U>
+  void load_unaligned(U const* mem) {
+    alignas(A::alignment()) T buffer[size];
+    std::copy(mem, mem + size, &buffer[0]);
+    load_aligned(&buffer[0]);
+  }
   static batch from_aligned(T const* mem) XSIMD_DEPRECATED("use xsimd::load_aligned(mem) instead") ;
   static batch from_unaligned(T const* mem) XSIMD_DEPRECATED ("use xsimd::load_unaligned(mem) instead") { return {mem}; }
 
