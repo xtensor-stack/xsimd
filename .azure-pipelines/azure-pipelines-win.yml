@@ -60,6 +60,7 @@ jobs:
                 -DCMAKE_C_COMPILER=clang-cl ^
                 -DCMAKE_CXX_COMPILER=clang-cl ^
                 -DDOWNLOAD_GTEST=ON ^
+                -DXSIMD_REFACTORING=ON ^
                 $(Build.SourcesDirectory)
         displayName: "Configure xsimd"
         workingDirectory: $(Build.BinariesDirectory)
@@ -80,4 +81,4 @@ jobs:
           cd test
           .\test_xsimd
         displayName: "Test xsimd"
-        workingDirectory: $(Build.BinariesDirectory)/build/test
+        workingDirectory: $(Build.BinariesDirectory)/build/test-refactoring
