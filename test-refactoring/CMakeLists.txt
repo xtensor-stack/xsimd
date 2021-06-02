@@ -147,7 +147,7 @@ set(XSIMD_TESTS
         test_basic_math.cpp
         test_batch.cpp
     #    test_batch_bool.cpp
-    #    test_batch_cast.cpp
+        test_batch_cast.cpp
     #    test_batch_complex.cpp
         test_batch_float.cpp
     #    test_batch_int.cpp
