@@ -55,6 +55,22 @@ namespace xsimd {
       return _mm_and_pd(self, other);
     }
 
+    // bitwise_or
+    template<class A> batch<float, A> bitwise_or(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_or_ps(self, other);
+    }
+    template<class A> batch<double, A> bitwise_or(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_or_pd(self, other);
+    }
+
+    // bitwise_xor
+    template<class A> batch<float, A> bitwise_xor(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_xor_ps(self, other);
+    }
+    template<class A> batch<double, A> bitwise_xor(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_xor_pd(self, other);
+    }
+
     // bitwise_cast
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<float, A> bitwise_cast(batch<T, A> const& self, batch<float, A> const &, requires<sse>) {
@@ -227,16 +243,6 @@ namespace xsimd {
     }
     template<class A> batch<double, A> mul(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_mul_pd(self, other);
-    }
-
-    // nearbyint
-    template<class A> batch<float, A> nearbyint(batch<float, A> const& , requires<sse>) {
-      //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
-      return {};
-    }
-    template<class A> batch<double, A> nearbyint(batch<double, A> const& , requires<sse>) {
-      //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
-      return {};
     }
 
     // neg

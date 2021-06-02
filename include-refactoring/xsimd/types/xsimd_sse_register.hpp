@@ -26,6 +26,8 @@ namespace xsimd {
     XSIMD_DECLARE_SIMD_REGISTER(int, sse, __m128i);
     XSIMD_DECLARE_SIMD_REGISTER(unsigned long int, sse, __m128i);
     XSIMD_DECLARE_SIMD_REGISTER(long int, sse, __m128i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, sse, __m128i);
+    XSIMD_DECLARE_SIMD_REGISTER(long long int, sse, __m128i);
     XSIMD_DECLARE_SIMD_REGISTER(float, sse, __m128);
     XSIMD_DECLARE_SIMD_REGISTER(double, sse, __m128d);
 
