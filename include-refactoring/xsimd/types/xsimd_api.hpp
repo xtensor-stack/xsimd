@@ -31,6 +31,11 @@ bool any(batch<T, A> const& self) {
   return kernel::any<A>(self, A{});
 }
 
+template<class T_out, class T_in, class A>
+batch<T_out, A> batch_cast(batch<T_in, A> const & self) {
+  return kernel::batch_cast<A>(self, batch<T_out, A>{}, A{});
+}
+
 template<class T, class A>
 batch<T, A> bitofsign(batch<T, A> const& self) {
   return kernel::bitofsign<A>(self, A{});
@@ -167,7 +172,7 @@ batch<To, A> load(From* ptr) {
   return kernel::load_aligned<A>(ptr, kernel::convert<To>{}, A{});
 }
 
-template<class To, class A=default_arch, class From>
+template<class To, class A, class From>
 batch<To, A> load_aligned(From* ptr) {
   return kernel::load_aligned<A>(ptr, kernel::convert<To>{}, A{});
 }

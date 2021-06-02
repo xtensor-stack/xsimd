@@ -15,6 +15,8 @@ namespace xsimd {
   batch<T, A> bitofsign(batch<T, A> const& self);
   template<class B, class T, class A>
   B bitwise_cast(batch<T, A> const& self);
+  template<class To, class A=default_arch, class From>
+  batch<To, A> load_aligned(From* ptr);
   template<class T, class A>
   batch<T, A> nearbyint(batch<T, A> const& self);
   template<class T, class A>
@@ -28,6 +30,21 @@ namespace xsimd {
 
   namespace kernel {
     using namespace types;
+    // batch_cast
+    template<class A, class T> batch<T, A> batch_cast(batch<T, A> const& self, batch<T, A> const&, requires<generic>) {
+      return self;
+    }
+    template<class A, class T_out, class T_in> batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires<generic>) {
+      using batch_type_in = batch<T_in, A>;
+      using batch_type_out = batch<T_out, A>;
+      static_assert(batch_type_in::size == batch_type_out::size, "compatible sizes");
+      alignas(A::alignment()) T_in buffer_in[batch_type_in::size];
+      alignas(A::alignment()) T_out buffer_out[batch_type_out::size];
+      self.store_aligned(&buffer_in[0]);
+      std::copy(std::begin(buffer_in), std::end(buffer_in), std::begin(buffer_out));
+      return load_aligned<T_out, A>(buffer_out);
+    }
+
     // bitofsign
     template<class A, class T> batch<T, A> bitofsign(batch<T, A> const& self, requires<generic>) {
       return self & constants::minuszero<batch<T, A>>();
