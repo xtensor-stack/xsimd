@@ -31,6 +31,11 @@ bool any(batch<T, A> const& self) {
   return kernel::any<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> bitofsign(batch<T, A> const& self) {
+  return kernel::bitofsign<A>(self, A{});
+}
+
 template<class T, class Tp>
 auto bitwise_and(T const& self, Tp const& other) -> decltype(self & other){
   return self & other;
@@ -44,6 +49,16 @@ B bitwise_cast(batch<T, A> const& self) {
 template<class T, class A>
 batch<T, A> bitwise_not(batch<T, A> const& self) {
   return kernel::bitwise_not<A>(self, A{});
+}
+
+template<class T, class Tp>
+auto bitwise_or(T const& self, Tp const& other) -> decltype(self | other){
+  return self | other;
+}
+
+template<class T, class Tp>
+auto bitwise_xor(T const& self, Tp const& other) -> decltype(self ^ other){
+  return self ^ other;
 }
 
 template<class A, class T>
@@ -259,6 +274,16 @@ auto ssub(T const& self, Tp const& other) -> decltype(self - other) {
 template<class T, class Tp>
 auto sub(T const& self, Tp const& other) -> decltype(self - other){
   return self - other;
+}
+
+template<class T, class A>
+batch<as_float_t<T>, A> to_float(batch<T, A> const& self) {
+  return kernel::to_float<A>(self, A{});
+}
+
+template<class T, class A>
+batch<as_integer_t<T>, A> to_int(batch<T, A> const& self) {
+  return kernel::to_int<A>(self, A{});
 }
 
 template<class T, class A>

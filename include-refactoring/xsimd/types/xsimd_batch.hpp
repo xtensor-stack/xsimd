@@ -92,12 +92,22 @@ struct batch : types::simd_register<T, A> {
     return batch<T, A>(self) &= other;
   }
 
+  friend batch<T, A> operator|(batch<T, A> const& self, batch<T, A> const& other) {
+    return batch<T, A>(self) |= other;
+  }
+
+  friend batch<T, A> operator^(batch<T, A> const& self, batch<T, A> const& other) {
+    return batch<T, A>(self) ^= other;
+  }
+
   // Update operators
   batch<T, A>& operator+=(batch const& other);
   batch<T, A>& operator-=(batch const& other);
   batch<T, A>& operator*=(batch const& other);
   batch<T, A>& operator/=(batch const& other);
   batch<T, A>& operator&=(batch const& other);
+  batch<T, A>& operator|=(batch const& other);
+  batch<T, A>& operator^=(batch const& other);
 
 };
 
@@ -196,6 +206,12 @@ batch<T, A>& batch<T, A>::operator/=(batch<T, A> const& other) { return *this = 
 
 template<class T, class A>
 batch<T, A>& batch<T, A>::operator&=(batch<T, A> const& other) { return *this = kernel::bitwise_and<A>(*this, other, A{}); }
+
+template<class T, class A>
+batch<T, A>& batch<T, A>::operator|=(batch<T, A> const& other) { return *this = kernel::bitwise_or<A>(*this, other, A{}); }
+
+template<class T, class A>
+batch<T, A>& batch<T, A>::operator^=(batch<T, A> const& other) { return *this = kernel::bitwise_xor<A>(*this, other, A{}); }
 
 
 // batch_bool implementation

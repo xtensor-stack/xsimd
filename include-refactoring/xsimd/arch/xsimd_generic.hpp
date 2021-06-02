@@ -2,6 +2,7 @@
 #define XSIMD_GENERIC_HPP
 
 #include "../types/xsimd_generic_arch.hpp"
+#include "./xsimd_constants.hpp"
 
 #include <limits>
 
@@ -10,21 +11,27 @@ namespace xsimd {
   // Forward declaration. Should we put them in a separate file?
   template<class T, class A>
   batch<T, A> abs(batch<T, A> const& self);
+  template<class T, class A>
+  batch<T, A> bitofsign(batch<T, A> const& self);
   template<class B, class T, class A>
   B bitwise_cast(batch<T, A> const& self);
-  template<class B>
-  B infinity();
-  template<class B>
-  B minusinfinity();
   template<class T, class A>
   batch<T, A> nearbyint(batch<T, A> const& self);
   template<class T, class A>
   batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const& , batch<T, A> const& );
   template<class T, class A>
+  batch<as_float_t<T>, A> to_float(batch<T, A> const& self);
+  template<class T, class A>
+  batch<as_integer_t<T>, A> to_int(batch<T, A> const& self);
+  template<class T, class A>
   batch<T, A> trunc(batch<T, A> const& self);
 
   namespace kernel {
     using namespace types;
+    // bitofsign
+    template<class A, class T> batch<T, A> bitofsign(batch<T, A> const& self, requires<generic>) {
+      return self & constants::minuszero<batch<T, A>>();
+    }
 
     // clip
     template<class A, class T> batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> const& hi, requires<generic>) {
@@ -71,6 +78,16 @@ namespace xsimd {
       return (self - self) == batch<T, A>((T)0);
     }
 
+    // nearbyint
+    template<class A, class T> batch<T, A> nearbyint(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+      batch_type s = bitofsign(self);
+      batch_type v = self ^ s;
+      batch_type t2n = constants::twotonmb<batch_type>();
+      batch_type d0 = v + t2n;
+      return s ^ select(v < t2n, d0 - t2n, v);
+    }
+
     // nextafter
     namespace detail
     {
@@ -115,13 +132,13 @@ namespace xsimd {
             static inline batch_type next(const batch_type& b) noexcept
             {
                 batch_type n = bitwise_cast<batch_type>(bitwise_cast<int_batch>(b) + int_type(1));
-                return select(b == infinity<batch_type>(), b, n);
+                return select(b == constants::infinity<batch_type>(), b, n);
             }
 
             static inline batch_type prev(const batch_type& b) noexcept
             {
                 batch_type p = bitwise_cast<batch_type>(bitwise_cast<int_batch>(b) - int_type(1));
-                return select(b == minusinfinity<batch_type>(), b, p);
+                return select(b == constants::minusinfinity<batch_type>(), b, p);
             }
         };
     }
@@ -135,6 +152,12 @@ namespace xsimd {
     template<class A, class T> batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return fnma(nearbyint(self / other), other, self);
     }
+
+    // trunc
+    template<class A, class T> batch<T, A> trunc(batch<T, A> const& self, requires<generic>) {
+      return select(abs(self) < constants::maxflint<batch<T, A>>(), to_float(to_int(self)), self);
+    }
+
 
   }
 
