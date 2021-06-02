@@ -171,43 +171,6 @@ set(XSIMD_TESTS
     #    test_shuffle_128.cpp
     #    test_trigonometric.cpp
     #    test_utils.hpp
-    #    #[[    xsimd_api_test.hpp
-    #    xsimd_api_test.cpp
-    #    xsimd_algorithms.cpp
-    #    xsimd_basic_test.hpp
-    #    xsimd_basic_test.cpp
-    #    xsimd_basic_math_test.hpp
-    #    xsimd_basic_math_test.cpp
-    #    xsimd_complex_basic_test.hpp
-    #    xsimd_complex_tester.hpp
-    #    xsimd_error_gamma_test.hpp
-    #    xsimd_error_gamma_test.cpp
-    #    xsimd_exponential_test.hpp
-    #    xsimd_exponential_test.cpp
-    #    xsimd_cexponential_test.hpp
-    #    xsimd_cexponential_test.cpp
-    #    xsimd_chyperbolic_test.hpp
-    #    xsimd_chyperbolic_test.cpp
-    #    xsimd_cpower_test.hpp
-    #    xsimd_cpower_test.cpp
-    #    xsimd_ctrigonometric_test.hpp
-    #    xsimd_ctrigonometric_test.cpp
-    #    xsimd_fp_manipulation_test.hpp
-    #    xsimd_fp_manipulation_test.cpp
-    #    xsimd_hyperbolic_test.hpp
-    #    xsimd_hyperbolic_test.cpp
-    #    xsimd_interface_test.cpp
-    #    xsimd_memory_test.cpp
-    #    xsimd_poly_evaluation_test.cpp
-    #    xsimd_poly_evaluation_test.hpp
-    #    xsimd_power_test.hpp
-    #    xsimd_power_test.cpp
-    #    xsimd_rounding_test.hpp
-    #    xsimd_rounding_test.cpp
-    #    xsimd_tester.hpp
-    #    xsimd_test_utils.hpp
-    #    xsimd_trigonometric_test.hpp
-    #    xsimd_trigonometric_test.cpp]]
 )
 
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})

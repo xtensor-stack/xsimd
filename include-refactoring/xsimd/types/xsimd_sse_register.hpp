@@ -11,6 +11,7 @@ namespace xsimd {
   struct sse : generic {
     static constexpr bool supported() { return XSIMD_WITH_SSE; }
     static constexpr bool available() { return true; }
+    static constexpr bool requires_alignment() { return true; }
     static constexpr std::size_t alignment() { return 8; }
     static constexpr unsigned version() { return generic::version(1, 1, 0); }
   };
