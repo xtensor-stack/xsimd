@@ -18,10 +18,10 @@ protected:
     static constexpr size_t N = CP::size;
     static constexpr size_t A = CP::alignment;
 
-    using int32_batch = xsimd::batch<int32_t, N * 2>;
-    using int64_batch = xsimd::batch<int64_t, N>;
-    using float_batch = xsimd::batch<float, N * 2>;
-    using double_batch = xsimd::batch<double, N>;
+    using int32_batch = xsimd::batch<int32_t>;
+    using int64_batch = xsimd::batch<int64_t>;
+    using float_batch = xsimd::batch<float>;
+    using double_batch = xsimd::batch<double>;
 
     using int32_vector = std::vector<int32_t, xsimd::aligned_allocator<int32_t, A>>;
     using int64_vector = std::vector<int64_t, xsimd::aligned_allocator<int64_t, A>>;

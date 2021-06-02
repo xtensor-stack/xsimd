@@ -550,7 +550,6 @@ using batch_math_types = to_testing_types<xsimd::batch_math_type_list>;
 using batch_types = to_testing_types<xsimd::batch_type_list>;
 
 
-#if 0
 /********************
  * conversion utils *
  ********************/
@@ -568,42 +567,14 @@ public:
     template <class T>
     static std::string GetName(int)
     {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        if (T::size == 2) { return "sse"; }
-        if (T::size == 4) { return "avx"; }
-        if (T::size == 8) { return "avx512";}
-        return "fallback";
-#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-        if (T::size == 2) { return "neon"; }
-        return "fallback";
-#else
-        return "fallback";
-#endif
+        return __PRETTY_FUNCTION__;
     }
 };
 
 using conversion_type_list = xsimd::mpl::type_list<
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                               conversion_param<2, 16>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                               ,
-                               conversion_param<4, 32>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                               ,
-                               conversion_param<8, 64>
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-                               conversion_param<2, 16>
-#endif
-#if defined(XSIMD_ENABLE_FALLBACK)
-                               XSIMD_FALLBACK_DELIMITER
-                               conversion_param<3, 32>
-#endif
+                               conversion_param<sizeof(xsimd::types::simd_register<int, xsimd::default_arch>) / sizeof(double), xsimd::default_arch::alignment()>
                                >;
 using conversion_types = to_testing_types<conversion_type_list>;
-#endif
 
 #endif // XXSIMD_TEST_UTILS_HPP
 
