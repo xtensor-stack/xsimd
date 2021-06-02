@@ -20,7 +20,7 @@ protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     template<class T>
-    using allocator = xsimd::aligned_allocator<T, B::arch_type::alignment()>;
+    using allocator = xsimd::default_allocator<T, typename B::arch_type>;
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
     using int8_vector_type = std::vector<int8_t, allocator<int8_t>>;

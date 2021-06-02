@@ -336,6 +336,12 @@ namespace xsimd
                 size);
         }
     }
+
+    template<class T, class A=default_arch>
+    using default_allocator = typename std::conditional<A::requires_alignment(),
+              aligned_allocator<T, A::alignment()>,
+              std::allocator<T>
+            >::type;
 }
 
 #endif
