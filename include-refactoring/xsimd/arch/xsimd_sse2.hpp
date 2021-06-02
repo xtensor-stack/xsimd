@@ -29,6 +29,14 @@ namespace xsimd {
       return _mm_add_pd(self, other);
     }
 
+    // batch_cast
+    template<class A> batch<float, A> batch_cast(batch<int32_t, A> const& self, batch<float, A> const&, requires<sse2>) {
+      return _mm_cvtepi32_ps(self);
+    }
+    template<class A> batch<int32_t, A> batch_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires<sse2>) {
+      return _mm_cvttps_epi32(self);
+    }
+
     // broadcast
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> broadcast(T val, requires<sse2>) {
