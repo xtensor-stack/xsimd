@@ -1199,6 +1199,24 @@ namespace xsimd
     /*****************************************
      * bitwise cast functions implementation *
      *****************************************/
+    template <std::size_t in_N, std::size_t out_N>
+    batch<uint16_t, out_N> u8_to_u16(const batch<uint8_t, in_N>& x);
+
+    template <std::size_t in_N, std::size_t out_N>
+    batch<uint8_t, out_N> u16_to_u8(const batch<uint16_t, in_N>& x);
+
+    template <std::size_t in_N, std::size_t out_N>
+    batch<uint32_t, out_N> u8_to_u32(const batch<uint8_t, in_N>& x);
+
+    template <std::size_t in_N, std::size_t out_N>
+    batch<uint8_t, out_N> u32_to_u8(const batch<uint32_t, in_N>& x);
+
+    template <std::size_t in_N, std::size_t out_N>
+    batch<uint64_t, out_N> u8_to_u64(const batch<uint8_t, in_N>& x);
+
+    template <std::size_t in_N, std::size_t out_N>
+    batch<uint8_t, out_N> u64_to_u8(const batch<uint64_t, in_N>& x);
+
 
     template <class T_in, class T_out, std::size_t N_in>
     struct bitwise_cast_impl<batch<T_in, N_in>,
@@ -1221,6 +1239,46 @@ namespace xsimd
             return batch<T_out, N_out>(caster.out);
         }
     };
+
+    /***********************************************
+     * static_cast conversion by bitwise_cast_impl *
+     ***********************************************/
+    template <std::size_t in_N, std::size_t out_N>
+    inline batch<uint16_t, out_N> u8_to_u16(const batch<uint8_t, in_N>& x)
+    {
+        return bitwise_cast_impl<batch<uint8_t, in_N>, batch<uint16_t, out_N>>::run(x);
+    }
+
+    template <std::size_t in_N, std::size_t out_N>
+    inline batch<uint8_t, out_N> u16_to_u8(const batch<uint16_t, in_N>& x)
+    {
+        return bitwise_cast_impl<batch<uint16_t, in_N>, batch<uint8_t, out_N>>::run(x);
+    }
+
+    template <std::size_t in_N, std::size_t out_N>
+    inline batch<uint32_t, out_N> u8_to_u32(const batch<uint8_t, in_N>& x)
+    {
+        return bitwise_cast_impl<batch<uint8_t, in_N>, batch<uint32_t, out_N>>::run(x);
+    }
+
+    template <std::size_t in_N, std::size_t out_N>
+    inline batch<uint8_t, out_N> u32_to_u8(const batch<uint32_t, in_N>& x)
+    {
+        return bitwise_cast_impl<batch<uint32_t, in_N>, batch<uint8_t, out_N>>::run(x);
+    }
+
+    template <std::size_t in_N, std::size_t out_N>
+    inline batch<uint64_t, out_N> u8_to_u64(const batch<uint8_t, in_N>& x)
+    {
+        return bitwise_cast_impl<batch<uint8_t, in_N>, batch<uint64_t, out_N>>::run(x);
+    }
+
+    template <std::size_t in_N, std::size_t out_N>
+    inline batch<uint8_t, out_N> u64_to_u8(const batch<uint64_t, in_N>& x)
+    {
+       return bitwise_cast_impl<batch<uint64_t, in_N>, batch<uint8_t, out_N>>::run(x);
+    }
+
 }
 
 #endif

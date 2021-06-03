@@ -31,6 +31,13 @@ namespace xsimd
     batch<float, 4> to_float(const batch<int32_t, 4>& x);
     batch<double, 2> to_float(const batch<int64_t, 2>& x);
 
+    batch<uint16_t, 8> u8_to_u16(const batch<uint8_t, 16>& x);
+    batch<uint8_t, 16> u16_to_u8(const batch<uint16_t, 8>& x);
+    batch<uint32_t, 4> u8_to_u32(const batch<uint8_t, 16>& x);
+    batch<uint8_t, 16> u32_to_u8(const batch<uint32_t, 4>& x);
+    batch<uint64_t, 2> u8_to_u64(const batch<uint8_t, 16>& x);
+    batch<uint8_t, 16> u64_to_u8(const batch<uint64_t, 2>& x);
+
     /**************************
      * boolean cast functions *
      **************************/
@@ -70,6 +77,36 @@ namespace xsimd
 #else
         return batch<double, 2>(static_cast<double>(x[0]), static_cast<double>(x[1]));
 #endif
+    }
+
+    inline batch<uint16_t, 8> u8_to_u16(const batch<uint8_t, 16>& x)
+    {
+        return static_cast<batch<uint16_t, 8>>(x);
+    }
+
+    inline batch<uint8_t, 16> u16_to_u8(const batch<uint16_t, 8>& x)
+    {
+        return static_cast<batch<uint8_t, 16>>(x);
+    }
+
+    inline batch<uint32_t, 4> u8_to_u32(const batch<uint8_t, 16>& x)
+    {
+        return static_cast<batch<uint32_t, 4>>(x);
+    }
+
+    inline batch<uint8_t, 16> u32_to_u8(const batch<uint32_t, 4>& x)
+    {
+        return static_cast<batch<uint8_t, 16>>(x);
+    }
+
+    inline batch<uint64_t, 2> u8_to_u64(const batch<uint8_t, 16>& x)
+    {
+        return static_cast<batch<uint64_t, 2>>(x);
+    }
+
+    inline batch<uint8_t, 16> u64_to_u8(const batch<uint64_t, 2>& x)
+    {
+        return static_cast<batch<uint8_t, 16>>(x);
     }
 
     /*****************************************
