@@ -17,6 +17,8 @@ namespace xsimd {
   B bitwise_cast(batch<T, A> const& self);
   template<class To, class A=default_arch, class From>
   batch<To, A> load_aligned(From* ptr);
+  template<class To, class A=default_arch, class From>
+  batch<To, A> load_unaligned(From* ptr);
   template<class T, class A>
   batch<T, A> nearbyint(batch<T, A> const& self);
   template<class T, class A>
@@ -28,13 +30,43 @@ namespace xsimd {
   template<class T, class A>
   batch<T, A> trunc(batch<T, A> const& self);
 
+
   namespace kernel {
+
+    namespace detail {
+      // Generic conversion handling machinery. Each architecture must define
+      // conversion function when such conversions exits in the form of
+      // intrinsic. Then we use that information to automatically decide whether
+      // to use scalar or vector conversion when doing load / store / batch_cast
+      struct with_fast_conversion{};
+      struct with_slow_conversion{};
+        template<class A, class From, class To>
+        class has_fast_conversion {
+          template<class T0, class T1>
+          static std::true_type get(decltype(kernel::conversion::fast(batch<T0, A>{}, batch<T1, A>{}, A{}))*);
+          template<class T0, class T1>
+          static std::false_type get(...);
+          public:
+          static constexpr bool value = decltype(get<From, To>(nullptr))::value;
+        };
+        template<class A, class From, class To>
+        using conversion_type = typename std::conditional<has_fast_conversion<A, From, To>::value, with_fast_conversion, with_slow_conversion>::type;
+    }
+
     using namespace types;
     // batch_cast
     template<class A, class T> batch<T, A> batch_cast(batch<T, A> const& self, batch<T, A> const&, requires<generic>) {
       return self;
     }
-    template<class A, class T_out, class T_in> batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires<generic>) {
+
+    namespace detail {
+    template<class A, class T_out, class T_in>
+    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires<generic>, with_fast_conversion) {
+      return conversion::fast<A>(self, out, A{});
+    }
+    template<class A, class T_out, class T_in>
+    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires<generic>, with_slow_conversion) {
+      static_assert(!std::is_same<T_in, T_out>::value, "there should be no conversion for this type combination");
       using batch_type_in = batch<T_in, A>;
       using batch_type_out = batch<T_out, A>;
       static_assert(batch_type_in::size == batch_type_out::size, "compatible sizes");
@@ -43,6 +75,13 @@ namespace xsimd {
       self.store_aligned(&buffer_in[0]);
       std::copy(std::begin(buffer_in), std::end(buffer_in), std::begin(buffer_out));
       return ::xsimd::load_aligned<T_out, A>(buffer_out);
+    }
+
+    }
+
+    template<class A, class T_out, class T_in>
+    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires<generic>) {
+      return detail::batch_cast(self, out, A{}, detail::conversion_type<A, T_in, T_out>{});
     }
 
     // bitofsign
@@ -93,6 +132,46 @@ namespace xsimd {
     // isfinite
     template<class A, class T> batch_bool<T, A> isfinite(batch<T, A> const& self, requires<generic>) {
       return (self - self) == batch<T, A>((T)0);
+    }
+
+    // load_aligned
+    namespace detail {
+      template<class A, class T_in, class T_out>
+      batch<T_out, A> load_aligned(T_in const* mem, convert<T_out>, requires<generic>, with_fast_conversion) {
+        using batch_type_out = batch<T_out, A>;
+        return conversion::fast(::xsimd::load_aligned<T_in, A>(mem), batch_type_out(), A{});
+      }
+      template<class A, class T_in, class T_out>
+      batch<T_out, A> load_aligned(T_in const* mem, convert<T_out>, requires<generic>, with_slow_conversion) {
+        static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct load for this type combination");
+        using batch_type_out = batch<T_out, A>;
+        alignas(A::alignment()) T_out buffer[batch_type_out::size];
+        std::copy(mem, mem + batch_type_out::size, std::begin(buffer));
+        return ::xsimd::load_aligned<T_out, A>(buffer);
+      }
+    }
+    template<class A, class T_in, class T_out>
+    batch<T_out, A> load_aligned(T_in const* mem, convert<T_out> cvt, requires<generic>) {
+      return detail::load_aligned<A>(mem, cvt, A{}, detail::conversion_type<A, T_in, T_out>{});
+    }
+
+    // load_unaligned
+    namespace detail {
+      template<class A, class T_in, class T_out>
+      batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out>, requires<generic>, with_fast_conversion) {
+        using batch_type_out = batch<T_out, A>;
+        return conversion::fast(::xsimd::load_unaligned<T_in, A>(mem), batch_type_out(), A{});
+      }
+
+      template<class A, class T_in, class T_out>
+      batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out> cvt, requires<generic>, with_slow_conversion) {
+        static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct load for this type combination");
+        return load_aligned<A>(mem, cvt, generic{}, with_slow_conversion{});
+      }
+    }
+    template<class A, class T_in, class T_out>
+    batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out> cvt, requires<generic>) {
+      return detail::load_unaligned<A>(mem, cvt, generic{}, detail::conversion_type<A, T_in, T_out>{});
     }
 
     // nearbyint
@@ -148,13 +227,13 @@ namespace xsimd {
 
             static inline batch_type next(const batch_type& b) noexcept
             {
-                batch_type n = bitwise_cast<batch_type>(bitwise_cast<int_batch>(b) + int_type(1));
+                batch_type n = ::xsimd::bitwise_cast<batch_type>(::xsimd::bitwise_cast<int_batch>(b) + int_type(1));
                 return select(b == constants::infinity<batch_type>(), b, n);
             }
 
             static inline batch_type prev(const batch_type& b) noexcept
             {
-                batch_type p = bitwise_cast<batch_type>(bitwise_cast<int_batch>(b) - int_type(1));
+                batch_type p = ::xsimd::bitwise_cast<batch_type>(::xsimd::bitwise_cast<int_batch>(b) - int_type(1));
                 return select(b == constants::minusinfinity<batch_type>(), b, p);
             }
         };
@@ -168,6 +247,20 @@ namespace xsimd {
     // remainder
     template<class A, class T> batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return fnma(nearbyint(self / other), other, self);
+    }
+
+    // store_aligned
+    template<class A, class T_in, class T_out> void store_aligned(T_out *mem, batch<T_in, A> const& self, requires<generic>) {
+      static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct store for this type combination");
+      alignas(A::alignment()) T_in buffer[batch<T_in, A>::size];
+      store_aligned(&buffer[0], self);
+      std::copy(std::begin(buffer), std::end(buffer), mem);
+    }
+
+    // store_unaligned
+    template<class A, class T_in, class T_out> void store_unaligned(T_out *mem, batch<T_in, A> const& self, requires<generic>) {
+      static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct store for this type combination");
+      return store_aligned<A>(mem, self, generic{});
     }
 
     // trunc
