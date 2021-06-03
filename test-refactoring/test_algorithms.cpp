@@ -8,8 +8,9 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include <numeric>
 #include "test_utils.hpp"
+#include "xsimd/stl/algorithms.hpp"
+#include <numeric>
 
 struct binary_functor
 {
@@ -114,11 +115,11 @@ class xsimd_reduce : public ::testing::Test
 public:
     using aligned_vec_t = std::vector<double, test_allocator_type<double>>;
 
-    static constexpr std::size_t num_elements = 4 * xsimd::simd_traits<double>::size;
-    static constexpr std::size_t small_num = xsimd::simd_traits<double>::size - 1;
+    static constexpr std::size_t num_elements = 4 * xsimd::batch<double>::size;
+    static constexpr std::size_t small_num = xsimd::batch<double>::size - 1;
 
     aligned_vec_t vec = aligned_vec_t(num_elements, 123.);
-    aligned_vec_t small_vec = aligned_vec_t(small_num, 42.); 
+    aligned_vec_t small_vec = aligned_vec_t(small_num, 42.);
     double        init = 1337.;
 
     struct multiply
@@ -219,7 +220,7 @@ TEST(algorithms, iterator)
     std::iota(a.begin(), a.end(), 0.f);
     std::vector<float> a_cpy(a.begin(), a.end());
 
-    using batch_type = typename xsimd::simd_traits<float>::type;
+    using batch_type = xsimd::batch<float>;
     auto begin = xsimd::aligned_iterator<batch_type>(&a[0]);
     auto end = xsimd::aligned_iterator<batch_type>(&a[0] + a.size());
  
@@ -245,7 +246,7 @@ TEST(algorithms, iterator)
 
 #ifdef XSIMD_BATCH_DOUBLE_SIZE
     std::vector<std::complex<double>, test_allocator_type<std::complex<double>>> ca(10 * 16, std::complex<double>(0.2));
-    using cbatch_type = typename xsimd::simd_traits<std::complex<double>>::type;
+    using cbatch_type = xsimd::batch_type<std::complex<double>;
     auto cbegin = xsimd::aligned_iterator<cbatch_type>(&ca[0]);
     auto cend = xsimd::aligned_iterator<cbatch_type>(&ca[0] + a.size());
 
