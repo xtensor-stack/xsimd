@@ -35,6 +35,13 @@ namespace xsimd
     batch<int32_t, 4> to_int(const batch<float, 4>& x);
     batch<float, 4> to_float(const batch<int32_t, 4>& x);
 
+    batch<uint16_t, 8> u8_to_u16(const batch<uint8_t, 16>& x);
+    batch<uint8_t, 16> u16_to_u8(const batch<uint16_t, 8>& x);
+    batch<uint32_t, 4> u8_to_u32(const batch<uint8_t, 16>& x);
+    batch<uint8_t, 16> u32_to_u8(const batch<uint32_t, 4>& x);
+    batch<uint64_t, 2> u8_to_u64(const batch<uint8_t, 16>& x);
+    batch<uint8_t, 16> u64_to_u8(const batch<uint64_t, 2>& x);
+
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
     batch<int64_t, 2> to_int(const batch<double, 2>& x);
     batch<double, 2> to_float(const batch<int64_t, 2>& x);
@@ -81,6 +88,36 @@ namespace xsimd
     inline batch<float, 4> to_float(const batch<int32_t, 4>& x)
     {
         return vcvtq_f32_s32(x);
+    }
+
+    inline batch<uint16_t, 8> u8_to_u16(const batch<uint8_t, 16>& x)
+    {
+        return vreinterpretq_u16_u8(x);
+    }
+
+    inline batch<uint8_t, 16> u16_to_u8(const batch<uint16_t, 8>& x)
+    {
+        return vreinterpretq_u8_u16(x);
+    }
+
+    inline batch<uint32_t, 4> u8_to_u32(const batch<uint8_t, 16>& x)
+    {
+        return vreinterpretq_u32_u8(x);
+    }
+
+    inline batch<uint8_t, 16> u32_to_u8(const batch<uint32_t, 4>& x)
+    {
+        return vreinterpretq_u8_u32(x);
+    }
+
+    inline batch<uint64_t, 2> u8_to_u64(const batch<uint8_t, 16>& x)
+    {
+        return vreinterpretq_u64_u8(x);
+    }
+
+    inline batch<uint8_t, 16> u64_to_u8(const batch<uint64_t, 2>& x)
+    {
+        return vreinterpretq_u8_u64(x);
     }
 
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
