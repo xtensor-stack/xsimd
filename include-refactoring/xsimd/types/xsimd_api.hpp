@@ -3,6 +3,7 @@
 
 #include "../types/xsimd_batch.hpp"
 #include "../arch/xsimd_isa.hpp"
+#include "../memory/xsimd_alignment.hpp"
 
 #include <limits>
 
@@ -64,6 +65,11 @@ auto bitwise_or(T const& self, Tp const& other) -> decltype(self | other){
 template<class T, class Tp>
 auto bitwise_xor(T const& self, Tp const& other) -> decltype(self ^ other){
   return self ^ other;
+}
+
+template<class T, class A=default_arch>
+batch<T, A> broadcast(T val) {
+  return kernel::broadcast<A>(val, A{});
 }
 
 template<class A, class T>
@@ -168,16 +174,21 @@ batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other) {
 }
 
 template<class To, class A=default_arch, class From>
-batch<To, A> load(From* ptr) {
-  return kernel::load_aligned<A>(ptr, kernel::convert<To>{}, A{});
-}
-
-template<class To, class A, class From>
-batch<To, A> load_aligned(From* ptr) {
+batch<To, A> load(From* ptr, aligned_mode= {}) {
   return kernel::load_aligned<A>(ptr, kernel::convert<To>{}, A{});
 }
 
 template<class To, class A=default_arch, class From>
+batch<To, A> load(From* ptr, unaligned_mode) {
+  return kernel::load_unaligned<A>(ptr, kernel::convert<To>{}, A{});
+}
+
+template<class To, class A/*=default_arch*/, class From>
+batch<To, A> load_aligned(From* ptr) {
+  return kernel::load_aligned<A>(ptr, kernel::convert<To>{}, A{});
+}
+
+template<class To, class A/*=default_arch*/, class From>
 batch<To, A> load_unaligned(From* ptr) {
   return kernel::load_unaligned<A>(ptr, kernel::convert<To>{}, A{});
 }
@@ -249,18 +260,23 @@ batch<T, A> sqrt(batch<T, A> const& self) {
   return kernel::sqrt<A>(self, A{});
 }
 
-template<class T, class A>
-void store(T* mem, batch<T, A> const& val) {
+template<class To, class A, class From>
+void store(From* mem, batch<To, A> const& val, aligned_mode={}) {
   return kernel::store_aligned<A>(mem, val, A{});
 }
 
-template<class T, class A>
-void store_aligned(T* mem, batch<T, A> const& val) {
+template<class To, class A, class From>
+void store(To* mem, batch<From, A> const& val, unaligned_mode) {
+  return kernel::store_unaligned<A>(mem, val, A{});
+}
+
+template<class To, class A, class From>
+void store_aligned(To* mem, batch<From, A> const& val) {
   return kernel::store_aligned<A>(mem, val, A{});
 }
 
-template<class T, class A>
-void store_unaligned(T* mem, batch<T, A> const& val) {
+template<class To, class A, class From>
+void store_unaligned(To* mem, batch<From, A> const& val) {
   return kernel::store_unaligned<A>(mem, val, A{});
 }
 
@@ -312,7 +328,6 @@ template<class T, class A>
 bool any(batch_bool<T, A> const& self) {
   return kernel::any<A>(bitwise_cast(self), A{});
 }
-
 
 }
 

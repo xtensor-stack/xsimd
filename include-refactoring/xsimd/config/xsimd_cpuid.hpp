@@ -2,6 +2,10 @@
 #define XSIMD_CPUID_HPP
 
 #include "../types/xsimd_all_registers.hpp"
+#include <cstring>
+#include <algorithm>
+#include <array>
+
 
 namespace xsimd {
   namespace detail {
