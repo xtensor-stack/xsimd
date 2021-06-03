@@ -42,7 +42,7 @@ namespace xsimd {
       alignas(A::alignment()) T_out buffer_out[batch_type_out::size];
       self.store_aligned(&buffer_in[0]);
       std::copy(std::begin(buffer_in), std::end(buffer_in), std::begin(buffer_out));
-      return load_aligned<T_out, A>(buffer_out);
+      return ::xsimd::load_aligned<T_out, A>(buffer_out);
     }
 
     // bitofsign
