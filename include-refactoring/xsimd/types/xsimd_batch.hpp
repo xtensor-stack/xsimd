@@ -9,6 +9,7 @@ namespace xsimd {
 
 template<class T, class A=default_arch>
 struct batch : types::simd_register<T, A> {
+
   static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T);
 
   using value_type = T;

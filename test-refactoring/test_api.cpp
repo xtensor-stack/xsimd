@@ -21,16 +21,16 @@ protected:
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
-    using int8_vector_type = std::vector<int8_t, XSIMD_DEFAULT_ALLOCATOR(int8_t)>;
-    using uint8_vector_type = std::vector<uint8_t, XSIMD_DEFAULT_ALLOCATOR(uint8_t)>;
-    using int16_vector_type = std::vector<int16_t, XSIMD_DEFAULT_ALLOCATOR(int16_t)>;
-    using uint16_vector_type = std::vector<uint16_t, XSIMD_DEFAULT_ALLOCATOR(uint16_t)>;
-    using int32_vector_type = std::vector<int32_t, XSIMD_DEFAULT_ALLOCATOR(int32_t)>;
-    using uint32_vector_type = std::vector<uint32_t, XSIMD_DEFAULT_ALLOCATOR(uint32_t)>;
-    using int64_vector_type = std::vector<int64_t, XSIMD_DEFAULT_ALLOCATOR(int64_t)>;
-    using uint64_vector_type = std::vector<uint64_t, XSIMD_DEFAULT_ALLOCATOR(uint64_t)>;
-    using float_vector_type = std::vector<float, XSIMD_DEFAULT_ALLOCATOR(float)>;
-    using double_vector_type = std::vector<double, XSIMD_DEFAULT_ALLOCATOR(double)>;
+    using int8_vector_type = std::vector<int8_t, xsimd::default_allocator<int8_t>>;
+    using uint8_vector_type = std::vector<uint8_t, xsimd::default_allocator<uint8_t>>;
+    using int16_vector_type = std::vector<int16_t, xsimd::default_allocator<int16_t>>;
+    using uint16_vector_type = std::vector<uint16_t, xsimd::default_allocator<uint16_t>>;
+    using int32_vector_type = std::vector<int32_t, xsimd::default_allocator<int32_t>>;
+    using uint32_vector_type = std::vector<uint32_t, xsimd::default_allocator<uint32_t>>;
+    using int64_vector_type = std::vector<int64_t, xsimd::default_allocator<int64_t>>;
+    using uint64_vector_type = std::vector<uint64_t, xsimd::default_allocator<uint64_t>>;
+    using float_vector_type = std::vector<float, xsimd::default_allocator<float>>;
+    using double_vector_type = std::vector<double, xsimd::default_allocator<double>>;
 
     int8_vector_type i8_vec;
     uint8_vector_type ui8_vec;
@@ -107,28 +107,26 @@ private:
     template <class V>
     void test_load_impl(const V& v, const std::string& name)
     {
-        using src_value_type = typename V::value_type;
         batch_type b;
         std::copy(v.cbegin(), v.cend(), expected.begin());
 
-        b = xsimd::load_simd<src_value_type, value_type>(v.data(), xsimd::unaligned_mode());
+        b = xsimd::load<value_type>(v.data(), xsimd::unaligned_mode());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " unaligned");
-        
-        b = xsimd::load_simd<src_value_type, value_type>(v.data(), xsimd::aligned_mode());
+
+        b = xsimd::load<value_type>(v.data(), xsimd::aligned_mode());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned");
     }
-    
+
     template <class V>
     void test_store_impl(const V& v, const std::string& name)
     {
-        using src_value_type = typename V::value_type;
-        batch_type b = xsimd::load_simd<src_value_type, value_type>(v.data(), xsimd::aligned_mode());
+        batch_type b = xsimd::load<value_type>(v.data(), xsimd::aligned_mode());
         V res(size);
 
-        xsimd::store_simd<src_value_type, value_type>(res.data(), b, xsimd::unaligned_mode());
+        xsimd::store(res.data(), b, xsimd::unaligned_mode());
         EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " unaligned");
-        
-        xsimd::store_simd<src_value_type, value_type>(res.data(), b, xsimd::aligned_mode());
+
+        xsimd::store(res.data(), b, xsimd::aligned_mode());
         EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " aligned");
     }
 
@@ -137,7 +135,7 @@ private:
     {
         T v = T(1);
         batch_type expected(v);
-        batch_type res = xsimd::set_simd<T, value_type>(v);
+        batch_type res = xsimd::broadcast<T, value_type>(v);
         EXPECT_BATCH_EQ(res, expected) << print_function_name(name);
     }
 
@@ -161,55 +159,16 @@ private:
 };
 
 using xsimd_api_types = testing::Types<
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                            xsimd::batch<uint8_t, 64>,
-                            xsimd::batch<int8_t, 64>,
-                            xsimd::batch<uint16_t, 32>,
-                            xsimd::batch<int16_t, 32>,
-                            xsimd::batch<uint32_t, 16>,
-                            xsimd::batch<int32_t, 16>,
-                            xsimd::batch<uint64_t, 8>,
-                            xsimd::batch<int64_t, 8>,
-                            xsimd::batch<float, 16>,
-                            xsimd::batch<double, 8>
-#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                            xsimd::batch<uint8_t, 32>,
-                            xsimd::batch<int8_t, 32>,
-                            xsimd::batch<uint16_t, 16>,
-                            xsimd::batch<int16_t, 16>,
-                            xsimd::batch<uint32_t, 8>,
-                            xsimd::batch<int32_t, 8>,
-                            xsimd::batch<uint64_t, 4>,
-                            xsimd::batch<int64_t, 4>,
-                            xsimd::batch<float, 8>,
-                            xsimd::batch<double, 4>
-#elif XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                            xsimd::batch<uint8_t, 16>,
-                            xsimd::batch<int8_t, 16>,
-                            xsimd::batch<uint16_t, 8>,
-                            xsimd::batch<int16_t, 8>,
-                            xsimd::batch<uint32_t, 4>,
-                            xsimd::batch<int32_t, 4>,
-                            xsimd::batch<uint64_t, 2>,
-                            xsimd::batch<int64_t, 2>,
-                            xsimd::batch<float, 4>,
-                            xsimd::batch<double, 2>
-#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-                            xsimd::batch<uint8_t, 16>,
-                            xsimd::batch<int8_t, 16>,
-                            xsimd::batch<uint16_t, 8>,
-                            xsimd::batch<int16_t, 8>,
-                            xsimd::batch<uint32_t, 4>,
-                            xsimd::batch<int32_t, 4>,
-                            xsimd::batch<uint64_t, 2>,
-                            xsimd::batch<int64_t, 2>,
-                            xsimd::batch<float, 4>
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-                            ,
-                            xsimd::batch<double, 2>
-#endif
-#endif
+                            xsimd::batch<uint8_t>,
+                            xsimd::batch<int8_t>,
+                            xsimd::batch<uint16_t>,
+                            xsimd::batch<int16_t>,
+                            xsimd::batch<uint32_t>,
+                            xsimd::batch<int32_t>,
+                            xsimd::batch<uint64_t>,
+                            xsimd::batch<int64_t>,
+                            xsimd::batch<float>,
+                            xsimd::batch<double>
                         >;
 
 TYPED_TEST_SUITE(xsimd_api_test, xsimd_api_types, simd_test_names);
