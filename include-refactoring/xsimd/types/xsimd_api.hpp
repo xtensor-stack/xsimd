@@ -3,7 +3,6 @@
 
 #include "../types/xsimd_batch.hpp"
 #include "../arch/xsimd_isa.hpp"
-#include "../memory/xsimd_alignment.hpp"
 
 #include <limits>
 
@@ -173,24 +172,24 @@ batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other) {
   return self <= other;
 }
 
-template<class To, class A=default_arch, class From>
-batch<To, A> load(From* ptr, aligned_mode= {}) {
-  return kernel::load_aligned<A>(ptr, kernel::convert<To>{}, A{});
+template<class A=default_arch, class From>
+batch<From, A> load(From const* ptr, aligned_mode= {}) {
+  return kernel::load_aligned<A>(ptr, kernel::convert<From>{}, A{});
 }
 
-template<class To, class A=default_arch, class From>
-batch<To, A> load(From* ptr, unaligned_mode) {
-  return kernel::load_unaligned<A>(ptr, kernel::convert<To>{}, A{});
+template<class A=default_arch, class From>
+batch<From, A> load(From const* ptr, unaligned_mode) {
+  return kernel::load_unaligned<A>(ptr, kernel::convert<From>{}, A{});
 }
 
-template<class To, class A/*=default_arch*/, class From>
-batch<To, A> load_aligned(From* ptr) {
-  return kernel::load_aligned<A>(ptr, kernel::convert<To>{}, A{});
+template<class A/*=default_arch*/, class From>
+batch<From, A> load_aligned(From const* ptr) {
+  return kernel::load_aligned<A>(ptr, kernel::convert<From>{}, A{});
 }
 
-template<class To, class A/*=default_arch*/, class From>
-batch<To, A> load_unaligned(From* ptr) {
-  return kernel::load_unaligned<A>(ptr, kernel::convert<To>{}, A{});
+template<class A/*=default_arch*/, class From>
+batch<From, A> load_unaligned(From const* ptr) {
+  return kernel::load_unaligned<A>(ptr, kernel::convert<From>{}, A{});
 }
 
 template<class T, class A>

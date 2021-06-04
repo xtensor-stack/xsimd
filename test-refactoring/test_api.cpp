@@ -110,17 +110,17 @@ private:
         batch_type b;
         std::copy(v.cbegin(), v.cend(), expected.begin());
 
-        b = xsimd::load<value_type>(v.data(), xsimd::unaligned_mode());
+        b = batch_type::load(v.data(), xsimd::unaligned_mode());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " unaligned");
 
-        b = xsimd::load<value_type>(v.data(), xsimd::aligned_mode());
+        b = batch_type::load(v.data(), xsimd::aligned_mode());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned");
     }
 
     template <class V>
     void test_store_impl(const V& v, const std::string& name)
     {
-        batch_type b = xsimd::load<value_type>(v.data(), xsimd::aligned_mode());
+        batch_type b = batch_type::load(v.data(), xsimd::aligned_mode());
         V res(size);
 
         xsimd::store(res.data(), b, xsimd::unaligned_mode());
