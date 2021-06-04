@@ -16,9 +16,9 @@ namespace xsimd {
   template<class B, class T, class A>
   B bitwise_cast(batch<T, A> const& self);
   template<class To, class A=default_arch, class From>
-  batch<To, A> load_aligned(From* ptr);
+  batch<To, A> load_aligned(From const* ptr);
   template<class To, class A=default_arch, class From>
-  batch<To, A> load_unaligned(From* ptr);
+  batch<To, A> load_unaligned(From const* ptr, To*_=(From*)nullptr);
   template<class T, class A>
   batch<T, A> nearbyint(batch<T, A> const& self);
   template<class T, class A>

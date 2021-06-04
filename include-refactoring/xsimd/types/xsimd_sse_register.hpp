@@ -19,6 +19,7 @@ namespace xsimd {
 #if XSIMD_WITH_SSE
   namespace types {
 
+    XSIMD_DECLARE_SIMD_REGISTER(bool, sse, __m128i);
     XSIMD_DECLARE_SIMD_REGISTER(signed char, sse, __m128i);
     XSIMD_DECLARE_SIMD_REGISTER(unsigned char, sse, __m128i);
     XSIMD_DECLARE_SIMD_REGISTER(char, sse, __m128i);
