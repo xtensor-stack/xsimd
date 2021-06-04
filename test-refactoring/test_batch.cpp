@@ -39,14 +39,13 @@ protected:
     void test_load_store() const
     {
         array_type res;
-        batch_type b;
-        b.load_unaligned(lhs.data());
+        batch_type b = batch_type::load_unaligned(lhs.data());
         b.store_unaligned(res.data());
         EXPECT_EQ(res, lhs) << print_function_name("load_unaligned / store_unaligned");
 
         alignas(xsimd::default_arch::alignment()) array_type arhs(this->rhs);
         alignas(xsimd::default_arch::alignment()) array_type ares;
-        b.load_aligned(arhs.data());
+        b = batch_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, rhs) << print_function_name("load_aligned / store_aligned");
     }

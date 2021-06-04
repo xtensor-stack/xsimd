@@ -15,10 +15,6 @@ namespace xsimd {
   batch<T, A> bitofsign(batch<T, A> const& self);
   template<class B, class T, class A>
   B bitwise_cast(batch<T, A> const& self);
-  template<class To, class A=default_arch, class From>
-  batch<To, A> load_aligned(From const* ptr);
-  template<class To, class A=default_arch, class From>
-  batch<To, A> load_unaligned(From const* ptr, To*_=(From*)nullptr);
   template<class T, class A>
   batch<T, A> nearbyint(batch<T, A> const& self);
   template<class T, class A>
@@ -74,7 +70,7 @@ namespace xsimd {
       alignas(A::alignment()) T_out buffer_out[batch_type_out::size];
       self.store_aligned(&buffer_in[0]);
       std::copy(std::begin(buffer_in), std::end(buffer_in), std::begin(buffer_out));
-      return ::xsimd::load_aligned<T_out, A>(buffer_out);
+      return batch_type_out::load_aligned(buffer_out);
     }
 
     }
@@ -138,8 +134,9 @@ namespace xsimd {
     namespace detail {
       template<class A, class T_in, class T_out>
       batch<T_out, A> load_aligned(T_in const* mem, convert<T_out>, requires<generic>, with_fast_conversion) {
+        using batch_type_in = batch<T_in, A>;
         using batch_type_out = batch<T_out, A>;
-        return conversion::fast(::xsimd::load_aligned<T_in, A>(mem), batch_type_out(), A{});
+        return conversion::fast(batch_type_in::load_aligned(mem), batch_type_out(), A{});
       }
       template<class A, class T_in, class T_out>
       batch<T_out, A> load_aligned(T_in const* mem, convert<T_out>, requires<generic>, with_slow_conversion) {
@@ -147,7 +144,7 @@ namespace xsimd {
         using batch_type_out = batch<T_out, A>;
         alignas(A::alignment()) T_out buffer[batch_type_out::size];
         std::copy(mem, mem + batch_type_out::size, std::begin(buffer));
-        return ::xsimd::load_aligned<T_out, A>(buffer);
+        return batch_type_out::load_aligned(buffer);
       }
     }
     template<class A, class T_in, class T_out>
@@ -159,8 +156,9 @@ namespace xsimd {
     namespace detail {
       template<class A, class T_in, class T_out>
       batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out>, requires<generic>, with_fast_conversion) {
+        using batch_type_in = batch<T_in, A>;
         using batch_type_out = batch<T_out, A>;
-        return conversion::fast(::xsimd::load_unaligned<T_in, A>(mem), batch_type_out(), A{});
+        return conversion::fast(batch_type_in::load_unaligned(mem), batch_type_out(), A{});
       }
 
       template<class A, class T_in, class T_out>

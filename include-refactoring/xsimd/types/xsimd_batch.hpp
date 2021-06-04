@@ -50,7 +50,7 @@ struct batch : types::simd_register<T, A> {
 
   T get(std::size_t i) const {
     alignas(A::alignment()) T buffer[size];
-    store_unaligned(&buffer[0]);
+    store_aligned(&buffer[0]);
     return buffer[i];
   }
 
@@ -115,6 +115,7 @@ struct batch_bool : types::simd_register<T, A> {
 
   batch_bool() : types::simd_register<T, A>{} {}
   batch_bool(bool val);
+  batch_bool(bool const* val);
   batch_bool(register_type reg) : types::simd_register<T, A>({reg}) {}
   batch_bool(std::initializer_list<bool> data);
   operator batch<T, A>() const;
@@ -125,6 +126,24 @@ struct batch_bool : types::simd_register<T, A> {
   static batch_bool load_unaligned(bool const * mem);
 
   batch_bool operator~() const;
+  batch_bool operator!() const { return operator~(); }
+  batch_bool operator==(batch_bool const& other) const;
+  batch_bool operator!=(batch_bool const& other) const;
+  batch_bool operator&(batch_bool const& other) const;
+  batch_bool operator|(batch_bool const& other) const;
+  batch_bool operator&&(batch_bool const& other) const {
+    return operator&(other);
+  }
+  batch_bool operator||(batch_bool const& other) const {
+    return operator|(other);
+  }
+
+  bool get(std::size_t i) const {
+    alignas(A::alignment()) bool buffer[size];
+    store_aligned(&buffer[0]);
+    return buffer[i];
+  }
+
 
 };
 
@@ -223,10 +242,32 @@ batch<T, A>& batch<T, A>::operator^=(batch<T, A> const& other) { return *this = 
 
 // batch_bool implementation
 template<class T, class A>
+batch_bool<T, A>::batch_bool(bool const* mem) : types::simd_register<T, A>(batch_bool::load_unaligned(mem).data) {}
+template<class T, class A>
 batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) : batch_bool(data.begin()) { assert(data.size() == size); }
 
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::operator~() const { return kernel::bitwise_not<A>(*this, A{}).data; }
+
+template<class T, class A>
+batch_bool<T, A> batch_bool<T, A>::operator==(batch_bool<T, A> const& other) const {
+  return kernel::eq<A>(*this, other, A{}).data;
+}
+
+template<class T, class A>
+batch_bool<T, A> batch_bool<T, A>::operator!=(batch_bool<T, A> const& other) const {
+  return kernel::neq<A>(*this, other, A{}).data;
+}
+
+template<class T, class A>
+batch_bool<T, A> batch_bool<T, A>::operator&(batch_bool<T, A> const& other) const {
+  return kernel::bitwise_and<A>(*this, other, A{}).data;
+}
+
+template<class T, class A>
+batch_bool<T, A> batch_bool<T, A>::operator|(batch_bool<T, A> const& other) const {
+  return kernel::bitwise_or<A>(*this, other, A{}).data;
+}
 
 template<class T, class A>
 batch_bool<T, A>::batch_bool(bool val) : types::simd_register<T, A>(val?
@@ -254,7 +295,7 @@ batch_bool<T, A> batch_bool<T, A>::load_aligned(bool const* mem) {
   alignas(A::alignment()) T buffer[size];
   for(std::size_t i = 0; i < size; ++i)
     buffer[i] = mem[i] ? (T)1 : (T)0;
-  return ref == batch<T, A>::load_aligned(&buffer[0]);
+  return ref != batch<T, A>::load_aligned(&buffer[0]);
 }
 
 template<class T, class A>

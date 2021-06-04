@@ -115,21 +115,19 @@ private:
     template <class V>
     void test_load_impl(const V& v, const std::string& name)
     {
-        batch_type b;
         std::copy(v.cbegin(), v.cend(), expected.begin());
 
-        b.load_unaligned(v.data());
+        batch_type b = batch_type::load_unaligned(v.data());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " unaligned");
 
-        b.load_aligned(v.data());
+        b = batch_type::load_aligned(v.data());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned");
     }
 
     template <class V>
     void test_store_impl(const V& v, const std::string& name)
     {
-        batch_type b;
-        b.load_aligned(v.data());
+        batch_type b = batch_type::load_aligned(v.data());
         V res(size);
 
         b.store_unaligned(res.data());
