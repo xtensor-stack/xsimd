@@ -322,7 +322,7 @@ private:
         if (detail::is_convertible<T_out>(in_test_value))
         {
             B_common_out res = xsimd::batch_cast<T_out>(B_common_in(in_test_value));
-            EXPECT_SCALAR_EQ(res[0], static_cast<T_out>(in_test_value)) << print_function_name(name);
+            EXPECT_SCALAR_EQ(res.get(0), static_cast<T_out>(in_test_value)) << print_function_name(name);
         }
     }
 };
