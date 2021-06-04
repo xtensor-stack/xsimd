@@ -41,7 +41,7 @@ namespace xsimd
             batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                batch_type batch = xsimd::load_aligned<value_type, Arch>(&first[i]);
+                batch_type batch = batch_type::load_aligned(&first[i]);
                 xsimd::store_aligned(&out_first[i], f(batch));
             }
 
@@ -60,7 +60,7 @@ namespace xsimd
             batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                batch = xsimd::load_aligned<value_type, Arch>(&first[i]);
+                batch = batch_type::load_aligned(&first[i]);
                 xsimd::store_unaligned(&out_first[i], f(batch));
             }
 
@@ -98,8 +98,8 @@ namespace xsimd
             batch_type batch_1, batch_2;                                        \
             for (std::size_t i = align_begin_1; i < align_end; i += simd_size)  \
             {                                                                   \
-                batch_1 = xsimd::A1<value_type, Arch>(&first_1[i]);                                \
-                batch_2 = xsimd::A2<value_type, Arch>(&first_2[i]);                                \
+                batch_1 = batch_type::A1(&first_1[i]);                                \
+                batch_2 = batch_type::A2(&first_2[i]);                                \
                 xsimd::A3(&out_first[i], f(batch_1, batch_2));                  \
             }                                                                   \
                                                                                 \
@@ -171,11 +171,11 @@ namespace xsimd
 
         // reduce aligned part
         auto ptr = ptr_begin + align_begin;
-        batch_type batch_init = xsimd::load_aligned<value_type, Arch>(ptr);
+        batch_type batch_init = batch_type::load_aligned(ptr);
         ptr += simd_size;
         for (auto const end = ptr_begin + align_end; ptr < end; ptr += simd_size)
         {
-            batch_type batch = xsimd::load_aligned<value_type, Arch>(ptr);
+            batch_type batch = batch_type::load_aligned(ptr);
             batch_init = binfun(batch_init, batch);
         }
 

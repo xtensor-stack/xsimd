@@ -73,8 +73,8 @@ namespace xsimd
     {
         using type = batch_bool<T>;
 
-        type all_true = {1};
-        type all_false = {0};
+        type all_true = true;
+        type all_false = false;
         type half = {0, 0, 1, 1};
         type ihalf = {1, 1, 0, 0};
         type interspersed = {0, 1, 0, 1};
@@ -161,7 +161,7 @@ protected:
 
         alignas(xsimd::default_arch::alignment()) bool_array_type arhs(this->ba);
         alignas(xsimd::default_arch::alignment()) bool_array_type ares;
-        b.load_aligned(arhs.data());
+        b = batch_bool_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, arhs) << print_function_name("load_aligned / store_aligned");
     }
@@ -180,16 +180,14 @@ protected:
 
             for (const auto& vec : bool_g.almost_all_false())
             {
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool any_res = xsimd::any(b);
                 EXPECT_TRUE(any_res) << print_function_name("any (almost_all_false)");
             }
 
             for (const auto& vec : bool_g.almost_all_true())
             {
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool any_res = xsimd::any(b);
                 EXPECT_TRUE(any_res) << print_function_name("any (almost_all_true)");
             }
@@ -208,16 +206,14 @@ protected:
                 // TODO: implement batch_bool(bool*)
                 // It currently compiles (need to understand why) but does not
                 // give expected result
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool all_res = xsimd::all(b);
                 EXPECT_FALSE(all_res) << print_function_name("all (almost_all_false)");
             }
 
             for (const auto& vec : bool_g.almost_all_true())
             {
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool all_res = xsimd::all(b);
                 EXPECT_FALSE(all_res) << print_function_name("all (almost_all_true)");
             }
