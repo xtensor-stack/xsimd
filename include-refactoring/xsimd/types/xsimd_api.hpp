@@ -278,6 +278,10 @@ batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, bat
   return kernel::select<A>(cond, true_br, false_br, A{});
 }
 
+template<class T, class A, bool... Values>
+batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br) {
+  return kernel::select<A>(cond, true_br, false_br, A{});
+}
 
 template<class T, class A>
 batch<T, A> sqrt(batch<T, A> const& self) {

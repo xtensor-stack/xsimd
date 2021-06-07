@@ -21,6 +21,8 @@
 #include <cstdlib>
 #endif
 
+#include <cassert>
+
 namespace xsimd
 {
 

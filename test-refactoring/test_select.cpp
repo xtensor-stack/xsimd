@@ -67,11 +67,11 @@ class select_test : public testing::Test
     void test_select_static()
     {
         constexpr auto mask =
-            xsimd::make_batch_bool_constant<value_type, pattern, size>();
+            xsimd::make_batch_bool_constant<batch_type, pattern>();
 
         for (size_t i = 0; i < nb_input; ++i)
         {
-            expected[i] = mask[i % size] ? lhs_input[i] : rhs_input[i];
+            expected[i] = mask.get(i % size) ? lhs_input[i] : rhs_input[i];
         }
 
         batch_type lhs_in, rhs_in, out;
