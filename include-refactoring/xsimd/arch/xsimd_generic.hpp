@@ -90,9 +90,26 @@ namespace xsimd {
       return min(hi, max(self, lo));
     }
 
+    // ceil
+    template<class A, class T> batch<T, A> ceil(batch<T, A> const& self, requires<generic>) {
+      batch<T, A> truncated_self = trunc(self);
+      return select(truncated_self < self, truncated_self + 1, truncated_self);
+    }
+
+    // copysign
+    template<class A, class T> batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+      return abs(self) | bitofsign(other);
+    }
+
     // fdim
     template<class A, class T> batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return fmax(batch<T, A>((T)0), self - other);
+    }
+
+    // floor
+    template<class A, class T> batch<T, A> floor(batch<T, A> const& self, requires<generic>) {
+      batch<T, A> truncated_self = trunc(self);
+      return select(truncated_self > self, truncated_self - 1, truncated_self);
     }
 
     // fma
@@ -245,6 +262,14 @@ namespace xsimd {
     // remainder
     template<class A, class T> batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return fnma(nearbyint(self / other), other, self);
+    }
+
+    // round
+    template<class A, class T> batch<T, A> round(batch<T, A> const& self, requires<generic>) {
+      auto v = abs(self);
+      auto c = ceil(v);
+      auto cp = select(c - 0.5 > v, c - 1, c);
+      return select(v > constants::maxflint<batch<T, A>>(), self, copysign(cp, self));
     }
 
     // store_aligned

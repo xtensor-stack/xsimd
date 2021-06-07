@@ -9,6 +9,21 @@ namespace xsimd {
 
   namespace kernel {
     using namespace types;
+    // ceil
+    template<class A> batch<float, A> ceil(batch<float, A> const& self, requires<sse4_1>) {
+      return _mm_round_ps(self, _MM_FROUND_CEIL);
+    }
+    template<class A> batch<double, A> ceil(batch<double, A> const& self, requires<sse4_1>) {
+      return _mm_round_pd(self, _MM_FROUND_CEIL);
+    }
+
+    // floor
+    template<class A> batch<float, A> floor(batch<float, A> const& self, requires<sse4_1>) {
+      return _mm_round_ps(self, _MM_FROUND_FLOOR);
+    }
+    template<class A> batch<double, A> floor(batch<double, A> const& self, requires<sse4_1>) {
+      return _mm_round_pd(self, _MM_FROUND_FLOOR);
+    }
 
     // nearbyint
     template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<sse4_1>) {

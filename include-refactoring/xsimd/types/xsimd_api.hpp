@@ -71,9 +71,19 @@ batch<T, A> broadcast(T val) {
   return kernel::broadcast<A>(val, A{});
 }
 
+template<class T, class A>
+batch<T, A> ceil(batch<T, A> const& self) {
+  return kernel::ceil<A>(self, A{});
+}
+
 template<class A, class T>
 batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> const& hi) {
   return kernel::clip(self, lo, hi, A{});
+}
+
+template<class A, class T>
+batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::copysign<A>(self, other, A{});
 }
 
 template<class T, class Tp>
@@ -94,6 +104,11 @@ batch<T, A> fabs(batch<T, A> const& self) {
 template<class T, class A>
 batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other) {
   return kernel::fdim<A>(self, other, A{});
+}
+
+template<class T, class A>
+batch<T, A> floor(batch<T, A> const& self) {
+  return kernel::floor<A>(self, A{});
 }
 
 template<class T, class A>
@@ -246,6 +261,16 @@ batch<T, A> pos(batch<T, A> const& self) {
 template<class T, class A>
 batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other) {
   return kernel::remainder<A>(self, other, A{});
+}
+
+template<class T, class A>
+batch<T, A> rint(batch<T, A> const& self) {
+  return nearbyint(self);
+}
+
+template<class T, class A>
+batch<T, A> round(batch<T, A> const& self) {
+  return kernel::round<A>(self, A{});
 }
 
 template<class T, class A>
