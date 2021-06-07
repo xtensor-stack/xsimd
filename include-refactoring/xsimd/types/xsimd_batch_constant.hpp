@@ -11,18 +11,19 @@
 #define XSIMD_BATCH_CONSTANT_HPP
 
 #include "./xsimd_batch.hpp"
+#include "./xsimd_utils.hpp"
 
 namespace xsimd
 {
-    template <class T, class A, bool... Values>
+    template <class batch_type, bool... Values>
     struct batch_bool_constant
     {
         static constexpr std::size_t size = sizeof...(Values);
-        using batch_type = batch_bool<T, A>;
-        using value_type = typename batch_type::value_type;
+        using arch_type = typename batch_type::arch_type;
+        using value_type = bool;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
-        operator batch_type() const { return {Values...}; }
+        operator batch_bool<typename batch_type::value_type, arch_type>() const { return {Values...}; }
 
         bool get(size_t i) const
         {
@@ -43,17 +44,17 @@ namespace xsimd
         }
     };
 
-    template <class T, class A, T... Values>
+    template <class batch_type, typename batch_type::value_type... Values>
     struct batch_constant
     {
         static constexpr std::size_t size = sizeof...(Values);
-        using batch_type = batch<T, A>;
+        using arch_type = typename batch_type::arch_type;
         using value_type = typename batch_type::value_type;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
         operator batch_type() const { return {Values...}; }
 
-        constexpr T get(size_t i) const
+        constexpr value_type get(size_t i) const
         {
             return std::array<value_type, size>{Values...}[i];
         }
@@ -61,36 +62,35 @@ namespace xsimd
 
     namespace detail
     {
-        template <class G, class A, std::size_t... Is>
+        template <class batch_type, class G, std::size_t... Is>
         constexpr auto make_batch_constant(detail::index_sequence<Is...>)
-            -> batch_constant<decltype(G::get(0, 0)), A,
-                              G::get(Is, sizeof...(Is))...>
+            -> batch_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
         }
-        template <class T, class G, class A, std::size_t... Is>
+        template <class batch_type, class G, std::size_t... Is>
         constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>)
-            -> batch_bool_constant<T, A, G::get(Is, sizeof...(Is))...>
+            -> batch_bool_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
         }
 
     } // namespace detail
 
-    template <class G, class A=default_arch>
+    template <class batch_type, class G>
     constexpr auto make_batch_constant() -> decltype(
-        detail::make_batch_constant<G, A>(detail::make_index_sequence<batch<decltype(G::get(0, 0)), A>::size>()))
+        detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
     {
-        return detail::make_batch_constant<G, A>(detail::make_index_sequence<batch<decltype(G::get(0, 0)), A>::size>());
+        return detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>());
     }
 
-    template <class T, class G, class A=default_arch>
+    template <class batch_type, class G>
     constexpr auto make_batch_bool_constant()
-        -> decltype(detail::make_batch_bool_constant<T, G, A>(
-            detail::make_index_sequence<batch<T, A>::size>()))
+        -> decltype(detail::make_batch_bool_constant<batch_type, G>(
+            detail::make_index_sequence<batch_type::size>()))
     {
-        return detail::make_batch_bool_constant<T, G, A>(
-            detail::make_index_sequence<batch<T, A>::size>());
+        return detail::make_batch_bool_constant<batch_type, G>(
+            detail::make_index_sequence<batch_type::size>());
     }
 
 } // namespace xsimd

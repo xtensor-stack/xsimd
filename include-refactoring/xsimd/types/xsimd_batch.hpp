@@ -149,6 +149,7 @@ struct batch_bool : types::simd_register<T, A> {
 
 }
 
+#include "../types/xsimd_batch_constant.hpp"
 #include "../arch/xsimd_isa.hpp"
 
 namespace xsimd {
