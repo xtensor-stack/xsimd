@@ -110,6 +110,20 @@ namespace xsimd {
       return _mm_xor_pd(self, _mm_castsi128_pd(_mm_set1_epi32(-1)));
     }
 
+    // bool_cast
+    template<class A> batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self, requires<sse>) {
+        return _mm_castps_si128(self);
+    }
+    template<class A> batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self, requires<sse>) {
+        return _mm_castsi128_ps(self);
+    }
+    template<class A> batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self, requires<sse>) {
+        return _mm_castpd_si128(self);
+    }
+    template<class A> batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self, requires<sse>) {
+        return _mm_castsi128_pd(self);
+    }
+
     // broadcast
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> broadcast(T val, requires<sse>) {
@@ -187,6 +201,14 @@ namespace xsimd {
     batch<double, A> haddp(batch<double, A> const *row, requires<sse>) {
       return _mm_add_pd(_mm_unpacklo_pd(row[0], row[1]),
           _mm_unpackhi_pd(row[0], row[1]));
+    }
+
+    // isnan
+    template<class A> batch_bool<float, A> isnan(batch<float, A> const& self, requires<sse>) {
+      return _mm_cmpunord_ps(self, self);
+    }
+    template<class A> batch_bool<double, A> isnan(batch<double, A> const& self, requires<sse>) {
+      return _mm_cmpunord_pd(self, self);
     }
 
     // le

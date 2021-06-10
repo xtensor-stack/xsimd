@@ -66,9 +66,31 @@ auto bitwise_xor(T const& self, Tp const& other) -> decltype(self ^ other){
   return self ^ other;
 }
 
+template<class A>
+batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self) {
+  return kernel::bool_cast<A>(self, A{});
+}
+template<class A>
+batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self) {
+  return kernel::bool_cast<A>(self, A{});
+}
+template<class A>
+batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self) {
+  return kernel::bool_cast<A>(self, A{});
+}
+template<class A>
+batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self) {
+  return kernel::bool_cast<A>(self, A{});
+}
+
 template<class T, class A=default_arch>
 batch<T, A> broadcast(T val) {
   return kernel::broadcast<A>(val, A{});
+}
+
+template<class T, class A>
+batch<T, A> cbrt(batch<T, A> const& self) {
+  return kernel::cbrt<A>(self, A{});
 }
 
 template<class T, class A>
@@ -94,6 +116,16 @@ auto div(T const& self, Tp const& other) -> decltype(self / other){
 template<class T, class A>
 batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other) {
   return self == other;
+}
+
+template<class T, class A>
+batch<T, A> exp(batch<T, A> const& self) {
+  return kernel::exp<A>(self, A{});
+}
+
+template <class T, class A, uint64_t... Coefs>
+batch<T, A> estrin(const batch<T, A>& self) {
+  return kernel::estrin<T, A, Coefs...>(self);
 }
 
 template<class T, class A>
@@ -146,6 +178,11 @@ batch<T, A> fnms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& 
   return kernel::fnms<A>(x, y, z, A{});
 }
 
+template <class T, class A>
+batch<T, A> frexp(const batch<T, A>& self, batch<as_integer_t<T>, A>& other) {
+  return kernel::frexp<A>(self, other, A{});
+}
+
 template<class T, class A>
 batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other) {
   return self >= other;
@@ -166,10 +203,36 @@ batch<T, A> haddp(batch<T, A> const* self) {
   return kernel::haddp<A>(self, A{});
 }
 
+template <class T, class A, uint64_t... Coefs>
+batch<T, A> horner(const batch<T, A>& self) {
+  return kernel::horner<T, A, Coefs...>(self);
+}
+
+template<class T, class A>
+batch<T, A> hypot(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::hypot<A>(self, other, A{});
+}
+
+
 template<class B>
 B infinity() {
   using T = typename B::value_type;
   return B(std::numeric_limits<T>::infinity());
+}
+
+template<class T, class A>
+batch_bool<T, A> is_even(batch<T, A> const& self) {
+  return kernel::is_even<A>(self, A{});
+}
+
+template<class T, class A>
+batch_bool<T, A> is_flint(batch<T, A> const& self) {
+  return kernel::is_flint<A>(self, A{});
+}
+
+template<class T, class A>
+batch_bool<T, A> is_odd(batch<T, A> const& self) {
+  return kernel::is_odd<A>(self, A{});
 }
 
 template<class T, class A>
@@ -180,6 +243,16 @@ batch_bool<T, A> isinf(batch<T, A> const& self) {
 template<class T, class A>
 batch_bool<T, A> isfinite(batch<T, A> const& self) {
   return kernel::isfinite<A>(self, A{});
+}
+
+template<class T, class A>
+batch_bool<T, A> isnan(batch<T, A> const& self) {
+  return kernel::isnan<A>(self, A{});
+}
+
+template <class T, class A>
+batch<T, A> ldexp(const batch<T, A>& self, const batch<as_integer_t<T>, A>& other) {
+  return kernel::ldexp<A>(self, other, A{});
 }
 
 template<class T, class A>
@@ -205,6 +278,11 @@ batch<From, A> load_aligned(From const* ptr) {
 template<class A/*=default_arch*/, class From>
 batch<From, A> load_unaligned(From const* ptr) {
   return kernel::load_unaligned<A>(ptr, kernel::convert<From>{}, A{});
+}
+
+template<class T, class A>
+batch<T, A> log(batch<T, A> const& self) {
+  return kernel::log<A>(self, A{});
 }
 
 template<class T, class A>
@@ -259,6 +337,16 @@ batch<T, A> pos(batch<T, A> const& self) {
 }
 
 template<class T, class A>
+batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::pow<A>(self, other, A{});
+}
+
+template<class T, class ITy, class A, class=typename std::enable_if<std::is_integral<ITy>::value, void>::type>
+batch<T, A> pow(batch<T, A> const& self, ITy other) {
+  return kernel::ipow<A>(self, other, A{});
+}
+
+template<class T, class A>
 batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other) {
   return kernel::remainder<A>(self, other, A{});
 }
@@ -282,6 +370,12 @@ template<class T, class A, bool... Values>
 batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br) {
   return kernel::select<A>(cond, true_br, false_br, A{});
 }
+
+template<class T, class A>
+batch<T, A> sign(batch<T, A> const& self) {
+  return kernel::sign<A>(self, A{});
+}
+
 
 template<class T, class A>
 batch<T, A> sqrt(batch<T, A> const& self) {

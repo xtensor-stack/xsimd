@@ -29,6 +29,89 @@ namespace xsimd {
       return _mm_add_pd(self, other);
     }
 
+    // bitwise_and
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      return _mm_and_si128(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse2>) {
+      return _mm_and_si128(self, other);
+    }
+
+    // bitwise_lshift
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<sse2>) {
+      switch(sizeof(T)) {
+        case 1: return _mm_and_si128(_mm_set1_epi8(0xFF << other), _mm_slli_epi32(self, other));
+        case 2: return _mm_slli_epi16(self, other);
+        case 4: return _mm_slli_epi32(self, other);
+        case 8: return _mm_slli_epi64(self, other);
+        default: assert(false && "unsupported arch/op combination"); return {};
+      }
+    }
+
+    // bitwise_not
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_not(batch<T, A> const& self, requires<sse2>) {
+      return _mm_xor_si128(self, _mm_set1_epi32(-1));
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_not(batch_bool<T, A> const& self, requires<sse2>) {
+      return _mm_xor_si128(self, _mm_set1_epi32(-1));
+    }
+
+    // bitwise_or
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_or(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      return _mm_or_si128(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_or(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse2>) {
+      return _mm_or_si128(self, other);
+    }
+
+    // bitwise_rshift
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires<sse2>) {
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: {
+            __m128i sign_mask = _mm_set1_epi16((0xFF00 >> other) & 0x00FF);
+            __m128i cmp_is_negative = _mm_cmpgt_epi8(_mm_setzero_si128(), self);
+            __m128i res = _mm_srai_epi16(self, other);
+            return _mm_or_si128(_mm_and_si128(sign_mask, cmp_is_negative), _mm_andnot_si128(sign_mask, res));
+          }
+          case 2: return _mm_srai_epi16(self, other);
+          case 4: return _mm_srai_epi32(self, other);
+          case 8: {
+            // from https://github.com/samyvilar/vect/blob/master/vect_128.h
+            return _mm_or_si128(
+                _mm_srli_epi64(self, other),
+                _mm_slli_epi64(
+                    _mm_srai_epi32(_mm_shuffle_epi32(self, _MM_SHUFFLE(3, 3, 1, 1)), 32),
+                    64 - other));
+          }
+          default: assert(false && "unsupported arch/op combination"); return {};
+        }
+      }
+      else {
+        switch(sizeof(T)) {
+          case 1: return _mm_and_si128(_mm_set1_epi8(0xFF >> other), _mm_srli_epi32(self, other));
+          case 2: return _mm_srli_epi16(self, other);
+          case 4: return _mm_srli_epi32(self, other);
+          case 8: return _mm_srli_epi64(self, other);
+          default: assert(false && "unsupported arch/op combination"); return {};
+        }
+      }
+    }
+
+    // bitwise_xor
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_xor(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      return _mm_xor_si128(self, other);
+    }
+
     // broadcast
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> broadcast(T val, requires<sse2>) {
@@ -57,6 +140,24 @@ namespace xsimd {
     }
     }
 
+    // eq
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      switch(sizeof(T)) {
+        case 1: return _mm_cmpeq_epi8(self, other);
+        case 2: return _mm_cmpeq_epi16(self, other);
+        case 4: return _mm_cmpeq_epi32(self, other);
+        case 8: {
+            __m128i tmp1 = _mm_cmpeq_epi32(self, other);
+            __m128i tmp2 = _mm_shuffle_epi32(tmp1, 0xB1);
+            __m128i tmp3 = _mm_and_si128(tmp1, tmp2);
+            __m128i tmp4 = _mm_srai_epi32(tmp3, 31);
+            return _mm_shuffle_epi32(tmp4, 0xF5);
+        }
+        default: assert(false && "unsupported arch/op combination"); return {};
+      }
+    }
+
     // load_aligned
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> load_aligned(T const* mem, convert<T>, requires<sse2>) {
@@ -69,15 +170,69 @@ namespace xsimd {
       return _mm_loadu_si128((__m128i const*)mem);
     }
 
+    // lt
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: return _mm_cmplt_epi8(self, other);
+          case 2: return _mm_cmplt_epi16(self, other);
+          case 4: return _mm_cmplt_epi32(self, other);
+          case 8: {
+              __m128i tmp1 = _mm_sub_epi64(self, other);
+              __m128i tmp2 = _mm_xor_si128(self, other);
+              __m128i tmp3 = _mm_andnot_si128(other, self);
+              __m128i tmp4 = _mm_andnot_si128(tmp2, tmp1);
+              __m128i tmp5 = _mm_or_si128(tmp3, tmp4);
+              __m128i tmp6 = _mm_srai_epi32(tmp5, 31);
+              return _mm_shuffle_epi32(tmp6, 0xF5);
+          }
+          default: assert(false && "unsupported arch/op combination"); return {};
+        }
+      }
+      else {
+        switch(sizeof(T)) {
+          case 1: return _mm_cmplt_epi8(_mm_xor_si128(self, _mm_set1_epi8(std::numeric_limits<int8_t>::lowest())), _mm_xor_si128(other, _mm_set1_epi8(std::numeric_limits<int8_t>::lowest())));
+          case 2: return _mm_cmplt_epi16(_mm_xor_si128(self, _mm_set1_epi16(std::numeric_limits<int16_t>::lowest())), _mm_xor_si128(other, _mm_set1_epi16(std::numeric_limits<int16_t>::lowest())));
+          case 4: return _mm_cmplt_epi32(_mm_xor_si128(self, _mm_set1_epi32(std::numeric_limits<int32_t>::lowest())), _mm_xor_si128(other, _mm_set1_epi32(std::numeric_limits<int32_t>::lowest())));
+          case 8: {
+                auto xself = _mm_xor_si128(self, _mm_set1_epi64x(std::numeric_limits<int64_t>::lowest()));
+                auto xother = _mm_xor_si128(other, _mm_set1_epi64x(std::numeric_limits<int64_t>::lowest()));
+                __m128i tmp1 = _mm_sub_epi64(xself, xother);
+                __m128i tmp2 = _mm_xor_si128(xself, xother);
+                __m128i tmp3 = _mm_andnot_si128(xother, xself);
+                __m128i tmp4 = _mm_andnot_si128(tmp2, tmp1);
+                __m128i tmp5 = _mm_or_si128(tmp3, tmp4);
+                __m128i tmp6 = _mm_srai_epi32(tmp5, 31);
+                return _mm_shuffle_epi32(tmp6, 0xF5);
+                  }
+          default: assert(false && "unsupported arch/op combination"); return {};
+        }
+      }
+    }
+    // select
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<sse2>) {
+      return _mm_or_si128(_mm_and_si128(cond, true_br), _mm_andnot_si128(cond, false_br));
+    }
+
     // store_aligned
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     void store_aligned(T *mem, batch<T, A> const& self, requires<sse2>) {
+      return _mm_store_si128((__m128i *)mem, self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    void store_aligned(T *mem, batch_bool<T, A> const& self, requires<sse2>) {
       return _mm_store_si128((__m128i *)mem, self);
     }
 
     // store_unaligned
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     void store_unaligned(T *mem, batch<T, A> const& self, requires<sse2>) {
+      return _mm_storeu_si128((__m128i *)mem, self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    void store_unaligned(T *mem, batch_bool<T, A> const& self, requires<sse2>) {
       return _mm_storeu_si128((__m128i *)mem, self);
     }
 
