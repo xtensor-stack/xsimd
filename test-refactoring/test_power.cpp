@@ -101,7 +101,6 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("cbrt");
         }
-        // hypot
     }
 };
 

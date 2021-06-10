@@ -15,6 +15,10 @@
 #include "./xsimd_sse3.hpp"
 #endif
 
+#ifdef XSIMD_WITH_SSSE3
+#include "./xsimd_ssse3.hpp"
+#endif
+
 #ifdef XSIMD_WITH_SSE4_1
 #include "./xsimd_sse4_1.hpp"
 #endif
@@ -23,8 +27,9 @@
 #include "./xsimd_sse4_2.hpp"
 #endif
 
-// Must come last to have access to all specialization
+// Must come last to have access to all conversion specializations.
 #include "./xsimd_generic.hpp"
+
 
 #endif
 

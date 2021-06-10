@@ -12,7 +12,7 @@
 
 namespace xsimd
 {
-    template <class T>
+    template <class T, std::size_t N = T::size>
     struct test_int_min_max
     {
         bool run()
@@ -22,12 +22,12 @@ namespace xsimd
     };
 
     template <class T>
-    struct test_int_min_max<batch<T, 2>>
+    struct test_int_min_max<batch<T>, 2>
     {
         void run()
         {
-            using B = batch<T, 2>;
-            using BB = batch_bool<T, 2>;
+            using B = batch<T>;
+            using BB = batch_bool<T>;
             using A = std::array<T, 2>;
 
             T max = std::numeric_limits<T>::max();
@@ -53,12 +53,12 @@ namespace xsimd
     };
 
     template <class T>
-    struct test_int_min_max<batch<T, 4>>
+    struct test_int_min_max<batch<T>, 4>
     {
         void run()
         {
-            using B = batch<T, 4>;
-            using BB = batch_bool<T, 4>;
+            using B = batch<T>;
+            using BB = batch_bool<T>;
             using A = std::array<T, 4>;
 
             B a(1,3,1,1);
@@ -78,12 +78,12 @@ namespace xsimd
     };
 
     template <class T>
-    struct test_int_min_max<batch<T, 8>>
+    struct test_int_min_max<batch<T>, 8>
     {
         void run()
         {
-            using B = batch<T, 8>;
-            using BB = batch_bool<T, 8>;
+            using B = batch<T>;
+            using BB = batch_bool<T>;
             using A = std::array<T, 8>;
 
             T max = std::numeric_limits<T>::max();
@@ -108,12 +108,12 @@ namespace xsimd
     };
 
     template <class T>
-    struct test_int_min_max<batch<T, 16>>
+    struct test_int_min_max<batch<T>, 16>
     {
         void run()
         {
-            using B = batch<T, 16>;
-            using BB = batch_bool<T, 16>;
+            using B = batch<T>;
+            using BB = batch_bool<T>;
             using A = std::array<T, 16>;
 
             T max = std::numeric_limits<T>::max();
@@ -144,12 +144,12 @@ namespace xsimd
     };
 
     template <class T>
-    struct test_int_min_max<batch<T, 32>>
+    struct test_int_min_max<batch<T>, 32>
     {
         void run()
         {
-            using B = batch<T, 32>;
-            using BB = batch_bool<T, 32>;
+            using B = batch<T>;
+            using BB = batch_bool<T>;
             using A = std::array<T, 32>;
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();

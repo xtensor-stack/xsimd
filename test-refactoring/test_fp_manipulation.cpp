@@ -16,11 +16,12 @@ class fp_manipulation_test : public testing::Test
 protected:
 
     using batch_type = B;
+    using arch_type = typename B::arch_type;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
     using int_value_type = xsimd::as_integer_t<value_type>;
-    using int_batch_type = xsimd::batch<int_value_type, size>;
+    using int_batch_type = xsimd::batch<int_value_type, arch_type>;
 
     array_type input;
     int_value_type exponent;

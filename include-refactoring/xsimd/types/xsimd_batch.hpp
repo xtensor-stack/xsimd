@@ -95,6 +95,22 @@ struct batch : types::simd_register<T, A> {
     return batch<T, A>(self) ^= other;
   }
 
+  friend batch<T, A> operator>>(batch<T, A> const& self, batch<T, A> const& other) {
+    return batch<T, A>(self) >>= other;
+  }
+
+  friend batch<T, A> operator<<(batch<T, A> const& self, batch<T, A> const& other) {
+    return batch<T, A>(self) <<= other;
+  }
+
+  friend batch<T, A> operator>>(batch<T, A> const& self, int32_t other) {
+    return batch<T, A>(self) >>= other;
+  }
+
+  friend batch<T, A> operator<<(batch<T, A> const& self, int32_t other) {
+    return batch<T, A>(self) <<= other;
+  }
+
   // Update operators
   batch<T, A>& operator+=(batch const& other);
   batch<T, A>& operator-=(batch const& other);
@@ -103,6 +119,16 @@ struct batch : types::simd_register<T, A> {
   batch<T, A>& operator&=(batch const& other);
   batch<T, A>& operator|=(batch const& other);
   batch<T, A>& operator^=(batch const& other);
+  batch<T, A>& operator>>=(int32_t other);
+  batch<T, A>& operator>>=(batch const& other);
+  batch<T, A>& operator<<=(int32_t other);
+  batch<T, A>& operator<<=(batch const& other);
+
+  // incr/decr
+  batch<T, A>& operator++() { return operator+=(1);}
+  batch<T, A>& operator--() { return operator-=(1);}
+  batch<T, A> operator++(int) { batch copy(*this); operator+=(1); return copy;}
+  batch<T, A> operator--(int) { batch copy(*this); operator-=(1); return copy;}
 
 };
 
@@ -126,7 +152,7 @@ struct batch_bool : types::simd_register<T, A> {
   static batch_bool load_unaligned(bool const * mem);
 
   batch_bool operator~() const;
-  batch_bool operator!() const { return operator~(); }
+  batch_bool operator!() const { return operator==(batch_bool(false)); }
   batch_bool operator==(batch_bool const& other) const;
   batch_bool operator!=(batch_bool const& other) const;
   batch_bool operator&(batch_bool const& other) const;
@@ -240,6 +266,17 @@ batch<T, A>& batch<T, A>::operator|=(batch<T, A> const& other) { return *this = 
 template<class T, class A>
 batch<T, A>& batch<T, A>::operator^=(batch<T, A> const& other) { return *this = kernel::bitwise_xor<A>(*this, other, A{}); }
 
+template<class T, class A>
+batch<T, A>& batch<T, A>::operator>>=(batch<T, A> const& other) { return *this = kernel::bitwise_rshift<A>(*this, other, A{}); }
+
+template<class T, class A>
+batch<T, A>& batch<T, A>::operator<<=(batch<T, A> const& other) { return *this = kernel::bitwise_lshift<A>(*this, other, A{}); }
+
+template<class T, class A>
+batch<T, A>& batch<T, A>::operator>>=(int32_t other) { return *this = kernel::bitwise_rshift<A>(*this, other, A{}); }
+
+template<class T, class A>
+batch<T, A>& batch<T, A>::operator<<=(int32_t other) { return *this = kernel::bitwise_lshift<A>(*this, other, A{}); }
 
 // batch_bool implementation
 template<class T, class A>
