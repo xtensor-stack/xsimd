@@ -150,7 +150,7 @@ set(XSIMD_TESTS
         test_batch_cast.cpp
     #    test_batch_complex.cpp
         test_batch_float.cpp
-    #    test_batch_int.cpp
+        test_batch_int.cpp
         test_bitwise_cast.cpp
         test_batch_constant.cpp
     #    test_complex_exponential.cpp
@@ -159,13 +159,13 @@ set(XSIMD_TESTS
     #    test_complex_trigonometric.cpp
         test_conversion.cpp
     #    test_error_gamma.cpp
-    #    test_exponential.cpp
-    #    test_fp_manipulation.cpp
+    test_exponential.cpp
+        test_fp_manipulation.cpp
     #    test_hyperbolic.cpp
         test_load_store.cpp
         test_memory.cpp
-    #    test_poly_evaluation.cpp
-    #    test_power.cpp
+        test_poly_evaluation.cpp
+    test_power.cpp
         test_rounding.cpp
         test_select.cpp
     #    test_shuffle_128.cpp

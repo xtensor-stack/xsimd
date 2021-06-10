@@ -19,6 +19,12 @@
 #define XSIMD_WITH_SSE3 0
 #endif
 
+#ifdef __SSSE3__
+#define XSIMD_WITH_SSSE3 1
+#else
+#define XSIMD_WITH_SSSE3 0
+#endif
+
 #ifdef __SSE4_1__
 #define XSIMD_WITH_SSE4_1 1
 #else
