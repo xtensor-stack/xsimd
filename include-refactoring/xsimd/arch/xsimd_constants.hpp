@@ -29,12 +29,12 @@ namespace constants {
         return T(NAME<typename T::value_type>());   \
     }                                               \
     template <>                                     \
-    constexpr float NAME<float>() noexcept          \
+    inline float NAME<float>() noexcept          \
     {                                               \
         return SINGLE;                              \
     }                                               \
     template <>                                     \
-    constexpr double NAME<double>() noexcept        \
+    inline double NAME<double>() noexcept        \
     {                                               \
         return DOUBLE;                              \
     }

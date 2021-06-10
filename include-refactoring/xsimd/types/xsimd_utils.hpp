@@ -56,8 +56,8 @@ namespace xsimd
         using type = batch<typename as_integer<T>::type, A>;
     };
 
-    template <class T>
-    using as_integer_t = typename as_integer<T>::type;
+    template <class B>
+    using as_integer_t = typename as_integer<B>::type;
 
     /***********************
      * as_unsigned_integer *
