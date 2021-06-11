@@ -34,7 +34,7 @@ class constant_batch_test : public testing::Test
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
                       [&i]() { return generator::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_constant<generator, size>();
+        constexpr auto b = xsimd::make_batch_constant<generator>();
         EXPECT_BATCH_EQ(b(), expected)
             << print_function_name("batch(value_type)");
     }
@@ -53,7 +53,7 @@ class constant_batch_test : public testing::Test
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
                       [&i]() { return arange::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_constant<arange, size>();
+        constexpr auto b = xsimd::make_batch_constant<arange>();
         EXPECT_BATCH_EQ(b(), expected)
             << print_function_name("batch(value_type)");
     }
@@ -70,7 +70,7 @@ class constant_batch_test : public testing::Test
     {
         array_type expected;
         std::fill(expected.begin(), expected.end(), constant::get(0, 0));
-        constexpr auto b = xsimd::make_batch_constant<constant, size>();
+        constexpr auto b = xsimd::make_batch_constant<constant>();
         EXPECT_BATCH_EQ(b(), expected)
             << print_function_name("batch(value_type)");
     }

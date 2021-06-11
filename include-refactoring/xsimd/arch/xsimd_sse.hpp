@@ -55,6 +55,22 @@ namespace xsimd {
       return _mm_and_pd(self, other);
     }
 
+    // bitwise_or
+    template<class A> batch<float, A> bitwise_or(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_or_ps(self, other);
+    }
+    template<class A> batch<double, A> bitwise_or(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_or_pd(self, other);
+    }
+
+    // bitwise_xor
+    template<class A> batch<float, A> bitwise_xor(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_xor_ps(self, other);
+    }
+    template<class A> batch<double, A> bitwise_xor(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_xor_pd(self, other);
+    }
+
     // bitwise_cast
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<float, A> bitwise_cast(batch<T, A> const& self, batch<float, A> const &, requires<sse>) {
@@ -92,6 +108,20 @@ namespace xsimd {
     template <class A>
     batch<double, A> bitwise_not(batch<double, A> const &self, requires<sse>) {
       return _mm_xor_pd(self, _mm_castsi128_pd(_mm_set1_epi32(-1)));
+    }
+
+    // bool_cast
+    template<class A> batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self, requires<sse>) {
+        return _mm_castps_si128(self);
+    }
+    template<class A> batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self, requires<sse>) {
+        return _mm_castsi128_ps(self);
+    }
+    template<class A> batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self, requires<sse>) {
+        return _mm_castpd_si128(self);
+    }
+    template<class A> batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self, requires<sse>) {
+        return _mm_castsi128_pd(self);
     }
 
     // broadcast
@@ -173,6 +203,14 @@ namespace xsimd {
           _mm_unpackhi_pd(row[0], row[1]));
     }
 
+    // isnan
+    template<class A> batch_bool<float, A> isnan(batch<float, A> const& self, requires<sse>) {
+      return _mm_cmpunord_ps(self, self);
+    }
+    template<class A> batch_bool<double, A> isnan(batch<double, A> const& self, requires<sse>) {
+      return _mm_cmpunord_pd(self, self);
+    }
+
     // le
     template<class A> batch_bool<float, A> le(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_cmple_ps(self, other);
@@ -227,16 +265,6 @@ namespace xsimd {
     }
     template<class A> batch<double, A> mul(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_mul_pd(self, other);
-    }
-
-    // nearbyint
-    template<class A> batch<float, A> nearbyint(batch<float, A> const& , requires<sse>) {
-      //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
-      return {};
-    }
-    template<class A> batch<double, A> nearbyint(batch<double, A> const& , requires<sse>) {
-      //static_assert(std::is_same<A, void>::value, "not supported for that architecture");
-      return {};
     }
 
     // neg

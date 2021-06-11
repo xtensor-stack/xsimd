@@ -39,14 +39,13 @@ protected:
     void test_load_store() const
     {
         array_type res;
-        batch_type b;
-        b.load_unaligned(lhs.data());
+        batch_type b = batch_type::load_unaligned(lhs.data());
         b.store_unaligned(res.data());
         EXPECT_EQ(res, lhs) << print_function_name("load_unaligned / store_unaligned");
 
-        alignas(xsimd::default_arch::alignment) array_type arhs(this->rhs);
-        alignas(xsimd::default_arch::alignment) array_type ares;
-        b.load_aligned(arhs.data());
+        alignas(xsimd::default_arch::alignment()) array_type arhs(this->rhs);
+        alignas(xsimd::default_arch::alignment()) array_type ares;
+        b = batch_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, rhs) << print_function_name("load_aligned / store_aligned");
     }
@@ -73,16 +72,16 @@ protected:
         }
         {
             array_type res;
-            auto b = batch_type::from_unaligned(lhs.data());
+            auto b = batch_type::load_unaligned(lhs.data());
             b.store_unaligned(res.data());
-            EXPECT_EQ(res, lhs) << print_function_name("batch::from_unaligned");
+            EXPECT_EQ(res, lhs) << print_function_name("batch::load_unaligned");
         }
         {
-            alignas(xsimd::default_arch::alignment) array_type arhs(this->rhs);
-            alignas(xsimd::default_arch::alignment) array_type ares;
-            auto b = batch_type::from_aligned(arhs.data());
+            alignas(xsimd::default_arch::alignment()) array_type arhs(this->rhs);
+            alignas(xsimd::default_arch::alignment()) array_type ares;
+            auto b = batch_type::load_aligned(arhs.data());
             b.store_aligned(ares.data());
-            EXPECT_EQ(ares, rhs) << print_function_name("batch::from_aligned");
+            EXPECT_EQ(ares, rhs) << print_function_name("batch::load_aligned");
         }
     }
 
@@ -91,7 +90,7 @@ protected:
         batch_type res = batch_lhs();
         for (size_t i = 0; i < size; ++i)
         {
-            EXPECT_EQ(res[i], lhs[i]) << print_function_name("operator[](") << i << ")";
+            EXPECT_EQ(res.get(i), lhs[i]) << print_function_name("get(") << i << ")";
         }
     }
 

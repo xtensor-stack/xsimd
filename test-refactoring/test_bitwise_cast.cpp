@@ -16,17 +16,16 @@ class bitwise_cast_test : public testing::Test
 protected:
 
     static constexpr size_t N = CP::size;
-    static constexpr size_t A = CP::alignment;
 
-    using int32_batch = xsimd::batch<int32_t, N * 2>;
-    using int64_batch = xsimd::batch<int64_t, N>;
-    using float_batch = xsimd::batch<float, N * 2>;
-    using double_batch = xsimd::batch<double, N>;
+    using int32_batch = xsimd::batch<int32_t>;
+    using int64_batch = xsimd::batch<int64_t>;
+    using float_batch = xsimd::batch<float>;
+    using double_batch = xsimd::batch<double>;
 
-    using int32_vector = std::vector<int32_t, xsimd::aligned_allocator<int32_t, A>>;
-    using int64_vector = std::vector<int64_t, xsimd::aligned_allocator<int64_t, A>>;
-    using float_vector = std::vector<float, xsimd::aligned_allocator<float, A>>;
-    using double_vector = std::vector<double, xsimd::aligned_allocator<double, A>>;
+    using int32_vector = std::vector<int32_t, xsimd::default_allocator<int32_t>>;
+    using int64_vector = std::vector<int64_t, xsimd::default_allocator<int64_t>>;
+    using float_vector = std::vector<float, xsimd::default_allocator<float>>;
+    using double_vector = std::vector<double, xsimd::default_allocator<double>>;
 
     int32_vector ftoi32_res;
     int32_vector dtoi32_res;
@@ -47,15 +46,15 @@ protected:
         {
             int32_batch input = i32_input();
             bitcast b;
-            b.i32[0] = input[0];
-            b.i32[1] = input[1];
+            b.i32[0] = input.get(0);
+            b.i32[1] = input.get(1);
             std::fill(i32tof_res.begin(), i32tof_res.end(), b.f[0]);
             std::fill(i32tod_res.begin(), i32tod_res.end(), b.d);
         }
         {
             int64_batch input = i64_input();
             bitcast b;
-            b.i64 = input[0];
+            b.i64 = input.get(0);
             std::fill(i64tod_res.begin(), i64tod_res.end(), b.d);
             for (size_t i = 0; i < N; ++i)
             {
@@ -66,8 +65,8 @@ protected:
         {
             float_batch input = f_input();
             bitcast b;
-            b.f[0] = input[0];
-            b.f[1] = input[1];
+            b.f[0] = input.get(0);
+            b.f[1] = input.get(1);
             std::fill(ftoi32_res.begin(), ftoi32_res.end(), b.i32[0]);
             std::fill(ftoi64_res.begin(), ftoi64_res.end(), b.i64);
             std::fill(ftod_res.begin(), ftod_res.end(), b.d);
@@ -75,7 +74,7 @@ protected:
         {
             double_batch input = d_input();
             bitcast b;
-            b.d = input[0];
+            b.d = input.get(0);
             //std::fill(dtoi32_res.begin(), dtoi32_res.end(), b.i32[0]);
             std::fill(dtoi64_res.begin(), dtoi64_res.end(), b.i64);
             for (size_t i = 0; i < N; ++i)

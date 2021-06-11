@@ -22,10 +22,10 @@
 
 struct interface_tester
 {
-    std::vector<float, xsimd::aligned_allocator<float, 64>> fvec;
-    std::vector<int32_t, xsimd::aligned_allocator<int32_t, 64>> ivec;
-    std::vector<float, xsimd::aligned_allocator<float, 64>> fres;
-    std::vector<int32_t, xsimd::aligned_allocator<int32_t, 64>> ires;
+    std::vector<float, xsimd::default_allocator<float>> fvec;
+    std::vector<int32_t, xsimd::default_allocator<int32_t>> ivec;
+    std::vector<float, xsimd::default_allocator<float>> fres;
+    std::vector<int32_t, xsimd::default_allocator<int32_t>> ires;
 
     interface_tester();
 

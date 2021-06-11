@@ -4,6 +4,11 @@
 namespace xsimd {
 
   struct generic {
+    static constexpr bool supported() { return true; }
+    static constexpr bool available() { return true; }
+    static constexpr bool requires_alignment() { return false; }
+    protected:
+    static constexpr unsigned version(unsigned major, unsigned minor, unsigned patch) { return major * 100u + minor * 10u + patch; }
   };
 
 }
