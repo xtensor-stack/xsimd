@@ -21,8 +21,6 @@ struct batch : types::simd_register<T, A> {
   // constructors
   batch() : types::simd_register<T, A>{} {}
   batch(T val);
-  batch(T const* mem);
-  batch(T const (&arr)[size]);
   batch(std::initializer_list<T> data);
   batch(register_type reg) : types::simd_register<T, A>({reg}) {}
 
@@ -141,7 +139,6 @@ struct batch_bool : types::simd_register<T, A> {
 
   batch_bool() : types::simd_register<T, A>{} {}
   batch_bool(bool val);
-  batch_bool(bool const* val);
   batch_bool(register_type reg) : types::simd_register<T, A>({reg}) {}
   batch_bool(std::initializer_list<bool> data);
   operator batch<T, A>() const;
@@ -186,13 +183,7 @@ template<class T, class A>
 batch<T, A>::batch(T val) : types::simd_register<T, A>(kernel::broadcast<A>(val, A{})) {}
 
 template<class T, class A>
-batch<T, A>::batch(T const* mem) : types::simd_register<T, A>(kernel::load_unaligned<A>(mem, kernel::convert<T>{}, A{})) {}
-
-template<class T, class A>
-batch<T, A>::batch(T const (&arr)[size]) : types::simd_register<T, A>(kernel::load_unaligned<A>(&arr[0], A{})) {}
-
-template<class T, class A>
-batch<T, A>::batch(std::initializer_list<T> data) : batch(data.begin()) { assert(data.size() == size); }
+batch<T, A>::batch(std::initializer_list<T> data) : batch(batch::load_unaligned(data.begin())) { assert(data.size() == size); }
 
 template<class T, class A>
 template<class U>
@@ -219,7 +210,7 @@ batch<T, A> batch<T, A>::load_unaligned(U const* mem) {
 }
 
 template<class T, class A>
-batch_bool<T, A> batch<T, A>::operator!() const { return kernel::eq<A>(*this, batch((T)0), A{}); }
+batch_bool<T, A> batch<T, A>::operator!() const { return kernel::eq<A>(*this, batch(0), A{}); }
 
 template<class T, class A>
 batch<T, A> batch<T, A>::operator~() const { return kernel::bitwise_not<A>(*this, A{}); }
@@ -280,9 +271,7 @@ batch<T, A>& batch<T, A>::operator<<=(int32_t other) { return *this = kernel::bi
 
 // batch_bool implementation
 template<class T, class A>
-batch_bool<T, A>::batch_bool(bool const* mem) : types::simd_register<T, A>(batch_bool::load_unaligned(mem).data) {}
-template<class T, class A>
-batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) : batch_bool(data.begin()) { assert(data.size() == size); }
+batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) : batch_bool(batch_bool::load_unaligned(data.begin())) { assert(data.size() == size); }
 
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::operator~() const { return kernel::bitwise_not<A>(*this, A{}).data; }
@@ -329,10 +318,10 @@ void batch_bool<T, A>::store_unaligned(bool* mem) const {
 
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::load_aligned(bool const* mem) {
-  batch<T, A> ref((T)0);
+  batch<T, A> ref(0);
   alignas(A::alignment()) T buffer[size];
   for(std::size_t i = 0; i < size; ++i)
-    buffer[i] = mem[i] ? (T)1 : (T)0;
+    buffer[i] = mem[i] ? 1 : 0;
   return ref != batch<T, A>::load_aligned(&buffer[0]);
 }
 
@@ -343,7 +332,7 @@ batch_bool<T, A> batch_bool<T, A>::load_unaligned(bool const* mem) {
 
 template<class T, class A>
 batch_bool<T, A>::operator batch<T, A>() const {
-  return batch<T, A>(this->data) & batch<T, A>((T)1);
+  return batch<T, A>(this->data) & batch<T, A>(1);
 }
 
 }

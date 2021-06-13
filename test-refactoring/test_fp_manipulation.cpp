@@ -60,7 +60,7 @@ private:
 
     batch_type batch_input() const
     {
-        return batch_type(input.data());
+        return batch_type::load_unaligned(input.data());
     }
 };
 
