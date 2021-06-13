@@ -159,7 +159,7 @@ namespace xsimd {
     template<class A, class T> batch<T, A> bitofsign(batch<T, A> const& self, requires<generic>) {
       static_assert(std::is_integral<T>::value, "int type implementation");
       if(std::is_unsigned<T>::value)
-        return batch<T, A>((T)0);
+        return batch<T, A>(0);
       else
         return self >> (T)(8 * sizeof(T) - 1);
     }
@@ -472,7 +472,7 @@ namespace xsimd {
 
     // fdim
     template<class A, class T> batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
-      return fmax(batch<T, A>((T)0), self - other);
+      return fmax(batch<T, A>(0), self - other);
     }
 
     // floor
@@ -594,7 +594,7 @@ namespace xsimd {
       return batch_bool<T, A>(true);
     }
     template<class A, class T> batch_bool<T, A> isfinite(batch<T, A> const& self, requires<generic>) {
-      return (self - self) == batch<T, A>((T)0);
+      return (self - self) == batch<T, A>(0);
     }
 
     // isnan
@@ -704,7 +704,7 @@ namespace xsimd {
 
                 batch_type x = self;
                 i_type hx = ::xsimd::bitwise_cast<i_type>(x) >> 32;
-                i_type k((typename i_type::value_type)0);
+                i_type k(0);
                 auto isnez = (self != batch_type(0.));
 #ifndef XSIMD_NO_DENORMALS
                 auto test = (self < constants::smallestposval<batch_type>()) && isnez;
@@ -860,7 +860,7 @@ namespace xsimd {
     // sign
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> sign(batch<T, A> const& self, requires<generic>) {
       using batch_type = batch<T, A>;
-      batch_type res = select(self > batch_type((T)0), batch_type((T)1), batch_type((T)0)) - select(self < batch_type((T)0), batch_type((T)1), batch_type((T)0));
+      batch_type res = select(self > batch_type(0), batch_type(1), batch_type(0)) - select(self < batch_type(0), batch_type(1), batch_type(0));
       return res;
     }
 
