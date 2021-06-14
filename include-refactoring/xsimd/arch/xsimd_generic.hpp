@@ -109,6 +109,24 @@ namespace xsimd {
         {
             return fma(self, horner<B, c1, args...>(self), coef<B, c0>());
         }
+
+        template <class B>
+        inline B horner1(const B&) noexcept
+        {
+            return B(1.);
+        }
+
+        template <class B, uint64_t c0>
+        inline B horner1(const B& x) noexcept
+        {
+            return x + detail::coef<B, c0>();
+        }
+
+        template <class B, uint64_t c0, uint64_t c1, uint64_t... args>
+        inline B horner1(const B& x) noexcept
+        {
+            return fma(x, horner1<B, c1, args...>(x), detail::coef<B, c0>());
+        }
     }
 
     using namespace types;
@@ -382,6 +400,33 @@ namespace xsimd {
             }
         };
 
+        template <class B>
+        struct exp_reduction_base<B, exp10_tag>
+        {
+            static constexpr B maxlog() noexcept
+            {
+                return constants::maxlog10<B>();
+            }
+
+            static constexpr B minlog() noexcept
+            {
+                return constants::minlog10<B>();
+            }
+        };
+
+        template <class B>
+        struct exp_reduction_base<B, exp2_tag>
+        {
+            static constexpr B maxlog() noexcept
+            {
+                return constants::maxlog2<B>();
+            }
+
+            static constexpr B minlog() noexcept
+            {
+                return constants::minlog2<B>();
+            }
+        };
 
         template <class T, class A, exp_reduction_tag Tag>
         struct exp_reduction;
@@ -407,6 +452,56 @@ namespace xsimd {
                 batch_type k = nearbyint(constants::invlog_2<batch_type>() * a);
                 x = fnma(k, constants::log_2hi<batch_type>(), a);
                 x = fnma(k, constants::log_2lo<batch_type>(), x);
+                return k;
+            }
+        };
+
+        template <class A>
+        struct exp_reduction<float, A, exp10_tag> : exp_reduction_base<batch<float, A>, exp10_tag>
+        {
+          using batch_type = batch<float, A>;
+            static inline batch_type approx(const batch_type& x)
+            {
+                return ++(detail::horner<batch_type,
+                                 0x40135d8e,  //    2.3025851e+00
+                                 0x4029a926,  //    2.6509490e+00
+                                 0x400237da,  //    2.0346589e+00
+                                 0x3f95eb4c,  //    1.1712432e+00
+                                 0x3f0aacef,  //    5.4170126e-01
+                                 0x3e54dff1  //    2.0788552e-01
+                                 >(x) *
+                          x);
+            }
+
+            static inline batch_type reduce(const batch_type& a, batch_type& x)
+            {
+                batch_type k = nearbyint(constants::invlog10_2<batch_type>() * a);
+                x = fnma(k, constants::log10_2hi<batch_type>(), a);
+                x -= k * constants::log10_2lo<batch_type>();
+                return k;
+            }
+        };
+
+        template <class A>
+        struct exp_reduction<float, A, exp2_tag> : exp_reduction_base<batch<float, A>, exp2_tag>
+        {
+            using batch_type = batch<float, A>;
+            static inline batch_type approx(const batch_type& x)
+            {
+                batch_type y = detail::horner<batch_type,
+                             0x3e75fdf1,  //    2.4022652e-01
+                             0x3d6356eb,  //    5.5502813e-02
+                             0x3c1d9422,  //    9.6178371e-03
+                             0x3ab01218,  //    1.3433127e-03
+                             0x3922c8c4  //    1.5524315e-04
+                             >(x);
+                return ++fma(y, x * x, x * constants::log_2<batch_type>());
+            }
+
+            static inline batch_type reduce(const batch_type& a, batch_type& x)
+            {
+                batch_type k = nearbyint(a);
+                x = (a - k);
                 return k;
             }
         };
@@ -443,6 +538,70 @@ namespace xsimd {
             }
         };
 
+        template <class A>
+        struct exp_reduction<double, A, exp10_tag> : exp_reduction_base<batch<double, A>, exp10_tag>
+        {
+          using batch_type = batch<double, A>;
+            static inline batch_type approx(const batch_type& x)
+            {
+                batch_type xx = x * x;
+                batch_type px = x * detail::horner<batch_type,
+                                  0x40a2b4798e134a01ull,
+                                  0x40796b7a050349e4ull,
+                                  0x40277d9474c55934ull,
+                                  0x3fa4fd75f3062dd4ull>(xx);
+                batch_type x2 = px / (detail::horner1<batch_type,
+                                     0x40a03f37650df6e2ull,
+                                     0x4093e05eefd67782ull,
+                                     0x405545fdce51ca08ull>(xx) -
+                             px);
+                return ++(x2 + x2);
+            }
+
+            static inline batch_type reduce(const batch_type& a, batch_type&, batch_type&, batch_type& x)
+            {
+                batch_type k = nearbyint(constants::invlog10_2<batch_type>() * a);
+                x = fnma(k, constants::log10_2hi<batch_type>(), a);
+                x = fnma(k, constants::log10_2lo<batch_type>(), x);
+                return k;
+            }
+
+            static inline batch_type finalize(const batch_type&, const batch_type& c, const batch_type&, const batch_type&)
+            {
+                return c;
+            }
+        };
+
+        template <class A>
+        struct exp_reduction<double, A, exp2_tag> : exp_reduction_base<batch<double, A>, exp2_tag>
+        {
+          using batch_type = batch<double, A>;
+            static inline batch_type approx(const batch_type& x)
+            {
+                batch_type t = x * x;
+                return fnma(t,
+                            detail::horner<batch_type,
+                                   0x3fc555555555553eull,
+                                   0xbf66c16c16bebd93ull,
+                                   0x3f11566aaf25de2cull,
+                                   0xbebbbd41c5d26bf1ull,
+                                   0x3e66376972bea4d0ull>(t),
+                            x);
+            }
+
+            static inline batch_type reduce(const batch_type& a, batch_type&, batch_type&, batch_type& x)
+            {
+                batch_type k = nearbyint(a);
+                x = (a - k) * constants::log_2<batch_type>();
+                return k;
+            }
+
+            static inline batch_type finalize(const batch_type& x, const batch_type& c, const batch_type&, const batch_type&)
+            {
+                return batch_type(1.) + x + x * c / (batch_type(2.) - c);
+            }
+        };
+
       template<exp_reduction_tag Tag, class A> batch<float, A> exp(batch<float, A> const& self) {
         using batch_type = batch<float, A>;
         using reducer_t = exp_reduction<float, A, Tag>;
@@ -468,6 +627,79 @@ namespace xsimd {
 
     template<class A, class T> batch<T, A> exp(batch<T, A> const& self, requires<generic>) {
       return detail::exp<detail::exp_tag>(self);
+    }
+
+    template<class A, class T> batch<T, A> exp10(batch<T, A> const& self, requires<generic>) {
+      return detail::exp<detail::exp10_tag>(self);
+    }
+
+    template<class A, class T> batch<T, A> exp2(batch<T, A> const& self, requires<generic>) {
+      return detail::exp<detail::exp2_tag>(self);
+    }
+
+    namespace detail {
+          template<class A>
+          static inline batch<float, A> expm1(const batch<float, A>& a)
+            {
+              using batch_type = batch<float, A>;
+                batch_type k = nearbyint(constants::invlog_2<batch_type>() * a);
+                batch_type x = fnma(k, constants::log_2hi<batch_type>(), a);
+                x = fnma(k, constants::log_2lo<batch_type>(), x);
+                batch_type hx = x * batch_type(0.5);
+                batch_type hxs = x * hx;
+                batch_type r = detail::horner<batch_type,
+                             0X3F800000UL,  // 1
+                             0XBD08887FUL,  // -3.3333298E-02
+                             0X3ACF6DB4UL  // 1.582554
+                             >(hxs);
+                batch_type t = fnma(r, hx, batch_type(3.));
+                batch_type e = hxs * ((r - t) / (batch_type(6.) - x * t));
+                e = fms(x, e, hxs);
+                using i_type = as_integer_t<batch_type>;
+                i_type ik = to_int(k);
+                batch_type two2mk = ::xsimd::bitwise_cast<batch_type>((constants::maxexponent<batch_type>() - ik) << constants::nmb<batch_type>());
+                batch_type y = batch_type(1.) - two2mk - (e - x);
+                return ldexp(y, ik);
+            }
+
+            template<class A>
+            static inline batch<double, A> expm1(const batch<double, A>& a)
+            {
+              using batch_type = batch<double, A>;
+                batch_type k = nearbyint(constants::invlog_2<batch_type>() * a);
+                batch_type hi = fnma(k, constants::log_2hi<batch_type>(), a);
+                batch_type lo = k * constants::log_2lo<batch_type>();
+                batch_type x = hi - lo;
+                batch_type hxs = x * x * batch_type(0.5);
+                batch_type r = detail::horner<batch_type,
+                             0X3FF0000000000000ULL,
+                             0XBFA11111111110F4ULL,
+                             0X3F5A01A019FE5585ULL,
+                             0XBF14CE199EAADBB7ULL,
+                             0X3ED0CFCA86E65239ULL,
+                             0XBE8AFDB76E09C32DULL>(hxs);
+                batch_type t = batch_type(3.) - r * batch_type(0.5) * x;
+                batch_type e = hxs * ((r - t) / (batch_type(6) - x * t));
+                batch_type c = (hi - x) - lo;
+                e = (x * (e - c) - c) - hxs;
+                using i_type = as_integer_t<batch_type>;
+                i_type ik = to_int(k);
+                batch_type two2mk = ::xsimd::bitwise_cast<batch_type>((constants::maxexponent<batch_type>() - ik) << constants::nmb<batch_type>());
+                batch_type ct1 = batch_type(1.) - two2mk - (e - x);
+                batch_type ct2 = ++(x - (e + two2mk));
+                batch_type y = select(k < batch_type(20.), ct1, ct2);
+                return ldexp(y, ik);
+            }
+
+    }
+
+    template<class A, class T> batch<T, A> expm1(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+      return select(self < constants::logeps<batch_type>(),
+                    batch_type(-1.),
+                    select(self > constants::maxlog<batch_type>(),
+                           constants::infinity<batch_type>(),
+                           detail::expm1(self)));
     }
 
     // fdim
@@ -698,6 +930,7 @@ namespace xsimd {
 #endif
       return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
+
     template<class A> batch<double, A> log(batch<double, A> const& self, requires<generic>) {
                using batch_type = batch<double, A>;
                 using i_type = as_integer_t<batch_type>;
@@ -743,6 +976,267 @@ namespace xsimd {
                 batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
 #endif
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+    }
+
+    // log2
+    template<class A> batch<float, A> log2(batch<float, A> const& self, requires<generic>) {
+      using batch_type = batch<float, A>;
+                using i_type = as_integer_t<batch_type>;
+                batch_type x = self;
+                i_type k(0);
+                auto isnez = (self != batch_type(0.));
+#ifndef XSIMD_NO_DENORMALS
+                auto test = (self < constants::smallestposval<batch_type>()) && isnez;
+                if (any(test))
+                {
+                    k = select(bool_cast(test), k - i_type(25), k);
+                    x = select(test, x * batch_type(33554432ul), x);
+                }
+#endif
+                i_type ix = ::xsimd::bitwise_cast<i_type>(x);
+                ix += 0x3f800000 - 0x3f3504f3;
+                k += (ix >> 23) - 0x7f;
+                ix = (ix & i_type(0x007fffff)) + 0x3f3504f3;
+                x = ::xsimd::bitwise_cast<batch_type>(ix);
+                batch_type f = --x;
+                batch_type s = f / (batch_type(2.) + f);
+                batch_type z = s * s;
+                batch_type w = z * z;
+                batch_type t1 = w * detail::horner<batch_type, 0x3eccce13, 0x3e789e26>(w);
+                batch_type t2 = z * detail::horner<batch_type, 0x3f2aaaaa, 0x3e91e9ee>(w);
+                batch_type R = t1 + t2;
+                batch_type hfsq = batch_type(0.5) * f * f;
+                batch_type dk = to_float(k);
+                batch_type r = fma(fms(s, hfsq + R, hfsq) + f, constants::invlog_2<batch_type>(), dk);
+#ifndef XSIMD_NO_INFINITIES
+                batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#else
+                batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
+#endif
+                return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+    }
+    template<class A> batch<double, A> log2(batch<double, A> const& self, requires<generic>) {
+      using batch_type = batch<double, A>;
+                using i_type = as_integer_t<batch_type>;
+                batch_type x = self;
+                i_type hx = ::xsimd::bitwise_cast<i_type>(x) >> 32;
+                i_type k(0);
+                auto isnez = (self != batch_type(0.));
+#ifndef XSIMD_NO_DENORMALS
+                auto test = (self < constants::smallestposval<batch_type>()) && isnez;
+                if (any(test))
+                {
+                    k = select(bool_cast(test), k - i_type(54), k);
+                    x = select(test, x * batch_type(18014398509481984ull), x);
+                }
+#endif
+                hx += 0x3ff00000 - 0x3fe6a09e;
+                k += (hx >> 20) - 0x3ff;
+                hx = (hx & i_type(0x000fffff)) + 0x3fe6a09e;
+                x = ::xsimd::bitwise_cast<batch_type>(hx << 32 | (i_type(0xffffffff) & ::xsimd::bitwise_cast<i_type>(x)));
+                batch_type f = --x;
+                batch_type s = f / (batch_type(2.) + f);
+                batch_type z = s * s;
+                batch_type w = z * z;
+                batch_type t1 = w * detail::horner<batch_type,
+                                  0x3fd999999997fa04ll,
+                                  0x3fcc71c51d8e78afll,
+                                  0x3fc39a09d078c69fll>(w);
+                batch_type t2 = z * detail::horner<batch_type,
+                                  0x3fe5555555555593ll,
+                                  0x3fd2492494229359ll,
+                                  0x3fc7466496cb03dell,
+                                  0x3fc2f112df3e5244ll>(w);
+                batch_type R = t2 + t1;
+                batch_type hfsq = batch_type(0.5) * f * f;
+                batch_type hi = f - hfsq;
+                hi = hi & ::xsimd::bitwise_cast<batch_type>((constants::allbits<i_type>() << 32));
+                batch_type lo = fma(s, hfsq + R, f - hi - hfsq);
+                batch_type val_hi = hi * constants::invlog_2hi<batch_type>();
+                batch_type val_lo = fma(lo + hi, constants::invlog_2lo<batch_type>(), lo * constants::invlog_2hi<batch_type>());
+                batch_type dk = to_float(k);
+                batch_type w1 = dk + val_hi;
+                val_lo += (dk - w1) + val_hi;
+                val_hi = w1;
+                batch_type r = val_lo + val_hi;
+#ifndef XSIMD_NO_INFINITIES
+                batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#else
+                batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
+#endif
+                return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+    }
+
+    // log10
+    template<class A> batch<float, A> log10(batch<float, A> const& self, requires<generic>) {
+      using batch_type = batch<float, A>;
+                const batch_type
+                    ivln10hi(4.3432617188e-01f),
+                    ivln10lo(-3.1689971365e-05f),
+                    log10_2hi(3.0102920532e-01f),
+                    log10_2lo(7.9034151668e-07f);
+                using i_type = as_integer_t<batch_type>;
+                batch_type x = self;
+                i_type k(0);
+                auto isnez = (self != batch_type(0.));
+#ifndef XSIMD_NO_DENORMALS
+                auto test = (self < constants::smallestposval<batch_type>()) && isnez;
+                if (any(test))
+                {
+                    k = select(bool_cast(test), k - i_type(25), k);
+                    x = select(test, x * batch_type(33554432ul), x);
+                }
+#endif
+                i_type ix = ::xsimd::bitwise_cast<i_type>(x);
+                ix += 0x3f800000 - 0x3f3504f3;
+                k += (ix >> 23) - 0x7f;
+                ix = (ix & i_type(0x007fffff)) + 0x3f3504f3;
+                x = ::xsimd::bitwise_cast<batch_type>(ix);
+                batch_type f = --x;
+                batch_type s = f / (batch_type(2.) + f);
+                batch_type z = s * s;
+                batch_type w = z * z;
+                batch_type t1 = w * detail::horner<batch_type, 0x3eccce13, 0x3e789e26>(w);
+                batch_type t2 = z * detail::horner<batch_type, 0x3f2aaaaa, 0x3e91e9ee>(w);
+                batch_type R = t2 + t1;
+                batch_type dk = to_float(k);
+                batch_type hfsq = batch_type(0.5) * f * f;
+                batch_type hibits = f - hfsq;
+                hibits &= ::xsimd::bitwise_cast<batch_type>(i_type(0xfffff000));
+                batch_type lobits = fma(s, hfsq + R, f - hibits - hfsq);
+                batch_type r = fma(dk, log10_2hi,
+                          fma(hibits, ivln10hi,
+                              fma(lobits, ivln10hi,
+                                  fma(lobits + hibits, ivln10lo, dk * log10_2lo))));
+#ifndef XSIMD_NO_INFINITIES
+                batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#else
+                batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
+#endif
+                return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+    }
+    template<class A> batch<double, A> log10(batch<double, A> const& self, requires<generic>) {
+      using batch_type = batch<double, A>;
+                const batch_type
+                    ivln10hi(4.34294481878168880939e-01),
+                    ivln10lo(2.50829467116452752298e-11),
+                    log10_2hi(3.01029995663611771306e-01),
+                    log10_2lo(3.69423907715893078616e-13);
+                using i_type = as_integer_t<batch_type>;
+                batch_type x = self;
+                i_type hx = ::xsimd::bitwise_cast<i_type>(x) >> 32;
+                i_type k(0);
+                auto isnez = (self != batch_type(0.));
+#ifndef XSIMD_NO_DENORMALS
+                auto test = (self < constants::smallestposval<batch_type>()) && isnez;
+                if (any(test))
+                {
+                    k = select(bool_cast(test), k - i_type(54), k);
+                    x = select(test, x * batch_type(18014398509481984ull), x);
+                }
+#endif
+                hx += 0x3ff00000 - 0x3fe6a09e;
+                k += (hx >> 20) - 0x3ff;
+                hx = (hx & i_type(0x000fffff)) + 0x3fe6a09e;
+                x = ::xsimd::bitwise_cast<batch_type>(hx << 32 | (i_type(0xffffffff) & ::xsimd::bitwise_cast<i_type>(x)));
+                batch_type f = --x;
+                batch_type dk = to_float(k);
+                batch_type s = f / (batch_type(2.) + f);
+                batch_type z = s * s;
+                batch_type w = z * z;
+                batch_type t1 = w * detail::horner<batch_type,
+                                  0x3fd999999997fa04ll,
+                                  0x3fcc71c51d8e78afll,
+                                  0x3fc39a09d078c69fll>(w);
+                batch_type t2 = z * detail::horner<batch_type,
+                                  0x3fe5555555555593ll,
+                                  0x3fd2492494229359ll,
+                                  0x3fc7466496cb03dell,
+                                  0x3fc2f112df3e5244ll>(w);
+                batch_type R = t2 + t1;
+                batch_type hfsq = batch_type(0.5) * f * f;
+                batch_type hi = f - hfsq;
+                hi = hi & ::xsimd::bitwise_cast<batch_type>(constants::allbits<i_type>() << 32);
+                batch_type lo = f - hi - hfsq + s * (hfsq + R);
+                batch_type val_hi = hi * ivln10hi;
+                batch_type y = dk * log10_2hi;
+                batch_type val_lo = dk * log10_2lo + (lo + hi) * ivln10lo + lo * ivln10hi;
+                batch_type w1 = y + val_hi;
+                val_lo += (y - w1) + val_hi;
+                val_hi = w1;
+                batch_type r = val_lo + val_hi;
+#ifndef XSIMD_NO_INFINITIES
+                batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#else
+                batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
+#endif
+                return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+    }
+
+    // log1p
+    template<class A> batch<float, A> log1p(batch<float, A> const& self, requires<generic>) {
+      using batch_type = batch<float, A>;
+                using i_type = as_integer_t<batch_type>;
+                const batch_type uf = self + batch_type(1.);
+                auto isnez = (uf != batch_type(0.));
+                i_type iu = ::xsimd::bitwise_cast<i_type>(uf);
+                iu += 0x3f800000 - 0x3f3504f3;
+                i_type k = (iu >> 23) - 0x7f;
+                iu = (iu & i_type(0x007fffff)) + 0x3f3504f3;
+                batch_type f = --(bitwise_cast<batch_type>(iu));
+                batch_type s = f / (batch_type(2.) + f);
+                batch_type z = s * s;
+                batch_type w = z * z;
+                batch_type t1 = w * detail::horner<batch_type, 0x3eccce13, 0x3e789e26>(w);
+                batch_type t2 = z * detail::horner<batch_type, 0x3f2aaaaa, 0x3e91e9ee>(w);
+                batch_type R = t2 + t1;
+                batch_type hfsq = batch_type(0.5) * f * f;
+                batch_type dk = to_float(k);
+                /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
+                batch_type c = select(bool_cast(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
+                batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, (hfsq + R), dk * constants::log_2lo<batch_type>() + c) - hfsq + f);
+#ifndef XSIMD_NO_INFINITIES
+                batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#else
+                batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
+#endif
+                return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
+    }
+    template<class A> batch<double, A> log1p(batch<double, A> const& self, requires<generic>) {
+      using batch_type = batch<double, A>;
+                using i_type = as_integer_t<batch_type>;
+                const batch_type uf = self + batch_type(1.);
+                auto isnez = (uf != batch_type(0.));
+                i_type hu = ::xsimd::bitwise_cast<i_type>(uf) >> 32;
+                hu += 0x3ff00000 - 0x3fe6a09e;
+                i_type k = (hu >> 20) - 0x3ff;
+                /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
+                batch_type c = select(bool_cast(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
+                hu = (hu & i_type(0x000fffff)) + 0x3fe6a09e;
+                batch_type f = ::xsimd::bitwise_cast<batch_type>((hu << 32) | (i_type(0xffffffff) & ::xsimd::bitwise_cast<i_type>(uf)));
+                f = --f;
+                batch_type hfsq = batch_type(0.5) * f * f;
+                batch_type s = f / (batch_type(2.) + f);
+                batch_type z = s * s;
+                batch_type w = z * z;
+                batch_type t1 = w * detail::horner<batch_type,
+                                  0x3fd999999997fa04ll,
+                                  0x3fcc71c51d8e78afll,
+                                  0x3fc39a09d078c69fll>(w);
+                batch_type t2 = z * detail::horner<batch_type,
+                                  0x3fe5555555555593ll,
+                                  0x3fd2492494229359ll,
+                                  0x3fc7466496cb03dell,
+                                  0x3fc2f112df3e5244ll>(w);
+                batch_type R = t2 + t1;
+                batch_type dk = to_float(k);
+                batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, hfsq + R, dk * constants::log_2lo<batch_type>() + c) - hfsq + f);
+#ifndef XSIMD_NO_INFINITIES
+                batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#else
+                batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
+#endif
+                return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
     // mul
