@@ -281,6 +281,29 @@ namespace xsimd {
       return {(int64_t)buffer[0], (int64_t)buffer[1]};
     }
 
+    // zip_hi
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      switch(sizeof(T)) {
+        case 1: return _mm_unpackhi_epi8(self, other);
+        case 2: return _mm_unpackhi_epi16(self, other);
+        case 4: return _mm_unpackhi_epi32(self, other);
+        case 8: return _mm_unpackhi_epi64(self, other);
+        default: assert(false && "unsupported arch/op combination"); return {};
+      }
+    }
+
+    // zip_lo
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      switch(sizeof(T)) {
+        case 1: return _mm_unpacklo_epi8(self, other);
+        case 2: return _mm_unpacklo_epi16(self, other);
+        case 4: return _mm_unpacklo_epi32(self, other);
+        case 8: return _mm_unpacklo_epi64(self, other);
+        default: assert(false && "unsupported arch/op combination"); return {};
+      }
+    }
 
   }
 
