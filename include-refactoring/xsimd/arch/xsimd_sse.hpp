@@ -344,6 +344,30 @@ namespace xsimd {
     template<class A> batch<double, A> sub(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_sub_pd(self, other);
     }
+
+    // zip_hi
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> zip_hi(batch<T, A> const&, batch<T, A> const&, requires<sse>) {
+      static_assert(std::is_same<A, sse>::value, "unsupported arch / op combination");
+    }
+    template<class A> batch<float, A> zip_hi(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_unpacklo_ps(self, other);
+    }
+    template<class A> batch<double, A> zip_hi(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_unpacklo_pd(self, other);
+    }
+
+    // zip_lo
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> zip_lo(batch<T, A> const&, batch<T, A> const&, requires<sse>) {
+      static_assert(std::is_same<A, sse>::value, "unsupported arch / op combination");
+    }
+    template<class A> batch<float, A> zip_lo(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_unpacklo_ps(self, other);
+    }
+    template<class A> batch<double, A> zip_lo(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_unpacklo_pd(self, other);
+    }
   }
 
 }
