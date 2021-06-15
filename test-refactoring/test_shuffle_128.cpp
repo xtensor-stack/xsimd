@@ -8,7 +8,7 @@
  ****************************************************************************/
 #include "test_utils.hpp"
 
-namespace xsimd
+namespace
 {
     template <typename T, std::size_t N>
     struct init_shuffle_128_base
@@ -62,7 +62,7 @@ class shuffle_128_test : public testing::Test
 
     void shuffle_128_low_high()
     {
-        xsimd::init_shuffle_128_base<value_type, size> shuffle_base;
+        init_shuffle_128_base<value_type, size> shuffle_base;
         auto shuffle_base_vecs = shuffle_base.create_vectors();
         auto v_lhs = shuffle_base_vecs[0];
         auto v_rhs = shuffle_base_vecs[1];

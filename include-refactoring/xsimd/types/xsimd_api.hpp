@@ -464,6 +464,16 @@ batch<T, A> trunc(batch<T, A> const& self) {
   return kernel::trunc<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::zip_hi<A>(self, other, A{});
+}
+
+template<class T, class A>
+batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::zip_lo<A>(self, other, A{});
+}
+
 // high level functions - batch_bool
 //
 template<class T, class A>
