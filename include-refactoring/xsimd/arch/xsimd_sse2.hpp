@@ -29,6 +29,15 @@ namespace xsimd {
       return _mm_add_pd(self, other);
     }
 
+    // any
+    template<class A> bool any(batch<float, A> const& self, requires<sse2>) {
+      return _mm_movemask_ps(self) != 0;
+    }
+    template<class A> bool any(batch<double, A> const& self, requires<sse2>) {
+      return _mm_movemask_pd(self) != 0;
+    }
+
+
     // bitwise_and
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {

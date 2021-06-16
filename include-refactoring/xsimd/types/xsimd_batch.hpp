@@ -274,7 +274,9 @@ template<class T, class A>
 batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) : batch_bool(batch_bool::load_unaligned(data.begin())) { assert(data.size() == size); }
 
 template<class T, class A>
-batch_bool<T, A> batch_bool<T, A>::operator~() const { return kernel::bitwise_not<A>(*this, A{}).data; }
+batch_bool<T, A> batch_bool<T, A>::operator~() const {
+  return kernel::bitwise_not<A>(*this, A{}).data;
+}
 
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::operator==(batch_bool<T, A> const& other) const {
