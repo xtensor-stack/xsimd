@@ -138,6 +138,16 @@ batch<T, A> expm1(batch<T, A> const& self) {
   return kernel::expm1<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> erf(batch<T, A> const& self) {
+  return kernel::erf<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> erfc(batch<T, A> const& self) {
+  return kernel::erfc<A>(self, A{});
+}
+
 template <class T, class A, uint64_t... Coefs>
 batch<T, A> estrin(const batch<T, A>& self) {
   return kernel::estrin<T, A, Coefs...>(self);
