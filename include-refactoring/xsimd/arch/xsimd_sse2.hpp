@@ -259,13 +259,13 @@ namespace xsimd {
     template<class A, class... Values>
     batch_bool<float, A> set(batch_bool<float, A> const&, requires<sse2>, Values... values) {
       static_assert(sizeof...(Values) == batch_bool<float, A>::size, "consistent init");
-      return _mm_castsi128_ps(set(batch<int32_t, A>(), requires<sse2>(), static_cast<int32_t>(values ? -1LL : 0LL )...).data);
+      return _mm_castsi128_ps(set(batch<int32_t, A>(), A{}, static_cast<int32_t>(values ? -1LL : 0LL )...).data);
     }
 
     template<class A, class... Values>
     batch_bool<double, A> set(batch_bool<double, A> const&, requires<sse2>, Values... values) {
       static_assert(sizeof...(Values) == batch_bool<double, A>::size, "consistent init");
-      return _mm_castsi128_pd(set(batch<int64_t, A>(), requires<sse2>(),  static_cast<int64_t>(values ? -1LL : 0LL )...).data);
+      return _mm_castsi128_pd(set(batch<int64_t, A>(), A{},  static_cast<int64_t>(values ? -1LL : 0LL )...).data);
     }
 
     // store_aligned
