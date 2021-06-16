@@ -23,6 +23,7 @@ struct batch : types::simd_register<T, A> {
   batch() : types::simd_register<T, A>{} {}
   batch(T val);
   batch(std::initializer_list<T> data) : batch(data.begin(), detail::make_index_sequence<size>()) {}
+  explicit batch(batch_bool_type b);
   batch(register_type reg) : types::simd_register<T, A>({reg}) {}
 
   template<class U>
@@ -140,12 +141,12 @@ struct batch_bool : types::simd_register<T, A> {
 
   using value_type = bool;
   using register_type = typename types::simd_register<T, A>::register_type;
+  using batch_type = batch<T, A>;
 
   batch_bool() : types::simd_register<T, A>{} {}
   batch_bool(bool val);
   batch_bool(register_type reg) : types::simd_register<T, A>({reg}) {}
   batch_bool(std::initializer_list<bool> data) : batch_bool(data.begin(), detail::make_index_sequence<size>()) {}
-  operator batch<T, A>() const;
 
   void store_aligned(bool * mem) const;
   void store_unaligned(bool * mem) const;
@@ -189,6 +190,9 @@ namespace xsimd {
 
 template<class T, class A>
 batch<T, A>::batch(T val) : types::simd_register<T, A>(kernel::broadcast<A>(val, A{})) {}
+
+template<class T, class A>
+batch<T, A>::batch(batch_bool<T, A> b) : batch(batch(b.data) & batch(1)) {}
 
 template<class T, class A>
 template<size_t... Is>
@@ -310,15 +314,15 @@ batch_bool<T, A> batch_bool<T, A>::operator|(batch_bool<T, A> const& other) cons
 
 template<class T, class A>
 batch_bool<T, A>::batch_bool(bool val) : types::simd_register<T, A>(val?
-    (batch<T, A>(T(0)) == batch<T, A>(T(0))):
-    (batch<T, A>(T(0)) != batch<T, A>(T(0)))) {
+    (batch_type(0) == batch_type(0)):
+    (batch_type(0) != batch_type(0))) {
 }
 
 
 template<class T, class A>
 void batch_bool<T, A>::store_aligned(bool* mem) const {
   alignas(A::alignment()) T buffer[size];
-  kernel::store_aligned<A>(&buffer[0], *this, A{});
+  kernel::store_aligned<A>(&buffer[0], batch_type(*this), A{});
   for(std::size_t i = 0; i < size; ++i)
     mem[i] = bool(buffer[i]);
 }
@@ -330,21 +334,16 @@ void batch_bool<T, A>::store_unaligned(bool* mem) const {
 
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::load_aligned(bool const* mem) {
-  batch<T, A> ref(0);
+  batch_type ref(0);
   alignas(A::alignment()) T buffer[size];
   for(std::size_t i = 0; i < size; ++i)
     buffer[i] = mem[i] ? 1 : 0;
-  return ref != batch<T, A>::load_aligned(&buffer[0]);
+  return ref != batch_type::load_aligned(&buffer[0]);
 }
 
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::load_unaligned(bool const* mem) {
   return load_aligned(mem);
-}
-
-template<class T, class A>
-batch_bool<T, A>::operator batch<T, A>() const {
-  return batch<T, A>(this->data) & batch<T, A>(1);
 }
 
 }

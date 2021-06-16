@@ -508,14 +508,14 @@ protected:
         {
             batch_bool_type tbt(true);
             batch_type expected = batch_type(value_type(1));
-            batch_type res = tbt;
+            batch_type res = (batch_type)tbt;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch = true");
         }
         // batch = false
         {
             batch_bool_type fbt(false);
             batch_type expected = batch_type(value_type(0));
-            batch_type res = fbt;
+            batch_type res = (batch_type)fbt;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch = false");
         }
         // !batch
@@ -523,7 +523,7 @@ protected:
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
                             [](const value_type& l) { return !l; });
-            batch_type res = !batch_lhs();
+            batch_type res = (batch_type)!batch_lhs();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("!batch");
         }
         // bitwise_cast
