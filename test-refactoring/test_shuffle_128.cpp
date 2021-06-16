@@ -69,19 +69,18 @@ class shuffle_128_test : public testing::Test
         auto v_exp_lo = shuffle_base_vecs[2];
         auto v_exp_hi = shuffle_base_vecs[3];
 
-        B b_lhs, b_rhs, b_exp_lo, b_exp_hi, b_res_lo, b_res_hi;
-        b_lhs.load_unaligned(v_lhs.data());
-        b_rhs.load_unaligned(v_rhs.data());
-        b_exp_lo.load_unaligned(v_exp_lo.data());
-        b_exp_hi.load_unaligned(v_exp_hi.data());
+        B b_lhs = B::load_unaligned(v_lhs.data());
+        B b_rhs = B::load_unaligned(v_rhs.data());
+        B b_exp_lo = B::load_unaligned(v_exp_lo.data());
+        B b_exp_hi = B::load_unaligned(v_exp_hi.data());
 
         /* Only Test 128bit */
         if ((sizeof(value_type) * size) == 16)
         {
-            b_res_lo = xsimd::zip_lo(b_lhs, b_rhs);
+            B b_res_lo = xsimd::zip_lo(b_lhs, b_rhs);
             EXPECT_BATCH_EQ(b_res_lo, b_exp_lo) << print_function_name("shuffle-128 low test");
 
-            b_res_hi = xsimd::zip_hi(b_lhs, b_rhs);
+            B b_res_hi = xsimd::zip_hi(b_lhs, b_rhs);
             EXPECT_BATCH_EQ(b_res_hi, b_exp_hi) << print_function_name("shuffle-128 high test");
         }
     }
