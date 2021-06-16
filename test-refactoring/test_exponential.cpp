@@ -75,7 +75,8 @@ protected:
         // exp10
         {
             std::transform(exp_input.cbegin(), exp_input.cend(), expected.begin(),
-                        [](const value_type& v) { return ::exp10(v); });
+                        /* imprecise but enough for testing version of exp10 */
+                        [](const value_type& v) { return exp(log(10) * v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
