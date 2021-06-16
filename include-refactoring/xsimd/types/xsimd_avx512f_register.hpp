@@ -47,5 +47,6 @@ template <class T> struct get_bool_simd_register<T, avx512f> {
   }
 #endif
 }
+
 #endif
 
