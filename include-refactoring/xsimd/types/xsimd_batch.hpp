@@ -3,6 +3,7 @@
 
 #include "../config/xsimd_arch.hpp"
 #include "../memory/xsimd_alignment.hpp"
+#include "./xsimd_utils.hpp"
 
 #include <cassert>
 
@@ -21,7 +22,7 @@ struct batch : types::simd_register<T, A> {
   // constructors
   batch() : types::simd_register<T, A>{} {}
   batch(T val);
-  batch(std::initializer_list<T> data);
+  batch(std::initializer_list<T> data) : batch(data.begin(), detail::make_index_sequence<size>()) {}
   batch(register_type reg) : types::simd_register<T, A>({reg}) {}
 
   template<class U>
@@ -128,6 +129,9 @@ struct batch : types::simd_register<T, A> {
   batch<T, A> operator++(int) { batch copy(*this); operator+=(1); return copy;}
   batch<T, A> operator--(int) { batch copy(*this); operator-=(1); return copy;}
 
+  private:
+  template<size_t... Is>
+  batch(T const* data, detail::index_sequence<Is...>);
 };
 
 template<class T, class A=default_arch>
@@ -140,7 +144,7 @@ struct batch_bool : types::simd_register<T, A> {
   batch_bool() : types::simd_register<T, A>{} {}
   batch_bool(bool val);
   batch_bool(register_type reg) : types::simd_register<T, A>({reg}) {}
-  batch_bool(std::initializer_list<bool> data);
+  batch_bool(std::initializer_list<bool> data) : batch_bool(data.begin(), detail::make_index_sequence<size>()) {}
   operator batch<T, A>() const;
 
   void store_aligned(bool * mem) const;
@@ -167,6 +171,10 @@ struct batch_bool : types::simd_register<T, A> {
     return buffer[i];
   }
 
+  private:
+  template<size_t... Is>
+  batch_bool(bool const* data, detail::index_sequence<Is...>);
+
 
 };
 
@@ -183,7 +191,8 @@ template<class T, class A>
 batch<T, A>::batch(T val) : types::simd_register<T, A>(kernel::broadcast<A>(val, A{})) {}
 
 template<class T, class A>
-batch<T, A>::batch(std::initializer_list<T> data) : batch(batch::load_unaligned(data.begin())) { assert(data.size() == size); }
+template<size_t... Is>
+batch<T, A>::batch(T const*data, detail::index_sequence<Is...>) : batch(kernel::set<A>(batch{}, A{}, data[Is]...)) {}
 
 template<class T, class A>
 template<class U>
@@ -271,7 +280,8 @@ batch<T, A>& batch<T, A>::operator<<=(int32_t other) { return *this = kernel::bi
 
 // batch_bool implementation
 template<class T, class A>
-batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) : batch_bool(batch_bool::load_unaligned(data.begin())) { assert(data.size() == size); }
+template<size_t... Is>
+batch_bool<T, A>::batch_bool(bool const*data, detail::index_sequence<Is...>) : batch_bool(kernel::set<A>(batch_bool{}, A{}, data[Is]...)) {}
 
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::operator~() const {
