@@ -387,10 +387,10 @@ namespace xsimd {
       static_assert(std::is_same<A, sse>::value, "unsupported arch / op combination");
     }
     template<class A> batch<float, A> zip_hi(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
-      return _mm_unpacklo_ps(self, other);
+      return _mm_unpackhi_ps(self, other);
     }
     template<class A> batch<double, A> zip_hi(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
-      return _mm_unpacklo_pd(self, other);
+      return _mm_unpackhi_pd(self, other);
     }
 
     // zip_lo

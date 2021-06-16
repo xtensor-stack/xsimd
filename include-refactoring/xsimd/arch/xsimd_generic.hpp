@@ -1450,7 +1450,7 @@ namespace xsimd {
                 iu += 0x3f800000 - 0x3f3504f3;
                 i_type k = (iu >> 23) - 0x7f;
                 iu = (iu & i_type(0x007fffff)) + 0x3f3504f3;
-                batch_type f = --(bitwise_cast<batch_type>(iu));
+                batch_type f = --(::xsimd::bitwise_cast<batch_type>(iu));
                 batch_type s = f / (batch_type(2.) + f);
                 batch_type z = s * s;
                 batch_type w = z * z;
