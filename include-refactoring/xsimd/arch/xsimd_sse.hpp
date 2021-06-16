@@ -31,14 +31,6 @@ namespace xsimd {
       return _mm_add_pd(self, other);
     }
 
-    // all
-    template<class A> bool all(batch<float, A> const& self, requires<sse>) {
-      return _mm_movemask_ps(self) == 0x0F;
-    }
-    template<class A> bool all(batch<double, A> const& self, requires<sse>) {
-      return _mm_movemask_pd(self) == 0x03;
-    }
-
     // bitwise_and
     template<class A> batch<float, A> bitwise_and(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_and_ps(self, other);
@@ -322,6 +314,19 @@ namespace xsimd {
     }
     template<class A> batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_add_pd(self, other); // no saturated arithmetic on floating point numbers
+    }
+
+    // set
+    template<class A, class... Values>
+    batch<float, A> set(batch<float, A> const&, requires<sse>, Values... values) {
+      static_assert(sizeof...(Values) == batch<float, A>::size, "consistent init");
+      return _mm_setr_ps(values...);
+    }
+
+    template<class A, class... Values>
+    batch<double, A> set(batch<double, A> const&, requires<sse>, Values... values) {
+      static_assert(sizeof...(Values) == batch<double, A>::size, "consistent init");
+      return _mm_setr_pd(values...);
     }
 
     // select

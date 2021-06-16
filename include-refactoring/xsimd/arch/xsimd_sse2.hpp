@@ -29,6 +29,14 @@ namespace xsimd {
       return _mm_add_pd(self, other);
     }
 
+    // all
+    template<class A> bool all(batch<float, A> const& self, requires<sse2>) {
+      return _mm_movemask_ps(self) == 0x0F;
+    }
+    template<class A> bool all(batch<double, A> const& self, requires<sse2>) {
+      return _mm_movemask_pd(self) == 0x03;
+    }
+
     // any
     template<class A> bool any(batch<float, A> const& self, requires<sse2>) {
       return _mm_movemask_ps(self) != 0;
@@ -223,6 +231,41 @@ namespace xsimd {
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<sse2>) {
       return _mm_or_si128(_mm_and_si128(cond, true_br), _mm_andnot_si128(cond, false_br));
+    }
+
+    // set
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> set(batch<T, A> const&, requires<sse2>, T v0, T v1) {
+      return _mm_set_epi64x(v1, v0);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> set(batch<T, A> const&, requires<sse2>, T v0, T v1, T v2, T v3) {
+      return _mm_setr_epi32(v0, v1, v2, v3);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> set(batch<T, A> const&, requires<sse2>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7) {
+      return _mm_setr_epi16(v0, v1, v2, v3, v4, v5, v6, v7);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> set(batch<T, A> const&, requires<sse2>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15) {
+      return _mm_setr_epi8(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
+    }
+
+    template<class A, class T, class... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> set(batch_bool<T, A> const&, requires<sse2>, Values... values) {
+      return set(batch<T, A>(), static_cast<T>(values ? -1LL : 0LL )...).data;
+    }
+
+    template<class A, class... Values>
+    batch_bool<float, A> set(batch_bool<float, A> const&, requires<sse2>, Values... values) {
+      static_assert(sizeof...(Values) == batch_bool<float, A>::size, "consistent init");
+      return _mm_castsi128_ps(set(batch<int32_t, A>(), requires<sse2>(), static_cast<int32_t>(values ? -1LL : 0LL )...).data);
+    }
+
+    template<class A, class... Values>
+    batch_bool<double, A> set(batch_bool<double, A> const&, requires<sse2>, Values... values) {
+      static_assert(sizeof...(Values) == batch_bool<double, A>::size, "consistent init");
+      return _mm_castsi128_pd(set(batch<int64_t, A>(), requires<sse2>(),  static_cast<int64_t>(values ? -1LL : 0LL )...).data);
     }
 
     // store_aligned
