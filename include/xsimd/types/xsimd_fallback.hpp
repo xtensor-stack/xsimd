@@ -382,16 +382,16 @@ namespace xsimd
      ******************************************/
 
     template <int N>
-    void bytes_to_vector(batch<uint8_t, N>& vec, int8_t b_n, ...);
+    void bytes_to_batch_vector(batch<uint8_t, N>& vec, int8_t b_n, ...);
 
     template <int N>
-    void shorts_to_vector(batch<uint16_t, N>& vec, int16_t s_n, ...);
+    void shorts_to_batch_vector(batch<uint16_t, N>& vec, int16_t s_n, ...);
 
     template <int N>
-    void words_to_vector(batch<uint32_t, N>& vec, int32_t i_n, ...);
+    void words_to_batch_vector(batch<uint32_t, N>& vec, int32_t i_n, ...);
 
     template <int N>
-    void longs_to_vector(batch<uint64_t, N>& vec, int64_t d_n, ...);
+    void longs_to_batch_vector(batch<uint64_t, N>& vec, int64_t d_n, ...);
 
     /**************************
      * Boilerplate generators *
@@ -1301,7 +1301,7 @@ namespace xsimd
      *****************************************/
 
     template <int N>
-    inline void bytes_to_vector(batch<uint8_t, N>& vec, int8_t b_n, ...)
+    inline void bytes_to_batch_vector(batch<uint8_t, N>& vec, int8_t b_n, ...)
     {
         uint8_t bytes_buf[N];
         va_list args;
@@ -1317,10 +1317,11 @@ namespace xsimd
     }
 
     template <int N>
-    inline void shorts_to_vector(batch<uint16_t, N>& vec, int16_t s_n, ...)
+    inline void shorts_to_batch_vector(batch<uint8_t, 2 * N>& vec, int16_t s_n, ...)
     {
         uint16_t shorts_buf[N];
         va_list args;
+        batch<uint16_t, N> vec_16;
 
         va_start(args, s_n);
         for(int i = 0; i < N; i++)
@@ -1329,39 +1330,44 @@ namespace xsimd
         }
         va_end(args);
 
-        vec.load_aligned(shorts_buf);
+        vec_16.load_aligned(shorts_buf);
+        vec = u16_to_u8(vec_16);
     }
 
     template <int N>
-    inline void words_to_vector(batch<uint32_t, N>& vec, int32_t i_n, ...)
+    inline void words_to_batch_vector(batch<uint8_t, 4 * N>& vec, int32_t i_n, ...)
     {
         uint32_t words_buf[N];
         va_list args;
+        batch<uint32_t, N> vec_32;
 
-        va_start(args, s_n);
+        va_start(args, i_n);
         for(int i = 0; i < N; i++)
         {
             words_buf[N - 1 - i] = static_cast<uint32_t>(va_arg(args, int32_t));
         }
         va_end(args);
 
-        vec.load_aligned(words_buf);
+        vec_32.load_aligned(words_buf);
+        vec = u32_to_u8(vec_32);
     }
 
     template <int N>
-    inline void longs_to_vector(batch<uint64_t, N>& vec, int64_t d_n, ...)
+    inline void longs_to_batch_vector(batch<uint8_t, 8 * N>& vec, int64_t l_n, ...)
     {
-        uint32_t double_buf[N];
+        uint64_t long_buf[N];
         va_list args;
+        batch<uint64_t, N> vec_64;
 
-        va_start(args, s_n);
+        va_start(args, l_n);
         for(int i = 0; i < N; i++)
         {
-            double_buf[N - 1 - i] = static_cast<uint64_t>(va_arg(args, int64_t));
+            long_buf[N - 1 - i] = static_cast<uint64_t>(va_arg(args, int64_t));
         }
         va_end(args);
 
-        vec.load_aligned(double_buf);
+        vec_64.load_aligned(long_buf);
+        vec = u64_to_u8(vec_64);
     }
 
 }

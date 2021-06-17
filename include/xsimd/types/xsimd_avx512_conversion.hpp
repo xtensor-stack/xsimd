@@ -52,7 +52,7 @@ namespace xsimd
      *  to batch functions                    *
      ******************************************/
 
-    void bytes_to_vector(batch<uint8_t, 64>& vec,
+    void bytes_to_batch_vector(batch<uint8_t, 64>& vec,
                          int8_t b63, int8_t b62, int8_t b61, int8_t b60,
                          int8_t b59, int8_t b58, int8_t b57, int8_t b56,
                          int8_t b55, int8_t b54, int8_t b53, int8_t b52,
@@ -70,7 +70,7 @@ namespace xsimd
                          int8_t b7, int8_t b6, int8_t b5, int8_t b4,
                          int8_t b3, int8_t b2, int8_t b1, int8_t b0);
 
-    void shorts_to_vector(batch<uint8_t, 64>& vec,
+    void shorts_to_batch_vector(batch<uint8_t, 64>& vec,
                           int16_t s31, int16_t s30, int16_t s29, int16_t s28,
                           int16_t s27, int16_t s26, int16_t s25, int16_t s24,
                           int16_t s23, int16_t s22, int16_t s21, int16_t s20,
@@ -80,13 +80,13 @@ namespace xsimd
                           int16_t s7, int16_t s6, int16_t s5, int16_t s4,
                           int16_t s3, int16_t s2, int16_t s1, int16_t s0);
 
-    void words_to_vector(batch<uint8_t, 64>& vec,
+    void words_to_batch_vector(batch<uint8_t, 64>& vec,
                          int32_t i15, int32_t i14, int32_t i13, int32_t i12,
                          int32_t i11, int32_t i10, int32_t i9, int32_t i8,
                          int32_t i7, int32_t i6, int32_t i5, int32_t i4,
                          int32_t i3, int32_t i2, int32_t i1, int32_t i0);
 
-    void longs_to_vector(batch<uint8_t, 64>& vec,
+    void longs_to_batch_vector(batch<uint8_t, 64>& vec,
                            int64_t d7, int64_t d6, int64_t d5, int64_t d4,
                            int64_t d3, int64_t d2, int64_t d1, int64_t d0);
 
@@ -328,7 +328,7 @@ namespace xsimd
     /*****************************************
      * vector cast functions implementation *
      *****************************************/
-    void bytes_to_vector(batch<uint8_t, 64>& vec,
+    void bytes_to_batch_vector(batch<uint8_t, 64>& vec,
                          int8_t b63, int8_t b62, int8_t b61, int8_t b60,
                          int8_t b59, int8_t b58, int8_t b57, int8_t b56,
                          int8_t b55, int8_t b54, int8_t b53, int8_t b52,
@@ -346,14 +346,16 @@ namespace xsimd
                          int8_t b7, int8_t b6, int8_t b5, int8_t b4,
                          int8_t b3, int8_t b2, int8_t b1, int8_t b0)
     {
+#if (XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION) && (__GNUC__ >= 8)
         vec = _mm512_set_epi8(
             b63, b62, b61, b60, b59, b58, b57, b56, b55, b54, b53, b52, b51, b50, b49, b48,
             b47, b46, b45, b44, b43, b42, b41, b40, b39, b38, b37, b36, b35, b34, b33, b32,
             b31, b30, b29, b28, b27, b26, b25, b24, b23, b22, b21, b20, b19, b18, b17, b16,
             b15, b14, b13, b12, b11, b10, b9, b8, b7, b6, b5, b4, b3, b2, b1, b0);
+#endif
     }
 
-    void shorts_to_vector(batch<uint8_t, 64>& vec,
+    void shorts_to_batch_vector(batch<uint8_t, 64>& vec,
                           int16_t s31, int16_t s30, int16_t s29, int16_t s28,
                           int16_t s27, int16_t s26, int16_t s25, int16_t s24,
                           int16_t s23, int16_t s22, int16_t s21, int16_t s20,
@@ -363,26 +365,32 @@ namespace xsimd
                           int16_t s7, int16_t s6, int16_t s5, int16_t s4,
                           int16_t s3, int16_t s2, int16_t s1, int16_t s0)
     {
+#if (XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION) && (__GNUC__ >= 8)
         vec = _mm512_set_epi16(
             s31, s30, s29, s28, s27, s26, s25, s24, s23, s22, s21, s20, s19, s18, s17, s16,
             s15, s14, s13, s12, s11, s10, s9, s8, s7, s6, s5, s4, s3, s2, s1, s0);
+#endif
     }
 
-    void words_to_vector(batch<uint8_t, 64>& vec,
+    void words_to_batch_vector(batch<uint8_t, 64>& vec,
                          int32_t i15, int32_t i14, int32_t i13, int32_t i12,
                          int32_t i11, int32_t i10, int32_t i9, int32_t i8,
                          int32_t i7, int32_t i6, int32_t i5, int32_t i4,
                          int32_t i3, int32_t i2, int32_t i1, int32_t i0)
     {
+#if (XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION) && (__GNUC__ >= 8)
         vec = _mm512_set_epi32(
             i15, i14, i13, i12, i11, i10, i9, i8, i7, i6, i5, i4, i3, i2, i1, i0);
+#endif
     }
 
-    void longs_to_vector(batch<uint8_t, 64>& vec,
+    void longs_to_batch_vector(batch<uint8_t, 64>& vec,
                            int64_t d7, int64_t d6, int64_t d5, int64_t d4,
                            int64_t d3, int64_t d2, int64_t d1, int64_t d0)
     {
+#if (XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION) && (__GNUC__ >= 8)
         vec = _mm512_set_epi64(d7, d6, d5, d4, d3, d2, d1, d0);
+#endif
     }
 
 }
