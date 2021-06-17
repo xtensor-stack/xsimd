@@ -30,17 +30,11 @@ namespace xsimd {
     }
 
     // all
-    template<class A> bool all(batch<float, A> const& self, requires<sse2>) {
-      return _mm_movemask_ps(self) == 0x0F;
-    }
     template<class A> bool all(batch<double, A> const& self, requires<sse2>) {
       return _mm_movemask_pd(self) == 0x03;
     }
 
     // any
-    template<class A> bool any(batch<float, A> const& self, requires<sse2>) {
-      return _mm_movemask_ps(self) != 0;
-    }
     template<class A> bool any(batch<double, A> const& self, requires<sse2>) {
       return _mm_movemask_pd(self) != 0;
     }
