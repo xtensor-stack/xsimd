@@ -123,6 +123,31 @@ batch<T, A> exp(batch<T, A> const& self) {
   return kernel::exp<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> exp10(batch<T, A> const& self) {
+  return kernel::exp10<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> exp2(batch<T, A> const& self) {
+  return kernel::exp2<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> expm1(batch<T, A> const& self) {
+  return kernel::expm1<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> erf(batch<T, A> const& self) {
+  return kernel::erf<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> erfc(batch<T, A> const& self) {
+  return kernel::erfc<A>(self, A{});
+}
+
 template <class T, class A, uint64_t... Coefs>
 batch<T, A> estrin(const batch<T, A>& self) {
   return kernel::estrin<T, A, Coefs...>(self);
@@ -286,6 +311,21 @@ batch<T, A> log(batch<T, A> const& self) {
 }
 
 template<class T, class A>
+batch<T, A> log2(batch<T, A> const& self) {
+  return kernel::log2<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> log10(batch<T, A> const& self) {
+  return kernel::log10<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> log1p(batch<T, A> const& self) {
+  return kernel::log1p<A>(self, A{});
+}
+
+template<class T, class A>
 batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other) {
   return self < other;
 }
@@ -432,6 +472,16 @@ batch<as_integer_t<T>, A> to_int(batch<T, A> const& self) {
 template<class T, class A>
 batch<T, A> trunc(batch<T, A> const& self) {
   return kernel::trunc<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::zip_hi<A>(self, other, A{});
+}
+
+template<class T, class A>
+batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::zip_lo<A>(self, other, A{});
 }
 
 // high level functions - batch_bool

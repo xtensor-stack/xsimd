@@ -57,7 +57,7 @@ protected:
         batch_type b0(2);
         EXPECT_EQ(b0, tmp) << print_function_name("batch(value_type)");
 
-        batch_type b1(lhs.data());
+        batch_type b1 = batch_type::load_unaligned(lhs.data());
         EXPECT_EQ(b1, lhs) << print_function_name("batch(value_type*)");
     }
 
@@ -508,14 +508,14 @@ protected:
         {
             batch_bool_type tbt(true);
             batch_type expected = batch_type(value_type(1));
-            batch_type res = tbt;
+            batch_type res = (batch_type)tbt;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch = true");
         }
         // batch = false
         {
             batch_bool_type fbt(false);
             batch_type expected = batch_type(value_type(0));
-            batch_type res = fbt;
+            batch_type res = (batch_type)fbt;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch = false");
         }
         // !batch
@@ -523,7 +523,7 @@ protected:
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
                             [](const value_type& l) { return !l; });
-            batch_type res = !batch_lhs();
+            batch_type res = (batch_type)!batch_lhs();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("!batch");
         }
         // bitwise_cast
@@ -576,12 +576,12 @@ private:
 
     batch_type batch_lhs() const
     {
-        return batch_type(lhs.data());
+        return batch_type::load_unaligned(lhs.data());
     }
 
     batch_type batch_rhs() const
     {
-        return batch_type(rhs.data());
+        return batch_type::load_unaligned(rhs.data());
     }
 
     template <class T = value_type>

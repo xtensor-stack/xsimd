@@ -35,16 +35,10 @@ namespace xsimd {
     template<class A> bool all(batch<float, A> const& self, requires<sse>) {
       return _mm_movemask_ps(self) == 0x0F;
     }
-    template<class A> bool all(batch<double, A> const& self, requires<sse>) {
-      return _mm_movemask_pd(self) == 0x03;
-    }
 
     // any
     template<class A> bool any(batch<float, A> const& self, requires<sse>) {
       return _mm_movemask_ps(self) != 0;
-    }
-    template<class A> bool any(batch<double, A> const& self, requires<sse>) {
-      return _mm_movemask_pd(self) != 0;
     }
 
     // bitwise_and
@@ -55,11 +49,24 @@ namespace xsimd {
       return _mm_and_pd(self, other);
     }
 
+    template<class A> batch_bool<float, A> bitwise_and(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<sse>) {
+      return _mm_and_ps(self, other);
+    }
+    template<class A> batch_bool<double, A> bitwise_and(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<sse>) {
+      return _mm_and_pd(self, other);
+    }
+
     // bitwise_or
     template<class A> batch<float, A> bitwise_or(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_or_ps(self, other);
     }
     template<class A> batch<double, A> bitwise_or(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_or_pd(self, other);
+    }
+    template<class A> batch_bool<float, A> bitwise_or(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<sse>) {
+      return _mm_or_ps(self, other);
+    }
+    template<class A> batch_bool<double, A> bitwise_or(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<sse>) {
       return _mm_or_pd(self, other);
     }
 
@@ -68,6 +75,12 @@ namespace xsimd {
       return _mm_xor_ps(self, other);
     }
     template<class A> batch<double, A> bitwise_xor(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_xor_pd(self, other);
+    }
+    template<class A> batch_bool<float, A> bitwise_xor(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<sse>) {
+      return _mm_xor_ps(self, other);
+    }
+    template<class A> batch_bool<double, A> bitwise_xor(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<sse>) {
       return _mm_xor_pd(self, other);
     }
 
@@ -107,6 +120,13 @@ namespace xsimd {
     }
     template <class A>
     batch<double, A> bitwise_not(batch<double, A> const &self, requires<sse>) {
+      return _mm_xor_pd(self, _mm_castsi128_pd(_mm_set1_epi32(-1)));
+    }
+    template<class A> batch_bool<float, A> bitwise_not(batch_bool<float, A> const& self, requires<sse>) {
+      return _mm_xor_ps(self, _mm_castsi128_ps(_mm_set1_epi32(-1)));
+    }
+    template <class A>
+    batch_bool<double, A> bitwise_not(batch_bool<double, A> const &self, requires<sse>) {
       return _mm_xor_pd(self, _mm_castsi128_pd(_mm_set1_epi32(-1)));
     }
 
@@ -156,6 +176,12 @@ namespace xsimd {
     }
     template<class A> batch_bool<double, A> eq(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_cmpeq_pd(self, other);
+    }
+    template<class A> batch_bool<float, A> eq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<sse>) {
+      return  _mm_castsi128_ps(_mm_cmpeq_epi32(_mm_castps_si128(self), _mm_castps_si128(other)));
+    }
+    template<class A> batch_bool<double, A> eq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<sse>) {
+      return  _mm_castsi128_pd(_mm_cmpeq_epi32(_mm_castpd_si128(self), _mm_castpd_si128(other)));
     }
 
     // ge
@@ -285,12 +311,32 @@ namespace xsimd {
       return _mm_cmpneq_pd(self, other);
     }
 
+    template<class A> batch_bool<float, A> neq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<sse>) {
+      return _mm_cmpneq_ps(self, other);
+    }
+    template<class A> batch_bool<double, A> neq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<sse>) {
+      return _mm_cmpneq_pd(self, other);
+    }
+
     // sadd
     template<class A> batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_add_ps(self, other); // no saturated arithmetic on floating point numbers
     }
     template<class A> batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_add_pd(self, other); // no saturated arithmetic on floating point numbers
+    }
+
+    // set
+    template<class A, class... Values>
+    batch<float, A> set(batch<float, A> const&, requires<sse>, Values... values) {
+      static_assert(sizeof...(Values) == batch<float, A>::size, "consistent init");
+      return _mm_setr_ps(values...);
+    }
+
+    template<class A, class... Values>
+    batch<double, A> set(batch<double, A> const&, requires<sse>, Values... values) {
+      static_assert(sizeof...(Values) == batch<double, A>::size, "consistent init");
+      return _mm_setr_pd(values...);
     }
 
     // select
@@ -343,6 +389,30 @@ namespace xsimd {
     }
     template<class A> batch<double, A> sub(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_sub_pd(self, other);
+    }
+
+    // zip_hi
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> zip_hi(batch<T, A> const&, batch<T, A> const&, requires<sse>) {
+      static_assert(std::is_same<A, sse>::value, "unsupported arch / op combination");
+    }
+    template<class A> batch<float, A> zip_hi(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_unpackhi_ps(self, other);
+    }
+    template<class A> batch<double, A> zip_hi(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_unpackhi_pd(self, other);
+    }
+
+    // zip_lo
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> zip_lo(batch<T, A> const&, batch<T, A> const&, requires<sse>) {
+      static_assert(std::is_same<A, sse>::value, "unsupported arch / op combination");
+    }
+    template<class A> batch<float, A> zip_lo(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_unpacklo_ps(self, other);
+    }
+    template<class A> batch<double, A> zip_lo(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_unpacklo_pd(self, other);
     }
   }
 

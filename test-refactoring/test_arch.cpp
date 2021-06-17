@@ -50,7 +50,7 @@ struct sum {
     batch acc(static_cast<T>(0));
     const unsigned n = size / batch::size * batch::size;
     for(unsigned i = 0; i != n; i += batch::size)
-        acc += batch(data + i);
+        acc += batch::load_unaligned(data + i);
     T star_acc = xsimd::hadd(acc);
     for(unsigned i = n; i < size; ++i)
       star_acc += data[i];

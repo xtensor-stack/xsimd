@@ -56,7 +56,7 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("exp");
         }
-#if 0
+
         // exp2
         {
             std::transform(exp_input.cbegin(), exp_input.cend(), expected.begin(),
@@ -71,6 +71,23 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("exp2");
         }
+
+        // exp10
+        {
+            std::transform(exp_input.cbegin(), exp_input.cend(), expected.begin(),
+                        /* imprecise but enough for testing version of exp10 */
+                        [](const value_type& v) { return exp(log(10) * v); });
+            batch_type in, out;
+            for (size_t i = 0; i < nb_input; i += size)
+            {
+                detail::load_batch(in, exp_input, i);
+                out = exp10(in);
+                detail::store_batch(out, res, i);
+            }
+            size_t diff = detail::get_nb_diff(res, expected);
+            EXPECT_EQ(diff, 0) << print_function_name("exp10");
+        }
+
         // expm1
         {
             std::transform(exp_input.cbegin(), exp_input.cend(), expected.begin(),
@@ -85,7 +102,6 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("expm1");
         }
-#endif
     }
 
     void test_log_functions()
@@ -104,7 +120,7 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("log");
         }
-#if 0
+
         // log2
         {
             std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
@@ -119,6 +135,7 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("log2");
         }
+
         // log10
         {
             std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
@@ -133,6 +150,7 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("log10");
         }
+
         // log1p
         {
             std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
@@ -147,7 +165,7 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("log1p");
         }
-#endif
+
     }
 };
 
