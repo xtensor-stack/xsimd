@@ -84,7 +84,7 @@ protected:
             for (size_t i = 0; i < nb_input; i += size)
             {
                 detail::load_batch(in, input, i);
-                sincos(in, out1, out2);
+                std::tie(out1, out2) = sincos(in);
                 detail::store_batch(out1, res, i);
                 detail::store_batch(out2, res2, i);
             }
@@ -111,6 +111,7 @@ protected:
 
     void test_reciprocal_functions()
     {
+
         // asin
         {
             std::transform(ainput.cbegin(), ainput.cend(), expected.begin(),
@@ -168,6 +169,7 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("atan2");
         }
+
     }
 };
 
