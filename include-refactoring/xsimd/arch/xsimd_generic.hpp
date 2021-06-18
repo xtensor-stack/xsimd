@@ -3,6 +3,7 @@
 
 #include "../types/xsimd_generic_arch.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "../math/xsimd_rem_pio2.hpp"
 #include "./xsimd_constants.hpp"
 
 #include <limits>
@@ -55,6 +56,8 @@ namespace xsimd {
   batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const& , batch<T, A> const& );
   template<class T, class A>
   batch<T, A> sign(batch<T, A> const& self);
+  template<class T, class A>
+  batch<T, A> signnz(batch<T, A> const& self);
   template<class T, class A>
   batch<T, A> sqrt(batch<T, A> const& self);
   template<class T, class A>
@@ -143,6 +146,146 @@ namespace xsimd {
         auto inv = self ^ sign;
         return inv - sign;
       }
+    }
+
+    // acos
+    template<class A, class T> batch<T, A> acos(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+        batch_type x = abs(self);
+        auto x_larger_05 = x > batch_type(0.5);
+        x = select(x_larger_05, sqrt(fma(batch_type(-0.5), x, batch_type(0.5))), self);
+        x = asin(x);
+        x = select(x_larger_05, x + x, x);
+        x = select(self < batch_type(-0.5), constants::pi<batch_type>() - x, x);
+        return select(x_larger_05, x, constants::pio2<batch_type>() - x);
+    }
+
+    // asin
+    template<class A> batch<float, A> asin(batch<float, A> const& self, requires<generic>) {
+      using batch_type = batch<float, A>;
+                batch_type x = abs(self);
+                batch_type sign = bitofsign(self);
+                auto x_larger_05 = x > batch_type(0.5);
+                batch_type z = select(x_larger_05, batch_type(0.5) * (batch_type(1.) - x), x * x);
+                x = select(x_larger_05, sqrt(z), x);
+                batch_type z1 = detail::horner<batch_type,
+                              0x3e2aaae4,
+                              0x3d9980f6,
+                              0x3d3a3ec7,
+                              0x3cc617e3,
+                              0x3d2cb352>(z);
+                z1 = fma(z1, z * x, x);
+                z = select(x_larger_05, constants::pio2<batch_type>() - (z1 + z1), z1);
+                return z ^ sign;
+    }
+    template<class A> batch<double, A> asin(batch<double, A> const& self, requires<generic>) {
+      using batch_type = batch<double, A>;
+                batch_type x = abs(self);
+                auto small_cond = x < constants::sqrteps<batch_type>();
+                batch_type ct1 = batch_type(bit_cast<double>(int64_t(0x3fe4000000000000)));
+                batch_type zz1 = batch_type(1.) - x;
+                batch_type vp = zz1 * detail::horner<batch_type,
+                                    0x403c896240f3081dull,
+                                    0xc03991aaac01ab68ull,
+                                    0x401bdff5baf33e6aull,
+                                    0xbfe2079259f9290full,
+                                    0x3f684fc3988e9f08ull>(zz1) /
+                    detail::horner1<batch_type,
+                            0x40756709b0b644beull,
+                            0xc077fe08959063eeull,
+                            0x40626219af6a7f42ull,
+                            0xc035f2a2b6bf5d8cull>(zz1);
+                zz1 = sqrt(zz1 + zz1);
+                batch_type z = constants::pio4<batch_type>() - zz1;
+                zz1 = fms(zz1, vp, constants::pio_2lo<batch_type>());
+                z = z - zz1;
+                zz1 = z + constants::pio4<batch_type>();
+                batch_type zz2 = self * self;
+                z = zz2 * detail::horner<batch_type,
+                                 0xc020656c06ceafd5ull,
+                                 0x40339007da779259ull,
+                                 0xc0304331de27907bull,
+                                 0x4015c74b178a2dd9ull,
+                                 0xbfe34341333e5c16ull,
+                                 0x3f716b9b0bd48ad3ull>(zz2) /
+                    detail::horner1<batch_type,
+                            0xc04898220a3607acull,
+                            0x4061705684ffbf9dull,
+                            0xc06265bb6d3576d7ull,
+                            0x40519fc025fe9054ull,
+                            0xc02d7b590b5e0eabull>(zz2);
+                zz2 = fma(x, z, x);
+                return select(x > batch_type(1.), constants::nan<batch_type>(),
+                              select(small_cond, x,
+                                     select(x > ct1, zz1, zz2)) ^
+                                  bitofsign(self));
+    }
+
+    // atan
+    namespace detail {
+    template<class A>
+            static inline batch<float, A> kernel_atan(const batch<float, A>& x, const batch<float, A>& recx)
+            {
+              using batch_type = batch<float, A>;
+                const auto flag1 = x < constants::tan3pio8<batch_type>();
+                const auto flag2 = (x >= batch_type(bit_cast<float>((uint32_t)0x3ed413cd))) && flag1;
+                batch_type yy = select(flag1, batch_type(0.), constants::pio2<batch_type>());
+                yy = select(flag2, constants::pio4<batch_type>(), yy);
+                batch_type xx = select(flag1, x, -recx);
+                xx = select(flag2, (x - batch_type(1.)) / (x + batch_type(1.)), xx);
+                const batch_type z = xx * xx;
+                batch_type z1 = detail::horner<batch_type,
+                              0xbeaaaa2aul,
+                              0x3e4c925ful,
+                              0xbe0e1b85ul,
+                              0x3da4f0d1ul>(z);
+                z1 = fma(xx, z1 * z, xx);
+                z1 = select(flag2, z1 + constants::pio_4lo<batch_type>(), z1);
+                z1 = select(!flag1, z1 + constants::pio_2lo<batch_type>(), z1);
+                return yy + z1;
+            }
+    template<class A>
+            static inline batch<double, A> kernel_atan(const batch<double, A>& x, const batch<double, A>& recx)
+            {
+              using batch_type = batch<double, A>;
+                const auto flag1 = x < constants::tan3pio8<batch_type>();
+                const auto flag2 = (x >= constants::tanpio8<batch_type>()) && flag1;
+                batch_type yy = select(flag1, batch_type(0.), constants::pio2<batch_type>());
+                yy = select(flag2, constants::pio4<batch_type>(), yy);
+                batch_type xx = select(flag1, x, -recx);
+                xx = select(flag2, (x - batch_type(1.)) / (x + batch_type(1.)), xx);
+                batch_type z = xx * xx;
+                z *= detail::horner<batch_type,
+                            0xc0503669fd28ec8eull,
+                            0xc05eb8bf2d05ba25ull,
+                            0xc052c08c36880273ull,
+                            0xc03028545b6b807aull,
+                            0xbfec007fa1f72594ull>(z) /
+                    detail::horner1<batch_type,
+                            0x4068519efbbd62ecull,
+                            0x407e563f13b049eaull,
+                            0x407b0e18d2e2be3bull,
+                            0x4064a0dd43b8fa25ull,
+                            0x4038dbc45b14603cull>(z);
+                z = fma(xx, z, xx);
+                z = select(flag2, z + constants::pio_4lo<batch_type>(), z);
+                z = z + select(flag1, batch_type(0.), constants::pio_2lo<batch_type>());
+                return yy + z;
+            }
+    }
+    template<class A, class T> batch<T, A> atan(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                const batch_type absa = abs(self);
+                const batch_type x = detail::kernel_atan(absa, batch_type(1.) / absa);
+                return x ^ bitofsign(self);
+    }
+
+    // atan2
+    template<class A, class T> batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+      using batch_type = batch<T, A>;
+                const batch_type q = abs(self / other);
+                const batch_type z = detail::kernel_atan(q, batch_type(1.) / q);
+                return select(other > batch_type(0.), z, constants::pi<batch_type>() - z) * signnz(self);
     }
 
     // batch_cast
@@ -296,6 +439,252 @@ namespace xsimd {
     // copysign
     template<class A, class T> batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return abs(self) | bitofsign(other);
+    }
+
+    // cos
+    namespace detail
+    {
+        template <class T, class A>
+        batch<T, A> quadrant(const batch<T, A>& x) {
+          return x & batch<T, A>(3);
+        }
+
+        template <class A>
+        batch<float, A> quadrant(const batch<float, A>& x) {
+          return to_float(quadrant(to_int(x)));
+        }
+
+        template <class A>
+        batch<double, A> quadrant(const batch<double, A>& x) {
+          using batch_type = batch<double, A>;
+                batch_type a = x * batch_type(0.25);
+                return (a - floor(a)) * batch_type(4.);
+        }
+
+        template<class A>
+        inline batch<float, A> cos_eval(const batch<float, A>& z)
+        {
+          using batch_type = batch<float, A>;
+            batch_type y = horner<batch_type,
+                         0x3d2aaaa5,
+                         0xbab60619,
+                         0x37ccf5ce>(z);
+            return batch_type(1.) + fma(z, batch_type(-0.5), y * z * z);
+        }
+
+        template<class A>
+        inline batch<float, A> sin_eval(const batch<float, A>& z, const batch<float, A>& x)
+            {
+          using batch_type = batch<float, A>;
+                batch_type y = horner<batch_type,
+                             0xbe2aaaa2,
+                             0x3c08839d,
+                             0xb94ca1f9>(z);
+                return fma(y * z, x, x);
+            }
+
+        template<class A>
+            static inline batch<float, A> base_tancot_eval(const batch<float, A>& z)
+            {
+          using batch_type = batch<float, A>;
+                batch_type zz = z * z;
+                batch_type y = horner<batch_type,
+                             0x3eaaaa6f,
+                             0x3e0896dd,
+                             0x3d5ac5c9,
+                             0x3cc821b5,
+                             0x3b4c779c,
+                             0x3c19c53b>(zz);
+                return fma(y, zz * z, z);
+            }
+
+            template <class A, class BB>
+            static inline batch<float, A> tan_eval(const batch<float, A>& z, const BB& test)
+            {
+          using batch_type = batch<float, A>;
+                batch_type y = base_tancot_eval(z);
+                return select(test, y, -batch_type(1.) / y);
+            }
+
+            template <class A, class BB>
+            static inline batch<float, A> cot_eval(const batch<float, A>& z, const BB& test)
+            {
+          using batch_type = batch<float, A>;
+                batch_type y = base_tancot_eval(z);
+                return select(test, batch_type(1.) / y, -y);
+            }
+
+            template<class A>
+            static inline batch<double, A> cos_eval(const batch<double, A>& z)
+            {
+          using batch_type = batch<double, A>;
+                batch_type y = horner<batch_type,
+                             0x3fe0000000000000ull,
+                             0xbfa5555555555551ull,
+                             0x3f56c16c16c15d47ull,
+                             0xbefa01a019ddbcd9ull,
+                             0x3e927e4f8e06d9a5ull,
+                             0xbe21eea7c1e514d4ull,
+                             0x3da8ff831ad9b219ull>(z);
+                return batch_type(1.) - y * z;
+            }
+
+            template<class A>
+            static inline batch<double, A> sin_eval(const batch<double, A>& z, const batch<double, A>& x)
+            {
+          using batch_type = batch<double, A>;
+                batch_type y = horner<batch_type,
+                             0xbfc5555555555548ull,
+                             0x3f8111111110f7d0ull,
+                             0xbf2a01a019bfdf03ull,
+                             0x3ec71de3567d4896ull,
+                             0xbe5ae5e5a9291691ull,
+                             0x3de5d8fd1fcf0ec1ull>(z);
+                return fma(y * z, x, x);
+            }
+
+            template<class A>
+            static inline batch<double, A> base_tancot_eval(const batch<double, A>& z)
+            {
+          using batch_type = batch<double, A>;
+                batch_type zz = z * z;
+                batch_type num = detail::horner<batch_type,
+                               0xc1711fead3299176ull,
+                               0x413199eca5fc9dddull,
+                               0xc0c992d8d24f3f38ull>(zz);
+                batch_type den = detail::horner1<batch_type,
+                                0xc189afe03cbe5a31ull,
+                                0x4177d98fc2ead8efull,
+                                0xc13427bc582abc96ull,
+                                0x40cab8a5eeb36572ull>(zz);
+                return fma(z, (zz * (num / den)), z);
+            }
+
+            template <class A, class BB>
+            static inline batch<double, A> tan_eval(const batch<double, A>& z, const BB& test)
+            {
+          using batch_type = batch<double, A>;
+                batch_type y = base_tancot_eval(z);
+                return select(test, y, -batch_type(1.) / y);
+            }
+
+            template <class A, class BB>
+            static inline batch<double, A> cot_eval(const batch<double, A>& z, const BB& test)
+            {
+          using batch_type = batch<double, A>;
+                batch_type y = base_tancot_eval(z);
+                return select(test, batch_type(1.) / y, -y);
+            }
+
+        struct trigo_radian_tag
+        {
+        };
+        struct trigo_pi_tag
+        {
+        };
+
+        template <class B, class Tag = trigo_radian_tag>
+        struct trigo_reducer
+        {
+            static inline B reduce(const B& x, B& xr)
+            {
+                if (all(x <= constants::pio4<B>()))
+                {
+                    xr = x;
+                    return B(0.);
+                }
+                else if (all(x <= constants::pio2<B>()))
+                {
+                    auto test = x > constants::pio4<B>();
+                    xr = x - constants::pio2_1<B>();
+                    xr -= constants::pio2_2<B>();
+                    xr -= constants::pio2_3<B>();
+                    xr = select(test, xr, x);
+                    return select(test, B(1.), B(0.));
+                }
+                else if (all(x <= constants::twentypi<B>()))
+                {
+                    B xi = nearbyint(x * constants::twoopi<B>());
+                    xr = fnma(xi, constants::pio2_1<B>(), x);
+                    xr -= xi * constants::pio2_2<B>();
+                    xr -= xi * constants::pio2_3<B>();
+                    return quadrant(xi);
+                }
+                else if (all(x <= constants::mediumpi<B>()))
+                {
+                    B fn = nearbyint(x * constants::twoopi<B>());
+                    B r = x - fn * constants::pio2_1<B>();
+                    B w = fn * constants::pio2_1t<B>();
+                    B t = r;
+                    w = fn * constants::pio2_2<B>();
+                    r = t - w;
+                    w = fn * constants::pio2_2t<B>() - ((t - r) - w);
+                    t = r;
+                    w = fn * constants::pio2_3<B>();
+                    r = t - w;
+                    w = fn * constants::pio2_3t<B>() - ((t - r) - w);
+                    xr = r - w;
+                    return quadrant(fn);
+                }
+                else
+                {
+                    static constexpr std::size_t size = B::size;
+                    using value_type = typename B::value_type;
+                    alignas(B) std::array<value_type, size> tmp;
+                    alignas(B) std::array<value_type, size> txr;
+                    alignas(B) std::array<value_type, size> args;
+                    x.store_aligned(args.data());
+
+                    for (std::size_t i = 0; i < size; ++i)
+                    {
+                        double arg = args[i];
+                        if (arg == std::numeric_limits<value_type>::infinity())
+                        {
+                            tmp[i] = 0.;
+                            txr[i] = std::numeric_limits<value_type>::quiet_NaN();
+                        }
+                        else
+                        {
+                            double y[2];
+                            std::int32_t n = ::xsimd::detail::__ieee754_rem_pio2(arg, y);
+                            tmp[i] = value_type(n & 3);
+                            txr[i] = value_type(y[0]);
+                        }
+                    }
+                    xr.load_aligned(&txr[0]);
+                    B res;
+                    res.load_aligned(&tmp[0]);
+                    return res;
+                }
+            }
+        };
+
+        template <class B>
+        struct trigo_reducer<B, trigo_pi_tag>
+        {
+            static inline B reduce(const B& x, B& xr)
+            {
+                B xi = nearbyint(x * B(2.));
+                B x2 = x - xi * B(0.5);
+                xr = x2 * constants::pi<B>();
+                return quadrant(xi);
+            }
+        };
+
+    }
+    template<class A, class T> batch<T, A> cos(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                const batch_type x = abs(self);
+                batch_type xr = constants::nan<batch_type>();
+                const batch_type n = detail::trigo_reducer<batch_type>::reduce(x, xr);
+                auto tmp = select(n >= batch_type(2.), batch_type(1.), batch_type(0.));
+                auto swap_bit = fma(batch_type(-2.), tmp, n);
+                auto sign_bit = select((swap_bit ^ tmp) != batch_type(0.), constants::signmask<batch_type>(), batch_type(0.));
+                const batch_type z = xr * xr;
+                const batch_type se = detail::sin_eval(z, xr);
+                const batch_type ce = detail::cos_eval(z);
+                const batch_type z1 = select(swap_bit != batch_type(0.), se, ce);
+                return z1 ^ sign_bit;
     }
 
     // div
@@ -1625,8 +2014,9 @@ namespace xsimd {
       return res;
     }
 
-    template<class A> batch<float, A> sign(batch<float, A> const& self, requires<generic>) {
-      using batch_type = batch<float, A>;
+    namespace detail {
+    template<class T, class A> batch<T, A> signf(batch<T, A> const& self) {
+      using batch_type = batch<T, A>;
       batch_type res = select(self > batch_type(0.f), batch_type(1.f), batch_type(0.f)) - select(self < batch_type(0.f), batch_type(1.f), batch_type(0.f));
 #ifdef XSIMD_NO_NANS
       return res;
@@ -1634,14 +2024,71 @@ namespace xsimd {
       return select(isnan(self), constants::nan<batch_type>(), res);
 #endif
     }
+    }
+
+    template<class A> batch<float, A> sign(batch<float, A> const& self, requires<generic>) {
+      return detail::signf(self);
+    }
     template<class A> batch<double, A> sign(batch<double, A> const& self, requires<generic>) {
-      using batch_type = batch<double, A>;
-      batch_type res = select(self > batch_type(0.), batch_type(1.), batch_type(0.)) - select(self < batch_type(0.), batch_type(1.), batch_type(0.));
-#ifdef XSIMD_NO_NANS
-      return res;
+      return detail::signf(self);
+    }
+
+    // signnz
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> signnz(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+      return (self >> (sizeof(T) * 8 - 1)) | batch_type(1.);
+    }
+
+    namespace detail {
+    template<class T, class A> batch<T, A> signnzf(batch<T, A> const& self) {
+      using batch_type = batch<T, A>;
+#ifndef XSIMD_NO_NANS
+                return select(isnan(self), constants::nan<batch_type>(), batch_type(1.) | (constants::signmask<batch_type>() & self));
 #else
-      return select(isnan(self), constants::nan<batch_type>(), res);
+                return batch_type(1.) | (constants::signmask<batch_type>() & self);
 #endif
+    }
+    }
+
+    template<class A> batch<float, A> signnz(batch<float, A> const& self, requires<generic>) {
+      return detail::signnzf(self);
+    }
+    template<class A> batch<double, A> signnz(batch<double, A> const& self, requires<generic>) {
+      return detail::signnzf(self);
+    }
+
+    // sin
+    template<class A, class T> batch<T, A> sin(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                const batch_type x = abs(self);
+                batch_type xr = constants::nan<batch_type>();
+                const batch_type n = detail::trigo_reducer<batch_type, detail::trigo_radian_tag>::reduce(x, xr);
+                auto tmp = select(n >= batch_type(2.), batch_type(1.), batch_type(0.));
+                auto swap_bit = fma(batch_type(-2.), tmp, n);
+                auto sign_bit = bitofsign(self) ^ select(tmp != batch_type(0.), constants::signmask<batch_type>(), batch_type(0.));
+                const batch_type z = xr * xr;
+                const batch_type se = detail::sin_eval(z, xr);
+                const batch_type ce = detail::cos_eval(z);
+                const batch_type z1 = select(swap_bit == batch_type(0.), se, ce);
+                return z1 ^ sign_bit;
+    }
+
+    // sincos
+    template<class A, class T> std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                const batch_type x = abs(self);
+                batch_type xr = constants::nan<batch_type>();
+                const batch_type n = detail::trigo_reducer<batch_type>::reduce(x, xr);
+                auto tmp = select(n >= batch_type(2.), batch_type(1.), batch_type(0.));
+                auto swap_bit = fma(batch_type(-2.), tmp, n);
+                const batch_type z = xr * xr;
+                const batch_type se = detail::sin_eval(z, xr);
+                const batch_type ce = detail::cos_eval(z);
+                auto sin_sign_bit = bitofsign(self) ^ select(tmp != batch_type(0.), constants::signmask<batch_type>(), batch_type(0.));
+                const batch_type sin_z1 = select(swap_bit == batch_type(0.), se, ce);
+                auto cos_sign_bit = select((swap_bit ^ tmp) != batch_type(0.), constants::signmask<batch_type>(), batch_type(0.));
+                const batch_type cos_z1 = select(swap_bit != batch_type(0.), se, ce);
+                return std::make_pair(sin_z1 ^ sin_sign_bit, cos_z1 ^ cos_sign_bit);
     }
 
     // store_aligned
@@ -1656,6 +2103,19 @@ namespace xsimd {
     template<class A, class T_in, class T_out> void store_unaligned(T_out *mem, batch<T_in, A> const& self, requires<generic>) {
       static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct store for this type combination");
       return store_aligned<A>(mem, self, generic{});
+    }
+
+    // tan
+    template<class A, class T> batch<T, A> tan(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                const batch_type x = abs(self);
+                batch_type xr = constants::nan<batch_type>();
+                const batch_type n = detail::trigo_reducer<batch_type>::reduce(x, xr);
+                auto tmp = select(n >= batch_type(2.), batch_type(1.), batch_type(0.));
+                auto swap_bit = fma(batch_type(-2.), tmp, n);
+                auto test = (swap_bit == batch_type(0.));
+                const batch_type y = detail::tan_eval(xr, test);
+                return y ^ bitofsign(self);
     }
 
     // trunc
