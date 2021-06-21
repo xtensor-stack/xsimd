@@ -160,6 +160,16 @@ namespace xsimd {
         return select(x_larger_05, x, constants::pio2<batch_type>() - x);
     }
 
+    // acosh
+    template<class A, class T> batch<T, A> acosh(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                batch_type x = self - batch_type(1.);
+                auto test = x > constants::oneotwoeps<batch_type>();
+                batch_type z = select(test, self, x + sqrt(x + x + x * x));
+                batch_type l1pz = log1p(z);
+                return select(test, l1pz + constants::log_2<batch_type>(), l1pz);
+    }
+
     // asin
     template<class A> batch<float, A> asin(batch<float, A> const& self, requires<generic>) {
       using batch_type = batch<float, A>;
@@ -221,6 +231,70 @@ namespace xsimd {
                                   bitofsign(self));
     }
 
+    // asinh
+    namespace detail {
+        template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+          batch<T, A>
+            average(const batch<T, A>& x1, const batch<T, A>& x2)
+            {
+                return (x1 & x2) + ((x1 ^ x2) >> 1);
+            }
+
+        template <class A, class T>
+          batch<T, A>
+            averagef(const batch<T, A>& x1, const batch<T, A>& x2)
+            {
+              using batch_type = batch<T, A>;
+                return fma(x1, batch_type(0.5), x2 * batch_type(0.5));
+            }
+        template<class A>
+          batch<float, A> average(batch<float, A> const & x1, batch<float, A> const & x2) {
+            return averagef(x1, x2);
+          }
+        template<class A>
+          batch<double, A> average(batch<double, A> const & x1, batch<double, A> const & x2) {
+            return averagef(x1, x2);
+          }
+    }
+    template<class A> batch<float, A> asinh(batch<float, A> const& self, requires<generic>) {
+      using batch_type = batch<float, A>;
+                batch_type x = abs(self);
+                auto lthalf = x < batch_type(0.5);
+                batch_type x2 = x * x;
+                batch_type bts = bitofsign(self);
+                batch_type z(0.);
+                if (any(lthalf))
+                {
+                    z = detail::horner<batch_type,
+                               0x3f800000,
+                               0xbe2aa9ad,
+                               0x3d9949b1,
+                               0xbd2ee581,
+                               0x3ca4d6e6>(x2) *
+                        x;
+                    if (all(lthalf))
+                        return z ^ bts;
+                }
+                batch_type tmp = select(x > constants::oneosqrteps<batch_type>(), x, detail::average(x, hypot(batch_type(1.), x)));
+#ifndef XSIMD_NO_NANS
+                return select(isnan(self), constants::nan<batch_type>(), select(lthalf, z, log(tmp) + constants::log_2<batch_type>()) ^ bts);
+#else
+                return select(lthalf, z, log(tmp) + constants::log_2<batch_type>()) ^ bts;
+#endif
+    }
+    template<class A> batch<double, A> asinh(batch<double, A> const& self, requires<generic>) {
+      using batch_type = batch<double, A>;
+                batch_type x = abs(self);
+                auto test = x > constants::oneosqrteps<batch_type>();
+                batch_type z = select(test, x - batch_type(1.), x + x * x / (batch_type(1.) + hypot(batch_type(1.), x)));
+#ifndef XSIMD_NO_INFINITIES
+                z = select(x == constants::infinity<batch_type>(), x, z);
+#endif
+                batch_type l1pz = log1p(z);
+                z = select(test, l1pz + constants::log_2<batch_type>(), l1pz);
+                return bitofsign(self) ^ z;
+    }
+
     // atan
     namespace detail {
     template<class A>
@@ -278,6 +352,17 @@ namespace xsimd {
                 const batch_type absa = abs(self);
                 const batch_type x = detail::kernel_atan(absa, batch_type(1.) / absa);
                 return x ^ bitofsign(self);
+    }
+
+    // atanh
+    template<class A, class T> batch<T, A> atanh(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                batch_type x = abs(self);
+                batch_type t = x + x;
+                batch_type z = batch_type(1.) - x;
+                auto test = x < batch_type(0.5);
+                batch_type tmp = select(test, x, t) / z;
+                return bitofsign(self) ^ (batch_type(0.5) * log1p(select(test, fma(t, tmp, t), tmp)));
     }
 
     // atan2
@@ -465,7 +550,7 @@ namespace xsimd {
         inline batch<float, A> cos_eval(const batch<float, A>& z)
         {
           using batch_type = batch<float, A>;
-            batch_type y = horner<batch_type,
+            batch_type y = detail::horner<batch_type,
                          0x3d2aaaa5,
                          0xbab60619,
                          0x37ccf5ce>(z);
@@ -476,7 +561,7 @@ namespace xsimd {
         inline batch<float, A> sin_eval(const batch<float, A>& z, const batch<float, A>& x)
             {
           using batch_type = batch<float, A>;
-                batch_type y = horner<batch_type,
+                batch_type y = detail::horner<batch_type,
                              0xbe2aaaa2,
                              0x3c08839d,
                              0xb94ca1f9>(z);
@@ -488,7 +573,7 @@ namespace xsimd {
             {
           using batch_type = batch<float, A>;
                 batch_type zz = z * z;
-                batch_type y = horner<batch_type,
+                batch_type y = detail::horner<batch_type,
                              0x3eaaaa6f,
                              0x3e0896dd,
                              0x3d5ac5c9,
@@ -518,7 +603,7 @@ namespace xsimd {
             static inline batch<double, A> cos_eval(const batch<double, A>& z)
             {
           using batch_type = batch<double, A>;
-                batch_type y = horner<batch_type,
+                batch_type y = detail::horner<batch_type,
                              0x3fe0000000000000ull,
                              0xbfa5555555555551ull,
                              0x3f56c16c16c15d47ull,
@@ -533,7 +618,7 @@ namespace xsimd {
             static inline batch<double, A> sin_eval(const batch<double, A>& z, const batch<double, A>& x)
             {
           using batch_type = batch<double, A>;
-                batch_type y = horner<batch_type,
+                batch_type y = detail::horner<batch_type,
                              0xbfc5555555555548ull,
                              0x3f8111111110f7d0ull,
                              0xbf2a01a019bfdf03ull,
@@ -689,30 +774,6 @@ namespace xsimd {
 
     // cosh
 
-    namespace detail {
-        template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-          batch<T, A>
-            average(const batch<T, A>& x1, const batch<T, A>& x2)
-            {
-                return (x1 & x2) + ((x1 ^ x2) >> 1);
-            }
-
-        template <class A, class T>
-          batch<T, A>
-            averagef(const batch<T, A>& x1, const batch<T, A>& x2)
-            {
-              using batch_type = batch<T, A>;
-                return fma(x1, batch_type(0.5), x2 * batch_type(0.5));
-            }
-        template<class A>
-          batch<float, A> average(batch<float, A> const & x1, batch<float, A> const & x2) {
-            return averagef(x1, x2);
-          }
-        template<class A>
-          batch<double, A> average(batch<double, A> const & x1, batch<double, A> const & x2) {
-            return averagef(x1, x2);
-          }
-    }
     template<class A, class T> batch<T, A> cosh(batch<T, A> const& self, requires<generic>) {
       using batch_type = batch<T, A>;
                 batch_type x = abs(self);

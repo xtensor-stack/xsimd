@@ -91,7 +91,6 @@ protected:
 
     void test_reciprocal_functions()
     {
-#if 0
         // asinh
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
@@ -134,7 +133,6 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("atanh");
         }
-#endif
     }
 };
 
