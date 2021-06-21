@@ -133,6 +133,11 @@ batch<T, A> cos(batch<T, A> const& self) {
   return kernel::cos<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> cosh(batch<T, A> const& self) {
+  return kernel::cosh<A>(self, A{});
+}
+
 template<class T, class Tp>
 auto div(T const& self, Tp const& other) -> decltype(self / other){
   return self / other;
@@ -458,6 +463,11 @@ batch<T, A> sin(batch<T, A> const& self) {
 }
 
 template<class T, class A>
+batch<T, A> sinh(batch<T, A> const& self) {
+  return kernel::sinh<A>(self, A{});
+}
+
+template<class T, class A>
 std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self) {
   return kernel::sincos<A>(self, A{});
 }
@@ -501,6 +511,11 @@ auto sub(T const& self, Tp const& other) -> decltype(self - other){
 template<class T, class A>
 batch<T, A> tan(batch<T, A> const& self) {
   return kernel::tan<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> tanh(batch<T, A> const& self) {
+  return kernel::tanh<A>(self, A{});
 }
 
 template<class T, class A>
