@@ -37,8 +37,18 @@ batch<T, A> acos(batch<T, A> const& self) {
 }
 
 template<class T, class A>
+batch<T, A> acosh(batch<T, A> const& self) {
+  return kernel::acosh<A>(self, A{});
+}
+
+template<class T, class A>
 batch<T, A> asin(batch<T, A> const& self) {
   return kernel::asin<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> asinh(batch<T, A> const& self) {
+  return kernel::asinh<A>(self, A{});
 }
 
 template<class T, class A>
@@ -49,6 +59,11 @@ batch<T, A> atan(batch<T, A> const& self) {
 template<class T, class A>
 batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other) {
   return kernel::atan2<A>(self, other, A{});
+}
+
+template<class T, class A>
+batch<T, A> atanh(batch<T, A> const& self) {
+  return kernel::atanh<A>(self, A{});
 }
 
 template<class T_out, class T_in, class A>
