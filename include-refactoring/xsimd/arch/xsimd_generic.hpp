@@ -687,6 +687,42 @@ namespace xsimd {
                 return z1 ^ sign_bit;
     }
 
+    // cosh
+
+    namespace detail {
+        template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+          batch<T, A>
+            average(const batch<T, A>& x1, const batch<T, A>& x2)
+            {
+                return (x1 & x2) + ((x1 ^ x2) >> 1);
+            }
+
+        template <class A, class T>
+          batch<T, A>
+            averagef(const batch<T, A>& x1, const batch<T, A>& x2)
+            {
+              using batch_type = batch<T, A>;
+                return fma(x1, batch_type(0.5), x2 * batch_type(0.5));
+            }
+        template<class A>
+          batch<float, A> average(batch<float, A> const & x1, batch<float, A> const & x2) {
+            return averagef(x1, x2);
+          }
+        template<class A>
+          batch<double, A> average(batch<double, A> const & x1, batch<double, A> const & x2) {
+            return averagef(x1, x2);
+          }
+    }
+    template<class A, class T> batch<T, A> cosh(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                batch_type x = abs(self);
+                auto test1 = x > (constants::maxlog<batch_type>() - constants::log_2<batch_type>());
+                batch_type fac = select(test1, batch_type(0.5), batch_type(1.));
+                batch_type tmp = exp(x * fac);
+                batch_type tmp1 = batch_type(0.5) * tmp;
+                return select(test1, tmp1 * tmp, detail::average(tmp, batch_type(1.) / tmp));
+    }
+
     // div
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> div(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
@@ -2091,6 +2127,37 @@ namespace xsimd {
                 return std::make_pair(sin_z1 ^ sin_sign_bit, cos_z1 ^ cos_sign_bit);
     }
 
+    // sinh
+    template<class A> batch<float, A> sinh(batch<float, A> const& self, requires<generic>) {
+      using batch_type = batch<float, A>;
+                batch_type sqr_self = self * self;
+                return detail::horner<batch_type,
+                              0x3f800000,  // 1.0f
+                              0x3e2aaacc,  // 1.66667160211E-1f
+                              0x3c087bbe,  // 8.33028376239E-3f
+                              0x39559e2f  // 2.03721912945E-4f
+                              >(sqr_self) *
+                    self;
+    }
+
+    template<class A> batch<double, A> sinh(batch<double, A> const& self, requires<generic>) {
+      using batch_type = batch<double, A>;
+                batch_type sqrself = self * self;
+                return fma(self, (detail::horner<batch_type,
+                                      0xc115782bdbf6ab05ull,  //  -3.51754964808151394800E5
+                                      0xc0c694b8c71d6182ull,  //  -1.15614435765005216044E4,
+                                      0xc064773a398ff4feull,  //  -1.63725857525983828727E2,
+                                      0xbfe9435fe8bb3cd6ull  //  -7.89474443963537015605E-1
+                                      >(sqrself) /
+                               detail::horner1<batch_type,
+                                       0xc1401a20e4f90044ull,  //  -2.11052978884890840399E6
+                                       0x40e1a7ba7ed72245ull,  //   3.61578279834431989373E4,
+                                       0xc0715b6096e96484ull  //  -2.77711081420602794433E2,
+                                       >(sqrself)) *
+                               sqrself,
+                           self);
+    }
+
     // store_aligned
     template<class A, class T_in, class T_out> void store_aligned(T_out *mem, batch<T_in, A> const& self, requires<generic>) {
       static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct store for this type combination");
@@ -2116,6 +2183,89 @@ namespace xsimd {
                 auto test = (swap_bit == batch_type(0.));
                 const batch_type y = detail::tan_eval(xr, test);
                 return y ^ bitofsign(self);
+    }
+
+    // tanh
+    namespace detail {
+        template <class B>
+        struct tanh_kernel;
+
+        template <class A>
+        struct tanh_kernel<batch<float, A>>
+        {
+          using batch_type = batch<float, A>;
+            static inline batch_type tanh(const batch_type& x)
+            {
+                batch_type sqrx = x * x;
+                return fma(detail::horner<batch_type,
+                                  0xbeaaaa99,  //    -3.33332819422E-1F
+                                  0x3e088393,  //    +1.33314422036E-1F
+                                  0xbd5c1e2d,  //    -5.37397155531E-2F
+                                  0x3ca9134e,  //    +2.06390887954E-2F
+                                  0xbbbaf0ea  //    -5.70498872745E-3F
+                                  >(sqrx) *
+                               sqrx,
+                           x, x);
+            }
+
+            static inline batch_type cotanh(const batch_type& x)
+            {
+                return batch_type(1.) / tanh(x);
+            }
+        };
+
+        template <class A>
+        struct tanh_kernel<batch<double, A>>
+        {
+          using batch_type = batch<double, A>;
+            static inline batch_type tanh(const batch_type& x)
+            {
+                batch_type sqrx = x * x;
+                return fma(sqrx * p(sqrx) / q(sqrx), x, x);
+            }
+
+            static inline batch_type cotanh(const batch_type& x)
+            {
+                batch_type sqrx = x * x;
+                batch_type qval = q(sqrx);
+                return qval / (x * fma(p(sqrx), sqrx, qval));
+            }
+
+            static inline batch_type p(const batch_type& x)
+            {
+                return detail::horner<batch_type,
+                              0xc0993ac030580563,  // -1.61468768441708447952E3
+                              0xc058d26a0e26682d,  // -9.92877231001918586564E1,
+                              0xbfeedc5baafd6f4b  // -9.64399179425052238628E-1
+                              >(x);
+            }
+
+            static inline batch_type q(const batch_type& x)
+            {
+                return detail::horner1<batch_type,
+                               0x40b2ec102442040c,  //  4.84406305325125486048E3
+                               0x40a176fa0e5535fa,  //  2.23548839060100448583E3,
+                               0x405c33f28a581B86  //  1.12811678491632931402E2,
+                               >(x);
+            }
+        };
+
+    }
+    template<class A, class T> batch<T, A> tanh(batch<T, A> const& self, requires<generic>) {
+      using batch_type = batch<T, A>;
+                batch_type one(1.);
+                batch_type x = abs(self);
+                auto test = x < (batch_type(5.) / batch_type(8.));
+                batch_type bts = bitofsign(self);
+                batch_type z = one;
+                if (any(test))
+                {
+                    z = detail::tanh_kernel<batch_type>::tanh(x);
+                    if (all(test))
+                        return z ^ bts;
+                }
+                batch_type r = fma(batch_type(-2.), one / (one + exp(x + x)), one);
+                return select(test, z, r) ^ bts;
     }
 
     // trunc
