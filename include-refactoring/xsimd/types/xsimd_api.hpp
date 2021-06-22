@@ -330,6 +330,11 @@ batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other) {
   return self <= other;
 }
 
+template<class T, class A>
+batch<T, A> lgamma(batch<T, A> const& self) {
+  return kernel::lgamma<A>(self, A{});
+}
+
 template<class A=default_arch, class From>
 batch<From, A> load(From const* ptr, aligned_mode= {}) {
   return kernel::load_aligned<A>(ptr, kernel::convert<From>{}, A{});
@@ -531,6 +536,11 @@ batch<T, A> tan(batch<T, A> const& self) {
 template<class T, class A>
 batch<T, A> tanh(batch<T, A> const& self) {
   return kernel::tanh<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> tgamma(batch<T, A> const& self) {
+  return kernel::tgamma<A>(self, A{});
 }
 
 template<class T, class A>
