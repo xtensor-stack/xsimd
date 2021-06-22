@@ -77,7 +77,6 @@ protected:
 
     void test_gamma_functions()
     {
-#if 0
         // tgamma
         {
             std::transform(gamma_input.cbegin(), gamma_input.cend(), expected.begin(),
@@ -134,7 +133,6 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("lgamma (negative input)");
         }
-#endif
     }
 };
 
