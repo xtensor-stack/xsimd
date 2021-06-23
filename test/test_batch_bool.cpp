@@ -9,6 +9,7 @@
 ****************************************************************************/
 
 #include <vector>
+#include <functional>
 
 #include "test_utils.hpp"
 
@@ -361,33 +362,34 @@ private:
     }
 };
 
-TEST_SUITE("batch_bool_test")
+TEST_SUITE_BEGIN("batch_bool_test");
+
+TEST_CASE_TEMPLATE_DEFINE("load_store", TypeParam, batch_bool_test_load_store)
 {
-    TEST_CASE_TEMPLATE_DEFINE("load_store", TypeParam, batch_bool_test_load_store)
-    {
-        batch_bool_test<TypeParam> tester;
-        tester.test_load_store();
-    }
-    TEST_CASE_TEMPLATE_APPLY(batch_bool_test_load_store, batch_types);
-
-    TEST_CASE_TEMPLATE_DEFINE("any_all", TypeParam, batch_bool_test_any_all)
-    {
-        batch_bool_test<TypeParam> tester;
-        tester.test_any_all();
-    }
-    TEST_CASE_TEMPLATE_APPLY(batch_bool_test_any_all, batch_types);
-
-    TEST_CASE_TEMPLATE_DEFINE("logical_operations", TypeParam, batch_bool_test_logical_operations)
-    {
-        batch_bool_test<TypeParam> tester;
-        tester.test_logical_operations();
-    }
-    TEST_CASE_TEMPLATE_APPLY(batch_bool_test_logical_operations, batch_types);
-
-    TEST_CASE_TEMPLATE_DEFINE("bitwise_operations", TypeParam, batch_bool_test_bitwise_operations)
-    {
-        batch_bool_test<TypeParam> tester;
-        tester.test_bitwise_operations();
-    }
-    TEST_CASE_TEMPLATE_APPLY(batch_bool_test_bitwise_operations, batch_types);
+    batch_bool_test<TypeParam> tester;
+    tester.test_load_store();
 }
+TEST_CASE_TEMPLATE_APPLY(batch_bool_test_load_store, batch_types);
+
+TEST_CASE_TEMPLATE_DEFINE("any_all", TypeParam, batch_bool_test_any_all)
+{
+    batch_bool_test<TypeParam> tester;
+    tester.test_any_all();
+}
+TEST_CASE_TEMPLATE_APPLY(batch_bool_test_any_all, batch_types);
+
+TEST_CASE_TEMPLATE_DEFINE("logical_operations", TypeParam, batch_bool_test_logical_operations)
+{
+    batch_bool_test<TypeParam> tester;
+    tester.test_logical_operations();
+}
+TEST_CASE_TEMPLATE_APPLY(batch_bool_test_logical_operations, batch_types);
+
+TEST_CASE_TEMPLATE_DEFINE("bitwise_operations", TypeParam, batch_bool_test_bitwise_operations)
+{
+    batch_bool_test<TypeParam> tester;
+    tester.test_bitwise_operations();
+}
+TEST_CASE_TEMPLATE_APPLY(batch_bool_test_bitwise_operations, batch_types);
+
+TEST_SUITE_END();
