@@ -398,7 +398,7 @@ namespace detail
 
 
 
-    std::string print_non_equal(const std::string & name,
+    inline std::string print_non_equal(const std::string & name,
                                 const std::string & lhs,
                                 const std::string & rhs)
     {
@@ -408,7 +408,7 @@ namespace detail
     }
 
     template <class V>
-    std::string print_on_expect_scalar_eq_fail(const V& lhs, const V & rhs)
+    inline std::string print_on_expect_scalar_eq_fail(const V& lhs, const V & rhs)
     {
         std::stringstream lhs_ss;
         std::stringstream rhs_ss;
@@ -418,7 +418,7 @@ namespace detail
     }
 
     template<class C>
-    std::string container_to_string(const C & c)
+    inline std::string container_to_string(const C & c)
     {
         using value_type = typename C::value_type;
         std::stringstream ss;
@@ -432,7 +432,7 @@ namespace detail
     }
 
     template<class T, std::size_t N>
-    std::string container_to_string(const xsimd::batch_bool<T, N> & c)
+    inline std::string container_to_string(const xsimd::batch_bool<T, N> & c)
     {
         std::array<bool, N> tmp;
         c.store_unaligned(tmp.data());
@@ -440,7 +440,7 @@ namespace detail
     }
 
     template<class T, std::size_t N>
-    std::string container_to_string(const xsimd::batch<T, N> & c)
+    inline std::string container_to_string(const xsimd::batch<T, N> & c)
     {
         std::array<T, N> tmp;
         c.store_unaligned(tmp.data());
@@ -448,7 +448,7 @@ namespace detail
     }
 
     template <class VL, class VR>
-    std::string print_on_container_eq_fail(const std::string name, const VL& lhs, const VR & rhs)
+    inline std::string print_on_container_eq_fail(const std::string name, const VL& lhs, const VR & rhs)
     {
         return print_non_equal(name, container_to_string(lhs), container_to_string(rhs));
     }
