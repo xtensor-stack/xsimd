@@ -332,30 +332,31 @@ private:
 };
 
 
-TEST_SUITE("batch_cast_test")
+TEST_SUITE_BEGIN("batch_cast_test");
+
+TEST_CASE_TEMPLATE_DEFINE("cast", TypeParam, batch_cast_test_cast)
 {
-    TEST_CASE_TEMPLATE_DEFINE("cast", TypeParam, batch_cast_test_cast)
-    {
-        batch_cast_test<TypeParam> tester;
-        tester.test_cast();
-    }
-    TEST_CASE_TEMPLATE_APPLY(batch_cast_test_cast, conversion_types);
-
-    #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-    TEST_CASE_TEMPLATE_DEFINE("cast_sizeshift1", TypeParam, batch_cast_test_cast_sizeshift1)
-    {
-        batch_cast_test<TypeParam> tester;
-        tester.test_cast_sizeshift1();
-    }
-    TEST_CASE_TEMPLATE_APPLY(batch_cast_test_cast_sizeshift1, conversion_types);
-    #endif
-
-    #if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-    TEST_CASE_TEMPLATE_DEFINE("cast_sizeshift2", TypeParam, batch_cast_test_cast_sizeshift2)
-    {
-        batch_cast_test<TypeParam> tester;
-        tester.test_cast_sizeshift2();
-    }
-    TEST_CASE_TEMPLATE_APPLY(batch_cast_test_cast_sizeshift2, conversion_types);
-    #endif
+    batch_cast_test<TypeParam> tester;
+    tester.test_cast();
 }
+TEST_CASE_TEMPLATE_APPLY(batch_cast_test_cast, conversion_types);
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+TEST_CASE_TEMPLATE_DEFINE("cast_sizeshift1", TypeParam, batch_cast_test_cast_sizeshift1)
+{
+    batch_cast_test<TypeParam> tester;
+    tester.test_cast_sizeshift1();
+}
+TEST_CASE_TEMPLATE_APPLY(batch_cast_test_cast_sizeshift1, conversion_types);
+#endif
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+TEST_CASE_TEMPLATE_DEFINE("cast_sizeshift2", TypeParam, batch_cast_test_cast_sizeshift2)
+{
+    batch_cast_test<TypeParam> tester;
+    tester.test_cast_sizeshift2();
+}
+TEST_CASE_TEMPLATE_APPLY(batch_cast_test_cast_sizeshift2, conversion_types);
+#endif
+
+TEST_SUITE_END();
