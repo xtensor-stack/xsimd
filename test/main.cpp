@@ -60,7 +60,7 @@ std::string get_instruction_set_name()
     return info_map[XSIMD_INSTR_SET];
 }
 
-int main(int argc, char* argv[])
+int main(int , char* )
 {
     std::ofstream out("log/xsimd_info.log", std::ios_base::out);
     std::string instruction_set = get_instruction_set_name();
