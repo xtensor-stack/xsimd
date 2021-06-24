@@ -31,6 +31,41 @@ bool any(batch<T, A> const& self) {
   return kernel::any<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> acos(batch<T, A> const& self) {
+  return kernel::acos<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> acosh(batch<T, A> const& self) {
+  return kernel::acosh<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> asin(batch<T, A> const& self) {
+  return kernel::asin<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> asinh(batch<T, A> const& self) {
+  return kernel::asinh<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> atan(batch<T, A> const& self) {
+  return kernel::atan<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other) {
+  return kernel::atan2<A>(self, other, A{});
+}
+
+template<class T, class A>
+batch<T, A> atanh(batch<T, A> const& self) {
+  return kernel::atanh<A>(self, A{});
+}
+
 template<class T_out, class T_in, class A>
 batch<T_out, A> batch_cast(batch<T_in, A> const & self) {
   return kernel::batch_cast<A>(self, batch<T_out, A>{}, A{});
@@ -106,6 +141,16 @@ batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> con
 template<class A, class T>
 batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other) {
   return kernel::copysign<A>(self, other, A{});
+}
+
+template<class T, class A>
+batch<T, A> cos(batch<T, A> const& self) {
+  return kernel::cos<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> cosh(batch<T, A> const& self) {
+  return kernel::cosh<A>(self, A{});
 }
 
 template<class T, class Tp>
@@ -285,6 +330,11 @@ batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other) {
   return self <= other;
 }
 
+template<class T, class A>
+batch<T, A> lgamma(batch<T, A> const& self) {
+  return kernel::lgamma<A>(self, A{});
+}
+
 template<class A=default_arch, class From>
 batch<From, A> load(From const* ptr, aligned_mode= {}) {
   return kernel::load_aligned<A>(ptr, kernel::convert<From>{}, A{});
@@ -401,6 +451,12 @@ batch<T, A> round(batch<T, A> const& self) {
   return kernel::round<A>(self, A{});
 }
 
+template<class T, class Tp>
+auto sadd(T const& self, Tp const& other) -> decltype(self + other) {
+  using A = typename decltype(self + other)::arch_type;
+  return kernel::sadd<A>(self, other, A{});
+}
+
 template<class T, class A>
 batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br) {
   return kernel::select<A>(cond, true_br, false_br, A{});
@@ -416,10 +472,35 @@ batch<T, A> sign(batch<T, A> const& self) {
   return kernel::sign<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> signnz(batch<T, A> const& self) {
+  return kernel::signnz<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> sin(batch<T, A> const& self) {
+  return kernel::sin<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> sinh(batch<T, A> const& self) {
+  return kernel::sinh<A>(self, A{});
+}
+
+template<class T, class A>
+std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self) {
+  return kernel::sincos<A>(self, A{});
+}
 
 template<class T, class A>
 batch<T, A> sqrt(batch<T, A> const& self) {
   return kernel::sqrt<A>(self, A{});
+}
+
+template<class T, class Tp>
+auto ssub(T const& self, Tp const& other) -> decltype(self - other) {
+  using A = typename decltype(self - other)::arch_type;
+  return kernel::ssub<A>(self, other, A{});
 }
 
 template<class To, class A, class From>
@@ -443,20 +524,23 @@ void store_unaligned(To* mem, batch<From, A> const& val) {
 }
 
 template<class T, class Tp>
-auto sadd(T const& self, Tp const& other) -> decltype(self + other) {
-  using A = typename decltype(self + other)::arch_type;
-  return kernel::sadd<A>(self, other, A{});
-}
-
-template<class T, class Tp>
-auto ssub(T const& self, Tp const& other) -> decltype(self - other) {
-  using A = typename decltype(self - other)::arch_type;
-  return kernel::ssub<A>(self, other, A{});
-}
-
-template<class T, class Tp>
 auto sub(T const& self, Tp const& other) -> decltype(self - other){
   return self - other;
+}
+
+template<class T, class A>
+batch<T, A> tan(batch<T, A> const& self) {
+  return kernel::tan<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> tanh(batch<T, A> const& self) {
+  return kernel::tanh<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> tgamma(batch<T, A> const& self) {
+  return kernel::tgamma<A>(self, A{});
 }
 
 template<class T, class A>
