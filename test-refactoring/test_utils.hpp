@@ -514,7 +514,6 @@ using to_testing_types = xsimd::mpl::cast_t<T, testing::Types>;
 namespace xsimd
 {
     using batch_int_type_list = mpl::type_list<
-#if 0
                                     batch<uint8_t>,
                                     batch<int8_t>,
                                     batch<uint16_t>,
@@ -523,15 +522,12 @@ namespace xsimd
                                     batch<int32_t>,
                                     batch<uint64_t>,
                                     batch<int64_t>
-#endif
                               >;
 
     using batch_float_type_list = mpl::type_list<batch<float>, batch<double>>;
 
     using batch_int32_type_list = mpl::type_list<
-#if 0
       batch<int32_t>
-#endif
       >;
 
     using batch_complex_type_list = mpl::type_list<
