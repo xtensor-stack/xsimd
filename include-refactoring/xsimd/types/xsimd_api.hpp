@@ -397,6 +397,11 @@ B minusinfinity() {
 }
 
 template<class T, class Tp>
+auto mod(T const& self, Tp const& other) -> decltype(self % other){
+  return self % other;
+}
+
+template<class T, class Tp>
 auto mul(T const& self, Tp const& other) -> decltype(self * other){
   return self * other;
 }
@@ -453,8 +458,9 @@ batch<T, A> round(batch<T, A> const& self) {
 
 template<class T, class Tp>
 auto sadd(T const& self, Tp const& other) -> decltype(self + other) {
-  using A = typename decltype(self + other)::arch_type;
-  return kernel::sadd<A>(self, other, A{});
+  using B = decltype(self + other);
+  using A = typename B::arch_type;
+  return kernel::sadd<A>(B(self), B(other), A{});
 }
 
 template<class T, class A>
@@ -499,8 +505,9 @@ batch<T, A> sqrt(batch<T, A> const& self) {
 
 template<class T, class Tp>
 auto ssub(T const& self, Tp const& other) -> decltype(self - other) {
-  using A = typename decltype(self - other)::arch_type;
-  return kernel::ssub<A>(self, other, A{});
+  using B = decltype(self + other);
+  using A = typename B::arch_type;
+  return kernel::ssub<A>(B(self), B(other), A{});
 }
 
 template<class To, class A, class From>

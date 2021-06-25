@@ -71,6 +71,21 @@ namespace xsimd {
   namespace kernel {
 
     namespace detail {
+      template<class F, class A, class T, class... Batches>
+      batch<T, A> apply(F&& func, batch<T, A> const& self, batch<T, A> const& other) {
+        constexpr std::size_t size = batch<T, A>::size;
+        alignas(A::alignment()) T self_buffer[size];
+        alignas(A::alignment()) T other_buffer[size];
+        self.store_aligned(&self_buffer[0]);
+        other.store_aligned(&other_buffer[0]);
+        for(std::size_t i = 0; i < size; ++i) {
+          self_buffer[i] = func(self_buffer[i], other_buffer[i]);
+        }
+        return batch<T, A>::load_aligned(self_buffer);
+      }
+    }
+
+    namespace detail {
       // Generic conversion handling machinery. Each architecture must define
       // conversion function when such conversions exits in the form of
       // intrinsic. Then we use that information to automatically decide whether
@@ -417,6 +432,18 @@ namespace xsimd {
     }
     template<class A> batch<double, A> bitofsign(batch<double, A> const& self, requires<generic>) {
       return self & constants::minuszero<batch<double, A>>();
+    }
+
+    // bitwise_lshift
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+      return detail::apply([](T x, T y) { return x << y;}, self, other);
+    }
+
+    // bitwise_rshift
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+      return detail::apply([](T x, T y) { return x >> y;}, self, other);
     }
 
     // cbrt
@@ -787,14 +814,7 @@ namespace xsimd {
     // div
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> div(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
-      constexpr std::size_t size = batch<T, A>::size;
-      alignas(A::alignment()) T self_buffer[size];
-      alignas(A::alignment()) T other_buffer[size];
-      self.store_aligned(&self_buffer[0]);
-      other.store_aligned(&other_buffer[0]);
-      for(std::size_t i = 0; i < size; ++i)
-        self_buffer[i] /= other_buffer[i];
-      return batch<T, A>::load_aligned(self_buffer);
+      return detail::apply([](T x, T y) -> T { return x / y;}, self, other);
     }
 
     // erf
@@ -1506,12 +1526,12 @@ namespace xsimd {
 
     // ge
     template<class A, class T> batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
-      return other < self;
+      return other <= self;
     }
 
     // gt
     template<class A, class T> batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
-      return other <= self;
+      return other < self;
     }
 
     // horner
@@ -1569,8 +1589,11 @@ namespace xsimd {
     batch_bool<T, A> isinf(batch<T, A> const& , requires<generic>) {
       return batch_bool<T, A>(false);
     }
-    template<class A, class T> batch_bool<T, A> isinf(batch<T, A> const& self, requires<generic>) {
-      return abs(self) == batch<T, A>(std::numeric_limits<T>::infinity());
+    template<class A> batch_bool<float, A> isinf(batch<float, A> const& self, requires<generic>) {
+      return abs(self) == std::numeric_limits<float>::infinity();
+    }
+    template<class A> batch_bool<double, A> isinf(batch<double, A> const& self, requires<generic>) {
+      return abs(self) == std::numeric_limits<double>::infinity();
     }
 
     // isfinite
@@ -1578,8 +1601,11 @@ namespace xsimd {
     batch_bool<T, A> isfinite(batch<T, A> const& , requires<generic>) {
       return batch_bool<T, A>(true);
     }
-    template<class A, class T> batch_bool<T, A> isfinite(batch<T, A> const& self, requires<generic>) {
-      return (self - self) == batch<T, A>(0);
+    template<class A> batch_bool<float, A> isfinite(batch<float, A> const& self, requires<generic>) {
+      return (self - self) == 0;
+    }
+    template<class A> batch_bool<double, A> isfinite(batch<double, A> const& self, requires<generic>) {
+      return (self - self) == 0;
     }
 
     // isnan
@@ -2278,27 +2304,39 @@ namespace xsimd {
                 return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
+    // mod
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> mod(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+      return detail::apply([](T x, T y) -> T { return x % y;}, self, other);
+    }
+
+
     // mul
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
-      constexpr std::size_t size = batch<T, A>::size;
-      alignas(A::alignment()) T self_buffer[size];
-      alignas(A::alignment()) T other_buffer[size];
-      self.store_aligned(&self_buffer[0]);
-      other.store_aligned(&other_buffer[0]);
-      for(std::size_t i = 0; i < size; ++i)
-        self_buffer[i] *= other_buffer[i];
-      return batch<T, A>::load_aligned(self_buffer);
+      return detail::apply([](T x, T y) -> T { return x * y;}, self, other);
     }
 
     // nearbyint
-    template<class A, class T> batch<T, A> nearbyint(batch<T, A> const& self, requires<generic>) {
-      using batch_type = batch<T, A>;
-      batch_type s = bitofsign(self);
-      batch_type v = self ^ s;
-      batch_type t2n = constants::twotonmb<batch_type>();
-      batch_type d0 = v + t2n;
-      return s ^ select(v < t2n, d0 - t2n, v);
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> nearbyint(batch<T, A> const& self, requires<generic>) {
+      return self;
+    }
+    namespace detail {
+      template<class A, class T> batch<T, A> nearbyintf(batch<T, A> const& self) {
+        using batch_type = batch<T, A>;
+        batch_type s = bitofsign(self);
+        batch_type v = self ^ s;
+        batch_type t2n = constants::twotonmb<batch_type>();
+        batch_type d0 = v + t2n;
+        return s ^ select(v < t2n, d0 - t2n, v);
+      }
+    }
+    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<generic>) {
+      return detail::nearbyintf(self);
+    }
+    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires<generic>) {
+      return detail::nearbyintf(self);
     }
 
     // neq
@@ -2378,8 +2416,18 @@ namespace xsimd {
 
 
     // remainder
-    template<class A, class T> batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    template<class A>
+    batch<float, A> remainder(batch<float, A> const& self, batch<float, A> const& other, requires<generic>) {
       return fnma(nearbyint(self / other), other, self);
+    }
+    template<class A>
+    batch<double, A> remainder(batch<double, A> const& self, batch<double, A> const& other, requires<generic>) {
+      return fnma(nearbyint(self / other), other, self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+      auto mod = self % other;
+      return select(mod <= other / 2, mod, mod - other);
     }
 
     // round
@@ -2824,8 +2872,15 @@ namespace xsimd {
     }
 
     // trunc
-    template<class A, class T> batch<T, A> trunc(batch<T, A> const& self, requires<generic>) {
-      return select(abs(self) < constants::maxflint<batch<T, A>>(), to_float(to_int(self)), self);
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> trunc(batch<T, A> const& self, requires<generic>) {
+      return self;
+    }
+    template<class A> batch<float, A> trunc(batch<float, A> const& self, requires<generic>) {
+      return select(abs(self) < constants::maxflint<batch<float, A>>(), to_float(to_int(self)), self);
+    }
+    template<class A> batch<double, A> trunc(batch<double, A> const& self, requires<generic>) {
+      return select(abs(self) < constants::maxflint<batch<double, A>>(), to_float(to_int(self)), self);
     }
 
 
