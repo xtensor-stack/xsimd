@@ -19,6 +19,7 @@ class constant_batch_test : public testing::Test
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
     using bool_array_type = std::array<bool, size>;
+    using batch_bool_type = typename batch_type::batch_bool_type;
 
     struct generator
     {
@@ -34,8 +35,8 @@ class constant_batch_test : public testing::Test
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
                       [&i]() { return generator::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_constant<generator>();
-        EXPECT_BATCH_EQ(b(), expected)
+        constexpr auto b = xsimd::make_batch_constant<batch_type, generator>();
+        EXPECT_BATCH_EQ((batch_type)b, expected)
             << print_function_name("batch(value_type)");
     }
 
@@ -53,8 +54,8 @@ class constant_batch_test : public testing::Test
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
                       [&i]() { return arange::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_constant<arange>();
-        EXPECT_BATCH_EQ(b(), expected)
+        constexpr auto b = xsimd::make_batch_constant<batch_type, arange>();
+        EXPECT_BATCH_EQ((batch_type)b, expected)
             << print_function_name("batch(value_type)");
     }
 
@@ -70,8 +71,8 @@ class constant_batch_test : public testing::Test
     {
         array_type expected;
         std::fill(expected.begin(), expected.end(), constant::get(0, 0));
-        constexpr auto b = xsimd::make_batch_constant<constant>();
-        EXPECT_BATCH_EQ(b(), expected)
+        constexpr auto b = xsimd::make_batch_constant<batch_type, constant>();
+        EXPECT_BATCH_EQ((batch_type)b, expected)
             << print_function_name("batch(value_type)");
     }
 };
@@ -102,6 +103,7 @@ class constant_bool_batch_test : public testing::Test
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
     using bool_array_type = std::array<bool, size>;
+    using batch_bool_type = typename batch_type::batch_bool_type;
 
     struct generator
     {
@@ -117,9 +119,8 @@ class constant_bool_batch_test : public testing::Test
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
                       [&i]() { return generator::get(i++, size); });
-        constexpr auto b =
-            xsimd::make_batch_bool_constant<value_type, generator, size>();
-        EXPECT_BATCH_EQ(b(), expected)
+        constexpr auto b = xsimd::make_batch_bool_constant<batch_type, generator>();
+        EXPECT_BATCH_EQ((batch_bool_type)b, expected)
             << print_function_name("batch_bool_constant(value_type)");
     }
 
@@ -138,8 +139,8 @@ class constant_bool_batch_test : public testing::Test
         std::generate(expected.begin(), expected.end(),
                       [&i]() { return split::get(i++, size); });
         constexpr auto b =
-            xsimd::make_batch_bool_constant<value_type, split, size>();
-        EXPECT_BATCH_EQ(b(), expected)
+            xsimd::make_batch_bool_constant<batch_type, split>();
+        EXPECT_BATCH_EQ((batch_bool_type)b, expected)
             << print_function_name("batch_bool_constant(value_type)");
     }
 };
