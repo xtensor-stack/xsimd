@@ -55,84 +55,84 @@ struct batch : types::simd_register<T, A> {
   }
 
   // unary operators
-  batch_bool<T, A> operator!() const;
-  batch<T, A> operator~() const;
+  batch_bool_type operator!() const;
+  batch operator~() const;
   batch operator-() const;
   batch operator+() const { return *this; }
 
   // comparison operators
-  batch_bool<T, A> operator==(batch const& other) const;
-  batch_bool<T, A> operator!=(batch const& other) const;
-  batch_bool<T, A> operator>=(batch const& other) const;
-  batch_bool<T, A> operator<=(batch const& other) const;
-  batch_bool<T, A> operator>(batch const& other) const;
-  batch_bool<T, A> operator<(batch const& other) const;
+  batch_bool_type operator==(batch const& other) const;
+  batch_bool_type operator!=(batch const& other) const;
+  batch_bool_type operator>=(batch const& other) const;
+  batch_bool_type operator<=(batch const& other) const;
+  batch_bool_type operator>(batch const& other) const;
+  batch_bool_type operator<(batch const& other) const;
 
   // arithmetic operators. They are defined as friend to enable automatic
   // conversion of parameters from scalar to batch
-  friend batch<T, A> operator+(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) += other;
+  friend batch operator+(batch const& self, batch const& other) {
+    return batch(self) += other;
   }
-  friend batch<T, A> operator-(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) -= other;
+  friend batch operator-(batch const& self, batch const& other) {
+    return batch(self) -= other;
   }
-  friend batch<T, A> operator*(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) *= other;
+  friend batch operator*(batch const& self, batch const& other) {
+    return batch(self) *= other;
   }
-  friend batch<T, A> operator/(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) /= other;
+  friend batch operator/(batch const& self, batch const& other) {
+    return batch(self) /= other;
   }
-  friend batch<T, A> operator%(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) %= other;
-  }
-
-  friend batch<T, A> operator&(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) &= other;
+  friend batch operator%(batch const& self, batch const& other) {
+    return batch(self) %= other;
   }
 
-  friend batch<T, A> operator|(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) |= other;
+  friend batch operator&(batch const& self, batch const& other) {
+    return batch(self) &= other;
   }
 
-  friend batch<T, A> operator^(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) ^= other;
+  friend batch operator|(batch const& self, batch const& other) {
+    return batch(self) |= other;
   }
 
-  friend batch<T, A> operator>>(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) >>= other;
+  friend batch operator^(batch const& self, batch const& other) {
+    return batch(self) ^= other;
   }
 
-  friend batch<T, A> operator<<(batch<T, A> const& self, batch<T, A> const& other) {
-    return batch<T, A>(self) <<= other;
+  friend batch operator>>(batch const& self, batch const& other) {
+    return batch(self) >>= other;
   }
 
-  friend batch<T, A> operator>>(batch<T, A> const& self, int32_t other) {
-    return batch<T, A>(self) >>= other;
+  friend batch operator<<(batch const& self, batch const& other) {
+    return batch(self) <<= other;
   }
 
-  friend batch<T, A> operator<<(batch<T, A> const& self, int32_t other) {
-    return batch<T, A>(self) <<= other;
+  friend batch operator>>(batch const& self, int32_t other) {
+    return batch(self) >>= other;
+  }
+
+  friend batch operator<<(batch const& self, int32_t other) {
+    return batch(self) <<= other;
   }
 
   // Update operators
-  batch<T, A>& operator+=(batch const& other);
-  batch<T, A>& operator-=(batch const& other);
-  batch<T, A>& operator*=(batch const& other);
-  batch<T, A>& operator/=(batch const& other);
-  batch<T, A>& operator%=(batch const& other);
-  batch<T, A>& operator&=(batch const& other);
-  batch<T, A>& operator|=(batch const& other);
-  batch<T, A>& operator^=(batch const& other);
-  batch<T, A>& operator>>=(int32_t other);
-  batch<T, A>& operator>>=(batch const& other);
-  batch<T, A>& operator<<=(int32_t other);
-  batch<T, A>& operator<<=(batch const& other);
+  batch& operator+=(batch const& other);
+  batch& operator-=(batch const& other);
+  batch& operator*=(batch const& other);
+  batch& operator/=(batch const& other);
+  batch& operator%=(batch const& other);
+  batch& operator&=(batch const& other);
+  batch& operator|=(batch const& other);
+  batch& operator^=(batch const& other);
+  batch& operator>>=(int32_t other);
+  batch& operator>>=(batch const& other);
+  batch& operator<<=(int32_t other);
+  batch& operator<<=(batch const& other);
 
   // incr/decr
-  batch<T, A>& operator++() { return operator+=(1);}
-  batch<T, A>& operator--() { return operator-=(1);}
-  batch<T, A> operator++(int) { batch copy(*this); operator+=(1); return copy;}
-  batch<T, A> operator--(int) { batch copy(*this); operator-=(1); return copy;}
+  batch& operator++() { return operator+=(1);}
+  batch& operator--() { return operator-=(1);}
+  batch operator++(int) { batch copy(*this); operator+=(1); return copy;}
+  batch operator--(int) { batch copy(*this); operator-=(1); return copy;}
 
   private:
   template<size_t... Is>
@@ -181,6 +181,101 @@ struct batch_bool : types::simd_register<T, A> {
   batch_bool(bool const* data, detail::index_sequence<Is...>);
 
 
+};
+
+template<class T, class A>
+struct batch<std::complex<T>, A> {
+  using value_type = std::complex<T>;
+  using real_batch = batch<T, A>;
+  using arch_type = A;
+  static constexpr std::size_t size = real_batch::size;
+
+  batch() = default;
+  batch(value_type const& val) : m_real(val.real()), m_imag(val.imag()) {}
+  batch(real_batch const& real, real_batch const& imag) : m_real(real), m_imag(imag) {}
+  batch(real_batch const& real) : m_real(real), m_imag(0) {}
+  batch(T val) : m_real(val), m_imag(0) {}
+  batch(std::initializer_list<std::complex<T>> data) { *this = load_unaligned(data.begin()); }
+
+        static batch load_aligned(const T* real_src, const T* imag_src=nullptr);
+        static batch load_unaligned(const T* real_src, const T* imag_src=nullptr);
+        void store_aligned(T* real_dst, T* imag_dst) const;
+        void store_unaligned(T* real_dst, T* imag_dst) const;
+
+        static batch load_aligned(const value_type* src);
+        static batch load_unaligned(const value_type* src);
+        void store_aligned(value_type* dst) const;
+        void store_unaligned(value_type* dst) const;
+
+  template<class U>
+  static batch load(U const* mem, aligned_mode) { return load_aligned(mem); }
+  template<class U>
+  static batch load(U const* mem, unaligned_mode) { return load_unaligned(mem); }
+  template<class U>
+  void store(U * mem, aligned_mode) const { return store_aligned(mem); }
+  template<class U>
+  void store(U * mem, unaligned_mode) const { return store_unaligned(mem); }
+
+    real_batch real() const { return m_real; }
+    real_batch imag() const { return m_imag; }
+
+  value_type get(std::size_t i) const {
+    alignas(A::alignment()) value_type buffer[size];
+    store_aligned(&buffer[0]);
+    return buffer[i];
+  }
+
+  // unary operators
+  batch operator~() const { return {~m_real, ~m_imag}; }
+  batch operator-() const { return {-m_real, -m_imag};}
+  batch operator+() const { return {+m_real, +m_imag}; }
+
+  // comparison operators
+  batch_bool<T, A> operator==(batch const& other) const { return m_real == other.m_real && m_imag == other.m_imag; }
+  batch_bool<T, A> operator!=(batch const& other) const { return m_real != other.m_real || m_imag != other.m_imag; }
+
+  // arithmetic operators. They are defined as friend to enable automatic
+  // conversion of parameters from scalar to batch
+  friend batch operator+(batch const& self, batch const& other) {
+    return batch(self) += other;
+  }
+  friend batch operator-(batch const& self, batch const& other) {
+    return batch(self) -= other;
+  }
+  friend batch operator*(batch const& self, batch const& other) {
+    return batch(self) *= other;
+  }
+  friend batch operator/(batch const& self, batch const& other) {
+    return batch(self) /= other;
+  }
+
+
+  // Update operators
+  batch& operator+=(batch const& other) {
+    m_real += other.m_real;
+    m_imag += other.m_imag;
+    return *this;
+  }
+  batch& operator-=(batch const& other){
+    m_real -= other.m_real;
+    m_imag -= other.m_imag;
+    return *this;
+  }
+  batch& operator*=(batch const& other);
+
+  batch& operator/=(batch const& other);
+
+  // incr/decr
+  batch& operator++() { return operator+=(1);}
+  batch& operator--() { return operator-=(1);}
+  batch operator++(int) { batch copy(*this); operator+=(1); return copy;}
+  batch operator--(int) { batch copy(*this); operator-=(1); return copy;}
+
+
+    protected:
+
+        real_batch m_real;
+        real_batch m_imag;
 };
 
 }
@@ -351,6 +446,90 @@ batch_bool<T, A> batch_bool<T, A>::load_aligned(bool const* mem) {
 template<class T, class A>
 batch_bool<T, A> batch_bool<T, A>::load_unaligned(bool const* mem) {
   return load_aligned(mem);
+}
+
+// batch complex implementation
+//
+template <class T, class A>
+batch<std::complex<T>, A> batch<std::complex<T>, A>::load_aligned(const T* real_src, const T* imag_src)
+{
+    return {batch<T, A>::load_aligned(real_src), imag_src?batch<T, A>::load_aligned(imag_src): batch<T, A>(0)};
+}
+template <class T, class A>
+batch<std::complex<T>, A> batch<std::complex<T>, A>::load_unaligned(const T* real_src, const T* imag_src)
+{
+    return {batch<T, A>::load_unaligned(real_src), imag_src?batch<T, A>::load_unaligned(imag_src):batch<T, A>(0)};
+}
+
+template<class T, class A>
+batch<std::complex<T>, A>
+batch<std::complex<T>, A>::load_aligned(const value_type* src)
+{
+  T const *buffer = reinterpret_cast<T const *>(src);
+  real_batch hi = real_batch::load_aligned(buffer),
+             lo = real_batch::load_aligned(buffer + real_batch::size);
+  return kernel::load_complex<A>(hi, lo, A{});
+}
+
+template<class T, class A>
+batch<std::complex<T>, A>
+batch<std::complex<T>, A>::load_unaligned(const value_type* src)
+{
+  T const *buffer = reinterpret_cast<T const *>(src);
+  real_batch hi = real_batch::load_unaligned(buffer),
+             lo = real_batch::load_unaligned(buffer + real_batch::size);
+  return kernel::load_complex<A>(hi, lo, A{});
+}
+
+template<class T, class A>
+void batch<std::complex<T>, A>::store_aligned(value_type* dst) const {
+          real_batch hi = kernel::complex_high(*this, A{});
+          real_batch lo = kernel::complex_low(*this, A{});
+          T * buffer = reinterpret_cast<T*>(dst);
+          lo.store_aligned(buffer);
+          hi.store_aligned(buffer + size);
+        }
+
+template<class T, class A>
+void batch<std::complex<T>, A>::store_unaligned(value_type* dst) const {
+          real_batch hi = kernel::complex_high(*this, A{});
+          real_batch lo = kernel::complex_low(*this, A{});
+          T * buffer = reinterpret_cast<T *>(dst);
+          lo.store_unaligned(buffer);
+          hi.store_unaligned(buffer + size);
+        }
+
+template<class T, class A>
+void batch<std::complex<T>, A>::store_aligned(T* real_dst, T* imag_dst) const {
+  m_real.store_aligned(real_dst);
+  m_imag.store_aligned(imag_dst);
+}
+
+template<class T, class A>
+void batch<std::complex<T>, A>::store_unaligned(T* real_dst, T* imag_dst) const {
+  m_real.store_unaligned(real_dst);
+  m_imag.store_unaligned(imag_dst);
+}
+
+template<class T, class A>
+batch<std::complex<T>, A>& batch<std::complex<T>, A>::operator*=(batch const& other) {
+  real_batch new_real = real() * other.real() - imag() * other.imag();
+  real_batch new_imag = real() * other.imag() + imag() * other.real();
+  m_real = new_real;
+  m_imag = new_imag;
+  return *this;
+}
+
+template<class T, class A>
+batch<std::complex<T>, A>& batch<std::complex<T>, A>::operator/=(batch const& other) {
+  real_batch a = real();
+  real_batch b = imag();
+  real_batch c = other.real();
+  real_batch d = other.imag();
+  real_batch e = c*c + d*d;
+  m_real = (c*a + d*b) / e;
+  m_imag = (c*b - d*a) / e;
+  return *this;
 }
 
 }

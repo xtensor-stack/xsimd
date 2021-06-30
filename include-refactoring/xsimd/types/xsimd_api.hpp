@@ -16,6 +16,11 @@ batch<T, A> abs(batch<T, A> const& self) {
   return kernel::abs<A>(self, A{});
 }
 
+template<class T, class A>
+batch<T, A> abs(batch<std::complex<T>, A> const& self) {
+  return kernel::abs<A>(self, A{});
+}
+
 template<class T, class Tp>
 auto add(T const& self, Tp const& other) -> decltype(self + other){
   return self + other;
@@ -39,6 +44,11 @@ batch<T, A> acos(batch<T, A> const& self) {
 template<class T, class A>
 batch<T, A> acosh(batch<T, A> const& self) {
   return kernel::acosh<A>(self, A{});
+}
+
+template<class T, class A>
+batch<T, A> arg(batch<std::complex<T>, A> const& self) {
+  return kernel::arg<A>(self, A{});
 }
 
 template<class T, class A>
@@ -136,6 +146,11 @@ batch<T, A> ceil(batch<T, A> const& self) {
 template<class A, class T>
 batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> const& hi) {
   return kernel::clip(self, lo, hi, A{});
+}
+
+template<class A, class T>
+batch<std::complex<T>, A> conj(batch<std::complex<T>, A> const& self) {
+  return kernel::conj(self, A{});
 }
 
 template<class A, class T>
@@ -426,6 +441,11 @@ batch<T, A> nextafter(batch<T, A> const& from, batch<T, A> const& to) {
   return kernel::nextafter<A>(from, to, A{});
 }
 
+template<class A, class T>
+batch<T, A> norm(batch<std::complex<T>, A> const& self) {
+  return kernel::norm(self, A{});
+}
+
 template<class T, class A>
 batch<T, A> pos(batch<T, A> const& self) {
   return +self;
@@ -439,6 +459,11 @@ batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other) {
 template<class T, class ITy, class A, class=typename std::enable_if<std::is_integral<ITy>::value, void>::type>
 batch<T, A> pow(batch<T, A> const& self, ITy other) {
   return kernel::ipow<A>(self, other, A{});
+}
+
+template<class A, class T>
+batch<std::complex<T>, A> proj(batch<std::complex<T>, A> const& self) {
+  return kernel::proj(self, A{});
 }
 
 template<class T, class A>
@@ -465,6 +490,11 @@ auto sadd(T const& self, Tp const& other) -> decltype(self + other) {
 
 template<class T, class A>
 batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br) {
+  return kernel::select<A>(cond, true_br, false_br, A{});
+}
+
+template<class T, class A>
+batch<std::complex<T>, A> select(batch_bool<T, A> const& cond, batch<std::complex<T>, A> const& true_br, batch<std::complex<T>, A> const& false_br) {
   return kernel::select<A>(cond, true_br, false_br, A{});
 }
 

@@ -162,6 +162,22 @@ namespace xsimd {
       return {};
     }
 
+    // complex_low
+    template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<sse>) {
+      return _mm_unpacklo_ps(self.real(), self.imag());
+    }
+    template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<sse>) {
+      return _mm_unpacklo_pd(self.real(), self.imag());
+    }
+
+    // complex_high
+    template<class A> batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires<sse>) {
+      return _mm_unpackhi_ps(self.real(), self.imag());
+    }
+    template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<sse>) {
+      return _mm_unpackhi_pd(self.real(), self.imag());
+    }
+
     // div
     template<class A> batch<float, A> div(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_div_ps(self, other);
@@ -262,6 +278,14 @@ namespace xsimd {
     }
     template<class A> batch<double, A> load_aligned(double const* mem, convert<double>, requires<sse>) {
       return _mm_load_pd(mem);
+    }
+
+    // load_complex
+    template<class A> batch<std::complex<float>, A> load_complex(batch<float> const& hi, batch<float> const& lo, requires<sse>) {
+      return {_mm_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0)), _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))};
+    }
+    template<class A> batch<std::complex<double>, A> load_complex(batch<double> const& hi, batch<double> const& lo, requires<sse>) {
+      return {_mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0)), _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1))};
     }
 
     // load_unaligned
