@@ -80,7 +80,7 @@ protected:
                 areal[i] = lhs[i].real();
                 aimag[i] = lhs[i].imag();
             }
-            b.load_aligned(areal.data(), aimag.data());
+            b = batch_type::load_aligned(areal.data(), aimag.data());
             b.store_aligned(ares_real.data(), ares_imag.data());
             EXPECT_EQ(ares_real, areal) << print_function_name("load_aligned / store_aligned (real*, real*)");
         }
@@ -102,7 +102,7 @@ protected:
                 areal[i] = lhs[i].real();
                 aimag[i] = 0;
             }
-            b.load_aligned(areal.data());
+            b = batch_type::load_aligned(areal.data());
             b.store_aligned(ares_real.data(), ares_imag.data());
             EXPECT_EQ(ares_real, areal) << print_function_name("load_aligned / store_aligned (real*)");
             EXPECT_EQ(ares_imag, aimag) << print_function_name("load_aligned / store_aligned (real*)");
