@@ -27,7 +27,7 @@ struct batch : types::simd_register<T, A> {
   batch(register_type reg) : types::simd_register<T, A>({reg}) {}
 
   template<class U>
-  static batch broadcast(U val) { return batch(static_cast<T>(val)); }
+  static XSIMD_NO_DISCARD batch broadcast(U val) { return batch(static_cast<T>(val)); }
 
   // memory operators
   template<class U>
@@ -40,13 +40,13 @@ struct batch : types::simd_register<T, A> {
   void store(U * mem, unaligned_mode) const { return store_unaligned(mem); }
 
   template<class U>
-  static batch load_aligned(U const* mem) ;
+  static XSIMD_NO_DISCARD batch load_aligned(U const* mem) ;
   template<class U>
-  static batch load_unaligned(U const* mem);
+  static XSIMD_NO_DISCARD batch load_unaligned(U const* mem);
   template<class U>
-  static batch load(U const* mem, aligned_mode) { return load_aligned(mem); }
+  static XSIMD_NO_DISCARD batch load(U const* mem, aligned_mode) { return load_aligned(mem); }
   template<class U>
-  static batch load(U const* mem, unaligned_mode) { return load_unaligned(mem); }
+  static XSIMD_NO_DISCARD batch load(U const* mem, unaligned_mode) { return load_unaligned(mem); }
 
   T get(std::size_t i) const {
     alignas(A::alignment()) T buffer[size];
@@ -154,8 +154,8 @@ struct batch_bool : types::simd_register<T, A> {
 
   void store_aligned(bool * mem) const;
   void store_unaligned(bool * mem) const;
-  static batch_bool load_aligned(bool const * mem);
-  static batch_bool load_unaligned(bool const * mem);
+  static XSIMD_NO_DISCARD batch_bool load_aligned(bool const * mem);
+  static XSIMD_NO_DISCARD batch_bool load_unaligned(bool const * mem);
 
   batch_bool operator~() const;
   batch_bool operator!() const { return operator==(batch_bool(false)); }
@@ -197,20 +197,20 @@ struct batch<std::complex<T>, A> {
   batch(T val) : m_real(val), m_imag(0) {}
   batch(std::initializer_list<std::complex<T>> data) { *this = load_unaligned(data.begin()); }
 
-        static batch load_aligned(const T* real_src, const T* imag_src=nullptr);
-        static batch load_unaligned(const T* real_src, const T* imag_src=nullptr);
+        static XSIMD_NO_DISCARD batch load_aligned(const T* real_src, const T* imag_src=nullptr);
+        static XSIMD_NO_DISCARD batch load_unaligned(const T* real_src, const T* imag_src=nullptr);
         void store_aligned(T* real_dst, T* imag_dst) const;
         void store_unaligned(T* real_dst, T* imag_dst) const;
 
-        static batch load_aligned(const value_type* src);
-        static batch load_unaligned(const value_type* src);
+        static XSIMD_NO_DISCARD batch load_aligned(const value_type* src);
+        static XSIMD_NO_DISCARD batch load_unaligned(const value_type* src);
         void store_aligned(value_type* dst) const;
         void store_unaligned(value_type* dst) const;
 
   template<class U>
-  static batch load(U const* mem, aligned_mode) { return load_aligned(mem); }
+  static XSIMD_NO_DISCARD batch load(U const* mem, aligned_mode) { return load_aligned(mem); }
   template<class U>
-  static batch load(U const* mem, unaligned_mode) { return load_unaligned(mem); }
+  static XSIMD_NO_DISCARD batch load(U const* mem, unaligned_mode) { return load_unaligned(mem); }
   template<class U>
   void store(U * mem, aligned_mode) const { return store_aligned(mem); }
   template<class U>

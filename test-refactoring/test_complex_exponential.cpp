@@ -80,8 +80,6 @@ protected:
 
     void test_huge_exp()
     {
-      // FIXME: issue with very large values (!)
-#if 0
         std::transform(huge_exp_input.cbegin(), huge_exp_input.cend(), expected.begin(),
                     [](const value_type& v) { using std::exp; return exp(v); });
         batch_type in, out;
@@ -93,7 +91,6 @@ protected:
         }
         size_t diff = detail::get_nb_diff(res, expected);
         EXPECT_EQ(diff, 0) << print_function_name("huge exp");
-#endif
     }
 
     void test_log()
