@@ -23,6 +23,24 @@ namespace xsimd {
       }
     }
 
+    // hadd
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    T hadd(batch<T, A> const& self, requires<ssse3>) {
+      switch(sizeof(T)) {
+        case 2: {
+                __m128i tmp1 = _mm_hadd_epi16(self, self);
+                __m128i tmp2 = _mm_hadd_epi16(tmp1, tmp1);
+                __m128i tmp3 = _mm_hadd_epi16(tmp2, tmp2);
+                return _mm_cvtsi128_si32(tmp3) & 0xFFFF;
+                }
+        case 4: {
+                __m128i tmp1 = _mm_hadd_epi32(self, self);
+                __m128i tmp2 = _mm_hadd_epi32(tmp1, tmp1);
+                return _mm_cvtsi128_si32(tmp2);
+                }
+        default: return hadd(self, sse3{});
+      }
+    }
   }
 
 }

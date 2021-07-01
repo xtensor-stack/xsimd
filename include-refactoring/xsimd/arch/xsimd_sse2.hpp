@@ -33,10 +33,18 @@ namespace xsimd {
     template<class A> bool all(batch<double, A> const& self, requires<sse2>) {
       return _mm_movemask_pd(self) == 0x03;
     }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    bool all(batch<T, A> const& self, requires<sse2>) {
+      return _mm_movemask_epi8(self) == 0xFFFF;
+    }
 
     // any
     template<class A> bool any(batch<double, A> const& self, requires<sse2>) {
       return _mm_movemask_pd(self) != 0;
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    bool any(batch<T, A> const& self, requires<sse2>) {
+      return _mm_movemask_epi8(self) != 0;
     }
 
 
@@ -168,6 +176,38 @@ namespace xsimd {
         default: assert(false && "unsupported arch/op combination"); return {};
       }
     }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse2>) {
+      return eq(batch<T, A>(self.data), batch<T, A>(other.data));
+    }
+
+    // hadd
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    T hadd(batch<T, A> const& self, requires<sse2>) {
+      switch(sizeof(T)) {
+        case 4: {
+                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
+                __m128i tmp2 = _mm_add_epi32(self, tmp1);
+                __m128i tmp3 = _mm_shuffle_epi32(tmp2, 0x01);
+                __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
+                return _mm_cvtsi128_si32(tmp4);
+                }
+        case 8: {
+                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
+                __m128i tmp2 = _mm_add_epi64(self, tmp1);
+#if defined(__x86_64__)
+                return _mm_cvtsi128_si64(tmp2);
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, tmp2);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
+        }
+        default: return hadd(self, sse{});
+      }
+    }
 
     // load_aligned
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -221,10 +261,45 @@ namespace xsimd {
         }
       }
     }
+    // max
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      return select(self > other, self, other);
+    }
+
+    // min
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      return select(self <= other, self, other);
+    }
+
     // select
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<sse2>) {
       return _mm_or_si128(_mm_and_si128(cond, true_br), _mm_andnot_si128(cond, false_br));
+    }
+    template<class A, class T, bool... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<sse2>) {
+      return select(batch_bool<T, A>{Values...}, true_br, false_br, sse2{});
+    }
+
+    // sadd
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: return _mm_adds_epi8(self, other);
+          case 2: return _mm_adds_epi16(self, other);
+          default: return sadd(self, other, sse{});
+        }
+      }
+      else {
+        switch(sizeof(T)) {
+          case 1: return _mm_adds_epu8(self, other);
+          case 2: return _mm_adds_epu16(self, other);
+          default: return sadd(self, other, sse{});
+        }
+      }
     }
 
     // set
@@ -247,7 +322,7 @@ namespace xsimd {
 
     template<class A, class T, class... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> set(batch_bool<T, A> const&, requires<sse2>, Values... values) {
-      return set(batch<T, A>(), static_cast<T>(values ? -1LL : 0LL )...).data;
+      return set(batch<T, A>(), A{}, static_cast<T>(values ? -1LL : 0LL )...).data;
     }
 
     template<class A, class... Values>
@@ -260,6 +335,25 @@ namespace xsimd {
     batch_bool<double, A> set(batch_bool<double, A> const&, requires<sse2>, Values... values) {
       static_assert(sizeof...(Values) == batch_bool<double, A>::size, "consistent init");
       return _mm_castsi128_pd(set(batch<int64_t, A>(), A{},  static_cast<int64_t>(values ? -1LL : 0LL )...).data);
+    }
+
+    // ssub
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: return _mm_subs_epi8(self, other);
+          case 2: return _mm_subs_epi16(self, other);
+          default: return ssub(self, other, sse{});
+        }
+      }
+      else {
+        switch(sizeof(T)) {
+          case 1: return _mm_subs_epu8(self, other);
+          case 2: return _mm_subs_epu16(self, other);
+          default: return ssub(self, other, sse{});
+        }
+      }
     }
 
     // store_aligned

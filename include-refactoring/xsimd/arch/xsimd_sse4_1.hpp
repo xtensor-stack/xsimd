@@ -9,6 +9,11 @@ namespace xsimd {
 
   namespace kernel {
     using namespace types;
+    // any
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    bool any(batch<T, A> const& self, requires<sse4_1>) {
+      return !_mm_testz_si128(self, self);
+    }
     // ceil
     template<class A> batch<float, A> ceil(batch<float, A> const& self, requires<sse4_1>) {
       return _mm_round_ps(self, _MM_FROUND_CEIL);
@@ -26,13 +31,54 @@ namespace xsimd {
       }
     }
 
-
     // floor
     template<class A> batch<float, A> floor(batch<float, A> const& self, requires<sse4_1>) {
       return _mm_round_ps(self, _MM_FROUND_FLOOR);
     }
     template<class A> batch<double, A> floor(batch<double, A> const& self, requires<sse4_1>) {
       return _mm_round_pd(self, _MM_FROUND_FLOOR);
+    }
+
+    // max
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires<sse4_1>) {
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: return _mm_max_epi8(self, other);
+          case 2: return _mm_max_epi16(self, other);
+          case 4: return _mm_max_epi32(self, other);
+          default: return max(self, other, ssse3{});
+        }
+      }
+      else {
+        switch(sizeof(T)) {
+          case 1: return _mm_max_epu8(self, other);
+          case 2: return _mm_max_epu16(self, other);
+          case 4: return _mm_max_epu32(self, other);
+          default: return max(self, other, ssse3{});
+        }
+      }
+    }
+
+    // min
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires<sse4_1>) {
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: return _mm_min_epi8(self, other);
+          case 2: return _mm_min_epi16(self, other);
+          case 4: return _mm_min_epi32(self, other);
+          default: return min(self, other, ssse3{});
+        }
+      }
+      else {
+        switch(sizeof(T)) {
+          case 1: return _mm_min_epu8(self, other);
+          case 2: return _mm_min_epu16(self, other);
+          case 4: return _mm_min_epu32(self, other);
+          default: return min(self, other, ssse3{});
+        }
+      }
     }
 
     // mul
@@ -89,14 +135,17 @@ namespace xsimd {
     batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<sse4_1>) {
       constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
       switch(sizeof(T)) {
-        case 1: return _mm_blend_epi8(false_br, true_br, mask);
-        case 1: return _mm_blend_epi16(false_br, true_br, mask);
-        case 1: return _mm_blend_epi32(false_br, true_br, mask);
+        case 2: return _mm_blend_epi16(false_br, true_br, mask);
+        case 4: {
+          constexpr int imask = detail::interleave(mask);
+          return _mm_blend_epi16(false_br, true_br, imask);
+        }
         case 8: {
           constexpr int imask = detail::interleave(mask);
-          return _mm_blend_epi32(false_br, true_br, imask);
+          constexpr int imask2 = detail::interleave(imask);
+          return _mm_blend_epi16(false_br, true_br, imask2);
         }
-        default: assert(false && "unsupported arch/op combination"); return {};
+        default: return select(batch_bool_constant<batch<T, A>, Values...>(), true_br, false_br, ssse3{});
       }
     }
     template<class A, bool... Values> batch<float, A> select(batch_bool_constant<batch<float, A>, Values...> const& , batch<float, A> const& true_br, batch<float, A> const& false_br, requires<sse4_1>) {

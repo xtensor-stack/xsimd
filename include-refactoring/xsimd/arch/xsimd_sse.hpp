@@ -210,6 +210,17 @@ namespace xsimd {
     double hadd(batch<double, A> const &self, requires<sse>) {
       return _mm_cvtsd_f64(_mm_add_sd(self, _mm_unpackhi_pd(self, self)));
     }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    T hadd(batch<T, A> const& self, requires<sse>) {
+        alignas(A::alignment()) T buffer[batch<T, A>::size];
+        self.store_aligned(buffer);
+        T res = 0;
+        for (T val : buffer)
+        {
+            res += val;
+        }
+        return res;
+    }
 
     // haddp
     template<class A> batch<float, A> haddp(batch<float, A> const* row, requires<sse>) {
@@ -294,6 +305,10 @@ namespace xsimd {
     }
 
     // neg
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> neg(batch<T, A> const& self, requires<sse>) {
+      return 0 - self;
+    }
     template<class A> batch<float, A> neg(batch<float, A> const& self, requires<sse>) {
       return _mm_xor_ps(self, _mm_castsi128_ps(_mm_set1_epi32(0x80000000)));
     }
@@ -310,12 +325,20 @@ namespace xsimd {
     template<class A> batch_bool<double, A> neq(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_cmpneq_pd(self, other);
     }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires<sse>) {
+        return ~(self == other);
+    }
 
     template<class A> batch_bool<float, A> neq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<sse>) {
       return _mm_cmpneq_ps(self, other);
     }
     template<class A> batch_bool<double, A> neq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<sse>) {
       return _mm_cmpneq_pd(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse>) {
+        return ~(self == other);
     }
 
     // sadd
@@ -324,6 +347,20 @@ namespace xsimd {
     }
     template<class A> batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_add_pd(self, other); // no saturated arithmetic on floating point numbers
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires<sse>) {
+      if(std::is_signed<T>::value) {
+        auto mask = (other >> (8 * sizeof(T) - 1));
+        auto self_pos_branch = min(std::numeric_limits<T>::max() - other, self);
+        auto self_neg_branch = max(std::numeric_limits<T>::min() - other, self);
+        return other + select(batch_bool<T, A>(mask.data), self_neg_branch, self_pos_branch);
+      }
+      else {
+        const auto diffmax = std::numeric_limits<T>::max() - self;
+        const auto mindiff = min(diffmax, other);
+        return self + mindiff;
+      }
     }
 
     // set
@@ -361,6 +398,16 @@ namespace xsimd {
     }
     template<class A> batch<double, A> ssub(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
       return _mm_sub_pd(self, other); // no saturated arithmetic on floating point numbers
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires<sse>) {
+      if(std::is_signed<T>::value) {
+         return sadd(self, -other);
+      }
+      else {
+        const auto diff = min(self, other);
+        return self - diff;
+      }
     }
 
     // store_aligned

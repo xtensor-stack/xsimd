@@ -82,6 +82,9 @@ struct batch : types::simd_register<T, A> {
   friend batch<T, A> operator/(batch<T, A> const& self, batch<T, A> const& other) {
     return batch<T, A>(self) /= other;
   }
+  friend batch<T, A> operator%(batch<T, A> const& self, batch<T, A> const& other) {
+    return batch<T, A>(self) %= other;
+  }
 
   friend batch<T, A> operator&(batch<T, A> const& self, batch<T, A> const& other) {
     return batch<T, A>(self) &= other;
@@ -116,6 +119,7 @@ struct batch : types::simd_register<T, A> {
   batch<T, A>& operator-=(batch const& other);
   batch<T, A>& operator*=(batch const& other);
   batch<T, A>& operator/=(batch const& other);
+  batch<T, A>& operator%=(batch const& other);
   batch<T, A>& operator&=(batch const& other);
   batch<T, A>& operator|=(batch const& other);
   batch<T, A>& operator^=(batch const& other);
@@ -260,6 +264,9 @@ batch<T, A>& batch<T, A>::operator*=(batch<T, A> const& other) { return *this = 
 
 template<class T, class A>
 batch<T, A>& batch<T, A>::operator/=(batch<T, A> const& other) { return *this = kernel::div<A>(*this, other, A{}); }
+
+template<class T, class A>
+batch<T, A>& batch<T, A>::operator%=(batch<T, A> const& other) { return *this = kernel::mod<A>(*this, other, A{}); }
 
 template<class T, class A>
 batch<T, A>& batch<T, A>::operator&=(batch<T, A> const& other) { return *this = kernel::bitwise_and<A>(*this, other, A{}); }
