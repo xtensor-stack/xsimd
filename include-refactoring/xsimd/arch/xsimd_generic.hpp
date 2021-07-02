@@ -15,7 +15,11 @@ namespace xsimd {
   template<class T, class A>
   batch<T, A> abs(batch<T, A> const& self);
   template<class T, class A>
+  batch<T, A> abs(batch<std::complex<T>, A> const& self);
+  template<class T, class A>
   bool any(batch_bool<T, A> const& self);
+  template<class T, class A>
+  batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other);
   template<class T, class A>
   batch<T, A> bitofsign(batch<T, A> const& self);
   template<class B, class T, class A>
@@ -29,13 +33,23 @@ namespace xsimd {
   template<class A>
   batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self);
   template<class T, class A>
+  batch<T, A> cos(batch<T, A> const& self);
+  template<class T, class A>
+  batch<T, A> cosh(batch<T, A> const& self);
+  template<class T, class A>
   batch<T, A> exp(batch<T, A> const& self);
   template<class T, class A>
   batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z);
   template<class T, class A>
+  batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z);
+  template<class T, class A>
   batch<T, A> frexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e);
+  template<class T, class A>
+  T hadd(batch<T, A> const&);
   template <class T, class A, uint64_t... Coefs>
   batch<T, A> horner(const batch<T, A>& self);
+  template <class T, class A>
+  batch<T, A> hypot(const batch<T, A>& self);
   template<class T, class A>
   batch_bool<T, A> is_even(batch<T, A> const& self);
   template<class T, class A>
@@ -55,11 +69,21 @@ namespace xsimd {
   template<class T, class A>
   batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const& , batch<T, A> const& );
   template<class T, class A>
+  batch<std::complex<T>, A> select(batch_bool<T, A> const&, batch<std::complex<T>, A> const& , batch<std::complex<T>, A> const& );
+  template<class T, class A>
   batch<T, A> sign(batch<T, A> const& self);
   template<class T, class A>
   batch<T, A> signnz(batch<T, A> const& self);
   template<class T, class A>
+  batch<T, A> sin(batch<T, A> const& self);
+  template<class T, class A>
+  batch<T, A> sinh(batch<T, A> const& self);
+  template<class T, class A>
+  std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self);
+  template<class T, class A>
   batch<T, A> sqrt(batch<T, A> const& self);
+  template<class T, class A>
+  batch<T, A> tan(batch<T, A> const& self);
   template<class T, class A>
   batch<as_float_t<T>, A> to_float(batch<T, A> const& self);
   template<class T, class A>
@@ -163,6 +187,11 @@ namespace xsimd {
       }
     }
 
+    template<class A, class T>
+    batch<T, A> abs(batch<std::complex<T>, A> const& z, requires<generic>) {
+      return hypot(z.real(), z.imag());
+    }
+
     // acos
     template<class A, class T> batch<T, A> acos(batch<T, A> const& self, requires<generic>) {
       using batch_type = batch<T, A>;
@@ -174,6 +203,14 @@ namespace xsimd {
         x = select(self < batch_type(-0.5), constants::pi<batch_type>() - x, x);
         return select(x_larger_05, x, constants::pio2<batch_type>() - x);
     }
+        template <class A, class T>
+        batch<std::complex<T>, A> acos(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using batch_type = batch<std::complex<T>, A>;
+            using real_batch = typename batch_type::real_batch;
+            batch_type tmp = asin(z);
+            return {constants::pio2<real_batch>() - tmp.real(), -tmp.imag()};
+        }
 
     // acosh
     template<class A, class T> batch<T, A> acosh(batch<T, A> const& self, requires<generic>) {
@@ -183,6 +220,20 @@ namespace xsimd {
                 batch_type z = select(test, self, x + sqrt(x + x + x * x));
                 batch_type l1pz = log1p(z);
                 return select(test, l1pz + constants::log_2<batch_type>(), l1pz);
+    }
+        template <class A, class T>
+        inline batch<std::complex<T>, A> acosh(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using batch_type = batch<std::complex<T>, A>;
+            batch_type w = acos(z);
+            w = batch_type(-w.imag(), w.real());
+            return w;
+        }
+
+    // arg
+    template<class A, class T>
+    batch<T, A> arg(batch<std::complex<T>, A> const& self, requires<generic>) {
+      return atan2(self.imag(), self.real());
     }
 
     // asin
@@ -245,6 +296,25 @@ namespace xsimd {
                                      select(x > ct1, zz1, zz2)) ^
                                   bitofsign(self));
     }
+        template <class A, class T>
+        batch<std::complex<T>, A> asin(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using batch_type = batch<std::complex<T>, A>;
+            using real_batch = typename batch_type::real_batch;
+            real_batch x = z.real();
+            real_batch y = z.imag();
+
+            batch_type ct(-y, x);
+            batch_type zz(real_batch(1.) - (x - y) * (x + y), -2 * x * y);
+            zz = log(ct + sqrt(zz));
+            batch_type resg(zz.imag(), -zz.real());
+
+            return select(y == real_batch(0.),
+                          select(fabs(x) > real_batch(1.),
+                                 batch_type(constants::pio2<real_batch>(), real_batch(0.)),
+                                 batch_type(asin(x), real_batch(0.))),
+                          resg);
+        }
 
     // asinh
     namespace detail {
@@ -309,6 +379,14 @@ namespace xsimd {
                 z = select(test, l1pz + constants::log_2<batch_type>(), l1pz);
                 return bitofsign(self) ^ z;
     }
+        template <class A, class T>
+        inline batch<std::complex<T>, A> asinh(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using batch_type = batch<std::complex<T>, A>;
+            batch_type w = asin(batch_type(-z.imag(), z.real()));
+            w = batch_type(w.imag(), -w.real());
+            return w;
+        }
 
     // atan
     namespace detail {
@@ -368,6 +446,26 @@ namespace xsimd {
                 const batch_type x = detail::kernel_atan(absa, batch_type(1.) / absa);
                 return x ^ bitofsign(self);
     }
+        template <class A, class T>
+        batch<std::complex<T>, A> atan(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using batch_type = batch<std::complex<T>, A>;
+            using real_batch = typename batch_type::real_batch;
+            real_batch x = z.real();
+            real_batch y = z.imag();
+            real_batch x2 = x * x;
+            real_batch one(1.);
+            real_batch a = one - x2 - (y * y);
+            real_batch w = 0.5 * atan2(2. * x, a);
+            real_batch num = y + one;
+            num = x2 + num * num;
+            real_batch den = y - one;
+            den = x2 + den * den;
+            batch_type res = select((x == real_batch(0.)) && (y == real_batch(1.)),
+                                batch_type(real_batch(0.), constants::infinity<real_batch>()),
+                                batch_type(w, 0.25 * log(num / den)));
+            return res;
+        }
 
     // atanh
     template<class A, class T> batch<T, A> atanh(batch<T, A> const& self, requires<generic>) {
@@ -379,6 +477,14 @@ namespace xsimd {
                 batch_type tmp = select(test, x, t) / z;
                 return bitofsign(self) ^ (batch_type(0.5) * log1p(select(test, fma(t, tmp, t), tmp)));
     }
+        template <class A, class T>
+        inline batch<std::complex<T>, A> atanh(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using batch_type = batch<std::complex<T>, A>;
+            batch_type w = atan(batch_type(-z.imag(), z.real()));
+            w = batch_type(w.imag(), -w.real());
+            return w;
+        }
 
     // atan2
     template<class A, class T> batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
@@ -546,6 +652,11 @@ namespace xsimd {
     template<class A, class T> batch<T, A> ceil(batch<T, A> const& self, requires<generic>) {
       batch<T, A> truncated_self = trunc(self);
       return select(truncated_self < self, truncated_self + 1, truncated_self);
+    }
+
+    // conj
+    template<class A, class T> batch<std::complex<T>, A> conj(batch<std::complex<T>, A> const& self, requires<generic>) {
+      return {self.real(), - self.imag()};
     }
 
     // copysign
@@ -763,9 +874,8 @@ namespace xsimd {
                             txr[i] = value_type(y[0]);
                         }
                     }
-                    xr.load_aligned(&txr[0]);
-                    B res;
-                    res.load_aligned(&tmp[0]);
+                    xr = B::load_aligned(&txr[0]);
+                    B res = B::load_aligned(&tmp[0]);
                     return res;
                 }
             }
@@ -799,6 +909,10 @@ namespace xsimd {
                 return z1 ^ sign_bit;
     }
 
+    template<class A, class T> batch<std::complex<T>, A> cos(batch<std::complex<T>, A> const& z, requires<generic>) {
+      return {cos(z.real()) * cosh(z.imag()), -sin(z.real()) * sinh(z.imag())};
+    }
+
     // cosh
 
     template<class A, class T> batch<T, A> cosh(batch<T, A> const& self, requires<generic>) {
@@ -810,6 +924,13 @@ namespace xsimd {
                 batch_type tmp1 = batch_type(0.5) * tmp;
                 return select(test1, tmp1 * tmp, detail::average(tmp, batch_type(1.) / tmp));
     }
+        template <class A, class T>
+        inline batch<std::complex<T>, A> cosh(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            auto x = z.real();
+            auto y = z.imag();
+            return {cosh(x) * cos(y), sinh(x) * sin(y)};
+        }
 
     // div
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -1402,14 +1523,23 @@ namespace xsimd {
       return detail::exp<detail::exp_tag>(self);
     }
 
+    template<class A, class T> batch<std::complex<T>, A> exp(batch<std::complex<T>, A> const& self, requires<generic>) {
+      using batch_type = batch<std::complex<T>, A>;
+      auto isincos = sincos(self.imag());
+      return exp(self.real()) * batch_type(std::get<1>(isincos), std::get<0>(isincos));
+    }
+
+    // exp10
     template<class A, class T> batch<T, A> exp10(batch<T, A> const& self, requires<generic>) {
       return detail::exp<detail::exp10_tag>(self);
     }
 
+    // exp2
     template<class A, class T> batch<T, A> exp2(batch<T, A> const& self, requires<generic>) {
       return detail::exp<detail::exp2_tag>(self);
     }
 
+    // expm1
     namespace detail {
           template<class A>
           static inline batch<float, A> expm1(const batch<float, A>& a)
@@ -1475,6 +1605,18 @@ namespace xsimd {
                            detail::expm1(self)));
     }
 
+    template <class A, class T>
+    batch<std::complex<T>, A> expm1(const batch<std::complex<T>, A>& z, requires<generic>)
+    {
+        using batch_type = batch<std::complex<T>, A>;
+        using real_batch = typename batch_type::real_batch;
+        real_batch isin = sin(z.imag());
+        real_batch rem1 = expm1(z.real());
+        real_batch re = rem1 + 1.;
+        real_batch si = sin(z.imag() * 0.5);
+        return {rem1 - 2. * re * si * si, re * isin};
+    }
+
     // fdim
     template<class A, class T> batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return fmax(batch<T, A>(0), self - other);
@@ -1491,6 +1633,12 @@ namespace xsimd {
       return x * y + z;
     }
 
+    template<class A, class T> batch<std::complex<T>, A> fma(batch<std::complex<T>, A> const& x, batch<std::complex<T>, A> const& y, batch<std::complex<T>, A> const& z, requires<generic>) {
+      auto res_r = fms(x.real(), y.real(), fms(x.imag(), y.imag(), z.real()));
+      auto res_i = fma(x.real(), y.imag(), fma(x.imag(), y.real(), z.imag()));
+      return {res_r, res_i};
+    }
+
     // fmod
     template<class A, class T> batch<T, A> fmod(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return fnma(trunc(self / other), other, self);
@@ -1501,14 +1649,32 @@ namespace xsimd {
       return x * y - z;
     }
 
+    template<class A, class T> batch<std::complex<T>, A> fms(batch<std::complex<T>, A> const& x, batch<std::complex<T>, A> const& y, batch<std::complex<T>, A> const& z, requires<generic>) {
+      auto res_r = fms(x.real(), y.real(), fma(x.imag(), y.imag(), z.real()));
+      auto res_i = fma(x.real(), y.imag(), fms(x.imag(), y.real(), z.imag()));
+      return {res_r, res_i};
+    }
+
     // fnma
     template<class A, class T> batch<T, A> fnma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires<generic>) {
       return -x * y + z;
     }
 
+    template<class A, class T> batch<std::complex<T>, A> fnma(batch<std::complex<T>, A> const& x, batch<std::complex<T>, A> const& y, batch<std::complex<T>, A> const& z, requires<generic>) {
+      auto res_r = - fms(x.real(), y.real(), fma(x.imag(), y.imag(), z.real()));
+      auto res_i = - fma(x.real(), y.imag(), fms(x.imag(), y.real(), z.imag()));
+      return {res_r, res_i};
+    }
+
     // fnms
     template<class A, class T> batch<T, A> fnms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires<generic>) {
       return -x * y - z;
+    }
+
+    template<class A, class T> batch<std::complex<T>, A> fnms(batch<std::complex<T>, A> const& x, batch<std::complex<T>, A> const& y, batch<std::complex<T>, A> const& z, requires<generic>) {
+      auto res_r = - fms(x.real(), y.real(), fms(x.imag(), y.imag(), z.real()));
+      auto res_i = - fma(x.real(), y.imag(), fma(x.imag(), y.real(), z.imag()));
+      return {res_r, res_i};
     }
 
     // frexp
@@ -1532,6 +1698,11 @@ namespace xsimd {
     // gt
     template<class A, class T> batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return other < self;
+    }
+
+    // hadd
+    template<class A, class T> std::complex<T> hadd(batch<std::complex<T>, A> const& self, requires<generic>) {
+      return {hadd(self.real()), hadd(self.imag())};
     }
 
     // horner
@@ -2043,6 +2214,12 @@ namespace xsimd {
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
+    template <class A, class T>
+    batch<std::complex<T>, A> log(const batch<std::complex<T>, A>& z, requires<generic>)
+    {
+        return batch<std::complex<T>, A>(log(abs(z)), atan2(z.imag(), z.real()));
+    }
+
     // log2
     template<class A> batch<float, A> log2(batch<float, A> const& self, requires<generic>) {
       using batch_type = batch<float, A>;
@@ -2130,6 +2307,19 @@ namespace xsimd {
                 batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
 #endif
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+    }
+    namespace detail {
+        template <class T, class A>
+        inline batch<T, A> logN_complex_impl(const batch<T, A>& z, typename batch<T, A>::value_type base)
+        {
+            using batch_type = batch<T, A>;
+            using rv_type = typename batch_type::value_type;
+            return log(z) / batch_type(rv_type(base));
+        }
+  }
+
+    template<class A, class T> batch<std::complex<T>, A> log2(batch<std::complex<T>, A> const& self, requires<generic>) {
+      return detail::logN_complex_impl(self, std::log(2));
     }
 
     // log10
@@ -2238,6 +2428,12 @@ namespace xsimd {
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
+        template <class A, class T>
+            batch<std::complex<T>, A> log10(const batch<std::complex<T>, A>& z, requires<generic>)
+            {
+                return detail::logN_complex_impl(z, std::log(10));
+            }
+
     // log1p
     template<class A> batch<float, A> log1p(batch<float, A> const& self, requires<generic>) {
       using batch_type = batch<float, A>;
@@ -2303,6 +2499,19 @@ namespace xsimd {
 #endif
                 return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
+
+    template<class A, class T> batch<std::complex<T>, A> log1p(batch<std::complex<T>, A> const& self, requires<generic>) {
+        using batch_type = batch<std::complex<T>, A>;
+        using real_batch = typename batch_type::real_batch;
+        batch_type u = 1 + self;
+        batch_type logu = log(u);
+        return select(u == batch_type(1.),
+                      self,
+                      select(u.real() <= real_batch(0.),
+                             logu,
+                             logu * self / (u - batch_type(1.))));
+    }
+
 
     // mod
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -2404,6 +2613,19 @@ namespace xsimd {
                     select(to > from, kernel::next(from), kernel::prev(from)));
     }
 
+    // norm
+    template<class A, class T> batch<T, A> norm(batch<std::complex<T>, A> const& self, requires<generic>) {
+      return {fma(self.real(), self.real(), self.imag() * self.imag())};
+    }
+
+    // proj
+    template<class A, class T> batch<std::complex<T>, A> proj(batch<std::complex<T>, A> const& self, requires<generic>) {
+      using batch_type = batch<std::complex<T>, A>;
+      using real_batch = typename batch_type::real_batch;
+      auto cond = xsimd::isinf(self.real()) || xsimd::isinf(self.imag());
+      return select(cond, batch_type(constants::infinity<real_batch>(), copysign(real_batch(0.), self.imag())), self);
+    }
+
     // pow
     template<class A, class T> batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
         using batch_type = batch<T, A>;
@@ -2413,6 +2635,24 @@ namespace xsimd {
         auto invalid = negx && !(is_flint(other) || isinf(other));
         return select(invalid, constants::nan<batch_type>(), z);
     }
+
+        template <class A, class T>
+        inline batch<std::complex<T>, A> pow(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using cplx_batch = batch<std::complex<T>, A>;
+            using real_batch = typename cplx_batch::real_batch;
+            real_batch absa = abs(a);
+            real_batch arga = arg(a);
+            real_batch x = z.real();
+            real_batch y = z.imag();
+            real_batch r = pow(absa, x);
+            real_batch theta = x * arga;
+            real_batch ze(0);
+            auto cond = (y == ze);
+            r = select(cond, r, r * exp(-y * arga));
+            theta = select(cond, theta, theta + y * log(absa));
+            return select(absa == ze, cplx_batch(ze), cplx_batch(r * cos(theta), r * sin(theta)));
+        }
 
 
     // remainder
@@ -2436,6 +2676,12 @@ namespace xsimd {
       auto c = ceil(v);
       auto cp = select(c - 0.5 > v, c - 1, c);
       return select(v > constants::maxflint<batch<T, A>>(), self, copysign(cp, self));
+    }
+
+    // select
+    template<class A, class T>
+    batch<std::complex<T>, A> select(batch_bool<T, A> const& cond, batch<std::complex<T>, A> const& true_br, batch<std::complex<T>, A> const& false_br, requires<generic>) {
+      return {select(cond, true_br.real(), false_br.real()), select(cond, true_br.imag(), false_br.imag())};
     }
 
     // sign
@@ -2463,6 +2709,17 @@ namespace xsimd {
     template<class A> batch<double, A> sign(batch<double, A> const& self, requires<generic>) {
       return detail::signf(self);
     }
+        template <class A, class T>
+        inline batch<std::complex<T>, A> sign(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using batch_type = batch<std::complex<T>, A>;
+            using real_batch = typename batch_type::real_batch;
+            auto rz = z.real();
+            auto iz = z.imag();
+            return select(rz != real_batch(0.),
+                          batch_type(sign(rz)),
+                          batch_type(sign(iz)));
+        }
 
     // signnz
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> signnz(batch<T, A> const& self, requires<generic>) {
@@ -2510,6 +2767,10 @@ namespace xsimd {
       return detail::sin(self);
     }
 
+    template<class A, class T> batch<std::complex<T>, A> sin(batch<std::complex<T>, A> const& z, requires<generic>) {
+      return {sin(z.real()) * cosh(z.imag()), cos(z.real()) * sinh(z.imag())};
+    }
+
     // sincos
     template<class A, class T> std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self, requires<generic>) {
       using batch_type = batch<T, A>;
@@ -2528,8 +2789,21 @@ namespace xsimd {
                 return std::make_pair(sin_z1 ^ sin_sign_bit, cos_z1 ^ cos_sign_bit);
     }
 
+    template<class A, class T>
+    std::pair<batch<std::complex<T>, A>, batch<std::complex<T>, A>>
+    sincos(batch<std::complex<T>, A> const& z, requires<generic>) {
+            using batch_type = batch<std::complex<T>, A>;
+            using real_batch = typename batch_type::real_batch;
+            real_batch rcos = cos(z.real());
+            real_batch rsin = sin(z.real());
+            real_batch icosh = cosh(z.imag());
+            real_batch isinh = sinh(z.imag());
+            return std::make_pair(batch_type(rsin * icosh, rcos * isinh), batch_type(rcos * icosh, -rsin * isinh));
+    }
+
     // sinh
-    template<class A> batch<float, A> sinh(batch<float, A> const& self, requires<generic>) {
+    namespace detail {
+    template<class A> batch<float, A> sinh_kernel(batch<float, A> const& self) {
       using batch_type = batch<float, A>;
                 batch_type sqr_self = self * self;
                 return detail::horner<batch_type,
@@ -2541,7 +2815,7 @@ namespace xsimd {
                     self;
     }
 
-    template<class A> batch<double, A> sinh(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> sinh_kernel(batch<double, A> const& self) {
       using batch_type = batch<double, A>;
                 batch_type sqrself = self * self;
                 return fma(self, (detail::horner<batch_type,
@@ -2558,6 +2832,70 @@ namespace xsimd {
                                sqrself,
                            self);
     }
+    }
+    template<class A, class T> batch<T, A> sinh(batch<T, A> const& a, requires<generic>) {
+                using batch_type = batch<T, A>;
+                batch_type half(0.5);
+                batch_type x = abs(a);
+                auto lt1 = x < batch_type(1.);
+                batch_type bts = bitofsign(a);
+                batch_type z(0.);
+                if (any(lt1))
+                {
+                    z = detail::sinh_kernel(x);
+                    if (all(lt1))
+                        return z ^ bts;
+                }
+                auto test1 = x >( constants::maxlog<batch_type>() -  constants::log_2<batch_type>());
+                batch_type fac = select(test1, half, batch_type(1.));
+                batch_type tmp = exp(x * fac);
+                batch_type tmp1 = half * tmp;
+                batch_type r = select(test1, tmp1 * tmp, tmp1 - half / tmp);
+                return select(lt1, z, r) ^ bts;
+    }
+        template <class A, class T>
+        inline batch<std::complex<T>, A> sinh(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            auto x = z.real();
+            auto y = z.imag();
+            return {sinh(x) * cos(y), cosh(x) * sin(y)};
+        }
+    // sqrt
+    template<class A, class T> batch<std::complex<T>, A> sqrt(batch<std::complex<T>, A> const& z, requires<generic>) {
+
+                constexpr T csqrt_scale_factor = std::is_same<T, float>::value?6.7108864e7f:1.8014398509481984e16;
+                constexpr T csqrt_scale = std::is_same<T, float>::value?1.220703125e-4f:7.450580596923828125e-9;
+                using batch_type = batch<std::complex<T>, A>;
+                using real_batch = batch<T, A>;
+                real_batch x = z.real();
+                real_batch y = z.imag();
+                real_batch sqrt_x = sqrt(fabs(x));
+                real_batch sqrt_hy = sqrt(0.5 * fabs(y));
+                auto cond = (fabs(x) > real_batch(4.) || fabs(y) > real_batch(4.));
+                x = select(cond, x * 0.25, x * csqrt_scale_factor);
+                y = select(cond, y * 0.25, y * csqrt_scale_factor);
+                real_batch scale = select(cond, real_batch(2.), real_batch(csqrt_scale));
+                real_batch r = abs(batch_type(x, y));
+
+                auto condxp = x > real_batch(0.);
+                real_batch t0 = select(condxp, xsimd::sqrt(0.5 * (r + x)), xsimd::sqrt(0.5 * (r - x)));
+                real_batch r0 = scale * fabs((0.5 * y) / t0);
+                t0 *= scale;
+                real_batch t = select(condxp, t0, r0);
+                r = select(condxp, r0, t0);
+                batch_type resg = select(y < real_batch(0.), batch_type(t, -r), batch_type(t, r));
+                real_batch ze(0.);
+
+                return select(y == ze,
+                              select(x == ze,
+                                     batch_type(ze, ze),
+                                     select(x < ze, batch_type(ze, sqrt_x), batch_type(sqrt_x, ze))),
+                              select(x == ze,
+                                     select(y > ze, batch_type(sqrt_hy, sqrt_hy), batch_type(sqrt_hy, -sqrt_hy)),
+                                     resg));
+
+    }
+
 
     // store_aligned
     template<class A, class T_in, class T_out> void store_aligned(T_out *mem, batch<T_in, A> const& self, requires<generic>) {
@@ -2584,6 +2922,17 @@ namespace xsimd {
                 auto test = (swap_bit == batch_type(0.));
                 const batch_type y = detail::tan_eval(xr, test);
                 return y ^ bitofsign(self);
+    }
+    template<class A, class T> batch<std::complex<T>, A> tan(batch<std::complex<T>, A> const& z, requires<generic>) {
+            using batch_type = batch<std::complex<T>, A>;
+            using real_batch = typename batch_type::real_batch;
+            real_batch d = cos(2 * z.real()) + cosh(2 * z.imag());
+            batch_type winf(constants::infinity<real_batch>(), constants::infinity<real_batch>());
+            real_batch wreal = sin(2 * z.real()) / d;
+            real_batch wimag = sinh(2 * z.imag());
+            batch_type wres = select(isinf(wimag), batch_type(wreal, real_batch(1.)), batch_type(wreal, wimag / d));
+            return select(d == real_batch(0.), winf, wres);
+
     }
 
     // tanh
@@ -2668,6 +3017,16 @@ namespace xsimd {
                 batch_type r = fma(batch_type(-2.), one / (one + exp(x + x)), one);
                 return select(test, z, r) ^ bts;
     }
+        template <class A, class T>
+        inline batch<std::complex<T>, A> tanh(const batch<std::complex<T>, A>& z, requires<generic>)
+        {
+            using real_batch = typename batch<std::complex<T>, A>::real_batch;
+            auto x = z.real();
+            auto y = z.imag();
+            real_batch two(2);
+            auto d = cosh(two * x) + cos(two * y);
+            return {sinh(two * x) / d, sin(two * y) / d};
+        }
 
     // tgamma
 
