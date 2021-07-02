@@ -20,9 +20,23 @@ namespace xsimd {
 namespace xsimd {
   namespace types {
 
+    namespace types
+    {
+    XSIMD_DECLARE_SIMD_REGISTER(bool, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(signed char, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned char, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(char, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned short, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(short, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned int, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(int, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned long int, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(long int, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, avx, __m256i);
+    XSIMD_DECLARE_SIMD_REGISTER(long long int, avx, __m256i);
     XSIMD_DECLARE_SIMD_REGISTER(float, avx, __m256);
     XSIMD_DECLARE_SIMD_REGISTER(double, avx, __m256d);
-
+    }
   }
 }
 #endif
