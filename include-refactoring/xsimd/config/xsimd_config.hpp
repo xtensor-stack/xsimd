@@ -124,5 +124,9 @@
         #define XSIMD_WITH_ARM8_64 0
         #define XSIMD_WITH_ARM8_32 0
     #endif
+#else
+    #define XSIMD_WITH_ARM7 0
+    #define XSIMD_WITH_ARM8_64 0
+    #define XSIMD_WITH_ARM8_32 0
 #endif
 #endif
