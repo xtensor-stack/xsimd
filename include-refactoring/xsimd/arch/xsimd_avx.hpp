@@ -279,19 +279,47 @@ namespace xsimd {
     }
 
     // complex_low
+    namespace detail {
+        // On clang, _mm256_extractf128_ps is built upon build_shufflevector
+        // which require index parameter to be a constant
+        template <int index, class B>
+        inline B get_half_complex_f(const B& real, const B& imag)
+        {
+            __m128 tmp0 = _mm256_extractf128_ps(real, index);
+            __m128 tmp1 = _mm256_extractf128_ps(imag, index);
+            __m128 tmp2 = _mm_unpackhi_ps(tmp0, tmp1);
+            tmp0 = _mm_unpacklo_ps(tmp0, tmp1);
+            __m256 res = real;
+            res = _mm256_insertf128_ps(res, tmp0, 0);
+            res = _mm256_insertf128_ps(res, tmp2, 1);
+            return res;
+        }
+        template <int index, class B>
+        inline B get_half_complex_d(const B& real, const B& imag)
+        {
+            __m128d tmp0 = _mm256_extractf128_pd(real, index);
+            __m128d tmp1 = _mm256_extractf128_pd(imag, index);
+            __m128d tmp2 = _mm_unpackhi_pd(tmp0, tmp1);
+            tmp0 = _mm_unpacklo_pd(tmp0, tmp1);
+            __m256d res = real;
+            res = _mm256_insertf128_pd(res, tmp0, 0);
+            res = _mm256_insertf128_pd(res, tmp2, 1);
+            return res;
+        }
+    }
     template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<avx>) {
-      return _mm256_unpacklo_ps(self.real(), self.imag());
+            return detail::get_half_complex_f<0>(self.real(), self.imag());
     }
     template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<avx>) {
-      return _mm256_unpacklo_pd(self.real(), self.imag());
+            return detail::get_half_complex_d<0>(self.real(), self.imag());
     }
 
     // complex_high
     template<class A> batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires<avx>) {
-      return _mm256_unpackhi_ps(self.real(), self.imag());
+            return detail::get_half_complex_f<1>(self.real(), self.imag());
     }
     template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx>) {
-      return _mm256_unpackhi_pd(self.real(), self.imag());
+            return detail::get_half_complex_d<1>(self.real(), self.imag());
     }
 
     // div
@@ -476,14 +504,14 @@ namespace xsimd {
 
     // load_complex
     template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<avx>) {
-            using batch_type = batch<float>;
+            using batch_type = batch<float, A>;
             __m128 tmp0 = _mm256_extractf128_ps(hi, 0);
             __m128 tmp1 = _mm256_extractf128_ps(hi, 1);
             __m128 tmp_real = _mm_shuffle_ps(tmp0, tmp1, _MM_SHUFFLE(2, 0, 2, 0));
             __m128 tmp_imag = _mm_shuffle_ps(tmp0, tmp1, _MM_SHUFFLE(3, 1, 3, 1));
-            batch_type real, imag;
-            real = _mm256_insertf128_ps(real, tmp_real, 0);
-            imag = _mm256_insertf128_ps(imag, tmp_imag, 0);
+            batch_type real = _mm256_insertf128_ps(real, tmp_real, 0);
+            batch_type imag = _mm256_insertf128_ps(imag, tmp_imag, 0);
+
             tmp0 = _mm256_extractf128_ps(lo, 0);
             tmp1 = _mm256_extractf128_ps(lo, 1);
             tmp_real = _mm_shuffle_ps(tmp0, tmp1, _MM_SHUFFLE(2, 0, 2, 0));
