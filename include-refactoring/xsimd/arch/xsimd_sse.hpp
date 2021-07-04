@@ -281,10 +281,10 @@ namespace xsimd {
     }
 
     // load_complex
-    template<class A> batch<std::complex<float>, A> load_complex(batch<float> const& hi, batch<float> const& lo, requires<sse>) {
+    template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<sse>) {
       return {_mm_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0)), _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))};
     }
-    template<class A> batch<std::complex<double>, A> load_complex(batch<double> const& hi, batch<double> const& lo, requires<sse>) {
+    template<class A> batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires<sse>) {
       return {_mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0)), _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1))};
     }
 

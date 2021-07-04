@@ -194,7 +194,7 @@ protected:
         }
     }
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
     template <size_t Align = A>
     typename std::enable_if<Align >= 32, void>::type test_cast_sizeshift1() const
     {
@@ -258,7 +258,7 @@ protected:
     }
 #endif
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
     template <size_t Align = A>
     typename std::enable_if<Align >= 64, void>::type test_cast_sizeshift2() const
     {
@@ -334,14 +334,14 @@ TYPED_TEST(batch_cast_test, cast)
     this->test_cast();
 }
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift1)
 {
     this->test_cast_sizeshift1();
 }
 #endif
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift2)
 {
     this->test_cast_sizeshift2();
