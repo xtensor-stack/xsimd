@@ -38,7 +38,6 @@ namespace xsimd
                 out_first[i] = f(first[i]);
             }
 
-            batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
                 batch_type batch = batch_type::load_aligned(&first[i]);
@@ -57,10 +56,9 @@ namespace xsimd
                 out_first[i] = f(first[i]);
             }
 
-            batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                batch = batch_type::load_aligned(&first[i]);
+                batch_type batch = batch_type::load_aligned(&first[i]);
                 xsimd::store_unaligned(&out_first[i], f(batch));
             }
 
