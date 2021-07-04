@@ -507,10 +507,11 @@ namespace xsimd {
             using batch_type = batch<float, A>;
             __m128 tmp0 = _mm256_extractf128_ps(hi, 0);
             __m128 tmp1 = _mm256_extractf128_ps(hi, 1);
+            batch_type real, imag;
             __m128 tmp_real = _mm_shuffle_ps(tmp0, tmp1, _MM_SHUFFLE(2, 0, 2, 0));
             __m128 tmp_imag = _mm_shuffle_ps(tmp0, tmp1, _MM_SHUFFLE(3, 1, 3, 1));
-            batch_type real = _mm256_insertf128_ps(real, tmp_real, 0);
-            batch_type imag = _mm256_insertf128_ps(imag, tmp_imag, 0);
+            real = _mm256_insertf128_ps(real, tmp_real, 0);
+            imag = _mm256_insertf128_ps(imag, tmp_imag, 0);
 
             tmp0 = _mm256_extractf128_ps(lo, 0);
             tmp1 = _mm256_extractf128_ps(lo, 1);

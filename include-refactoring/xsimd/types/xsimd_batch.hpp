@@ -20,7 +20,7 @@ struct batch : types::simd_register<T, A> {
   using batch_bool_type = batch_bool<T, A>;
 
   // constructors
-  batch() : types::simd_register<T, A>{} {}
+  batch() = default;
   batch(T val);
   batch(std::initializer_list<T> data) : batch(data.begin(), detail::make_index_sequence<size>()) {}
   explicit batch(batch_bool_type b);
@@ -147,7 +147,7 @@ struct batch_bool : types::simd_register<T, A> {
   using register_type = typename types::simd_register<T, A>::register_type;
   using batch_type = batch<T, A>;
 
-  batch_bool() : types::simd_register<T, A>{} {}
+  batch_bool() = default;
   batch_bool(bool val);
   batch_bool(register_type reg) : types::simd_register<T, A>({reg}) {}
   batch_bool(std::initializer_list<bool> data) : batch_bool(data.begin(), detail::make_index_sequence<size>()) {}
