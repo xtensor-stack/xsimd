@@ -51,20 +51,23 @@
 
 #ifdef __FMA__
 
-#if defined(__SSE__)
+#if defined(__SSE__) && ! defined(__AVX__)
 #define XSIMD_WITH_FMA3 1
 #define XSIMD_WITH_FMA5 0
+#endif
 
-#elif defined(__AVX__)
+#if defined(__AVX__)
 #define XSIMD_WITH_FMA3 0
 #define XSIMD_WITH_FMA5 1
+#endif
 
-#else
+#if !defined(__SSE__) && ! defined(__AVX__)
 #define XSIMD_WITH_FMA3 0
 #define XSIMD_WITH_FMA5 0
 #endif
 
 #else
+
 #define XSIMD_WITH_FMA3 0
 #define XSIMD_WITH_FMA5 0
 #endif

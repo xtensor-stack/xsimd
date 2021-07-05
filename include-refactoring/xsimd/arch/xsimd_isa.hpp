@@ -29,6 +29,10 @@
 #include "./xsimd_sse4_2.hpp"
 #endif
 
+#if XSIMD_WITH_FMA3
+#include "./xsimd_fma3.hpp"
+#endif
+
 #if XSIMD_WITH_AVX
 #include "./xsimd_avx.hpp"
 #endif
@@ -37,8 +41,8 @@
 #include "./xsimd_avx2.hpp"
 #endif
 
-#if XSIMD_WITH_FMA
-#include "./xsimd_fma.hpp"
+#if XSIMD_WITH_FMA5
+#include "./xsimd_fma5.hpp"
 #endif
 
 // Must come last to have access to all conversion specializations.
