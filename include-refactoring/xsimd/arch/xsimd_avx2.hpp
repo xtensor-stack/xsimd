@@ -91,6 +91,19 @@ namespace xsimd {
       }
     }
 
+    // complex_low
+    template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<avx2>) {
+            __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 1, 1, 0));
+            __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(1, 2, 0, 0));
+            return _mm256_blend_pd(tmp0, tmp1, 10);
+    }
+
+    // complex_high
+    template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx2>) {
+            __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 3, 1, 2));
+            __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(3, 2, 2, 0));
+            return _mm256_blend_pd(tmp0, tmp1, 10);
+    }
 
     // eq
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -143,6 +156,25 @@ namespace xsimd {
           }
           default: return hadd(self, avx{});
       }
+    }
+    // load_complex
+    template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<avx2>) {
+            using batch_type = batch<float, A>;
+            batch_type real = _mm256_castpd_ps(
+                         _mm256_permute4x64_pd(
+                             _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0))),
+                             _MM_SHUFFLE(3, 1, 2, 0)));
+            batch_type imag = _mm256_castpd_ps(
+                         _mm256_permute4x64_pd(
+                             _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))),
+                             _MM_SHUFFLE(3, 1, 2, 0)));
+            return {real, imag};
+    }
+    template<class A> batch<std::complex<double>, A> load_complex(batch<double,A> const& hi, batch<double,A> const& lo, requires<avx2>) {
+            using batch_type = batch<double>;
+            batch_type real = _mm256_permute4x64_pd(_mm256_unpacklo_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
+            batch_type imag = _mm256_permute4x64_pd(_mm256_unpackhi_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
+            return {real, imag};
     }
 
     // max
