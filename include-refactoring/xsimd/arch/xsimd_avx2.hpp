@@ -35,6 +35,16 @@ namespace xsimd {
       }
     }
 
+    // bitwise_and
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+      return _mm256_and_si256(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx2>) {
+      return _mm256_and_si256(self, other);
+    }
+
     // bitwise_lshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx2>) {
@@ -86,6 +96,7 @@ namespace xsimd {
       else {
         switch(sizeof(T)) {
           case 4: return _mm256_srlv_epi32(self, other);
+          case 8: return _mm256_srlv_epi64(self, other);
           default: return bitwise_rshift(self, other, avx{});
         }
       }
@@ -257,6 +268,21 @@ namespace xsimd {
         case 4: return _mm256_blendv_epi8(false_br, true_br, cond);
         case 8: return _mm256_blendv_epi8(false_br, true_br, cond);
         default: return select(cond, true_br, false_br, avx{});
+      }
+    }
+    template<class A, class T, bool... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx2>) {
+      constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
+      switch(sizeof(T)) {
+        // FIXME: for some reason mask here is not considered as an immediate,
+        // but it's okay for _mm256_blend_epi32
+        //case 2: return _mm256_blend_epi16(false_br, true_br, mask);
+        case 4: return _mm256_blend_epi32(false_br, true_br, mask);
+        case 8: {
+          constexpr int imask = detail::interleave(mask);
+          return _mm256_blend_epi32(false_br, true_br, imask);
+        }
+        default: return select(batch_bool<T, A>{Values...}, true_br, false_br, avx2{});
       }
     }
 

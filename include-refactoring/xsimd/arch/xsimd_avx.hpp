@@ -289,6 +289,15 @@ namespace xsimd {
       return _mm256_set1_pd(val);
     }
 
+    // ceil
+    template<class A> batch<float, A> ceil(batch<float, A> const& self, requires<avx>) {
+      return _mm256_ceil_ps(self);
+    }
+    template<class A> batch<double, A> ceil(batch<double, A> const& self, requires<avx>) {
+      return _mm256_ceil_pd(self);
+    }
+
+
     // complex_low
     namespace detail {
         // On clang, _mm256_extractf128_ps is built upon build_shufflevector
@@ -332,14 +341,6 @@ namespace xsimd {
     template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx>) {
             return detail::get_half_complex_d<1>(self.real(), self.imag());
     }
-
-    // div
-    template<class A> batch<float, A> div(batch<float, A> const& self, batch<float, A> const& other, requires<avx>) {
-      return _mm256_div_ps(self, other);
-    }
-    template<class A> batch<double, A> div(batch<double, A> const& self, batch<double, A> const& other, requires<avx>) {
-      return _mm256_div_pd(self, other);
-    }
     // convert
     namespace detail {
     template<class A> batch<float, A> fast_cast(batch<int32_t, A> const& self, batch<float, A> const&, requires<avx>) {
@@ -348,6 +349,14 @@ namespace xsimd {
     template<class A> batch<int32_t, A> fast_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires<avx>) {
       return _mm256_cvttps_epi32(self);
     }
+    }
+
+    // div
+    template<class A> batch<float, A> div(batch<float, A> const& self, batch<float, A> const& other, requires<avx>) {
+      return _mm256_div_ps(self, other);
+    }
+    template<class A> batch<double, A> div(batch<double, A> const& self, batch<double, A> const& other, requires<avx>) {
+      return _mm256_div_pd(self, other);
     }
 
     // eq
@@ -383,6 +392,14 @@ namespace xsimd {
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx>) {
       return eq(batch<T, A>(self.data), batch<T, A>(other.data));
+    }
+
+    // floor
+    template<class A> batch<float, A> floor(batch<float, A> const& self, requires<avx>) {
+      return _mm256_floor_ps(self);
+    }
+    template<class A> batch<double, A> floor(batch<double, A> const& self, requires<avx>) {
+      return _mm256_floor_pd(self);
     }
 
     // ge
@@ -606,6 +623,14 @@ namespace xsimd {
       return _mm256_mul_pd(self, other);
     }
 
+    // nearbyint
+    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<avx>) {
+      return _mm256_round_ps(self, _MM_FROUND_TO_NEAREST_INT);
+    }
+    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires<avx>) {
+      return _mm256_round_pd(self, _MM_FROUND_TO_NEAREST_INT);
+    }
+
     // neg
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> neg(batch<T, A> const& self, requires<avx>) {
@@ -664,6 +689,34 @@ namespace xsimd {
         return self + mindiff;
       }
     }
+
+    // select
+    template<class A> batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires<avx>) {
+                return _mm256_blendv_ps(false_br, true_br, cond);
+    }
+    template<class A> batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires<avx>) {
+                return _mm256_blendv_pd(false_br, true_br, cond);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx>) {
+      __m128i cond_low, cond_hi;
+      detail::split_avx(cond, cond_low, cond_hi);
+
+      __m128i true_low, true_hi;
+      detail::split_avx(true_br, true_low, true_hi);
+
+      __m128i false_low, false_hi;
+      detail::split_avx(false_br, false_low, false_hi);
+
+      __m128i res_low = select(batch_bool<T, sse4_2>(cond_low), batch<T, sse4_2>(true_low), batch<T, sse4_2>(false_low), sse4_2{});
+      __m128i res_hi = select(batch_bool<T, sse4_2>(cond_hi), batch<T, sse4_2>(true_hi), batch<T, sse4_2>(false_hi), sse4_2{});
+      return detail::merge_sse(res_low, res_hi);
+    }
+    template<class A, class T, bool... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx>) {
+      return select(batch_bool<T, A>{Values...}, true_br, false_br, avx2{});
+    }
+
 
     // set
     template<class A, class... Values>
@@ -754,34 +807,6 @@ namespace xsimd {
       return _mm256_store_pd(mem, self);
     }
 
-    // select
-    template<class A> batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires<avx>) {
-                return _mm256_blendv_ps(false_br, true_br, cond);
-    }
-    template<class A> batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires<avx>) {
-                return _mm256_blendv_pd(false_br, true_br, cond);
-    }
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx>) {
-      __m128i cond_low, cond_hi;
-      detail::split_avx(cond, cond_low, cond_hi);
-
-      __m128i true_low, true_hi;
-      detail::split_avx(true_br, true_low, true_hi);
-
-      __m128i false_low, false_hi;
-      detail::split_avx(false_br, false_low, false_hi);
-
-      __m128i res_low = select(batch_bool<T, sse4_2>(cond_low), batch<T, sse4_2>(true_low), batch<T, sse4_2>(false_low), sse4_2{});
-      __m128i res_hi = select(batch_bool<T, sse4_2>(cond_hi), batch<T, sse4_2>(true_hi), batch<T, sse4_2>(false_hi), sse4_2{});
-      return detail::merge_sse(res_low, res_hi);
-    }
-    template<class A, class T, bool... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx>) {
-      return select(batch_bool<T, A>{Values...}, true_br, false_br, avx2{});
-    }
-
-
     // store_unaligned
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     void store_unaligned(T *mem, batch<T, A> const& self, requires<avx>) {
@@ -841,6 +866,14 @@ namespace xsimd {
       alignas(A::alignment()) double buffer[batch<double, A>::size];
       self.store_aligned(&buffer[0]);
       return {(int64_t)buffer[0], (int64_t)buffer[1], (int64_t)buffer[2], (int64_t)buffer[3]};
+    }
+
+    // trunc
+    template<class A> batch<float, A> trunc(batch<float, A> const& self, requires<avx>) {
+      return _mm256_round_ps(self, _MM_FROUND_TO_ZERO);
+    }
+    template<class A> batch<double, A> trunc(batch<double, A> const& self, requires<avx>) {
+      return _mm256_round_pd(self, _MM_FROUND_TO_ZERO);
     }
 
     // zip_hi
