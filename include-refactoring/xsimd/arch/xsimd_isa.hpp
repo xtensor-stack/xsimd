@@ -37,6 +37,10 @@
 #include "./xsimd_avx2.hpp"
 #endif
 
+#if XSIMD_WITH_FMA
+#include "./xsimd_fma.hpp"
+#endif
+
 // Must come last to have access to all conversion specializations.
 #include "./xsimd_generic.hpp"
 
