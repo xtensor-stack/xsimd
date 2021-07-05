@@ -31,6 +31,10 @@
 #include "./xsimd_avx.hpp"
 #endif
 
+#ifdef XSIMD_WITH_AVX2
+#include "./xsimd_avx2.hpp"
+#endif
+
 // Must come last to have access to all conversion specializations.
 #include "./xsimd_generic.hpp"
 

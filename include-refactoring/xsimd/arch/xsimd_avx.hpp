@@ -53,7 +53,7 @@ namespace xsimd {
         case 1: return _mm256_add_epi8(self, other);
         case 2: return _mm256_add_epi16(self, other);
         case 4: return detail::fwd_to_sse([](__m128i s, __m128i o) { return add(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
-        case 8: return _mm256_add_epi64(self, other);
+        case 8: return detail::fwd_to_sse([](__m128i s, __m128i o) { return add(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
         default: assert(false && "unsupported arch/op combination"); return {};
       }
     }
