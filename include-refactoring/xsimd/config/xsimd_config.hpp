@@ -44,9 +44,7 @@
 #endif
 
 #ifdef __AVX2__
-// Until we support it!
-//#define XSIMD_WITH_AVX2 1
-#define XSIMD_WITH_AVX2 0
+#define XSIMD_WITH_AVX2 1
 #else
 #define XSIMD_WITH_AVX2 0
 #endif
