@@ -12,7 +12,7 @@ namespace xsimd {
     static constexpr unsigned version() { return generic::version(2, 3, 0); }
   };
 
-#if XSIMD_WITH_FMA
+#if XSIMD_WITH_FMA5
   namespace types {
 
     XSIMD_DECLARE_SIMD_REGISTER_ALIAS(fma5, avx2);
