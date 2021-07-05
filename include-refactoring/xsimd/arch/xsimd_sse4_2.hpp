@@ -17,10 +17,10 @@ namespace xsimd {
     }
 
     // floor
-    template<class A> batch<float, A> floor(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> floor(batch<float, A> const& self, requires<sse4_2>) {
       return _mm_floor_ps(self);
     }
-    template<class A> batch<double, A> floor(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> floor(batch<double, A> const& self, requires<sse4_2>) {
       return _mm_floor_pd(self);
     }
 
@@ -37,19 +37,19 @@ namespace xsimd {
     }
 
     // nearbyint
-    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<sse4_2>) {
       return _mm_round_ps(self, _MM_FROUND_TO_NEAREST_INT);
     }
-    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires<sse4_2>) {
       return _mm_round_pd(self, _MM_FROUND_TO_NEAREST_INT);
     }
 
     // trunc
-    template<class A> batch<float, A> trunc(batch<float, A> const& self, requires<generic>) {
-      return _mm_round_ps(x, _MM_FROUND_TO_ZERO);
+    template<class A> batch<float, A> trunc(batch<float, A> const& self, requires<sse4_2>) {
+      return _mm_round_ps(self, _MM_FROUND_TO_ZERO);
     }
-    template<class A> batch<double, A> trunc(batch<double, A> const& self, requires<generic>) {
-      return _mm_round_pd(x, _MM_FROUND_TO_ZERO);
+    template<class A> batch<double, A> trunc(batch<double, A> const& self, requires<sse4_2>) {
+      return _mm_round_pd(self, _MM_FROUND_TO_ZERO);
     }
 
   }
