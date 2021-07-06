@@ -16,10 +16,10 @@ namespace xsimd {
     }
     // ceil
     template<class A> batch<float, A> ceil(batch<float, A> const& self, requires<sse4_1>) {
-      return _mm_round_ps(self, _MM_FROUND_CEIL);
+      return _mm_ceil_ps(self);
     }
     template<class A> batch<double, A> ceil(batch<double, A> const& self, requires<sse4_1>) {
-      return _mm_round_pd(self, _MM_FROUND_CEIL);
+      return _mm_ceil_pd(self);
     }
 
     // eq
@@ -33,10 +33,10 @@ namespace xsimd {
 
     // floor
     template<class A> batch<float, A> floor(batch<float, A> const& self, requires<sse4_1>) {
-      return _mm_round_ps(self, _MM_FROUND_FLOOR);
+      return _mm_floor_ps(self);
     }
     template<class A> batch<double, A> floor(batch<double, A> const& self, requires<sse4_1>) {
-      return _mm_round_pd(self, _MM_FROUND_FLOOR);
+      return _mm_floor_pd(self);
     }
 
     // max
