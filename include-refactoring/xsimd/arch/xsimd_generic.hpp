@@ -175,7 +175,7 @@ namespace xsimd {
 
     using namespace types;
     // abs
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    template<class A, class T, class/*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
     batch<T, A> abs(batch<T, A> const& self, requires<generic>)
     {
       if(std::is_unsigned<T>::value)
@@ -541,13 +541,13 @@ namespace xsimd {
     }
 
     // bitwise_lshift
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    template<class A, class T, class/*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return detail::apply([](T x, T y) { return x << y;}, self, other);
     }
 
     // bitwise_rshift
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    template<class A, class T, class/*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
     batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return detail::apply([](T x, T y) { return x >> y;}, self, other);
     }
@@ -2521,7 +2521,7 @@ namespace xsimd {
 
 
     // mul
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    template<class A, class T, class/*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
     batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return detail::apply([](T x, T y) -> T { return x * y;}, self, other);
     }

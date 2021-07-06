@@ -155,7 +155,7 @@ namespace xsimd {
       return _mm_cvtepi32_ps(self);
     }
     template<class A> batch<int32_t, A> fast(batch<float, A> const& self, batch<int32_t, A> const&, requires<sse2>) {
-      return _mm_cvttps_epi32(self);
+      return _mm_cvtps_epi32(self);
     }
     }
 
@@ -179,6 +179,22 @@ namespace xsimd {
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse2>) {
       return eq(batch<T, A>(self.data), batch<T, A>(other.data));
+    }
+
+    // gt
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: return _mm_cmpgt_epi8(self, other);
+          case 2: return _mm_cmpgt_epi16(self, other);
+          case 4: return _mm_cmpgt_epi32(self, other);
+          default: return gt(self, other, generic{});
+        }
+      }
+      else {
+        return gt(self, other, generic{});
+      }
     }
 
     // hadd

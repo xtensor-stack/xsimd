@@ -38,19 +38,38 @@
 #endif
 
 #ifdef __AVX__
-// Until we support it!
-//#define XSIMD_WITH_AVX 1
-#define XSIMD_WITH_AVX 0
+#define XSIMD_WITH_AVX 1
 #else
 #define XSIMD_WITH_AVX 0
 #endif
 
 #ifdef __AVX2__
-// Until we support it!
-//#define XSIMD_WITH_AVX2 1
-#define XSIMD_WITH_AVX2 0
+#define XSIMD_WITH_AVX2 1
 #else
 #define XSIMD_WITH_AVX2 0
+#endif
+
+#ifdef __FMA__
+
+#if defined(__SSE__) && ! defined(__AVX__)
+#define XSIMD_WITH_FMA3 1
+#define XSIMD_WITH_FMA5 0
+#endif
+
+#if defined(__AVX__)
+#define XSIMD_WITH_FMA3 0
+#define XSIMD_WITH_FMA5 1
+#endif
+
+#if !defined(__SSE__) && ! defined(__AVX__)
+#define XSIMD_WITH_FMA3 0
+#define XSIMD_WITH_FMA5 0
+#endif
+
+#else
+
+#define XSIMD_WITH_FMA3 0
+#define XSIMD_WITH_FMA5 0
 #endif
 
 // AVX512 instructions are supported starting with gcc 6

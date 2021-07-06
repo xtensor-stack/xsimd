@@ -91,7 +91,7 @@ namespace xsimd {
         : join<typename Arch::template extend<Archs...>, Args...> {};
   } // namespace detail
 
-  using all_x86_architectures = arch_list<avx512f, avx2, /*fma3, xop, fma4,*/ avx, sse4_2, sse4_1, /*sse4a, ssse3,*/ sse3, sse2, sse>;
+  using all_x86_architectures = arch_list<avx512f, fma5, avx2, /*xop, fma4,*/ avx, fma3, sse4_2, sse4_1, /*sse4a,*/ ssse3, sse3, sse2, sse>;
   //using all_arm_architectures = arch_list<neon64, neon>;
   using all_architectures = typename detail::join</*all_arm_architectures,*/ all_x86_architectures>::type;
 
