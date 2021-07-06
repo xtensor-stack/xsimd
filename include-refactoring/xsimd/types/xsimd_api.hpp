@@ -1519,14 +1519,6 @@ batch<T, A> zip_lo(batch<T, A> const& x, batch<T, A> const& y) {
 // high level functions - batch_bool
 //
 
-/**
- * @ingroup simd_batch_bool_reducers
- *
- * Returns true if all the boolean values in the batch are true,
- * false otherwise.
- * @param x the batch to reduce.
- * @return a boolean scalar.
- */
 template<class T, class A>
 bool all(batch_bool<T, A> const& x) {
   return kernel::all<A>(x, A{});
