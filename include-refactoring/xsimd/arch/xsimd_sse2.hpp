@@ -189,19 +189,7 @@ namespace xsimd {
           case 1: return _mm_cmpgt_epi8(self, other);
           case 2: return _mm_cmpgt_epi16(self, other);
           case 4: return _mm_cmpgt_epi32(self, other);
-          default: {
-            // from https://github.com/lemire/vectorclass/blob/master/vectori128.h
-      __m128i s      = _mm_sub_epi64(self,other);                   // self-other
-      // self < other if self and other have same sign and s < 0 or (self < 0 and other >= 0)
-      // The latter () corrects for overflow
-      __m128i axb    = _mm_xor_si128(self,other);                   // self ^ other
-      __m128i anb    = _mm_andnot_si128(other,self);                // self & ~other
-      __m128i snaxb  = _mm_andnot_si128(axb,s);              // s & ~(self ^ other)
-      __m128i or1    = _mm_or_si128(anb,snaxb);              // (self & ~other) | (s & ~(self ^ other))
-      __m128i teste  = _mm_srai_epi32(or1,31);               // extend sign bit to 32 bits
-      __m128i testee = _mm_shuffle_epi32(teste,0xF5);        // extend sign bit to 64 bits
-      return  testee;
-                   }
+          default: return gt(self, other, generic{});
         }
       }
       else {
