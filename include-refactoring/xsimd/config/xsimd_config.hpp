@@ -72,13 +72,8 @@
 #define XSIMD_WITH_FMA5 0
 #endif
 
-// AVX512 instructions are supported starting with gcc 6
-// see https://www.gnu.org/software/gcc/gcc-6/changes.html
-#if !defined(XSIMD_X86_INSTR_SET) && (defined(__AVX512__) || defined(__KNCNI__) || defined(__AVX512F__)\
-    && (defined(__clang__) || (!defined(__GNUC__) || __GNUC__ >= 6)))
-// Until we support it!
-//#define XSIMD_WITH_AVX512F 1
-#define XSIMD_WITH_AVX512F 0
+#ifdef __AVX512F__
+#define XSIMD_WITH_AVX512F 1
 #else
 #define XSIMD_WITH_AVX512F 0
 #endif
