@@ -62,7 +62,6 @@
 #endif
 
 #if XSIMD_WITH_ARM8_64
-#pragma message "COINCOIN"
 #include "./xsimd_arm8_64.hpp"
 #endif
 
