@@ -15,6 +15,18 @@ namespace xsimd {
 #if XSIMD_WITH_AVX512F
   namespace types {
 
+    XSIMD_DECLARE_SIMD_REGISTER(bool, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(signed char, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned char, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(char, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned short, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(short, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned int, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(int, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned long int, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(long int, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, avx512f, __m512i);
+    XSIMD_DECLARE_SIMD_REGISTER(long long int, avx512f, __m512i);
     XSIMD_DECLARE_SIMD_REGISTER(float, avx512f, __m512);
     XSIMD_DECLARE_SIMD_REGISTER(double, avx512f, __m512d);
 
