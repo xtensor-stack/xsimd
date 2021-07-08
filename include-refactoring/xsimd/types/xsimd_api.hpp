@@ -1537,25 +1537,8 @@ bool any(batch_bool<T, A> const& x) {
   return kernel::any<A>(x, A{});
 }
 
-/**
- * @ingroup simd_batch_miscellaneous
- *
- * Dump the content of batch \c x to stream \c o
- * @param o the stream where the batch is dumped
- * @param x batch to dump.
- * @return a reference to \c o
- */
-template<class T, class A>
-std::ostream& operator<<(std::ostream& o, batch<T, A> const& x) {
-  constexpr auto size = batch<T, A>::size;
-  alignas(A::alignment()) T buffer[size];
-  x.store_aligned(&buffer[0]);
-  o << '(';
-  for(std::size_t i = 0; i < size - 1; ++i)
-    o << buffer[i] << ", ";
-  return o << buffer[size - 1] << ')';
-}
-
+=======
+>>>>>>> b8fabe1... Implemented bool_cast for ARM
 }
 
 #endif
