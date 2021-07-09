@@ -73,7 +73,7 @@
 #endif
 
 #ifdef __AVX512F__
-#define XSIMD_WITH_AVX512F 1
+#define XSIMD_WITH_AVX512F 0
 #else
 #define XSIMD_WITH_AVX512F 0
 #endif
