@@ -65,26 +65,26 @@ namespace xsimd {
     }
 
     // all
-    template<class A> bool all(batch<float, A> const& self, requires<avx>) {
+    template<class A> bool all(batch_bool<float, A> const& self, requires<avx>) {
       return _mm256_testc_ps(self, batch_bool<float, A>(true)) != 0;
     }
-    template<class A> bool all(batch<double, A> const& self, requires<avx>) {
+    template<class A> bool all(batch_bool<double, A> const& self, requires<avx>) {
       return _mm256_testc_pd(self, batch_bool<double, A>(true)) != 0;
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    bool all(batch<T, A> const& self, requires<avx>) {
+    bool all(batch_bool<T, A> const& self, requires<avx>) {
                 return _mm256_testc_si256(self, batch_bool<T, A>(true)) != 0;
     }
 
     // any
-    template<class A> bool any(batch<float, A> const& self, requires<avx>) {
+    template<class A> bool any(batch_bool<float, A> const& self, requires<avx>) {
       return !_mm256_testz_ps(self, self);
     }
-    template<class A> bool any(batch<double, A> const& self, requires<avx>) {
+    template<class A> bool any(batch_bool<double, A> const& self, requires<avx>) {
       return !_mm256_testz_pd(self, self);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    bool any(batch<T, A> const& self, requires<avx>) {
+    bool any(batch_bool<T, A> const& self, requires<avx>) {
                 return !_mm256_testz_si256(self, self);
     }
 
