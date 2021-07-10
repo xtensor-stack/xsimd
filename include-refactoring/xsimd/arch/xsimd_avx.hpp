@@ -551,7 +551,7 @@ namespace xsimd {
             return {real, imag};
     }
     template<class A> batch<std::complex<double>, A> load_complex(batch<double,A> const& hi, batch<double,A> const& lo, requires<avx>) {
-            using batch_type = batch<double>;
+            using batch_type = batch<double, A>;
             __m128d tmp0 = _mm256_extractf128_pd(hi, 0);
             __m128d tmp1 = _mm256_extractf128_pd(hi, 1);
             batch_type real, imag;
