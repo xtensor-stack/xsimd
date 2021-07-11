@@ -38,7 +38,6 @@ protected:
 
     void test_load_store() const
     {
-#ifdef T
         array_type res;
         batch_type b = batch_type::load_unaligned(lhs.data());
         b.store_unaligned(res.data());
@@ -49,7 +48,6 @@ protected:
         b = batch_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, rhs) << print_function_name("load_aligned / store_aligned");
-#endif
     }
 
     void test_constructors() const
