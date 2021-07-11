@@ -89,13 +89,11 @@ protected:
 
     void test_access_operator() const
     {
-#ifdef T
         batch_type res = batch_lhs();
         for (size_t i = 0; i < size; ++i)
         {
             EXPECT_EQ(res.get(i), lhs[i]) << print_function_name("get(") << i << ")";
         }
-#endif
     }
 
     void test_arithmetic() const
