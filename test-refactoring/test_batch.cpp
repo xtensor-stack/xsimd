@@ -38,6 +38,7 @@ protected:
 
     void test_load_store() const
     {
+#ifdef T
         array_type res;
         batch_type b = batch_type::load_unaligned(lhs.data());
         b.store_unaligned(res.data());
@@ -48,10 +49,12 @@ protected:
         b = batch_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, rhs) << print_function_name("load_aligned / store_aligned");
+#endif
     }
 
     void test_constructors() const
     {
+#ifdef T
         array_type tmp;
         std::fill(tmp.begin(), tmp.end(), value_type(2));
         batch_type b0(2);
@@ -59,10 +62,12 @@ protected:
 
         batch_type b1 = batch_type::load_unaligned(lhs.data());
         EXPECT_EQ(b1, lhs) << print_function_name("batch(value_type*)");
+#endif
     }
 
     void test_static_builders() const
     {
+#ifdef T
         {
             array_type expected;
             std::fill(expected.begin(), expected.end(), value_type(2));
@@ -83,19 +88,23 @@ protected:
             b.store_aligned(ares.data());
             EXPECT_EQ(ares, rhs) << print_function_name("batch::load_aligned");
         }
+#endif
     }
 
     void test_access_operator() const
     {
+#ifdef T
         batch_type res = batch_lhs();
         for (size_t i = 0; i < size; ++i)
         {
             EXPECT_EQ(res.get(i), lhs[i]) << print_function_name("get(") << i << ")";
         }
+#endif
     }
 
     void test_arithmetic() const
     {
+#ifdef T
         // +batch
         {
             array_type expected = lhs;
@@ -175,10 +184,12 @@ protected:
             batch_type rres = scalar / batch_lhs();
             EXPECT_BATCH_EQ(rres, expected) << print_function_name("scalar / batch");
         }
+#endif
     }
 
     void test_saturated_arithmetic() const
     {
+#ifdef T
         // batch + batch
         {
             array_type expected;
@@ -212,10 +223,12 @@ protected:
             batch_type rres = xsimd::ssub(scalar, batch_lhs());
             EXPECT_BATCH_EQ(rres, expected) << print_function_name("ssub(scalar, batch)");
         }
+#endif
     }
 
     void test_computed_assignment() const
     {
+#ifdef T
         // batch += batch
         {
             array_type expected;
@@ -280,10 +293,12 @@ protected:
             res /= scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch /= scalar");
         }
+#endif
     }
 
     void test_comparison() const
     {
+#ifdef T
         // batch == batch
         {
             bool_array_type expected;
@@ -380,10 +395,12 @@ protected:
             auto res = batch_lhs() >= scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch >= scalar");
         }
+#endif
     }
 
     void test_min_max() const
     {
+#ifdef T
         // min
         {
             array_type expected;
@@ -432,10 +449,12 @@ protected:
             batch_type res = fmax(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fmax");
         }
+#endif
     }
 
     void test_fused_operations() const
     {
+#ifdef T
         // fma
         {
             array_type expected;
@@ -469,10 +488,12 @@ protected:
             batch_type res = fnms(batch_lhs(), batch_rhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fnms");
         }
+#endif
     }
 
     void test_abs() const
     {
+#ifdef T
         // abs
         {
             array_type expected;
@@ -489,20 +510,24 @@ protected:
             batch_type res = fabs(batch_lhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fabs");
         }
+#endif
     }
 
     void test_horizontal_operations() const
     {
+#ifdef T
         // hadd
         {
             value_type expected = std::accumulate(lhs.cbegin(), lhs.cend(), value_type(0));
             value_type res = hadd(batch_lhs());
             EXPECT_SCALAR_EQ(res, expected) << print_function_name("hadd");
         }
+#endif
     }
 
     void test_boolean_conversions() const
     {
+#ifdef T
         using batch_bool_type = typename batch_type::batch_bool_type;
         // batch = true
         {
@@ -533,6 +558,7 @@ protected:
             batch_type res = (batch_type)~fbt;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("~batch");
         }
+#endif
     }
 
     void test_iterator() const
