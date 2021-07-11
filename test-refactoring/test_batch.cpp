@@ -52,7 +52,6 @@ protected:
 
     void test_constructors() const
     {
-#ifdef T
         array_type tmp;
         std::fill(tmp.begin(), tmp.end(), value_type(2));
         batch_type b0(2);
@@ -60,7 +59,6 @@ protected:
 
         batch_type b1 = batch_type::load_unaligned(lhs.data());
         EXPECT_EQ(b1, lhs) << print_function_name("batch(value_type*)");
-#endif
     }
 
     void test_static_builders() const
