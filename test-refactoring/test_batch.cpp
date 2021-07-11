@@ -63,7 +63,6 @@ protected:
 
     void test_static_builders() const
     {
-#ifdef T
         {
             array_type expected;
             std::fill(expected.begin(), expected.end(), value_type(2));
@@ -71,6 +70,7 @@ protected:
             auto res = batch_type::broadcast(value_type(2));
             EXPECT_EQ(res, expected) << print_function_name("batch::broadcast");
         }
+#ifdef T
         {
             array_type res;
             auto b = batch_type::load_unaligned(lhs.data());
