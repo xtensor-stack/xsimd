@@ -335,7 +335,7 @@ namespace xsimd {
         switch(sizeof(T)) {
           case 4: return (register_type)_mm512_cmpeq_epu32_mask(self, other);
           case 8: return (register_type)_mm512_cmpeq_epu64_mask(self, other);
-          default: assert(false && "unsupported vector / arch combination");
+          default: assert(false && "unsupported vector / arch combination"); return {};
         }
     }
     template<class A, class T>
@@ -564,7 +564,7 @@ namespace xsimd {
         switch(sizeof(T)) {
           case 4: return (register_type)_mm512_cmplt_epu32_mask(self, other);
           case 8: return (register_type)_mm512_cmplt_epu64_mask(self, other);
-          default: assert(false && "unsupported vector / arch combination");
+          default: assert(false && "unsupported vector / arch combination"); return {};
         }
     }
 
@@ -667,7 +667,6 @@ namespace xsimd {
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      using register_type = typename batch_bool<T, A>::register_type;
       if(std::is_signed<T>::value) {
         auto mask = other < 0;
         auto self_pos_branch = min(std::numeric_limits<T>::max() - other, self);
@@ -725,7 +724,7 @@ namespace xsimd {
         }
         case 4: return _mm512_mask_blend_epi32(cond, false_br, true_br);
         case 8: return _mm512_mask_blend_epi64(cond, false_br, true_br);
-        default: assert(false && "unsupported arch/type combination");
+        default: assert(false && "unsupported arch/type combination"); return {};
       };
     }
     template<class A, class T, bool... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
