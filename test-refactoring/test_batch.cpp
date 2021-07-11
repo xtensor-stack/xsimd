@@ -70,13 +70,13 @@ protected:
             auto res = batch_type::broadcast(value_type(2));
             EXPECT_EQ(res, expected) << print_function_name("batch::broadcast");
         }
-#ifdef T
         {
             array_type res;
             auto b = batch_type::load_unaligned(lhs.data());
             b.store_unaligned(res.data());
             EXPECT_EQ(res, lhs) << print_function_name("batch::load_unaligned");
         }
+#ifdef T
         {
             alignas(xsimd::default_arch::alignment()) array_type arhs(this->rhs);
             alignas(xsimd::default_arch::alignment()) array_type ares;
