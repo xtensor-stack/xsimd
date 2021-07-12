@@ -181,6 +181,11 @@ struct batch_bool : types::get_bool_simd_register_t<T, A> {
   template<size_t... Is>
   batch_bool(bool const* data, detail::index_sequence<Is...>);
 
+  template <class U, class... V, size_t I, size_t... Is>
+  static register_type make_register(detail::index_sequence<I, Is...>, U u, V... v);
+
+  template <class... V>
+  static register_type make_register(detail::index_sequence<>, V... v);
 
 };
 
@@ -416,11 +421,24 @@ batch_bool<T, A> batch_bool<T, A>::operator|(batch_bool<T, A> const& other) cons
 }
 
 template<class T, class A>
-batch_bool<T, A>::batch_bool(bool val) : base_type(val?
-    (batch_type(0) == batch_type(0)):
-    (batch_type(0) != batch_type(0))) {
+batch_bool<T, A>::batch_bool(bool val)
+    : base_type(make_register(detail::make_index_sequence<size-1>(), val))
+{
 }
 
+template <class T, class A>
+template <class U, class... V, size_t I, size_t... Is>
+auto batch_bool<T, A>::make_register(detail::index_sequence<I, Is...>, U u, V... v) -> register_type
+{
+    return make_register(detail::index_sequence<Is...>(), u, u, v...);
+}
+
+template <class T, class A>
+template <class... V>
+auto batch_bool<T, A>::make_register(detail::index_sequence<>, V... v) -> register_type
+{
+    return register_type{v...};
+}
 
 template<class T, class A>
 void batch_bool<T, A>::store_aligned(bool* mem) const {
