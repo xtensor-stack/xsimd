@@ -48,6 +48,63 @@ namespace xsimd {
         return merge_avx(res_low, res_high);
       }
     }
+    namespace detail {
+
+    template<class A, class T,  int Cmp>
+    batch_bool<T, A> compare_int_avx512(batch<T, A> const& self, batch<T, A> const& other) {
+      using register_type = typename batch_bool<T, A>::register_type;
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 1: {
+            // shifting to take sign into account
+            __mmask64 mask_low0 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x000000FF)) << 24,
+                                                         (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x000000FF)) << 24,
+                                                         Cmp);
+            __mmask64 mask_low1 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x0000FF00)) << 16,
+                                                         (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x0000FF00)) << 16,
+                                                         Cmp);
+            __mmask64 mask_high0 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x00FF0000)) << 8,
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x00FF0000)) << 8,
+                                                          Cmp);
+            __mmask64 mask_high1 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFF000000)),
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFF000000)),
+                                                          Cmp);
+            return mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48);
+          }
+          case 2: {
+            // shifting to take sign into account
+            __mmask64 mask_low = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x0000FFFF)) << 16,
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x0000FFFF)) << 16,
+                                                          Cmp);
+            __mmask64 mask_high = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFFFF0000)),
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFFFF0000)),
+                                                          Cmp);
+            return mask_low | (mask_high << 32);
+          }
+          case 4: return (register_type)_mm512_cmp_epi32_mask(self, other, Cmp);
+          case 8: return (register_type)_mm512_cmp_epi64_mask(self, other, Cmp);
+        }
+      }
+      else {
+        switch(sizeof(T)) {
+          case 1: {
+            __mmask64 mask_low0 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x00000FF), batch<uint32_t, A>(self.other)  & batch<T, A>(0x000000FF), Cmp);
+            __mmask64 mask_low1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x0000FF00), batch<uint32_t, A>(self.other)  & batch<T, A>(0x0000FF00), Cmp);
+            __mmask64 mask_high0 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x00FF0000), batch<uint32_t, A>(self.other)  & batch<T, A>(0x00FF0000), Cmp);
+            __mmask64 mask_high1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0xFF000000), batch<uint32_t, A>(self.other)  & batch<T, A>(0xFF000000), Cmp);
+            return (register_type)(mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48));
+          }
+          case 2: {
+            __mmask32 mask_low = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x000FFFF), batch<uint32_t, A>(self.other)  & batch<uint32_t, A>(0x0000FFFF), Cmp);
+            __mmask32 mask_high = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFFFF0000), batch<uint32_t, A>(self.other)  & batch<uint32_t, A>(0xFFFF0000), Cmp);
+            return (register_type)(mask_low | (mask_high << 32));
+          }
+          case 4: return (register_type)_mm512_cmp_epu32_mask(self, other, Cmp);
+          case 8: return (register_type)_mm512_cmp_epu64_mask(self, other, Cmp);
+        }
+      }
+    }
+    }
 
     // abs
     template<class A> batch<float, A> abs(batch<float, A> const& self, requires<avx512f>) {
@@ -331,12 +388,7 @@ namespace xsimd {
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      using register_type = typename batch_bool<T, A>::register_type;
-        switch(sizeof(T)) {
-          case 4: return (register_type)_mm512_cmpeq_epu32_mask(self, other);
-          case 8: return (register_type)_mm512_cmpeq_epu64_mask(self, other);
-          default: assert(false && "unsupported vector / arch combination"); return {};
-        }
+      return detail::compare_int_avx512<A, T, _MM_CMPINT_EQ>(self, other);
     }
     template<class A, class T>
     batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx512f>) {
@@ -352,31 +404,29 @@ namespace xsimd {
       return _mm512_floor_pd(self);
     }
 
-#if 0
     // ge
     template<class A> batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires<avx512f>) {
-      return _mm256_cmp_ps(self, other, _CMP_GE_OQ);
+      return _mm512_cmp_ps_mask(self, other, _CMP_GE_OQ);
     }
     template<class A> batch_bool<double, A> ge(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
-      return _mm256_cmp_pd(self, other, _CMP_GE_OQ);
+      return _mm512_cmp_pd_mask(self, other, _CMP_GE_OQ);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      return detail::fwd_to_sse([](__m128i s, __m128i o) { return ge(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
+      return detail::compare_int_avx512<A, T, _MM_CMPINT_GE>(self, other);
     }
 
     // gt
     template<class A> batch_bool<float, A> gt(batch<float, A> const& self, batch<float, A> const& other, requires<avx512f>) {
-      return _mm256_cmp_ps(self, other, _CMP_GT_OQ);
+      return _mm512_cmp_ps_mask(self, other, _CMP_GT_OQ);
     }
     template<class A> batch_bool<double, A> gt(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
-      return _mm256_cmp_pd(self, other, _CMP_GT_OQ);
+      return _mm512_cmp_pd_mask(self, other, _CMP_GT_OQ);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      return detail::fwd_to_sse([](__m128i s, __m128i o) { return gt(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
+      return detail::compare_int_avx512<A, T, _MM_CMPINT_GT>(self, other);
     }
-#endif
 
 
     // hadd
@@ -509,6 +559,11 @@ namespace xsimd {
     template<class A> batch_bool<double, A> le(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
       return _mm512_cmp_pd_mask(self, other, _CMP_LE_OQ);
     }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
+      return detail::compare_int_avx512<A, T, _MM_CMPINT_LE>(self, other);
+    }
+
 
     // load_aligned
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -558,63 +613,6 @@ namespace xsimd {
       return _mm512_cmp_pd_mask(self, other, _CMP_LT_OQ);
     }
 
-    namespace detail {
-
-    template<class A, class T,  _MM_CMPINT_ENUM Cmp>
-    batch_bool<T, A> compare_int_avx512(batch<T, A> const& self, batch<T, A> const& other) {
-      using register_type = typename batch_bool<T, A>::register_type;
-      if(std::is_signed<T>::value) {
-        switch(sizeof(T)) {
-          case 1: {
-            // shifting to take sign into account
-            __mmask64 mask_low0 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x000000FF)) << 24,
-                                                         (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x000000FF)) << 24,
-                                                         Cmp);
-            __mmask64 mask_low1 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x0000FF00)) << 16,
-                                                         (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x0000FF00)) << 16,
-                                                         Cmp);
-            __mmask64 mask_high0 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x00FF0000)) << 8,
-                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x00FF0000)) << 8,
-                                                          Cmp);
-            __mmask64 mask_high1 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFF000000)),
-                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFF000000)),
-                                                          Cmp);
-            return mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48);
-          }
-          case 2: {
-            // shifting to take sign into account
-            __mmask64 mask_low = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x0000FFFF)) << 16,
-                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x0000FFFF)) << 16,
-                                                          Cmp);
-            __mmask64 mask_high = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFFFF0000)),
-                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFFFF0000)),
-                                                          Cmp);
-            return mask_low | (mask_high << 32);
-          }
-          case 4: return (register_type)_mm512_cmp_epi32_mask(self, other, Cmp);
-          case 8: return (register_type)_mm512_cmp_epi64_mask(self, other, Cmp);
-        }
-      }
-      else {
-        switch(sizeof(T)) {
-          case 1: {
-            __mmask64 mask_low0 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x00000FF), batch<uint32_t, A>(self.other)  & batch<T, A>(0x000000FF), Cmp);
-            __mmask64 mask_low1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x0000FF00), batch<uint32_t, A>(self.other)  & batch<T, A>(0x0000FF00), Cmp);
-            __mmask64 mask_high0 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x00FF0000), batch<uint32_t, A>(self.other)  & batch<T, A>(0x00FF0000), Cmp);
-            __mmask64 mask_high1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0xFF000000), batch<uint32_t, A>(self.other)  & batch<T, A>(0xFF000000), Cmp);
-            return (register_type)(mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48));
-          }
-          case 2: {
-            __mmask32 mask_low = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x000FFFF), batch<uint32_t, A>(self.other)  & batch<uint32_t, A>(0x0000FFFF), Cmp);
-            __mmask32 mask_high = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFFFF0000), batch<uint32_t, A>(self.other)  & batch<uint32_t, A>(0xFFFF0000), Cmp);
-            return (register_type)(mask_low | (mask_high << 32));
-          }
-          case 4: return (register_type)_mm512_cmp_epu32_mask(self, other, Cmp);
-          case 8: return (register_type)_mm512_cmp_epu64_mask(self, other, Cmp);
-        }
-      }
-    }
-    }
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
