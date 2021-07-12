@@ -69,7 +69,7 @@ namespace xsimd {
             __mmask64 mask_high1 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFF000000)),
                                                           (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFF000000)),
                                                           Cmp);
-            return mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48);
+            return static_cast<register_type>(mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48));
           }
           case 2: {
             // shifting to take sign into account
@@ -79,7 +79,7 @@ namespace xsimd {
             __mmask64 mask_high = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFFFF0000)),
                                                           (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFFFF0000)),
                                                           Cmp);
-            return mask_low | (mask_high << 32);
+            return static_cast<register_type>(mask_low | (mask_high << 32));
           }
           case 4: return (register_type)_mm512_cmp_epi32_mask(self, other, Cmp);
           case 8: return (register_type)_mm512_cmp_epi64_mask(self, other, Cmp);
