@@ -563,16 +563,46 @@ namespace xsimd {
       using register_type = typename batch_bool<T, A>::register_type;
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
+          case 1: {
+            // shifting to take sign into account
+            __mmask64 mask_low0 = _mm512_cmplt_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x000000FF)) << 24,
+                                                         (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x000000FF)) << 24);
+            __mmask64 mask_low1 = _mm512_cmplt_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x0000FF00)) << 16,
+                                                         (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x0000FF00)) << 16);
+            __mmask64 mask_high0 = _mm512_cmplt_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x00FF0000)) << 8,
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x00FF0000)) << 8);
+            __mmask64 mask_high0 = _mm512_cmplt_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFF000000)),
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFF000000)));
+            return mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48);
+          }
+          case 2: {
+            // shifting to take sign into account
+            __mmask32 mask_low0 = _mm512_cmplt_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0x0000FFFF)) << 16,
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0x0000FFFF)) << 16);
+            __mmask32 mask_high0 = _mm512_cmplt_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFFFF0000)),
+                                                          (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFFFF0000)));
+            return mask_low | (mask_high << 32);
+          }
           case 4: return (register_type)_mm512_cmplt_epi32_mask(self, other);
           case 8: return (register_type)_mm512_cmplt_epi64_mask(self, other);
-          default: return detail::fwd_to_avx([](__m256i s, __m256i o) { return batch<T, avx2>(s) < batch<T, avx2>(o); }, self, other);
         }
       }
       else {
         switch(sizeof(T)) {
+          case 1: {
+            __mmask64 mask_low0 = _mm512_cmplt_epu32_mask((batch<uint32_t, A>(self.data) & batch<T, A>(0x00000FF), batch<uint32_t, A>(self.other)  & batch<T, A>(0x000000FF));
+            __mmask64 mask_low1 = _mm512_cmplt_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x0000FF00), batch<uint32_t, A>(self.other)  & batch<T, A>(0x0000FF00));
+            __mmask64 mask_high0 = _mm512_cmplt_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0x00FF0000), batch<uint32_t, A>(self.other)  & batch<T, A>(0x00FF0000));
+            __mmask64 mask_high1 = _mm512_cmplt_epu32_mask(batch<uint32_t, A>(self.data) & batch<T, A>(0xFF000000), batch<uint32_t, A>(self.other)  & batch<T, A>(0xFF000000));
+            return (register_type)(mask_low0 | (mask_low1 << 16) | (mask_high0 << 32) | (mask_high1 << 48));
+          }
+          case 2: {
+            __mmask32 mask_low0 = _mm512_cmplt_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x000FFFF), batch<uint32_t, A>(self.other)  & batch<uint32_t, A>(0x0000FFFF));
+            __mmask32 mask_high = _mm512_cmplt_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFFFF0000), batch<uint32_t, A>(self.other)  & batch<uint32_t, A>(0xFFFF0000));
+            return (register_type)(mask_low | (mask_high << 32));
+          }
           case 4: return (register_type)_mm512_cmplt_epu32_mask(self, other);
           case 8: return (register_type)_mm512_cmplt_epu64_mask(self, other);
-          default: return detail::fwd_to_avx([](__m256i s, __m256i o) { return batch<T, avx2>(s) < batch<T, avx2>(o); }, self, other);
         }
       }
     }
