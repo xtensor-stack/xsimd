@@ -179,6 +179,7 @@ protected:
 
     void test_saturated_arithmetic() const
     {
+#ifdef T
         // batch + batch
         {
             array_type expected;
@@ -195,7 +196,6 @@ protected:
             batch_type rres = xsimd::sadd(scalar, batch_lhs());
             EXPECT_BATCH_EQ(rres, expected) << print_function_name("sadd(scalar, batch)");
         }
-#ifdef T
         // batch - batch
         {
             array_type expected;
@@ -286,7 +286,7 @@ protected:
 
     void test_comparison() const
     {
-#ifdef T
+
         // batch == batch
         {
             bool_array_type expected;
@@ -295,6 +295,7 @@ protected:
             auto res = batch_lhs() == batch_rhs();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch == batch");
         }
+#ifdef T
         // batch == scalar
         {
             bool_array_type expected;
