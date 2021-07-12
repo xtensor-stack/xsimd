@@ -76,7 +76,6 @@ protected:
             b.store_unaligned(res.data());
             EXPECT_EQ(res, lhs) << print_function_name("batch::load_unaligned");
         }
-#ifdef T
         {
             alignas(xsimd::default_arch::alignment()) array_type arhs(this->rhs);
             alignas(xsimd::default_arch::alignment()) array_type ares;
@@ -84,7 +83,6 @@ protected:
             b.store_aligned(ares.data());
             EXPECT_EQ(ares, rhs) << print_function_name("batch::load_aligned");
         }
-#endif
     }
 
     void test_access_operator() const
