@@ -218,7 +218,6 @@ protected:
 
     void test_computed_assignment() const
     {
-#ifdef T
         // batch += batch
         {
             array_type expected;
@@ -283,7 +282,6 @@ protected:
             res /= scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch /= scalar");
         }
-#endif
     }
 
     void test_comparison() const
