@@ -443,7 +443,6 @@ protected:
 
     void test_fused_operations() const
     {
-#ifdef T
         // fma
         {
             array_type expected;
@@ -477,7 +476,6 @@ protected:
             batch_type res = fnms(batch_lhs(), batch_rhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fnms");
         }
-#endif
     }
 
     void test_abs() const
