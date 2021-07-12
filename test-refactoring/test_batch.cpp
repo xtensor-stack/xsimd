@@ -96,7 +96,6 @@ protected:
 
     void test_arithmetic() const
     {
-#ifdef T
         // +batch
         {
             array_type expected = lhs;
@@ -110,6 +109,7 @@ protected:
             batch_type res = -batch_lhs();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("-batch");
         }
+#ifdef T
         // batch + batch
         {
             array_type expected;
