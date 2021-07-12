@@ -109,7 +109,6 @@ protected:
             batch_type res = -batch_lhs();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("-batch");
         }
-#ifdef T
         // batch + batch
         {
             array_type expected;
@@ -143,6 +142,7 @@ protected:
             batch_type rres = scalar - batch_lhs();
             EXPECT_BATCH_EQ(rres, expected) << print_function_name("scalar - batch");
         }
+#ifdef T
         // batch * batch
         {
             array_type expected;
