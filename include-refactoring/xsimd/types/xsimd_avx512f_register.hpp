@@ -17,7 +17,14 @@ namespace xsimd {
 namespace types {
 template <class T> struct simd_avx512_bool_register {
   using register_type = typename std::conditional<
-      (sizeof(T) < 4), std::conditional<(sizeof(T) == 1), __mmask64, __mmask32>,
+      (sizeof(T) < 4), __m512i,
+      std::conditional<(sizeof(T) == 4), __mmask16, __mmask8>>::type::type;
+  register_type data;
+  operator register_type() const { return data; }
+};
+template <class T> struct simd_avx512_bool_register {
+  using register_type = typename std::conditional<
+      (sizeof(T) < 4), __m512i,
       std::conditional<(sizeof(T) == 4), __mmask16, __mmask8>>::type::type;
   register_type data;
   operator register_type() const { return data; }

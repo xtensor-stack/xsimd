@@ -561,11 +561,20 @@ namespace xsimd {
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
       using register_type = typename batch_bool<T, A>::register_type;
+      if(std::is_signed<T>::value) {
+        switch(sizeof(T)) {
+          case 4: return (register_type)_mm512_cmplt_epi32_mask(self, other);
+          case 8: return (register_type)_mm512_cmplt_epi64_mask(self, other);
+          default: return detail::fwd_to_avx([](__m256i s, __m256i o) { return batch<T, avx2>(s) < batch<T, avx2>(o); }, self, other);
+        }
+      }
+      else {
         switch(sizeof(T)) {
           case 4: return (register_type)_mm512_cmplt_epu32_mask(self, other);
           case 8: return (register_type)_mm512_cmplt_epu64_mask(self, other);
-          default: assert(false && "unsupported vector / arch combination"); return {};
+          default: return detail::fwd_to_avx([](__m256i s, __m256i o) { return batch<T, avx2>(s) < batch<T, avx2>(o); }, self, other);
         }
+      }
     }
 
     // max
