@@ -295,7 +295,6 @@ protected:
             auto res = batch_lhs() == batch_rhs();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch == batch");
         }
-#ifdef T
         // batch == scalar
         {
             bool_array_type expected;
@@ -320,6 +319,7 @@ protected:
             auto res = batch_lhs() != scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch != scalar");
         }
+#ifdef T
         // batch < batch
         {
             bool_array_type expected;
