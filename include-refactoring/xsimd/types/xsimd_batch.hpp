@@ -291,7 +291,7 @@ template<class T, class A>
 batch<T, A>::batch(T val) : types::simd_register<T, A>(kernel::broadcast<A>(val, A{})) {}
 
 template<class T, class A>
-batch<T, A>::batch(batch_bool<T, A> b) : batch(batch(b.data) & batch(1)) {}
+batch<T, A>::batch(batch_bool<T, A> b) : batch(kernel::from_bool(b, A{})) {}
 
 template<class T, class A>
 template<size_t... Is>
