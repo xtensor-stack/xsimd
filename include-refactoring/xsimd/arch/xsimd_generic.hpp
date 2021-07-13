@@ -1690,6 +1690,12 @@ namespace xsimd {
         return select((self != batch_type(0.)), x | ::xsimd::bitwise_cast<batch_type>(constants::mask2frexp<batch_type>()), batch_type(0.));
     }
 
+    // from bool
+    template<class A, class T>
+    batch<T, A> from_bool(batch_bool<T, A> const& self, requires<generic>) {
+      return batch<T, A>(self.data) & batch<T,A>(1);
+    }
+
     // ge
     template<class A, class T> batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return other <= self;
