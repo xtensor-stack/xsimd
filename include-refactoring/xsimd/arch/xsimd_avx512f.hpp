@@ -824,12 +824,12 @@ namespace xsimd {
     batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx512f>) {
       switch(sizeof(T)) {
         case 1: {
-          auto cond_low0 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16((uint64_t)cond.data & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0x00FF);
-          auto cond_low1 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16(((uint64_t)cond.data >> 16) & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0xFF00);
-          __m256i cond_low = (cond_low0 | cond_low1).data;
-          auto cond_hi0 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16(((uint64_t)cond.data >> 32) & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0x00FF);
-          auto cond_hi1 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16(((uint64_t)cond.data >> 48) & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0xFF00);
-          __m256i cond_hi = (cond_hi0 | cond_hi1).data;
+          alignas(avx2::alignment()) uint8_t buffer[64];
+          // FIXME: ultra inefficient
+          for(int i =0; i < 64; ++i)
+            buffer[i] = cond.data & ((uint64_t)1 << i) ? 0xFF : 0;
+          __m256i cond_low = batch<uint8_t, avx2>::load_aligned(&buffer[0]);
+          __m256i cond_hi = batch<uint8_t, avx2>::load_aligned(&buffer[32]);
 
           __m256i true_low, true_hi;
           detail::split_avx512(true_br, true_low, true_hi);
