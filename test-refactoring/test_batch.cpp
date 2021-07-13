@@ -480,7 +480,6 @@ protected:
 
     void test_abs() const
     {
-#ifdef T
         // abs
         {
             array_type expected;
@@ -497,7 +496,6 @@ protected:
             batch_type res = fabs(batch_lhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fabs");
         }
-#endif
     }
 
     void test_horizontal_operations() const
