@@ -508,7 +508,6 @@ protected:
 
     void test_boolean_conversions() const
     {
-#ifdef T
         using batch_bool_type = typename batch_type::batch_bool_type;
         // batch = true
         {
@@ -539,7 +538,6 @@ protected:
             batch_type res = (batch_type)~fbt;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("~batch");
         }
-#endif
     }
 
     void test_iterator() const
