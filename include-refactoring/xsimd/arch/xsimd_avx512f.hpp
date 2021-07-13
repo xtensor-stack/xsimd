@@ -420,22 +420,21 @@ namespace xsimd {
 
     // complex_low
     template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<avx512f>) {
-        __m512i idx = _mm512_setr_epi32(8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31);
+        __m512i idx = _mm512_setr_epi32(0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23);
         return _mm512_permutex2var_ps(self.real(), idx, self.imag());
-
     }
     template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<avx512f>) {
-        __m512i idx = _mm512_setr_epi64(4, 12, 5, 13, 6, 14, 7, 15);
+        __m512i idx = _mm512_setr_epi64(0, 8, 1, 9, 2, 10, 3, 11);
         return _mm512_permutex2var_pd(self.real(), idx, self.imag());
     }
 
     // complex_high
     template<class A> batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires<avx512f>) {
-        __m512i idx = _mm512_setr_epi32(0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23);
+        __m512i idx = _mm512_setr_epi32(8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31);
         return _mm512_permutex2var_ps(self.real(), idx, self.imag());
     }
     template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx512f>) {
-        __m512i idx = _mm512_setr_epi64(0, 8, 1, 9, 2, 10, 3, 11);
+        __m512i idx = _mm512_setr_epi64(4, 12, 5, 13, 6, 14, 7, 15);
         return _mm512_permutex2var_pd(self.real(), idx, self.imag());
     }
 
