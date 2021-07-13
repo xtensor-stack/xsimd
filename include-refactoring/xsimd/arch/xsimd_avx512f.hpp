@@ -31,6 +31,14 @@ namespace xsimd {
         return _mm512_insertf64x4(_mm512_castpd256_pd512(low), high, 1);
       }
       template<class F>
+      __m512i fwd_to_avx(F f, __m512i self) {
+        __m256i self_low, self_high;
+        split_avx512(self, self_low, self_high);
+        __m256i res_low = f(self_low);
+        __m256i res_high = f(self_high);
+        return merge_avx(res_low, res_high);
+      }
+      template<class F>
       __m512i fwd_to_avx(F f, __m512i self, __m512i other) {
         __m256i self_low, self_high, other_low, other_high;
         split_avx512(self, self_low, self_high);
@@ -185,8 +193,8 @@ namespace xsimd {
         return self;
 
       switch(sizeof(T)) {
-        case 1: return detail::fwd_to_avx([](__m256i s, __m256i o) { return add(batch<T, avx2>(s), batch<T, avx2>(o)); }, self, other);
-        case 2: return detail::fwd_to_avx([](__m256i s, __m256i o) { return add(batch<T, avx2>(s), batch<T, avx2>(o)); }, self, other);
+        case 1: return detail::fwd_to_avx([](__m256i s) { return abs(batch<T, avx2>(s)); }, self);
+        case 2: return detail::fwd_to_avx([](__m256i s) { return abs(batch<T, avx2>(s)); }, self);
         case 4: return _mm512_abs_epi32(self);
         case 8: return _mm512_abs_epi64(self);
         default: assert(false && "unsupported arch/op combination"); return {};
