@@ -425,12 +425,13 @@ namespace detail
         return expect_array_near(lhs_expression, rhs_expression, lhs, tmp);
     }
 
-    template <class T, size_t N, class A>
+    template <class T, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
                                                const ::xsimd::batch_bool<T, A>& lhs,
                                                const ::xsimd::batch_bool<T, A>& rhs)
     {
+        constexpr auto N = xsimd::batch<T, A>::size;
         std::array<bool, N> tmp;
         lhs.store_unaligned(tmp.data());
         return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
