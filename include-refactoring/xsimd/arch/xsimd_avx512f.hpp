@@ -829,8 +829,12 @@ namespace xsimd {
     batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx512f>) {
       switch(sizeof(T)) {
         case 1: {
-          __m256i cond_low, cond_hi;
-          detail::split_avx512(cond, cond_low, cond_hi);
+          auto cond_low0 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16(cond.data & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0x00FF);
+          auto cond_low1 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16((cond.data >> 16) & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0xFF00);
+          __m256i cond_low = (cond_low0 | cond_low1).data;
+          auto cond_hi0 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16((cond.data >> 32) & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0x00FF);
+          auto cond_hi1 = batch<uint16_t, avx2>(_mm512_maskz_cvtepi32_epi16((cond.data >> 48) & 0xFFFF, _mm512_set1_epi32(~0))) & batch<uint16_t, avx2>(0xFF00);
+          __m256i cond_hi = (cond_hi0 | cond_hi1).data;
 
           __m256i true_low, true_hi;
           detail::split_avx512(true_br, true_low, true_hi);
@@ -843,9 +847,8 @@ namespace xsimd {
           return detail::merge_avx(res_low, res_hi);
         }
         case 2: {
-          __m512i mcond = _mm512_maskz_broadcastw_epi16((__mmask32)cond, _mm_set1_epi16(~0));
-          __m256i cond_low, cond_hi;
-          detail::split_avx512(mcond, cond_low, cond_hi);
+          __m256i cond_low = _mm512_maskz_cvtepi32_epi16(cond.data & 0xFFFF, _mm512_set1_epi32(~0));
+          __m256i cond_hi = _mm512_maskz_cvtepi32_epi16(cond.data >> 16, _mm512_set1_epi32(~0));
 
           __m256i true_low, true_hi;
           detail::split_avx512(true_br, true_low, true_hi);
