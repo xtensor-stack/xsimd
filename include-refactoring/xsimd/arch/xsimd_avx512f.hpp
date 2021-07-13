@@ -50,22 +50,6 @@ namespace xsimd {
     }
     namespace detail {
 
-
-inline uint64_t morton_split(uint32_t a){
-	uint64_t x = a;
-	x = (x | x << 32) & 0x00000000FFFFFFFF;
-	x = (x | x << 16) & 0x0000FFFF0000FFFF;
-	x = (x | x << 8) & 0x00FF00FF00FF00FF;
-	x = (x | x << 4) & 0x0F0F0F0F0F0F0F0F;
-	x = (x | x << 2) & 0x3333333333333333;
-	x = (x | x << 1) & 0x5555555555555555;
-	return x;
-}
-
-inline uint64_t morton(uint32_t x, uint32_t y){
-	return morton_split(x) | (morton_split(y) << 1);
-}
-
     inline uint32_t morton(uint16_t x, uint16_t y) {
 
       static const unsigned short MortonTable256[256] = 
@@ -130,7 +114,14 @@ inline uint64_t morton(uint32_t x, uint32_t y){
             uint16_t mask_high1 = _mm512_cmp_epi32_mask((batch<int32_t, A>(self.data) & batch<int32_t, A>(0xFF000000)),
                                                           (batch<int32_t, A>(other.data) & batch<int32_t, A>(0xFF000000)),
                                                           Cmp);
-            return static_cast<register_type>(morton(morton(mask_low0, mask_low1), morton(mask_high0, mask_high1)));
+            uint64_t mask = 0;
+            for(unsigned i = 0; i < 16; ++i) {
+              mask |= (mask_low0 & (uint16_t(1) << i)) << (3 * i + 0);
+              mask |= (mask_low1 & (uint16_t(1) << i)) << (3 * i + 1);
+              mask |= (mask_high0 & (uint16_t(1) << i)) << (3 * i + 2);
+              mask |= (mask_high1 & (uint16_t(1) << i)) << (3 * i + 3);
+            }
+            return (register_type)mask;
           }
           case 2: {
             // shifting to take sign into account
@@ -153,7 +144,14 @@ inline uint64_t morton(uint32_t x, uint32_t y){
             uint16_t mask_low1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x0000FF00), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x0000FF00), Cmp);
             uint16_t mask_high0 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x00FF0000), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x00FF0000), Cmp);
             uint16_t mask_high1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFF000000), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0xFF000000), Cmp);
-            return static_cast<register_type>(morton(morton(mask_low0, mask_low1), morton(mask_high0, mask_high1)));
+            uint64_t mask = 0;
+            for(unsigned i = 0; i < 16; ++i) {
+              mask |= (mask_low0 & (uint16_t(1) << i)) << (3 * i + 0);
+              mask |= (mask_low1 & (uint16_t(1) << i)) << (3 * i + 1);
+              mask |= (mask_high0 & (uint16_t(1) << i)) << (3 * i + 2);
+              mask |= (mask_high1 & (uint16_t(1) << i)) << (3 * i + 3);
+            }
+            return (register_type)mask;
           }
           case 2: {
             uint16_t mask_low = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x0000FFFF), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x0000FFFF), Cmp);
@@ -767,7 +765,7 @@ inline uint64_t morton(uint32_t x, uint32_t y){
     template<class A, class T>
     batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx512f>) {
       using register_type = typename batch_bool<T, A>::register_type;
-        return register_type(self.data != other.data);
+      return register_type(self.data ^ other.data);
     }
 
     // sadd
@@ -947,6 +945,15 @@ inline uint64_t morton(uint32_t x, uint32_t y){
         const auto diff = min(self, other);
         return self - diff;
       }
+    }
+
+    // store
+    template<class T, class A>
+    void store(batch_bool<T, A> const& self, bool* mem, requires<avx512f>) {
+      using register_type = typename batch_bool<T, A>::register_type;
+      constexpr auto size = batch_bool<T, A>::size;
+      for(std::size_t i = 0; i < size; ++i)
+        mem[i] = self.data & (register_type(1) << i);
     }
 
     // store_aligned

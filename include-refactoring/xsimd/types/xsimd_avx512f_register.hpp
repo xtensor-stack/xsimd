@@ -14,21 +14,6 @@ namespace xsimd {
 
 #if XSIMD_WITH_AVX512F
 
-template<class T>
-batch_bool<T, avx512f> batch_bool<T, avx512f>::load_aligned(bool const* mem) {
-  register_type reg(0);
-  for(std::size_t i = 0; i < size; ++i)
-    reg |= mem[i] ? (register_type(1) << i) : 0;
-  return reg;
-}
-
-
-template<class T>
-void batch_bool<T, avx512f>::store_aligned(bool* mem) const {
-  for(std::size_t i = 0; i < size; ++i)
-    mem[i] = bool(data & (register_type(1) << i));
-}
-
 namespace types {
 template <class T> struct simd_avx512_bool_register {
   using register_type = typename std::conditional<
