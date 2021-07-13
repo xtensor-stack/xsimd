@@ -423,10 +423,7 @@ batch_bool<T, A>::batch_bool(bool val) : types::get_bool_simd_register_t<T, A>(v
 
 template<class T, class A>
 void batch_bool<T, A>::store_aligned(bool* mem) const {
-  alignas(A::alignment()) T buffer[size];
-  kernel::store_aligned<A>(&buffer[0], batch_type(*this), A{});
-  for(std::size_t i = 0; i < size; ++i)
-    mem[i] = bool(buffer[i]);
+  kernel::store(*this, mem, A{});
 }
 
 template<class T, class A>
