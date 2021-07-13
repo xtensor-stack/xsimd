@@ -389,7 +389,6 @@ protected:
 
     void test_min_max() const
     {
-#ifdef T
         // min
         {
             array_type expected;
@@ -406,6 +405,7 @@ protected:
             batch_type res = xsimd::min(batch_type(std::numeric_limits<value_type>::min()), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("min limit");
         }
+#ifdef T
         // fmin
         {
             array_type expected;
