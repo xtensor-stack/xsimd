@@ -144,7 +144,7 @@ set(XSIMD_TESTS
         test_algorithms.cpp
         #test_api.cpp
         #test_arch.cpp
-        #test_basic_math.cpp
+        test_basic_math.cpp
         test_batch.cpp
         test_batch_bool.cpp
         #test_batch_cast.cpp
