@@ -718,7 +718,7 @@ namespace xsimd {
       else {
         switch(sizeof(T)) {
           case 4: return _mm512_max_epu32(self, other);
-          case 8: return _mm512_max_epi32(self, other);
+          case 8: return _mm512_max_epu32(self, other);
           default: return detail::fwd_to_avx([](__m256i s, __m256i o) { return max(batch<T, avx2>(s), batch<T, avx2>(o)); }, self, other);
         }
       }
@@ -743,7 +743,7 @@ namespace xsimd {
       else {
         switch(sizeof(T)) {
           case 4: return _mm512_min_epu32(self, other);
-          case 8: return _mm512_min_epi32(self, other);
+          case 8: return _mm512_min_epu32(self, other);
           default: return detail::fwd_to_avx([](__m256i s, __m256i o) { return min(batch<T, avx2>(s), batch<T, avx2>(o)); }, self, other);
         }
       }
