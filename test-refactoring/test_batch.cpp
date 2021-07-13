@@ -498,14 +498,12 @@ protected:
 
     void test_horizontal_operations() const
     {
-#ifdef T
         // hadd
         {
             value_type expected = std::accumulate(lhs.cbegin(), lhs.cend(), value_type(0));
             value_type res = hadd(batch_lhs());
             EXPECT_SCALAR_EQ(res, expected) << print_function_name("hadd");
         }
-#endif
     }
 
     void test_boolean_conversions() const
