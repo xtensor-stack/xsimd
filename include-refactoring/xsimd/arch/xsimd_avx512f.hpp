@@ -484,6 +484,12 @@ namespace xsimd {
       return _mm512_floor_pd(self);
     }
 
+    // from bool
+    template<class A, class T>
+    batch<T, A> from_bool(batch_bool<T, A> const& self, requires<avx512f>) {
+      return select(self, batch<T, A>(1), batch<T, A>(0));
+    }
+
     // ge
     template<class A> batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires<avx512f>) {
       return _mm512_cmp_ps_mask(self, other, _CMP_GE_OQ);
@@ -822,7 +828,6 @@ namespace xsimd {
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx512f>) {
       switch(sizeof(T)) {
-#if 0
         case 1: {
           __m256i cond_low, cond_hi;
           detail::split_avx512(cond, cond_low, cond_hi);
@@ -837,7 +842,6 @@ namespace xsimd {
           __m256i res_hi = select(batch_bool<T, avx2>(cond_hi), batch<T, avx2>(true_hi), batch<T, avx2>(false_hi), avx2{});
           return detail::merge_avx(res_low, res_hi);
         }
-#endif
         case 2: {
           __m512i mcond = _mm512_maskz_broadcastw_epi16((__mmask32)cond, _mm_set1_epi16(~0));
           __m256i cond_low, cond_hi;
