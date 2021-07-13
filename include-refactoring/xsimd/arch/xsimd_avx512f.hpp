@@ -179,6 +179,19 @@ namespace xsimd {
                                                    self_asi);
                 return *reinterpret_cast<__m512d*>(&res_asi);
     }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> abs(batch<T, A> const& self, requires<avx512f>) {
+      if(std::is_unsigned<T>::value)
+        return self;
+
+      switch(sizeof(T)) {
+        case 1: return detail::fwd_to_avx([](__m256i s, __m256i o) { return add(batch<T, avx2>(s), batch<T, avx2>(o)); }, self, other);
+        case 2: return detail::fwd_to_avx([](__m256i s, __m256i o) { return add(batch<T, avx2>(s), batch<T, avx2>(o)); }, self, other);
+        case 4: return _mm512_abs_epi32(self);
+        case 8: return _mm512_abs_epi64(self);
+        default: assert(false && "unsupported arch/op combination"); return {};
+      }
+    }
 
     // add
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
