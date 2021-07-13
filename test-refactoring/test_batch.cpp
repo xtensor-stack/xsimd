@@ -405,7 +405,6 @@ protected:
             batch_type res = xsimd::min(batch_type(std::numeric_limits<value_type>::min()), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("min limit");
         }
-#ifdef T
         // fmin
         {
             array_type expected;
@@ -438,7 +437,6 @@ protected:
             batch_type res = fmax(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fmax");
         }
-#endif
     }
 
     void test_fused_operations() const
