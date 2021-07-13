@@ -2896,6 +2896,17 @@ namespace xsimd {
 
     }
 
+    // store
+    template<class T, class A>
+    void store(batch_bool<T, A> const& self, bool* mem, requires<generic>) {
+      using batch_type = batch<T, A>;
+      constexpr auto size = batch_bool<T, A>::size;
+      alignas(A::alignment()) T buffer[size];
+      kernel::store_aligned<A>(&buffer[0], batch_type(self), A{});
+      for(std::size_t i = 0; i < size; ++i)
+        mem[i] = bool(buffer[i]);
+    }
+
 
     // store_aligned
     template<class A, class T_in, class T_out> void store_aligned(T_out *mem, batch<T_in, A> const& self, requires<generic>) {
