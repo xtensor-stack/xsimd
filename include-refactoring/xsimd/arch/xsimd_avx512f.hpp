@@ -104,7 +104,7 @@ namespace xsimd {
     }
 
     template<class A, class T,  int Cmp>
-    batch_bool<T, A> compare_int_avx512(batch<T, A> const& self, batch<T, A> const& other) {
+    batch_bool<T, A> compare_int_avx512f(batch<T, A> const& self, batch<T, A> const& other) {
       using register_type = typename batch_bool<T, A>::register_type;
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
@@ -463,7 +463,7 @@ namespace xsimd {
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      return detail::compare_int_avx512<A, T, _MM_CMPINT_EQ>(self, other);
+      return detail::compare_int_avx512f<A, T, _MM_CMPINT_EQ>(self, other);
     }
     template<class A, class T>
     batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx512f>) {
@@ -494,7 +494,7 @@ namespace xsimd {
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      return detail::compare_int_avx512<A, T, _MM_CMPINT_GE>(self, other);
+      return detail::compare_int_avx512f<A, T, _MM_CMPINT_GE>(self, other);
     }
 
     // gt
@@ -506,7 +506,7 @@ namespace xsimd {
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      return detail::compare_int_avx512<A, T, _MM_CMPINT_GT>(self, other);
+      return detail::compare_int_avx512f<A, T, _MM_CMPINT_GT>(self, other);
     }
 
 
@@ -642,7 +642,7 @@ namespace xsimd {
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      return detail::compare_int_avx512<A, T, _MM_CMPINT_LE>(self, other);
+      return detail::compare_int_avx512f<A, T, _MM_CMPINT_LE>(self, other);
     }
 
 
@@ -697,7 +697,7 @@ namespace xsimd {
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
-      return detail::compare_int_avx512<A, T, _MM_CMPINT_LT>(self, other);
+      return detail::compare_int_avx512f<A, T, _MM_CMPINT_LT>(self, other);
     }
 
     // max
@@ -756,6 +756,14 @@ namespace xsimd {
     }
     template<class A> batch<double, A> mul(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
       return _mm512_mul_pd(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
+        switch(sizeof(T)) {
+          case 4: return _mm512_mullo_epi32(self, other);
+          case 8: return _mm512_mullo_epi64(self, other);
+          default : return detail::fwd_to_avx([](__m256i s, __m256i o) { return mul(batch<T, avx2>(s), batch<T, avx2>(o)); }, self, other);
+        }
     }
 
     // nearbyint
