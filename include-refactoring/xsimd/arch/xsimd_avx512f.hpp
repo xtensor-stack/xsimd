@@ -1039,7 +1039,8 @@ namespace xsimd {
       // FIXME: call _mm_cvtepi64_pd
       alignas(A::alignment()) int64_t buffer[batch<int64_t, A>::size];
       self.store_aligned(&buffer[0]);
-      return {(double)buffer[0], (double)buffer[1], (double)buffer[2], (double)buffer[3],};
+      return {(double)buffer[0], (double)buffer[1], (double)buffer[2], (double)buffer[3]
+              (double)buffer[4], (double)buffer[5], (double)buffer[6], (double)buffer[7],};
     }
 
     // to_int
@@ -1053,7 +1054,8 @@ namespace xsimd {
       // FIXME: call _mm_cvttpd_epi64
       alignas(A::alignment()) double buffer[batch<double, A>::size];
       self.store_aligned(&buffer[0]);
-      return {(int64_t)buffer[0], (int64_t)buffer[1], (int64_t)buffer[2], (int64_t)buffer[3]};
+      return {(int64_t)buffer[0], (int64_t)buffer[1], (int64_t)buffer[2], (int64_t)buffer[3],
+              (int64_t)buffer[4], (int64_t)buffer[5], (int64_t)buffer[6], (int64_t)buffer[7]};
     }
 
     // trunc
