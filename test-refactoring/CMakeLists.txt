@@ -162,7 +162,7 @@ set(XSIMD_TESTS
         test_exponential.cpp
         test_fp_manipulation.cpp
         test_hyperbolic.cpp
-        #test_load_store.cpp
+        test_load_store.cpp
         #test_memory.cpp
         #test_poly_evaluation.cpp
         test_power.cpp
