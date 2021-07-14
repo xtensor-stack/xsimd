@@ -24,7 +24,8 @@ namespace xsimd {
         unsigned xop : 1;
         unsigned avx : 1;
         unsigned avx2 : 1;
-        unsigned avx512 : 1;
+        unsigned avx512f : 1;
+        unsigned avx512bw : 1;
         unsigned neon : 1;
         unsigned neon64 : 1;
 
@@ -117,8 +118,11 @@ namespace xsimd {
              avx2 = regs[1] >> 5 & 1;
              best = std::max(best, avx2::version() * avx2);
 
-             avx512 = regs[1] >> 16 & 1; // actually avx512f
-             best = std::max(best, avx512f::version() * avx512);
+             avx512f = regs[1] >> 16 & 1;
+             best = std::max(best, avx512f::version() * avx512f);
+
+             avx512bw = regs[1] >> 30 & 1;
+             best = std::max(best, avx512bw::version() * avx512bw);
 
              //get_cpuid(regs, 0x80000001);
              //fma4 = regs[2] >> 16 & 1;
