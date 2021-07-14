@@ -74,7 +74,7 @@ namespace xsimd {
       }
       else {
         switch(sizeof(T)) {
-          case 2: return _mm512_srli_epi8(self, other);
+          case 2: return _mm512_srli_epi16(self, other);
           default: return bitwise_rshift(self, other, avx512f{});
         }
       }
