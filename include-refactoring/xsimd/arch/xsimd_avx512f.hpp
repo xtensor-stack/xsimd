@@ -1039,8 +1039,8 @@ namespace xsimd {
       // FIXME: call _mm_cvtepi64_pd
       alignas(A::alignment()) int64_t buffer[batch<int64_t, A>::size];
       self.store_aligned(&buffer[0]);
-      return {(double)buffer[0], (double)buffer[1], (double)buffer[2], (double)buffer[3]
-              (double)buffer[4], (double)buffer[5], (double)buffer[6], (double)buffer[7],};
+      return {(double)buffer[0], (double)buffer[1], (double)buffer[2], (double)buffer[3],
+              (double)buffer[4], (double)buffer[5], (double)buffer[6], (double)buffer[7]};
     }
 
     // to_int
