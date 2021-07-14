@@ -84,4 +84,11 @@
 #define XSIMD_WITH_AVX512F 0
 #endif
 
+#ifdef __AVX512BW__
+// Avoids repeating the GCC workaround over and over
+#define XSIMD_WITH_AVX512BW XSIMD_WITH_AVX512F
+#else
+#define XSIMD_WITH_AVX512BW 0
+#endif
+
 #endif

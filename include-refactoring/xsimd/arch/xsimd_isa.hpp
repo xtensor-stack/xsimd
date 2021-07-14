@@ -49,6 +49,10 @@
 #include "./xsimd_avx512f.hpp"
 #endif
 
+#if XSIMD_WITH_AVX512BW
+#include "./xsimd_avx512bw.hpp"
+#endif
+
 // Must come last to have access to all conversion specializations.
 #include "./xsimd_generic.hpp"
 
