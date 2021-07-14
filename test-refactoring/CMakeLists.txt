@@ -157,7 +157,7 @@ set(XSIMD_TESTS
         test_complex_hyperbolic.cpp
         test_complex_power.cpp
         test_complex_trigonometric.cpp
-        #test_conversion.cpp
+        test_conversion.cpp
         test_error_gamma.cpp
         test_exponential.cpp
         test_fp_manipulation.cpp
@@ -170,7 +170,7 @@ set(XSIMD_TESTS
         test_select.cpp
         #test_shuffle_128.cpp
         test_trigonometric.cpp
-        #test_utils.hpp
+        test_utils.hpp
 )
 
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})
