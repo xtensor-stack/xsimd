@@ -896,25 +896,7 @@ namespace xsimd {
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
         T v16, T v17, T v18, T v19, T v20, T v21, T v22, T v23, T v24, T v25, T v26, T v27, T v28, T v29, T v30, T v31) {
-      return _mm512_setr_epi32(
-          v0  | (v1  << 8*sizeof(T)),
-          v2  | (v3  << 8*sizeof(T)),
-          v4  | (v5  << 8*sizeof(T)),
-          v6  | (v7  << 8*sizeof(T)),
-          v8  | (v9  << 8*sizeof(T)),
-          v10 | (v11 << 8*sizeof(T)),
-          v12 | (v13 << 8*sizeof(T)),
-          v14 | (v15 << 8*sizeof(T)),
-          v16 | (v17 << 8*sizeof(T)),
-          v18 | (v19 << 8*sizeof(T)),
-          v20 | (v21 << 8*sizeof(T)),
-          v22 | (v23 << 8*sizeof(T)),
-          v24 | (v25 << 8*sizeof(T)),
-          v26 | (v27 << 8*sizeof(T)),
-          v28 | (v29 << 8*sizeof(T)),
-          v30 | (v31 << 8*sizeof(T))
-          );
-
+      return _mm512_set_epi16(v31, v30, v29, v28, v27, v26, v25, v24, v23, v22, v21, v20, v19, v18, v17, v16, v15, v14, v13, v12, v11, v10, v9, v8, v7, v6, v5, v4, v3, v2, v1, v0);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
@@ -922,24 +904,7 @@ namespace xsimd {
       T v32, T v33, T v34, T v35, T v36, T v37, T v38, T v39, T v40, T v41, T v42, T v43, T v44, T v45, T v46, T v47,
       T v48, T v49, T v50, T v51, T v52, T v53, T v54, T v55, T v56, T v57, T v58, T v59, T v60, T v61, T v62, T v63
       ) {
-      return _mm512_setr_epi32(
-          v0  | (v1  << 8*sizeof(T)) | (v2  << 16*sizeof(T)) | (v3  << 24*sizeof(T)),
-          v4  | (v5  << 8*sizeof(T)) | (v6  << 16*sizeof(T)) | (v7  << 24*sizeof(T)),
-          v8  | (v9  << 8*sizeof(T)) | (v10 << 16*sizeof(T)) | (v11 << 24*sizeof(T)),
-          v12 | (v13 << 8*sizeof(T)) | (v14 << 16*sizeof(T)) | (v15 << 24*sizeof(T)),
-          v16 | (v17 << 8*sizeof(T)) | (v18 << 16*sizeof(T)) | (v19 << 24*sizeof(T)),
-          v20 | (v21 << 8*sizeof(T)) | (v22 << 16*sizeof(T)) | (v23 << 24*sizeof(T)),
-          v24 | (v25 << 8*sizeof(T)) | (v26 << 16*sizeof(T)) | (v27 << 24*sizeof(T)),
-          v28 | (v29 << 8*sizeof(T)) | (v30 << 16*sizeof(T)) | (v31 << 24*sizeof(T)),
-          v32 | (v33 << 8*sizeof(T)) | (v34 << 16*sizeof(T)) | (v35 << 24*sizeof(T)),
-          v36 | (v37 << 8*sizeof(T)) | (v38 << 16*sizeof(T)) | (v39 << 24*sizeof(T)),
-          v40 | (v41 << 8*sizeof(T)) | (v42 << 16*sizeof(T)) | (v43 << 24*sizeof(T)),
-          v44 | (v45 << 8*sizeof(T)) | (v46 << 16*sizeof(T)) | (v47 << 24*sizeof(T)),
-          v48 | (v49 << 8*sizeof(T)) | (v50 << 16*sizeof(T)) | (v51 << 24*sizeof(T)),
-          v52 | (v53 << 8*sizeof(T)) | (v54 << 16*sizeof(T)) | (v55 << 24*sizeof(T)),
-          v56 | (v57 << 8*sizeof(T)) | (v58 << 16*sizeof(T)) | (v59 << 24*sizeof(T)),
-          v60 | (v61 << 8*sizeof(T)) | (v62 << 16*sizeof(T)) | (v63 << 24*sizeof(T))
-          );
+      return _mm512_set_epi8(v63, v62, v61, v60, v59, v58, v57, v56, v55, v54, v53, v52, v51, v50, v49, v48, v47, v46, v45, v44, v43, v42, v41, v40, v39, v38, v37, v36, v35, v34, v33, v32, v31, v30, v29, v28, v27, v26, v25, v24, v23, v22, v21, v20, v19, v18, v17, v16, v15, v14, v13, v12, v11, v10, v9, v8, v7, v6, v5, v4, v3, v2, v1, v0);
     }
 
     template<class A, class T, class... Values>
