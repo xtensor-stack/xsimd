@@ -10,4 +10,6 @@
 #include "../types/xsimd_fma5_register.hpp"
 
 #include "../types/xsimd_avx512f_register.hpp"
+#include "../types/xsimd_avx512cd_register.hpp"
+#include "../types/xsimd_avx512dq_register.hpp"
 #include "../types/xsimd_avx512bw_register.hpp"
