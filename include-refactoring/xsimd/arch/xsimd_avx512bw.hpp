@@ -40,7 +40,7 @@ namespace xsimd {
       switch(sizeof(T)) {
         case 1: return _mm512_abs_epi8(self);
         case 2: return _mm512_abs_epi16(self);
-        default: return abs(self, avx512f{});
+        default: return abs(self, avx512dq{});
       }
     }
 
@@ -50,7 +50,7 @@ namespace xsimd {
       switch(sizeof(T)) {
         case 1: return _mm512_add_epi8(self, other);
         case 2: return _mm512_add_epi16(self, other);
-        default: return add(self, other, avx512f{});
+        default: return add(self, other, avx512dq{});
       }
     }
 
@@ -59,7 +59,7 @@ namespace xsimd {
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx512bw>) {
       switch(sizeof(T)) {
         case 2: return _mm512_slli_epi16(self, other);
-        default: return bitwise_lshift(self, other, avx512f{});
+        default: return bitwise_lshift(self, other, avx512dq{});
       }
     }
 
@@ -69,13 +69,13 @@ namespace xsimd {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 2: return _mm512_srai_epi16(self, other);
-          default: return bitwise_rshift(self, other, avx512f{});
+          default: return bitwise_rshift(self, other, avx512dq{});
         }
       }
       else {
         switch(sizeof(T)) {
           case 2: return _mm512_srli_epi16(self, other);
-          default: return bitwise_rshift(self, other, avx512f{});
+          default: return bitwise_rshift(self, other, avx512dq{});
         }
       }
     }
@@ -118,14 +118,14 @@ namespace xsimd {
         switch(sizeof(T)) {
           case 1: return _mm512_max_epi8(self, other);
           case 2: return _mm512_max_epi16(self, other);
-          default: return max(self, other, avx512f{});
+          default: return max(self, other, avx512dq{});
         }
       }
       else {
         switch(sizeof(T)) {
           case 1: return _mm512_max_epu8(self, other);
           case 2: return _mm512_max_epu16(self, other);
-          default: return max(self, other, avx512f{});
+          default: return max(self, other, avx512dq{});
         }
       }
     }
@@ -137,14 +137,14 @@ namespace xsimd {
         switch(sizeof(T)) {
           case 1: return _mm512_min_epi8(self, other);
           case 2: return _mm512_min_epi16(self, other);
-          default: return min(self, other, avx512f{});
+          default: return min(self, other, avx512dq{});
         }
       }
       else {
         switch(sizeof(T)) {
           case 1: return _mm512_min_epu8(self, other);
           case 2: return _mm512_min_epu16(self, other);
-          default: return min(self, other, avx512f{});
+          default: return min(self, other, avx512dq{});
         }
       }
     }
@@ -160,7 +160,7 @@ namespace xsimd {
                 return _mm512_or_si512(upper, lower);
         }
         case 2: return _mm512_mullo_epi16(self, other);
-        default: return mul(self, other, avx512f{});
+        default: return mul(self, other, avx512dq{});
       }
     }
 
@@ -178,14 +178,14 @@ namespace xsimd {
         switch(sizeof(T)) {
           case 1: return _mm512_adds_epi8(self, other);
           case 2: return _mm512_adds_epi16(self, other);
-          default: return sadd(self, other, avx512f{});
+          default: return sadd(self, other, avx512dq{});
         }
       }
       else {
         switch(sizeof(T)) {
           case 1: return _mm512_adds_epu8(self, other);
           case 2: return _mm512_adds_epu16(self, other);
-          default: return sadd(self, other, avx512f{});
+          default: return sadd(self, other, avx512dq{});
         }
       }
     }
@@ -196,7 +196,7 @@ namespace xsimd {
       switch(sizeof(T)) {
         case 1: return _mm512_mask_blend_epi8(cond, false_br, true_br);
         case 2: return _mm512_mask_blend_epi16(cond, false_br, true_br);
-        default: return select(cond, true_br, false_br, avx512f{});
+        default: return select(cond, true_br, false_br, avx512dq{});
       };
     }
 
@@ -208,14 +208,14 @@ namespace xsimd {
         switch(sizeof(T)) {
           case 1: return _mm512_subs_epi8(self, other);
           case 2: return _mm512_subs_epi16(self, other);
-          default: return ssub(self, other, avx512f{});
+          default: return ssub(self, other, avx512dq{});
         }
       }
       else {
         switch(sizeof(T)) {
           case 1: return _mm512_subs_epu8(self, other);
           case 2: return _mm512_subs_epu16(self, other);
-          default: return ssub(self, other, avx512f{});
+          default: return ssub(self, other, avx512dq{});
         }
       }
     }
@@ -227,7 +227,7 @@ namespace xsimd {
       switch(sizeof(T)) {
         case 1: return _mm512_sub_epi8(self, other);
         case 2: return _mm512_sub_epi16(self, other);
-          default: return sub(self, other, avx512f{});
+          default: return sub(self, other, avx512dq{});
       }
     }
 

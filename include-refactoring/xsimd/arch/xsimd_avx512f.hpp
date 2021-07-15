@@ -235,10 +235,10 @@ namespace xsimd {
 
     // bitwise_and
     template<class A> batch<float, A> bitwise_and(batch<float, A> const& self, batch<float, A> const& other, requires<avx512f>) {
-      return _mm512_and_ps(self, other);
+      return _mm512_castsi512_ps(_mm512_and_si512(_mm512_castps_si512(self), _mm512_castps_si512(other)));
     }
     template<class A> batch<double, A> bitwise_and(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
-      return _mm512_and_pd(self, other);
+      return _mm512_castsi512_pd(_mm512_and_si512(_mm512_castpd_si512(self), _mm512_castpd_si512(other)));
     }
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -289,10 +289,10 @@ namespace xsimd {
 
     // bitwise_or
     template<class A> batch<float, A> bitwise_or(batch<float, A> const& self, batch<float, A> const& other, requires<avx512f>) {
-      return _mm512_or_ps(self, other);
+      return _mm512_castsi512_ps(_mm512_or_si512(_mm512_castps_si512(self), _mm512_castps_si512(other)));
     }
     template<class A> batch<double, A> bitwise_or(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
-      return _mm512_or_pd(self, other);
+      return _mm512_castsi512_pd(_mm512_or_si512(_mm512_castpd_si512(self), _mm512_castpd_si512(other)));
     }
 
     template<class A, class T> batch_bool<T, A> bitwise_or(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx512f>) {
@@ -326,10 +326,10 @@ namespace xsimd {
 
     // bitwise_xor
     template<class A> batch<float, A> bitwise_xor(batch<float, A> const& self, batch<float, A> const& other, requires<avx512f>) {
-      return _mm512_xor_ps(self, other);
+      return _mm512_castsi512_ps(_mm512_xor_si512(_mm512_castps_si512(self), _mm512_castps_si512(other)));
     }
     template<class A> batch<double, A> bitwise_xor(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
-      return _mm512_xor_pd(self, other);
+      return _mm512_castsi512_pd(_mm512_xor_si512(_mm512_castpd_si512(self), _mm512_castpd_si512(other)));
     }
 
     template<class A, class T> batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx512f>) {
