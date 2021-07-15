@@ -149,6 +149,22 @@ namespace xsimd {
       }
     }
 
+
+    // mul
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires<avx512bw>) {
+      switch(sizeof(T)) {
+        case 1: {
+                __m512i upper = _mm512_and_si512(_mm512_mullo_epi16(self, other), _mm512_srli_epi16(_mm512_set1_epi16(-1), 8));
+                __m512i lower = _mm512_slli_epi16(_mm512_mullo_epi16(_mm512_srli_epi16(self, 8), _mm512_srli_epi16(other, 8)), 8);
+                return _mm512_or_si512(upper, lower);
+        }
+        case 2: return _mm512_mullo_epi16(self, other);
+        default: return mul(self, other, avx512f{});
+      }
+    }
+
+
     // neq
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires<avx512bw>) {
