@@ -422,7 +422,8 @@ batch_bool<T, A> batch_bool<T, A>::operator|(batch_bool<T, A> const& other) cons
 
 template<class T, class A>
 batch_bool<T, A>::batch_bool(bool val)
-    : base_type(make_register(detail::make_index_sequence<size-1>(), val))
+    : base_type(make_register(detail::make_index_sequence<size-1>(),
+                              static_cast<as_unsigned_integer_t<T>>(val ? -1LL : 0)))
 {
 }
 
