@@ -46,6 +46,16 @@ namespace xsimd
                                  static_cast<unsigned_type>(b1 ? -1LL : 0LL)};
         }
 
+        /*************
+         * from_bool *
+         *************/
+
+        template <class A>
+        batch<double, A> from_bool(batch_bool<double, A> const& arg, requires<arm8_64>)
+        {
+            return vreinterpretq_f64_u64(vandq_u64(arg, vreinterpretq_u64_f64(vdupq_n_f64(1.))));
+        }
+
         /********
          * load *
          ********/
