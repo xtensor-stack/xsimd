@@ -1505,7 +1505,7 @@ namespace xsimd
             switch(n)
             {
                 case 0: return lhs;
-                XSIMD_REPEAT_16(vshrq_n_s16);
+                XSIMD_REPEAT_16(vshlq_n_s16);
                 default: break;
             }
             return batch<T, A>(T(0));
