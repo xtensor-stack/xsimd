@@ -267,6 +267,64 @@ namespace xsimd
             return register_type{static_cast<unsigned_type>(args ? -1LL : 0LL)...};
         }
 
+        /*************
+         * from_bool *
+         *************/
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_u8(arg, vdupq_n_u8(1));
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_s8(reinterpret_cast<int8x16_t>(arg.data), vdupq_n_s8(1));
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_u16(arg, vdupq_n_u16(1));
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_s16(reinterpret_cast<int16x8_t>(arg.data), vdupq_n_s16(1));
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_u32(arg, vdupq_n_u32(1));
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_s32(reinterpret_cast<int32x4_t>(arg.data), vdupq_n_s32(1));
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_u64(arg, vdupq_n_u64(1));
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        {
+            return vandq_s64(reinterpret_cast<int64x2_t>(arg.data), vdupq_n_s64(1));
+        }
+
+        template <class A>
+        batch<float, A> from_bool(batch_bool<float, A> const& arg, requires<arm7>)
+        {
+            return vreinterpretq_f32_u32(vandq_u32(arg, vreinterpretq_u32_f32(vdupq_n_f32(1.f))));
+        }
+
         /********
          * load *
          ********/
