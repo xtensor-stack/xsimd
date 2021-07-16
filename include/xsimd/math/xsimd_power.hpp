@@ -131,10 +131,10 @@ namespace xsimd
                 z = select(denormal, z * twotonmb<B>(), z);
                 B f = select(denormal, twotonmbo3<B>(), B(1.));
 #endif
-                static const B CBRT2 = B(detail::caster32_t(0x3fa14518).f);
-                static const B CBRT4 = B(detail::caster32_t(0x3fcb2ff5).f);
-                static const B CBRT2I = B(detail::caster32_t(0x3f4b2ff5).f);
-                static const B CBRT4I = B(detail::caster32_t(0x3f214518).f);
+                const B CBRT2 = B(detail::caster32_t(0x3fa14518).f);
+                const B CBRT4 = B(detail::caster32_t(0x3fcb2ff5).f);
+                const B CBRT2I = B(detail::caster32_t(0x3f4b2ff5).f);
+                const B CBRT4I = B(detail::caster32_t(0x3f214518).f);
                 using i_type = as_integer_t<B>;
                 i_type e;
                 B x = frexp(z, e);
@@ -180,10 +180,10 @@ namespace xsimd
                 z = select(denormal, z * twotonmb<B>(), z);
                 B f = select(denormal, twotonmbo3<B>(), B(1.));
 #endif
-                static const B CBRT2 = B(detail::caster64_t(int64_t(0x3ff428a2f98d728b)).f);
-                static const B CBRT4 = B(detail::caster64_t(int64_t(0x3ff965fea53d6e3d)).f);
-                static const B CBRT2I = B(detail::caster64_t(int64_t(0x3fe965fea53d6e3d)).f);
-                static const B CBRT4I = B(detail::caster64_t(int64_t(0x3fe428a2f98d728b)).f);
+                const B CBRT2 = B(detail::caster64_t(int64_t(0x3ff428a2f98d728b)).f);
+                const B CBRT4 = B(detail::caster64_t(int64_t(0x3ff965fea53d6e3d)).f);
+                const B CBRT2I = B(detail::caster64_t(int64_t(0x3fe965fea53d6e3d)).f);
+                const B CBRT4I = B(detail::caster64_t(int64_t(0x3fe428a2f98d728b)).f);
                 using i_type = as_integer_t<B>;
                 i_type e;
                 B x = frexp(z, e);
