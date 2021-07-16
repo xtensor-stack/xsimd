@@ -14,7 +14,7 @@ Aligned memory allocator
 Comparison operators
 --------------------
 
-.. doxygengroup:: allocator_comparison
+.. doxygengroup:: allocator_logical
    :project: xsimd
    :content-only:
 

@@ -21,7 +21,7 @@ Arithmetic operators
 Comparison operators
 --------------------
 
-.. doxygengroup:: simd_complex_batch_comparison
+.. doxygengroup:: simd_complex_batch_logical
    :project: xsimd
    :content-only:
 

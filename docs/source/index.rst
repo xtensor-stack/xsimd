@@ -36,17 +36,17 @@ lightweight implementation of the algorithms also used in `boost.SIMD`_.
 
 The following SIMD instruction set extensions are supported:
 
-+--------------+----------------------------------------------------+
-| Architecture | Instruction set extensions                         |
-+==============+====================================================+
-| x86          | SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, FMA3, AVX2 |
-+--------------+----------------------------------------------------+
-| x86          | AVX512 (gcc7 and higher)                           |
-+--------------+----------------------------------------------------+
-| x86 AMD      | same as above + SSE4A, FMA4, XOP                   |
-+--------------+----------------------------------------------------+
-| ARM          | ARMv7, ARMv8                                       |
-+--------------+----------------------------------------------------+
++--------------+---------------------------------------------------------+
+| Architecture | Instruction set extensions                              |
++==============+=========================================================+
+| x86          | SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, FMA3, AVX2 |
++--------------+---------------------------------------------------------+
+| x86          | AVX512 (gcc7 and higher)                                |
++--------------+---------------------------------------------------------+
+| x86 AMD      | same as above + SSE4A, FMA4, XOP                        |
++--------------+---------------------------------------------------------+
+| ARM          | ARMv7, ARMv8                                            |
++--------------+---------------------------------------------------------+
 
 Licensing
 ---------
@@ -73,7 +73,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
 .. toctree::
    :caption: API REFERENCE
    :maxdepth: 2
-   
+
    api/instr_macros
    api/batch_index
    api/data_transfer
