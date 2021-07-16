@@ -27,7 +27,7 @@ namespace xsimd {
     namespace detail {
 
       template<class T, class A>
-      batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, ::xsimd::detail::index_sequence<0>) {
+      batch<T, A> extract_pair(batch<T, A> const&, batch<T, A> const& other, std::size_t, ::xsimd::detail::index_sequence<0>) {
         return other;
       }
 
