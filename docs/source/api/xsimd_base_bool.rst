@@ -28,7 +28,7 @@ Logical operators
 Comparison operators
 --------------------
 
-.. doxygengroup:: simd_batch_bool_comparison
+.. doxygengroup:: simd_batch_bool_logical
    :project: xsimd
    :content-only:
    

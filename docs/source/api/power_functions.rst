@@ -8,11 +8,11 @@ Power functions
 ===============
 
 .. _pow-function-reference:
-.. doxygenfunction:: pow(const simd_base<B>&, const simd_base<B>&)
+.. doxygenfunction:: pow(batch<T, A> const &x, batch<T, A> const &y)
    :project: xsimd
 
 .. _sqrt-function-reference:
-.. doxygenfunction:: sqrt(const simd_base<X>&)
+.. doxygenfunction:: sqrt(batch<T, A> const &)
    :project: xsimd
 
 .. _cbrt-function-reference:

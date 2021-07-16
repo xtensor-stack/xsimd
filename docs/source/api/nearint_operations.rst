@@ -8,26 +8,26 @@ Nearest integer floating point operations
 =========================================
 
 .. _ceil-function-reference:
-.. doxygenfunction:: ceil(const simd_base<B>&)
+.. doxygenfunction:: ceil(const batch<T, A>&)
    :project: xsimd
 
 .. _floor-func-ref:
-.. doxygenfunction:: floor(const simd_base<B>&)
+.. doxygenfunction:: floor(const batch<T, A>&)
    :project: xsimd
 
 .. _trunc-func-ref:
-.. doxygenfunction:: trunc(const simd_base<B>&)
+.. doxygenfunction:: trunc(const batch<T, A>&)
    :project: xsimd
 
 .. _round-func-ref:
-.. doxygenfunction:: round(const simd_base<B>&)
+.. doxygenfunction:: round(const batch<T, A>&)
    :project: xsimd
 
 .. _nearbyint-func-ref:
-.. doxygenfunction:: nearbyint(const simd_base<B>&)
+.. doxygenfunction:: nearbyint(const batch<T, A>&)
    :project: xsimd
 
 .. _rint-function-reference:
-.. doxygenfunction:: rint(const simd_base<B>&)
+.. doxygenfunction:: rint(const batch<T, A>&)
    :project: xsimd
 

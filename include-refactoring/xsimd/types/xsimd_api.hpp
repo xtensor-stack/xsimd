@@ -5,6 +5,7 @@
 #include "../arch/xsimd_isa.hpp"
 
 #include <limits>
+#include <ostream>
 
 namespace xsimd {
 
@@ -13,7 +14,7 @@ namespace xsimd {
  *
  * @defgroup simd_batch_arithmetic Arithmetic operators
  * @defgroup simd_batch_constant Constant batches
- * @defgroup simd_batch_memory Memory operators
+ * @defgroup simd_batch_data_transfer Memory operators
  * @defgroup simd_batch_math Basic math operators
  * @defgroup simd_batch_math_extra Extra math operators
  * @defgroup simd_batch_fp Floating point manipulation
@@ -268,7 +269,7 @@ batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
  *
  * Creates a batch from the single value \c v.
  * @param v the value used to initialize the batch
@@ -482,17 +483,31 @@ batch<T, A> estrin(const batch<T, A>& x) {
 }
 
 /**
+ * Extract vector from pair of vectors
+ * extracts the lowest vector elements from the second source \c x
+ * and the highest vector elements from the first source \c y
+ * Concatenates the results into th Return value.
+ * @param x batch of integer or floating point values.
+ * @param y batch of integer or floating point values.
+ * @param i integer specifuing the lowest vector element to extract from the first source register
+ * @return.
+ */
+template <class T, class A>
+batch<T, A> extract_pair(batch<T, A> const & x, batch<T, A> const& y, std::size_t i) {
+  return kernel::extract_pair<A>(x, y, i, A{});
+}
+
+/**
  * @ingroup simd_batch_math
  *
  * Computes the absolute values of each scalar in the batch \c x.
- * @param y batch floating point values.
+ * @param x batch floating point values.
  * @return the asbolute values of \c x.
  */
 template<class T, class A>
 batch<T, A> fabs(batch<T, A> const& x) {
   return kernel::abs<A>(x, A{});
 }
-
 
 /**
  * @ingroup simd_batch_math
@@ -662,8 +677,8 @@ batch_bool<T, A> gt(batch<T, A> const& x, batch<T, A> const& y) {
 /**
  * @ingroup simd_batch_reducers
  *
- * Adds all the scalars of the batch \c y.
- * @param y batch involved in the reduction
+ * Adds all the scalars of the batch \c x.
+ * @param x batch involved in the reduction
  * @return the result of the reduction.
  */
 template<class T, class A>
@@ -681,8 +696,8 @@ T hadd(batch<T, A> const& x) {
  * @return the result of the reduction.
  */
 template<class T, class A>
-batch<T, A> haddp(batch<T, A> const* x) {
-  return kernel::haddp<A>(x, A{});
+batch<T, A> haddp(batch<T, A> const* row) {
+  return kernel::haddp<A>(row, A{});
 }
 
 
@@ -839,11 +854,11 @@ batch<T, A> lgamma(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
  *
- * Creates a batch from the buffer \c src. The
+ * Creates a batch from the buffer \c ptr. The
  * memory needs to be aligned.
- * @param src the memory buffer to read
+ * @param ptr the memory buffer to read
  * @return a new batch instance
  */
 template<class A=default_arch, class From>
@@ -852,11 +867,11 @@ batch<From, A> load(From const* ptr, aligned_mode= {}) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
  *
- * Creates a batch from the buffer \c src. The
+ * Creates a batch from the buffer \c ptr. The
  * memory does not need to be aligned.
- * @param src the memory buffer to read
+ * @param ptr the memory buffer to read
  * @return a new batch instance
  */
 template<class A=default_arch, class From>
@@ -865,11 +880,11 @@ batch<From, A> load(From const* ptr, unaligned_mode) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
  *
- * Creates a batch from the buffer \c src. The
+ * Creates a batch from the buffer \c ptr. The
  * memory needs to be aligned.
- * @param src the memory buffer to read
+ * @param ptr the memory buffer to read
  * @return a new batch instance
  */
 template<class A/*=default_arch*/, class From>
@@ -878,11 +893,11 @@ batch<From, A> load_aligned(From const* ptr) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
  *
- * Creates a batch from the buffer \c src. The
+ * Creates a batch from the buffer \c ptr. The
  * memory does not need to be aligned.
- * @param src the memory buffer to read
+ * @param ptr the memory buffer to read
  * @return a new batch instance
  */
 template<class A/*=default_arch*/, class From>
@@ -1043,10 +1058,9 @@ batch_bool<T, A> neq(batch<T, A> const& x, batch<T, A> const& y) {
 /**
  * @ingroup simd_batch_arithmetic
  *
- * Computes the opposite of the batch \c y.
- * @tparam X the actual type of batch.
- * @param y batch involved in the operation.
- * @return the opposite of \c y.
+ * Computes the opposite of the batch \c x.
+ * @param x batch involved in the operation.
+ * @return the opposite of \c x.
  */
 template<class T, class A>
 batch<T, A> neg(batch<T, A> const& x) {
@@ -1063,8 +1077,8 @@ batch<T, A> neg(batch<T, A> const& x) {
  * @return \c x raised to the power \c y.
  */
 template<class T, class A>
-batch<T, A> nextafter(batch<T, A> const& from, batch<T, A> const& to) {
-  return kernel::nextafter<A>(from, to, A{});
+batch<T, A> nextafter(batch<T, A> const& x, batch<T, A> const& y) {
+  return kernel::nextafter<A>(x, y, A{});
 }
 
 /**
@@ -1082,10 +1096,9 @@ batch<T, A> norm(batch<std::complex<T>, A> const& x) {
 /**
  * @ingroup simd_batch_arithmetic
  *
- * No-op on \c y.
- * @tparam X the actual type of batch.
- * @param y batch involved in the operation.
- * @return \c y.
+ * No-op on \c x.
+ * @param x batch involved in the operation.
+ * @return \c x.
  */
 template<class T, class A>
 batch<T, A> pos(batch<T, A> const& x) {
@@ -1192,15 +1205,15 @@ auto sadd(T const& x, Tp const& y) -> decltype(x + y) {
 /**
  * @ingroup simd_batch_miscellaneous
  *
- * Ternary operator for batches: selects values from the batches \c a or \c b
- * depending on the boolean values in \c cond. Equivalent to
+ * Ternary operator for batches: selects values from the batches \c true_br or \c false_br
+ * depending on the boolean values in the constant batch \c cond. Equivalent to
  * \code{.cpp}
  * for(std::size_t i = 0; i < N; ++i)
- *     res[i] = cond[i] ? a[i] : b[i];
+ *     res[i] = cond[i] ? true_br[i] : false_br[i];
  * \endcode
- * @param cond batch condition.
- * @param a batch values for truthy condition.
- * @param b batch value for falsy condition.
+ * @param cond constant batch condition.
+ * @param true_br batch values for truthy condition.
+ * @param false_br batch value for falsy condition.
  * @return the result of the selection.
  */
 template<class T, class A>
@@ -1211,15 +1224,15 @@ batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, bat
 /**
  * @ingroup simd_batch_miscellaneous
  *
- * Ternary operator for batches: selects values from the batches \c a or \c b
- * depending on the boolean values in \c cond. Equivalent to
+ * Ternary operator for batches: selects values from the batches \c true_br or \c false_br
+ * depending on the boolean values in the constant batch \c cond. Equivalent to
  * \code{.cpp}
  * for(std::size_t i = 0; i < N; ++i)
- *     res[i] = cond[i] ? a[i] : b[i];
+ *     res[i] = cond[i] ? true_br[i] : false_br[i];
  * \endcode
- * @param cond batch condition.
- * @param a batch values for truthy condition.
- * @param b batch value for falsy condition.
+ * @param cond constant batch condition.
+ * @param true_br batch values for truthy condition.
+ * @param false_br batch value for falsy condition.
  * @return the result of the selection.
  */
 template<class T, class A>
@@ -1230,15 +1243,15 @@ batch<std::complex<T>, A> select(batch_bool<T, A> const& cond, batch<std::comple
 /**
  * @ingroup simd_batch_miscellaneous
  *
- * Ternary operator for batches: selects values from the batches \c a or \c b
+ * Ternary operator for batches: selects values from the batches \c true_br or \c false_br
  * depending on the boolean values in the constant batch \c cond. Equivalent to
  * \code{.cpp}
  * for(std::size_t i = 0; i < N; ++i)
- *     res[i] = cond[i] ? a[i] : b[i];
+ *     res[i] = cond[i] ? true_br[i] : false_br[i];
  * \endcode
  * @param cond constant batch condition.
- * @param a batch values for truthy condition.
- * @param b batch value for falsy condition.
+ * @param true_br batch values for truthy condition.
+ * @param false_br batch value for falsy condition.
  * @return the result of the selection.
  */
 template<class T, class A, bool... Values>
@@ -1310,9 +1323,9 @@ std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& x) {
 /**
  * @ingroup simd_batch_math
  *
- * Computes the square root of the batch \c y.
- * @param y batch of floating point values.
- * @return the square root of \c y.
+ * Computes the square root of the batch \c x.
+ * @param x batch of floating point values.
+ * @return the square root of \c x.
  */
 template<class T, class A>
 batch<T, A> sqrt(batch<T, A> const& x) {
@@ -1337,11 +1350,12 @@ auto ssub(T const& x, Tp const& y) -> decltype(x - y) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
+ *
  * copy content of batch \c val to the buffer \c mem. the
- * memory needs to be aligned.
- * @param src the memory buffer to read
- * @return a new batch instance
+ * memory does not need to be aligned.
+ * @param mem the memory buffer to read
+ * @param val the batch to copy
  */
 template<class To, class A, class From>
 void store(From* mem, batch<To, A> const& val, aligned_mode={}) {
@@ -1349,11 +1363,12 @@ void store(From* mem, batch<To, A> const& val, aligned_mode={}) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
+ *
  * copy content of batch \c val to the buffer \c mem. the
  * memory does not need to be aligned.
- * @param src the memory buffer to read
- * @return a new batch instance
+ * @param mem the memory buffer to read
+ * @param val the batch to copy
  */
 template<class To, class A, class From>
 void store(To* mem, batch<From, A> const& val, unaligned_mode) {
@@ -1361,11 +1376,12 @@ void store(To* mem, batch<From, A> const& val, unaligned_mode) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
+ *
  * copy content of batch \c val to the buffer \c mem. the
- * memory needs to be aligned.
- * @param src the memory buffer to read
- * @return a new batch instance
+ * memory does not need to be aligned.
+ * @param mem the memory buffer to read
+ * @param val the batch to copy
  */
 template<class To, class A, class From>
 void store_aligned(To* mem, batch<From, A> const& val) {
@@ -1373,11 +1389,12 @@ void store_aligned(To* mem, batch<From, A> const& val) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
+ *
  * copy content of batch \c val to the buffer \c mem. the
  * memory does not need to be aligned.
- * @param src the memory buffer to read
- * @return a new batch instance
+ * @param mem the memory buffer to read
+ * @param val the batch to copy
  */
 template<class To, class A, class From>
 void store_unaligned(To* mem, batch<From, A> const& val) {
@@ -1387,10 +1404,11 @@ void store_unaligned(To* mem, batch<From, A> const& val) {
 /**
  * @ingroup simd_batch_arithmetic
  *
- * Computes the opposite of the batch \c y.
+ * Computes the difference between \c x and \c y
  * @tparam X the actual type of batch.
- * @param y batch involved in the operation.
- * @return the opposite of \c y.
+ * @param x scalar or batch of scalars
+ * @param y scalar or batch of scalars
+ * @return the difference between \c x and \c y
  */
 template<class T, class Tp>
 auto sub(T const& x, Tp const& y) -> decltype(x - y){
@@ -1458,7 +1476,7 @@ batch<as_integer_t<T>, A> to_int(batch<T, A> const& x) {
 }
 
 /**
- * @ingroupd simd_batch_rounding
+ * @ingroup simd_batch_rounding
  *
  * Computes the batch of nearest integer values not greater in magnitude
  * than scalars in \c x.
@@ -1471,7 +1489,7 @@ batch<T, A> trunc(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
  *
  * Unpack and interleave data from the HIGH half of batches \c x and \c y.
  * Store the results in the Return value.
@@ -1485,7 +1503,7 @@ batch<T, A> zip_hi(batch<T, A> const& x, batch<T, A> const& y) {
 }
 
 /**
- * @ingroup simd_batch_memory
+ * @ingroup simd_batch_data_transfer
  *
  * Unpack and interleave data from the LOW half of batches \c x and \c y.
  * Store the results in the Return value.
@@ -1506,7 +1524,7 @@ batch<T, A> zip_lo(batch<T, A> const& x, batch<T, A> const& y) {
  *
  * Returns true if all the boolean values in the batch are true,
  * false otherwise.
- * @param y the batch to reduce.
+ * @param x the batch to reduce.
  * @return a boolean scalar.
  */
 template<class T, class A>
@@ -1519,12 +1537,31 @@ bool all(batch_bool<T, A> const& x) {
  *
  * Return true if any of the boolean values in the batch is true,
  * false otherwise.
- * @param y the batch to reduce.
+ * @param x the batch to reduce.
  * @return a boolean scalar.
  */
 template<class T, class A>
 bool any(batch_bool<T, A> const& x) {
   return kernel::any<A>(x, A{});
+}
+
+/**
+ * @ingroup simd_batch_miscellaneous
+ *
+ * Dump the content of batch \c x to stream \c o
+ * @param o the stream where the batch is dumped
+ * @param x batch to dump.
+ * @return a reference to \c o
+ */
+template<class T, class A>
+std::ostream& operator<<(std::ostream& o, batch<T, A> const& x) {
+  constexpr auto size = batch<T, A>::size;
+  alignas(A::alignment()) T buffer[size];
+  x.store_aligned(&buffer[0]);
+  o << '(';
+  for(std::size_t i = 0; i < size - 1; ++i)
+    o << buffer[i] << ", ";
+  return o << buffer[size - 1] << ')';
 }
 
 }

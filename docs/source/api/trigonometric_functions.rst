@@ -8,34 +8,34 @@ Trigonometric functions
 =======================
 
 .. _sin-function-reference:
-.. doxygenfunction:: sin(const simd_base<B>&)
+.. doxygenfunction:: sin(const batch<T, A>&)
    :project: xsimd
 
 .. _cos-function-reference:
-.. doxygenfunction:: cos(const simd_base<B>&)
+.. doxygenfunction:: cos(const batch<T, A>&)
    :project: xsimd
 
 .. _sincos-func-ref:
-.. doxygenfunction:: sincos(const simd_base<B>&, batch_type_t<B>&, batch_type_t<B>&)
+.. doxygenfunction:: sincos(const batch<T, A>&, batch_type_t<B>&, batch_type_t<B>&)
    :project: xsimd
 
 .. _tan-function-reference:
-.. doxygenfunction:: tan(const simd_base<B>&)
+.. doxygenfunction:: tan(const batch<T, A>&)
    :project: xsimd
 
 .. _asin-function-reference:
-.. doxygenfunction:: asin(const simd_base<B>&)
+.. doxygenfunction:: asin(const batch<T, A>&)
    :project: xsimd
 
 .. _acos-function-reference:
-.. doxygenfunction:: acos(const simd_base<B>&)
+.. doxygenfunction:: acos(const batch<T, A>&)
    :project: xsimd
 
 .. _atan-function-reference:
-.. doxygenfunction:: atan(const simd_base<B>&)
+.. doxygenfunction:: atan(const batch<T, A>&)
    :project: xsimd
 
 .. _atan2-func-ref:
-.. doxygenfunction:: atan2(const simd_base<B>&, const simd_base<B>&)
+.. doxygenfunction:: atan2(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
