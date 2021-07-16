@@ -33,7 +33,7 @@ namespace xsimd
     batch_type_t<B> sinh(const simd_base<B>& x);
 
     /**
-     * Computes the hyperbolic cosine of the batch \c x.
+     * computes the hyperbolic cosine of the batch \c x.
      * @param x batch of floating point values.
      * @return the hyperbolic cosine of \c x.
      */
