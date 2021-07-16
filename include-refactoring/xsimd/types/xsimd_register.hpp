@@ -16,16 +16,6 @@ namespace xsimd
         template<class T, class Arch>
         struct simd_register;
 
-  template <class T, class Arch>
-  struct get_bool_simd_register
-  {
-  using type = simd_register<T, Arch>;
-  };
-
-  template <class T, class Arch>
-  using get_bool_simd_register_t = typename get_bool_simd_register<T, Arch>::type;
-
-
 #define XSIMD_DECLARE_SIMD_REGISTER(SCALAR_TYPE, ISA, VECTOR_TYPE) \
     template<> \
     struct simd_register<SCALAR_TYPE, ISA>\

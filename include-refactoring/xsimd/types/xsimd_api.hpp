@@ -212,13 +212,6 @@ B bitwise_cast(batch<T, A> const& x) {
   return kernel::bitwise_cast<A>(x, B{}, A{});
 }
 
-/**
- * @ingroup simd_batch_bitwise
- *
- * Computes the bitwise not of batch \c x.
- * @param x batch involved in the operation.
- * @return the result of the bitwise not.
- */
 template<class T, class A>
 batch<T, A> bitwise_not(batch<T, A> const& x) {
   return kernel::bitwise_not<A>(x, A{});
@@ -1518,27 +1511,20 @@ batch<T, A> zip_lo(batch<T, A> const& x, batch<T, A> const& y) {
 
 // high level functions - batch_bool
 //
-
 template<class T, class A>
-bool all(batch_bool<T, A> const& x) {
-  return kernel::all<A>(x, A{});
+batch<T, A> bitwise_cast(batch_bool<T, A> const& self) {
+  return {self.data};
 }
 
-/**
- * @ingroup simd_batch_bool_reducers
- *
- * Return true if any of the boolean values in the batch is true,
- * false otherwise.
- * @param x the batch to reduce.
- * @return a boolean scalar.
- */
 template<class T, class A>
-bool any(batch_bool<T, A> const& x) {
-  return kernel::any<A>(x, A{});
+bool all(batch_bool<T, A> const& self) {
+  return kernel::all<A>(self, A{});
 }
 
-=======
->>>>>>> b8fabe1... Implemented bool_cast for ARM
+template<class T, class A>
+bool any(batch_bool<T, A> const& self) {
+  return kernel::any<A>(self, A{});
+}
 }
 
 #endif
