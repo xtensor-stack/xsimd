@@ -93,7 +93,6 @@ protected:
 
     void test_set()
     {
-#if 0
         test_set_impl<int8_t>("set int8_t");
         test_set_impl<uint8_t>("set uint8_t");
         test_set_impl<int16_t>("set int16_t");
@@ -104,7 +103,6 @@ protected:
         test_set_impl<uint64_t>("set uint64_t");
         test_set_impl<float>("set float");
         test_set_impl<double>("set double");
-#endif
     }
 
 private:
