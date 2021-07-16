@@ -8,66 +8,66 @@ Basic functions
 ===============
 
 .. _abs-function-reference:
-.. doxygenfunction:: abs(const simd_base<X>& )
+.. doxygenfunction:: abs(batch<T, A> const &x)
    :project: xsimd
 
 .. _fabs-function-reference:
-.. doxygenfunction:: fabs(const simd_base<X>& )
+.. doxygenfunction:: fabs(const batch<T, A>& )
    :project: xsimd
 
 .. _fmod-function-reference:
-.. doxygenfunction:: fmod(const simd_base<B>&, const simd_base<B>&)
+.. doxygenfunction:: fmod(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _remainder-func-ref:
-.. doxygenfunction:: remainder(const simd_base<B>&, const simd_base<B>&)
+.. doxygenfunction:: remainder(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _fma-function-reference:
-.. doxygenfunction:: fma(const simd_base<X>&, const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: fma(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _fms-function-reference:
-.. doxygenfunction:: fms(const simd_base<X>&, const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: fms(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _fnma-function-reference:
-.. doxygenfunction:: fnma(const simd_base<X>&, const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: fnma(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _fnms-function-reference:
-.. doxygenfunction:: fnms(const simd_base<X>&, const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: fnms(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _min-function-reference:
-.. doxygenfunction:: min(const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: min(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _max-function-reference:
-.. doxygenfunction:: max(const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: max(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _fmin-function-reference:
-.. doxygenfunction:: fmin(const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: fmin(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _fmax-function-reference:
-.. doxygenfunction:: fmax(const simd_base<X>&, const simd_base<X>&)
+.. doxygenfunction:: fmax(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _fdim-function-reference:
-.. doxygenfunction:: fdim(const batch<T, N>&, const batch<T, N>&)
+.. doxygenfunction:: fdim(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _sadd-function-reference:
-.. doxygenfunction:: sadd(const simd_base<B>&, const simd_base<B>&)
+.. doxygenfunction:: sadd(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _ssub-function-reference:
-.. doxygenfunction:: ssub(const simd_base<B>&, const simd_base<B>&)
+.. doxygenfunction:: ssub(const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 
 .. _clip-function-reference:
-.. doxygenfunction:: clip(const simd_base<B>&, const simd_base<B>&, const simd_base<B>&)
+.. doxygenfunction:: clip(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
    :project: xsimd
 

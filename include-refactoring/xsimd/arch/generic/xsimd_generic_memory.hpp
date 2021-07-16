@@ -10,6 +10,30 @@ namespace xsimd {
 
     using namespace types;
 
+    // extract_pair
+    template<class A, class T> batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires<generic>) {
+      constexpr std::size_t size = batch<T, A>::size;
+      assert(0<= i && i< size && "index in bounds");
+
+          alignas(A::alignment()) T self_buffer[size];
+          self.store_aligned(self_buffer);
+
+          alignas(A::alignment()) T other_buffer[size];
+          other.store_aligned(other_buffer);
+
+          alignas(A::alignment()) T concat_buffer[size];
+
+          for (std::size_t j = 0 ; j < (size - i); ++j)
+          {
+              concat_buffer[j] = self_buffer[i + j];
+              if(j < i)
+              {
+                  concat_buffer[size - 1 - j] = other_buffer[i - 1 - j];
+              }
+          }
+          return batch<T, A>::load_aligned(concat_buffer);
+    }
+
     // load_aligned
     namespace detail {
       template<class A, class T_in, class T_out>

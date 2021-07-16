@@ -23,6 +23,30 @@ namespace xsimd {
       }
     }
 
+    // extract_pair
+    namespace detail {
+
+      template<class T, class A>
+      batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, ::xsimd::detail::index_sequence<0>) {
+        return other;
+      }
+
+      template<class T, class A, size_t I, std::size_t... Is>
+      batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, ::xsimd::detail::index_sequence<I, Is...>) {
+        if(i == I)
+          return _mm_alignr_epi8(self, other, sizeof(T) * I);
+        else
+          return extract_pair(self, other, ::xsimd::detail::index_sequence<Is...>());
+      }
+    }
+
+    template<class A, class T, typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires<ssse3>) {
+      constexpr std::size_t size = batch<T, A>::size;
+      assert(0<= i && i< size && "index in bounds");
+      return detail::extract_pair(self, other, i, ::xsimd::detail::make_index_sequence<size>());
+    }
+
     // hadd
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     T hadd(batch<T, A> const& self, requires<ssse3>) {

@@ -200,6 +200,7 @@ namespace xsimd {
       return  _mm_castsi128_pd(_mm_cmpeq_epi32(_mm_castpd_si128(self), _mm_castpd_si128(other)));
     }
 
+
     // ge
     template<class A> batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_cmpge_ps(self, other);

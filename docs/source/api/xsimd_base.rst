@@ -21,7 +21,7 @@ Arithmetic operators
 Comparison operators
 --------------------
 
-.. doxygengroup:: simd_batch_comparison
+.. doxygengroup:: simd_batch_logical
    :project: xsimd
    :content-only:
 
@@ -45,12 +45,3 @@ Miscellaneous
 .. doxygengroup:: simd_batch_miscellaneous
    :project: xsimd
    :content-only:
-
-Other operators
----------------
-
-.. doxygenfunction:: xsimd::operator!(const simd_batch<X>&)
-   :project: xsimd
-
-.. doxygenfunction:: xsimd::operator<<(std::ostream&, const simd_batch<X>&)
-   :project: xsimd

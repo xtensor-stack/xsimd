@@ -11,6 +11,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
+#include <sstream>
 
 #include "test_utils.hpp"
 
@@ -35,6 +36,26 @@ protected:
     {
         init_operands();
     }
+
+    void test_stream_dump() const
+    {
+        array_type res;
+        batch_type b = batch_type::load_unaligned(lhs.data());
+        b.store_unaligned(res.data());
+
+        std::ostringstream b_dump;
+        b_dump << b;
+
+        std::ostringstream res_dump;
+        res_dump << '(';
+        for(std::size_t i = 0; i < res.size() - 1; ++i)
+          res_dump << res[i] << ", ";
+        res_dump << res.back() << ')';
+
+        EXPECT_EQ(res_dump.str(), b_dump.str()) << print_function_name("stream dump");
+    }
+
+
 
     void test_load_store() const
     {
@@ -615,6 +636,11 @@ private:
 };
 
 TYPED_TEST_SUITE(batch_test, batch_types, simd_test_names);
+
+TYPED_TEST(batch_test, stream_dump)
+{
+    this->test_stream_dump();
+}
 
 TYPED_TEST(batch_test, load_store)
 {
