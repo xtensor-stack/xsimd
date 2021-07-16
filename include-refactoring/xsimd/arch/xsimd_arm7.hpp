@@ -1735,9 +1735,9 @@ namespace xsimd
         bool all(batch_bool<T, A> const& arg, requires<arm7>)
         {
             uint8x8_t tmp = vand_u8(vget_low_u8(arg), vget_high_u8(arg));
-            tmp = vpmax_u8(tmp, tmp);
-            tmp = vpmax_u8(tmp, tmp);
-            tmp = vpmax_u8(tmp, tmp);
+            tmp = vpmin_u8(tmp, tmp);
+            tmp = vpmin_u8(tmp, tmp);
+            tmp = vpmin_u8(tmp, tmp);
             return vget_lane_u8(tmp, 0);
         }
 
