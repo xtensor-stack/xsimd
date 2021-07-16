@@ -20,7 +20,7 @@ namespace xsimd {
  * @defgroup simd_batch_rounding Rounding operators
  * @defgroup simd_batch_conversion Conversion operators
  * @defgroup simd_batch_complex Complex operators
- * @defgroup simd_batch_comparison Comparison operators
+ * @defgroup simd_batch_logical Logical operators
  * @defgroup simd_batch_bitwise Bitwise operators
  * @defgroup simd_batch_reducers Reducers
  * @defgroup simd_batch_miscellaneous Miscellaneous
@@ -384,7 +384,7 @@ auto div(T const& x, Tp const& y) -> decltype(x / y){
 }
 
 /**
- * @ingroup simd_batch_comparison
+ * @ingroup simd_batch_logical
  *
  * Element-wise equality comparison of batches \c x and \c y.
  * @param x batch of scalars
@@ -522,7 +522,7 @@ batch<T, A> floor(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_math
+ * @ingroup simd_batch_arithmetic
  *
  * Computes <tt>(x*y) + z</tt> in a single instruction when possible.
  * @param x a batch of integer or floating point values.
@@ -577,7 +577,7 @@ batch<T, A> fmod(batch<T, A> const& x, batch<T, A> const& y) {
 }
 
 /**
- * @ingroup simd_batch_math
+ * @ingroup simd_batch_arithmetic
  *
  * Computes <tt>(x*y) - z</tt> in a single instruction when possible.
  * @param x a batch of integer or floating point values.
@@ -591,7 +591,7 @@ batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z
 }
 
 /**
- * @ingroup simd_batch_math
+ * @ingroup simd_batch_arithmetic
  *
  * Computes <tt>-(x*y) + z</tt> in a single instruction when possible.
  * @param x a batch of integer or floating point values.
@@ -605,7 +605,7 @@ batch<T, A> fnma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& 
 }
 
 /**
- * @ingroup simd_batch_math
+ * @ingroup simd_batch_arithmetic
  *
  * Computes <tt>-(x*y) - z</tt> in a single instruction when possible.
  * @param x a batch of integer or floating point values.
@@ -632,7 +632,7 @@ batch<T, A> frexp(const batch<T, A>& x, batch<as_integer_t<T>, A>& y) {
 }
 
 /**
- * @ingroup simd_batch_comparison
+ * @ingroup simd_batch_logical
  *
  * Element-wise greater or equal comparison of batches \c x and \c y.
  * @tparam X the actual type of batch.
@@ -646,7 +646,7 @@ batch_bool<T, A> ge(batch<T, A> const& x, batch<T, A> const& y) {
 }
 
 /**
- * @ingroup simd_batch_comparison
+ * @ingroup simd_batch_logical
  *
  * Element-wise greater than comparison of batches \c x and \c y.
  * @tparam X the actual type of batch.
@@ -727,7 +727,7 @@ B infinity() {
 }
 
 /**
- * @ingroup simd_batch_miscellaneous
+ * @ingroup simd_batch_logical
  *
  * Determines if the scalars in the given batch \c x represent an even integer value
  * @param x batch of floating point values.
@@ -739,7 +739,7 @@ batch_bool<T, A> is_even(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_fp
+ * @ingroup simd_batch_logical
  *
  * Determines if the floating-point scalars in the given batch \c x represent integer value
  * @param x batch of floating point values.
@@ -751,7 +751,7 @@ batch_bool<T, A> is_flint(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_miscellaneous
+ * @ingroup simd_batch_logical
  *
  * Determines if the scalars in the given batch \c x represent an odd integer value
  * @param x batch of floating point values.
@@ -764,7 +764,7 @@ batch_bool<T, A> is_odd(batch<T, A> const& x) {
 
 
 /**
- * @ingroup simd_batch_fp
+ * @ingroup simd_batch_logical
  *
  * Determines if the scalars in the given batch \c x are inf values.
  * @param x batch of floating point values.
@@ -777,7 +777,7 @@ batch_bool<T, A> isinf(batch<T, A> const& x) {
 
 
 /**
- * @ingroup simd_batch_fp
+ * @ingroup simd_batch_logical
  *
  * Determines if the scalars in the given batch \c x are finite values.
  * @param x batch of floating point values.
@@ -789,7 +789,7 @@ batch_bool<T, A> isfinite(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_fp
+ * @ingroup simd_batch_logical
  *
  * Determines if the scalars in the given batch \c x are NaN values.
  * @param x batch of floating point values.
@@ -814,7 +814,7 @@ batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& y) {
 }
 
 /**
- * @ingroup simd_batch_comparison
+ * @ingroup simd_batch_logical
  *
  * Element-wise lesser or equal to comparison of batches \c x and \c y.
  * @param x batch involved in the comparison.
@@ -936,7 +936,7 @@ batch<T, A> log1p(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_comparison
+ * @ingroup simd_batch_logical
  *
  * Element-wise lesser than comparison of batches \c x and \c y.
  * @param x batch involved in the comparison.
@@ -1027,7 +1027,7 @@ batch<T, A> nearbyint(batch<T, A> const& x) {
 }
 
 /**
- * @ingroup simd_batch_comparison
+ * @ingroup simd_batch_logical
  *
  * Element-wise inequality comparison of batches \c x and \c y.
  * @param x batch involved in the comparison.
