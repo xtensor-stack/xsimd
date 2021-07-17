@@ -396,19 +396,47 @@ namespace xsimd
             }                                                                  \
         };
 
+    #define XSIMD_BITWISE_CAST_IMPLICIT(T_IN, N_IN, T_OUT, N_OUT)              \
+        template <>                                                            \
+        struct bitwise_cast_impl<batch<T_IN, N_IN>, batch<T_OUT, N_OUT>>       \
+        {                                                                      \
+            static inline batch<T_OUT, N_OUT> run(const batch<T_IN, N_IN>& x)  \
+            {                                                                  \
+                return batch<T_OUT, N_OUT>(x);                                 \
+            }                                                                  \
+        };
+
 
     // Backwards-compatible interface to bitwise_cast_impl
     template <class B, std::size_t N = simd_batch_traits<B>::size>
-    B bitwise_cast(const batch<float, N>& x);
+    B bitwise_cast(const batch<int8_t, N>& x);
 
     template <class B, std::size_t N = simd_batch_traits<B>::size>
-    B bitwise_cast(const batch<double, N>& x);
+    B bitwise_cast(const batch<uint8_t, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<int16_t, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<uint16_t, N>& x);
 
     template <class B, std::size_t N = simd_batch_traits<B>::size>
     B bitwise_cast(const batch<int32_t, N>& x);
 
     template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<uint32_t, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
     B bitwise_cast(const batch<int64_t, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<uint64_t, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<float, N>& x);
+
+    template <class B, std::size_t N = simd_batch_traits<B>::size>
+    B bitwise_cast(const batch<double, N>& x);
 
     template <class T, std::size_t N>
     batch<T, N> bitwise_cast(const batch_bool<T, N>& src);
@@ -2034,15 +2062,27 @@ namespace xsimd
      *****************************************/
 
     template <class B, std::size_t N>
-    inline B bitwise_cast(const batch<float, N>& x)
+    inline B bitwise_cast(const batch<int8_t, N>& x)
     {
-        return bitwise_cast_impl<batch<float, N>, B>::run(x);
+        return bitwise_cast_impl<batch<int8_t, N>, B>::run(x);
     }
 
     template <class B, std::size_t N>
-    inline B bitwise_cast(const batch<double, N>& x)
+    inline B bitwise_cast(const batch<uint8_t, N>& x)
     {
-        return bitwise_cast_impl<batch<double, N>, B>::run(x);
+        return bitwise_cast_impl<batch<uint8_t, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    inline B bitwise_cast(const batch<int16_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<int16_t, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    inline B bitwise_cast(const batch<uint16_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<uint16_t, N>, B>::run(x);
     }
 
     template <class B, std::size_t N>
@@ -2052,9 +2092,33 @@ namespace xsimd
     }
 
     template <class B, std::size_t N>
+    inline B bitwise_cast(const batch<uint32_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<uint32_t, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
     inline B bitwise_cast(const batch<int64_t, N>& x)
     {
         return bitwise_cast_impl<batch<int64_t, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    inline B bitwise_cast(const batch<uint64_t, N>& x)
+    {
+        return bitwise_cast_impl<batch<uint64_t, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    inline B bitwise_cast(const batch<float, N>& x)
+    {
+        return bitwise_cast_impl<batch<float, N>, B>::run(x);
+    }
+
+    template <class B, std::size_t N>
+    inline B bitwise_cast(const batch<double, N>& x)
+    {
+        return bitwise_cast_impl<batch<double, N>, B>::run(x);
     }
 
     template <class T, std::size_t N>
