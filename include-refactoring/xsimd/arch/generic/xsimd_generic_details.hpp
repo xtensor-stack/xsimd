@@ -116,17 +116,24 @@ namespace xsimd {
       // to use scalar or vector conversion when doing load / store / batch_cast
       struct with_fast_conversion{};
       struct with_slow_conversion{};
-        template<class A, class From, class To>
-        class has_fast_conversion {
-          template<class T0, class T1>
-          static std::true_type get(decltype(kernel::conversion::fast(batch<T0, A>{}, batch<T1, A>{}, A{}))*);
-          template<class T0, class T1>
-          static std::false_type get(...);
-          public:
-          static constexpr bool value = decltype(get<From, To>(nullptr))::value;
-        };
-        template<class A, class From, class To>
-        using conversion_type = typename std::conditional<has_fast_conversion<A, From, To>::value, with_fast_conversion, with_slow_conversion>::type;
+
+      template <class A, class From, class To, class = void>
+      struct conversion_type_impl
+      {
+          using type = with_slow_conversion;
+      };
+
+      using xsimd::detail::void_t;
+
+      template <class A, class From, class To>
+      struct conversion_type_impl<A, From, To,
+                void_t<decltype(fast_cast(std::declval<const From&>(), std::declval<const To&>(), std::declval<const A&>()))>>
+      {
+          using type = with_fast_conversion;
+      };
+
+      template <class A, class From, class To>
+      using conversion_type = typename conversion_type_impl<A, From, To>::type;
     }
 
     namespace detail {

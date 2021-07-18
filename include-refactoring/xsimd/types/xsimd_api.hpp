@@ -1513,17 +1513,52 @@ batch<T, A> zip_lo(batch<T, A> const& x, batch<T, A> const& y) {
 //
 template<class T, class A>
 batch<T, A> bitwise_cast(batch_bool<T, A> const& self) {
-  return {self.data};
+  return batch<T, A>(self);
 }
 
+/**
+ * @ingroup simd_batch_bool_reducers
+ *
+ * Returns true if all the boolean values in the batch are true,
+ * false otherwise.
+ * @param x the batch to reduce.
+ * @return a boolean scalar.
+ */
 template<class T, class A>
 bool all(batch_bool<T, A> const& self) {
   return kernel::all<A>(self, A{});
 }
 
+/**
+ * @ingroup simd_batch_bool_reducers
+ *
+ * Return true if any of the boolean values in the batch is true,
+ * false otherwise.
+ * @param x the batch to reduce.
+ * @return a boolean scalar.
+ */
 template<class T, class A>
 bool any(batch_bool<T, A> const& self) {
   return kernel::any<A>(self, A{});
+}
+
+/**
+ * @ingroup simd_batch_miscellaneous
+ *
+ * Dump the content of batch \c x to stream \c o
+ * @param o the stream where the batch is dumped
+ * @param x batch to dump.
+ * @return a reference to \c o
+ */
+template<class T, class A>
+std::ostream& operator<<(std::ostream& o, batch<T, A> const& x) {
+  constexpr auto size = batch<T, A>::size;
+  alignas(A::alignment()) T buffer[size];
+  x.store_aligned(&buffer[0]);
+  o << '(';
+  for(std::size_t i = 0; i < size - 1; ++i)
+    o << buffer[i] << ", ";
+  return o << buffer[size - 1] << ')';
 }
 }
 
