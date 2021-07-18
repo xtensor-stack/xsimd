@@ -23,10 +23,17 @@ protected:
     using float_batch = xsimd::batch<float>;
     using double_batch = xsimd::batch<double>;
 
+    using uint8_batch = xsimd::batch<uint8_t>;
+    using uint16_batch = xsimd::batch<uint16_t>;
+    using uint32_batch = xsimd::batch<uint32_t>;
+    using uint64_batch = xsimd::batch<uint64_t>;
+
     using int32_vector = std::vector<int32_t, xsimd::default_allocator<int32_t>>;
     using int64_vector = std::vector<int64_t, xsimd::default_allocator<int64_t>>;
     using float_vector = std::vector<float, xsimd::default_allocator<float>>;
     using double_vector = std::vector<double, xsimd::default_allocator<double>>;
+
+    using uint8_vector = std::vector<uint8_t, xsimd::aligned_allocator<uint8_t, A>>;
 
     /*int32_batch i32pos;
     int32_batch i32neg;
@@ -46,10 +53,13 @@ protected:
     double_vector i64posres;
     double_vector i64negres;
 
+    uint8_vector ui8res;
+
     conversion_test()
         : fposres(2 * N, 7), fnegres(2 * N, -6), dposres(N, 5), dnegres(N, -1),
           i32posres(2 * N, float(2)), i32negres(2 * N, float(-3)),
-          i64posres(N, double(2)), i64negres(N, double(-3))
+          i64posres(N, double(2)), i64negres(N, double(-3)),
+          ui8res(8 * N, 4)
     {
     }
 
@@ -116,6 +126,30 @@ protected:
             EXPECT_VECTOR_EQ(i64vres, i64negres) << print_function_name("to_float(negative int64)");
         }
     }
+
+    void test_u8_casting()
+    {
+        uint8_batch ui8tmp(4);
+        uint8_vector ui8vres(uint8_batch::size);
+        {
+            uint16_batch ui16casting = xsimd::bitwise_cast<uint16_batch>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui16casting);
+            ui8casting.store_aligned(ui8vres.data());
+            EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_16");
+        }
+        {
+            uint32_batch ui32casting = xsimd::bitwise_cast<uint32_batch>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui32casting);
+            ui8casting.store_aligned(ui8vres.data());
+            EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_32");
+        }
+        {
+            uint64_batch ui64casting = xsimd::bitwise_cast<uint64_batch>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui64casting);
+            ui8casting.store_aligned(ui8vres.data());
+            EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_64");
+        }
+    }
 };
 
 TYPED_TEST_SUITE(conversion_test, conversion_types, conversion_test_names);
@@ -138,4 +172,9 @@ TYPED_TEST(conversion_test, to_float)
 TYPED_TEST(conversion_test, to_double)
 {
     this->test_to_double();
+}
+
+TYPED_TEST(conversion_test, u8_casting)
+{
+    this->test_u8_casting();
 }
