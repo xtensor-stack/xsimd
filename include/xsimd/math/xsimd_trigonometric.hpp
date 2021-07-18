@@ -99,21 +99,41 @@ namespace xsimd
          */
 
         template <class B>
+        void print_batch(const std::string& name, const B& b)
+        {
+            using register_type = typename B::storage_type;
+            register_type bs = b;
+            int64_t buff[2];
+            memcpy(buff, &bs, 16);
+            std::cout << name << "= " << std::hex << buff[0] << buff[1] << std::endl;
+        }
+
+        template <class B>
         struct trigo_kernel
         {
             template <class Tag = trigo_radian_tag>
             static inline B sin(const B& a, Tag = Tag())
             {
                 const B x = abs(a);
+                print_batch("x", x);
                 B xr = nan<B>();
+                print_batch("xr", xr);
                 const B n = trigo_reducer<B, Tag>::reduce(x, xr);
+                print_batch("n", n);
                 auto tmp = select(n >= B(2.), B(1.), B(0.));
+                print_batch("tmp", tmp);
                 auto swap_bit = fma(B(-2.), tmp, n);
+                print_batch("swap_bit", swap_bit);
                 auto sign_bit = bitofsign(a) ^ select(tmp != B(0.), signmask<B>(), B(0.));
+                print_batch("sign_bit", sign_bit);
                 const B z = xr * xr;
+                print_batch("z", z);
                 const B se = trigo_evaluation<B>::sin_eval(z, xr);
+                print_batch("se", se);
                 const B ce = trigo_evaluation<B>::cos_eval(z);
+                print_batch("ce", ce);
                 const B z1 = select(swap_bit == B(0.), se, ce);
+                print_batch("z1", z1);
                 return z1 ^ sign_bit;
             }
 

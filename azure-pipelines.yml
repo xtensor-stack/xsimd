@@ -3,6 +3,4 @@ trigger:
   - feature/xsimd-refactoring
 
 jobs:
-  - template: ./.azure-pipelines/azure-pipelines-win.yml
   - template: ./.azure-pipelines/azure-pipelines-linux-gcc.yml
-  - template: ./.azure-pipelines/azure-pipelines-linux-clang.yml
