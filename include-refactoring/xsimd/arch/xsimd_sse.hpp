@@ -318,7 +318,7 @@ namespace xsimd {
 
     template <class T, class A> batch<std::complex<float>, A> load_complex_aligned(std::complex<T> const* mem, requires<sse>) {
       using real_batch = batch<T, A>;
-      T const *buffer = reinterpret_cast<T const *>(src);
+      T const *buffer = reinterpret_cast<T const *>(mem);
       real_batch hi = real_batch::load_aligned(buffer),
                  lo = real_batch::load_aligned(buffer + real_batch::size);
       return detail::load_complex(hi, lo, A{});
@@ -326,7 +326,7 @@ namespace xsimd {
 
     template <class T, class A> batch<std::complex<float>, A> load_complex_unaligned(std::complex<T> const* mem, requires<sse>) {
       using real_batch = batch<T, A>;
-      T const *buffer = reinterpret_cast<T const *>(src);
+      T const *buffer = reinterpret_cast<T const *>(mem);
       real_batch hi = real_batch::load_unaligned(buffer),
                  lo = real_batch::load_unaligned(buffer + real_batch::size);
       return detail::load_complex(hi, lo, A{});
