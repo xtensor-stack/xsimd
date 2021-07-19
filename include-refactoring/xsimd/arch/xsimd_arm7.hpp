@@ -858,6 +858,16 @@ namespace xsimd
             return detail::bitwise_xor_arm7(register_type(lhs), register_type(rhs));
         }
 
+        /*******
+         * neq *
+         *******/
+
+        template <class A, class T>
+        batch_bool<T, A> neq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<arm7>)
+        {
+            return bitwise_xor(lhs, rhs, A{});
+        }
+
         /***************
          * bitwise_not *
          ***************/
