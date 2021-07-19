@@ -77,10 +77,7 @@ namespace xsimd {
     template<class A, class T> batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
       return !(other == self);
     }
-
-
   }
-
 }
 
 #endif
