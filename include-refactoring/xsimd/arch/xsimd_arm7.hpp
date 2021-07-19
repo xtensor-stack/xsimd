@@ -1344,7 +1344,7 @@ namespace xsimd
          ****************/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1356,7 +1356,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1368,7 +1368,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1380,7 +1380,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1392,7 +1392,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1404,7 +1404,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1416,7 +1416,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1428,7 +1428,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, const int n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
@@ -1440,7 +1440,7 @@ namespace xsimd
         }
 
         template <class A>
-        batch<float, A> extract_pair(batch<float, A> const& lhs, batch<float, A> const& rhs, const int n, requires<arm7>)
+        batch<float, A> extract_pair(batch<float, A> const& lhs, batch<float, A> const& rhs, std::size_t n, requires<arm7>)
         {
             switch(n)
             {
