@@ -651,7 +651,7 @@ namespace xsimd
          ****************/
 
         template <class A>
-        batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, const int n, requires<arm8_64>)
+        batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n, requires<arm8_64>)
         {
             using batch_type = batch<double, A>;
             switch(n)
