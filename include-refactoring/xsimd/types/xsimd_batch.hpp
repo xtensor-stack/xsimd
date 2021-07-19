@@ -9,6 +9,16 @@
 
 namespace xsimd {
 
+/**
+ * @brief batch of integer or floating point values.
+ *
+ * Abstract representation of an SIMD register for floating point or integral
+ * value.
+ *
+ * @tparam T the type of the underlying values.
+ * @tparam A the architecture this batch is tied too.
+ **/
+
 template<class T, class A=default_arch>
 struct batch : types::simd_register<T, A> {
 
@@ -139,6 +149,15 @@ struct batch : types::simd_register<T, A> {
   batch(T const* data, detail::index_sequence<Is...>);
 };
 
+/**
+ * @brief batch of predicate over scalar or complex values.
+ *
+ * Abstract representation of a predicate over SIMD register for scalar or
+ * complex values.
+ *
+ * @tparam T the type of the predicated values.
+ * @tparam A the architecture this batch is tied too.
+ **/
 template<class T, class A=default_arch>
 struct batch_bool : types::get_bool_simd_register_t<T, A> {
   static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T);
@@ -189,6 +208,14 @@ struct batch_bool : types::get_bool_simd_register_t<T, A> {
 
 };
 
+/**
+ * @brief batch of complex values.
+ *
+ * Abstract representation of an SIMD register for complex values.
+ *
+ * @tparam T the type of the underlying values.
+ * @tparam A the architecture this batch is tied too.
+ **/
 template<class T, class A>
 struct batch<std::complex<T>, A> {
   using value_type = std::complex<T>;

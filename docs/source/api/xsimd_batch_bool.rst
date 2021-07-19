@@ -9,7 +9,21 @@ batch_bool
 
 .. _xsimd-batch-bool-ref:
 
-.. doxygenclass:: xsimd::batch_bool
+.. doxygenstruct:: xsimd::batch_bool
    :project: xsimd
    :members:
+
+Logical operators
+-----------------
+
+.. doxygengroup:: batch_bool_logical
+   :project: xsimd
+   :content-only:
+
+Reducers
+--------
+
+.. doxygengroup:: batch_bool_reducers
+   :project: xsimd
+   :content-only:
 

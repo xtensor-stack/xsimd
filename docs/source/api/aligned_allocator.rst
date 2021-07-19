@@ -10,11 +10,3 @@ Aligned memory allocator
 .. doxygenclass:: xsimd::aligned_allocator
    :project: xsimd
    :members:
-
-Comparison operators
---------------------
-
-.. doxygengroup:: allocator_logical
-   :project: xsimd
-   :content-only:
-
