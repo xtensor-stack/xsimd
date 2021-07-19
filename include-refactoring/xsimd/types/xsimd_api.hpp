@@ -1509,11 +1509,22 @@ batch<T, A> zip_lo(batch<T, A> const& x, batch<T, A> const& y) {
   return kernel::zip_lo<A>(x, y, A{});
 }
 
-// high level functions - batch_bool
-//
-template<class T, class A>
-batch<T, A> bitwise_cast(batch_bool<T, A> const& self) {
-  return batch<T, A>(self);
+// bitwise_cast
+template <class A, class T, typename std::enable_if<std::is_integral<T>::value, int>::type = 3>
+batch<T, A> bitwise_cast(batch_bool<T, A> const& self)
+{
+  T z(0);
+  return select(self, batch<T, A>(T(~z)), batch<T, A>(z));
+}
+    
+template <class A, class T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 3>
+batch<T, A> bitwise_cast(batch_bool<T, A> const& self)
+{
+    T z0(0), z1(0);
+    using int_type = as_unsigned_integer_t<T>;
+    int_type value(~int_type(0));
+    std::memcpy(&z1, &value, sizeof(int_type));
+    return select(self, batch<T, A>(z1), batch<T, A>(z0)); 
 }
 
 /**
