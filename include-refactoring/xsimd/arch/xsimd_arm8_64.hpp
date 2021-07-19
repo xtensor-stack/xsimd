@@ -403,6 +403,16 @@ namespace xsimd
             return veorq_u64(lhs, rhs);
         }
 
+        /*******
+         * neq *
+         *******/
+
+        template <class A>
+        batch_bool<double, A> neq(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires<arm8_64>)
+        {
+            return bitwise_xor(lhs, rhs, A{});
+        }
+
         /***************
          * bitwise_not *
          ***************/
