@@ -337,19 +337,19 @@ namespace xsimd
         template <class A, class T,  detail::enable_sized_unsigned_t<T, 8> = 0>
         batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm8_64>)
         {
-            return vcgtq_u64(lhs, rhs);
+            return vcgeq_u64(lhs, rhs);
         }
 
         template <class A, class T,  detail::enable_sized_signed_t<T, 8> = 0>
         batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm8_64>)
         {
-            return vcgtq_s64(lhs, rhs);
+            return vcgeq_s64(lhs, rhs);
         }
 
         template <class A>
         batch_bool<double, A> ge(batch<double, A> const& lhs, batch<double, A> const& rhs, requires<arm8_64>)
         {
-            return vcgtq_f64(lhs, rhs);
+            return vcgeq_f64(lhs, rhs);
         }
 
         /***************
