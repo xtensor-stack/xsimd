@@ -103,7 +103,43 @@ namespace xsimd {
       return store_aligned<A>(mem, self, generic{});
     }
 
+    // load_complex_aligned
+    template <class A, class T> batch<std::complex<T>, A> load_complex_aligned(std::complex<T> const* mem, requires<generic>) {
+      using real_batch = batch<T, A>;
+      T const *buffer = reinterpret_cast<T const *>(mem);
+      real_batch hi = real_batch::load_aligned(buffer),
+                 lo = real_batch::load_aligned(buffer + real_batch::size);
+      return detail::load_complex(hi, lo, A{});
+    }
 
+    // load_complex_unaligned
+    template <class A, class T> batch<std::complex<T>, A> load_complex_unaligned(std::complex<T> const* mem, requires<generic>) {
+      using real_batch = batch<T, A>;
+      T const *buffer = reinterpret_cast<T const *>(mem);
+      real_batch hi = real_batch::load_unaligned(buffer),
+                 lo = real_batch::load_unaligned(buffer + real_batch::size);
+      return detail::load_complex(hi, lo, A{});
+    }
+
+    // store_complex_aligned
+    template <class A, class T> void store_complex_aligned(std::complex<T>* dst, batch<std::complex<T>, A> const& src, requires<generic>) {
+        using real_batch = batch<T, A>;
+        real_batch hi = detail::complex_high(src, A{});
+        real_batch lo = detail::complex_low(src, A{});
+        T * buffer = reinterpret_cast<T*>(dst);
+        lo.store_aligned(buffer);
+        hi.store_aligned(buffer + real_batch::size);
+    }
+
+    // store_compelx_unaligned
+    template <class A, class T> void store_complex_unaligned(std::complex<T>* dst, batch<std::complex<T>, A> const& src, requires<generic>) {
+        using real_batch = batch<T, A>;
+        real_batch hi = detail::complex_high(src, A{});
+        real_batch lo = detail::complex_low(src, A{});
+        T * buffer = reinterpret_cast<T *>(dst);
+        lo.store_unaligned(buffer);
+        hi.store_unaligned(buffer + real_batch::size);
+    }
 
   }
 
