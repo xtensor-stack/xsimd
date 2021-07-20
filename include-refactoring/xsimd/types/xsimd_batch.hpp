@@ -438,7 +438,7 @@ template <class T, class A>
 template <class... V>
 auto batch_bool<T, A>::make_register(detail::index_sequence<>, V... v) -> register_type
 {
-    return register_type{v...};
+    return kernel::set<A>(batch_bool<T, A>(), A{}, v...).data;
 }
 
 template<class T, class A>
