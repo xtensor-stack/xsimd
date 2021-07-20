@@ -43,21 +43,11 @@ namespace xsimd
                  arm8_32 = 1;
                  arm8_64 = 1;
                  best = arm8_64::version();
-#elif defined(__ARM_NEON)
-#if __ARM_ARCH >= 8
-                 arm7 = 1;
-                 arm8_32 = 1;
-                 arm8_64 = 0;
-                 best = arm8_32::version();
-#else
-                 arm7 = 1;
+#elif defined(__ARM_NEON) || defined(_M_ARM)
+                 arm7 = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
+                 best = arm7::version() * neon;
                  arm8_32 = 0;
                  arm8_64 = 0;
-                 best = arm7::version();
-#endif
-//#elif defined(__ARM_NEON) || defined(_M_ARM)
-//                 neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
-//                 best = neon::version() * neon;
 
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
                  auto get_cpuid = [](int reg[4], int func_id)
