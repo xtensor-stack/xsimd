@@ -103,6 +103,21 @@ namespace xsimd
     {
         return rhs == lhs;
     }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, class A, size_t N, bool i3ec>
+    inline bool operator==(const batch<std::complex<T>, A>& lhs, const std::array<xtl::xcomplex<T, T, i3ec>, N>& rhs)
+    {
+        std::array<xtl::xcomplex<T, T, i3ec>, N> tmp;
+        lhs.store_unaligned(tmp.data());
+        return tmp == rhs;
+    }
+
+    template <class T, class A, size_t N, bool i3ec>
+    inline bool operator==(const std::array<xtl::xcomplex<T, T, i3ec>, N>& lhs, const batch<std::complex<T>, A>& rhs)
+    {
+        return rhs == lhs;
+    }
+#endif
 }
 
 namespace detail

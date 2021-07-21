@@ -228,17 +228,17 @@ struct batch<std::complex<T>, A> {
   batch(real_batch const& real, real_batch const& imag) : m_real(real), m_imag(imag) {}
   batch(real_batch const& real) : m_real(real), m_imag(0) {}
   batch(T val) : m_real(val), m_imag(0) {}
-  batch(std::initializer_list<std::complex<T>> data) { *this = load_unaligned(data.begin()); }
+  batch(std::initializer_list<value_type> data) { *this = load_unaligned(data.begin()); }
 
-        static XSIMD_NO_DISCARD batch load_aligned(const T* real_src, const T* imag_src=nullptr);
-        static XSIMD_NO_DISCARD batch load_unaligned(const T* real_src, const T* imag_src=nullptr);
-        void store_aligned(T* real_dst, T* imag_dst) const;
-        void store_unaligned(T* real_dst, T* imag_dst) const;
+  static XSIMD_NO_DISCARD batch load_aligned(const T* real_src, const T* imag_src=nullptr);
+  static XSIMD_NO_DISCARD batch load_unaligned(const T* real_src, const T* imag_src=nullptr);
+  void store_aligned(T* real_dst, T* imag_dst) const;
+  void store_unaligned(T* real_dst, T* imag_dst) const;
 
-        static XSIMD_NO_DISCARD batch load_aligned(const value_type* src);
-        static XSIMD_NO_DISCARD batch load_unaligned(const value_type* src);
-        void store_aligned(value_type* dst) const;
-        void store_unaligned(value_type* dst) const;
+  static XSIMD_NO_DISCARD batch load_aligned(const value_type* src);
+  static XSIMD_NO_DISCARD batch load_unaligned(const value_type* src);
+  void store_aligned(value_type* dst) const;
+  void store_unaligned(value_type* dst) const;
 
   template<class U>
   static XSIMD_NO_DISCARD batch load(U const* mem, aligned_mode) { return load_aligned(mem); }
@@ -249,8 +249,24 @@ struct batch<std::complex<T>, A> {
   template<class U>
   void store(U * mem, unaligned_mode) const { return store_unaligned(mem); }
 
-    real_batch real() const { return m_real; }
-    real_batch imag() const { return m_imag; }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+  template<bool i3ec>
+  batch(xtl::xcomplex<T, T, i3ec> const& val) : m_real(val.real()), m_imag(val.imag()) {}
+  template<bool i3ec>
+  batch(std::initializer_list<xtl::xcomplex<T, T, i3ec>> data) { *this = load_unaligned(data.begin()); }
+
+  template<bool i3ec>
+  static XSIMD_NO_DISCARD batch load_aligned(const xtl::xcomplex<T, T, i3ec>* src);
+  template<bool i3ec>
+  static XSIMD_NO_DISCARD batch load_unaligned(const xtl::xcomplex<T, T, i3ec>* src);
+  template<bool i3ec>
+  void store_aligned(xtl::xcomplex<T, T, i3ec>* dst) const;
+  template<bool i3ec>
+  void store_unaligned(xtl::xcomplex<T, T, i3ec>* dst) const;
+#endif
+
+  real_batch real() const { return m_real; }
+  real_batch imag() const { return m_imag; }
 
   value_type get(std::size_t i) const {
     alignas(A::alignment()) value_type buffer[size];
@@ -539,6 +555,35 @@ void batch<std::complex<T>, A>::store_unaligned(T* real_dst, T* imag_dst) const 
   m_real.store_unaligned(real_dst);
   m_imag.store_unaligned(imag_dst);
 }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+// Memory layout of an xcomplex and std::complex are the same when xcomplex
+// stores values and not reference. Unfortunately, this breaks strict
+// aliasing...
+
+template<class T, class A>
+template<bool i3ec>
+batch<std::complex<T>, A> batch<std::complex<T>, A>::load_aligned(const xtl::xcomplex<T, T, i3ec>* src) {
+  return load_aligned(reinterpret_cast<std::complex<T> const*>(src));
+}
+
+template<class T, class A>
+template<bool i3ec>
+batch<std::complex<T>, A> batch<std::complex<T>, A>::load_unaligned(const xtl::xcomplex<T, T, i3ec>* src) {
+  return load_unaligned(reinterpret_cast<std::complex<T> const*>(src));
+}
+
+template<class T, class A>
+template<bool i3ec>
+void batch<std::complex<T>, A>::store_aligned(xtl::xcomplex<T, T, i3ec>* dst) const {
+  store_aligned(reinterpret_cast<std::complex<T> *>(dst));
+}
+
+template<class T, class A>
+template<bool i3ec>
+void batch<std::complex<T>, A>::store_unaligned(xtl::xcomplex<T, T, i3ec>* dst) const {
+  store_unaligned(reinterpret_cast<std::complex<T>*>(dst));
+}
+#endif
 
 template<class T, class A>
 batch<std::complex<T>, A>& batch<std::complex<T>, A>::operator*=(batch const& other) {
