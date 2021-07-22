@@ -1536,8 +1536,8 @@ batch<T, A> bitwise_cast(batch_bool<T, A> const& self)
  * @return a boolean scalar.
  */
 template<class T, class A>
-bool all(batch_bool<T, A> const& self) {
-  return kernel::all<A>(self, A{});
+bool all(batch_bool<T, A> const& x) {
+  return kernel::all<A>(x, A{});
 }
 
 /**
@@ -1549,8 +1549,8 @@ bool all(batch_bool<T, A> const& self) {
  * @return a boolean scalar.
  */
 template<class T, class A>
-bool any(batch_bool<T, A> const& self) {
-  return kernel::any<A>(self, A{});
+bool any(batch_bool<T, A> const& x) {
+  return kernel::any<A>(x, A{});
 }
 
 /**

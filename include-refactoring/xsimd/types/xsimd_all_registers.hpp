@@ -14,7 +14,6 @@
 #include "../types/xsimd_avx512dq_register.hpp"
 #include "../types/xsimd_avx512bw_register.hpp"
 
-#include "xsimd_arm7_register.hpp"
-#include "xsimd_arm8_32_register.hpp"
-#include "xsimd_arm8_64_register.hpp"
+#include "xsimd_neon_register.hpp"
+#include "xsimd_neon64_register.hpp"
 
