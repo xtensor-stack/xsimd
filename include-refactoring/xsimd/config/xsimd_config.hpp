@@ -107,26 +107,18 @@
 
 #ifdef __ARM_NEON
     #if __ARM_ARCH >= 7
-        #define XSIMD_WITH_ARM7 1
+        #define XSIMD_WITH_NEON 1
     #else
-        #define XSIMD_WITH_ARM7 0
+        #define XSIMD_WITH_NEON 0
     #endif
 
-    #if __ARM_ARCH >= 8
-        #ifdef __aarch64__
-            #define XSIMD_WITH_ARM8_64 1
-            #define XSIMD_WITH_ARM8_32 1
-        #else
-            #define XSIMD_WITH_ARM8_64 0
-            #define XSIMD_WITH_ARM8_32 1
-        #endif
+    #ifdef __aarch64__
+        #define XSIMD_WITH_NEON64 1
     #else
-        #define XSIMD_WITH_ARM8_64 0
-        #define XSIMD_WITH_ARM8_32 0
+        #define XSIMD_WITH_NEON64 0
     #endif
 #else
-    #define XSIMD_WITH_ARM7 0
-    #define XSIMD_WITH_ARM8_64 0
-    #define XSIMD_WITH_ARM8_32 0
+    #define XSIMD_WITH_NEON 0
+    #define XSIMD_WITH_NEON64 0
 #endif
 #endif

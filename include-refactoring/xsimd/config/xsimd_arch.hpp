@@ -95,7 +95,7 @@ namespace xsimd {
 
   struct unsupported {};
   using all_x86_architectures = arch_list<avx512bw, avx512dq, avx512cd, avx512f, fma5, avx2, /*fma3, xop, fma4,*/ avx, sse4_2, sse4_1, /*sse4a, ssse3,*/ sse3, sse2, sse>;
-  using all_arm_architectures = arch_list<arm8_64, arm8_32, arm7>;
+  using all_arm_architectures = arch_list<neon64, neon>;
   using all_architectures = typename detail::join<all_arm_architectures, all_x86_architectures>::type;
 
   using supported_architectures = typename detail::supported<all_architectures>::type;

@@ -1,9 +1,9 @@
-#ifndef XSIMD_ARM7_HPP
-#define XSIMD_ARM7_HPP
+#ifndef XSIMD_NEON_HPP
+#define XSIMD_NEON_HPP
 
 #include <tuple>
 
-#include "../types/xsimd_arm7_register.hpp"
+#include "../types/xsimd_neon_register.hpp"
 #include "../types/xsimd_utils.hpp"
 
 namespace xsimd
@@ -15,7 +15,7 @@ namespace xsimd
         namespace detail
         {
             template <template <class> class return_type, class... T>
-            struct arm_dispatcher_base
+            struct neon_dispatcher_base
             {
                 struct unary
                 {
@@ -23,7 +23,7 @@ namespace xsimd
                     const container_type m_func;
 
                     template <class U>
-                    return_type<U> run(U rhs) const
+                    return_type<U> apply(U rhs) const
                     {
                         using func_type = return_type<U> (*)(U);
                         auto func = xsimd::detail::get<func_type>(m_func);
@@ -37,7 +37,7 @@ namespace xsimd
                     const container_type m_func;
 
                     template <class U>
-                    return_type<U> run(U lhs, U rhs) const
+                    return_type<U> apply(U lhs, U rhs) const
                     {
                         using func_type = return_type<U> (*)(U, U);
                         auto func = xsimd::detail::get<func_type>(m_func);
@@ -54,18 +54,18 @@ namespace xsimd
             using identity_return_type = T;
             
             template <class... T>
-            struct arm_dispatcher_impl : arm_dispatcher_base<identity_return_type, T...>
+            struct neon_dispatcher_impl : neon_dispatcher_base<identity_return_type, T...>
             {
             };
 
 
-            using arm_dispatcher = arm_dispatcher_impl<uint8x16_t, int8x16_t,
+            using neon_dispatcher = neon_dispatcher_impl<uint8x16_t, int8x16_t,
                                                        uint16x8_t, int16x8_t,
                                                        uint32x4_t, int32x4_t,
                                                        uint64x2_t, int64x2_t,
                                                        float32x4_t>;
 
-            using excluding_int64_dispatcher = arm_dispatcher_impl<uint8x16_t, int8x16_t,
+            using excluding_int64_dispatcher = neon_dispatcher_impl<uint8x16_t, int8x16_t,
                                                                    uint16x8_t, int16x8_t,
                                                                    uint32x4_t, int32x4_t,
                                                                    float32x4_t>;
@@ -135,11 +135,11 @@ namespace xsimd
             using comp_return_type = typename comp_return_type_impl<T>::type;
 
             template <class... T>
-            struct arm_comp_dispatcher_impl : arm_dispatcher_base<comp_return_type, T...>
+            struct neon_comp_dispatcher_impl : neon_dispatcher_base<comp_return_type, T...>
             {
             };
 
-            using excluding_int64_comp_dispatcher = arm_comp_dispatcher_impl<uint8x16_t, int8x16_t,
+            using excluding_int64_comp_dispatcher = neon_comp_dispatcher_impl<uint8x16_t, int8x16_t,
                                                                              uint16x8_t, int16x8_t,
                                                                              uint32x4_t, int32x4_t,
                                                                              float32x4_t>;
@@ -152,7 +152,7 @@ namespace xsimd
             using enable_integral_t = typename std::enable_if<std::is_integral<T>::value, int>::type;
 
             template <class T>
-            using enable_arm7_type_t = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value,
+            using enable_neon_type_t = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value,
                                                                int>::type;
 
             template <class T, size_t S>
@@ -173,7 +173,7 @@ namespace xsimd
             using enable_sized_t = typename std::enable_if<sizeof(T) == S, int>::type;
 
             template <class T>
-            using exclude_int64_arm7_t
+            using exclude_int64_neon_t
                  = typename std::enable_if<std::is_integral<T>::value && sizeof(T) != 8 || std::is_same<T, float>::value, int>::type;
         }
 
@@ -182,55 +182,55 @@ namespace xsimd
          *************/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_u8(uint8_t(val));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_s8(int8_t(val));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_u16(uint16_t(val));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_s16(int16_t(val));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_u32(uint32_t(val));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_s32(int32_t(val));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_u64(uint64_t(val));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> broadcast(T val, requires<arm7>)
+        batch<T, A> broadcast(T val, requires<neon>)
         {
             return vdupq_n_s64(int64_t(val));
         }
 
         template <class A>
-        batch<float, A> broadcast(float val, requires<arm7>)
+        batch<float, A> broadcast(float val, requires<neon>)
         {
             return vdupq_n_f32(val);
         }
@@ -240,13 +240,13 @@ namespace xsimd
          *******/
 
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
-        batch<T, A> set(batch<T, A> const&, requires<arm7>, Args... args)
+        batch<T, A> set(batch<T, A> const&, requires<neon>, Args... args)
         {
-            return xsimd::types::detail::arm_vector_type<T>{args...};
+            return xsimd::types::detail::neon_vector_type<T>{args...};
         }
 
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
-        batch_bool<T, A> set(batch_bool<T, A> const&, requires<arm7>, Args... args)
+        batch_bool<T, A> set(batch_bool<T, A> const&, requires<neon>, Args... args)
         {
             using register_type = typename batch_bool<T, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<T>;
@@ -254,13 +254,13 @@ namespace xsimd
         }
 
         template <class A>
-        batch<float, A> set(batch<float, A> const&, requires<arm7>, float f0, float f1, float f2, float f3)
+        batch<float, A> set(batch<float, A> const&, requires<neon>, float f0, float f1, float f2, float f3)
         {
             return float32x4_t{f0, f1, f2, f3};
         }
 
         template <class A, class... Args>
-        batch_bool<float, A> set(batch_bool<float, A> const&, requires<arm7>, Args... args)
+        batch_bool<float, A> set(batch_bool<float, A> const&, requires<neon>, Args... args)
         {
             using register_type = typename batch_bool<float, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<float>;
@@ -272,55 +272,55 @@ namespace xsimd
          *************/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_u8(arg, vdupq_n_u8(1));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_s8(reinterpret_cast<int8x16_t>(arg.data), vdupq_n_s8(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_u16(arg, vdupq_n_u16(1));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_s16(reinterpret_cast<int16x8_t>(arg.data), vdupq_n_s16(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_u32(arg, vdupq_n_u32(1));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_s32(reinterpret_cast<int32x4_t>(arg.data), vdupq_n_s32(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_u64(arg, vdupq_n_u64(1));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<arm7>)
+        batch<T, A> from_bool(batch_bool<T, A> const& arg, requires<neon>)
         {
             return vandq_s64(reinterpret_cast<int64x2_t>(arg.data), vdupq_n_s64(1));
         }
 
         template <class A>
-        batch<float, A> from_bool(batch_bool<float, A> const& arg, requires<arm7>)
+        batch<float, A> from_bool(batch_bool<float, A> const& arg, requires<neon>)
         {
             return vreinterpretq_f32_u32(vandq_u32(arg, vreinterpretq_u32_f32(vdupq_n_f32(1.f))));
         }
@@ -330,56 +330,56 @@ namespace xsimd
          ********/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_u8(src);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_s8(src);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_u16(src);
         }
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_s16(src);
         }
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_u32(src);
         }
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_s32(src);
         }
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_u64(src);
         }
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> load_aligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_aligned(T const* src, convert<T>, requires<neon>)
         {
             return vld1q_s64(src);
         }
 
         template <class A>
-        batch<float, A> load_aligned(float const* src, convert<float>, requires<arm7>)
+        batch<float, A> load_aligned(float const* src, convert<float>, requires<neon>)
         {
             return vld1q_f32(src);
         }
 
         template <class A, class T>
-        batch<T, A> load_unaligned(T const* src, convert<T>, requires<arm7>)
+        batch<T, A> load_unaligned(T const* src, convert<T>, requires<neon>)
         {
             return load_aligned<A>(src, convert<T>(), A{});
         }
@@ -389,61 +389,61 @@ namespace xsimd
          *********/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_u8(dst, src);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_s8(dst, src);
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_u16(dst, src);
         }
         
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_s16(dst, src);
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_u32(dst, src);
         }
         
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_s32(dst, src);
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_u64(dst, src);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        void store_aligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_aligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             vst1q_s64(dst, src);
         }
 
         template <class A>
-        void store_aligned(float* dst, batch<float, A> const& src, requires<arm7>)
+        void store_aligned(float* dst, batch<float, A> const& src, requires<neon>)
         {
             vst1q_f32(dst, src);
         }
 
         template <class A, class T>
-        void store_unaligned(T* dst, batch<T, A> const& src, requires<arm7>)
+        void store_unaligned(T* dst, batch<T, A> const& src, requires<neon>)
         {
             store_aligned<A>(dst, src, A{});
         }
@@ -453,43 +453,43 @@ namespace xsimd
          *******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> neg(batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
         {
             return vreinterpretq_u8_s8(vnegq_s8(vreinterpretq_s8_u8(rhs)));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> neg(batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
         {
             return vnegq_s8(rhs);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> neg(batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
         {
             return vreinterpretq_u16_s16(vnegq_s16(vreinterpretq_s16_u16(rhs)));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> neg(batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
         {
             return vnegq_s16(rhs);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> neg(batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
         {
             return vreinterpretq_u32_s32(vnegq_s32(vreinterpretq_s32_u32(rhs)));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> neg(batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
         {
             return vnegq_s32(rhs);
         }
 
         template <class A>
-        batch<float, A> neg(batch<float, A> const& rhs, requires<arm7>)
+        batch<float, A> neg(batch<float, A> const& rhs, requires<neon>)
         {
             return vnegq_f32(rhs);
         }
@@ -498,68 +498,68 @@ namespace xsimd
          * add *
          *******/
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::arm_dispatcher::binary dispatcher =
+            constexpr detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vaddq_u8, vaddq_s8, vaddq_u16, vaddq_s16,
                                 vaddq_u32, vaddq_s32, vaddq_u64, vaddq_s64,
                                 vaddq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /********
          * sadd *
          ********/
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::arm_dispatcher::binary dispatcher =
+            constexpr detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vqaddq_u8, vqaddq_s8, vqaddq_u16, vqaddq_s16,
                                 vqaddq_u32, vqaddq_s32, vqaddq_u64, vqaddq_s64,
                                 vaddq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /*******
          * sub *
          *******/
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::arm_dispatcher::binary dispatcher =
+            constexpr detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vsubq_u8, vsubq_s8, vsubq_u16, vsubq_s16,
                                 vsubq_u32, vsubq_s32, vsubq_u64, vsubq_s64,
                                 vsubq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /********
          * ssub *
          ********/
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::arm_dispatcher::binary dispatcher =
+            constexpr detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vqsubq_u8, vqsubq_s8, vqsubq_u16, vqsubq_s16,
                                 vqsubq_u32, vqsubq_s32, vqsubq_u64, vqsubq_s64,
                                 vsubq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
 
@@ -567,15 +567,15 @@ namespace xsimd
          * mul *
          *******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vmulq_u8, vmulq_s8, vmulq_u16, vmulq_s16, vmulq_u32, vmulq_s32, vmulq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -584,20 +584,20 @@ namespace xsimd
 
 #if defined(XSIMD_FAST_INTEGER_DIVISION)
         template <class A, class T,  detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vcvtq_s32_f32(vcvtq_f32_s32(lhs) / vcvtq_f32_s32(rhs));
         }
 
         template <class A, class T,  detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vcvtq_u32_f32(vcvtq_f32_u32(lhs) / vcvtq_f32_u32(rhs));
         }
 #endif
 
         template <class A>
-        batch<float, A> div(batch<float, A> const& lhs, batch<float, A> const& rhs, requires<arm7>)
+        batch<float, A> div(batch<float, A> const& lhs, batch<float, A> const& rhs, requires<neon>)
         {
             // from stackoverflow & https://projectne10.github.io/Ne10/doc/NE10__divc_8neon_8c_source.html
             // get an initial estimate of 1/b.
@@ -617,87 +617,87 @@ namespace xsimd
          * eq *
          ******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vceqq_u8, vceqq_s8, vceqq_u16, vceqq_s16, vceqq_u32, vceqq_s32, vceqq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            using dispatcher_type = detail::arm_comp_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary;
+            using dispatcher_type = detail::neon_comp_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary;
             constexpr dispatcher_type dispatcher =
             {
                 std::make_tuple(vceqq_u8, vceqq_u16, vceqq_u32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /******
          * lt *
          ******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vcltq_u8, vcltq_s8, vcltq_u16, vcltq_s16, vcltq_u32, vcltq_s32, vcltq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /******
          * le *
          ******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vcleq_u8, vcleq_s8, vcleq_u16, vcleq_s16, vcleq_u32, vcleq_s32, vcleq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /******
          * gt *
          ******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vcgtq_u8, vcgtq_s8, vcgtq_u16, vcgtq_s16, vcgtq_u32, vcgtq_s32, vcgtq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /******
          * ge *
          ******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(vcgeq_u8, vcgeq_s8, vcgeq_u16, vcgeq_s16, vcgeq_u32, vcgeq_s32, vcgeq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         /***************
@@ -713,30 +713,30 @@ namespace xsimd
             }
 
             template <class V>
-            V bitwise_and_arm7(V const& lhs, V const& rhs)
+            V bitwise_and_neon(V const& lhs, V const& rhs)
             {
-                constexpr arm_dispatcher::binary dispatcher =
+                constexpr neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(vandq_u8, vandq_s8, vandq_u16, vandq_s16,
                                     vandq_u32, vandq_s32, vandq_u64, vandq_s64,
                                     bitwise_and_f32)
                 };
-                return dispatcher.run(lhs, rhs);
+                return dispatcher.apply(lhs, rhs);
             }
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_and_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch_bool<T, A> bitwise_and(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch_bool<T, A> bitwise_and(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_and_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
         }
 
         /**************
@@ -752,30 +752,30 @@ namespace xsimd
             }
 
             template <class V>
-            V bitwise_or_arm7(V const& lhs, V const& rhs)
+            V bitwise_or_neon(V const& lhs, V const& rhs)
             {
-                constexpr arm_dispatcher::binary dispatcher =
+                constexpr neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(vorrq_u8, vorrq_s8, vorrq_u16, vorrq_s16,
                                     vorrq_u32, vorrq_s32, vorrq_u64, vorrq_s64,
                                     bitwise_or_f32)
                 };
-                return dispatcher.run(lhs, rhs);
+                return dispatcher.apply(lhs, rhs);
             }
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_or_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_or_neon(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch_bool<T, A> bitwise_or(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch_bool<T, A> bitwise_or(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_or_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_or_neon(register_type(lhs), register_type(rhs));
         }
 
         /***************
@@ -791,30 +791,30 @@ namespace xsimd
             }
 
             template <class V>
-            V bitwise_xor_arm7(V const& lhs, V const& rhs)
+            V bitwise_xor_neon(V const& lhs, V const& rhs)
             {
-                constexpr arm_dispatcher::binary dispatcher =
+                constexpr neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(veorq_u8, veorq_s8, veorq_u16, veorq_s16,
                                     veorq_u32, veorq_s32, veorq_u64, veorq_s64,
                                     bitwise_xor_f32)
                 };
-                return dispatcher.run(lhs, rhs);
+                return dispatcher.apply(lhs, rhs);
             }
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_xor_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_xor_neon(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_xor_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_xor_neon(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -822,7 +822,7 @@ namespace xsimd
          *******/
 
         template <class A, class T>
-        batch_bool<T, A> neq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<arm7>)
+        batch_bool<T, A> neq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
         {
             return bitwise_xor(lhs, rhs, A{});
         }
@@ -849,31 +849,31 @@ namespace xsimd
             }
 
             template <class V>
-            V bitwise_not_arm7(V const& arg)
+            V bitwise_not_neon(V const& arg)
             {
-                constexpr arm_dispatcher::unary dispatcher =
+                constexpr neon_dispatcher::unary dispatcher =
                 {
                     std::make_tuple(vmvnq_u8, vmvnq_s8, vmvnq_u16, vmvnq_s16,
                                     vmvnq_u32, vmvnq_s32,
                                     bitwise_not_u64, bitwise_not_s64,
                                     bitwise_not_f32)
                 };
-                return dispatcher.run(arg);
+                return dispatcher.apply(arg);
             }
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> bitwise_not(batch<T, A> const& arg, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> bitwise_not(batch<T, A> const& arg, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_not_arm7(register_type(arg));
+            return detail::bitwise_not_neon(register_type(arg));
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch_bool<T, A> bitwise_not(batch_bool<T, A> const& arg, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch_bool<T, A> bitwise_not(batch_bool<T, A> const& arg, requires<neon>)
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_not_arm7(register_type(arg));
+            return detail::bitwise_not_neon(register_type(arg));
         }
 
         /******************
@@ -888,38 +888,38 @@ namespace xsimd
             }
 
             template <class V>
-            V bitwise_andnot_arm7(V const& lhs, V const& rhs)
+            V bitwise_andnot_neon(V const& lhs, V const& rhs)
             {
-                constexpr detail::arm_dispatcher::binary dispatcher =
+                constexpr detail::neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(vbicq_u8, vbicq_s8, vbicq_u16, vbicq_s16,
                                     vbicq_u32, vbicq_s32, vbicq_u64, vbicq_s64,
                                     bitwise_andnot_f32)
                 };
-                return dispatcher.run(lhs, rhs);
+                return dispatcher.apply(lhs, rhs);
             }
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_andnot_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_andnot_arm7(register_type(lhs), register_type(rhs));
+            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
         }
 
         /*******
          * min *
          *******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_dispatcher::binary dispatcher = 
@@ -927,11 +927,11 @@ namespace xsimd
                 std::make_tuple(vminq_u8, vminq_s8, vminq_u16, vminq_s16,
                                 vminq_u32, vminq_s32, vminq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
-        batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return { std::min(lhs.get(0), rhs.get(0)), std::min(lhs.get(1), rhs.get(1)) };
         }
@@ -940,8 +940,8 @@ namespace xsimd
          * max *
          *******/
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_dispatcher::binary dispatcher = 
@@ -949,11 +949,11 @@ namespace xsimd
                 std::make_tuple(vmaxq_u8, vmaxq_s8, vmaxq_u16, vmaxq_s16,
                                 vmaxq_u32, vmaxq_s32, vmaxq_f32)
             };
-            return dispatcher.run(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
-        batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return { std::max(lhs.get(0), rhs.get(0)), std::max(lhs.get(1), rhs.get(1)) };
         }
@@ -980,8 +980,8 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, detail::exclude_int64_arm7_t<T> = 0>
-        batch<T, A> abs(batch<T, A> const& arg, requires<arm7>)
+        template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
+        batch<T, A> abs(batch<T, A> const& arg, requires<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
             constexpr detail::excluding_int64_dispatcher::unary dispatcher = 
@@ -989,7 +989,7 @@ namespace xsimd
                 std::make_tuple(detail::abs_u8, vabsq_s8, detail::abs_u16, vabsq_s16,
                                 detail::abs_u32, vabsq_s32, vabsq_f32)
             };
-            return dispatcher.run(register_type(arg));
+            return dispatcher.apply(register_type(arg));
         }
 
         /********
@@ -997,7 +997,7 @@ namespace xsimd
          ********/
 
         template <class A>
-        batch<float, A> sqrt(batch<float, A> const& arg, requires<arm7>)
+        batch<float, A> sqrt(batch<float, A> const& arg, requires<neon>)
         {
             batch<float, A> sqrt_reciprocal = vrsqrteq_f32(arg);
             // one iter
@@ -1013,13 +1013,13 @@ namespace xsimd
 
 #ifdef __ARM_FEATURE_FMA
         template <class A>
-        batch<float, A> fma(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires<arm7>)
+        batch<float, A> fma(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires<neon>)
         {
             return vfmaq_f32(z, x, y);
         }
 
         template <class A>
-        batch<float, A> fms(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires<arm7>)
+        batch<float, A> fms(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires<neon>)
         {
             return vfmaq_f32(-z, x, y);
         }
@@ -1044,35 +1044,35 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<arm7>)
+        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<neon>)
         {
             uint8x8_t tmp = vpadd_u8(vget_low_u8(arg), vget_high_u8(arg));
             return detail::sum_batch<T, A>(tmp);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<arm7>)
+        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<neon>)
         {
             int8x8_t tmp = vpadd_s8(vget_low_s8(arg), vget_high_s8(arg));
             return detail::sum_batch<T, A>(tmp);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<arm7>)
+        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<neon>)
         {
             uint16x4_t tmp = vpadd_u16(vget_low_u16(arg), vget_high_u16(arg));
             return detail::sum_batch<T, A>(tmp);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<arm7>)
+        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<neon>)
         {
             int16x4_t tmp = vpadd_s16(vget_low_s16(arg), vget_high_s16(arg));
             return detail::sum_batch<T, A>(tmp);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<arm7>)
+        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<neon>)
         {
             uint32x2_t tmp = vpadd_u32(vget_low_u32(arg), vget_high_u32(arg));
             tmp = vpadd_u32(tmp, tmp);
@@ -1080,7 +1080,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<arm7>)
+        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<neon>)
         {
             int32x2_t tmp = vpadd_s32(vget_low_s32(arg), vget_high_s32(arg));
             tmp = vpadd_s32(tmp, tmp);
@@ -1088,7 +1088,7 @@ namespace xsimd
         }
 
         template <class A>
-        float hadd(batch<float, A> const& arg, requires<arm7>)
+        float hadd(batch<float, A> const& arg, requires<neon>)
         {
             float32x2_t tmp = vpadd_f32(vget_low_f32(arg), vget_high_f32(arg));
             tmp = vpadd_f32(tmp, tmp);
@@ -1100,7 +1100,7 @@ namespace xsimd
          *********/
 
         template <class A>
-        batch<float, A> haddp(const batch<float, A>* row, requires<arm7>)
+        batch<float, A> haddp(const batch<float, A>* row, requires<neon>)
         {
             // row = (a,b,c,d)
             float32x2_t tmp1, tmp2, tmp3;
@@ -1127,13 +1127,13 @@ namespace xsimd
         namespace detail
         {
             template <class... T>
-            struct arm_select_dispatcher_impl
+            struct neon_select_dispatcher_impl
             {
                 using container_type = std::tuple<T (*)(comp_return_type<T>, T, T)...>;
                 const container_type m_func;
 
                 template <class U>
-                U run(comp_return_type<U> cond, U lhs, U rhs) const
+                U apply(comp_return_type<U> cond, U lhs, U rhs) const
                 {
                     using func_type = U (*)(comp_return_type<U>, U, U);
                     auto func = xsimd::detail::get<func_type>(m_func);
@@ -1141,31 +1141,31 @@ namespace xsimd
                 }
             };
 
-            using arm_select_dispatcher = arm_select_dispatcher_impl<uint8x16_t, int8x16_t,
+            using neon_select_dispatcher = neon_select_dispatcher_impl<uint8x16_t, int8x16_t,
                                                                      uint16x8_t, int16x8_t,
                                                                      uint32x4_t, int32x4_t,
                                                                      uint64x2_t, int64x2_t,
                                                                      float32x4_t>;
         }
 
-        template <class A, class T, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& a, batch<T, A> const& b, requires<arm7>)
+        template <class A, class T, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& a, batch<T, A> const& b, requires<neon>)
         {
             using bool_register_type = typename batch_bool<T, A>::register_type;
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::arm_select_dispatcher dispatcher =
+            constexpr detail::neon_select_dispatcher dispatcher =
             {
                 std::make_tuple(vbslq_u8, vbslq_s8, vbslq_u16, vbslq_s16,
                                 vbslq_u32, vbslq_s32, vbslq_u64, vbslq_s64,
                                 vbslq_f32)
             };
-            return dispatcher.run(bool_register_type(cond), register_type(a), register_type(b));
+            return dispatcher.apply(bool_register_type(cond), register_type(a), register_type(b));
         }
 
-        template <class A, class T, bool... b, detail::enable_arm7_type_t<T> = 0>
-        batch<T, A> select(batch_bool_constant<batch<T, A>, b...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<arm7>)
+        template <class A, class T, bool... b, detail::enable_neon_type_t<T> = 0>
+        batch<T, A> select(batch_bool_constant<batch<T, A>, b...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<neon>)
         {
-            return select(batch_bool<T, A>{b...}, true_br, false_br, arm7{});
+            return select(batch_bool<T, A>{b...}, true_br, false_br, neon{});
         }
 
         /**********
@@ -1173,61 +1173,61 @@ namespace xsimd
          **********/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             uint8x8x2_t tmp = vzip_u8(vget_low_u8(lhs), vget_low_u8(rhs));
             return vcombine_u8(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             int8x8x2_t tmp = vzip_s8(vget_low_s8(lhs), vget_low_s8(rhs));
             return vcombine_s8(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             uint16x4x2_t tmp = vzip_u16(vget_low_u16(lhs), vget_low_u16(rhs));
             return vcombine_u16(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             int16x4x2_t tmp = vzip_s16(vget_low_s16(lhs), vget_low_s16(rhs));
             return vcombine_s16(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             uint32x2x2_t tmp = vzip_u32(vget_low_u32(lhs), vget_low_u32(rhs));
             return vcombine_u32(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             int32x2x2_t tmp = vzip_s32(vget_low_s32(lhs), vget_low_s32(rhs));
             return vcombine_s32(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vcombine_u64(vget_low_u64(lhs), vget_low_u64(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vcombine_s64(vget_low_s64(lhs), vget_low_s64(rhs));
         }
 
         template <class A>
-        batch<float, A> zip_lo(batch<float, A> const& lhs, batch<float, A> const& rhs, requires<arm7>)
+        batch<float, A> zip_lo(batch<float, A> const& lhs, batch<float, A> const& rhs, requires<neon>)
         {
             float32x2x2_t tmp = vzip_f32(vget_low_f32(lhs), vget_low_f32(rhs));
             return vcombine_f32(tmp.val[0], tmp.val[1]);
@@ -1238,61 +1238,61 @@ namespace xsimd
          **********/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             uint8x8x2_t tmp = vzip_u8(vget_high_u8(lhs), vget_high_u8(rhs));
             return vcombine_u8(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             int8x8x2_t tmp = vzip_s8(vget_high_s8(lhs), vget_high_s8(rhs));
             return vcombine_s8(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             uint16x4x2_t tmp = vzip_u16(vget_high_u16(lhs), vget_high_u16(rhs));
             return vcombine_u16(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             int16x4x2_t tmp = vzip_s16(vget_high_s16(lhs), vget_high_s16(rhs));
             return vcombine_s16(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             uint32x2x2_t tmp = vzip_u32(vget_high_u32(lhs), vget_high_u32(rhs));
             return vcombine_u32(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             int32x2x2_t tmp = vzip_s32(vget_high_s32(lhs), vget_high_s32(rhs));
             return vcombine_s32(tmp.val[0], tmp.val[1]);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vcombine_u64(vget_high_u64(lhs), vget_high_u64(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vcombine_s64(vget_high_s64(lhs), vget_high_s64(rhs));
         }
 
         template <class A>
-        batch<float, A> zip_hi(batch<float, A> const& lhs, batch<float, A> const& rhs, requires<arm7>)
+        batch<float, A> zip_hi(batch<float, A> const& lhs, batch<float, A> const& rhs, requires<neon>)
         {
             float32x2x2_t tmp = vzip_f32(vget_high_f32(lhs), vget_high_f32(rhs));
             return vcombine_f32(tmp.val[0], tmp.val[1]);
@@ -1303,7 +1303,7 @@ namespace xsimd
          ****************/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1315,7 +1315,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1327,7 +1327,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1339,7 +1339,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1351,7 +1351,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1363,7 +1363,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1375,7 +1375,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1387,7 +1387,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1399,7 +1399,7 @@ namespace xsimd
         }
 
         template <class A>
-        batch<float, A> extract_pair(batch<float, A> const& lhs, batch<float, A> const& rhs, std::size_t n, requires<arm7>)
+        batch<float, A> extract_pair(batch<float, A> const& lhs, batch<float, A> const& rhs, std::size_t n, requires<neon>)
         {
             switch(n)
             {
@@ -1415,7 +1415,7 @@ namespace xsimd
          ******************/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1427,13 +1427,13 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon>)
         {
             return vshlq_u8(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1445,13 +1445,13 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vshlq_s8(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1463,13 +1463,13 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon>)
         {
             return vshlq_u16(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1481,13 +1481,13 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vshlq_s16(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1499,13 +1499,13 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon>)
         {
             return vshlq_u32(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1517,13 +1517,13 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vshlq_s32(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1535,13 +1535,13 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon>)
         {
             return vshlq_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1553,7 +1553,7 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vshlq_s64(lhs, rhs);
         }
@@ -1563,7 +1563,7 @@ namespace xsimd
          ******************/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1575,13 +1575,13 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon>)
         {
             return vshlq_u8(lhs, vnegq_s8(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1593,13 +1593,13 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vshlq_s8(lhs, vnegq_s8(rhs));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1611,13 +1611,13 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon>)
         {
             return vshlq_u16(lhs, vnegq_s16(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1629,13 +1629,13 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vshlq_s16(lhs, vnegq_s16(rhs));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1647,13 +1647,13 @@ namespace xsimd
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon>)
         {
             return vshlq_u32(lhs, vnegq_s32(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1665,13 +1665,13 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
         {
             return vshlq_s32(lhs, vnegq_s32(rhs));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
             switch(n)
             {
@@ -1683,7 +1683,7 @@ namespace xsimd
         }
        
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<arm7>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
            switch(n)
             {
@@ -1701,7 +1701,7 @@ namespace xsimd
          *******/
 
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
-        bool all(batch_bool<T, A> const& arg, requires<arm7>)
+        bool all(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint8x8_t tmp = vand_u8(vget_low_u8(arg), vget_high_u8(arg));
             tmp = vpmin_u8(tmp, tmp);
@@ -1711,7 +1711,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
-        bool all(batch_bool<T, A> const& arg, requires<arm7>)
+        bool all(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint16x4_t tmp = vand_u16(vget_low_u16(arg), vget_high_u16(arg));
             tmp = vpmin_u16(tmp, tmp);
@@ -1720,14 +1720,14 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_t<T, 4> = 0>
-        bool all(batch_bool<T, A> const& arg, requires<arm7>)
+        bool all(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint32x2_t tmp = vand_u32(vget_low_u32(arg), vget_high_u32(arg));
             return vget_lane_u32(vpmin_u32(tmp, tmp), 0) != 0;
         }
 
         template <class A, class T, detail::enable_sized_t<T, 8> = 0>
-        bool all(batch_bool<T, A> const& arg, requires<arm7>)
+        bool all(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint64x1_t tmp = vand_u64(vget_low_u64(arg), vget_high_u64(arg));
             return vget_lane_u64(tmp, 0) != 0;
@@ -1738,7 +1738,7 @@ namespace xsimd
          *******/
 
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
-        bool any(batch_bool<T, A> const& arg, requires<arm7>)
+        bool any(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint8x8_t tmp = vorr_u8(vget_low_u8(arg), vget_high_u8(arg));
             tmp = vpmax_u8(tmp, tmp);
@@ -1748,7 +1748,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
-        bool any(batch_bool<T, A> const& arg, requires<arm7>)
+        bool any(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint16x4_t tmp = vorr_u16(vget_low_u16(arg), vget_high_u16(arg));
             tmp = vpmax_u16(tmp, tmp);
@@ -1757,14 +1757,14 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_t<T, 4> = 0>
-        bool any(batch_bool<T, A> const& arg, requires<arm7>)
+        bool any(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint32x2_t tmp = vorr_u32(vget_low_u32(arg), vget_high_u32(arg));
             return vget_lane_u32(vpmax_u32(tmp, tmp), 0);
         }
 
         template <class A, class T, detail::enable_sized_t<T, 8> = 0>
-        bool any(batch_bool<T, A> const& arg, requires<arm7>)
+        bool any(batch_bool<T, A> const& arg, requires<neon>)
         {
             uint64x1_t tmp = vorr_u64(vget_low_u64(arg), vget_high_u64(arg));
             return bool(vget_lane_u64(tmp, 0));
@@ -1783,7 +1783,7 @@ namespace xsimd
                 container_type m_func;
 
                 template <class U>
-                R run(U rhs) const
+                R apply(U rhs) const
                 {
                     using func_type = R (*)(U);
                     auto func = xsimd::detail::get<func_type>(m_func);
@@ -1810,18 +1810,18 @@ namespace xsimd
                 container_type m_caster;
 
                 template <class V, class U>
-                V run(U rhs) const
+                V apply(U rhs) const
                 {
                     using caster_type = bitwise_caster_impl<V, T...>;
                     auto caster = xsimd::detail::get<caster_type>(m_caster);
-                    return caster.run(rhs);
+                    return caster.apply(rhs);
                 }
             };
 
             template <class... T>
             using bitwise_caster_t = bitwise_caster<type_list<T...>, type_list<T...>>;
                     
-            using arm_bitwise_caster = bitwise_caster_t<uint8x16_t, int8x16_t,
+            using neon_bitwise_caster = bitwise_caster_t<uint8x16_t, int8x16_t,
                                                         uint16x8_t, int16x8_t,
                                                         uint32x4_t, int32x4_t,
                                                         uint64x2_t, int64x2_t,
@@ -1839,9 +1839,9 @@ namespace xsimd
         }
 
         template <class A, class T, class R>
-        batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires<arm7>)
+        batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires<neon>)
         {
-            constexpr detail::arm_bitwise_caster caster = {
+            constexpr detail::neon_bitwise_caster caster = {
                 std::make_tuple(
                 detail::make_bitwise_caster_impl(detail::identity_u8,  vreinterpretq_u8_s8,  vreinterpretq_u8_u16, vreinterpretq_u8_s16,
                                                  vreinterpretq_u8_u32, vreinterpretq_u8_s32, vreinterpretq_u8_u64, vreinterpretq_u8_s64,
@@ -1873,7 +1873,7 @@ namespace xsimd
             };
             using src_register_type = typename batch<T, A>::register_type;
             using dst_register_type = typename batch<R, A>::register_type;
-            return caster.run<dst_register_type>(src_register_type(arg));
+            return caster.apply<dst_register_type>(src_register_type(arg));
         }
 
         /*************
@@ -1881,14 +1881,14 @@ namespace xsimd
          *************/
 
         template <class A>
-        batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& arg, requires<arm7>)
+        batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& arg, requires<neon>)
         {
             using register_type = typename batch_bool<int32_t, A>::register_type;
             return register_type(arg);
         }
 
         template <class A>
-        batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& arg, requires<arm7>)
+        batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& arg, requires<neon>)
         {
             using register_type = typename batch_bool<float, A>::register_type;
             return register_type(arg);
@@ -1899,7 +1899,7 @@ namespace xsimd
          **********/
 
         template <class A>
-        batch<int32_t, A> to_int(const batch<float, A>& x, requires<arm7>)
+        batch<int32_t, A> to_int(const batch<float, A>& x, requires<neon>)
         {
             return vcvtq_s32_f32(x);
         }
@@ -1909,7 +1909,7 @@ namespace xsimd
          ************/
 
         template <class A>
-        batch<float, A> to_float(const batch<int32_t, A>& x, requires<arm7>)
+        batch<float, A> to_float(const batch<int32_t, A>& x, requires<neon>)
         {
             return vcvtq_f32_s32(x);
         }
@@ -1921,7 +1921,7 @@ namespace xsimd
         namespace detail
         {
             template <class Tin, class Tout, class A>
-            batch<Tout, A> fast_cast(batch<Tin, A> const& in, batch<Tout, A> const& out, requires<arm7>)
+            batch<Tout, A> fast_cast(batch<Tin, A> const& in, batch<Tout, A> const& out, requires<neon>)
             {
                 return bitwise_cast(in, out, A{});
             }
@@ -1932,7 +1932,7 @@ namespace xsimd
          *********/
 
         template <class A>
-        batch_bool<float, A> isnan(batch<float, A> const& arg, requires<arm7>)
+        batch_bool<float, A> isnan(batch<float, A> const& arg, requires<neon>)
         {
             return !(arg == arg);
         }
