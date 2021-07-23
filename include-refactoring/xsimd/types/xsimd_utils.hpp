@@ -239,6 +239,39 @@ namespace xsimd
 
             template <typename... Ts>
             using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
+
+
+            template <int... Is>
+            using int_sequence = integer_sequence<int, Is...>;
+
+            template <typename Lhs, typename Rhs>
+            struct make_int_sequence_concat;
+
+            template <std::size_t... Lhs, std::size_t... Rhs>
+            struct make_int_sequence_concat<int_sequence<Lhs...>,
+                                            int_sequence<Rhs...>>
+              : identity<int_sequence<Lhs..., (sizeof...(Lhs) + Rhs)...>> {};
+
+            template <std::size_t N>
+            struct make_int_sequence_impl;
+
+            template <std::size_t N>
+            using make_int_sequence = typename make_int_sequence_impl<N>::type;
+
+            template <std::size_t N>
+            struct make_int_sequence_impl
+              : make_int_sequence_concat<make_int_sequence<N / 2>,
+                                         make_int_sequence<N - (N / 2)>> {};
+
+            template <>
+            struct make_int_sequence_impl<0> : identity<int_sequence<>> {};
+
+            template <>
+            struct make_int_sequence_impl<1> : identity<int_sequence<0>> {};
+
+            template <typename... Ts>
+            using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
+
         #endif
     }
 
@@ -380,128 +413,6 @@ namespace xsimd
         };
 #endif
     }
-
-    /*****************
-     * REPEAT macros *
-     *****************/
-
-/* For Shift instruction: vshlq_n_u8/vshrq_n_u8 (lhs, n),
- * 'n' must be a constant and is the compile-time literal constant.
- *
- * This Macro is to fix compiling issues from llvm(clang):
- * "argument must be a constant..."
- *
- */
-#define EXPAND(...) __VA_ARGS__
-#define CASE_LHS(op, i)                  \
-    case i: return op(lhs, i);
-
-#define XSIMD_REPEAT_8_0(op, addx)       \
-    CASE_LHS(EXPAND(op), 1 + addx);      \
-    CASE_LHS(EXPAND(op), 2 + addx);      \
-    CASE_LHS(EXPAND(op), 3 + addx);      \
-    CASE_LHS(EXPAND(op), 4 + addx);      \
-    CASE_LHS(EXPAND(op), 5 + addx);      \
-    CASE_LHS(EXPAND(op), 6 + addx);      \
-    CASE_LHS(EXPAND(op), 7 + addx);
-
-#define XSIMD_REPEAT_8_N(op, addx)       \
-    CASE_LHS(EXPAND(op), 0 + addx);      \
-    XSIMD_REPEAT_8_0(op, addx);
-
-#define XSIMD_REPEAT_8(op)               \
-    XSIMD_REPEAT_8_0(op, 0);
-
-#define XSIMD_REPEAT_16_0(op, addx)      \
-    XSIMD_REPEAT_8_0(op, 0 + addx);      \
-    XSIMD_REPEAT_8_N(op, 8 + addx);
-
-#define XSIMD_REPEAT_16_N(op, addx)      \
-    XSIMD_REPEAT_8_N(op, 0 + addx);      \
-    XSIMD_REPEAT_8_N(op, 8 + addx);
-
-#define XSIMD_REPEAT_16(op)              \
-    XSIMD_REPEAT_16_0(op, 0);
-
-#define XSIMD_REPEAT_32_0(op, addx)      \
-    XSIMD_REPEAT_16_0(op, 0 + addx);     \
-    XSIMD_REPEAT_16_N(op, 16 + addx);
-
-#define XSIMD_REPEAT_32_N(op, addx)      \
-    XSIMD_REPEAT_16_N(op, 0 + addx);     \
-    XSIMD_REPEAT_16_N(op, 16 + addx);
-
-#define XSIMD_REPEAT_32(op)              \
-    XSIMD_REPEAT_32_0(op, 0);
-
-#define XSIMD_REPEAT_64(op)              \
-    XSIMD_REPEAT_32_0(op, 0);            \
-    XSIMD_REPEAT_32_N(op, 32);
-
-/* The Macro is for vext (lhs, rhs, n)
- *
- * _mm_alignr_epi8, _mm_alignr_epi32 ...
- */
-#define CASE_LHS_RHS(op, i)              \
-    case i: return op(lhs, rhs, i);
-
-#define XSIMD_REPEAT_2_0(op, addx)       \
-    CASE_LHS_RHS(EXPAND(op), 1 + addx);
-
-#define XSIMD_REPEAT_2_N(op, addx)       \
-    CASE_LHS_RHS(EXPAND(op), 0 + addx);  \
-    XSIMD_REPEAT_2_0(op, addx);
-
-#define XSIMD_REPEAT_2(op)               \
-    XSIMD_REPEAT_2_0(op, 0);
-
-#define XSIMD_REPEAT_4_0(op, addx)       \
-    XSIMD_REPEAT_2_0(op, 0 + addx);      \
-    XSIMD_REPEAT_2_N(op, 2 + addx);
-
-#define XSIMD_REPEAT_4_N(op, addx)       \
-    XSIMD_REPEAT_2_N(op, 0 + addx);      \
-    XSIMD_REPEAT_2_N(op, 2 + addx);
-
-#define XSIMD_REPEAT_4(op)               \
-    XSIMD_REPEAT_4_0(op, 0);
-
-#define XSIMD_REPEAT_8_0_v2(op, addx)    \
-    XSIMD_REPEAT_4_0(op, 0 + addx);      \
-    XSIMD_REPEAT_4_N(op, 4 + addx);
-
-#define XSIMD_REPEAT_8_N_v2(op, addx)    \
-    XSIMD_REPEAT_4_N(op, 0 + addx);      \
-    XSIMD_REPEAT_4_N(op, 4 + addx);
-
-#define XSIMD_REPEAT_8_v2(op)            \
-    XSIMD_REPEAT_8_0_v2(op, 0);
-
-#define XSIMD_REPEAT_16_0_v2(op, addx)   \
-    XSIMD_REPEAT_8_0_v2(op, 0 + addx);   \
-    XSIMD_REPEAT_8_N_v2(op, 8 + addx);
-
-#define XSIMD_REPEAT_16_N_v2(op, addx)   \
-    XSIMD_REPEAT_8_N_v2(op, 0 + addx);   \
-    XSIMD_REPEAT_8_N_v2(op, 8 + addx);
-
-#define XSIMD_REPEAT_16_v2(op)           \
-    XSIMD_REPEAT_16_0_v2(op, 0);
-
-#define XSIMD_REPEAT_32_0_v2(op, addx)   \
-    XSIMD_REPEAT_16_0_v2(op, 0 + addx);  \
-    XSIMD_REPEAT_16_N_v2(op, 16 + addx);
-
-#define XSIMD_REPEAT_32_N_v2(op, addx)   \
-    XSIMD_REPEAT_16_N_v2(op, 0 + addx);  \
-    XSIMD_REPEAT_16_N_v2(op, 16 + addx);
-
-#define XSIMD_REPEAT_32_v2(op)           \
-    XSIMD_REPEAT_32_0_v2(op, 0);
-
-#define XSIMD_REPEAT_64_v2(op)           \
-    XSIMD_REPEAT_32_0_v2(op, 0);         \
-    XSIMD_REPEAT_32_N_v2(op, 32);
 }
 
 #endif

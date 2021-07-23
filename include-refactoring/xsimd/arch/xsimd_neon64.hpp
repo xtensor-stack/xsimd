@@ -650,17 +650,29 @@ namespace xsimd
          * extract_pair *
          ****************/
 
+        namespace detail
+        {
+            template <class A, size_t I, size_t... Is>
+            batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n,
+                                          ::xsimd::detail::index_sequence<I, Is...>)
+            {
+                if (n == I)
+                {
+                    return vextq_f64(lhs, rhs, n);
+                }
+                else
+                {
+                    return extract_pair(lhs, rhs, n, ::xsimd::detail::index_sequence<Is...>());
+                }
+            }
+        }
+
         template <class A>
         batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n, requires<neon64>)
         {
-            using batch_type = batch<double, A>;
-            switch(n)
-            {
-                case 0: return lhs;
-                XSIMD_REPEAT_2(vextq_f64);
-                default: break;
-            }
-            return batch_type(double(0));
+            constexpr std::size_t size = batch<T, A>::size;
+            assert(0<= n && n< size && "index in bounds");
+            return detail::extract_pair(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
         }
 
         /******************
@@ -670,13 +682,25 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
         batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon64>)
         {
-            return bitwise_rshift<A>(lhs, n, neon64{}); 
+            return bitwise_rshift<A>(lhs, n, neon{}); 
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
         batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires<neon64>)
         {
             return vshlq_u64(lhs, vnegq_s64(rhs));
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon64>)
+        {
+            return bitwise_rshift<A>(lhs, n, neon{}); 
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T>, A> const& rhs, requires<neon64>)
+        {
+            return vshlq_s64(lhs, vnegq_s64(rhs));
         }
 
         /****************
