@@ -33,7 +33,7 @@ namespace xsimd {
         if(i == I)
           return _mm_alignr_epi8(self, other, sizeof(T) * I);
         else
-          return extract_pair(self, other, ::xsimd::detail::index_sequence<Is...>());
+          return extract_pair(self, other, i, ::xsimd::detail::index_sequence<Is...>());
       }
     }
 
