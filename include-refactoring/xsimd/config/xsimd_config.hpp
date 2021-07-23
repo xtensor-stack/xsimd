@@ -1,77 +1,140 @@
 #ifndef XSIMD_CONFIG_HPP
 #define XSIMD_CONFIG_HPP
 
+
+/**
+ * high level free functions
+ *
+ * @defgroup xsimd_config_macro Instruction Set Detection
+ */
+
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if SSE is available at compile-time, to 0 otherwise.
+ */
 #ifdef __SSE__
 #define XSIMD_WITH_SSE 1
 #else
 #define XSIMD_WITH_SSE 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if SSE2 is available at compile-time, to 0 otherwise.
+ */
 #ifdef __SSE2__
 #define XSIMD_WITH_SSE2 1
 #else
 #define XSIMD_WITH_SSE2 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if SSE3 is available at compile-time, to 0 otherwise.
+ */
 #ifdef __SSE3__
 #define XSIMD_WITH_SSE3 1
 #else
 #define XSIMD_WITH_SSE3 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if SSSE3 is available at compile-time, to 0 otherwise.
+ */
 #ifdef __SSSE3__
 #define XSIMD_WITH_SSSE3 1
 #else
 #define XSIMD_WITH_SSSE3 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if SSE4.1 is available at compile-time, to 0 otherwise.
+ */
 #ifdef __SSE4_1__
 #define XSIMD_WITH_SSE4_1 1
 #else
 #define XSIMD_WITH_SSE4_1 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if SSE4.2 is available at compile-time, to 0 otherwise.
+ */
 #ifdef __SSE4_2__
 #define XSIMD_WITH_SSE4_2 1
 #else
 #define XSIMD_WITH_SSE4_2 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if AVX is available at compile-time, to 0 otherwise.
+ */
 #ifdef __AVX__
 #define XSIMD_WITH_AVX 1
 #else
 #define XSIMD_WITH_AVX 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if AVX2 is available at compile-time, to 0 otherwise.
+ */
 #ifdef __AVX2__
 #define XSIMD_WITH_AVX2 1
 #else
 #define XSIMD_WITH_AVX2 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if FMA  for SSE is available at compile-time, to 0 otherwise.
+ */
 #ifdef __FMA__
 
 #if defined(__SSE__) && ! defined(__AVX__)
 #define XSIMD_WITH_FMA3 1
-#define XSIMD_WITH_FMA5 0
+#else
+#define XSIMD_WITH_FMA3 0
 #endif
+
+#else
+#define XSIMD_WITH_FMA3 0
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if FMA for AVX is available at compile-time, to 0 otherwise.
+ */
+#ifdef __FMA__
 
 #if defined(__AVX__)
-#define XSIMD_WITH_FMA3 0
 #define XSIMD_WITH_FMA5 1
-#endif
-
-#if !defined(__SSE__) && ! defined(__AVX__)
-#define XSIMD_WITH_FMA3 0
+#else
 #define XSIMD_WITH_FMA5 0
 #endif
 
 #else
-
-#define XSIMD_WITH_FMA3 0
 #define XSIMD_WITH_FMA5 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if AVX512F is available at compile-time, to 0 otherwise.
+ */
 #ifdef __AVX512F__
 // AVX512 instructions are supported starting with gcc 6
 // see https://www.gnu.org/software/gcc/gcc-6/changes.html
@@ -84,6 +147,11 @@
 #define XSIMD_WITH_AVX512F 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if AVX512CD is available at compile-time, to 0 otherwise.
+ */
 #ifdef __AVX512CD__
 // Avoids repeating the GCC workaround over and over
 #define XSIMD_WITH_AVX512CD XSIMD_WITH_AVX512F
@@ -91,15 +159,23 @@
 #define XSIMD_WITH_AVX512CD 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if AVX512DQ is available at compile-time, to 0 otherwise.
+ */
 #ifdef __AVX512DQ__
-// Avoids repeating the GCC workaround over and over
 #define XSIMD_WITH_AVX512DQ XSIMD_WITH_AVX512F
 #else
 #define XSIMD_WITH_AVX512DQ 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if SSE is available at compile-time, to 0 otherwise.
+ */
 #ifdef __AVX512BW__
-// Avoids repeating the GCC workaround over and over
 #define XSIMD_WITH_AVX512BW XSIMD_WITH_AVX512F
 #else
 #define XSIMD_WITH_AVX512BW 0

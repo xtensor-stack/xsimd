@@ -1,6 +1,8 @@
 PROJECT_NAME      = "xsimd"
 XML_OUTPUT        = xml
 INPUT             = ../include-refactoring/xsimd/types/xsimd_api.hpp \
+                    ../include-refactoring/xsimd/types/xsimd_batch.hpp \
+                    ../include-refactoring/xsimd/config/xsimd_config.hpp \
                     ../include-refactoring/xsimd/memory/xsimd_aligned_allocator.hpp
 GENERATE_LATEX    = NO
 GENERATE_MAN      = NO

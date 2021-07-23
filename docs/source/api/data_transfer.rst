@@ -7,7 +7,7 @@
 Data transfer
 =============
 
-.. doxygengroup:: simd_batch_data_transfer
+.. doxygengroup:: batch_data_transfer
    :project: xsimd
    :content-only:
 

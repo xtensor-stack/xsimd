@@ -36,6 +36,11 @@ protected:
     value_type scalar;
     real_value_type real_scalar;
 
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    using xtl_value_type = xtl::xcomplex<real_value_type, real_value_type, true>;
+    using xtl_array_type = std::array<xtl_value_type, size>;
+#endif
+
     batch_complex_test()
     {
         scalar = value_type(real_value_type(1.4), real_value_type(2.3));
@@ -109,6 +114,16 @@ protected:
         }
 
     }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    void test_load_store_xtl() const
+    {
+      xtl_array_type tmp;
+      std::fill(tmp.begin(), tmp.end(), xtl_value_type(2, 3));
+      batch_type b0(xtl_value_type(2, 3));
+      EXPECT_EQ(b0, tmp) << print_function_name("batch(value_type)");
+    }
+#endif
+
 
     void test_constructors() const
     {
@@ -539,6 +554,13 @@ TYPED_TEST(batch_complex_test, load_store)
 {
     this->test_load_store();
 }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+TYPED_TEST(batch_complex_test, load_store_xtl)
+{
+    this->test_load_store_xtl();
+}
+#endif
 
 TYPED_TEST(batch_complex_test, constructors)
 {
