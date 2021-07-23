@@ -173,7 +173,7 @@
 /**
  * @ingroup xsimd_config_macro
  *
- * Set to 1 if SSE is available at compile-time, to 0 otherwise.
+ * Set to 1 if AVX512BW is available at compile-time, to 0 otherwise.
  */
 #ifdef __AVX512BW__
 #define XSIMD_WITH_AVX512BW XSIMD_WITH_AVX512F
@@ -182,12 +182,23 @@
 #endif
 
 #ifdef __ARM_NEON
+
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if NEON is available at compile-time, to 0 otherwise.
+ */
     #if __ARM_ARCH >= 7
         #define XSIMD_WITH_NEON 1
     #else
         #define XSIMD_WITH_NEON 0
     #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if NEON64 is available at compile-time, to 0 otherwise.
+ */
     #ifdef __aarch64__
         #define XSIMD_WITH_NEON64 1
     #else
