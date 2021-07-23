@@ -212,13 +212,6 @@ B bitwise_cast(batch<T, A> const& x) {
   return kernel::bitwise_cast<A>(x, B{}, A{});
 }
 
-/**
- * @ingroup simd_batch_bitwise
- *
- * Computes the bitwise not of batch \c x.
- * @param x batch involved in the operation.
- * @return the result of the bitwise not.
- */
 template<class T, class A>
 batch<T, A> bitwise_not(batch<T, A> const& x) {
   return kernel::bitwise_not<A>(x, A{});
@@ -1516,8 +1509,23 @@ batch<T, A> zip_lo(batch<T, A> const& x, batch<T, A> const& y) {
   return kernel::zip_lo<A>(x, y, A{});
 }
 
-// high level functions - batch_bool
-//
+// bitwise_cast
+template <class A, class T, typename std::enable_if<std::is_integral<T>::value, int>::type = 3>
+batch<T, A> bitwise_cast(batch_bool<T, A> const& self)
+{
+  T z(0);
+  return select(self, batch<T, A>(T(~z)), batch<T, A>(z));
+}
+    
+template <class A, class T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 3>
+batch<T, A> bitwise_cast(batch_bool<T, A> const& self)
+{
+    T z0(0), z1(0);
+    using int_type = as_unsigned_integer_t<T>;
+    int_type value(~int_type(0));
+    std::memcpy(&z1, &value, sizeof(int_type));
+    return select(self, batch<T, A>(z1), batch<T, A>(z0)); 
+}
 
 /**
  * @ingroup simd_batch_bool_reducers
@@ -1563,7 +1571,6 @@ std::ostream& operator<<(std::ostream& o, batch<T, A> const& x) {
     o << buffer[i] << ", ";
   return o << buffer[size - 1] << ')';
 }
-
 }
 
 #endif

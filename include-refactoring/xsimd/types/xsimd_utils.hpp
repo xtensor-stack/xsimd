@@ -89,6 +89,18 @@ namespace xsimd
     template <class T>
     using as_unsigned_integer_t = typename as_unsigned_integer<T>::type;
 
+    /*********************
+     * as_signed_integer *
+     *********************/
+
+    template <class T>
+    struct as_signed_integer : std::make_signed<T>
+    {
+    };
+
+    template <class T>
+    using as_signed_integer_t = typename as_signed_integer<T>::type;
+
     /******************
      * flip_sign_type *
      ******************/
@@ -227,9 +239,84 @@ namespace xsimd
 
             template <typename... Ts>
             using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
+
+
+            template <int... Is>
+            using int_sequence = integer_sequence<int, Is...>;
+
+            template <typename Lhs, typename Rhs>
+            struct make_int_sequence_concat;
+
+            template <std::size_t... Lhs, std::size_t... Rhs>
+            struct make_int_sequence_concat<int_sequence<Lhs...>,
+                                            int_sequence<Rhs...>>
+              : identity<int_sequence<Lhs..., (sizeof...(Lhs) + Rhs)...>> {};
+
+            template <std::size_t N>
+            struct make_int_sequence_impl;
+
+            template <std::size_t N>
+            using make_int_sequence = typename make_int_sequence_impl<N>::type;
+
+            template <std::size_t N>
+            struct make_int_sequence_impl
+              : make_int_sequence_concat<make_int_sequence<N / 2>,
+                                         make_int_sequence<N - (N / 2)>> {};
+
+            template <>
+            struct make_int_sequence_impl<0> : identity<int_sequence<>> {};
+
+            template <>
+            struct make_int_sequence_impl<1> : identity<int_sequence<0>> {};
+
+            template <typename... Ts>
+            using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
+
         #endif
     }
 
+    /***********************************
+     * Backport of std::get from C++14 *
+     ***********************************/
+
+    namespace detail
+    {
+        template <class T, class... Types, size_t I, size_t... Is>
+        const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, T>, index_sequence<I, Is...>)
+        {
+            return std::get<I>(t);
+        }
+
+        template <class T, class U, class... Types, size_t I, size_t... Is>
+        const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, U>, index_sequence<I, Is...>)
+        {
+            using tuple_elem = typename std::tuple_element<I+1, std::tuple<Types...>>::type;
+            return get_impl<T>(t, std::is_same<T, tuple_elem>(), index_sequence<Is...>());
+        }
+
+        template <class T, class... Types>
+        const T& get(const std::tuple<Types...>& t)
+        {
+            using tuple_elem = typename std::tuple_element<0, std::tuple<Types...>>::type;
+            return get_impl<T>(t, std::is_same<T, tuple_elem>(), make_index_sequence<sizeof...(Types)>());
+        }
+    }
+
+    /*********************************
+     * Backport of void_t from C++17 *
+     *********************************/
+
+    namespace detail
+    {
+        template <class... T>
+        struct make_void
+        {
+            using type = void;
+        };
+
+        template <class... T>
+        using void_t = typename make_void<T...>::type;
+    }
 
     /*****************************************
      * Supplementary std::array constructors *
@@ -240,7 +327,8 @@ namespace xsimd
         // std::array constructor from scalar value ("broadcast")
         template <typename T, std::size_t... Is>
         constexpr std::array<T, sizeof...(Is)>
-        array_from_scalar_impl(const T& scalar, index_sequence<Is...>) {
+        array_from_scalar_impl(const T& scalar, index_sequence<Is...>)
+        {
             // You can safely ignore this silly ternary, the "scalar" is all
             // that matters. The rest is just a dirty workaround...
             return std::array<T, sizeof...(Is)>{ (Is+1) ? scalar : T() ... };
@@ -248,20 +336,23 @@ namespace xsimd
 
         template <typename T, std::size_t N>
         constexpr std::array<T, N>
-        array_from_scalar(const T& scalar) {
+        array_from_scalar(const T& scalar)
+        {
             return array_from_scalar_impl(scalar, make_index_sequence<N>());
         }
 
         // std::array constructor from C-style pointer (handled as an array)
         template <typename T, std::size_t... Is>
         constexpr std::array<T, sizeof...(Is)>
-        array_from_pointer_impl(const T* c_array, index_sequence<Is...>) {
+        array_from_pointer_impl(const T* c_array, index_sequence<Is...>)
+        {
             return std::array<T, sizeof...(Is)>{ c_array[Is]... };
         }
 
         template <typename T, std::size_t N>
         constexpr std::array<T, N>
-        array_from_pointer(const T* c_array) {
+        array_from_pointer(const T* c_array)
+        {
             return array_from_pointer_impl(c_array, make_index_sequence<N>());
         }
     }
@@ -322,8 +413,6 @@ namespace xsimd
         };
 #endif
     }
-
-
 }
 
 #endif

@@ -53,9 +53,16 @@
 #include "./xsimd_avx512bw.hpp"
 #endif
 
+#if XSIMD_WITH_NEON
+#include "./xsimd_neon.hpp"
+#endif
+
+#if XSIMD_WITH_NEON64
+#include "./xsimd_neon64.hpp"
+#endif
+
 // Must come last to have access to all conversion specializations.
 #include "./xsimd_generic.hpp"
-
 
 #endif
 

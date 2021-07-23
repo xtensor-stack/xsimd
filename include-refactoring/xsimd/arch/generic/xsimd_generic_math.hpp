@@ -36,7 +36,7 @@ namespace xsimd {
     namespace detail {
     template<class A, class T_out, class T_in>
     batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires<generic>, with_fast_conversion) {
-      return conversion::fast<A>(self, out, A{});
+      return fast_cast(self, out, A{});
     }
     template<class A, class T_out, class T_in>
     batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires<generic>, with_slow_conversion) {

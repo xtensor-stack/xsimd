@@ -162,20 +162,25 @@ namespace xsimd {
       return {};
     }
 
-    // complex_low
-    template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<sse>) {
-      return _mm_unpacklo_ps(self.real(), self.imag());
-    }
-    template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<sse>) {
-      return _mm_unpacklo_pd(self.real(), self.imag());
-    }
+    // store_complex
+    namespace detail
+    {
+      // Override these methods in SSE-based archs, no need to override store_aligned / store_unaligned
+      // complex_low
+      template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<sse>) {
+        return _mm_unpacklo_ps(self.real(), self.imag());
+      }
+      template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<sse>) {
+        return _mm_unpacklo_pd(self.real(), self.imag());
+      }
 
-    // complex_high
-    template<class A> batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires<sse>) {
-      return _mm_unpackhi_ps(self.real(), self.imag());
-    }
-    template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<sse>) {
-      return _mm_unpackhi_pd(self.real(), self.imag());
+      // complex_high
+      template<class A> batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires<sse>) {
+        return _mm_unpackhi_ps(self.real(), self.imag());
+      }
+      template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<sse>) {
+        return _mm_unpackhi_pd(self.real(), self.imag());
+      }
     }
 
     // div
@@ -282,11 +287,15 @@ namespace xsimd {
     }
 
     // load_complex
-    template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<sse>) {
-      return {_mm_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0)), _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))};
-    }
-    template<class A> batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires<sse>) {
-      return {_mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0)), _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1))};
+    namespace detail
+    {
+      // Redefine these methods in the SSE-based archs if required
+      template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<sse>) {
+        return {_mm_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0)), _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))};
+      }
+      template<class A> batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires<sse>) {
+        return {_mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0)), _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1))};
+      }
     }
 
     // load_unaligned

@@ -21,6 +21,8 @@ template <class T> struct simd_avx512_bool_register {
       (sizeof(T) < 4), std::conditional<(sizeof(T) == 1), __mmask64, __mmask32>,
       std::conditional<(sizeof(T) == 4), __mmask16, __mmask8>>::type::type;
   register_type data;
+  simd_avx512_bool_register() = default;
+  simd_avx512_bool_register(register_type r) { data = r; }
   operator register_type() const { return data; }
 };
 template <class T> struct get_bool_simd_register<T, avx512f> {
@@ -47,5 +49,6 @@ template <class T> struct get_bool_simd_register<T, avx512f> {
   }
 #endif
 }
+
 #endif
 

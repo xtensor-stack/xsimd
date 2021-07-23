@@ -298,7 +298,6 @@ namespace xsimd {
     }
 
 
-    // complex_low
     namespace detail {
         // On clang, _mm256_extractf128_ps is built upon build_shufflevector
         // which require index parameter to be a constant
@@ -326,20 +325,22 @@ namespace xsimd {
             res = _mm256_insertf128_pd(res, tmp2, 1);
             return res;
         }
-    }
-    template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<avx>) {
-            return detail::get_half_complex_f<0>(self.real(), self.imag());
-    }
-    template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<avx>) {
-            return detail::get_half_complex_d<0>(self.real(), self.imag());
-    }
 
-    // complex_high
-    template<class A> batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires<avx>) {
-            return detail::get_half_complex_f<1>(self.real(), self.imag());
-    }
-    template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx>) {
-            return detail::get_half_complex_d<1>(self.real(), self.imag());
+        // complex_low
+        template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<avx>) {
+                return get_half_complex_f<0>(self.real(), self.imag());
+        }
+        template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<avx>) {
+                return get_half_complex_d<0>(self.real(), self.imag());
+        }
+
+        // complex_high
+        template<class A> batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires<avx>) {
+                return get_half_complex_f<1>(self.real(), self.imag());
+        }
+        template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx>) {
+                return get_half_complex_d<1>(self.real(), self.imag());
+        }
     }
     // convert
     namespace detail {
@@ -531,6 +532,8 @@ namespace xsimd {
       return _mm256_load_pd(mem);
     }
 
+    namespace detail
+    {
     // load_complex
     template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<avx>) {
             using batch_type = batch<float, A>;
@@ -564,6 +567,7 @@ namespace xsimd {
             real = _mm256_blend_pd(re_tmp0, re_tmp1, 12);
             imag = _mm256_blend_pd(im_tmp0, im_tmp1, 12);
             return {real, imag};
+    }
     }
 
     // load_unaligned

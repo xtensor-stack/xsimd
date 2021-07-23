@@ -35,7 +35,47 @@ public:
     template <class T>
     static std::string GetName(int)
     {
-        return __PRETTY_FUNCTION__ + std::string("unknow_type");
+        using value_type = typename T::value_type;
+        std::string prefix = "fallback_";
+#if XSIMD_WITH_SSE
+        size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
+        if (register_size == size_t(128))
+        {
+            prefix = "sse_";
+        }
+        else if (register_size == size_t(256))
+        {
+            prefix = "avx_";
+        }
+        else if (register_size == size_t(512))
+        {
+            prefix = "avx512_";
+        }
+#elif XSIMD_WITH_ARM7
+        size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
+        if (register_size == size_t(128))
+        {
+            prefix = "arm_";
+        }
+#endif
+        if (std::is_same<value_type, uint8_t>::value) { return prefix + "uint8_t"; }
+        if (std::is_same<value_type, int8_t>::value) { return prefix + "int8_t"; }
+        if (std::is_same<value_type, uint16_t>::value) { return prefix + "uint16_t"; }
+        if (std::is_same<value_type, int16_t>::value) { return prefix + "int16_t"; }
+        if (std::is_same<value_type, uint32_t>::value) { return prefix + "uint32_t"; }
+        if (std::is_same<value_type, int32_t>::value) { return prefix + "int32_t"; }
+        if (std::is_same<value_type, uint64_t>::value) { return prefix + "uint64_t"; }
+        if (std::is_same<value_type, int64_t>::value) { return prefix + "int64_t"; }
+        if (std::is_same<value_type, float>::value) { return prefix + "float"; }
+        if (std::is_same<value_type, double>::value) { return prefix + "double"; }
+        if (std::is_same<value_type, std::complex<float>>::value) { return prefix + "complex<float>"; }
+        if (std::is_same<value_type, std::complex<double>>::value) { return prefix + "complex<double>"; }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        if (std::is_same<value_type, xtl::xcomplex<float>>::value) { return prefix + "xcomplex<float>"; }
+        if (std::is_same<value_type, xtl::xcomplex<double>>::value) { return prefix + "xcomplex<double>"; }
+#endif
+
+        return prefix + "unknow_type";
     }
 };
 
@@ -385,12 +425,13 @@ namespace detail
         return expect_array_near(lhs_expression, rhs_expression, lhs, tmp);
     }
 
-    template <class T, size_t N, class A>
+    template <class T, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
                                                const ::xsimd::batch_bool<T, A>& lhs,
                                                const ::xsimd::batch_bool<T, A>& rhs)
     {
+        constexpr auto N = xsimd::batch<T, A>::size;
         std::array<bool, N> tmp;
         lhs.store_unaligned(tmp.data());
         return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);

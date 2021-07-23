@@ -280,11 +280,11 @@ namespace xsimd {
     }
 
     template<class A> batch<float, A> bitwise_not(batch<float, A> const& self, requires<avx512f>) {
-      return _mm256_xor_ps(self, _mm256_castsi256_ps(_mm256_set1_epi32(-1)));
+      return _mm512_xor_ps(self, _mm512_castsi512_ps(_mm512_set1_epi32(-1)));
     }
     template <class A>
     batch<double, A> bitwise_not(batch<double, A> const &self, requires<avx512f>) {
-      return _mm256_xor_pd(self, _mm256_castsi256_pd(_mm256_set1_epi32(-1)));
+      return _mm512_xor_pd(self, _mm512_castsi512_pd(_mm512_set1_epi32(-1)));
     }
 
     // bitwise_or
@@ -414,6 +414,8 @@ namespace xsimd {
     }
 
 
+    namespace detail
+    {
     // complex_low
     template<class A> batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires<avx512f>) {
         __m512i idx = _mm512_setr_epi32(0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23);
@@ -432,6 +434,7 @@ namespace xsimd {
     template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx512f>) {
         __m512i idx = _mm512_setr_epi64(4, 12, 5, 13, 6, 14, 7, 15);
         return _mm512_permutex2var_pd(self.real(), idx, self.imag());
+    }
     }
 
     // convert
@@ -659,6 +662,8 @@ namespace xsimd {
     }
 
     // load_complex
+    namespace detail
+    {
     template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<avx512f>) {
         __m512i real_idx = _mm512_setr_epi32(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30);
         __m512i imag_idx = _mm512_setr_epi32(1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
@@ -672,6 +677,7 @@ namespace xsimd {
         auto real = _mm512_permutex2var_pd(hi, real_idx, lo);
         auto imag = _mm512_permutex2var_pd(hi, imag_idx, lo);
         return {real, imag};
+    }
     }
 
     // load_unaligned

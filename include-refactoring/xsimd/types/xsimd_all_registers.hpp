@@ -13,3 +13,7 @@
 #include "../types/xsimd_avx512cd_register.hpp"
 #include "../types/xsimd_avx512dq_register.hpp"
 #include "../types/xsimd_avx512bw_register.hpp"
+
+#include "xsimd_neon_register.hpp"
+#include "xsimd_neon64_register.hpp"
+
