@@ -112,6 +112,30 @@ namespace xsimd {
       return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
     }
 
+    // bitwise_andnot
+    template<class A> batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires<avx>) {
+      return _mm256_andnot_ps(self, other);
+    }
+    template<class A> batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires<avx>) {
+      return _mm256_andnot_pd(self, other);
+    }
+
+    template<class A> batch_bool<float, A> bitwise_andnot(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<avx>) {
+      return _mm256_andnot_ps(self, other);
+    }
+    template<class A> batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<avx>) {
+      return _mm256_andnot_pd(self, other);
+    }
+
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires<avx>) {
+      return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_andnot(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx>) {
+      return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_andnot(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
+    }
+
     // bitwise_lshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx>) {

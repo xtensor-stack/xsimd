@@ -252,6 +252,25 @@ namespace xsimd {
       return register_type(self.data & other.data);
     }
 
+    // bitwise_andnot
+    template<class A> batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires<avx512f>) {
+      return _mm512_castsi512_ps(_mm512_andnot_si512(_mm512_castps_si512(self), _mm512_castps_si512(other)));
+    }
+    template<class A> batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires<avx512f>) {
+      return _mm512_castsi512_pd(_mm512_andnot_si512(_mm512_castpd_si512(self), _mm512_castpd_si512(other)));
+    }
+
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires<avx512f>) {
+      return _mm512_andnot_si512(self, other);
+    }
+
+    template<class A, class T>
+    batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx512f>) {
+      using register_type = typename batch_bool<T, A>::register_type;
+      return register_type(self.data & ~other.data);
+    }
+
     // bitwise_lshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx512f>) {

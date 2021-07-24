@@ -60,8 +60,8 @@ namespace xsimd {
       return _mm_andnot_si128(self, other);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse2>) {
-      return _mm_and_si128(self, other);
+    batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse2>) {
+      return _mm_andnot_si128(self, other);
     }
 
     // bitwise_lshift

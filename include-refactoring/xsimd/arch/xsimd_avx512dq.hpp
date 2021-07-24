@@ -16,6 +16,14 @@ namespace xsimd {
       return _mm512_and_pd(self, other);
     }
 
+    // bitwise_andnot
+    template<class A> batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires<avx512dq>) {
+      return _mm512_andnot_ps(self, other);
+    }
+    template<class A> batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires<avx512dq>) {
+      return _mm512_andnot_pd(self, other);
+    }
+
     // bitwise_or
     template<class A> batch<float, A> bitwise_or(batch<float, A> const& self, batch<float, A> const& other, requires<avx512dq>) {
       return _mm512_or_ps(self, other);
