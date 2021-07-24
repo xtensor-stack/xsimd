@@ -54,6 +54,16 @@ namespace xsimd {
       return _mm_and_si128(self, other);
     }
 
+    // bitwise_andnot
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires<sse2>) {
+      return _mm_andnot_si128(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<sse2>) {
+      return _mm_and_si128(self, other);
+    }
+
     // bitwise_lshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<sse2>) {
