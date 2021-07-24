@@ -56,6 +56,21 @@ namespace xsimd {
       return _mm_and_pd(self, other);
     }
 
+    // bitwise_andnot
+    template<class A> batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
+      return _mm_andnot_ps(self, other);
+    }
+    template<class A> batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires<sse>) {
+      return _mm_andnot_pd(self, other);
+    }
+
+    template<class A> batch_bool<float, A> bitwise_andnot(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires<sse>) {
+      return _mm_andnot_ps(self, other);
+    }
+    template<class A> batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires<sse>) {
+      return _mm_andnot_pd(self, other);
+    }
+
     // bitwise_or
     template<class A> batch<float, A> bitwise_or(batch<float, A> const& self, batch<float, A> const& other, requires<sse>) {
       return _mm_or_ps(self, other);
