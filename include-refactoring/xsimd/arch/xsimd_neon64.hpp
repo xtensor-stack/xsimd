@@ -369,6 +369,23 @@ namespace xsimd
             return vandq_u64(lhs, rhs);
         }
 
+        /******************
+         * bitwise_andnot *
+         ******************/
+
+        template <class A>
+        batch<double, A> bitwise_andnot(batch<double, A> const& lhs, batch<double, A> const& rhs, requires<neon64>)
+        {
+            return vreinterpretq_f64_u64(vbicq_u64(vreinterpretq_u64_f64(lhs),
+                                                   vreinterpretq_u64_f64(rhs)));
+        }
+
+        template <class A>
+        batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires<neon64>)
+        {
+            return vbicq_u64(lhs, rhs);
+        }
+
         /**************
          * bitwise_or *
          **************/

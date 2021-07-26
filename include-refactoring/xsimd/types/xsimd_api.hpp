@@ -204,6 +204,33 @@ auto bitwise_and(T const& x, Tp const& y) -> decltype(x & y){
 }
 
 /**
+ * @ingroup batch_bitwise
+ *
+ * Computes the bitwise and not of batches \c x and \c y.
+ * @param x batch involved in the operation.
+ * @param y batch involved in the operation.
+ * @return the result of the bitwise and not.
+ */
+template<class T, class A>
+batch<T, A> bitwise_andnot(batch<T, A> const& x, batch<T, A> const& y) {
+  return kernel::bitwise_andnot<A>(x, y, A{});
+}
+
+
+/**
+ * @ingroup batch_bool_logical
+ *
+ * Computes the bitwise and not of batches \c x and \c y.
+ * @param x batch involved in the operation.
+ * @param y batch involved in the operation.
+ * @return the result of the bitwise and not.
+ */
+template<class T, class A>
+batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& x, batch_bool<T, A> const& y) {
+  return kernel::bitwise_andnot<A>(x, y, A{});
+}
+
+/**
  * @ingroup batch_conversion
  *
  * Perform a reinterpret_cast from \c T_in to \c T_out on \c x.
