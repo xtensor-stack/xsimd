@@ -27,9 +27,8 @@ namespace xsimd
             unsigned avx2 : 1;
             unsigned avx512f : 1;
             unsigned avx512bw : 1;
-            unsigned arm7 : 1;
-            unsigned arm8_32 : 1;
-            unsigned arm8_64 : 1;
+            unsigned neon : 1;
+            unsigned neon64 : 1;
 
             // version number of the best arch available
             unsigned best;
@@ -39,15 +38,16 @@ namespace xsimd
                  memset(this, 0, sizeof(supported_arch));
 
 #if defined(__aarch64__) || defined(_M_ARM64)
-                 arm7 = 1;
-                 arm8_32 = 1;
-                 arm8_64 = 1;
-                 best = arm8_64::version();
+                 neon = 1;
+                 neon64 = 1;
+                 best = neon64::version();
 #elif defined(__ARM_NEON) || defined(_M_ARM)
-                 arm7 = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
-                 best = arm7::version() * neon;
-                 arm8_32 = 0;
-                 arm8_64 = 0;
+                 // TODO: fix undefined error of AT_HWCAP on arm7
+                 //neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
+                 //best = neon::version() * neon;
+                 neon = 1;
+                 neon64 = 0;
+                 best = neon::version();
 
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
                  auto get_cpuid = [](int reg[4], int func_id)
