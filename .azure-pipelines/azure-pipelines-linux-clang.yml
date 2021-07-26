@@ -14,19 +14,14 @@ jobs:
           arm_arch_target: 'armv8-a'
         clang_5:
           llvm_version: '5.0'
-          refactoring: 1
         clang_6:
           llvm_version: '6.0'
-          refactoring: 1
         clang_7:
           llvm_version: '7'
-          refactoring: 1
         clang_8:
           llvm_version: '8'
-          refactoring: 1
         clang_9:
           llvm_version: '9'
-          refactoring: 1
         clang_10_avx512:
           llvm_version: '10'
           avx512: 1
