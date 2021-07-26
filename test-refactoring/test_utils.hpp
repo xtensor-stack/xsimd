@@ -51,7 +51,7 @@ public:
         {
             prefix = "avx512_";
         }
-#elif XSIMD_WITH_ARM7
+#elif XSIMD_WITH_NEON
         size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
         if (register_size == size_t(128))
         {
