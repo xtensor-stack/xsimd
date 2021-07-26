@@ -247,10 +247,10 @@ namespace xsimd
             template <typename Lhs, typename Rhs>
             struct make_int_sequence_concat;
 
-            template <std::size_t... Lhs, std::size_t... Rhs>
+            template <int... Lhs, int... Rhs>
             struct make_int_sequence_concat<int_sequence<Lhs...>,
                                             int_sequence<Rhs...>>
-              : identity<int_sequence<Lhs..., (sizeof...(Lhs) + Rhs)...>> {};
+              : identity<int_sequence<Lhs..., int(sizeof...(Lhs) + Rhs)...>> {};
 
             template <std::size_t N>
             struct make_int_sequence_impl;

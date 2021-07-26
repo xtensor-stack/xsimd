@@ -448,6 +448,47 @@ namespace xsimd
             store_aligned<A>(dst, src, A{});
         }
 
+        /****************
+         * load_complex *
+         ****************/
+
+        template <class A>
+        batch<std::complex<float>, A> load_complex_aligned(std::complex<float> const* mem, requires<neon>)
+        {
+            using real_batch = batch<float, A>;
+            const float* buf = reinterpret_cast<const float*>(mem);
+            float32x4x2_t tmp = vld2q_f32(buf);
+            real_batch real = tmp.val[0],
+                       imag = tmp.val[1];
+            return batch<std::complex<float>, A>{real, imag};
+        }
+
+        template <class A>
+        batch<std::complex<float>, A> load_complex_unaligned(std::complex<float> const* mem, requires<neon>)
+        {
+            return load_complex_aligned<A>(mem, A{});
+        }
+
+        /*****************
+         * store_complex *
+         *****************/
+
+        template <class A>
+        void store_complex_aligned(std::complex<float>* dst, batch<std::complex<float> ,A> const& src, requires<neon>)
+        {
+            float32x4x2_t tmp;
+            tmp.val[0] = src.real();
+            tmp.val[1] = src.imag();
+            float* buf = reinterpret_cast<float*>(dst);
+            vst2q_f32(buf, tmp);
+        }
+
+        template <class A>
+        void store_complex_unaligned(std::complex<float>* dst, batch<std::complex<float> ,A> const& src, requires<neon>)
+        {
+            store_complex_aligned(dst, src, A{});
+        }
+
         /*******
          * neg *
          *******/
@@ -1443,7 +1484,7 @@ namespace xsimd
         namespace detail
         {
             template <class A, class T>
-            batch<T, A> bitwise_lshfit(batch<T, A> const& lhs, int n, ::xsimd::detail::index_sequence<0>)
+            batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, ::xsimd::detail::int_sequence<0>)
             {
                 return lhs;
             }
@@ -1616,7 +1657,7 @@ namespace xsimd
         namespace detail
         {
             template <class A, class T>
-            batch<T, A> bitwise_rshfit(batch<T, A> const& lhs, int n, ::xsimd::detail::index_sequence<0>)
+            batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, ::xsimd::detail::int_sequence<0>)
             {
                 return lhs;
             }
@@ -1692,6 +1733,19 @@ namespace xsimd
                 if (n == I)
                 {
                     return vshrq_n_s32(lhs, n);
+                }
+                else
+                {
+                    return bitwise_rshift(lhs, n, ::xsimd::detail::int_sequence<Is...>());
+                }
+            }
+
+            template <class A, class T, int I, int... Is, detail::enable_sized_unsigned_t<T, 8> = 0>
+            batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, ::xsimd::detail::int_sequence<I, Is...>)
+            {
+                if (n == I)
+                {
+                    return vshrq_n_u64(lhs, n);
                 }
                 else
                 {

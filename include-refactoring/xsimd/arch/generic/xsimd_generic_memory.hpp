@@ -103,6 +103,27 @@ namespace xsimd {
       return store_aligned<A>(mem, self, generic{});
     }
 
+    namespace detail
+    {
+        template <class A, class T>
+        batch<std::complex<T>, A> load_complex(batch<T, A> const& /*hi*/, batch<T, A> const& /*lo*/, requires<generic>)
+        {
+            throw std::runtime_error("load_complex not implemented");
+        }
+
+        template <class A, class T>
+        batch<T, A> complex_high(batch<std::complex<T>, A> const& /*src*/, requires<generic>)
+        {
+            throw std::runtime_error("complex_high not implemented");
+        }
+
+        template <class A, class T>
+        batch<T, A> complex_low(batch<std::complex<T>, A> const& /*src*/, requires<generic>)
+        {
+            throw std::runtime_error("complex_low not implemented");
+        }
+    }
+
     // load_complex_aligned
     template <class A, class T> batch<std::complex<T>, A> load_complex_aligned(std::complex<T> const* mem, requires<generic>) {
       using real_batch = batch<T, A>;
