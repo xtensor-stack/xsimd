@@ -739,45 +739,6 @@ namespace xsimd
             return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
         }
 
-        /******************
-         * bitwise_andnot *
-         ******************/
-
-        namespace detail
-        {
-            inline float32x4_t bitwise_andnot_f32(float32x4_t lhs, float32x4_t rhs)
-            {
-                return vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(lhs),
-                                                       vreinterpretq_u32_f32(rhs)));
-            }
-
-            template <class V>
-            V bitwise_andnot_neon(V const& lhs, V const& rhs)
-            {
-                constexpr neon_dispatcher::binary dispatcher =
-                {
-                    std::make_tuple(vbicq_u8, vbicq_s8, vbicq_u16, vbicq_s16,
-                                    vbicq_u32, vbicq_s32, vbicq_u64, vbicq_s64,
-                                    bitwise_andnot_f32)
-                };
-                return dispatcher.apply(lhs, rhs);
-            }
-        }
-
-        template <class A, class T, detail::enable_neon_type_t<T> = 0>
-        batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
-        {
-            using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
-        }
-
-        template <class A, class T, detail::enable_neon_type_t<T> = 0>
-        batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
-        {
-            using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
-        }
-
         /**************
          * bitwise_or *
          **************/

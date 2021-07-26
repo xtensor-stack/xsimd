@@ -369,23 +369,6 @@ namespace xsimd
             return vandq_u64(lhs, rhs);
         }
 
-        /******************
-         * bitwise_andnot *
-         ******************/
-
-        template <class A>
-        batch<double, A> bitwise_andnot(batch<double, A> const& lhs, batch<double, A> const& rhs, requires<neon64>)
-        {
-            return vreinterpretq_f64_u64(vbicq_u64(vreinterpretq_u64_f64(lhs),
-                                                   vreinterpretq_u64_f64(rhs)));
-        }
-
-        template <class A>
-        batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires<neon64>)
-        {
-            return vbicq_u64(lhs, rhs);
-        }
-
         /**************
          * bitwise_or *
          **************/
@@ -687,7 +670,7 @@ namespace xsimd
         template <class A>
         batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n, requires<neon64>)
         {
-            constexpr std::size_t size = batch<T, A>::size;
+            constexpr std::size_t size = batch<double, A>::size;
             assert(0<= n && n< size && "index in bounds");
             return detail::extract_pair(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
         }
@@ -715,7 +698,7 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T>, A> const& rhs, requires<neon64>)
+        batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon64>)
         {
             return vshlq_s64(lhs, vnegq_s64(rhs));
         }
