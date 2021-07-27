@@ -22,6 +22,9 @@ namespace xsimd
     template <class T, std::size_t N>
     batch<T, N> frexp(const batch<T, N>& arg, batch<as_integer_t<T>, N>& exp);
 
+    template <typename T>
+    as_float_t<T> fexp_to_float(const T& x);
+
     /********************************************************
      * Floating point manipulation functions implementation *
      ********************************************************/
@@ -66,6 +69,27 @@ namespace xsimd
         exp = select(bool_cast(arg != b_type(0.)), exp, zero<i_type>());
         return select((arg != b_type(0.)), x | bitwise_cast<b_type>(mask2frexp<b_type>()), b_type(0.));
     }
+
+    template <typename T>
+    inline as_float_t<T> fexp_to_float(const T& x)
+    {
+        return to_float(x);
+    }
+
+    // fexps are 8/11-bit numbers. so we can down-cast to int16_t/int32_t then do the job
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+    inline batch<double, 4> fexp_to_float(const batch<int64_t, 4>& x)
+    {
+        return _mm256_cvtepi32_pd(detail::xsimd_cvtepi64_epi32(x));
+    }
+#endif
+
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+    inline batch<double, 2> fexp_to_float(const batch<int64_t, 2>& x)
+    {
+        return _mm_cvtepi32_pd(_mm_shuffle_epi32(x, _MM_SHUFFLE(0, 0, 2, 0)));
+    }
+#endif
 }
 
 #endif
