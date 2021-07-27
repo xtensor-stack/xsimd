@@ -95,7 +95,7 @@ namespace xsimd
                 B t2 = z * horner<B, 0x3f2aaaaa, 0x3e91e9ee>(w);
                 B R = t2 + t1;
                 B hfsq = B(0.5) * f * f;
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 B r = fma(dk, log_2hi<B>(), fma(s, (hfsq + R), dk * log_2lo<B>()) - hfsq + f);
 #ifndef XSIMD_NO_INFINITIES
                 B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
@@ -136,7 +136,7 @@ namespace xsimd
 #endif
                 hx += 0x3ff00000 - 0x3fe6a09e;
                 k += (hx >> 20) - 0x3ff;
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 hx = (hx & i_type(0x000fffff)) + 0x3fe6a09e;
                 x = bitwise_cast<B>(hx << 32 | (i_type(0xffffffff) & bitwise_cast<i_type>(x)));
 
@@ -223,7 +223,7 @@ namespace xsimd
                 B t2 = z * horner<B, 0x3f2aaaaa, 0x3e91e9ee>(w);
                 B R = t1 + t2;
                 B hfsq = B(0.5) * f * f;
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 B r = fma(fms(s, hfsq + R, hfsq) + f, invlog_2<B>(), dk);
 #ifndef XSIMD_NO_INFINITIES
                 B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
@@ -287,7 +287,7 @@ namespace xsimd
                 B lo = fma(s, hfsq + R, f - hi - hfsq);
                 B val_hi = hi * invlog_2hi<B>();
                 B val_lo = fma(lo + hi, invlog_2lo<B>(), lo * invlog_2hi<B>());
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 B w1 = dk + val_hi;
                 val_lo += (dk - w1) + val_hi;
                 val_hi = w1;
@@ -362,7 +362,7 @@ namespace xsimd
                 B t1 = w * horner<B, 0x3eccce13, 0x3e789e26>(w);
                 B t2 = z * horner<B, 0x3f2aaaaa, 0x3e91e9ee>(w);
                 B R = t2 + t1;
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 B hfsq = B(0.5) * f * f;
                 B hibits = f - hfsq;
                 hibits &= bitwise_cast<B>(i_type(0xfffff000));
@@ -419,7 +419,7 @@ namespace xsimd
                 hx = (hx & i_type(0x000fffff)) + 0x3fe6a09e;
                 x = bitwise_cast<B>(hx << 32 | (i_type(0xffffffff) & bitwise_cast<i_type>(x)));
                 B f = --x;
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 B s = f / (B(2.) + f);
                 B z = s * s;
                 B w = z * z;
@@ -498,7 +498,7 @@ namespace xsimd
                 B t2 = z * horner<B, 0x3f2aaaaa, 0x3e91e9ee>(w);
                 B R = t2 + t1;
                 B hfsq = B(0.5) * f * f;
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
                 B c = select(bool_cast(k >= i_type(2)), B(1.) - (uf - a), a - (uf - B(1.))) / uf;
                 B r = fma(dk, log_2hi<B>(), fma(s, (hfsq + R), dk * log_2lo<B>() + c) - hfsq + f);
@@ -550,7 +550,7 @@ namespace xsimd
                                   0x3fc7466496cb03dell,
                                   0x3fc2f112df3e5244ll>(w);
                 B R = t2 + t1;
-                B dk = to_float(k);
+                B dk = fexp_to_float(k);
                 B r = fma(dk, log_2hi<B>(), fma(s, hfsq + R, dk * log_2lo<B>() + c) - hfsq + f);
 #ifndef XSIMD_NO_INFINITIES
                 B zz = select(isnez, select(a == infinity<B>(), infinity<B>(), r), minusinfinity<B>());
