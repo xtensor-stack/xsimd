@@ -73,10 +73,20 @@ namespace xsimd
             {
                 using reducer_t = exp_reduction<B, Tag>;
                 B x;
+                print_batch("a", a);
                 B k = reducer_t::reduce(a, x);
+                print_batch("x", x);
+                print_batch("k", k);
                 x = reducer_t::approx(x);
+                print_batch("x", x);
+                print_batch("minlog", reducer_t::minlog());
+                print_batch("a <= minlog", B(a <= reducer_t::minlog()));
+                print_batch("to_int(k)", to_int(k));
+                print_batch("ldexp(x, to_int(k))", ldexp(x, to_int(k)));
                 x = select(a <= reducer_t::minlog(), B(0.), ldexp(x, to_int(k)));
+                print_batch("x", x);
                 x = select(a >= reducer_t::maxlog(), infinity<B>(), x);
+                print_batch("x", x);
                 return x;
             }
         };

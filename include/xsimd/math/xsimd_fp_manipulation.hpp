@@ -26,6 +26,19 @@ namespace xsimd
      * Floating point manipulation functions implementation *
      ********************************************************/
 
+    namespace detail
+    {
+        template <class B>
+        void print_batch(const std::string& name, const B& b)
+        {
+            using register_type = typename B::storage_type;
+            register_type bs = b;
+            int64_t buff[2];
+            memcpy(buff, &bs, 16);
+            std::cout << name << "= " << std::hex << buff[0] << buff[1] << std::endl;
+        }
+    }
+
     /* origin: boost/simd/arch/common/simd/function/ldexp.hpp */
     /*
       * ====================================================
@@ -41,7 +54,11 @@ namespace xsimd
         using btype = batch<T, N>;
         using itype = as_integer_t<btype>;
         itype ik = e + maxexponent<T>();
+        detail::print_batch("ik", ik);
         ik = ik << nmb<T>();
+        detail::print_batch("ik", ik);
+        btype tmp = bitwise_cast<btype>(ik);
+        detail::print_batch("tmp", tmp);
         return x * bitwise_cast<btype>(ik);
     }
 
