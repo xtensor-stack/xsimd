@@ -37,6 +37,8 @@ namespace xsimd
         __m128i xsimd_cvtepi32_epi16(__m256i a);
         __m128i xsimd_cvtepi32_epu16(__m256i a);
 
+        __m128i xsimd_cvtepi64_epi32(__m256i a);
+
         /******************
          * Implementation *
          ******************/
@@ -164,6 +166,13 @@ namespace xsimd
             __m128i res = _mm_unpacklo_epi64(tmp_lo, tmp_hi);
 #endif
             return res;
+        }
+
+        inline __m128i xsimd_cvtepi64_epi32(__m256i a)
+        {
+            __m128i hi = _mm256_extractf128_si256(a, 1);
+            __m128i lo = _mm256_castsi256_si128(a);
+            return (__m128i)_mm_shuffle_ps((__m128)lo, (__m128)hi, _MM_SHUFFLE(2, 0, 2, 0));
         }
     }
 }
