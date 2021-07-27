@@ -170,9 +170,9 @@ namespace xsimd
 
         inline __m128i xsimd_cvtepi64_epi32(__m256i a)
         {
-            __m128i hi = _mm256_extractf128_si256(a, 1);
-            __m128i lo = _mm256_castsi256_si128(a);
-            return (__m128i)_mm_shuffle_ps((__m128)lo, (__m128)hi, _MM_SHUFFLE(2, 0, 2, 0));
+            __m128 hi = _mm_castsi128_ps(_mm256_extractf128_si256(a, 1));
+            __m128 lo = _mm_castsi128_ps(_mm256_castsi256_si128(a));
+            return _mm_castps_si128(_mm_shuffle_ps(lo, hi, _MM_SHUFFLE(2, 0, 2, 0)));
         }
     }
 }
