@@ -77,14 +77,14 @@ namespace xsimd
     }
 
     // fexps are 8/11-bit numbers. so we can down-cast to int16_t/int32_t then do the job
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION && XSIMD_X86_INSTR_SET < XSIMD_X86_AVX512_VERSION
     inline batch<double, 4> fexp_to_float(const batch<int64_t, 4>& x)
     {
         return _mm256_cvtepi32_pd(detail::xsimd_cvtepi64_epi32(x));
     }
 #endif
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION && XSIMD_X86_INSTR_SET < XSIMD_X86_AVX512_VERSION
     inline batch<double, 2> fexp_to_float(const batch<int64_t, 2>& x)
     {
         return _mm_cvtepi32_pd(_mm_shuffle_epi32(x, _MM_SHUFFLE(0, 0, 2, 0)));
