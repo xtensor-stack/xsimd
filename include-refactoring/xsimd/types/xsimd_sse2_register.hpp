@@ -21,6 +21,19 @@ namespace xsimd
     namespace types
     {
         XSIMD_DECLARE_SIMD_REGISTER_ALIAS(sse2, sse);
+        XSIMD_DECLARE_SIMD_REGISTER(bool, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(signed char, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned char, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(char, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned short, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(short, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned int, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(int, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned long int, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(long int, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(long long int, sse2, __m128i);
+        XSIMD_DECLARE_SIMD_REGISTER(double, sse2, __m128d);
     }
 #endif
 }

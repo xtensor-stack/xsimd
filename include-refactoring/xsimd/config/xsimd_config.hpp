@@ -211,4 +211,42 @@
     #define XSIMD_WITH_NEON 0
     #define XSIMD_WITH_NEON64 0
 #endif
+
+// Workaround for MSVC compiler
+#ifdef _MSC_VER
+
+#if XSIMD_WITH_AVX512
+#define XSIMD_WITH_AVX2 1
+#endif
+
+#if XSIMD_WITH_AVX2
+#define XSIMD_WITH_AVX 1
+#endif
+
+#if XSIMD_WITH_AVX
+#define XSIMD_WITH_SSE4_2 1
+#endif
+
+#if XSIMD_WITH_SSE4_2
+#define XSIMD_WITH_SSE4_1 1
+#endif
+
+#if XSIMD_WITH_SSE4_1
+#define XSIMD_WITH_SSSE3 1
+#endif
+
+#if XSIMD_WITH_SSSE3
+#define XSIMD_WITH_SSE3 1
+#endif
+
+#if XSIMD_WITH_SSE3
+#define XSIMD_WITH_SSE2 1
+#endif
+
+#if XSIMD_WITH_SSE2
+#define XSIMD_WITH_SSE 1
+#endif
+
+#endif
+
 #endif

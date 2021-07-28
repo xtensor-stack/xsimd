@@ -134,7 +134,7 @@ namespace xsimd {
         case 2: return _mm256_cmpeq_epi16(self, other);
         case 4: return _mm256_cmpeq_epi32(self, other);
         case 8: return _mm256_cmpeq_epi64(self, other);
-        default: eq(self, other, avx{});
+        default: return eq(self, other, avx{});
       }
     }
 
