@@ -136,13 +136,16 @@
  * Set to 1 if AVX512F is available at compile-time, to 0 otherwise.
  */
 #ifdef __AVX512F__
-// AVX512 instructions are supported starting with gcc 6
-// see https://www.gnu.org/software/gcc/gcc-6/changes.html
-#if defined(__GNUC__) && __GNUC__ < 6
-#define XSIMD_WITH_AVX512F 0
-#else
-#define XSIMD_WITH_AVX512F 1
-#endif
+    // AVX512 instructions are supported starting with gcc 6
+    // see https://www.gnu.org/software/gcc/gcc-6/changes.html
+    #if defined(__GNUC__) && __GNUC__ < 6
+        #define XSIMD_WITH_AVX512F 0
+    #else
+        #define XSIMD_WITH_AVX512F 1
+        #if __GNUC__ == 6
+            #define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
+        #endif
+    #endif
 #else
 #define XSIMD_WITH_AVX512F 0
 #endif
