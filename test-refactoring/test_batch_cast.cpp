@@ -10,6 +10,7 @@
 
 #include "test_utils.hpp"
 
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 namespace detail
 {
     template <class T_out, class T_in>
@@ -333,7 +334,7 @@ TYPED_TEST(batch_cast_test, cast)
 {
     this->test_cast();
 }
-
+#endif
 #if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift1)
 {

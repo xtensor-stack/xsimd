@@ -207,14 +207,28 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
     auto const begin = vec.begin();
     auto const end = vec.end();
 
-    EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+    if (std::is_same<aligned_vec_t::value_type, double>::value)
+    {
+        EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+    }
+    else
+    {
+        EXPECT_FLOAT_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+    }
 
     if(small_vec.size() > 1)
     {
         auto const sbegin = small_vec.begin();
         auto const send = small_vec.end();
 
-        EXPECT_DOUBLE_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+        if (std::is_same<aligned_vec_t::value_type, double>::value)
+        {
+            EXPECT_DOUBLE_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+        }
+        else
+        {
+            EXPECT_FLOAT_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+        }
     }
 }
 

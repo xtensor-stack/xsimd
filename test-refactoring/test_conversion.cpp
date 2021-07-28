@@ -10,6 +10,7 @@
 
 #include "test_utils.hpp"
 
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 template <class CP>
 class conversion_test : public testing::Test
 {
@@ -178,3 +179,5 @@ TYPED_TEST(conversion_test, u8_casting)
 {
     this->test_u8_casting();
 }
+
+#endif
