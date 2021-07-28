@@ -20,10 +20,13 @@ jobs:
           gcc_version: '4.9'
           arm_arch_dir: 'aarch64-linux-gnu'
           arm_arch_target: 'armv8-a'
-        gcc_8_enable_fallback:
+        #gcc_8_enable_fallback:
+          #gcc_version: '8'
+          #enable_xtl_complex: 1
+          #enable_fallback: 1
+        gcc_8:
           gcc_version: '8'
           enable_xtl_complex: 1
-          enable_fallback: 1
         gcc_9:
           gcc_version: '9'
     pool:
