@@ -628,7 +628,11 @@ public:
     template <class T>
     static std::string GetName(int)
     {
+#ifndef _MSC_VER
         return __PRETTY_FUNCTION__;
+#else
+        return "Unknown name";
+#endif
     }
 };
 

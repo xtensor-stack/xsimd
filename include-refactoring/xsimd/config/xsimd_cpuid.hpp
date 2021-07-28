@@ -5,6 +5,11 @@
 #include <algorithm>
 #include <array>
 
+#if defined(_MSC_VER)
+// Contains the definition of __cpuidex
+#include <intrin.h>
+#endif
+
 #include "../types/xsimd_all_registers.hpp"
 
 namespace xsimd
