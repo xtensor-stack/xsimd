@@ -58,7 +58,11 @@ namespace xsimd {
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx512bw>) {
       switch(sizeof(T)) {
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        case 2: return _mm512_sllv_epi16(self, _mm512_set1_epi16(other));
+#else
         case 2: return _mm512_slli_epi16(self, other);
+#endif
         default: return bitwise_lshift(self, other, avx512dq{});
       }
     }
@@ -68,13 +72,34 @@ namespace xsimd {
     batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires<avx512bw>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
+          case 1:
+          {
+            __m512i sign_mask = _mm512_set1_epi16((0xFF00 >> other) & 0x00FF);
+            __m512i zeros = _mm512_setzero_si512();
+            __mmask64 cmp_is_negative_mask = _mm512_cmpgt_epi8_mask(zeros, self);
+            __m512i cmp_sign_mask = _mm512_mask_blend_epi8(cmp_is_negative_mask, zeros, sign_mask);
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+            __m512i res = _mm512_srav_epi16(self, _mm512_set1_epi16(other));
+#else
+            __m512i res = _mm512_srai_epi16(self, other);
+#endif
+            return _mm512_or_si512(cmp_sign_mask, _mm512_andnot_si512(sign_mask, res));
+          }
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          case 2: return _mm512_srav_epi16(self, _mm512_set1_epi16(other));
+#else
           case 2: return _mm512_srai_epi16(self, other);
+#endif
           default: return bitwise_rshift(self, other, avx512dq{});
         }
       }
       else {
         switch(sizeof(T)) {
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          case 2: return _mm512_srlv_epi16(self, _mm512_set1_epi16(other));
+#else
           case 2: return _mm512_srli_epi16(self, other);
+#endif
           default: return bitwise_rshift(self, other, avx512dq{});
         }
       }

@@ -276,13 +276,21 @@ namespace xsimd {
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx512f>) {
       switch(sizeof(T)) {
         case 1: {
-        __m512i tmp = _mm512_slli_epi32(self, other);
-        return _mm512_and_si512(_mm512_set1_epi8(0xFF << other), tmp);
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          __m512i tmp = _mm512_sllv_epi32(self, _mm512_set1_epi32(other));
+#else
+          __m512i tmp = _mm512_slli_epi32(self, other);
+#endif
+          return _mm512_and_si512(_mm512_set1_epi8(0xFF << other), tmp);
         }
         case 2: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_lshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        case 4: return _mm512_sllv_epi32(self, _mm512_set1_epi32(other));
+        case 8: return _mm512_sllv_epi64(self, _mm512_set1_epi64(other));
+#else
         case 4: return _mm512_slli_epi32(self, other);
-        case 8: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_lshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
-
+        case 8: return _mm512_slli_epi64(self, other);
+#endif
         default: assert(false && "unsupported arch/op combination"); return {};
       }
     }
@@ -329,15 +337,34 @@ namespace xsimd {
     batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires<avx512f>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          case 4: return _mm512_srav_epi32(self, _mm512_set1_epi32(other));
+          case 8: return _mm512_srav_epi64(self, _mm512_set1_epi64(other));
+#else
           case 4: return _mm512_srai_epi32(self, other);
           case 8: return _mm512_srai_epi64(self, other);
+#endif
           default: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_rshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
         }
       }
       else {
         switch(sizeof(T)) {
+          case 1:
+          {
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+            __m512i tmp = _mm512_srlv_epi32(self, _mm512_set1_epi32(other));
+#else
+            __m512i tmp = _mm512_srli_epi32(self, other);
+#endif
+            return _mm512_and_si512(_mm512_set1_epi8(0xFF >> other), tmp);
+          }
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          case 4: return _mm512_srlv_epi32(self, _mm512_set1_epi32(other));
+          case 8: return _mm512_srlv_epi64(self, _mm512_set1_epi64(other));
+#else
           case 4: return _mm512_srli_epi32(self, other);
           case 8: return _mm512_srli_epi64(self, other);
+#endif
           default: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_rshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
         }
       }
