@@ -10,6 +10,7 @@
 
 #include "test_utils.hpp"
 
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 template <class CP>
 class bitwise_cast_test : public testing::Test
 {
@@ -209,3 +210,5 @@ TYPED_TEST(bitwise_cast_test, to_double)
 {
     this->test_to_double();
 }
+#endif
+
