@@ -18,7 +18,6 @@ namespace xsimd
     {
         struct supported_arch
         {
-            unsigned sse : 1;
             unsigned sse2 : 1;
             unsigned sse3 : 1;
             unsigned ssse3 : 1;
@@ -92,8 +91,6 @@ namespace xsimd
                  int regs[4];
 
                  get_cpuid(regs, 0x1);
-                 sse = regs[3]>> 25 & 1;
-                 best = std::max(best, sse::version() * sse);
 
                  sse2 = regs[2] >> 26 & 1;
                  best = std::max(best, sse2::version() * sse2);

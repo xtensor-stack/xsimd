@@ -671,7 +671,7 @@ namespace xsimd {
                 auto tmpx = _mm512_shuffle_pd(resx1, resx2, 0b00000000);
                 auto tmpy = _mm512_shuffle_pd(resx1, resx2, 0b11111111);
 
-                return tmpx + tmpy;
+                return _mm512_add_pd(tmpx, tmpy);
     }
 
     // isnan

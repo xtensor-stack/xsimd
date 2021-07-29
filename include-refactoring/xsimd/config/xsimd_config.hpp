@@ -11,17 +11,6 @@
 /**
  * @ingroup xsimd_config_macro
  *
- * Set to 1 if SSE is available at compile-time, to 0 otherwise.
- */
-#ifdef __SSE__
-#define XSIMD_WITH_SSE 1
-#else
-#define XSIMD_WITH_SSE 0
-#endif
-
-/**
- * @ingroup xsimd_config_macro
- *
  * Set to 1 if SSE2 is available at compile-time, to 0 otherwise.
  */
 #ifdef __SSE2__
@@ -241,10 +230,6 @@
 
 #if XSIMD_WITH_SSE3
 #define XSIMD_WITH_SSE2 1
-#endif
-
-#if XSIMD_WITH_SSE2
-#define XSIMD_WITH_SSE 1
 #endif
 
 #endif
