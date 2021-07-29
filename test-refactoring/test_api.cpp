@@ -157,18 +157,7 @@ private:
     }
 };
 
-using xsimd_api_types = testing::Types<
-                            xsimd::batch<uint8_t>,
-                            xsimd::batch<int8_t>,
-                            xsimd::batch<uint16_t>,
-                            xsimd::batch<int16_t>,
-                            xsimd::batch<uint32_t>,
-                            xsimd::batch<int32_t>,
-                            xsimd::batch<uint64_t>,
-                            xsimd::batch<int64_t>,
-                            xsimd::batch<float>,
-                            xsimd::batch<double>
-                        >;
+using xsimd_api_types = batch_types;
 
 TYPED_TEST_SUITE(xsimd_api_test, xsimd_api_types, simd_test_names);
 

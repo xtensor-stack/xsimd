@@ -11,17 +11,6 @@
 /**
  * @ingroup xsimd_config_macro
  *
- * Set to 1 if SSE is available at compile-time, to 0 otherwise.
- */
-#ifdef __SSE__
-#define XSIMD_WITH_SSE 1
-#else
-#define XSIMD_WITH_SSE 0
-#endif
-
-/**
- * @ingroup xsimd_config_macro
- *
  * Set to 1 if SSE2 is available at compile-time, to 0 otherwise.
  */
 #ifdef __SSE2__
@@ -136,13 +125,16 @@
  * Set to 1 if AVX512F is available at compile-time, to 0 otherwise.
  */
 #ifdef __AVX512F__
-// AVX512 instructions are supported starting with gcc 6
-// see https://www.gnu.org/software/gcc/gcc-6/changes.html
-#if defined(__GNUC__) && __GNUC__ < 6
-#define XSIMD_WITH_AVX512F 0
-#else
-#define XSIMD_WITH_AVX512F 1
-#endif
+    // AVX512 instructions are supported starting with gcc 6
+    // see https://www.gnu.org/software/gcc/gcc-6/changes.html
+    #if defined(__GNUC__) && __GNUC__ < 6
+        #define XSIMD_WITH_AVX512F 0
+    #else
+        #define XSIMD_WITH_AVX512F 1
+        #if __GNUC__ == 6
+            #define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
+        #endif
+    #endif
 #else
 #define XSIMD_WITH_AVX512F 0
 #endif
@@ -208,4 +200,38 @@
     #define XSIMD_WITH_NEON 0
     #define XSIMD_WITH_NEON64 0
 #endif
+
+// Workaround for MSVC compiler
+#ifdef _MSC_VER
+
+#if XSIMD_WITH_AVX512
+#define XSIMD_WITH_AVX2 1
+#endif
+
+#if XSIMD_WITH_AVX2
+#define XSIMD_WITH_AVX 1
+#endif
+
+#if XSIMD_WITH_AVX
+#define XSIMD_WITH_SSE4_2 1
+#endif
+
+#if XSIMD_WITH_SSE4_2
+#define XSIMD_WITH_SSE4_1 1
+#endif
+
+#if XSIMD_WITH_SSE4_1
+#define XSIMD_WITH_SSSE3 1
+#endif
+
+#if XSIMD_WITH_SSSE3
+#define XSIMD_WITH_SSE3 1
+#endif
+
+#if XSIMD_WITH_SSE3
+#define XSIMD_WITH_SSE2 1
+#endif
+
+#endif
+
 #endif

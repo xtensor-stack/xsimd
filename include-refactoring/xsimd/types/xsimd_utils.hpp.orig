@@ -272,6 +272,31 @@ namespace xsimd
             template <typename... Ts>
             using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
 
+<<<<<<< HEAD
+=======
+
+            template <class S>
+            struct reverse_integer_sequence;
+
+            template <class T, T... Is>
+            struct reverse_integer_sequence<integer_sequence<T, Is...>>
+                : integer_sequence<T, T(sizeof...(Is)-1u-Is)...>
+            {
+            };
+
+            template <std::size_t N>
+            struct make_reverse_index_sequence
+                : reverse_integer_sequence<make_index_sequence<N>>
+            {
+            };
+
+            template <std::size_t N>
+            struct make_reverse_int_sequence
+                : reverse_integer_sequence<make_int_sequence<N>>
+            {
+            };
+
+>>>>>>> 76bfd47... Fixed MSVC build
         #endif
     }
 

@@ -174,7 +174,7 @@ namespace xsimd
 
             template <class T>
             using exclude_int64_neon_t
-                 = typename std::enable_if<std::is_integral<T>::value && sizeof(T) != 8 || std::is_same<T, float>::value, int>::type;
+                 = typename std::enable_if<(std::is_integral<T>::value && sizeof(T) != 8) || std::is_same<T, float>::value, int>::type;
         }
 
         /*************
@@ -448,6 +448,47 @@ namespace xsimd
             store_aligned<A>(dst, src, A{});
         }
 
+        /****************
+         * load_complex *
+         ****************/
+
+        template <class A>
+        batch<std::complex<float>, A> load_complex_aligned(std::complex<float> const* mem, requires<neon>)
+        {
+            using real_batch = batch<float, A>;
+            const float* buf = reinterpret_cast<const float*>(mem);
+            float32x4x2_t tmp = vld2q_f32(buf);
+            real_batch real = tmp.val[0],
+                       imag = tmp.val[1];
+            return batch<std::complex<float>, A>{real, imag};
+        }
+
+        template <class A>
+        batch<std::complex<float>, A> load_complex_unaligned(std::complex<float> const* mem, requires<neon>)
+        {
+            return load_complex_aligned<A>(mem, A{});
+        }
+
+        /*****************
+         * store_complex *
+         *****************/
+
+        template <class A>
+        void store_complex_aligned(std::complex<float>* dst, batch<std::complex<float> ,A> const& src, requires<neon>)
+        {
+            float32x4x2_t tmp;
+            tmp.val[0] = src.real();
+            tmp.val[1] = src.imag();
+            float* buf = reinterpret_cast<float*>(dst);
+            vst2q_f32(buf, tmp);
+        }
+
+        template <class A>
+        void store_complex_unaligned(std::complex<float>* dst, batch<std::complex<float> ,A> const& src, requires<neon>)
+        {
+            store_complex_aligned(dst, src, A{});
+        }
+
         /*******
          * neg *
          *******/
@@ -488,6 +529,18 @@ namespace xsimd
             return vnegq_s32(rhs);
         }
 
+        template <class A, class T,  detail::enable_sized_unsigned_t<T, 8> = 0>
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
+        {
+            return batch<T, A>({-rhs.get(0), -rhs.get(1)});
+        }
+
+        template <class A, class T,  detail::enable_sized_signed_t<T, 8> = 0>
+        batch<T, A> neg(batch<T, A> const& rhs, requires<neon>)
+        {
+            return batch<T, A>({-rhs.get(0), -rhs.get(1)});
+        }
+        
         template <class A>
         batch<float, A> neg(batch<float, A> const& rhs, requires<neon>)
         {
@@ -640,6 +693,18 @@ namespace xsimd
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
+        {
+            return batch_bool<T, A>({lhs.get(0) == rhs.get(0), lhs.get(1) == rhs.get(1)});
+        }
+
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
+        {
+            return batch_bool<T, A>({lhs.get(0) == rhs.get(0), lhs.get(1) == rhs.get(1)});
+        }
+
         /******
          * lt *
          ******/
@@ -653,6 +718,12 @@ namespace xsimd
                 std::make_tuple(vcltq_u8, vcltq_s8, vcltq_u16, vcltq_s16, vcltq_u32, vcltq_s32, vcltq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+        }
+
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
+        {
+            return batch_bool<T, A>({lhs.get(0) < rhs.get(0), lhs.get(1) < rhs.get(1)});
         }
 
         /******
@@ -670,6 +741,12 @@ namespace xsimd
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
+        {
+            return batch_bool<T, A>({lhs.get(0) <= rhs.get(0), lhs.get(1) <= rhs.get(1)});
+        }
+
         /******
          * gt *
          ******/
@@ -685,6 +762,12 @@ namespace xsimd
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
+        {
+            return batch_bool<T, A>({lhs.get(0) > rhs.get(0), lhs.get(1) > rhs.get(1)});
+        }
+
         /******
          * ge *
          ******/
@@ -698,6 +781,12 @@ namespace xsimd
                 std::make_tuple(vcgeq_u8, vcgeq_s8, vcgeq_u16, vcgeq_s16, vcgeq_u32, vcgeq_s32, vcgeq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+        }
+
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
+        {
+            return batch_bool<T, A>({lhs.get(0) >= rhs.get(0), lhs.get(1) >= rhs.get(1)});
         }
 
         /***************
@@ -737,45 +826,6 @@ namespace xsimd
         {
             using register_type = typename batch_bool<T, A>::register_type;
             return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
-        }
-
-        /******************
-         * bitwise_andnot *
-         ******************/
-
-        namespace detail
-        {
-            inline float32x4_t bitwise_andnot_f32(float32x4_t lhs, float32x4_t rhs)
-            {
-                return vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(lhs),
-                                                       vreinterpretq_u32_f32(rhs)));
-            }
-
-            template <class V>
-            V bitwise_andnot_neon(V const& lhs, V const& rhs)
-            {
-                constexpr neon_dispatcher::binary dispatcher =
-                {
-                    std::make_tuple(vbicq_u8, vbicq_s8, vbicq_u16, vbicq_s16,
-                                    vbicq_u32, vbicq_s32, vbicq_u64, vbicq_s64,
-                                    bitwise_andnot_f32)
-                };
-                return dispatcher.apply(lhs, rhs);
-            }
-        }
-
-        template <class A, class T, detail::enable_neon_type_t<T> = 0>
-        batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires<neon>)
-        {
-            using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
-        }
-
-        template <class A, class T, detail::enable_neon_type_t<T> = 0>
-        batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires<neon>)
-        {
-            using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
         }
 
         /**************
@@ -1126,6 +1176,12 @@ namespace xsimd
             return vget_lane_s32(tmp, 0);
         }
 
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires<neon>)
+        {
+            return arg.get(0) + arg.get(1);
+        }
+
         template <class A>
         float hadd(batch<float, A> const& arg, requires<neon>)
         {
@@ -1344,9 +1400,10 @@ namespace xsimd
         namespace detail
         {
             template <class A, class T>
-            batch<T, A> extract_pair(batch<T, A> const&, batch<T, A> const& rhs, std::size_t, ::xsimd::detail::index_sequence<0>)
+            batch<T, A> extract_pair(batch<T, A> const&, batch<T, A> const& /*rhs*/, std::size_t, ::xsimd::detail::index_sequence<>)
             {
-                return rhs;
+                assert(false && "extract_pair out of bounds");
+                return  batch<T, A>{};
             }
 
             template <class A, class T, size_t I, size_t... Is, detail::enable_sized_unsigned_t<T, 1> = 0>
@@ -1354,7 +1411,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_u8(lhs, rhs, n);
+                    return vextq_u8(lhs, rhs, I);
                 }
                 else
                 {
@@ -1367,7 +1424,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s8(lhs, rhs, n);
+                    return vextq_s8(lhs, rhs, I);
                 }
                 else
                 {
@@ -1380,7 +1437,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_u16(lhs, rhs, n);
+                    return vextq_u16(lhs, rhs, I);
                 }
                 else
                 {
@@ -1393,7 +1450,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s16(lhs, rhs, n);
+                    return vextq_s16(lhs, rhs, I);
                 }
                 else
                 {
@@ -1406,7 +1463,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_u32(lhs, rhs, n);
+                    return vextq_u32(lhs, rhs, I);
                 }
                 else
                 {
@@ -1419,7 +1476,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s32(lhs, rhs, n);
+                    return vextq_s32(lhs, rhs, I);
                 }
                 else
                 {
@@ -1427,12 +1484,12 @@ namespace xsimd
                 }
             }
 
-            template <class A, class T, size_t I, size_t... Is, detail::enable_sized_unsigned_t<T, 9> = 0>
+            template <class A, class T, size_t I, size_t... Is, detail::enable_sized_unsigned_t<T, 8> = 0>
             batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, ::xsimd::detail::index_sequence<I, Is...>)
             {
                 if (n == I)
                 {
-                    return vextq_u64(lhs, rhs, n);
+                    return vextq_u64(lhs, rhs, I);
                 }
                 else
                 {
@@ -1445,7 +1502,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s64(lhs, rhs, n);
+                    return vextq_s64(lhs, rhs, I);
                 }
                 else
                 {
@@ -1458,7 +1515,20 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_f32(lhs, rhs, n);
+                    return vextq_f32(lhs, rhs, I);
+                }
+                else
+                {
+                    return extract_pair(lhs, rhs, n, ::xsimd::detail::index_sequence<Is...>());
+                }
+            }
+
+            template <class A, class T, size_t... Is>
+            batch<T, A> extract_pair_impl(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, ::xsimd::detail::index_sequence<0, Is...>)
+            {
+                if (n == 0)
+                {
+                    return rhs;
                 }
                 else
                 {
@@ -1472,7 +1542,7 @@ namespace xsimd
         {
             constexpr std::size_t size = batch<T, A>::size;
             assert(0<= n && n< size && "index in bounds");
-            return detail::extract_pair(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
+            return detail::extract_pair_impl(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
         }
 
         /******************
@@ -1482,9 +1552,10 @@ namespace xsimd
         namespace detail
         {
             template <class A, class T>
-            batch<T, A> bitwise_lshfit(batch<T, A> const& lhs, int n, ::xsimd::detail::index_sequence<0>)
+            batch<T, A> bitwise_lshift(batch<T, A> const& /*lhs*/, int /*n*/, ::xsimd::detail::int_sequence<>)
             {
-                return lhs;
+                assert(false && "bitwise_lshift out of bounds");
+                return batch<T, A>{};
             }
 
             template <class A, class T, int I, int... Is, detail::enable_sized_unsigned_t<T, 1> = 0>
@@ -1492,7 +1563,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_u8(lhs, n);
+                    return vshlq_n_u8(lhs, I);
                 }
                 else
                 {
@@ -1505,7 +1576,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_s8(lhs, n);
+                    return vshlq_n_s8(lhs, I);
                 }
                 else
                 {
@@ -1518,7 +1589,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_u16(lhs, n);
+                    return vshlq_n_u16(lhs, I);
                 }
                 else
                 {
@@ -1531,7 +1602,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_s16(lhs, n);
+                    return vshlq_n_s16(lhs, I);
                 }
                 else
                 {
@@ -1544,7 +1615,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_u32(lhs, n);
+                    return vshlq_n_u32(lhs, I);
                 }
                 else
                 {
@@ -1557,7 +1628,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_s32(lhs, n);
+                    return vshlq_n_s32(lhs, I);
                 }
                 else
                 {
@@ -1570,7 +1641,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_u64(lhs, n);
+                    return vshlq_n_u64(lhs, I);
                 }
                 else
                 {
@@ -1583,7 +1654,20 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshlq_n_s64(lhs, n);
+                    return vshlq_n_s64(lhs, I);
+                }
+                else
+                {
+                    return bitwise_lshift(lhs, n, ::xsimd::detail::int_sequence<Is...>());
+                }
+            }
+
+            template <class A, class T, int... Is>
+            batch<T, A> bitwise_lshift_impl(batch<T, A> const& lhs, int n, ::xsimd::detail::int_sequence<0, Is...>)
+            {
+                if (n == 0)
+                {
+                    return lhs;
                 }
                 else
                 {
@@ -1595,9 +1679,9 @@ namespace xsimd
         template <class A, class T>
         batch<T, A> bitwise_lshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
-            constexpr std::size_t size = batch<T, A>::size;
+            constexpr std::size_t size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0<= n && n< size && "index in bounds");
-            return detail::bitwise_lshift(lhs, n, ::xsimd::detail::make_int_sequence<size>());
+            return detail::bitwise_lshift_impl(lhs, n, ::xsimd::detail::make_int_sequence<size>());
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
@@ -1655,9 +1739,10 @@ namespace xsimd
         namespace detail
         {
             template <class A, class T>
-            batch<T, A> bitwise_rshfit(batch<T, A> const& lhs, int n, ::xsimd::detail::index_sequence<0>)
+            batch<T, A> bitwise_rshift(batch<T, A> const& /*lhs*/, int /*n*/, ::xsimd::detail::int_sequence<>)
             {
-                return lhs;
+                assert(false && "bitwise_rshift out of bounds");
+                return batch<T, A>{};
             }
 
             template <class A, class T, int I, int... Is, detail::enable_sized_unsigned_t<T, 1> = 0>
@@ -1665,7 +1750,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshrq_n_u8(lhs, n);
+                    return vshrq_n_u8(lhs, I);
                 }
                 else
                 {
@@ -1678,7 +1763,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshrq_n_s8(lhs, n);
+                    return vshrq_n_s8(lhs, I);
                 }
                 else
                 {
@@ -1691,7 +1776,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshrq_n_u16(lhs, n);
+                    return vshrq_n_u16(lhs, I);
                 }
                 else
                 {
@@ -1704,7 +1789,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshrq_n_s16(lhs, n);
+                    return vshrq_n_s16(lhs, I);
                 }
                 else
                 {
@@ -1717,7 +1802,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshrq_n_u32(lhs, n);
+                    return vshrq_n_u32(lhs, I);
                 }
                 else
                 {
@@ -1730,7 +1815,20 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshrq_n_s32(lhs, n);
+                    return vshrq_n_s32(lhs, I);
+                }
+                else
+                {
+                    return bitwise_rshift(lhs, n, ::xsimd::detail::int_sequence<Is...>());
+                }
+            }
+
+            template <class A, class T, int I, int... Is, detail::enable_sized_unsigned_t<T, 8> = 0>
+            batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, ::xsimd::detail::int_sequence<I, Is...>)
+            {
+                if (n == I)
+                {
+                    return vshrq_n_u64(lhs, I);
                 }
                 else
                 {
@@ -1743,7 +1841,20 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vshrq_n_s64(lhs, n);
+                    return vshrq_n_s64(lhs, I);
+                }
+                else
+                {
+                    return bitwise_rshift(lhs, n, ::xsimd::detail::int_sequence<Is...>());
+                }
+            }
+
+            template <class A, class T, int... Is>
+            batch<T, A> bitwise_rshift_impl(batch<T, A> const& lhs, int n, ::xsimd::detail::int_sequence<0, Is...>)
+            {
+                if (n == 0)
+                {
+                    return lhs;
                 }
                 else
                 {
@@ -1755,9 +1866,9 @@ namespace xsimd
         template <class A, class T>
         batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires<neon>)
         {
-            constexpr std::size_t size = batch<T, A>::size;
+            constexpr std::size_t size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0<= n && n< size && "index in bounds");
-            return detail::bitwise_rshift(lhs, n, ::xsimd::detail::make_int_sequence<size>());
+            return detail::bitwise_rshift_impl(lhs, n, ::xsimd::detail::make_int_sequence<size>());
         }
         
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>

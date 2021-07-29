@@ -51,7 +51,7 @@ public:
         {
             prefix = "avx512_";
         }
-#elif XSIMD_WITH_ARM7
+#elif XSIMD_WITH_NEON
         size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
         if (register_size == size_t(128))
         {
@@ -580,17 +580,26 @@ namespace xsimd
                                     batch<int64_t>
                               >;
 
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+    using batch_float_type_list = mpl::type_list<batch<float>>;
+#else
     using batch_float_type_list = mpl::type_list<batch<float>, batch<double>>;
+#endif
 
     using batch_int32_type_list = mpl::type_list<
       batch<int32_t>
-      >;
+    >;
 
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+    using batch_complex_type_list = mpl::type_list<
+                                    batch<std::complex<float>>
+    >;
+#else
     using batch_complex_type_list = mpl::type_list<
                                     batch<std::complex<float>>,
                                     batch<std::complex<double>>
     >;
-
+#endif
     using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
     using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
 }
@@ -619,7 +628,11 @@ public:
     template <class T>
     static std::string GetName(int)
     {
+#ifndef _MSC_VER
         return __PRETTY_FUNCTION__;
+#else
+        return "Unknown name";
+#endif
     }
 };
 

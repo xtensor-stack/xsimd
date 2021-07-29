@@ -276,13 +276,21 @@ namespace xsimd {
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx512f>) {
       switch(sizeof(T)) {
         case 1: {
-        __m512i tmp = _mm512_slli_epi32(self, other);
-        return _mm512_and_si512(_mm512_set1_epi8(0xFF << other), tmp);
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          __m512i tmp = _mm512_sllv_epi32(self, _mm512_set1_epi32(other));
+#else
+          __m512i tmp = _mm512_slli_epi32(self, other);
+#endif
+          return _mm512_and_si512(_mm512_set1_epi8(0xFF << other), tmp);
         }
         case 2: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_lshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+        case 4: return _mm512_sllv_epi32(self, _mm512_set1_epi32(other));
+        case 8: return _mm512_sllv_epi64(self, _mm512_set1_epi64(other));
+#else
         case 4: return _mm512_slli_epi32(self, other);
-        case 8: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_lshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
-
+        case 8: return _mm512_slli_epi64(self, other);
+#endif
         default: assert(false && "unsupported arch/op combination"); return {};
       }
     }
@@ -329,15 +337,34 @@ namespace xsimd {
     batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires<avx512f>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          case 4: return _mm512_srav_epi32(self, _mm512_set1_epi32(other));
+          case 8: return _mm512_srav_epi64(self, _mm512_set1_epi64(other));
+#else
           case 4: return _mm512_srai_epi32(self, other);
           case 8: return _mm512_srai_epi64(self, other);
+#endif
           default: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_rshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
         }
       }
       else {
         switch(sizeof(T)) {
+          case 1:
+          {
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+            __m512i tmp = _mm512_srlv_epi32(self, _mm512_set1_epi32(other));
+#else
+            __m512i tmp = _mm512_srli_epi32(self, other);
+#endif
+            return _mm512_and_si512(_mm512_set1_epi8(0xFF >> other), tmp);
+          }
+#if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
+          case 4: return _mm512_srlv_epi32(self, _mm512_set1_epi32(other));
+          case 8: return _mm512_srlv_epi64(self, _mm512_set1_epi64(other));
+#else
           case 4: return _mm512_srli_epi32(self, other);
           case 8: return _mm512_srli_epi64(self, other);
+#endif
           default: return detail::fwd_to_avx([](__m256i s, int32_t o) { return bitwise_rshift(batch<T, avx2>(s), o, avx2{}); }, self, other);
         }
       }
@@ -426,10 +453,10 @@ namespace xsimd {
 
     // ceil
     template<class A> batch<float, A> ceil(batch<float, A> const& self, requires<avx512f>) {
-      return _mm512_ceil_ps(self);
+      return _mm512_roundscale_ps(self, _MM_FROUND_TO_POS_INF);
     }
     template<class A> batch<double, A> ceil(batch<double, A> const& self, requires<avx512f>) {
-      return _mm512_ceil_pd(self);
+      return _mm512_roundscale_pd(self, _MM_FROUND_TO_POS_INF);
     }
 
 
@@ -495,10 +522,10 @@ namespace xsimd {
 
     // floor
     template<class A> batch<float, A> floor(batch<float, A> const& self, requires<avx512f>) {
-      return _mm512_floor_ps(self);
+      return _mm512_roundscale_ps(self, _MM_FROUND_TO_NEG_INF);
     }
     template<class A> batch<double, A> floor(batch<double, A> const& self, requires<avx512f>) {
-      return _mm512_floor_pd(self);
+      return _mm512_roundscale_pd(self, _MM_FROUND_TO_NEG_INF);
     }
 
     // from bool
@@ -644,7 +671,7 @@ namespace xsimd {
                 auto tmpx = _mm512_shuffle_pd(resx1, resx2, 0b00000000);
                 auto tmpy = _mm512_shuffle_pd(resx1, resx2, 0b11111111);
 
-                return tmpx + tmpy;
+                return _mm512_add_pd(tmpx, tmpy);
     }
 
     // isnan
@@ -899,6 +926,16 @@ namespace xsimd {
     }
 
 
+    namespace detail
+    {
+        template <class T>
+        using enable_signed_integer_t = typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value,
+                                                                int>::type;
+
+        template <class T>
+        using enable_unsigned_integer_t = typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value,
+                                                                  int>::type;
+    }
 
     // set
     template<class A>
@@ -915,23 +952,94 @@ namespace xsimd {
       return _mm512_set_epi64(v7, v6, v5, v4, v3, v2, v1, v0);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15) {
+    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7,
+                                                           T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15) {
       return _mm512_setr_epi32(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
     }
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
-        T v16, T v17, T v18, T v19, T v20, T v21, T v22, T v23, T v24, T v25, T v26, T v27, T v28, T v29, T v30, T v31) {
-      return _mm512_set_epi16(v31, v30, v29, v28, v27, v26, v25, v24, v23, v22, v21, v20, v19, v18, v17, v16, v15, v14, v13, v12, v11, v10, v9, v8, v7, v6, v5, v4, v3, v2, v1, v0);
+    template<class A, class T, detail::enable_signed_integer_t<T> = 0>
+    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7,
+                                                           T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
+                                                           T v16, T v17, T v18, T v19, T v20, T v21, T v22, T v23,
+                                                           T v24, T v25, T v26, T v27, T v28, T v29, T v30, T v31) {
+#if defined(__clang__) || __GNUC__
+      return __extension__ (__m512i)(__v32hi)
+      {
+        v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+        v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31
+      };
+#else
+      return _mm512_set_epi16(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+                              v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31);
+#endif
     }
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
-      T v16, T v17, T v18, T v19, T v20, T v21, T v22, T v23, T v24, T v25, T v26, T v27, T v28, T v29, T v30, T v31,
-      T v32, T v33, T v34, T v35, T v36, T v37, T v38, T v39, T v40, T v41, T v42, T v43, T v44, T v45, T v46, T v47,
-      T v48, T v49, T v50, T v51, T v52, T v53, T v54, T v55, T v56, T v57, T v58, T v59, T v60, T v61, T v62, T v63
+    template<class A, class T, detail::enable_unsigned_integer_t<T> = 0>
+    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7,
+                                                           T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
+                                                           T v16, T v17, T v18, T v19, T v20, T v21, T v22, T v23,
+                                                           T v24, T v25, T v26, T v27, T v28, T v29, T v30, T v31) {
+#if defined(__clang__) || __GNUC__
+      return __extension__ (__m512i)(__v32hu)
+      {
+        v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+        v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31
+      };
+#else
+      return _mm512_set_epi16(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+                              v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31);
+#endif
+    }
+    template<class A, class T, detail::enable_signed_integer_t<T> = 0>
+    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7,
+                                                           T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
+                                                           T v16, T v17, T v18, T v19, T v20, T v21, T v22, T v23,
+                                                           T v24, T v25, T v26, T v27, T v28, T v29, T v30, T v31,
+                                                           T v32, T v33, T v34, T v35, T v36, T v37, T v38, T v39,
+                                                           T v40, T v41, T v42, T v43, T v44, T v45, T v46, T v47,
+                                                           T v48, T v49, T v50, T v51, T v52, T v53, T v54, T v55,
+                                                           T v56, T v57, T v58, T v59, T v60, T v61, T v62, T v63
       ) {
-      return _mm512_set_epi8(v63, v62, v61, v60, v59, v58, v57, v56, v55, v54, v53, v52, v51, v50, v49, v48, v47, v46, v45, v44, v43, v42, v41, v40, v39, v38, v37, v36, v35, v34, v33, v32, v31, v30, v29, v28, v27, v26, v25, v24, v23, v22, v21, v20, v19, v18, v17, v16, v15, v14, v13, v12, v11, v10, v9, v8, v7, v6, v5, v4, v3, v2, v1, v0);
-    }
 
+#if defined(__clang__) || __GNUC__
+      return __extension__ (__m512i)(__v64qi)
+      {
+          v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+          v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31,
+          v32, v33, v34, v35, v36, v37, v38, v39, v40, v41, v42, v43, v44, v45, v46, v47,
+          v48, v49, v50, v51, v52, v53, v54, v55, v56, v57, v58, v59, v60, v61, v62, v63
+      };
+#else
+      return _mm512_set_epi8(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+          v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31,
+          v32, v33, v34, v35, v36, v37, v38, v39, v40, v41, v42, v43, v44, v45, v46, v47,
+          v48, v49, v50, v51, v52, v53, v54, v55, v56, v57, v58, v59, v60, v61, v62, v63);
+#endif
+    }
+    template<class A, class T, detail::enable_unsigned_integer_t<T> = 0>
+    batch<T, A> set(batch<T, A> const&, requires<avx512f>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7,
+                                                           T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15,
+                                                           T v16, T v17, T v18, T v19, T v20, T v21, T v22, T v23,
+                                                           T v24, T v25, T v26, T v27, T v28, T v29, T v30, T v31,
+                                                           T v32, T v33, T v34, T v35, T v36, T v37, T v38, T v39,
+                                                           T v40, T v41, T v42, T v43, T v44, T v45, T v46, T v47,
+                                                           T v48, T v49, T v50, T v51, T v52, T v53, T v54, T v55,
+                                                           T v56, T v57, T v58, T v59, T v60, T v61, T v62, T v63
+      ) {
+
+#if defined(__clang__) || __GNUC__
+      return __extension__ (__m512i)(__v64qu)
+      {
+          v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+          v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31,
+          v32, v33, v34, v35, v36, v37, v38, v39, v40, v41, v42, v43, v44, v45, v46, v47,
+          v48, v49, v50, v51, v52, v53, v54, v55, v56, v57, v58, v59, v60, v61, v62, v63
+      };
+#else
+      return _mm512_set_epi8(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15,
+          v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31,
+          v32, v33, v34, v35, v36, v37, v38, v39, v40, v41, v42, v43, v44, v45, v46, v47,
+          v48, v49, v50, v51, v52, v53, v54, v55, v56, v57, v58, v59, v60, v61, v62, v63);
+#endif
+    }
     template<class A, class T, class... Values>
     batch_bool<T, A> set(batch_bool<T, A> const&, requires<avx512f>, Values... values) {
       static_assert(sizeof...(Values) == batch_bool<T, A>::size, "consistent init");
