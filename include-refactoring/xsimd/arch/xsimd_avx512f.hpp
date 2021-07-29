@@ -453,10 +453,10 @@ namespace xsimd {
 
     // ceil
     template<class A> batch<float, A> ceil(batch<float, A> const& self, requires<avx512f>) {
-      return _mm512_ceil_ps(self);
+      return _mm512_roundscale_ps(self, _MM_FROUND_TO_POS_INF);
     }
     template<class A> batch<double, A> ceil(batch<double, A> const& self, requires<avx512f>) {
-      return _mm512_ceil_pd(self);
+      return _mm512_roundscale_pd(self, _MM_FROUND_TO_POS_INF);
     }
 
 
@@ -522,10 +522,10 @@ namespace xsimd {
 
     // floor
     template<class A> batch<float, A> floor(batch<float, A> const& self, requires<avx512f>) {
-      return _mm512_floor_ps(self);
+      return _mm512_roundscale_ps(self, _MM_FROUND_TO_NEG_INF);
     }
     template<class A> batch<double, A> floor(batch<double, A> const& self, requires<avx512f>) {
-      return _mm512_floor_pd(self);
+      return _mm512_roundscale_pd(self, _MM_FROUND_TO_NEG_INF);
     }
 
     // from bool
