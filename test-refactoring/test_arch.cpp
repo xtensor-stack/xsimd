@@ -66,7 +66,7 @@ TEST(arch, dispatcher)
   // platform specific
   {
     auto dispatched = xsimd::dispatch(sum{});
-    float res = dispatched(data, 17.f);
+    float res = dispatched(data, 17);
     EXPECT_EQ(ref, res);
   }
 
