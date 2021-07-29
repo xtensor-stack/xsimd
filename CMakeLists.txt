@@ -40,7 +40,6 @@ ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_isa.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_neon.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_neon64.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_scalar.hpp
-${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse2.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse3.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse4_1.hpp
@@ -67,7 +66,6 @@ ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse2_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse3_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse4_1_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse4_2_register.hpp
-${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_ssse3_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp

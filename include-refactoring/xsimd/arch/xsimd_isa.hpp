@@ -5,10 +5,6 @@
 
 #include "./xsimd_generic_fwd.hpp"
 
-#if XSIMD_WITH_SSE
-#include "./xsimd_sse.hpp"
-#endif
-
 #if XSIMD_WITH_SSE2
 #include "./xsimd_sse2.hpp"
 #endif

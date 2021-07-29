@@ -1,4 +1,3 @@
-#include "../types/xsimd_sse_register.hpp"
 #include "../types/xsimd_sse2_register.hpp"
 #include "../types/xsimd_sse3_register.hpp"
 #include "../types/xsimd_sse4_1_register.hpp"
