@@ -11,7 +11,7 @@ namespace xsimd {
 
     // abs
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> abs(batch<T, A> const& self, requires<avx2>) {
+    batch<T, A> abs(batch<T, A> const& self, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1: return _mm256_abs_epi8(self);
@@ -25,7 +25,7 @@ namespace xsimd {
 
     // add
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 1: return _mm256_add_epi8(self, other);
         case 2: return _mm256_add_epi16(self, other);
@@ -37,27 +37,27 @@ namespace xsimd {
 
     // bitwise_and
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       return _mm256_and_si256(self, other);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx2>) {
+    batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx2>) {
       return _mm256_and_si256(self, other);
     }
 
     // bitwise_andnot
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       return _mm256_andnot_si256(self, other);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires<avx2>) {
+    batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx2>) {
       return _mm256_andnot_si256(self, other);
     }
 
     // bitwise_lshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires<avx2>) {
+    batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 2: return _mm256_slli_epi16(self, other);
         case 4: return _mm256_slli_epi32(self, other);
@@ -67,7 +67,7 @@ namespace xsimd {
     }
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 4: return _mm256_sllv_epi32(self, other);
         case 8: return _mm256_sllv_epi64(self, other);
@@ -77,7 +77,7 @@ namespace xsimd {
 
     // bitwise_rshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires<avx2>) {
+    batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 2: return _mm256_srai_epi16(self, other);
@@ -96,7 +96,7 @@ namespace xsimd {
     }
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 4: return _mm256_srav_epi32(self, other);
@@ -113,14 +113,14 @@ namespace xsimd {
     }
 
     // complex_low
-    template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires<avx2>) {
+    template<class A> batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<avx2>) {
             __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 1, 1, 0));
             __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(1, 2, 0, 0));
             return _mm256_blend_pd(tmp0, tmp1, 10);
     }
 
     // complex_high
-    template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires<avx2>) {
+    template<class A> batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<avx2>) {
             __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 3, 1, 2));
             __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(3, 2, 2, 0));
             return _mm256_blend_pd(tmp0, tmp1, 10);
@@ -128,7 +128,7 @@ namespace xsimd {
 
     // eq
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 1: return _mm256_cmpeq_epi8(self, other);
         case 2: return _mm256_cmpeq_epi16(self, other);
@@ -140,7 +140,7 @@ namespace xsimd {
 
     // gt
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1: return _mm256_cmpgt_epi8(self, other);
@@ -157,7 +157,7 @@ namespace xsimd {
 
     // hadd
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    T hadd(batch<T, A> const& self, requires<avx2>) {
+    T hadd(batch<T, A> const& self, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 4:
           {
@@ -179,7 +179,7 @@ namespace xsimd {
       }
     }
     // load_complex
-    template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires<avx2>) {
+    template<class A> batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<avx2>) {
             using batch_type = batch<float, A>;
             batch_type real = _mm256_castpd_ps(
                          _mm256_permute4x64_pd(
@@ -191,7 +191,7 @@ namespace xsimd {
                              _MM_SHUFFLE(3, 1, 2, 0)));
             return {real, imag};
     }
-    template<class A> batch<std::complex<double>, A> load_complex(batch<double,A> const& hi, batch<double,A> const& lo, requires<avx2>) {
+    template<class A> batch<std::complex<double>, A> load_complex(batch<double,A> const& hi, batch<double,A> const& lo, requires_arch<avx2>) {
             using batch_type = batch<double, A>;
             batch_type real = _mm256_permute4x64_pd(_mm256_unpacklo_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
             batch_type imag = _mm256_permute4x64_pd(_mm256_unpackhi_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
@@ -200,7 +200,7 @@ namespace xsimd {
 
     // max
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1: return _mm256_max_epi8(self, other);
@@ -221,7 +221,7 @@ namespace xsimd {
 
     // min
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1:  return _mm256_min_epi8(self, other);
@@ -242,7 +242,7 @@ namespace xsimd {
 
     // mul
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 2: return _mm256_mullo_epi16(self, other);
         case 4: return _mm256_mullo_epi32(self, other);
@@ -252,7 +252,7 @@ namespace xsimd {
 
     // sadd
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1: return _mm256_adds_epi8(self, other);
@@ -271,7 +271,7 @@ namespace xsimd {
 
     // select
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx2>) {
+    batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 1: return _mm256_blendv_epi8(false_br, true_br, cond);
         case 2: return _mm256_blendv_epi8(false_br, true_br, cond);
@@ -281,7 +281,7 @@ namespace xsimd {
       }
     }
     template<class A, class T, bool... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<avx2>) {
+    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx2>) {
       constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
       switch(sizeof(T)) {
         // FIXME: for some reason mask here is not considered as an immediate,
@@ -298,7 +298,7 @@ namespace xsimd {
 
     // ssub
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1: return _mm256_subs_epi8(self, other);
@@ -317,7 +317,7 @@ namespace xsimd {
 
     // sub
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires<avx2>) {
+    batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
       switch(sizeof(T)) {
         case 1: return _mm256_sub_epi8(self, other);
         case 2: return _mm256_sub_epi16(self, other);

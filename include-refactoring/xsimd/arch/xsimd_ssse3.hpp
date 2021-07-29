@@ -10,7 +10,7 @@ namespace xsimd {
 
     // abs
     template<class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, void>::type>
-    batch<T, A> abs(batch<T, A> const& self, requires<ssse3>) {
+    batch<T, A> abs(batch<T, A> const& self, requires_arch<ssse3>) {
       switch(sizeof(T)) {
         case 1: return _mm_abs_epi8(self);
         case 2: return _mm_abs_epi16(self);
@@ -38,7 +38,7 @@ namespace xsimd {
     }
 
     template<class A, class T, typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires<ssse3>) {
+    batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<ssse3>) {
       constexpr std::size_t size = batch<T, A>::size;
       assert(0<= i && i< size && "index in bounds");
       return detail::extract_pair(self, other, i, ::xsimd::detail::make_index_sequence<size>());
@@ -46,7 +46,7 @@ namespace xsimd {
 
     // hadd
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    T hadd(batch<T, A> const& self, requires<ssse3>) {
+    T hadd(batch<T, A> const& self, requires_arch<ssse3>) {
       switch(sizeof(T)) {
         case 2: {
                 __m128i tmp1 = _mm_hadd_epi16(self, self);

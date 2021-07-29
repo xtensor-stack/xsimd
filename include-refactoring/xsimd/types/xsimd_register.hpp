@@ -49,7 +49,7 @@ namespace xsimd
         // TODO: rename this, as it might conflict with C++20 keyword.
         // We should use add_const and add_reference to build A const&
         template<class A>
-        using requires = A const&;
+        using requires_arch = A const&;
         template<class T>
         struct convert {};
     }
