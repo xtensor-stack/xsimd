@@ -12,24 +12,24 @@ namespace xsimd {
 
     // arg
     template<class A, class T>
-    batch<T, A> arg(batch<std::complex<T>, A> const& self, requires<generic>) {
+    batch<T, A> arg(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       return atan2(self.imag(), self.real());
     }
 
 
     // conj
-    template<class A, class T> batch<std::complex<T>, A> conj(batch<std::complex<T>, A> const& self, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> conj(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       return {self.real(), - self.imag()};
     }
 
     // norm
-    template<class A, class T> batch<T, A> norm(batch<std::complex<T>, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> norm(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       return {fma(self.real(), self.real(), self.imag() * self.imag())};
     }
 
 
     // proj
-    template<class A, class T> batch<std::complex<T>, A> proj(batch<std::complex<T>, A> const& self, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> proj(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       using batch_type = batch<std::complex<T>, A>;
       using real_batch = typename batch_type::real_batch;
       auto cond = xsimd::isinf(self.real()) || xsimd::isinf(self.imag());

@@ -9,20 +9,20 @@ namespace xsimd {
     using namespace types;
     // any
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    bool any(batch<T, A> const& self, requires<sse4_1>) {
+    bool any(batch<T, A> const& self, requires_arch<sse4_1>) {
       return !_mm_testz_si128(self, self);
     }
     // ceil
-    template<class A> batch<float, A> ceil(batch<float, A> const& self, requires<sse4_1>) {
+    template<class A> batch<float, A> ceil(batch<float, A> const& self, requires_arch<sse4_1>) {
       return _mm_ceil_ps(self);
     }
-    template<class A> batch<double, A> ceil(batch<double, A> const& self, requires<sse4_1>) {
+    template<class A> batch<double, A> ceil(batch<double, A> const& self, requires_arch<sse4_1>) {
       return _mm_ceil_pd(self);
     }
 
     // eq
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires<sse4_1>) {
+    batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) {
       switch(sizeof(T)) {
         case 8: return _mm_cmpeq_epi64(self, other);
         default: return eq(self, other, ssse3{});
@@ -30,16 +30,16 @@ namespace xsimd {
     }
 
     // floor
-    template<class A> batch<float, A> floor(batch<float, A> const& self, requires<sse4_1>) {
+    template<class A> batch<float, A> floor(batch<float, A> const& self, requires_arch<sse4_1>) {
       return _mm_floor_ps(self);
     }
-    template<class A> batch<double, A> floor(batch<double, A> const& self, requires<sse4_1>) {
+    template<class A> batch<double, A> floor(batch<double, A> const& self, requires_arch<sse4_1>) {
       return _mm_floor_pd(self);
     }
 
     // max
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires<sse4_1>) {
+    batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1: return _mm_max_epi8(self, other);
@@ -60,7 +60,7 @@ namespace xsimd {
 
     // min
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires<sse4_1>) {
+    batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
           case 1: return _mm_min_epi8(self, other);
@@ -81,7 +81,7 @@ namespace xsimd {
 
     // mul
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires<sse4_1>) {
+    batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) {
       switch(sizeof(T)) {
         case 1: return _mm_or_si128(
                             _mm_and_si128(_mm_mullo_epi16(self, other), _mm_srli_epi16(_mm_cmpeq_epi8(self, self), 8)),
@@ -102,10 +102,10 @@ namespace xsimd {
     }
 
     // nearbyint
-    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<sse4_1>) {
+    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<sse4_1>) {
       return _mm_round_ps(self, _MM_FROUND_TO_NEAREST_INT);
     }
-    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires<sse4_1>) {
+    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires_arch<sse4_1>) {
       return _mm_round_pd(self, _MM_FROUND_TO_NEAREST_INT);
     }
 
@@ -119,18 +119,18 @@ namespace xsimd {
     }
 
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<sse4_1>) {
+    batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) {
       return _mm_blendv_epi8(false_br, true_br, cond);
     }
-    template<class A> batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires<sse4_1>) {
+    template<class A> batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<sse4_1>) {
       return _mm_blendv_ps(false_br, true_br, cond);
     }
-    template<class A> batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires<sse4_1>) {
+    template<class A> batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<sse4_1>) {
       return _mm_blendv_pd(false_br, true_br, cond);
     }
 
     template<class A, class T, bool... Values, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires<sse4_1>) {
+    batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) {
       constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
       switch(sizeof(T)) {
         case 2: return _mm_blend_epi16(false_br, true_br, mask);
@@ -146,21 +146,21 @@ namespace xsimd {
         default: return select(batch_bool_constant<batch<T, A>, Values...>(), true_br, false_br, ssse3{});
       }
     }
-    template<class A, bool... Values> batch<float, A> select(batch_bool_constant<batch<float, A>, Values...> const& , batch<float, A> const& true_br, batch<float, A> const& false_br, requires<sse4_1>) {
+    template<class A, bool... Values> batch<float, A> select(batch_bool_constant<batch<float, A>, Values...> const& , batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<sse4_1>) {
       constexpr int mask = batch_bool_constant<batch<float, A>, Values...>::mask();
       return _mm_blend_ps(false_br, true_br, mask);
     }
-    template<class A, bool... Values> batch<double, A> select(batch_bool_constant<batch<double, A>, Values...> const& , batch<double, A> const& true_br, batch<double, A> const& false_br, requires<sse4_1>) {
+    template<class A, bool... Values> batch<double, A> select(batch_bool_constant<batch<double, A>, Values...> const& , batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<sse4_1>) {
       constexpr int mask = batch_bool_constant<batch<double, A>, Values...>::mask();
       return _mm_blend_pd(false_br, true_br, mask);
     }
 
 
     // trunc
-    template<class A> batch<float, A> trunc(batch<float, A> const& self, requires<sse4_1>) {
+    template<class A> batch<float, A> trunc(batch<float, A> const& self, requires_arch<sse4_1>) {
       return _mm_round_ps(self, _MM_FROUND_TO_ZERO);
     }
-    template<class A> batch<double, A> trunc(batch<double, A> const& self, requires<sse4_1>) {
+    template<class A> batch<double, A> trunc(batch<double, A> const& self, requires_arch<sse4_1>) {
       return _mm_round_pd(self, _MM_FROUND_TO_ZERO);
     }
 

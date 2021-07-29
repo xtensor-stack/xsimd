@@ -19,7 +19,7 @@ namespace xsimd {
     using namespace types;
 
     // acos
-    template<class A, class T> batch<T, A> acos(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> acos(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
         batch_type x = abs(self);
         auto x_larger_05 = x > batch_type(0.5);
@@ -30,7 +30,7 @@ namespace xsimd {
         return select(x_larger_05, x, constants::pio2<batch_type>() - x);
     }
         template <class A, class T>
-        batch<std::complex<T>, A> acos(const batch<std::complex<T>, A>& z, requires<generic>)
+        batch<std::complex<T>, A> acos(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -48,7 +48,7 @@ namespace xsimd {
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-    template<class A, class T> batch<T, A> acosh(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> acosh(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 batch_type x = self - batch_type(1.);
                 auto test = x > constants::oneotwoeps<batch_type>();
@@ -57,7 +57,7 @@ namespace xsimd {
                 return select(test, l1pz + constants::log_2<batch_type>(), l1pz);
     }
         template <class A, class T>
-        inline batch<std::complex<T>, A> acosh(const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> acosh(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using batch_type = batch<std::complex<T>, A>;
             batch_type w = acos(z);
@@ -66,7 +66,7 @@ namespace xsimd {
         }
 
     // asin
-    template<class A> batch<float, A> asin(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> asin(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type x = abs(self);
                 batch_type sign = bitofsign(self);
@@ -83,7 +83,7 @@ namespace xsimd {
                 z = select(x_larger_05, constants::pio2<batch_type>() - (z1 + z1), z1);
                 return z ^ sign;
     }
-    template<class A> batch<double, A> asin(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> asin(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type x = abs(self);
                 auto small_cond = x < constants::sqrteps<batch_type>();
@@ -126,7 +126,7 @@ namespace xsimd {
                                   bitofsign(self));
     }
         template <class A, class T>
-        batch<std::complex<T>, A> asin(const batch<std::complex<T>, A>& z, requires<generic>)
+        batch<std::complex<T>, A> asin(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -179,7 +179,7 @@ namespace xsimd {
             return averagef(x1, x2);
           }
     }
-    template<class A> batch<float, A> asinh(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> asinh(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type x = abs(self);
                 auto lthalf = x < batch_type(0.5);
@@ -205,7 +205,7 @@ namespace xsimd {
                 return select(lthalf, z, log(tmp) + constants::log_2<batch_type>()) ^ bts;
 #endif
     }
-    template<class A> batch<double, A> asinh(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> asinh(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type x = abs(self);
                 auto test = x > constants::oneosqrteps<batch_type>();
@@ -218,7 +218,7 @@ namespace xsimd {
                 return bitofsign(self) ^ z;
     }
         template <class A, class T>
-        inline batch<std::complex<T>, A> asinh(const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> asinh(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using batch_type = batch<std::complex<T>, A>;
             batch_type w = asin(batch_type(-z.imag(), z.real()));
@@ -278,14 +278,14 @@ namespace xsimd {
                 return yy + z;
             }
     }
-    template<class A, class T> batch<T, A> atan(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> atan(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 const batch_type absa = abs(self);
                 const batch_type x = detail::kernel_atan(absa, batch_type(1.) / absa);
                 return x ^ bitofsign(self);
     }
         template <class A, class T>
-        batch<std::complex<T>, A> atan(const batch<std::complex<T>, A>& z, requires<generic>)
+        batch<std::complex<T>, A> atan(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -315,7 +315,7 @@ namespace xsimd {
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-    template<class A, class T> batch<T, A> atanh(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> atanh(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 batch_type x = abs(self);
                 batch_type t = x + x;
@@ -325,7 +325,7 @@ namespace xsimd {
                 return bitofsign(self) ^ (batch_type(0.5) * log1p(select(test, fma(t, tmp, t), tmp)));
     }
         template <class A, class T>
-        inline batch<std::complex<T>, A> atanh(const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> atanh(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using batch_type = batch<std::complex<T>, A>;
             batch_type w = atan(batch_type(-z.imag(), z.real()));
@@ -334,7 +334,7 @@ namespace xsimd {
         }
 
     // atan2
-    template<class A, class T> batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    template<class A, class T> batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 const batch_type q = abs(self / other);
                 const batch_type z = detail::kernel_atan(q, batch_type(1.) / q);
@@ -599,7 +599,7 @@ namespace xsimd {
         };
 
     }
-    template<class A, class T> batch<T, A> cos(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> cos(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 const batch_type x = abs(self);
                 batch_type xr = constants::nan<batch_type>();
@@ -614,7 +614,7 @@ namespace xsimd {
                 return z1 ^ sign_bit;
     }
 
-    template<class A, class T> batch<std::complex<T>, A> cos(batch<std::complex<T>, A> const& z, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> cos(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
       return {cos(z.real()) * cosh(z.imag()), -sin(z.real()) * sinh(z.imag())};
     }
 
@@ -630,7 +630,7 @@ namespace xsimd {
       * ====================================================
       */
 
-    template<class A, class T> batch<T, A> cosh(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> cosh(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 batch_type x = abs(self);
                 auto test1 = x > (constants::maxlog<batch_type>() - constants::log_2<batch_type>());
@@ -640,7 +640,7 @@ namespace xsimd {
                 return select(test1, tmp1 * tmp, detail::average(tmp, batch_type(1.) / tmp));
     }
         template <class A, class T>
-        inline batch<std::complex<T>, A> cosh(const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> cosh(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             auto x = z.real();
             auto y = z.imag();
@@ -666,16 +666,16 @@ namespace xsimd {
     }
     }
 
-    template<class A, class T> batch<T, A> sin(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> sin(batch<T, A> const& self, requires_arch<generic>) {
       return detail::sin(self);
     }
 
-    template<class A, class T> batch<std::complex<T>, A> sin(batch<std::complex<T>, A> const& z, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> sin(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
       return {sin(z.real()) * cosh(z.imag()), cos(z.real()) * sinh(z.imag())};
     }
 
     // sincos
-    template<class A, class T> std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 const batch_type x = abs(self);
                 batch_type xr = constants::nan<batch_type>();
@@ -694,7 +694,7 @@ namespace xsimd {
 
     template<class A, class T>
     std::pair<batch<std::complex<T>, A>, batch<std::complex<T>, A>>
-    sincos(batch<std::complex<T>, A> const& z, requires<generic>) {
+    sincos(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
             real_batch rcos = cos(z.real());
@@ -754,7 +754,7 @@ namespace xsimd {
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-    template<class A, class T> batch<T, A> sinh(batch<T, A> const& a, requires<generic>) {
+    template<class A, class T> batch<T, A> sinh(batch<T, A> const& a, requires_arch<generic>) {
                 using batch_type = batch<T, A>;
                 batch_type half(0.5);
                 batch_type x = abs(a);
@@ -775,7 +775,7 @@ namespace xsimd {
                 return select(lt1, z, r) ^ bts;
     }
         template <class A, class T>
-        inline batch<std::complex<T>, A> sinh(const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> sinh(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             auto x = z.real();
             auto y = z.imag();
@@ -783,7 +783,7 @@ namespace xsimd {
         }
 
     // tan
-    template<class A, class T> batch<T, A> tan(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> tan(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 const batch_type x = abs(self);
                 batch_type xr = constants::nan<batch_type>();
@@ -794,7 +794,7 @@ namespace xsimd {
                 const batch_type y = detail::tan_eval(xr, test);
                 return y ^ bitofsign(self);
     }
-    template<class A, class T> batch<std::complex<T>, A> tan(batch<std::complex<T>, A> const& z, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> tan(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
             real_batch d = cos(2 * z.real()) + cosh(2 * z.imag());
@@ -890,7 +890,7 @@ namespace xsimd {
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-    template<class A, class T> batch<T, A> tanh(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> tanh(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
                 batch_type one(1.);
                 batch_type x = abs(self);
@@ -907,7 +907,7 @@ namespace xsimd {
                 return select(test, z, r) ^ bts;
     }
         template <class A, class T>
-        inline batch<std::complex<T>, A> tanh(const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> tanh(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using real_batch = typename batch<std::complex<T>, A>::real_batch;
             auto x = z.real();

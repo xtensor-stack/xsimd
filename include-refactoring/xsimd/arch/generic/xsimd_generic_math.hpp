@@ -12,7 +12,7 @@ namespace xsimd {
     using namespace types;
     // abs
     template<class A, class T, class/*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
-    batch<T, A> abs(batch<T, A> const& self, requires<generic>)
+    batch<T, A> abs(batch<T, A> const& self, requires_arch<generic>)
     {
       if(std::is_unsigned<T>::value)
         return self;
@@ -24,22 +24,22 @@ namespace xsimd {
     }
 
     template<class A, class T>
-    batch<T, A> abs(batch<std::complex<T>, A> const& z, requires<generic>) {
+    batch<T, A> abs(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
       return hypot(z.real(), z.imag());
     }
 
     // batch_cast
-    template<class A, class T> batch<T, A> batch_cast(batch<T, A> const& self, batch<T, A> const&, requires<generic>) {
+    template<class A, class T> batch<T, A> batch_cast(batch<T, A> const& self, batch<T, A> const&, requires_arch<generic>) {
       return self;
     }
 
     namespace detail {
     template<class A, class T_out, class T_in>
-    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires<generic>, with_fast_conversion) {
+    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires_arch<generic>, with_fast_conversion) {
       return fast_cast(self, out, A{});
     }
     template<class A, class T_out, class T_in>
-    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires<generic>, with_slow_conversion) {
+    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires_arch<generic>, with_slow_conversion) {
       static_assert(!std::is_same<T_in, T_out>::value, "there should be no conversion for this type combination");
       using batch_type_in = batch<T_in, A>;
       using batch_type_out = batch<T_out, A>;
@@ -54,12 +54,12 @@ namespace xsimd {
     }
 
     template<class A, class T_out, class T_in>
-    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires<generic>) {
+    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires_arch<generic>) {
       return detail::batch_cast(self, out, A{}, detail::conversion_type<A, T_in, T_out>{});
     }
 
     // bitofsign
-    template<class A, class T> batch<T, A> bitofsign(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> bitofsign(batch<T, A> const& self, requires_arch<generic>) {
       static_assert(std::is_integral<T>::value, "int type implementation");
       if(std::is_unsigned<T>::value)
         return batch<T, A>(0);
@@ -67,10 +67,10 @@ namespace xsimd {
         return self >> (T)(8 * sizeof(T) - 1);
     }
 
-    template<class A> batch<float, A> bitofsign(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> bitofsign(batch<float, A> const& self, requires_arch<generic>) {
       return self & constants::minuszero<batch<float, A>>();
     }
-    template<class A> batch<double, A> bitofsign(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> bitofsign(batch<double, A> const& self, requires_arch<generic>) {
       return self & constants::minuszero<batch<double, A>>();
     }
 
@@ -85,7 +85,7 @@ namespace xsimd {
          * (See copy at http://boost.org/LICENSE_1_0.txt)
          * ====================================================
          */
-    template<class A> batch<float, A> cbrt(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> cbrt(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type z = abs(self);
 #ifndef XSIMD_NO_DENORMALS
@@ -129,7 +129,7 @@ namespace xsimd {
                 return select(self == batch_type(0.), self, x);
 #endif
     }
-    template<class A> batch<double, A> cbrt(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> cbrt(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type z = abs(self);
 #ifndef XSIMD_NO_DENORMALS
@@ -176,13 +176,13 @@ namespace xsimd {
     }
 
     // clip
-    template<class A, class T> batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> const& hi, requires<generic>) {
+    template<class A, class T> batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> const& hi, requires_arch<generic>) {
       return min(hi, max(self, lo));
     }
 
 
     // copysign
-    template<class A, class T> batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    template<class A, class T> batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return abs(self) | bitofsign(other);
     }
 
@@ -361,7 +361,7 @@ namespace xsimd {
          */
 
     template<class A>
-    batch<float, A> erf(batch<float, A> const& self, requires<generic>) {
+    batch<float, A> erf(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type x = abs(self);
                 batch_type r1(0.);
@@ -382,7 +382,7 @@ namespace xsimd {
 #endif
                 return r1;
             }
-    template<class A> batch<double, A> erf(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> erf(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type x = abs(self);
                 batch_type xx = x * x;
@@ -416,7 +416,7 @@ namespace xsimd {
     }
 
     // erfc
-    template<class A> batch<float, A> erfc(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> erfc(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type x = abs(self);
                 auto test0 = self < batch_type(0.);
@@ -437,7 +437,7 @@ namespace xsimd {
 #endif
                 return select(test0, batch_type(2.) - r1, r1);
     }
-    template<class A> batch<double, A> erfc(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> erfc(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type x = abs(self);
                 batch_type xx = x * x;
@@ -795,23 +795,23 @@ namespace xsimd {
       }
     }
 
-    template<class A, class T> batch<T, A> exp(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> exp(batch<T, A> const& self, requires_arch<generic>) {
       return detail::exp<detail::exp_tag>(self);
     }
 
-    template<class A, class T> batch<std::complex<T>, A> exp(batch<std::complex<T>, A> const& self, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> exp(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       using batch_type = batch<std::complex<T>, A>;
       auto isincos = sincos(self.imag());
       return exp(self.real()) * batch_type(std::get<1>(isincos), std::get<0>(isincos));
     }
 
     // exp10
-    template<class A, class T> batch<T, A> exp10(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> exp10(batch<T, A> const& self, requires_arch<generic>) {
       return detail::exp<detail::exp10_tag>(self);
     }
 
     // exp2
-    template<class A, class T> batch<T, A> exp2(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> exp2(batch<T, A> const& self, requires_arch<generic>) {
       return detail::exp<detail::exp2_tag>(self);
     }
 
@@ -881,7 +881,7 @@ namespace xsimd {
 
     }
 
-    template<class A, class T> batch<T, A> expm1(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> expm1(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
       return select(self < constants::logeps<batch_type>(),
                     batch_type(-1.),
@@ -891,7 +891,7 @@ namespace xsimd {
     }
 
     template <class A, class T>
-    batch<std::complex<T>, A> expm1(const batch<std::complex<T>, A>& z, requires<generic>)
+    batch<std::complex<T>, A> expm1(const batch<std::complex<T>, A>& z, requires_arch<generic>)
     {
         using batch_type = batch<std::complex<T>, A>;
         using real_batch = typename batch_type::real_batch;
@@ -903,12 +903,12 @@ namespace xsimd {
     }
 
     // fdim
-    template<class A, class T> batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    template<class A, class T> batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return fmax(batch<T, A>(0), self - other);
     }
 
     // fmod
-    template<class A, class T> batch<T, A> fmod(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    template<class A, class T> batch<T, A> fmod(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return fnma(trunc(self / other), other, self);
     }
 
@@ -923,7 +923,7 @@ namespace xsimd {
      * ====================================================
      */
     template <class A, class T>
-    batch<T, A> frexp(const batch<T, A>& self, batch<as_integer_t<T>, A>& exp, requires<generic>) {
+    batch<T, A> frexp(const batch<T, A>& self, batch<as_integer_t<T>, A>& exp, requires_arch<generic>) {
         using batch_type = batch<T, A>;
         using i_type = batch<as_integer_t<T>, A>;
         i_type m1f = constants::mask1frexp<batch_type>();
@@ -936,12 +936,12 @@ namespace xsimd {
 
     // from bool
     template<class A, class T>
-    batch<T, A> from_bool(batch_bool<T, A> const& self, requires<generic>) {
+    batch<T, A> from_bool(batch_bool<T, A> const& self, requires_arch<generic>) {
       return batch<T, A>(self.data) & batch<T,A>(1);
     }
 
     // hadd
-    template<class A, class T> std::complex<T> hadd(batch<std::complex<T>, A> const& self, requires<generic>) {
+    template<class A, class T> std::complex<T> hadd(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       return {hadd(self.real()), hadd(self.imag())};
     }
 
@@ -952,12 +952,12 @@ namespace xsimd {
     }
 
     // hypot
-    template<class A, class T> batch<T, A> hypot(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    template<class A, class T> batch<T, A> hypot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return sqrt(fma(self, self, other * other));
     }
 
     // ipow
-    template<class A, class T, class ITy> batch<T, A> ipow(batch<T, A> const& self, ITy other, requires<generic>) {
+    template<class A, class T, class ITy> batch<T, A> ipow(batch<T, A> const& self, ITy other, requires_arch<generic>) {
       static_assert(std::is_integral<ITy>::value, "second argument must be an integer");
       batch<T, A> a = self;
       ITy b = other;
@@ -991,7 +991,7 @@ namespace xsimd {
       * ====================================================
       */
     template <class A, class T>
-    batch<T, A> ldexp(const batch<T, A>& self, const batch<as_integer_t<T>, A>& other, requires<generic>) {
+    batch<T, A> ldexp(const batch<T, A>& self, const batch<as_integer_t<T>, A>& other, requires_arch<generic>) {
         using batch_type = batch<T, A>;
         using itype = as_integer_t<batch_type>;
         itype ik = other + constants::maxexponent<T>();
@@ -1000,7 +1000,7 @@ namespace xsimd {
     }
 
     // lgamma
-    template<class A, class T> batch<T, A> lgamma(batch<T, A> const& self, requires<generic>);
+    template<class A, class T> batch<T, A> lgamma(batch<T, A> const& self, requires_arch<generic>);
 
     namespace detail {
     /* origin: boost/simd/arch/common/detail/generic/gammaln_kernel.hpp */
@@ -1299,7 +1299,7 @@ namespace xsimd {
         };
     }
 
-    template<class A, class T> batch<T, A> lgamma(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> lgamma(batch<T, A> const& self, requires_arch<generic>) {
       return detail::lgamma_impl<batch<T, A>>::compute(self);
     }
 
@@ -1314,7 +1314,7 @@ namespace xsimd {
              * (See copy at http://boost.org/LICENSE_1_0.txt)
              * ====================================================
              */
-    template<class A> batch<float, A> log(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> log(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
       using i_type = as_integer_t<batch_type>;
       batch_type x = self;
@@ -1351,7 +1351,7 @@ namespace xsimd {
       return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
-    template<class A> batch<double, A> log(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> log(batch<double, A> const& self, requires_arch<generic>) {
                using batch_type = batch<double, A>;
                 using i_type = as_integer_t<batch_type>;
 
@@ -1399,13 +1399,13 @@ namespace xsimd {
     }
 
     template <class A, class T>
-    batch<std::complex<T>, A> log(const batch<std::complex<T>, A>& z, requires<generic>)
+    batch<std::complex<T>, A> log(const batch<std::complex<T>, A>& z, requires_arch<generic>)
     {
         return batch<std::complex<T>, A>(log(abs(z)), atan2(z.imag(), z.real()));
     }
 
     // log2
-    template<class A> batch<float, A> log2(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> log2(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 using i_type = as_integer_t<batch_type>;
                 batch_type x = self;
@@ -1441,7 +1441,7 @@ namespace xsimd {
 #endif
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
-    template<class A> batch<double, A> log2(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> log2(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 using i_type = as_integer_t<batch_type>;
                 batch_type x = self;
@@ -1502,7 +1502,7 @@ namespace xsimd {
         }
   }
 
-    template<class A, class T> batch<std::complex<T>, A> log2(batch<std::complex<T>, A> const& self, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> log2(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       return detail::logN_complex_impl(self, std::log(2));
     }
 
@@ -1518,7 +1518,7 @@ namespace xsimd {
              * is preserved.
              * ====================================================
              */
-    template<class A> batch<float, A> log10(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> log10(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 const batch_type
                     ivln10hi(4.3432617188e-01f),
@@ -1565,7 +1565,7 @@ namespace xsimd {
 #endif
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
-    template<class A> batch<double, A> log10(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> log10(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 const batch_type
                     ivln10hi(4.34294481878168880939e-01),
@@ -1624,7 +1624,7 @@ namespace xsimd {
     }
 
         template <class A, class T>
-            batch<std::complex<T>, A> log10(const batch<std::complex<T>, A>& z, requires<generic>)
+            batch<std::complex<T>, A> log10(const batch<std::complex<T>, A>& z, requires_arch<generic>)
             {
                 return detail::logN_complex_impl(z, std::log(10));
             }
@@ -1639,7 +1639,7 @@ namespace xsimd {
              * (See copy at http://boost.org/LICENSE_1_0.txt)
              * ====================================================
              */
-    template<class A> batch<float, A> log1p(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> log1p(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 using i_type = as_integer_t<batch_type>;
                 const batch_type uf = self + batch_type(1.);
@@ -1667,7 +1667,7 @@ namespace xsimd {
 #endif
                 return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
-    template<class A> batch<double, A> log1p(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> log1p(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 using i_type = as_integer_t<batch_type>;
                 const batch_type uf = self + batch_type(1.);
@@ -1704,7 +1704,7 @@ namespace xsimd {
                 return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
-    template<class A, class T> batch<std::complex<T>, A> log1p(batch<std::complex<T>, A> const& self, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> log1p(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
         using batch_type = batch<std::complex<T>, A>;
         using real_batch = typename batch_type::real_batch;
         batch_type u = 1 + self;
@@ -1719,14 +1719,14 @@ namespace xsimd {
 
     // mod
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> mod(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    batch<T, A> mod(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return detail::apply([](T x, T y) -> T { return x % y;}, self, other);
     }
 
 
     // nearbyint
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> nearbyint(batch<T, A> const& self, requires<generic>) {
+    batch<T, A> nearbyint(batch<T, A> const& self, requires_arch<generic>) {
       return self;
     }
     namespace detail {
@@ -1739,10 +1739,10 @@ namespace xsimd {
         return s ^ select(v < t2n, d0 - t2n, v);
       }
     }
-    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<generic>) {
       return detail::nearbyintf(self);
     }
-    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires_arch<generic>) {
       return detail::nearbyintf(self);
     }
 
@@ -1800,7 +1800,7 @@ namespace xsimd {
             }
         };
     }
-    template<class A, class T> batch<T, A> nextafter(batch<T, A> const& from, batch<T, A> const& to, requires<generic>) {
+    template<class A, class T> batch<T, A> nextafter(batch<T, A> const& from, batch<T, A> const& to, requires_arch<generic>) {
       using kernel = detail::nextafter_kernel<T, A>;
       return select(from == to, from,
                     select(to > from, kernel::next(from), kernel::prev(from)));
@@ -1817,7 +1817,7 @@ namespace xsimd {
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-    template<class A, class T> batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    template<class A, class T> batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
         using batch_type = batch<T, A>;
         auto negx = self < batch_type(0.);
         batch_type z = exp(other * log(abs(self)));
@@ -1827,7 +1827,7 @@ namespace xsimd {
     }
 
         template <class A, class T>
-        inline batch<std::complex<T>, A> pow(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> pow(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using cplx_batch = batch<std::complex<T>, A>;
             using real_batch = typename cplx_batch::real_batch;
@@ -1847,27 +1847,27 @@ namespace xsimd {
 
     // remainder
     template<class A>
-    batch<float, A> remainder(batch<float, A> const& self, batch<float, A> const& other, requires<generic>) {
+    batch<float, A> remainder(batch<float, A> const& self, batch<float, A> const& other, requires_arch<generic>) {
       return fnma(nearbyint(self / other), other, self);
     }
     template<class A>
-    batch<double, A> remainder(batch<double, A> const& self, batch<double, A> const& other, requires<generic>) {
+    batch<double, A> remainder(batch<double, A> const& self, batch<double, A> const& other, requires_arch<generic>) {
       return fnma(nearbyint(self / other), other, self);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires<generic>) {
+    batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       auto mod = self % other;
       return select(mod <= other / 2, mod, mod - other);
     }
 
     // select
     template<class A, class T>
-    batch<std::complex<T>, A> select(batch_bool<T, A> const& cond, batch<std::complex<T>, A> const& true_br, batch<std::complex<T>, A> const& false_br, requires<generic>) {
+    batch<std::complex<T>, A> select(batch_bool<T, A> const& cond, batch<std::complex<T>, A> const& true_br, batch<std::complex<T>, A> const& false_br, requires_arch<generic>) {
       return {select(cond, true_br.real(), false_br.real()), select(cond, true_br.imag(), false_br.imag())};
     }
 
     // sign
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> sign(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> sign(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
       batch_type res = select(self > batch_type(0), batch_type(1), batch_type(0)) - select(self < batch_type(0), batch_type(1), batch_type(0));
       return res;
@@ -1885,14 +1885,14 @@ namespace xsimd {
     }
     }
 
-    template<class A> batch<float, A> sign(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> sign(batch<float, A> const& self, requires_arch<generic>) {
       return detail::signf(self);
     }
-    template<class A> batch<double, A> sign(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> sign(batch<double, A> const& self, requires_arch<generic>) {
       return detail::signf(self);
     }
         template <class A, class T>
-        inline batch<std::complex<T>, A> sign(const batch<std::complex<T>, A>& z, requires<generic>)
+        inline batch<std::complex<T>, A> sign(const batch<std::complex<T>, A>& z, requires_arch<generic>)
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -1904,7 +1904,7 @@ namespace xsimd {
         }
 
     // signnz
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> signnz(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> signnz(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
       return (self >> (sizeof(T) * 8 - 1)) | batch_type(1.);
     }
@@ -1920,15 +1920,15 @@ namespace xsimd {
     }
     }
 
-    template<class A> batch<float, A> signnz(batch<float, A> const& self, requires<generic>) {
+    template<class A> batch<float, A> signnz(batch<float, A> const& self, requires_arch<generic>) {
       return detail::signnzf(self);
     }
-    template<class A> batch<double, A> signnz(batch<double, A> const& self, requires<generic>) {
+    template<class A> batch<double, A> signnz(batch<double, A> const& self, requires_arch<generic>) {
       return detail::signnzf(self);
     }
 
     // sqrt
-    template<class A, class T> batch<std::complex<T>, A> sqrt(batch<std::complex<T>, A> const& z, requires<generic>) {
+    template<class A, class T> batch<std::complex<T>, A> sqrt(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
 
                 constexpr T csqrt_scale_factor = std::is_same<T, float>::value?6.7108864e7f:1.8014398509481984e16;
                 constexpr T csqrt_scale = std::is_same<T, float>::value?1.220703125e-4f:7.450580596923828125e-9;
@@ -2181,7 +2181,7 @@ namespace xsimd {
         }
     }
 
-    template<class A, class T> batch<T, A> tgamma(batch<T, A> const& self, requires<generic>) {
+    template<class A, class T> batch<T, A> tgamma(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
             auto nan_result = (self < batch_type(0.) && is_flint(self));
 #ifndef XSIMD_NO_INVALIDS
