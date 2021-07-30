@@ -8,7 +8,6 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include "xsimd/math/xsimd_math_complex.hpp"
 #include "test_utils.hpp"
 
 template <class B>

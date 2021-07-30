@@ -11,21 +11,17 @@
 #ifndef XSIMD_ALIGNED_ALLOCATOR_HPP
 #define XSIMD_ALIGNED_ALLOCATOR_HPP
 
+#include "../config/xsimd_arch.hpp"
+
 #include <algorithm>
-#include <memory>
-#include <cstddef>
-#include <stdlib.h>
-#include <cassert>
-
-#include "../config/xsimd_align.hpp"
-
-#if defined(XSIMD_ALLOCA)
-#if defined(__GNUC__)
-#include <alloca.h>
-#elif defined(_MSC_VER)
+#include <utility>
+#ifdef _WIN32
 #include <malloc.h>
+#else
+#include <cstdlib>
 #endif
-#endif
+
+#include <cassert>
 
 namespace xsimd
 {
@@ -40,7 +36,7 @@ namespace xsimd
      * @tparam T type of objects to allocate.
      * @tparam Align alignment in bytes.
      */
-    template <class T, size_t Align=arch::default_::alignment>
+    template <class T, size_t Align=default_arch::alignment()>
     class aligned_allocator
     {
     public:
@@ -342,6 +338,12 @@ namespace xsimd
                 size);
         }
     }
+
+    template<class T, class A=default_arch>
+    using default_allocator = typename std::conditional<A::requires_alignment(),
+              aligned_allocator<T, A::alignment()>,
+              std::allocator<T>
+            >::type;
 }
 
 #endif

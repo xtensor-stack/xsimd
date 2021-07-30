@@ -11,19 +11,18 @@
 #ifndef XSIMD_ALGORITHMS_HPP
 #define XSIMD_ALGORITHMS_HPP
 
-#include "../memory/xsimd_load_store.hpp"
+#include "../types/xsimd_api.hpp"
 
 namespace xsimd
 {
-    template <class I1, class I2, class O1, class UF>
+    template <class Arch=default_arch, class I1, class I2, class O1, class UF>
     void transform(I1 first, I2 last, O1 out_first, UF&& f)
     {
         using value_type = typename std::decay<decltype(*first)>::type;
-        using traits = simd_traits<value_type>;
-        using batch_type = typename traits::type;
+        using batch_type = batch<value_type, Arch>;
 
         std::size_t size = static_cast<std::size_t>(std::distance(first, last));
-        std::size_t simd_size = traits::size;
+        std::size_t simd_size = batch_type::size;
 
         const auto* ptr_begin = &(*first);
         auto* ptr_out = &(*out_first);
@@ -39,10 +38,9 @@ namespace xsimd
                 out_first[i] = f(first[i]);
             }
 
-            batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                xsimd::load_aligned(&first[i], batch);
+                batch_type batch = batch_type::load_aligned(&first[i]);
                 xsimd::store_aligned(&out_first[i], f(batch));
             }
 
@@ -58,10 +56,9 @@ namespace xsimd
                 out_first[i] = f(first[i]);
             }
 
-            batch_type batch;
             for (std::size_t i = align_begin; i < align_end; i += simd_size)
             {
-                xsimd::load_aligned(&first[i], batch);
+                batch_type batch = batch_type::load_aligned(&first[i]);
                 xsimd::store_unaligned(&out_first[i], f(batch));
             }
 
@@ -72,15 +69,14 @@ namespace xsimd
         }
     }
 
-    template <class I1, class I2, class I3, class O1, class UF>
+    template <class Arch=default_arch, class I1, class I2, class I3, class O1, class UF>
     void transform(I1 first_1, I2 last_1, I3 first_2, O1 out_first, UF&& f)
     {
         using value_type = typename std::decay<decltype(*first_1)>::type;
-        using traits = simd_traits<value_type>;
-        using batch_type = typename traits::type;
+        using batch_type = batch<value_type, Arch>;
 
         std::size_t size = static_cast<std::size_t>(std::distance(first_1, last_1));
-        std::size_t simd_size = traits::size;
+        std::size_t simd_size = batch_type::size;
 
         const auto* ptr_begin_1 = &(*first_1);
         const auto* ptr_begin_2 = &(*first_2);
@@ -100,8 +96,8 @@ namespace xsimd
             batch_type batch_1, batch_2;                                        \
             for (std::size_t i = align_begin_1; i < align_end; i += simd_size)  \
             {                                                                   \
-                xsimd::A1(&first_1[i], batch_1);                                \
-                xsimd::A2(&first_2[i], batch_2);                                \
+                batch_1 = batch_type::A1(&first_1[i]);                                \
+                batch_2 = batch_type::A2(&first_2[i]);                                \
                 xsimd::A3(&out_first[i], f(batch_1, batch_2));                  \
             }                                                                   \
                                                                                 \
@@ -142,15 +138,14 @@ namespace xsimd
     }
 
 
-    template <class Iterator1, class Iterator2, class Init, class BinaryFunction = detail::plus>
+    template <class Arch=default_arch, class Iterator1, class Iterator2, class Init, class BinaryFunction = detail::plus>
     Init reduce(Iterator1 first, Iterator2 last, Init init, BinaryFunction&& binfun = detail::plus{})
     {
         using value_type = typename std::decay<decltype(*first)>::type;
-        using traits = simd_traits<value_type>;
-        using batch_type = typename traits::type;
+        using batch_type = batch<value_type, Arch>;
 
         std::size_t size = static_cast<std::size_t>(std::distance(first, last));
-        constexpr std::size_t simd_size = traits::size;
+        constexpr std::size_t simd_size = batch_type::size;
 
         if(size < simd_size)
         {
@@ -173,13 +168,12 @@ namespace xsimd
         }
 
         // reduce aligned part
-        batch_type batch_init, batch;
         auto ptr = ptr_begin + align_begin;
-        xsimd::load_aligned(ptr, batch_init);
+        batch_type batch_init = batch_type::load_aligned(ptr);
         ptr += simd_size;
         for (auto const end = ptr_begin + align_end; ptr < end; ptr += simd_size)
         {
-            xsimd::load_aligned(ptr, batch);
+            batch_type batch = batch_type::load_aligned(ptr);
             batch_init = binfun(batch_init, batch);
         }
 

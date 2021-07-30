@@ -14,6 +14,8 @@
 #include <sstream>
 #include <type_traits>
 #include <vector>
+#include <cmath>
+#include <complex>
 
 #include "gtest/gtest.h"
 
@@ -35,7 +37,7 @@ public:
     {
         using value_type = typename T::value_type;
         std::string prefix = "fallback_";
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
+#if XSIMD_WITH_SSE
         size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
         if (register_size == size_t(128))
         {
@@ -49,7 +51,7 @@ public:
         {
             prefix = "avx512_";
         }
-#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
+#elif XSIMD_WITH_NEON
         size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
         if (register_size == size_t(128))
         {
@@ -88,19 +90,34 @@ inline std::string print_function_name(const std::string& func)
 
 namespace xsimd
 {
-    template <class T, size_t N>
-    inline bool operator==(const batch<T, N>& lhs, const std::array<T, N>& rhs)
+    template <class T, class A, size_t N>
+    inline bool operator==(const batch<T, A>& lhs, const std::array<T, N>& rhs)
     {
         std::array<T, N> tmp;
         lhs.store_unaligned(tmp.data());
         return tmp == rhs;
     }
 
-    template <class T, size_t N>
-    inline bool operator==(const std::array<T, N>& lhs, const batch<T, N>& rhs)
+    template <class T, class A, size_t N>
+    inline bool operator==(const std::array<T, N>& lhs, const batch<T, A>& rhs)
     {
         return rhs == lhs;
     }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, class A, size_t N, bool i3ec>
+    inline bool operator==(const batch<std::complex<T>, A>& lhs, const std::array<xtl::xcomplex<T, T, i3ec>, N>& rhs)
+    {
+        std::array<xtl::xcomplex<T, T, i3ec>, N> tmp;
+        lhs.store_unaligned(tmp.data());
+        return tmp == rhs;
+    }
+
+    template <class T, class A, size_t N, bool i3ec>
+    inline bool operator==(const std::array<xtl::xcomplex<T, T, i3ec>, N>& lhs, const batch<std::complex<T>, A>& rhs)
+    {
+        return rhs == lhs;
+    }
+#endif
 }
 
 namespace detail
@@ -366,10 +383,10 @@ namespace detail
         return expect_container_near(lhs_expression, rhs_expression, lhs, rhs);
     }
 
-    template <class T, size_t N>
+    template <class T, size_t N, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
-                                               const ::xsimd::batch<T, N>& lhs,
+                                               const ::xsimd::batch<T, A>& lhs,
                                                const std::array<T, N>& rhs)
     {
         std::array<T, N> tmp;
@@ -377,11 +394,11 @@ namespace detail
         return expect_array_near(lhs_expression, rhs_expression, tmp, rhs);
     }
 
-    template <class T, size_t N>
+    template <class T, size_t N, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
                                                const std::array<T, N>& lhs,
-                                               const ::xsimd::batch<T, N>& rhs)
+                                               const ::xsimd::batch<T, A>& rhs)
     {
         std::array<T, N> tmp;
         rhs.store_unaligned(tmp.data());
@@ -389,21 +406,22 @@ namespace detail
 
     }
 
-    template <class T, size_t N>
+    template <class T, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
-                                               const ::xsimd::batch<T, N>& lhs,
-                                               const ::xsimd::batch<T, N>& rhs)
+                                               const ::xsimd::batch<T, A>& lhs,
+                                               const ::xsimd::batch<T, A>& rhs)
     {
+        constexpr auto N = xsimd::batch<T, A>::size;
         std::array<T, N> tmp;
         lhs.store_unaligned(tmp.data());
         return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
     }
 
-    template <class T, size_t N>
+    template <class T, size_t N, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
-                                               const ::xsimd::batch_bool<T, N>& lhs,
+                                               const ::xsimd::batch_bool<T, A>& lhs,
                                                const std::array<bool, N>& rhs)
     {
         std::array<bool, N> tmp;
@@ -411,23 +429,24 @@ namespace detail
         return expect_array_near(lhs_expression, rhs_expression, tmp, rhs);
     }
 
-    template <class T, size_t N>
+    template <class T, size_t N, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
                                                const std::array<bool, N>& lhs,
-                                               const ::xsimd::batch_bool<T, N>& rhs)
+                                               const ::xsimd::batch_bool<T, A>& rhs)
     {
         std::array<bool, N> tmp;
         rhs.store_unaligned(tmp.data());
         return expect_array_near(lhs_expression, rhs_expression, lhs, tmp);
     }
 
-    template <class T, size_t N>
+    template <class T, class A>
     testing::AssertionResult expect_batch_near(const char* lhs_expression,
                                                const char* rhs_expression,
-                                               const ::xsimd::batch_bool<T, N>& lhs,
-                                               const ::xsimd::batch_bool<T, N>& rhs)
+                                               const ::xsimd::batch_bool<T, A>& lhs,
+                                               const ::xsimd::batch_bool<T, A>& rhs)
     {
+        constexpr auto N = xsimd::batch<T, A>::size;
         std::array<bool, N> tmp;
         lhs.store_unaligned(tmp.data());
         return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
@@ -463,7 +482,7 @@ namespace detail
     template <class B, class S>
     void load_batch(B& b, const S& src, size_t i = 0)
     {
-        b.load_unaligned(src.data() + i);
+        b = B::load_unaligned(src.data() + i);
     }
 
     template <class B, class D>
@@ -551,152 +570,36 @@ using to_testing_types = xsimd::mpl::cast_t<T, testing::Types>;
 namespace xsimd
 {
     using batch_int_type_list = mpl::type_list<
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                                    batch<uint8_t, 16>,
-                                    batch<int8_t, 16>,
-                                    batch<uint16_t, 8>,
-                                    batch<int16_t, 8>,
-                                    batch<uint32_t, 4>,
-                                    batch<int32_t, 4>,
-                                    batch<uint64_t, 2>,
-                                    batch<int64_t, 2>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                                    ,
-                                    batch<uint8_t, 32>,
-                                    batch<int8_t, 32>,
-                                    batch<uint16_t, 16>,
-                                    batch<int16_t, 16>,
-                                    batch<uint32_t, 8>,
-                                    batch<int32_t, 8>,
-                                    batch<uint64_t, 4>,
-                                    batch<int64_t, 4>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                                    ,
-                                    batch<uint8_t, 64>,
-                                    batch<int8_t, 64>,
-                                    batch<uint16_t, 32>,
-                                    batch<int16_t, 32>,
-                                    batch<uint32_t, 16>,
-                                    batch<int32_t, 16>,
-                                    batch<uint64_t, 8>,
-                                    batch<int64_t, 8>
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-                                    batch<uint8_t, 16>,
-                                    batch<int8_t, 16>,
-                                    batch<uint16_t, 8>,
-                                    batch<int16_t, 8>,
-                                    batch<uint32_t, 4>,
-                                    batch<int32_t, 4>,
-                                    batch<uint64_t, 2>,
-                                    batch<int64_t, 2>
-#endif
-#if defined(XSIMD_ENABLE_FALLBACK)
-                                    XSIMD_FALLBACK_DELIMITER
-                                    batch<int32_t, 7>,
-                                    batch<int64_t, 3>
-#endif
+                                    batch<uint8_t>,
+                                    batch<int8_t>,
+                                    batch<uint16_t>,
+                                    batch<int16_t>,
+                                    batch<uint32_t>,
+                                    batch<int32_t>,
+                                    batch<uint64_t>,
+                                    batch<int64_t>
                               >;
 
-    using batch_float_type_list = mpl::type_list<
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                                     batch<float, 4>,
-                                     batch<double, 2>
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+    using batch_float_type_list = mpl::type_list<batch<float>>;
+#else
+    using batch_float_type_list = mpl::type_list<batch<float>, batch<double>>;
 #endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                                     ,
-                                     batch<float, 8>,
-                                     batch<double, 4>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                                     ,
-                                     batch<float, 16>,
-                                     batch<double, 8>
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-                                     batch<float, 4>
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-                                     ,
-                                     batch<double, 2>
-#endif
-#if defined(XSIMD_ENABLE_FALLBACK)
-                                     XSIMD_FALLBACK_DELIMITER
-                                     batch<float, 7>,
-                                     batch<double, 3>
-#endif
-                                >;
 
     using batch_int32_type_list = mpl::type_list<
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                                    batch<int32_t, 4>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                                    ,
-                                    batch<int32_t, 8>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                                    ,
-                                    batch<int32_t, 16>
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-                                    batch<int32_t, 4>
-#endif
-#if defined(XSIMD_ENABLE_FALLBACK)
-                                    XSIMD_FALLBACK_DELIMITER
-                                    batch<int32_t, 7>
-#endif
+      batch<int32_t>
     >;
 
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
     using batch_complex_type_list = mpl::type_list<
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                                    batch<std::complex<float>, 4>,
-                                    batch<std::complex<double>, 2>
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-                                    ,
-                                    batch<xtl::xcomplex<float>, 4>,
-                                    batch<xtl::xcomplex<double>, 2>
-#endif
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                                    ,
-                                    batch<std::complex<float>, 8>,
-                                    batch<std::complex<double>, 4>
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-                                    ,
-                                    batch<xtl::xcomplex<float>, 8>,
-                                    batch<xtl::xcomplex<double>, 4>
-#endif
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                                    ,
-                                    batch<std::complex<float>, 16>,
-                                    batch<std::complex<double>, 8>
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-                                    ,
-                                    batch<xtl::xcomplex<float>, 16>,
-                                    batch<xtl::xcomplex<double>, 8>
-#endif
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-                                     batch<std::complex<float>, 4>
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-                                     ,
-                                     batch<xtl::xcomplex<float>, 4>
-#endif
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-                                     ,
-                                     batch<std::complex<double>, 2>
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-                                     ,
-                                     batch<xtl::xcomplex<double>, 2>
-#endif
-#endif
+                                    batch<std::complex<float>>
     >;
-
+#else
+    using batch_complex_type_list = mpl::type_list<
+                                    batch<std::complex<float>>,
+                                    batch<std::complex<double>>
+    >;
+#endif
     using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
     using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
 }
@@ -711,7 +614,6 @@ using batch_types = to_testing_types<xsimd::batch_type_list>;
 /********************
  * conversion utils *
  ********************/
-
 template <size_t N, size_t A>
 struct conversion_param
 {
@@ -726,39 +628,16 @@ public:
     template <class T>
     static std::string GetName(int)
     {
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-        if (T::size == 2) { return "sse"; }
-        if (T::size == 4) { return "avx"; }
-        if (T::size == 8) { return "avx512";}
-        return "fallback";
-#elif XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-        if (T::size == 2) { return "neon"; }
-        return "fallback";
+#ifndef _MSC_VER
+        return __PRETTY_FUNCTION__;
 #else
-        return "fallback";
+        return "Unknown name";
 #endif
     }
 };
 
 using conversion_type_list = xsimd::mpl::type_list<
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE2_VERSION
-                               conversion_param<2, 16>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
-                               ,
-                               conversion_param<4, 32>
-#endif
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
-                               ,
-                               conversion_param<8, 64>
-#endif
-#if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-                               conversion_param<2, 16>
-#endif
-#if defined(XSIMD_ENABLE_FALLBACK)
-                               XSIMD_FALLBACK_DELIMITER
-                               conversion_param<3, 32>
-#endif
+                               conversion_param<sizeof(xsimd::types::simd_register<int, xsimd::default_arch>) / sizeof(double), xsimd::default_arch::alignment()>
                                >;
 using conversion_types = to_testing_types<conversion_type_list>;
 

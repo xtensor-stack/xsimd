@@ -38,7 +38,7 @@ install:
   - conda install cmake xtl -c conda-forge
   - cmake -G "NMake Makefiles" -D DOWNLOAD_GTEST=1 -D ENABLE_XTL_COMPLEX=1 -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -D CMAKE_BUILD_TYPE=Release .
   - nmake test_xsimd
-  - cd test-refactoring
+  - cd test
 
 build_script:
   - "%RUNTEST%"

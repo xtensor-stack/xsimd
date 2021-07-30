@@ -81,4 +81,4 @@ jobs:
           cd test
           .\test_xsimd
         displayName: "Test xsimd"
-        workingDirectory: $(Build.BinariesDirectory)/build/test-refactoring
+        workingDirectory: $(Build.BinariesDirectory)/build/test

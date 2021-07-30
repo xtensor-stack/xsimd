@@ -81,12 +81,12 @@ private:
 
     batch_type batch_lhs() const
     {
-        return batch_type(lhs.data());
+        return batch_type::load_unaligned(lhs.data());
     }
 
     batch_type batch_rhs() const
     {
-        return batch_type(rhs.data());
+        return batch_type::load_unaligned(rhs.data());
     }
 };
 

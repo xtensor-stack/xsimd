@@ -10,6 +10,7 @@
 
 #include "test_utils.hpp"
 
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 namespace detail
 {
     template <class T_out, class T_in>
@@ -59,16 +60,16 @@ protected:
     static constexpr size_t N = CP::size;
     static constexpr size_t A = CP::alignment;
 
-    using int8_batch = xsimd::batch<int8_t, N * 8>;
-    using uint8_batch = xsimd::batch<uint8_t, N * 8>;
-    using int16_batch = xsimd::batch<int16_t, N * 4>;
-    using uint16_batch = xsimd::batch<uint16_t, N * 4>;
-    using int32_batch = xsimd::batch<int32_t, N * 2>;
-    using uint32_batch = xsimd::batch<uint32_t, N * 2>;
-    using int64_batch = xsimd::batch<int64_t, N>;
-    using uint64_batch = xsimd::batch<uint64_t, N>;
-    using float_batch = xsimd::batch<float, N * 2>;
-    using double_batch = xsimd::batch<double, N>;
+    using int8_batch = xsimd::batch<int8_t>;
+    using uint8_batch = xsimd::batch<uint8_t>;
+    using int16_batch = xsimd::batch<int16_t>;
+    using uint16_batch = xsimd::batch<uint16_t>;
+    using int32_batch = xsimd::batch<int32_t>;
+    using uint32_batch = xsimd::batch<uint32_t>;
+    using int64_batch = xsimd::batch<int64_t>;
+    using uint64_batch = xsimd::batch<uint64_t>;
+    using float_batch = xsimd::batch<float>;
+    using double_batch = xsimd::batch<double>;
 
     std::vector<uint64_t> int_test_values;
     std::vector<float> float_test_values;
@@ -194,7 +195,7 @@ protected:
         }
     }
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
     template <size_t Align = A>
     typename std::enable_if<Align >= 32, void>::type test_cast_sizeshift1() const
     {
@@ -258,7 +259,7 @@ protected:
     }
 #endif
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
     template <size_t Align = A>
     typename std::enable_if<Align >= 64, void>::type test_cast_sizeshift2() const
     {
@@ -315,15 +316,14 @@ private:
     {
         using T_in = typename B_in::value_type;
         using T_out = typename B_out::value_type;
-        static constexpr std::size_t N_common = B_in::size < B_out::size ? B_in::size : B_out::size;
-        using B_common_in = xsimd::batch<T_in, N_common>;
-        using B_common_out = xsimd::batch<T_out, N_common>;
+        using B_common_in = xsimd::batch<T_in>;
+        using B_common_out = xsimd::batch<T_out>;
 
         T_in in_test_value = static_cast<T_in>(test_value);
         if (detail::is_convertible<T_out>(in_test_value))
         {
             B_common_out res = xsimd::batch_cast<T_out>(B_common_in(in_test_value));
-            EXPECT_SCALAR_EQ(res[0], static_cast<T_out>(in_test_value)) << print_function_name(name);
+            EXPECT_SCALAR_EQ(res.get(0), static_cast<T_out>(in_test_value)) << print_function_name(name);
         }
     }
 };
@@ -334,15 +334,15 @@ TYPED_TEST(batch_cast_test, cast)
 {
     this->test_cast();
 }
-
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#endif
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift1)
 {
     this->test_cast_sizeshift1();
 }
 #endif
 
-#if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift2)
 {
     this->test_cast_sizeshift2();

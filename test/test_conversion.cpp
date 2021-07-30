@@ -10,6 +10,7 @@
 
 #include "test_utils.hpp"
 
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 template <class CP>
 class conversion_test : public testing::Test
 {
@@ -18,20 +19,20 @@ protected:
     static constexpr size_t N = CP::size;
     static constexpr size_t A = CP::alignment;
 
-    using int32_batch = xsimd::batch<int32_t, N * 2>;
-    using int64_batch = xsimd::batch<int64_t, N>;
-    using float_batch = xsimd::batch<float, N * 2>;
-    using double_batch = xsimd::batch<double, N>;
+    using int32_batch = xsimd::batch<int32_t>;
+    using int64_batch = xsimd::batch<int64_t>;
+    using float_batch = xsimd::batch<float>;
+    using double_batch = xsimd::batch<double>;
 
-    using uint8_batch = xsimd::batch<uint8_t, N * 8>;
-    using uint16_batch = xsimd::batch<uint16_t, N * 4>;
-    using uint32_batch = xsimd::batch<uint32_t, N * 2>;
-    using uint64_batch = xsimd::batch<uint64_t, N>;
+    using uint8_batch = xsimd::batch<uint8_t>;
+    using uint16_batch = xsimd::batch<uint16_t>;
+    using uint32_batch = xsimd::batch<uint32_t>;
+    using uint64_batch = xsimd::batch<uint64_t>;
 
-    using int32_vector = std::vector<int32_t, xsimd::aligned_allocator<int32_t, A>>;
-    using int64_vector = std::vector<int64_t, xsimd::aligned_allocator<int64_t, A>>;
-    using float_vector = std::vector<float, xsimd::aligned_allocator<float, A>>;
-    using double_vector = std::vector<double, xsimd::aligned_allocator<double, A>>;
+    using int32_vector = std::vector<int32_t, xsimd::default_allocator<int32_t>>;
+    using int64_vector = std::vector<int64_t, xsimd::default_allocator<int64_t>>;
+    using float_vector = std::vector<float, xsimd::default_allocator<float>>;
+    using double_vector = std::vector<double, xsimd::default_allocator<double>>;
 
     using uint8_vector = std::vector<uint8_t, xsimd::aligned_allocator<uint8_t, A>>;
 
@@ -132,20 +133,20 @@ protected:
         uint8_batch ui8tmp(4);
         uint8_vector ui8vres(uint8_batch::size);
         {
-            uint16_batch ui16casting = u8_to_u16(ui8tmp);
-            uint8_batch ui8casting = u16_to_u8(ui16casting);
+            uint16_batch ui16casting = xsimd::bitwise_cast<uint16_batch>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui16casting);
             ui8casting.store_aligned(ui8vres.data());
             EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_16");
         }
         {
-            uint32_batch ui32casting = u8_to_u32(ui8tmp);
-            uint8_batch ui8casting = u32_to_u8(ui32casting);
+            uint32_batch ui32casting = xsimd::bitwise_cast<uint32_batch>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui32casting);
             ui8casting.store_aligned(ui8vres.data());
             EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_32");
         }
         {
-            uint64_batch ui64casting = u8_to_u64(ui8tmp);
-            uint8_batch ui8casting = u64_to_u8(ui64casting);
+            uint64_batch ui64casting = xsimd::bitwise_cast<uint64_batch>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui64casting);
             ui8casting.store_aligned(ui8vres.data());
             EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_64");
         }
@@ -178,3 +179,5 @@ TYPED_TEST(conversion_test, u8_casting)
 {
     this->test_u8_casting();
 }
+
+#endif

@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.1)
 project(xsimd)
 option(XSIMD_REFACTORING ON)
 
-set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include-refactoring)
+set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Versionning
 # ===========
@@ -100,7 +100,7 @@ endif()
 
 if(BUILD_TESTS)
     enable_testing()
-    add_subdirectory(test-refactoring)
+    add_subdirectory(test)
 endif()
 
 OPTION(BUILD_BENCHMARK "xsimd benchmarks" OFF)
