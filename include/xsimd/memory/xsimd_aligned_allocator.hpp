@@ -281,22 +281,27 @@ namespace xsimd
     {
         inline void* xaligned_malloc(size_t size, size_t alignment)
         {
-            void* res = 0;
-            void* ptr = malloc(size + alignment);
-            if (ptr != 0 && alignment != 0)
+            assert(((alignment & (alignment - 1)) == 0) && "alignment must be a power of two");
+            assert((alignment >= sizeof(void*)) && "alignment must be at least the size of a pointer");
+            void* res = nullptr;
+#ifdef _WIN32
+            res = _aligned_malloc(size, alignment);
+#else
+            if(posix_memalign(&res, alignment, size) != 0)
             {
-                res = reinterpret_cast<void*>(
-                    (reinterpret_cast<size_t>(ptr) & ~(size_t(alignment - 1))) +
-                    alignment);
-                *(reinterpret_cast<void**>(res) - 1) = ptr;
+                res = nullptr;
             }
+#endif
             return res;
         }
 
         inline void xaligned_free(void* ptr)
         {
-            if (ptr != 0)
-                free(*(reinterpret_cast<void**>(ptr) - 1));
+#ifdef _WIN32
+            _aligned_free(ptr);
+#else
+            free(ptr);
+#endif
         }
     }
 
