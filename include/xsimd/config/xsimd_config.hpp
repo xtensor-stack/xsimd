@@ -14,7 +14,7 @@
 #include "xsimd_align.hpp"
 
 #define XSIMD_VERSION_MAJOR 7
-#define XSIMD_VERSION_MINOR 5
+#define XSIMD_VERSION_MINOR 6
 #define XSIMD_VERSION_PATCH 0
 
 #ifndef XSIMD_DEFAULT_ALLOCATOR
