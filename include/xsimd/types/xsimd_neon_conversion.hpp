@@ -136,23 +136,23 @@ namespace xsimd
      * batch cast functions implementation *
      *****************************************/
 
-    XSIMD_BATCH_CAST_INTRINSIC(int8_t, uint8_t, 16, vreinterpretq_u8_s8);
-    XSIMD_BATCH_CAST_INTRINSIC(uint8_t, int8_t, 16, vreinterpretq_s8_u8);
-    XSIMD_BATCH_CAST_INTRINSIC(int16_t, uint16_t, 8, vreinterpretq_u16_s16);
-    XSIMD_BATCH_CAST_INTRINSIC(uint16_t, int16_t, 8, vreinterpretq_s16_u16);
-    XSIMD_BATCH_CAST_INTRINSIC(int32_t, uint32_t, 4, vreinterpretq_u32_s32);
-    XSIMD_BATCH_CAST_INTRINSIC(int32_t, float, 4, vcvtq_f32_s32);
-    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, int32_t, 4, vreinterpretq_s32_u32);
-    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 4, vcvtq_f32_u32);
-    XSIMD_BATCH_CAST_INTRINSIC(float, int32_t, 4, vcvtq_s32_f32);
-    XSIMD_BATCH_CAST_INTRINSIC(float, uint32_t, 4, vcvtq_u32_f32);
+    XSIMD_BATCH_CAST_INTRINSIC(int8_t, uint8_t, 16, vreinterpretq_u8_s8)
+    XSIMD_BATCH_CAST_INTRINSIC(uint8_t, int8_t, 16, vreinterpretq_s8_u8)
+    XSIMD_BATCH_CAST_INTRINSIC(int16_t, uint16_t, 8, vreinterpretq_u16_s16)
+    XSIMD_BATCH_CAST_INTRINSIC(uint16_t, int16_t, 8, vreinterpretq_s16_u16)
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, uint32_t, 4, vreinterpretq_u32_s32)
+    XSIMD_BATCH_CAST_INTRINSIC(int32_t, float, 4, vcvtq_f32_s32)
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, int32_t, 4, vreinterpretq_s32_u32)
+    XSIMD_BATCH_CAST_INTRINSIC(uint32_t, float, 4, vcvtq_f32_u32)
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, uint64_t, 2, vreinterpretq_u64_s64)
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, int64_t, 2, vreinterpretq_s64_u64)
+    XSIMD_BATCH_CAST_INTRINSIC(float, int32_t, 4, vcvtq_s32_f32)
+    XSIMD_BATCH_CAST_INTRINSIC(float, uint32_t, 4, vcvtq_u32_f32)
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-    XSIMD_BATCH_CAST_INTRINSIC(int64_t, uint64_t, 2, vreinterpretq_u64_s64);
-    XSIMD_BATCH_CAST_INTRINSIC(int64_t, double, 2, vcvtq_f64_s64);
-    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, int64_t, 2, vreinterpretq_s64_u64);
-    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, double, 2, vcvtq_f64_u64);
-    XSIMD_BATCH_CAST_INTRINSIC(double, int64_t, 2, vcvtq_s64_f64);
-    XSIMD_BATCH_CAST_INTRINSIC(double, uint64_t, 2, vcvtq_u64_f64);
+    XSIMD_BATCH_CAST_INTRINSIC(int64_t, double, 2, vcvtq_f64_s64)
+    XSIMD_BATCH_CAST_INTRINSIC(uint64_t, double, 2, vcvtq_f64_u64)
+    XSIMD_BATCH_CAST_INTRINSIC(double, int64_t, 2, vcvtq_s64_f64)
+    XSIMD_BATCH_CAST_INTRINSIC(double, uint64_t, 2, vcvtq_u64_f64)
 #endif
 
     /**************************
@@ -185,46 +185,107 @@ namespace xsimd
      * bitwise cast functions implementation *
      *****************************************/
 
-    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
-                                 int32_t, 4,
-                                 vreinterpretq_s32_f32)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
-                                 int64_t, 2,
-                                 vreinterpretq_s64_f32)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4,
-                                 float, 4,
-                                 vreinterpretq_f32_s32)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2,
-                                 float, 4,
-                                 vreinterpretq_f32_s64)
-
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 16, int8_t, 16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, uint8_t, 16, vreinterpretq_u8_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, int16_t, 8, vreinterpretq_s16_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, uint16_t, 8, vreinterpretq_u16_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, int32_t, 4, vreinterpretq_s32_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, uint32_t, 4, vreinterpretq_u32_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, int64_t, 2, vreinterpretq_s64_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, uint64_t, 2, vreinterpretq_u64_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, float, 4, vreinterpretq_f32_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, int8_t, 16, vreinterpretq_s8_u8)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 16, uint8_t, 16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, int16_t, 8, vreinterpretq_s16_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, uint16_t, 8, vreinterpretq_u16_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, int32_t, 4, vreinterpretq_s32_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, uint32_t, 4, vreinterpretq_u32_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, int64_t, 2, vreinterpretq_s64_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, uint64_t, 2, vreinterpretq_u64_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, float, 4, vreinterpretq_f32_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, int8_t, 16, vreinterpretq_s8_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, uint8_t, 16, vreinterpretq_u8_s16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 8, int16_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, uint16_t, 8, vreinterpretq_u16_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, int32_t, 4, vreinterpretq_s32_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, uint32_t, 4, vreinterpretq_u32_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, int64_t, 2, vreinterpretq_s64_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, uint64_t, 2, vreinterpretq_u64_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, float, 4, vreinterpretq_f32_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, int8_t, 16, vreinterpretq_s8_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, uint8_t, 16, vreinterpretq_u8_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, int16_t, 8, vreinterpretq_s16_u16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 8, uint16_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, int32_t, 4, vreinterpretq_s32_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, uint32_t, 4, vreinterpretq_u32_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, int64_t, 2, vreinterpretq_s64_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, uint64_t, 2, vreinterpretq_u64_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, float, 4, vreinterpretq_f32_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, int8_t, 16, vreinterpretq_s8_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, uint8_t, 16, vreinterpretq_u8_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, int16_t, 8, vreinterpretq_s16_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, uint16_t, 8, vreinterpretq_u16_s32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 4, int32_t, 4)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, uint32_t, 4, vreinterpretq_u32_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, int64_t, 2, vreinterpretq_s64_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, uint64_t, 2, vreinterpretq_u64_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, float, 4, vreinterpretq_f32_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, int8_t, 16, vreinterpretq_s8_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, uint8_t, 16, vreinterpretq_u8_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, int16_t, 8, vreinterpretq_s16_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, uint16_t, 8, vreinterpretq_u16_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, int32_t, 4, vreinterpretq_s32_u32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 4, uint32_t, 4)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, int64_t, 2, vreinterpretq_s64_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, uint64_t, 2, vreinterpretq_u64_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, float, 4, vreinterpretq_f32_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, int8_t, 16, vreinterpretq_s8_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, uint8_t, 16, vreinterpretq_u8_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, int16_t, 8, vreinterpretq_s16_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, uint16_t, 8, vreinterpretq_u16_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, int32_t, 4, vreinterpretq_s32_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, uint32_t, 4, vreinterpretq_u32_s64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 2, int64_t, 2)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, uint64_t, 2, vreinterpretq_u64_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, float, 4, vreinterpretq_f32_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, int8_t, 16, vreinterpretq_s8_u64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, uint8_t, 16, vreinterpretq_u8_u64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, int16_t, 8, vreinterpretq_s16_u64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, uint16_t, 8, vreinterpretq_u16_u64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, int32_t, 4, vreinterpretq_s32_u64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, uint32_t, 4, vreinterpretq_u32_u64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, int64_t, 2, vreinterpretq_s64_u64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 2, uint64_t, 2)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, float, 4, vreinterpretq_f32_u64)
+    XSIMD_BITWISE_CAST_IMPLICIT(float, 4, float, 4)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, int8_t, 16, vreinterpretq_s8_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, uint8_t, 16, vreinterpretq_u8_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, int16_t, 8, vreinterpretq_s16_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, uint16_t, 8, vreinterpretq_u16_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, int32_t, 4, vreinterpretq_s32_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, uint32_t, 4, vreinterpretq_u32_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, int64_t, 2, vreinterpretq_s64_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, uint64_t, 2, vreinterpretq_u64_f32)
 #if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
-    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
-                                 float, 4,
-                                 vreinterpretq_f32_f64)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
-                                 int32_t, 4,
-                                 vreinterpretq_s32_f64)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(double, 2,
-                                 int64_t, 2,
-                                 vreinterpretq_s64_f64)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4,
-                                 double, 2,
-                                 vreinterpretq_f64_s32)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2,
-                                 double, 2,
-                                 vreinterpretq_f64_s64)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(float, 4,
-                                 double, 2,
-                                 vreinterpretq_f64_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 16, double, 2, vreinterpretq_f64_s8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 16, double, 2, vreinterpretq_f64_u8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 8, double, 2, vreinterpretq_f64_s16)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 8, double, 2, vreinterpretq_f64_u16)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 4, double, 2, vreinterpretq_f64_s32)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 4, double, 2, vreinterpretq_f64_u32)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 2, double, 2, vreinterpretq_f64_s64)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 2, double, 2, vreinterpretq_f64_u64)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 4, double, 2, vreinterpretq_f64_f32)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, int8_t, 16, vreinterpretq_s8_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, uint8_t, 16, vreinterpretq_u8_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, int16_t, 8, vreinterpretq_s16_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, uint16_t, 8, vreinterpretq_u16_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, int32_t, 4, vreinterpretq_s32_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, uint32_t, 4, vreinterpretq_u32_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, int64_t, 2, vreinterpretq_s64_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, uint64_t, 2, vreinterpretq_u64_f64)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 2, float, 4, vreinterpretq_f32_f64)
+    XSIMD_BITWISE_CAST_IMPLICIT(double, 2, double, 2)
 #endif
 
 }

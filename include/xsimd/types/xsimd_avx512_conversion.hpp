@@ -242,45 +242,106 @@ namespace xsimd
      * bitwise cast functions implementation *
      *****************************************/
 
-    XSIMD_BITWISE_CAST_INTRINSIC(float, 16,
-                                 double, 8,
-                                 _mm512_castps_pd)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(float, 16,
-                                 int32_t, 16,
-                                 _mm512_castps_si512)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(float, 16,
-                                 int64_t, 8,
-                                 _mm512_castps_si512)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(double, 8,
-                                 float, 16,
-                                 _mm512_castpd_ps)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(double, 8,
-                                 int32_t, 16,
-                                 _mm512_castpd_si512)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(double, 8,
-                                 int64_t, 8,
-                                 _mm512_castpd_si512)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 16,
-                                 float, 16,
-                                 _mm512_castsi512_ps)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 16,
-                                 double, 8,
-                                 _mm512_castsi512_pd)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 8,
-                                 float, 16,
-                                 _mm512_castsi512_ps)
-
-    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 8,
-                                 double, 8,
-                                 _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(int8_t, 64, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 64, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(int8_t, 64, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint8_t, 64, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 64, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint8_t, 64, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(int16_t, 32, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 32, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(int16_t, 32, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint16_t, 32, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 32, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint16_t, 32, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(int32_t, 16, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 16, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(int32_t, 16, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint32_t, 16, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 16, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint32_t, 16, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(int64_t, 8, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 8, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(int64_t, 8, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, int8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, uint8_t, 64)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, int16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, uint16_t, 32)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, int32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, uint32_t, 16)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, int64_t, 8)
+    XSIMD_BITWISE_CAST_IMPLICIT(uint64_t, 8, uint64_t, 8)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 8, float, 16, _mm512_castsi512_ps)
+    XSIMD_BITWISE_CAST_INTRINSIC(uint64_t, 8, double, 8, _mm512_castsi512_pd)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, int8_t, 64, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, uint8_t, 64, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, int16_t, 32, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, uint16_t, 32, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, int32_t, 16, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, uint32_t, 16, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, int64_t, 8, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, uint64_t, 8, _mm512_castps_si512)
+    XSIMD_BITWISE_CAST_IMPLICIT(float, 16, float, 16)
+    XSIMD_BITWISE_CAST_INTRINSIC(float, 16, double, 8, _mm512_castps_pd)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, int8_t, 64, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, uint8_t, 64, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, int16_t, 32, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, uint16_t, 32, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, int32_t, 16, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, uint32_t, 16, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, int64_t, 8, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, uint64_t, 8, _mm512_castpd_si512)
+    XSIMD_BITWISE_CAST_INTRINSIC(double, 8, float, 16, _mm512_castpd_ps)
+    XSIMD_BITWISE_CAST_IMPLICIT(double, 8, double, 8)
 }
 
 #endif
