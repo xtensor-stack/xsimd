@@ -13,138 +13,21 @@
 
 #include <complex>
 #include <cstdint>
+#include <cstring>
 #include <type_traits>
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
 #include "xtl/xcomplex.hpp"
 #endif
 
-/* For Shift instruction: vshlq_n_u8/vshrq_n_u8 (lhs, n),
- * 'n' must be a constant and is the compile-time literal constant.
- *
- * This Macro is to fix compiling issues from llvm(clang):
- * "argument must be a constant..."
- *
- */
-#define EXPAND(...) __VA_ARGS__
-#define CASE_LHS(op, i)                   \
-    case i: return op(lhs, i);
-
-#define XSIMD_REPEAT_8_0(op, addx)    \
-    CASE_LHS(EXPAND(op), 1 + addx);       \
-    CASE_LHS(EXPAND(op), 2 + addx);       \
-    CASE_LHS(EXPAND(op), 3 + addx);       \
-    CASE_LHS(EXPAND(op), 4 + addx);       \
-    CASE_LHS(EXPAND(op), 5 + addx);       \
-    CASE_LHS(EXPAND(op), 6 + addx);       \
-    CASE_LHS(EXPAND(op), 7 + addx);
-
-#define XSIMD_REPEAT_8_N(op, addx)    \
-    CASE_LHS(EXPAND(op), 0 + addx);       \
-    XSIMD_REPEAT_8_0(op, addx);
-
-#define XSIMD_REPEAT_8(op)            \
-    XSIMD_REPEAT_8_0(op, 0);
-
-#define XSIMD_REPEAT_16_0(op, addx)   \
-    XSIMD_REPEAT_8_0(op, 0 + addx);   \
-    XSIMD_REPEAT_8_N(op, 8 + addx);
-
-#define XSIMD_REPEAT_16_N(op, addx)   \
-    XSIMD_REPEAT_8_N(op, 0 + addx);   \
-    XSIMD_REPEAT_8_N(op, 8 + addx);
-
-#define XSIMD_REPEAT_16(op)           \
-    XSIMD_REPEAT_16_0(op, 0);
-
-#define XSIMD_REPEAT_32_0(op, addx)   \
-    XSIMD_REPEAT_16_0(op, 0 + addx);  \
-    XSIMD_REPEAT_16_N(op, 16 + addx);
-
-#define XSIMD_REPEAT_32_N(op, addx)   \
-    XSIMD_REPEAT_16_N(op, 0 + addx);  \
-    XSIMD_REPEAT_16_N(op, 16 + addx);
-
-#define XSIMD_REPEAT_32(op)           \
-    XSIMD_REPEAT_32_0(op, 0);
-
-#define XSIMD_REPEAT_64(op)           \
-    XSIMD_REPEAT_32_0(op, 0);         \
-    XSIMD_REPEAT_32_N(op, 32);
-
-/* The Macro is for vext (lhs, rhs, n)
- *
- * _mm_alignr_epi8, _mm_alignr_epi32 ...
- */
-#define CASE_LHS_RHS(op, i)                   \
-    case i: return op(lhs, rhs, i);
-
-#define XSIMD_REPEAT_2_0(op, addx)    \
-    CASE_LHS_RHS(EXPAND(op), 1 + addx);
-
-#define XSIMD_REPEAT_2_N(op, addx)    \
-    CASE_LHS_RHS(EXPAND(op), 0 + addx);       \
-    XSIMD_REPEAT_2_0(op, addx);
-
-#define XSIMD_REPEAT_2(op)            \
-    XSIMD_REPEAT_2_0(op, 0);
-
-#define XSIMD_REPEAT_4_0(op, addx)   \
-    XSIMD_REPEAT_2_0(op, 0 + addx);   \
-    XSIMD_REPEAT_2_N(op, 2 + addx);
-
-#define XSIMD_REPEAT_4_N(op, addx)   \
-    XSIMD_REPEAT_2_N(op, 0 + addx);   \
-    XSIMD_REPEAT_2_N(op, 2 + addx);
-
-#define XSIMD_REPEAT_4(op)           \
-    XSIMD_REPEAT_4_0(op, 0);
-
-#define XSIMD_REPEAT_8_0_v2(op, addx)   \
-    XSIMD_REPEAT_4_0(op, 0 + addx);   \
-    XSIMD_REPEAT_4_N(op, 4 + addx);
-
-#define XSIMD_REPEAT_8_N_v2(op, addx)   \
-    XSIMD_REPEAT_4_N(op, 0 + addx);   \
-    XSIMD_REPEAT_4_N(op, 4 + addx);
-
-#define XSIMD_REPEAT_8_v2(op)           \
-    XSIMD_REPEAT_8_0_v2(op, 0);
-
-#define XSIMD_REPEAT_16_0_v2(op, addx)   \
-    XSIMD_REPEAT_8_0_v2(op, 0 + addx);   \
-    XSIMD_REPEAT_8_N_v2(op, 8 + addx);
-
-#define XSIMD_REPEAT_16_N_v2(op, addx)   \
-    XSIMD_REPEAT_8_N_v2(op, 0 + addx);   \
-    XSIMD_REPEAT_8_N_v2(op, 8 + addx);
-
-#define XSIMD_REPEAT_16_v2(op)           \
-    XSIMD_REPEAT_16_0_v2(op, 0);
-
-#define XSIMD_REPEAT_32_0_v2(op, addx)   \
-    XSIMD_REPEAT_16_0_v2(op, 0 + addx);   \
-    XSIMD_REPEAT_16_N_v2(op, 16 + addx);
-
-#define XSIMD_REPEAT_32_N_v2(op, addx)   \
-    XSIMD_REPEAT_16_N_v2(op, 0 + addx);   \
-    XSIMD_REPEAT_16_N_v2(op, 16 + addx);
-
-#define XSIMD_REPEAT_32_v2(op)           \
-    XSIMD_REPEAT_32_0_v2(op, 0);
-
-#define XSIMD_REPEAT_64_v2(op)           \
-    XSIMD_REPEAT_32_0_v2(op, 0);         \
-    XSIMD_REPEAT_32_N_v2(op, 32);
-
 namespace xsimd
 {
 
-    template <class T, size_t N>
-    class batch;
+    template <class T, class A>
+    struct batch;
 
-    template <class T, std::size_t N>
-    class batch_bool;
+    template <class T, class A>
+    struct batch_bool;
 
     /**************
      * as_integer *
@@ -167,14 +50,14 @@ namespace xsimd
         using type = int64_t;
     };
 
-    template <class T, std::size_t N>
-    struct as_integer<batch<T, N>>
+    template <class T, class A>
+    struct as_integer<batch<T, A>>
     {
-        using type = batch<typename as_integer<T>::type, N>;
+        using type = batch<typename as_integer<T>::type, A>;
     };
 
-    template <class T>
-    using as_integer_t = typename as_integer<T>::type;
+    template <class B>
+    using as_integer_t = typename as_integer<B>::type;
 
     /***********************
      * as_unsigned_integer *
@@ -197,14 +80,26 @@ namespace xsimd
         using type = uint64_t;
     };
 
-    template <class T, std::size_t N>
-    struct as_unsigned_integer<batch<T, N>>
+    template <class T, class A>
+    struct as_unsigned_integer<batch<T, A>>
     {
-        using type = batch<typename as_unsigned_integer<T>::type, N>;
+        using type = batch<typename as_unsigned_integer<T>::type, A>;
     };
 
     template <class T>
     using as_unsigned_integer_t = typename as_unsigned_integer<T>::type;
+
+    /*********************
+     * as_signed_integer *
+     *********************/
+
+    template <class T>
+    struct as_signed_integer : std::make_signed<T>
+    {
+    };
+
+    template <class T>
+    using as_signed_integer_t = typename as_signed_integer<T>::type;
 
     /******************
      * flip_sign_type *
@@ -251,10 +146,10 @@ namespace xsimd
         using type = double;
     };
 
-    template <class T, std::size_t N>
-    struct as_float<batch<T, N>>
+    template <class T, class A>
+    struct as_float<batch<T, A>>
     {
-        using type = batch<typename as_float<T>::type, N>;
+        using type = batch<typename as_float<T>::type, A>;
     };
 
     template <class T>
@@ -267,83 +162,30 @@ namespace xsimd
     template <class T>
     struct as_logical;
 
-    template <class T, std::size_t N>
-    struct as_logical<batch<T, N>>
+    template <class T, class A>
+    struct as_logical<batch<T, A>>
     {
-        using type = batch_bool<T, N>;
+        using type = batch_bool<T, A>;
     };
 
     template <class T>
     using as_logical_t = typename as_logical<T>::type;
 
     /********************
-     * primitive caster *
+     * bit_cast *
      ********************/
 
-    namespace detail
-    {
-        template <class UI, class I, class F>
-        union generic_caster {
-            UI ui;
-            I i;
-            F f;
-
-            constexpr generic_caster(UI t)
-                : ui(t) {}
-            constexpr generic_caster(I t)
-                : i(t) {}
-            constexpr generic_caster(F t)
-                : f(t) {}
-        };
-
-        using caster32_t = generic_caster<uint32_t, int32_t, float>;
-        using caster64_t = generic_caster<uint64_t, int64_t, double>;
-
-        template <class T>
-        struct caster;
-
-        template <>
-        struct caster<float>
-        {
-            using type = caster32_t;
-        };
-
-        template <>
-        struct caster<double>
-        {
-            using type = caster64_t;
-        };
-
-        template <class T>
-        using caster_t = typename caster<T>::type;
+    template<class To, class From>
+    To bit_cast(From val) {
+      static_assert(sizeof(From) == sizeof(To), "casting between compatible layout");
+      // FIXME: Some old version of GCC don't support that trait
+      //static_assert(std::is_trivially_copyable<From>::value, "input type is trivially copyable");
+      //static_assert(std::is_trivially_copyable<To>::value, "output type is trivially copyable");
+      To res;
+      std::memcpy(&res, &val, sizeof(val));
+      return res;
     }
 
-    /****************************
-     * to/from_unsigned_integer *
-     ****************************/
-
-    namespace detail
-    {
-        template <typename T>
-        union unsigned_convertor {
-            T data;
-            as_unsigned_integer_t<T> bits;
-        };
-
-        template <typename T>
-        as_unsigned_integer_t<T> to_unsigned_integer(const T& input) {
-            unsigned_convertor<T> convertor;
-            convertor.data = input;
-            return convertor.bits;
-        }
-
-        template <typename T>
-        T from_unsigned_integer(const as_unsigned_integer_t<T>& input) {
-            unsigned_convertor<T> convertor;
-            convertor.bits = input;
-            return convertor.data;
-        }
-    }
 
     /*****************************************
      * Backport of index_sequence from c++14 *
@@ -397,30 +239,83 @@ namespace xsimd
 
             template <typename... Ts>
             using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
+
+
+            template <int... Is>
+            using int_sequence = integer_sequence<int, Is...>;
+
+            template <typename Lhs, typename Rhs>
+            struct make_int_sequence_concat;
+
+            template <int... Lhs, int... Rhs>
+            struct make_int_sequence_concat<int_sequence<Lhs...>,
+                                            int_sequence<Rhs...>>
+              : identity<int_sequence<Lhs..., int(sizeof...(Lhs) + Rhs)...>> {};
+
+            template <std::size_t N>
+            struct make_int_sequence_impl;
+
+            template <std::size_t N>
+            using make_int_sequence = typename make_int_sequence_impl<N>::type;
+
+            template <std::size_t N>
+            struct make_int_sequence_impl
+              : make_int_sequence_concat<make_int_sequence<N / 2>,
+                                         make_int_sequence<N - (N / 2)>> {};
+
+            template <>
+            struct make_int_sequence_impl<0> : identity<int_sequence<>> {};
+
+            template <>
+            struct make_int_sequence_impl<1> : identity<int_sequence<0>> {};
+
+            template <typename... Ts>
+            using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
+
         #endif
     }
 
-#define XSIMD_MACRO_UNROLL_BINARY(FUNC)                                                                   \
-    constexpr std::size_t size = simd_batch_traits<batch_type>::size;                                     \
-    using tmp_value_type = typename simd_batch_traits<batch_type>::value_type;                                \
-    alignas(simd_batch_traits<batch_type>::align) tmp_value_type tmp_lhs[size], tmp_rhs[size], tmp_res[size]; \
-    lhs.store_aligned(tmp_lhs);                                                                           \
-    rhs.store_aligned(tmp_rhs);                                                                           \
-    unroller<size>([&](std::size_t i) {                                                                   \
-        tmp_res[i] = tmp_lhs[i] FUNC tmp_rhs[i];                                                          \
-    });                                                                                                   \
-    return batch_type(&tmp_res[0], aligned_mode());
+    /***********************************
+     * Backport of std::get from C++14 *
+     ***********************************/
 
-    template <class F, std::size_t... I>
-    inline void unroller_impl(F&& f, detail::index_sequence<I...>)
+    namespace detail
     {
-        static_cast<void>(std::initializer_list<int>{(f(I), 0)...});
+        template <class T, class... Types, size_t I, size_t... Is>
+        const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, T>, index_sequence<I, Is...>)
+        {
+            return std::get<I>(t);
+        }
+
+        template <class T, class U, class... Types, size_t I, size_t... Is>
+        const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, U>, index_sequence<I, Is...>)
+        {
+            using tuple_elem = typename std::tuple_element<I+1, std::tuple<Types...>>::type;
+            return get_impl<T>(t, std::is_same<T, tuple_elem>(), index_sequence<Is...>());
+        }
+
+        template <class T, class... Types>
+        const T& get(const std::tuple<Types...>& t)
+        {
+            using tuple_elem = typename std::tuple_element<0, std::tuple<Types...>>::type;
+            return get_impl<T>(t, std::is_same<T, tuple_elem>(), make_index_sequence<sizeof...(Types)>());
+        }
     }
 
-    template <std::size_t N, class F>
-    inline void unroller(F&& f)
+    /*********************************
+     * Backport of void_t from C++17 *
+     *********************************/
+
+    namespace detail
     {
-        unroller_impl(f, detail::make_index_sequence<N>{});
+        template <class... T>
+        struct make_void
+        {
+            using type = void;
+        };
+
+        template <class... T>
+        using void_t = typename make_void<T...>::type;
     }
 
     /*****************************************
@@ -432,7 +327,8 @@ namespace xsimd
         // std::array constructor from scalar value ("broadcast")
         template <typename T, std::size_t... Is>
         constexpr std::array<T, sizeof...(Is)>
-        array_from_scalar_impl(const T& scalar, index_sequence<Is...>) {
+        array_from_scalar_impl(const T& scalar, index_sequence<Is...>)
+        {
             // You can safely ignore this silly ternary, the "scalar" is all
             // that matters. The rest is just a dirty workaround...
             return std::array<T, sizeof...(Is)>{ (Is+1) ? scalar : T() ... };
@@ -440,20 +336,23 @@ namespace xsimd
 
         template <typename T, std::size_t N>
         constexpr std::array<T, N>
-        array_from_scalar(const T& scalar) {
+        array_from_scalar(const T& scalar)
+        {
             return array_from_scalar_impl(scalar, make_index_sequence<N>());
         }
 
         // std::array constructor from C-style pointer (handled as an array)
         template <typename T, std::size_t... Is>
         constexpr std::array<T, sizeof...(Is)>
-        array_from_pointer_impl(const T* c_array, index_sequence<Is...>) {
+        array_from_pointer_impl(const T* c_array, index_sequence<Is...>)
+        {
             return std::array<T, sizeof...(Is)>{ c_array[Is]... };
         }
 
         template <typename T, std::size_t N>
         constexpr std::array<T, N>
-        array_from_pointer(const T* c_array) {
+        array_from_pointer(const T* c_array)
+        {
             return array_from_pointer_impl(c_array, make_index_sequence<N>());
         }
     }
@@ -514,8 +413,7 @@ namespace xsimd
         };
 #endif
     }
-
-
 }
 
 #endif
+

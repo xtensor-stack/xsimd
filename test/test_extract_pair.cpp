@@ -68,15 +68,14 @@ class extract_pair_test : public testing::Test
         auto v_rhs = extract_pair_vecs[1];
         auto v_exped = extract_pair_vecs[2];
 
-        B b_lhs, b_rhs, b_exped, b_res;
-        b_lhs.load_unaligned(v_lhs.data());
-        b_rhs.load_unaligned(v_rhs.data());
-        b_exped.load_unaligned(v_exped.data());
+        B b_lhs = B::load_unaligned(v_lhs.data());
+        B b_rhs = B::load_unaligned(v_rhs.data());
+        B b_exped = B::load_unaligned(v_exped.data());
 
         /* Only Test 128bit */
         if ((sizeof(value_type) * size) == 16)
         {
-            b_res = xsimd::extract_pair(b_lhs, b_rhs, 1);
+            B b_res = xsimd::extract_pair(b_lhs, b_rhs, 1);
             EXPECT_BATCH_EQ(b_res, b_exped) << print_function_name("extract_pair 128 test");
         }
     }

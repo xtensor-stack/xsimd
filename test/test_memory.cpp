@@ -13,18 +13,16 @@
 
 #include "gtest/gtest.h"
 
-#include "xsimd/config/xsimd_instruction_set.hpp"
-
-#ifdef XSIMD_INSTR_SET_AVAILABLE
 
 #include "xsimd/memory/xsimd_alignment.hpp"
+#include "xsimd/memory/xsimd_aligned_allocator.hpp"
 
 struct mock_container {};
 
 TEST(xsimd, alignment)
 {
     using u_vector_type = std::vector<double>;
-    using a_vector_type = std::vector<double, xsimd::aligned_allocator<double>>;
+    using a_vector_type = std::vector<double, xsimd::default_allocator<double>>;
 
     using u_vector_align = xsimd::container_alignment_t<u_vector_type>;
     using a_vector_align = xsimd::container_alignment_t<a_vector_type>;
@@ -34,4 +32,3 @@ TEST(xsimd, alignment)
     EXPECT_TRUE((std::is_same<a_vector_align, xsimd::aligned_mode>::value));
     EXPECT_TRUE((std::is_same<mock_align, xsimd::unaligned_mode>::value));
 }
-#endif // XSIMD_INSTR_SET_AVAILABLE

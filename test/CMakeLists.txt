@@ -54,7 +54,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set(CMAKE_SYSTEM_PROCESSOR arm)
         set(CMAKE_C_COMPILER_TARGET arm-linux-gnueabi)
         set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabi)
-        
+
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/${ARM_ARCH_DIRECTORY}/)
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/)
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/)
@@ -90,6 +90,7 @@ endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MP /bigobj")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4267 /wd4005 /wd4146 /wd4800")
     set(CMAKE_EXE_LINKER_FLAGS /MANIFEST:NO)
 endif()
 
@@ -152,7 +153,7 @@ set(XSIMD_TESTS
     test_batch_float.cpp
     test_batch_int.cpp
     test_bitwise_cast.cpp
-    test_constant_batch.cpp
+    test_batch_constant.cpp
     test_complex_exponential.cpp
     test_complex_hyperbolic.cpp
     test_complex_power.cpp
@@ -165,7 +166,6 @@ set(XSIMD_TESTS
     test_hyperbolic.cpp
     test_load_store.cpp
     test_memory.cpp
-    test_numerical_constant.cpp
     test_poly_evaluation.cpp
     test_power.cpp
     test_rounding.cpp
@@ -173,43 +173,6 @@ set(XSIMD_TESTS
     test_shuffle_128.cpp
     test_trigonometric.cpp
     test_utils.hpp
-    #[[    xsimd_api_test.hpp
-    xsimd_api_test.cpp
-    xsimd_algorithms.cpp
-    xsimd_basic_test.hpp
-    xsimd_basic_test.cpp
-    xsimd_basic_math_test.hpp
-    xsimd_basic_math_test.cpp
-    xsimd_complex_basic_test.hpp
-    xsimd_complex_tester.hpp
-    xsimd_error_gamma_test.hpp
-    xsimd_error_gamma_test.cpp
-    xsimd_exponential_test.hpp
-    xsimd_exponential_test.cpp
-    xsimd_cexponential_test.hpp
-    xsimd_cexponential_test.cpp
-    xsimd_chyperbolic_test.hpp
-    xsimd_chyperbolic_test.cpp
-    xsimd_cpower_test.hpp
-    xsimd_cpower_test.cpp
-    xsimd_ctrigonometric_test.hpp
-    xsimd_ctrigonometric_test.cpp
-    xsimd_fp_manipulation_test.hpp
-    xsimd_fp_manipulation_test.cpp
-    xsimd_hyperbolic_test.hpp
-    xsimd_hyperbolic_test.cpp
-    xsimd_interface_test.cpp
-    xsimd_memory_test.cpp
-    xsimd_poly_evaluation_test.cpp
-    xsimd_poly_evaluation_test.hpp
-    xsimd_power_test.hpp
-    xsimd_power_test.cpp
-    xsimd_rounding_test.hpp
-    xsimd_rounding_test.cpp
-    xsimd_tester.hpp
-    xsimd_test_utils.hpp
-    xsimd_trigonometric_test.hpp
-    xsimd_trigonometric_test.cpp]]
 )
 
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})

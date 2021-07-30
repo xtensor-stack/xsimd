@@ -16,11 +16,11 @@ Exponential functions
    :project: xsimd
 
 .. _exp10-func-ref:
-.. doxygenfunction:: exp10(const simd_base<B>&)
+.. doxygenfunction:: exp10(const batch<T, A>&)
    :project: xsimd
 
 .. _expm1-func-ref:
-.. doxygenfunction:: expm1(const simd_base<B>&)
+.. doxygenfunction:: expm1(const batch<T, A>&)
    :project: xsimd
 
 .. _log-function-reference:
@@ -28,7 +28,7 @@ Exponential functions
    :project: xsimd
 
 .. _log2-function-reference:
-.. doxygenfunction:: log2(const simd_base<B>&)
+.. doxygenfunction:: log2(const batch<T, A>&)
    :project: xsimd
 
 .. _log10-func-ref:
@@ -36,5 +36,5 @@ Exponential functions
    :project: xsimd
 
 .. _log1p-func-ref:
-.. doxygenfunction:: log1p(const simd_base<B>&)
+.. doxygenfunction:: log1p(const batch<T, A>&)
    :project: xsimd

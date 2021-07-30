@@ -60,6 +60,7 @@ jobs:
                 -DCMAKE_C_COMPILER=clang-cl ^
                 -DCMAKE_CXX_COMPILER=clang-cl ^
                 -DDOWNLOAD_GTEST=ON ^
+                -DXSIMD_REFACTORING=ON ^
                 $(Build.SourcesDirectory)
         displayName: "Configure xsimd"
         workingDirectory: $(Build.BinariesDirectory)

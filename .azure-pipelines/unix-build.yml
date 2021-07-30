@@ -51,6 +51,7 @@ steps:
     workingDirectory: $(Build.BinariesDirectory)/build
 
   - script: |
+      cd test
       source activate xsimd
       if [[ $(avx512) == 1 ]]; then
         ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd
@@ -65,4 +66,4 @@ steps:
         ./test_xsimd
       fi
     displayName: Test xsimd
-    workingDirectory: $(Build.BinariesDirectory)/build/test
+    workingDirectory: $(Build.BinariesDirectory)/build

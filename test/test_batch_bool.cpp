@@ -54,96 +54,76 @@ namespace xsimd
         }
     };
 
-    template <class T>
+    template <class T, size_t N=T::size>
     struct get_bool;
 
     template <class T>
-    struct get_bool<batch_bool<T, 2>> : public get_bool_base<T, 2>
+    struct get_bool<batch_bool<T>, 2> : public get_bool_base<T, 2>
     {
-        using type = batch_bool<T, 2>;
+        using type = batch_bool<T>;
         type all_true = type(true);
         type all_false = type(false);
-        type half = type(0, 1);
-        type ihalf = type(1, 0);
-        type interspersed = type(0, 1);
+        type half = {0, 1};
+        type ihalf = {1, 0};
+        type interspersed = {0, 1};
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 4>> : public get_bool_base<T, 4>
+    struct get_bool<batch_bool<T>, 4> : public get_bool_base<T, 4>
     {
-        using type = batch_bool<T, 4>;
+        using type = batch_bool<T>;
 
-        type all_true = type(1);
-        type all_false = type(0);
-        type half = type(0, 0, 1, 1);
-        type ihalf = type(1, 1, 0, 0);
-        type interspersed = type(0, 1, 0, 1);
+        type all_true = true;
+        type all_false = false;
+        type half = {0, 0, 1, 1};
+        type ihalf = {1, 1, 0, 0};
+        type interspersed = {0, 1, 0, 1};
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 8>> : public get_bool_base<T, 8>
+    struct get_bool<batch_bool<T>, 8> : public get_bool_base<T, 8>
     {
-        using type = batch_bool<T, 8>;
-        type all_true = type(true);
-        type all_false = type(false);
-        type half = type(0, 0, 0, 0, 1, 1, 1, 1);
-        type ihalf = type(1, 1, 1, 1, 0, 0, 0, 0);
-        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1);
+        using type = batch_bool<T>;
+        type all_true = true;
+        type all_false = false;
+        type half = {0, 0, 0, 0, 1, 1, 1, 1};
+        type ihalf = {1, 1, 1, 1, 0, 0, 0, 0};
+        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1};
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 16>> : public get_bool_base<T, 16>
+    struct get_bool<batch_bool<T>, 16> : public get_bool_base<T, 16>
     {
-        using type = batch_bool<T, 16>;
-        type all_true = type(true);
-        type all_false = type(false);
-        type half = type(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1);
-        type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0);
-        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+        using type = batch_bool<T>;
+        type all_true = true;
+        type all_false = false;
+        type half = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1};
+        type ihalf = {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
+        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 32>> : public get_bool_base<T, 32>
+    struct get_bool<batch_bool<T>, 32> : public get_bool_base<T, 32>
     {
-        using type = batch_bool<T, 32>;
-        type all_true = type(true);
-        type all_false = type(false);
-        type half = type(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-        type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+        using type = batch_bool<T>;
+        type all_true = true;
+        type all_false = false;
+        type half = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+        type ihalf = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
     };
 
     template <class T>
-    struct get_bool<batch_bool<T, 64>> : public get_bool_base<T, 64>
+    struct get_bool<batch_bool<T>, 64> : public get_bool_base<T, 64>
     {
-        using type = batch_bool<T, 64>;
-        type all_true = type(true);
-        type all_false = type(false);
-        type half = type (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-        type ihalf = type(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        type interspersed = type(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+        using type = batch_bool<T>;
+        type all_true = true;
+        type all_false = false;
+        type half = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+        type ihalf = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
     };
 
-    // For fallbacks
-    template <class T>
-    struct get_bool<batch_bool<T, 3>> : public get_bool_base<T, 3>
-    {
-        using type = batch_bool<T, 3>;
-        type all_true = type(true);
-        type all_false = type(false);
-        type half = type(false, false, true);
-        type ihalf = type(true, true, false);
-    };
-
-    template <class T>
-    struct get_bool<batch_bool<T, 7>> : public get_bool_base<T, 7>
-    {
-        using type = batch_bool<T, 7>;
-        type all_true = type(true);
-        type all_false = type(false);
-        type half = type(false, false, false, false, true, true, true);
-        type ihalf = type(true, true, true, true, false, false, false);
-    };
 }
 
 template <class B>
@@ -175,14 +155,13 @@ protected:
     void test_load_store() const
     {
         bool_array_type res;
-        batch_bool_type b;
-        b.load_unaligned(ba);
+        batch_bool_type b(batch_bool_type::load_unaligned(ba.data()));
         b.store_unaligned(res.data());
         EXPECT_EQ(res, ba) << print_function_name("load_unaligned / store_unaligned");
 
-        alignas(xsimd::arch::default_::alignment) bool_array_type arhs(this->ba);
-        alignas(xsimd::arch::default_::alignment) bool_array_type ares;
-        b.load_aligned(arhs.data());
+        alignas(xsimd::default_arch::alignment()) bool_array_type arhs(this->ba);
+        alignas(xsimd::default_arch::alignment()) bool_array_type ares;
+        b = batch_bool_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
         EXPECT_EQ(ares, arhs) << print_function_name("load_aligned / store_aligned");
     }
@@ -201,16 +180,14 @@ protected:
 
             for (const auto& vec : bool_g.almost_all_false())
             {
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool any_res = xsimd::any(b);
                 EXPECT_TRUE(any_res) << print_function_name("any (almost_all_false)");
             }
 
             for (const auto& vec : bool_g.almost_all_true())
             {
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool any_res = xsimd::any(b);
                 EXPECT_TRUE(any_res) << print_function_name("any (almost_all_true)");
             }
@@ -229,16 +206,14 @@ protected:
                 // TODO: implement batch_bool(bool*)
                 // It currently compiles (need to understand why) but does not
                 // give expected result
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool all_res = xsimd::all(b);
                 EXPECT_FALSE(all_res) << print_function_name("all (almost_all_false)");
             }
 
             for (const auto& vec : bool_g.almost_all_true())
             {
-                batch_bool_type b;
-                b.load_unaligned(vec.data());
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool all_res = xsimd::all(b);
                 EXPECT_FALSE(all_res) << print_function_name("all (almost_all_true)");
             }
@@ -272,8 +247,16 @@ protected:
             batch_bool_type res = bool_g.half || bool_g.ihalf;
             bool_array_type ares;
             res.store_unaligned(ares.data());
-            size_t nb_false = std::count(ares.cbegin(), ares.cend(), true);
-            EXPECT_EQ(nb_false, s) << print_function_name("operator||");
+            size_t nb_true = std::count(ares.cbegin(), ares.cend(), true);
+            EXPECT_EQ(nb_true, s) << print_function_name("operator||");
+        }
+        // bitwise_andnot
+        {
+            batch_bool_type res = xsimd::bitwise_andnot(bool_g.half, bool_g.half);
+            bool_array_type ares;
+            res.store_unaligned(ares.data());
+            size_t nb_false = std::count(ares.cbegin(), ares.cend(), false);
+            EXPECT_EQ(nb_false, s) << print_function_name("bitwise_andnot");
         }
     }
 
@@ -301,12 +284,12 @@ private:
 
     batch_type batch_lhs() const
     {
-        return batch_type(lhs.data());
+        return batch_type::load_unaligned(lhs.data());
     }
 
     batch_type batch_rhs() const
     {
-        return batch_type(rhs.data());
+        return batch_type::load_unaligned(rhs.data());
     }
 };
 

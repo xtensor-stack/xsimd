@@ -8,8 +8,9 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#include <numeric>
 #include "test_utils.hpp"
+#include "xsimd/stl/algorithms.hpp"
+#include <numeric>
 
 struct binary_functor
 {
@@ -32,12 +33,18 @@ struct unary_functor
 template <class T>
 using test_allocator_type = xsimd::aligned_allocator<T>;
 
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+using test_value_type = float;
+#else
+using test_value_type = double;
+#endif
+
 TEST(algorithms, binary_transform)
 {
-    std::vector<double> expected(93);
+    std::vector<test_value_type> expected(93);
 
-    std::vector<double> a(93, 123), b(93, 123), c(93);
-    std::vector<double, test_allocator_type<double>> aa(93, 123), ba(93, 123), ca(93);
+    std::vector<test_value_type> a(93, 123), b(93, 123), c(93);
+    std::vector<test_value_type, test_allocator_type<test_value_type>> aa(93, 123), ba(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), b.begin(), expected.begin(),
                     binary_functor{});
@@ -81,9 +88,9 @@ TEST(algorithms, binary_transform)
 
 TEST(algorithms, unary_transform)
 {
-    std::vector<double> expected(93);
-    std::vector<double> a(93, 123), c(93);
-    std::vector<double, test_allocator_type<double>> aa(93, 123), ca(93);
+    std::vector<test_value_type> expected(93);
+    std::vector<test_value_type> a(93, 123), c(93);
+    std::vector<test_value_type, test_allocator_type<test_value_type>> aa(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), expected.begin(),
                    unary_functor{});
@@ -112,14 +119,14 @@ TEST(algorithms, unary_transform)
 class xsimd_reduce : public ::testing::Test
 {
 public:
-    using aligned_vec_t = std::vector<double, test_allocator_type<double>>;
+    using aligned_vec_t = std::vector<test_value_type, test_allocator_type<test_value_type>>;
 
-    static constexpr std::size_t num_elements = 4 * xsimd::simd_traits<double>::size;
-    static constexpr std::size_t small_num = xsimd::simd_traits<double>::size - 1;
+    static constexpr std::size_t num_elements = 4 * xsimd::batch<test_value_type>::size;
+    static constexpr std::size_t small_num = xsimd::batch<test_value_type>::size - 1;
 
     aligned_vec_t vec = aligned_vec_t(num_elements, 123.);
-    aligned_vec_t small_vec = aligned_vec_t(small_num, 42.); 
-    double        init = 1337.;
+    aligned_vec_t small_vec = aligned_vec_t(small_num, 42.);
+    test_value_type init = 1337.;
 
     struct multiply
     {
@@ -200,14 +207,28 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
     auto const begin = vec.begin();
     auto const end = vec.end();
 
-    EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+    if (std::is_same<aligned_vec_t::value_type, double>::value)
+    {
+        EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+    }
+    else
+    {
+        EXPECT_FLOAT_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+    }
 
     if(small_vec.size() > 1)
     {
         auto const sbegin = small_vec.begin();
         auto const send = small_vec.end();
 
-        EXPECT_DOUBLE_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+        if (std::is_same<aligned_vec_t::value_type, double>::value)
+        {
+            EXPECT_DOUBLE_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+        }
+        else
+        {
+            EXPECT_FLOAT_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+        }
     }
 }
 
@@ -219,7 +240,7 @@ TEST(algorithms, iterator)
     std::iota(a.begin(), a.end(), 0.f);
     std::vector<float> a_cpy(a.begin(), a.end());
 
-    using batch_type = typename xsimd::simd_traits<float>::type;
+    using batch_type = xsimd::batch<float>;
     auto begin = xsimd::aligned_iterator<batch_type>(&a[0]);
     auto end = xsimd::aligned_iterator<batch_type>(&a[0] + a.size());
  
@@ -243,9 +264,9 @@ TEST(algorithms, iterator)
         EXPECT_NEAR(a[i], sinf(a_cpy[i]), 1e-6);
     }
 
-#ifdef XSIMD_BATCH_DOUBLE_SIZE
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
     std::vector<std::complex<double>, test_allocator_type<std::complex<double>>> ca(10 * 16, std::complex<double>(0.2));
-    using cbatch_type = typename xsimd::simd_traits<std::complex<double>>::type;
+    using cbatch_type = xsimd::batch_type<std::complex<double>;
     auto cbegin = xsimd::aligned_iterator<cbatch_type>(&ca[0]);
     auto cend = xsimd::aligned_iterator<cbatch_type>(&ca[0] + a.size());
 

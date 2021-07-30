@@ -22,6 +22,7 @@ class batch_complex_test : public testing::Test
 protected:
 
     using batch_type = B;
+    using arch_type = typename B::arch_type;
     using real_batch_type = typename B::real_batch;
     using value_type = typename B::value_type;
     using real_value_type = typename value_type::value_type;
@@ -34,6 +35,11 @@ protected:
     array_type rhs;
     value_type scalar;
     real_value_type real_scalar;
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    using xtl_value_type = xtl::xcomplex<real_value_type, real_value_type, true>;
+    using xtl_array_type = std::array<xtl_value_type, size>;
+#endif
 
     batch_complex_test()
     {
@@ -51,17 +57,17 @@ protected:
     {
         {
             array_type res;
-            batch_type b;
-            b.load_unaligned(lhs.data());
+            batch_type b = batch_type::load_unaligned(lhs.data());
             b.store_unaligned(res.data());
             EXPECT_EQ(res, lhs) << print_function_name("load_unaligned / store_unaligned complex*");
 
-            alignas(xsimd::arch::default_::alignment) array_type arhs(this->rhs);
-            alignas(xsimd::arch::default_::alignment) array_type ares;
-            b.load_aligned(arhs.data());
+            alignas(arch_type::alignment()) array_type arhs(this->rhs);
+            alignas(arch_type::alignment()) array_type ares;
+            b = batch_type::load_aligned(arhs.data());
             b.store_aligned(ares.data());
             EXPECT_EQ(ares, rhs) << print_function_name("load_aligned / store_aligned complex*");
         }
+
         {
             real_array_type real, imag, res_real, res_imag;
             for (size_t i = 0; i < size; ++i)
@@ -69,42 +75,55 @@ protected:
                 real[i] = lhs[i].real();
                 imag[i] = lhs[i].imag();
             }
-            batch_type b;
-            b.load_unaligned(real.data(), imag.data());
+            batch_type b = batch_type::load_unaligned(real.data(), imag.data());
             b.store_unaligned(res_real.data(), res_imag.data());
             EXPECT_EQ(res_real, real) << print_function_name("load_unaligned / store_unaligned (real*, real*)");
 
-            alignas(xsimd::arch::default_::alignment) real_array_type areal, aimag, ares_real, ares_imag;
+            alignas(arch_type::alignment()) real_array_type areal, aimag, ares_real, ares_imag;
             for (size_t i = 0; i < size; ++i)
             {
                 areal[i] = lhs[i].real();
                 aimag[i] = lhs[i].imag();
             }
-            b.load_aligned(areal.data(), aimag.data());
+            b = batch_type::load_aligned(areal.data(), aimag.data());
             b.store_aligned(ares_real.data(), ares_imag.data());
             EXPECT_EQ(ares_real, areal) << print_function_name("load_aligned / store_aligned (real*, real*)");
         }
         {
-            real_array_type real, res_real;
+            real_array_type real, imag, res_real, res_imag;
             for (size_t i = 0; i < size; ++i)
             {
                 real[i] = lhs[i].real();
+                imag[i] = 0;
             }
-            batch_type b;
-            b.load_unaligned(real.data());
-            b.store_unaligned(res_real.data());
+            batch_type b = batch_type::load_unaligned(real.data());
+            b.store_unaligned(res_real.data(), res_imag.data());
             EXPECT_EQ(res_real, real) << print_function_name("load_unaligned / store_unaligned (real*)");
+            EXPECT_EQ(res_imag, imag) << print_function_name("load_unaligned / store_unaligned (real*)");
 
-            alignas(xsimd::arch::default_::alignment) real_array_type areal, ares_real;
+            alignas(arch_type::alignment()) real_array_type areal, aimag, ares_real, ares_imag;
             for (size_t i = 0; i < size; ++i)
             {
                 areal[i] = lhs[i].real();
+                aimag[i] = 0;
             }
-            b.load_aligned(areal.data());
-            b.store_aligned(ares_real.data());
+            b = batch_type::load_aligned(areal.data());
+            b.store_aligned(ares_real.data(), ares_imag.data());
             EXPECT_EQ(ares_real, areal) << print_function_name("load_aligned / store_aligned (real*)");
+            EXPECT_EQ(ares_imag, aimag) << print_function_name("load_aligned / store_aligned (real*)");
         }
+
     }
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    void test_load_store_xtl() const
+    {
+      xtl_array_type tmp;
+      std::fill(tmp.begin(), tmp.end(), xtl_value_type(2, 3));
+      batch_type b0(xtl_value_type(2, 3));
+      EXPECT_EQ(b0, tmp) << print_function_name("batch(value_type)");
+    }
+#endif
+
 
     void test_constructors() const
     {
@@ -124,18 +143,6 @@ protected:
             imag[i] = lhs[i].imag();
             tmp[i] = value_type(real[i]);
         }
-
-        batch_type b2(real.data());
-        EXPECT_EQ(b2, tmp) << print_function_name("batch(real_batch)");
-
-        batch_type b3(real.data(), imag.data());
-        EXPECT_EQ(b3, lhs) << print_function_name("batch(real_batch, real_batch)");
-
-        batch_type b4(real_batch_type(real.data()));
-        EXPECT_EQ(b4, tmp) << print_function_name("batch(real_ptr)");
-
-        batch_type b5(real_batch_type(real.data()), real_batch_type(imag.data()));
-        EXPECT_EQ(b5, lhs) << print_function_name("batch(real_ptr, real_ptr)");
     }
 
     void test_access_operator() const
@@ -143,7 +150,7 @@ protected:
         batch_type res = batch_lhs();
         for (size_t i = 0; i < size; ++i)
         {
-            EXPECT_EQ(res[i], lhs[i]) << print_function_name("operator[](") << i << ")";
+            EXPECT_EQ(res.get(i), lhs[i]) << print_function_name("get(") << i << ")";
         }
     }
 
@@ -178,6 +185,7 @@ protected:
             batch_type rres = scalar + batch_lhs();
             EXPECT_BATCH_EQ(rres, expected) << print_function_name("scalar + batch");
         }
+
         // batch + real_batch
         {
             array_type expected;
@@ -314,6 +322,7 @@ protected:
 
     void test_computed_assignment() const
     {
+
         // batch += batch
         {
             array_type expected;
@@ -326,7 +335,7 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(std::plus<value_type>(), _1, scalar));
-            batch_type res = batch_lhs(); 
+            batch_type res = batch_lhs();
             res += scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch += scalar");
         }
@@ -343,7 +352,7 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(std::plus<value_type>(), _1, real_scalar));
-            batch_type res = batch_lhs(); 
+            batch_type res = batch_lhs();
             res += real_scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch += real_scalar");
         }
@@ -376,7 +385,7 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(std::minus<value_type>(), _1, real_scalar));
-            batch_type res = batch_lhs(); 
+            batch_type res = batch_lhs();
             res -= real_scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch -= real_scalar");
         }
@@ -409,7 +418,7 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(std::multiplies<value_type>(), _1, real_scalar));
-            batch_type res = batch_lhs(); 
+            batch_type res = batch_lhs();
             res *= real_scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch *= real_scalar");
         }
@@ -442,10 +451,11 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(std::divides<value_type>(), _1, real_scalar));
-            batch_type res = batch_lhs(); 
+            batch_type res = batch_lhs();
             res /= real_scalar;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch /= real_scalar");
         }
+
     }
 
     void test_conj_norm_proj() const
@@ -504,6 +514,7 @@ protected:
             batch_type res = fms(batch_lhs(), batch_rhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fms");
         }
+
         // fnma
         {
             array_type expected;
@@ -526,15 +537,13 @@ private:
 
     batch_type batch_lhs() const
     {
-        batch_type res;
-        res.load_unaligned(lhs.data());
+        batch_type res = batch_type::load_unaligned(lhs.data());
         return res;
     }
 
     batch_type batch_rhs() const
     {
-        batch_type res;
-        res.load_unaligned(rhs.data());
+        batch_type res = batch_type::load_unaligned(rhs.data());
         return res;
     }
 };
@@ -545,6 +554,13 @@ TYPED_TEST(batch_complex_test, load_store)
 {
     this->test_load_store();
 }
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+TYPED_TEST(batch_complex_test, load_store_xtl)
+{
+    this->test_load_store_xtl();
+}
+#endif
 
 TYPED_TEST(batch_complex_test, constructors)
 {

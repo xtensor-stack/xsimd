@@ -7,17 +7,7 @@
 Data transfer
 =============
 
-Data transfer instructions
---------------------------
-
-.. doxygengroup:: data_transfer
-   :project: xsimd
-   :content-only:
-
-Generic load and store
-----------------------
-
-.. doxygengroup:: generic_load_store
+.. doxygengroup:: batch_data_transfer
    :project: xsimd
    :content-only:
 
