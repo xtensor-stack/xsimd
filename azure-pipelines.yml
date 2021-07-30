@@ -1,6 +1,7 @@
 trigger:
   - master
   - feature/xsimd-refactoring
+  - 7.x
 
 jobs:
   - template: ./.azure-pipelines/azure-pipelines-win.yml
