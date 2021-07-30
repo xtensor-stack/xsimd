@@ -1,5 +1,6 @@
 trigger:
   - master
+  - 7.x
 
 jobs:
   - template: ./.azure-pipelines/azure-pipelines-win.yml
