@@ -231,6 +231,7 @@ namespace scalar {
 
 
 
+// run simd version of mandelbrot benchmark for a specific arch
 template<class arch, class bencher_t>
 void run_arch(
               bencher_t & bencher,
@@ -248,7 +249,6 @@ void run_arch(
     xsimd::mandelbrot<arch>(x0, y0, x1, y1, width, height, maxIters, buffer.data());
   });
 
-
   const float scalar_min = stats.min().count();
 
   std::cout << '\n' << typeid(arch).name() <<" "<< stats << '\n';
@@ -258,10 +258,12 @@ void run_arch(
 }
 
 template<class T>
-struct RunMandelbrot;
+struct run_archlist;
 
+// run simd version of mandelbrot benchmark for a list
+// of archs
 template<class ... Arch>
-struct RunMandelbrot<xsimd::arch_list<Arch ...>>
+struct run_archlist<xsimd::arch_list<Arch ...>>
 {
     template<class bencher_t>
     static void run(
@@ -327,57 +329,7 @@ int main()
 
     writePPM("mandelbrot_omp.ppm", width, height, buf.data());
 
-
-
-    RunMandelbrot<xsimd::supported_architectures>::run(bencher, x0, y0, x1, y1, width, height, maxIters, buf);
-
-
-
-
-
-    // xsimd_1 run //////////////////////////////////////////////////////////////
-
-    std::fill(buf.begin(), buf.end(), 0);
-
-    auto stats_1 = bencher([&]() {
-      xsimd::mandelbrot<xsimd::avx>(x0, y0, x1, y1, width, height, maxIters, buf.data());
-    });
-
-    const float xsimd1_min = stats_1.min().count();
-
-    std::cout << '\n' << "xsimd_1 " << stats_1 << '\n';
-
-    writePPM("mandelbrot_xsimd1.ppm", width, height, buf.data());
-
-    // xsimd_4 run //////////////////////////////////////////////////////////////
-
-    std::fill(buf.begin(), buf.end(), 0);
-
-    auto stats_4 = bencher([&]() {
-      xsimd::mandelbrot<xsimd::avx>(x0, y0, x1, y1, width, height, maxIters, buf.data());
-    });
-
-    const float xsimd4_min = stats_4.min().count();
-
-    std::cout << '\n' << "xsimd_4 " << stats_4 << '\n';
-
-    writePPM("mandelbrot_xsimd4.ppm", width, height, buf.data());
-
-    // xsimd_8 run //////////////////////////////////////////////////////////////
-
-    std::fill(buf.begin(), buf.end(), 0);
-
-    auto stats_8 = bencher([&]() {
-      xsimd::mandelbrot<xsimd::avx>(x0, y0, x1, y1, width, height, maxIters, buf.data());
-    });
-
-    const float xsimd8_min = stats_8.min().count();
-
-    std::cout << '\n' << "xsimd_8 " << stats_8 << '\n';
-
-    writePPM("mandelbrot_xsimd8.ppm", width, height, buf.data());
-
- 
+    run_archlist<xsimd::supported_architectures>::run(bencher, x0, y0, x1, y1, width, height, maxIters, buf);
 
     return 0;
 }
