@@ -11,6 +11,7 @@ namespace xsimd {
     static constexpr unsigned version() { return generic::version(2, 1, 0); }
     static constexpr std::size_t alignment() { return 32; }
     static constexpr bool requires_alignment() { return true; }
+    static constexpr char const* name() { return "avx"; }
   };
 }
 

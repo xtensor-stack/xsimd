@@ -10,6 +10,7 @@ namespace xsimd {
     static constexpr bool supported() { return XSIMD_WITH_FMA3; }
     static constexpr bool available() { return true; }
     static constexpr unsigned version() { return generic::version(1, 5, 0); }
+    static constexpr char const* name() { return "sse4.2+fma"; }
   };
 
 #if XSIMD_WITH_FMA3

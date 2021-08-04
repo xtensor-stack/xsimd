@@ -18,6 +18,7 @@ namespace xsimd
         static constexpr bool requires_alignment() { return true; }
         static constexpr unsigned version() { return generic::version(1, 2, 0); }
         static constexpr std::size_t alignment() { return 16; }
+        static constexpr char const* name() { return "sse2"; }
     };
 
 #if XSIMD_WITH_SSE2
