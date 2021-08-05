@@ -1,6 +1,9 @@
 #ifndef XSIMD_CONFIG_HPP
 #define XSIMD_CONFIG_HPP
 
+#define XSIMD_VERSION_MAJOR 8
+#define XSIMD_VERSION_MINOR 0
+#define XSIMD_VERSION_PATCH 0
 
 /**
  * high level free functions
