@@ -318,6 +318,22 @@ namespace xsimd
         using void_t = typename make_void<T...>::type;
     }
 
+    /**************************************************
+     * Equivalent of void_t but with size_t parameter *
+     **************************************************/
+
+    namespace detail
+    {
+        template <std::size_t>
+        struct check_size
+        {
+            using type = void;
+        };
+
+        template <std::size_t S>
+        using check_size_t = typename check_size<S>::type;
+    }
+
     /*****************************************
      * Supplementary std::array constructors *
      *****************************************/

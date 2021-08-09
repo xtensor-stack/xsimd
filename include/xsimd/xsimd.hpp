@@ -13,4 +13,5 @@
 #include "types/xsimd_api.hpp"
 #include "arch/xsimd_scalar.hpp"
 #include "memory/xsimd_aligned_allocator.hpp"
+#include "types/xsimd_traits.hpp"
 #endif
