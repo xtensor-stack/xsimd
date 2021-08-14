@@ -917,7 +917,7 @@ batch<From, A> load(From const* ptr, unaligned_mode) {
  * @param ptr the memory buffer to read
  * @return a new batch instance
  */
-template<class A/*=default_arch*/, class From>
+template<class A=default_arch, class From>
 batch<From, A> load_aligned(From const* ptr) {
   return kernel::load_aligned<A>(ptr, kernel::convert<From>{}, A{});
 }
@@ -930,7 +930,7 @@ batch<From, A> load_aligned(From const* ptr) {
  * @param ptr the memory buffer to read
  * @return a new batch instance
  */
-template<class A/*=default_arch*/, class From>
+template<class A=default_arch, class From>
 batch<From, A> load_unaligned(From const* ptr) {
   return kernel::load_unaligned<A>(ptr, kernel::convert<From>{}, A{});
 }

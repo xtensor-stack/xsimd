@@ -55,6 +55,10 @@ namespace xsimd {
     batch<T_out, A> load_aligned(T_in const* mem, convert<T_out> cvt, requires_arch<generic>) {
       return detail::load_aligned<A>(mem, cvt, A{}, detail::conversion_type<A, T_in, T_out>{});
     }
+    template<class A, class T>
+    batch<std::complex<T>, A> load_aligned(std::complex<T> const* mem, convert<std::complex<T>>, requires_arch<generic>) {
+      return batch<std::complex<T>, A>::load_aligned(mem);
+    }
 
     // load_unaligned
     namespace detail {
@@ -75,7 +79,10 @@ namespace xsimd {
     batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out> cvt, requires_arch<generic>) {
       return detail::load_unaligned<A>(mem, cvt, generic{}, detail::conversion_type<A, T_in, T_out>{});
     }
-
+    template<class A, class T>
+    batch<std::complex<T>, A> load_unaligned(std::complex<T> const* mem, convert<std::complex<T>>, requires_arch<generic>) {
+      return batch<std::complex<T>, A>::load_unaligned(mem);
+    }
 
     // store
     template<class T, class A>

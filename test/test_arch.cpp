@@ -87,6 +87,29 @@ TEST(arch, dispatcher)
 #endif
 }
 
+template<class T>
+static bool try_load() {
+  static_assert(std::is_same<xsimd::batch<T>, decltype(xsimd::load_aligned(std::declval<T*>()))>::value,
+                "loading the expected type");
+  static_assert(std::is_same<xsimd::batch<T>, decltype(xsimd::load_unaligned(std::declval<T*>()))>::value,
+                "loading the expected type");
+  return true;
+}
+
+template<class... Tys>
+void try_loads() {
+  (void)std::initializer_list<bool>{try_load<Tys>()...};
+}
+
+TEST(arch, default_load)
+{
+  // make sure load_aligned / load_unaligned work for the default arch and
+  // return the appropriate type.
+  using type_list = xsimd::mpl::type_list<short, int, long, float, double, std::complex<float>, std::complex<double>>;
+  try_loads<type_list>();
+
+}
+
 #ifdef XSIMD_ENABLE_FALLBACK
 // FIXME: this should be named scalar
 TEST(arch, scalar)
