@@ -30,6 +30,13 @@ TEST(arch, supported)
   xsimd::supported_architectures::for_each(check_supported{});
 }
 
+TEST(arch, name)
+{
+  constexpr char const* name = xsimd::default_arch::name();
+  (void)name;
+}
+
+
 struct check_available {
   template<class Arch>
   void operator()(Arch) const {

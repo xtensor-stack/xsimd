@@ -14,6 +14,7 @@ namespace xsimd
         static constexpr bool supported() { return XSIMD_WITH_SSE3; }
         static constexpr bool available() { return true; }
         static constexpr unsigned version() { return generic::version(1, 3, 0); }
+        static constexpr char const* name() { return "sse3"; }
     };
 
 #if XSIMD_WITH_SSE3

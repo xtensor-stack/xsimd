@@ -5,6 +5,11 @@
 #include <algorithm>
 #include <array>
 
+#if defined(__linux__) && (defined(__ARM_NEON) || defined(_M_ARM))
+#include <sys/auxv.h>
+#include <asm/hwcap.h>
+#endif
+
 #if defined(_MSC_VER)
 // Contains the definition of __cpuidex
 #include <intrin.h>
@@ -46,12 +51,14 @@ namespace xsimd
                  neon64 = 1;
                  best = neon64::version();
 #elif defined(__ARM_NEON) || defined(_M_ARM)
-                 // TODO: fix undefined error of AT_HWCAP on arm7
-                 //neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
-                 //best = neon::version() * neon;
-                 neon = 1;
+#if defined(__linux__)
+                 neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
+#else
+                 // that's very conservative :-/
+                 neon = 0;
+#endif
                  neon64 = 0;
-                 best = neon::version();
+                 best = neon::version() * neon;
 
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
                  auto get_cpuid = [](int reg[4], int func_id)

@@ -12,6 +12,7 @@ namespace xsimd
         static constexpr bool requires_alignment() { return true; }
         static constexpr std::size_t alignment() { return 16; }
         static constexpr unsigned version() { return generic::version(8, 1, 0); }
+        static constexpr char const* name() { return "arm64+neon"; }
     };
 
 #if XSIMD_WITH_NEON64
