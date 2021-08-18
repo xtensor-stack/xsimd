@@ -52,26 +52,31 @@ inline void writePPM(const std::string &fileName,
 
 namespace xsimd {
 
-  template <std::size_t N>
-  inline batch<int, N> mandel(const batch_bool<float, N> &_active,
-                              const batch<float, N> &c_re,
-                              const batch<float, N> &c_im,
+  template <class arch>
+  inline batch<int, arch> mandel(const batch_bool<float, arch> &_active,
+                              const batch<float, arch> &c_re,
+                              const batch<float, arch> &c_im,
                               int maxIters)
   {
-      batch<float, N> z_re = c_re;
-      batch<float, N> z_im = c_im;
-      batch<int,   N> vi(0);
+      using float_batch_type = batch<float, arch>;
+      using int_batch_type = batch<int, arch>;
+
+      constexpr std::size_t N = float_batch_type::size;
+
+      float_batch_type z_re = c_re;
+      float_batch_type z_im = c_im;
+      int_batch_type vi(0);
 
       for (int i = 0; i < maxIters; ++i)
       {
-          auto active = _active & ((z_re * z_re + z_im * z_im) <= batch<float, N>(4.f));
+          auto active = _active & ((z_re * z_re + z_im * z_im) <= float_batch_type(4.f));
           if (!xsimd::any(active))
           {
               break;
           }
 
-          batch<float, N> new_re = z_re * z_re - z_im * z_im;
-          batch<float, N> new_im = 2.f * z_re * z_im;
+          float_batch_type new_re = z_re * z_re - z_im * z_im;
+          float_batch_type new_im = 2.f * z_re * z_im;
 
           z_re = c_re + new_re;
           z_im = c_im + new_im;
@@ -82,7 +87,7 @@ namespace xsimd {
       return vi;
   }
 
-  template <std::size_t N>
+  template <class arch>
   void mandelbrot(float x0,
                   float y0,
                   float x1,
@@ -92,29 +97,35 @@ namespace xsimd {
                   int maxIters,
                   int output[])
   {
+      using float_batch_type = batch<float, arch>;
+      using int_batch_type = batch<int, arch>;
+
+      constexpr std::size_t N = float_batch_type::size;
       float dx = (x1 - x0) / width;
       float dy = (y1 - y0) / height;
 
       float arange[N];
       std::iota(&arange[0], &arange[N], 0.f);
-      batch<float, N> programIndex(&arange[0], xsimd::aligned_mode());
+      //float_batch_type programIndex(&arange[0], xsimd::aligned_mode());
+
+      auto programIndex = float_batch_type::load(&arange[0], xsimd::aligned_mode());
       // std::iota(programIndex.begin(), programIndex.end(), 0.f);
 
       for (int j = 0; j < height; j++)
       {
           for (int i = 0; i < width; i += N)
           {
-              batch<float, N> x(x0 + (i + programIndex) * dx);
-              batch<float, N> y(y0 + j * dy);
+              float_batch_type x(x0 + (i + programIndex) * dx);
+              float_batch_type y(y0 + j * dy);
 
-              auto active = x < batch<float, N>(width);
+              auto active = x < float_batch_type(width);
 
               int base_index = (j * width + i);
-              auto result    = mandel(active, x, y, maxIters);
+              auto result    = mandel<arch>(active, x, y, maxIters);
 
               // implement masked store!
               // xsimd::store_aligned(result, output + base_index, active);
-              batch<int, N> prev_data(output + base_index);
+              int_batch_type prev_data(output + base_index);
               select(bool_cast(active), result, prev_data)
                     .store_aligned(output + base_index);
           }
@@ -217,6 +228,60 @@ namespace scalar {
 
 }  // namespace scalar
 
+
+
+// run simd version of mandelbrot benchmark for a specific arch
+template<class arch, class bencher_t>
+void run_arch(
+              bencher_t & bencher,
+              float x0,
+              float y0,
+              float x1,
+              float y1,
+              int width,
+              int height,
+              int maxIters,
+              std::vector<int, xsimd::aligned_allocator<int>> & buffer)
+{
+  std::fill(buffer.begin(), buffer.end(), 0);
+  auto stats = bencher([&]() {
+    xsimd::mandelbrot<arch>(x0, y0, x1, y1, width, height, maxIters, buffer.data());
+  });
+
+  const float scalar_min = stats.min().count();
+
+  std::cout << '\n' << arch::name() <<" "<< stats << '\n';
+  auto filename = std::string("mandelbrot_") + std::string(arch::name()) + std::string(".ppm");
+  writePPM(filename.c_str(), width, height, buffer.data());
+
+}
+
+template<class T>
+struct run_archlist;
+
+// run simd version of mandelbrot benchmark for a list
+// of archs
+template<class ... Arch>
+struct run_archlist<xsimd::arch_list<Arch ...>>
+{
+    template<class bencher_t>
+    static void run(
+                  bencher_t & bencher,
+                  float x0,
+                  float y0,
+                  float x1,
+                  float y1,
+                  int width,
+                  int height,
+                  int maxIters,
+                  std::vector<int, xsimd::aligned_allocator<int>> & buffer)
+    {
+      using expand_type = int[];
+      expand_type{(run_arch<Arch>(bencher, x0, y0,x1,x1,width,height, maxIters, buffer),0)...};
+    }
+};
+
+
 int main()
 {
     using namespace std::chrono;
@@ -263,199 +328,7 @@ int main()
 
     writePPM("mandelbrot_omp.ppm", width, height, buf.data());
 
-    // xsimd_1 run //////////////////////////////////////////////////////////////
-
-    std::fill(buf.begin(), buf.end(), 0);
-
-    auto stats_1 = bencher([&]() {
-      xsimd::mandelbrot<1>(x0, y0, x1, y1, width, height, maxIters, buf.data());
-    });
-
-    const float xsimd1_min = stats_1.min().count();
-
-    std::cout << '\n' << "xsimd_1 " << stats_1 << '\n';
-
-    writePPM("mandelbrot_xsimd1.ppm", width, height, buf.data());
-
-    // xsimd_4 run //////////////////////////////////////////////////////////////
-
-    std::fill(buf.begin(), buf.end(), 0);
-
-    auto stats_4 = bencher([&]() {
-      xsimd::mandelbrot<4>(x0, y0, x1, y1, width, height, maxIters, buf.data());
-    });
-
-    const float xsimd4_min = stats_4.min().count();
-
-    std::cout << '\n' << "xsimd_4 " << stats_4 << '\n';
-
-    writePPM("mandelbrot_xsimd4.ppm", width, height, buf.data());
-
-    // xsimd_8 run //////////////////////////////////////////////////////////////
-
-    std::fill(buf.begin(), buf.end(), 0);
-
-    auto stats_8 = bencher([&]() {
-      xsimd::mandelbrot<8>(x0, y0, x1, y1, width, height, maxIters, buf.data());
-    });
-
-    const float xsimd8_min = stats_8.min().count();
-
-    std::cout << '\n' << "xsimd_8 " << stats_8 << '\n';
-
-    writePPM("mandelbrot_xsimd8.ppm", width, height, buf.data());
-
-    // xsimd_16 run /////////////////////////////////////////////////////////////
-
-    std::fill(buf.begin(), buf.end(), 0);
-
-    auto stats_16 = bencher([&]() {
-      xsimd::mandelbrot<16>(x0, y0, x1, y1, width, height, maxIters, buf.data());
-    });
-
-    const float xsimd16_min = stats_16.min().count();
-
-    std::cout << '\n' << "xsimd_16 " << stats_16 << '\n';
-
-    writePPM("mandelbrot_xsimd16.ppm", width, height, buf.data());
-
-    // conclusions //////////////////////////////////////////////////////////////
-
-    std::cout << '\n' << "Conclusions: " << '\n';
-
-    // scalar //
-
-    std::cout << '\n'
-              << "--> scalar was " << omp_min / scalar_min
-              << "x the speed of omp";
-
-    std::cout << '\n'
-              << "--> scalar was " << xsimd1_min / scalar_min
-              << "x the speed of xsimd_1";
-
-    std::cout << '\n'
-              << "--> scalar was " << xsimd4_min / scalar_min
-              << "x the speed of xsimd_4";
-
-    std::cout << '\n'
-              << "--> scalar was " << xsimd8_min / scalar_min
-              << "x the speed of xsimd_8";
-
-    std::cout << '\n'
-              << "--> scalar was " << xsimd16_min / scalar_min
-              << "x the speed of xsimd_16" << '\n';
-
-    // omp //
-
-    std::cout << '\n'
-              << "--> omp was " << scalar_min / omp_min
-              << "x the speed of scalar";
-
-    std::cout << '\n'
-              << "--> omp was " << xsimd1_min / omp_min
-              << "x the speed of xsimd_1";
-
-    std::cout << '\n'
-              << "--> omp was " << xsimd4_min / omp_min
-              << "x the speed of xsimd_4";
-
-    std::cout << '\n'
-              << "--> omp was " << xsimd8_min / omp_min
-              << "x the speed of xsimd_8";
-
-    std::cout << '\n'
-              << "--> omp was " << xsimd16_min / omp_min
-              << "x the speed of xsimd_16" << '\n';
-
-    // xsimd1 //
-
-    std::cout << '\n'
-              << "--> xsimd1 was " << scalar_min / xsimd1_min
-              << "x the speed of scalar";
-
-    std::cout << '\n'
-              << "--> xsimd1 was " << omp_min / xsimd1_min
-              << "x the speed of omp";
-
-    std::cout << '\n'
-              << "--> xsimd1 was " << xsimd4_min / xsimd1_min
-              << "x the speed of xsimd_4";
-
-    std::cout << '\n'
-              << "--> xsimd1 was " << xsimd8_min / xsimd1_min
-              << "x the speed of xsimd_8";
-
-    std::cout << '\n'
-              << "--> xsimd1 was " << xsimd16_min / xsimd1_min
-              << "x the speed of xsimd_16" << '\n';
-
-    // xsimd4 //
-
-    std::cout << '\n'
-              << "--> xsimd4 was " << scalar_min / xsimd4_min
-              << "x the speed of scalar";
-
-    std::cout << '\n'
-              << "--> xsimd4 was " << omp_min / xsimd4_min
-              << "x the speed of omp";
-
-    std::cout << '\n'
-              << "--> xsimd4 was " << xsimd1_min / xsimd4_min
-              << "x the speed of xsimd_1";
-
-    std::cout << '\n'
-              << "--> xsimd4 was " << xsimd8_min / xsimd4_min
-              << "x the speed of xsimd_8";
-
-    std::cout << '\n'
-              << "--> xsimd4 was " << xsimd16_min / xsimd4_min
-              << "x the speed of xsimd_16" << '\n';
-
-    // xsimd8 //
-
-    std::cout << '\n'
-              << "--> xsimd8 was " << scalar_min / xsimd8_min
-              << "x the speed of scalar";
-
-    std::cout << '\n'
-              << "--> xsimd8 was " << omp_min / xsimd8_min
-              << "x the speed of omp";
-
-    std::cout << '\n'
-              << "--> xsimd8 was " << xsimd1_min / xsimd8_min
-              << "x the speed of xsimd_1";
-
-    std::cout << '\n'
-              << "--> xsimd8 was " << xsimd4_min / xsimd8_min
-              << "x the speed of xsimd_4";
-
-    std::cout << '\n'
-              << "--> xsimd8 was " << xsimd16_min / xsimd8_min
-              << "x the speed of xsimd_16" << '\n';
-
-    // xsimd16 //
-
-    std::cout << '\n'
-              << "--> xsimd16 was " << scalar_min / xsimd16_min
-              << "x the speed of scalar";
-
-    std::cout << '\n'
-              << "--> xsimd16 was " << omp_min / xsimd16_min
-              << "x the speed of omp";
-
-    std::cout << '\n'
-              << "--> xsimd16 was " << xsimd1_min / xsimd16_min
-              << "x the speed of xsimd_1";
-
-    std::cout << '\n'
-              << "--> xsimd16 was " << xsimd4_min / xsimd16_min
-              << "x the speed of xsimd_4";
-
-    std::cout << '\n'
-              << "--> xsimd16 was " << xsimd8_min / xsimd16_min
-              << "x the speed of xsimd_8" << '\n';
-
-    std::cout << '\n' << "wrote output images to 'mandelbrot_[type].ppm'" << '\n';
+    run_archlist<xsimd::supported_architectures>::run(bencher, x0, y0, x1, y1, width, height, maxIters, buf);
 
     return 0;
 }
