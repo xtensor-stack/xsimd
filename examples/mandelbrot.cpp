@@ -16,7 +16,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <typeinfo>       // operator typeid
 
 #include "pico_bench.hpp"
 
@@ -251,8 +250,8 @@ void run_arch(
 
   const float scalar_min = stats.min().count();
 
-  std::cout << '\n' << typeid(arch).name() <<" "<< stats << '\n';
-  auto filename = std::string("mandelbrot_") + std::string(typeid(arch).name()) + std::string(".ppm");
+  std::cout << '\n' << arch::name() <<" "<< stats << '\n';
+  auto filename = std::string("mandelbrot_") + std::string(arch::name()) + std::string(".ppm");
   writePPM(filename.c_str(), width, height, buffer.data());
 
 }
