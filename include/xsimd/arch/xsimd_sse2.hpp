@@ -1288,6 +1288,35 @@ namespace xsimd
         }
     }
 
+    // array to batch
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    void bytes_array_to_batch(batch<T, A>& vec, std::array<int8_t, 16>& bytes_array, requires_arch<sse2>) {
+      vec = _mm_set_epi8(
+        bytes_array[15], bytes_array[14], bytes_array[13], bytes_array[12],
+        bytes_array[11], bytes_array[10], bytes_array[9], bytes_array[8],
+        bytes_array[7], bytes_array[6], bytes_array[5], bytes_array[4],
+        bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]);
+
+    }
+
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    void shorts_array_to_batch(batch<T, A>& vec, std::array<int16_t, 8>& shorts_array, requires_arch<sse2>) {
+      vec = _mm_set_epi16(
+        shorts_array[7], shorts_array[6], shorts_array[5], shorts_array[4],
+        shorts_array[3], shorts_array[2], shorts_array[1], shorts_array[0]);
+    }
+
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    void words_array_to_batch(batch<T, A>& vec, std::array<int32_t, 4>& words_array, requires_arch<sse2>) {
+      vec = _mm_set_epi32(words_array[3], words_array[2], words_array[1], words_array[0]);
+    }
+
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    void longs_array_to_batch(batch<T, A>& vec, std::array<int64_t, 2>& longs_array, requires_arch<sse2>) {
+      vec = _mm_set_epi64x(longs_array[1], longs_array[0]);
+    }
+  }
+
 }
 
 #endif

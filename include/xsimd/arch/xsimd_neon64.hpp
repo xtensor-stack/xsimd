@@ -719,6 +719,47 @@ namespace xsimd
             return vzip2q_f64(lhs, rhs);
         }
 
+        /******************
+         * array to batch *
+         ******************/
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        void bytes_array_to_batch(batch<T, A>& vec, std::array<int8_t, 16>& bytes_array, requires_arch<neon64>)
+        {
+            int8_t bytes_buf[16] = {
+                bytes_array[0], bytes_array[1], bytes_array[2], bytes_array[3],
+                bytes_array[4], bytes_array[5], bytes_array[6], bytes_array[7],
+                bytes_array[8], bytes_array[9], bytes_array[10], bytes_array[11],
+                bytes_array[12], bytes_array[13], bytes_array[14], bytes_array[15]};
+
+            vec = vreinterpretq_u8_s8(vld1q_s8(bytes_buf));
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        void shorts_array_to_batch(batch<T, A>& vec, std::array<int16_t, 8>& shorts_array, requires_arch<neon64>)
+        {
+            int16_t shorts_buf[8] = {
+                shorts_array[0], shorts_array[1], shorts_array[2], shorts_array[3],
+                shorts_array[4], shorts_array[5], shorts_array[6], shorts_array[7]};
+
+            vec = vreinterpretq_u8_s16(vld1q_s16(shorts_buf));
+
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        void words_array_to_batch(batch<T, A>& vec, std::array<int32_t, 4>& words_array, requires_arch<neon64>)
+        {
+            int32_t words_buf[4] = {words_array[0], words_array[1], words_array[2], words_array[3]};
+            vec = vreinterpretq_u8_s32(vld1q_s32(words_buf));
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        void longs_array_to_batch(batch<T, A>& vec, std::array<int64_t, 2>& longs_array, requires_arch<neon64>)
+        {
+            vec = vreinterpretq_u8_s64(
+                vcombine_s64(vcreate_s64(longs_array[0]), vcreate_s64(longs_array[1])));
+        }
+
         /****************
          * extract_pair *
          ****************/
@@ -907,6 +948,7 @@ namespace xsimd
         {
             return !(arg == arg);
         }
+
     }
 }
 
