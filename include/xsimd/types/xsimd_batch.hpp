@@ -149,6 +149,9 @@ struct batch : types::simd_register<T, A> {
   batch(T const* data, detail::index_sequence<Is...>);
 };
 
+template <class T, class A>
+constexpr std::size_t batch<T, A>::size;
+
 /**
  * @brief batch of predicate over scalar or complex values.
  *
@@ -207,6 +210,9 @@ struct batch_bool : types::get_bool_simd_register_t<T, A> {
   static register_type make_register(detail::index_sequence<>, V... v);
 
 };
+
+template <class T, class A>
+constexpr std::size_t batch_bool<T, A>::size;
 
 /**
  * @brief batch of complex values.
@@ -326,6 +332,9 @@ struct batch<std::complex<T>, A> {
         real_batch m_real;
         real_batch m_imag;
 };
+
+template <class T, class A>
+constexpr std::size_t batch<std::complex<T>, A>::size;
 
 }
 

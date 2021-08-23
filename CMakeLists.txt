@@ -67,6 +67,7 @@ ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse3_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse4_1_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse4_2_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_ssse3_register.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_traits.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_utils.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/xsimd.hpp
 )
