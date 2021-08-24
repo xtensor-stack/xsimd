@@ -81,43 +81,6 @@ namespace xsimd
     template <class T>
     using revert_simd_type = typename revert_simd_traits<T>::type;
 
-
-// TODO: we have a problem here since the specialization for
-// batch<xtl::xcomplex<T, T, i3ec>> does not exit anymore
-/*#ifdef XSIMD_ENABLE_XTL_COMPLEX
-    template <bool i3ec>
-    struct simd_traits<xtl::xcomplex<float, float, i3ec>>
-    {
-        using type = batch<xtl::xcomplex<float, float, i3ec>, XSIMD_BATCH_FLOAT_SIZE>;
-        using bool_type = typename simd_batch_traits<type>::batch_bool_type;
-        static constexpr size_t size = type::size;
-    };
-
-    template <bool i3ec>
-    struct revert_simd_traits<batch<xtl::xcomplex<float, float, i3ec>, XSIMD_BATCH_FLOAT_SIZE>>
-    {
-        using type = xtl::xcomplex<float, float, i3ec>;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-#endif // XSIMD_ENABLE_XTL_COMPLEX
-*/
-/*#ifdef XSIMD_ENABLE_XTL_COMPLEX
-    template <bool i3ec>
-    struct simd_traits<xtl::xcomplex<double, double, i3ec>>
-    {
-        using type = batch<xtl::xcomplex<double, double, i3ec>, XSIMD_BATCH_DOUBLE_SIZE>;
-        using bool_type = typename simd_batch_traits<type>::batch_bool_type;
-        static constexpr size_t size = type::size;
-    };
-
-    template <bool i3ec>
-    struct revert_simd_traits<batch<xtl::xcomplex<double, double, i3ec>, XSIMD_BATCH_DOUBLE_SIZE>>
-    {
-        using type = xtl::xcomplex<double, double, i3ec>;
-        static constexpr size_t size = simd_traits<type>::size;
-    };
-#endif // XSIMD_ENABLE_XTL_COMPLEX*/
-
     /********************
      * simd_return_type *
      ********************/
@@ -174,20 +137,6 @@ namespace xsimd
             : std::enable_if<simd_condition<T1, T2>::value, batch<std::complex<T2>, A>>
         {
         };
-
-/*#ifdef XSIMD_ENABLE_XTL_COMPLEX
-        template <class T1, bool i3ec, class T2, std::size_t N>
-        struct simd_return_type_impl<xtl::xcomplex<T1, T1, i3ec>, T2, N>
-            : std::enable_if<simd_condition<T1, T2>::value, batch<xtl::xcomplex<T2, T2, i3ec>, N>>
-        {
-        };
-
-        template <class T1, class T2, bool i3ec, std::size_t N>
-        struct simd_return_type_impl<xtl::xcomplex<T1, T1, i3ec>, xtl::xcomplex<T2, T2, i3ec>, N>
-            : std::enable_if<simd_condition<T1, T2>::value, batch<xtl::xcomplex<T2, T2, i3ec>, N>>
-        {
-        };
-#endif // XSIMD_ENABLE_XTL_COMPLEX*/
     }
 
     template <class T1, class T2, class A = default_arch>
@@ -234,14 +183,6 @@ namespace xsimd
     struct is_batch_complex<batch<std::complex<T>, A>> : std::true_type
     {
     };
-/*
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-    template <class T, bool i3ec, std::size_t N>
-    struct is_batch_complex<batch<xtl::xcomplex<T, T, i3ec>, N>> : std::true_type
-    {
-    };
-#endif //XSIMD_ENABLE_XTL_COMPLEX*/
-
 }
 
 #endif

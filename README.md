@@ -72,7 +72,39 @@ http://xsimd.readthedocs.io/
 
 ## Usage
 
-### Explicit use of an instruction set extension
+The version 8 of the library is a complete rewrite and there are some slight differences with 7.x versions.
+A migration guide will be available soon. In the meanwhile, the following examples show how to use both versions
+7 and 8 of the library?
+
+### Explicit use of an instruction set extension (8.x)
+
+Here is an example that computes the mean of two sets of 4 double floating point values, assuming AVX extension is supported:
+```cpp
+#include <iostream>
+#include "xsimd/xsimd.hpp"
+
+namespace xs = xsimd;
+
+int main(int argc, char* argv[])
+{
+    xs::batch<double, xs::avx2> a(1.5, 2.5, 3.5, 4.5);
+    xs::batch<double, xs::avx2> b(2.5, 3.5, 4.5, 5.5);
+    auto mean = (a + b) / 2;
+    std::cout << mean << std::endl;
+    return 0;
+}
+```
+
+Do not forget to enable AVX extension when building the example. With gcc or clang, this is done with the `-march=native` flag,
+on MSVC you have to pass the `/arch:AVX` option.
+
+This example outputs:
+
+```cpp
+(2.0, 3.0, 4.0, 5.0)
+```
+
+### Explicit use of an instruction set extension (7.x and 8.x)
 
 Here is an example that computes the mean of two sets of 4 double floating point values, assuming AVX extension is supported:
 ```cpp
@@ -100,7 +132,7 @@ This example outputs:
 (2.0, 3.0, 4.0, 5.0)
 ```
 
-### Auto detection of the instruction set extension to be used
+### Auto detection of the instruction set extension to be used (7.x)
 
 The same computation operating on vectors and using the most performant instruction set available:
 
