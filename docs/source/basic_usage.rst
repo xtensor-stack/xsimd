@@ -28,6 +28,8 @@ Here is an example that computes the mean of two sets of 4 double floating point
         return 0;
     }
 
+Note that in that case, the instruction set is explicilty specified in the batch type.
+
 This example outputs:
 
 .. code::
@@ -37,7 +39,7 @@ This example outputs:
 Auto detection of the instruction set extension to be used
 ----------------------------------------------------------
 
-The same computation operating on vectors and using the most performant instruction set available:
+The same computation operating on vectors and using the most performant instruction set available, using a code that's generic on the batch size:
 
 .. code::
 
@@ -67,3 +69,4 @@ The same computation operating on vectors and using the most performant instruct
         }
     }
 
+In that case, the architecture is chosen based on the compilation flags, prioritizing the largest width and the most recent instruction set.

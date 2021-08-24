@@ -19,6 +19,9 @@ vendors and compilers.
 `xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of numbers with the same arithmetic
 operators as for single values. It also provides accelerated implementation of common mathematical functions operating on batches.
 
+`xsimd` makes it easy to write a single algorithm, generate one version of the algorithm per micro-architecture and pick the best one at runtime, based on the
+running processor capability.
+
 You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the `The C++ Scientist`_. The mathematical functions are a
 lightweight implementation of the algorithms also used in `boost.SIMD`_.
 
@@ -80,6 +83,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    api/batch_manip
    api/math_index
    api/aligned_allocator
+   api/dispatching
 
 .. _The C++ Scientist: http://johanmabille.github.io/blog/archives/
 .. _boost.SIMD: https://github.com/NumScale/boost.simd

@@ -11,3 +11,10 @@ Data transfer
    :project: xsimd
    :content-only:
 
+The following empty types are used for tag dispatching:
+
+.. doxygenstruct:: xsimd::aligned_mode
+   :project: xsimd
+
+.. doxygenstruct:: xsimd::unaligned_mode
+   :project: xsimd

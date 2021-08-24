@@ -1,9 +1,11 @@
 PROJECT_NAME      = "xsimd"
 XML_OUTPUT        = xml
-INPUT             = ../include-refactoring/xsimd/types/xsimd_api.hpp \
-                    ../include-refactoring/xsimd/types/xsimd_batch.hpp \
-                    ../include-refactoring/xsimd/config/xsimd_config.hpp \
-                    ../include-refactoring/xsimd/memory/xsimd_aligned_allocator.hpp
+INPUT             = ../include/xsimd/types/xsimd_api.hpp \
+                    ../include/xsimd/types/xsimd_batch.hpp \
+                    ../include/xsimd/config/xsimd_arch.hpp \
+                    ../include/xsimd/config/xsimd_config.hpp \
+                    ../include/xsimd/memory/xsimd_alignment.hpp \
+                    ../include/xsimd/memory/xsimd_aligned_allocator.hpp
 GENERATE_LATEX    = NO
 GENERATE_MAN      = NO
 GENERATE_RTF      = NO
@@ -14,3 +16,7 @@ RECURSIVE         = YES
 QUIET             = YES
 JAVADOC_AUTOBRIEF = YES
 WARN_IF_UNDOCUMENTED = NO
+ENABLE_PREPROCESSING = YES
+MACRO_EXPANSION      = YES
+EXPAND_ONLY_PREDEF   = YES
+PREDEFINED           = XSIMD_NO_DISCARD=

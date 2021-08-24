@@ -355,24 +355,48 @@ template<class T, class A>
 template<size_t... Is>
 batch<T, A>::batch(T const*data, detail::index_sequence<Is...>) : batch(kernel::set<A>(batch{}, A{}, data[Is]...)) {}
 
+/**
+ * Copy content of this batch to the buffer \c mem. The
+ * memory needs to be aligned.
+ * @param mem the memory buffer to read
+ */
 template<class T, class A>
 template<class U>
 void batch<T, A>::store_aligned(U* mem) const {
   kernel::store_aligned<A>(mem, *this, A{});
 }
 
+/**
+ * Copy content of this batch to the buffer \c mem. The
+ * memory does not need to be aligned.
+ * @param mem the memory buffer to write to
+ */
 template<class T, class A>
 template<class U>
 void batch<T, A>::store_unaligned(U* mem) const {
   kernel::store_unaligned<A>(mem, *this, A{});
 }
 
+/**
+ * Loading from aligned memory. May involve a conversion if \c U is different
+ * from \c T.
+ *
+ * @param mem the memory buffer to read from.
+ * @return a new batch instance.
+ */
 template<class T, class A>
 template<class U>
 batch<T, A> batch<T, A>::load_aligned(U const* mem) {
   return kernel::load_aligned<A>(mem, kernel::convert<T>{}, A{});
 }
 
+/**
+ * Loading from unaligned memory. May involve a conversion if \c U is different
+ * from \c T.
+ *
+ * @param mem the memory buffer to read from.
+ * @return a new batch instance.
+ */
 template<class T, class A>
 template<class U>
 batch<T, A> batch<T, A>::load_unaligned(U const* mem) {
