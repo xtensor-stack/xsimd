@@ -3,6 +3,7 @@
 
 #include "./xsimd_generic_details.hpp"
 #include "./xsimd_generic_trigo.hpp"
+#include "../xsimd_scalar.hpp"
 
 
 namespace xsimd {
@@ -958,25 +959,7 @@ namespace xsimd {
 
     // ipow
     template<class A, class T, class ITy> batch<T, A> ipow(batch<T, A> const& self, ITy other, requires_arch<generic>) {
-      static_assert(std::is_integral<ITy>::value, "second argument must be an integer");
-      batch<T, A> a = self;
-      ITy b = other;
-      bool const recip = b < 0;
-      batch<T, A> r(static_cast<T>(1));
-      while (1)
-      {
-          if (b & 1)
-          {
-              r *= a;
-          }
-          b /= 2;
-          if (b == 0)
-          {
-              break;
-          }
-          a *= a;
-      }
-      return recip ? 1 / r : r;
+      return ::xsimd::detail::ipow(self, other);
     }
 
 
