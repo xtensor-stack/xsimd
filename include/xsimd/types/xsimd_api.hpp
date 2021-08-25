@@ -1382,10 +1382,10 @@ auto ssub(T const& x, Tp const& y) -> decltype(x - y) {
 /**
  * @ingroup batch_data_transfer
  *
- * copy content of batch \c val to the buffer \c mem. the
+ * Copy content of batch \c val to the buffer \c mem. The
  * memory does not need to be aligned.
- * @param mem the memory buffer to read
- * @param val the batch to copy
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy from
  */
 template<class To, class A, class From>
 void store(From* mem, batch<To, A> const& val, aligned_mode={}) {
@@ -1395,10 +1395,10 @@ void store(From* mem, batch<To, A> const& val, aligned_mode={}) {
 /**
  * @ingroup batch_data_transfer
  *
- * copy content of batch \c val to the buffer \c mem. the
+ * Copy content of batch \c val to the buffer \c mem. The
  * memory does not need to be aligned.
- * @param mem the memory buffer to read
- * @param val the batch to copy
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy from
  */
 template<class To, class A, class From>
 void store(To* mem, batch<From, A> const& val, unaligned_mode) {
@@ -1408,10 +1408,10 @@ void store(To* mem, batch<From, A> const& val, unaligned_mode) {
 /**
  * @ingroup batch_data_transfer
  *
- * copy content of batch \c val to the buffer \c mem. the
- * memory does not need to be aligned.
- * @param mem the memory buffer to read
- * @param val the batch to copy
+ * Copy content of batch \c val to the buffer \c mem. The
+ * memory needs to be aligned.
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy from
  */
 template<class To, class A, class From>
 void store_aligned(To* mem, batch<From, A> const& val) {
@@ -1421,9 +1421,9 @@ void store_aligned(To* mem, batch<From, A> const& val) {
 /**
  * @ingroup batch_data_transfer
  *
- * copy content of batch \c val to the buffer \c mem. the
+ * Copy content of batch \c val to the buffer \c mem. The
  * memory does not need to be aligned.
- * @param mem the memory buffer to read
+ * @param mem the memory buffer to write to
  * @param val the batch to copy
  */
 template<class To, class A, class From>
