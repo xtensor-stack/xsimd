@@ -173,6 +173,7 @@ set(XSIMD_TESTS
     test_shuffle_128.cpp
     test_traits.cpp
     test_trigonometric.cpp
+    test_simd_traits.cpp
     test_utils.hpp
 )
 

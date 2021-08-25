@@ -60,6 +60,17 @@ namespace xsimd
     };
 
     template <class T>
+    struct simd_traits<std::complex<T>, true>
+    {
+        using type = batch<T>;
+        //using bool_type = typename type::batch_bool_type;
+        static constexpr size_t size = type::size;
+    };
+
+
+
+
+    template <class T>
     constexpr size_t simd_traits<T, true>::size;
 
     template <class T>
