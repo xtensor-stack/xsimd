@@ -27,6 +27,11 @@ protected:
         using batch_bool_type = xsimd::batch_bool<value_type>;
         constexpr bool same_bool_type = std::is_same<batch_bool_type, typename traits_type::bool_type>::value;
         EXPECT_TRUE(same_bool_type);
+
+        using vector_traits_type = xsimd::simd_traits<std::vector<value_type>>;
+        EXPECT_EQ(vector_traits_type::size, 1);
+        constexpr bool vec_same_type = std::is_same<typename vector_traits_type::type, std::vector<value_type>>::value;
+        EXPECT_TRUE(vec_same_type);
     }
 
     void test_revert_simd_traits()
