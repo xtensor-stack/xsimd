@@ -17,29 +17,62 @@
 
 namespace xsimd
 {
+
+    /**************************************
+     * simd_traits and revert_simd_traits *
+     **************************************/
+
+    template <class T, class A = default_arch>
+    struct has_simd_register : types::has_simd_register<T, A>
+    {
+    };
+
     namespace detail
     {
-        template <class T, class = void>
-        struct has_batch : std::false_type
+        template <class T, bool>
+        struct simd_traits_impl;
+
+        template <class T>
+        struct simd_traits_impl<T, false>
         {
+            using type = T;
+            using bool_type = bool;
+            static constexpr size_t size = 1;
         };
 
         template <class T>
-        struct has_batch<T, check_size_t<sizeof(batch<T>)>> : std::true_type
+        constexpr size_t simd_traits_impl<T, false>::size;
+
+        template <class T>
+        struct simd_traits_impl<T, true>
         {
+            using type = batch<T>;
+            using bool_type = typename type::batch_bool_type;
+            static constexpr size_t size = type::size;
         };
+
+        template <class T>
+        constexpr size_t simd_traits_impl<T, true>::size;
     }
 
-    template <class T, bool = detail::has_batch<T>::value>
-    struct simd_traits
+    template <class T>
+    struct simd_traits : detail::simd_traits_impl<T, has_simd_register<T>::value>
     {
-        using type = T;
-        using bool_type = bool;
-        static constexpr size_t size = 1;
     };
 
-    template <class T, bool B>
-    constexpr size_t simd_traits<T, B>::size;
+    template <class T>
+    struct simd_traits<std::complex<T>>
+        : detail::simd_traits_impl<std::complex<T>, has_simd_register<T>::value>
+    {
+    };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <class T, bool i3ec>
+    struct simd_traits<xtl::xcomplex<T, T, i3ec>>
+        : detail::simd_traits_impl<std::complex<T>, has_simd_register<T>::value>
+    {
+    };
+#endif
 
     template <class T>
     struct revert_simd_traits
@@ -50,17 +83,6 @@ namespace xsimd
 
     template <class T>
     constexpr size_t revert_simd_traits<T>::size;
-
-    template <class T>
-    struct simd_traits<T, true>
-    {
-        using type = batch<T>;
-        using bool_type = typename type::batch_bool_type;
-        static constexpr size_t size = type::size;
-    };
-
-    template <class T>
-    constexpr size_t simd_traits<T, true>::size;
 
     template <class T>
     struct revert_simd_traits<batch<T>>
