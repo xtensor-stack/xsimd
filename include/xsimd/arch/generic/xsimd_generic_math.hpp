@@ -1718,8 +1718,17 @@ namespace xsimd {
         batch_type s = bitofsign(self);
         batch_type v = self ^ s;
         batch_type t2n = constants::twotonmb<batch_type>();
+        // Under fast-math, reordering is possible and the compiler optimizes d
+        // to v. That's not what we want, so prevent compiler optimization here.
+        // FIXME: it may be better to emit a memory barrier here (?).
+#ifdef __FAST_MATH__
+        volatile batch_type d0 = v + t2n;
+        batch_type d = *(batch_type*)(void*)(&d0) - t2n;
+#else
         batch_type d0 = v + t2n;
-        return s ^ select(v < t2n, d0 - t2n, v);
+        batch_type d = d0 - t2n;
+#endif
+        return s ^ select(v < t2n, d, v);
       }
     }
     template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<generic>) {
