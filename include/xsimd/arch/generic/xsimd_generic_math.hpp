@@ -1707,6 +1707,40 @@ namespace xsimd {
     }
 
 
+#if !defined(__FAST_MATH__)
+    template <class T>
+    T conformant_add_then_sub (T x, T v)
+    {
+        return x + v - v;
+    }
+#else
+#if defined(__clang__)
+    // available on clang 4
+    #define XSIMD_NO_OPTIMIZATION_ATTRIBUTE __attribute__((optnone))
+    #define XSIMD_NO_OPTIMIZATION_PRAGMA
+#elif defined(__GNUC__)
+    // available on GCC 4.9
+    #define XSIMD_NO_OPTIMIZATION_ATTRIBUTE __attribute__((optimize("O0")))
+    #define XSIMD_NO_OPTIMIZATION_PRAGMA
+#elif defined(_MSC_VER)
+    // available Visual Studio 2015
+    #define XSIMD_NO_OPTIMIZATION_ATTRIBUTE
+    #define XSIMD_NO_OPTIMIZATION_PRAGMA __pragma(optimize("", off))
+#else
+    // Under fast-math, the compiler will assume (x - v + v = x).
+    //
+    // This error is hit it is because you are using an unsuported compiler.
+    // Consider submitting a patch, as workaunding it is easy.
+    #error "Unoptimized version of x + y - y required. See the code for details."
+#endif
+    XSIMD_NO_OPTIMIZATION_PRAGMA
+    template <class T>
+    XSIMD_NO_OPTIMIZATION_ATTRIBUTE T conformant_add_then_sub (T x, T v)
+    {
+        return x + v - v;
+    }
+#endif
+
     // nearbyint
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> nearbyint(batch<T, A> const& self, requires_arch<generic>) {
@@ -1718,16 +1752,7 @@ namespace xsimd {
         batch_type s = bitofsign(self);
         batch_type v = self ^ s;
         batch_type t2n = constants::twotonmb<batch_type>();
-        // Under fast-math, reordering is possible and the compiler optimizes d
-        // to v. That's not what we want, so prevent compiler optimization here.
-        // FIXME: it may be better to emit a memory barrier here (?).
-#ifdef __FAST_MATH__
-        volatile batch_type d0 = v + t2n;
-        batch_type d = *(batch_type*)(void*)(&d0) - t2n;
-#else
-        batch_type d0 = v + t2n;
-        batch_type d = d0 - t2n;
-#endif
+        batch_type d = conformant_add_then_sub (v, t2n);
         return s ^ select(v < t2n, d, v);
       }
     }
@@ -2199,4 +2224,3 @@ namespace xsimd {
 }
 
 #endif
-
