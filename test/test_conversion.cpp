@@ -156,6 +156,42 @@ protected:
             EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_64");
         }
     }
+
+    void test_to_vector()
+    {
+        uint8_batch batch_ui8_op;
+        uint8_batch batch_ui8_exp(2);
+        {
+            std::array<int8_t, uint8_batch::size> bytes_arr;
+            bytes_arr.fill(2);
+            xsimd::bytes_array_to_batch(batch_ui8_op, bytes_arr);
+            EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("bytes to vector");
+        }
+        {
+            uint16_batch batch_ui16(2);
+            batch_ui8_exp = xsimd::bitwise_cast<uint8_batch>(batch_ui16);
+            std::array<int16_t, uint16_batch::size> shorts_arr;
+            shorts_arr.fill(2);
+            xsimd::shorts_array_to_batch(batch_ui8_op, shorts_arr);
+            EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("shorts to vedctor");
+        }
+        {
+            uint32_batch batch_ui32(2);
+            batch_ui8_exp = xsimd::bitwise_cast<uint8_batch>(batch_ui32);
+            std::array<int32_t, uint32_batch::size> words_arr;
+            words_arr.fill(2);
+            xsimd::words_array_to_batch(batch_ui8_op, words_arr);
+            EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("words to vector");
+        }
+        {
+            uint64_batch batch_ui64(2);
+            batch_ui8_exp = xsimd::bitwise_cast<uint8_batch>(batch_ui64);
+            std::array<int64_t, uint64_batch::size> longs_arr;
+            longs_arr.fill(2);
+            xsimd::longs_array_to_batch(batch_ui8_op, longs_arr);
+            EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("longs to vector");
+        }
+    }
 };
 
 TYPED_TEST_SUITE(conversion_test, conversion_types, conversion_test_names);
@@ -183,6 +219,11 @@ TYPED_TEST(conversion_test, to_double)
 TYPED_TEST(conversion_test, u8_casting)
 {
     this->test_u8_casting();
+}
+
+TYPED_TEST(conversion_test, to_vector)
+{
+    this->test_to_vector();
 }
 
 #endif

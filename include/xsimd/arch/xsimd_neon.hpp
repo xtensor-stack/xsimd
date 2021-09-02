@@ -1518,6 +1518,43 @@ namespace xsimd
             return vcombine_f32(tmp.val[0], tmp.val[1]);
         }
 
+        /******************
+         * array to batch *
+         ******************/
+
+        template <class A>
+        void bytes_array_to_batch(batch<uint8_t, A>& vec, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<neon>)
+        {
+            int8_t bytes_buf[8] = {
+                bytes_array[0], bytes_array[1], bytes_array[2], bytes_array[3],
+                bytes_array[4], bytes_array[5], bytes_array[6], bytes_array[7]};
+
+            vec = vreinterpret_u8_s8(vld1_s8(bytes_buf));
+        }
+
+        template <class A>
+        void shorts_array_to_batch(batch<uint8_t, A>& vec, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<neon>)
+        {
+            int16_t shorts_buf[4] = {
+                shorts_array[0], shorts_array[1], shorts_array[2], shorts_array[3]};
+
+            vec = vreinterpret_u8_s16(vld1_s16(shorts_buf));
+
+        }
+
+        template <class A>
+        void words_array_to_batch(batch<uint8_t, A>& vec, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<neon>)
+        {
+            int32_t words_buf[2] = {words_array[0], words_array[1]};
+            vec = vreinterpret_u8_s32(vld1_s32(words_buf));
+        }
+
+        template <class A>
+        void longs_array_to_batch(batch<uint8_t, A>& vec, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<neon>)
+        {
+            vec = vreinterpret_u8_s64(vcreate_s64(longs_array[0]));
+        }
+
         /****************
          * extract_pair *
          ****************/

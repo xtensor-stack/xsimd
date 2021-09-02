@@ -1601,8 +1601,8 @@ namespace xsimd
         }
 
     // array to batch
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    void bytes_array_to_batch(batch<T, A>& vec, std::array<int8_t, 64>& bytes_array, requires_arch<avx512f>) {
+    template<class A>
+    void bytes_array_to_batch(batch<uint8_t, A>& vec, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<avx512f>) {
       vec = _mm512_set_epi8(
         bytes_array[63], bytes_array[62], bytes_array[61], bytes_array[60], bytes_array[59],
         bytes_array[58], bytes_array[57], bytes_array[56], bytes_array[55], bytes_array[54],
@@ -1619,8 +1619,8 @@ namespace xsimd
         bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]);
     }
 
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    void shorts_array_to_batch(batch<T, A>& vec, std::array<int16_t, 32>& shorts_array, requires_arch<avx512f>) {
+    template<class A>
+    void shorts_array_to_batch(batch<uint8_t, A>& vec, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<avx512f>) {
       vec = _mm512_set_epi16(
         shorts_array[31], shorts_array[30], shorts_array[29], shorts_array[28], shorts_array[27],
         shorts_array[26], shorts_array[25], shorts_array[24], shorts_array[23], shorts_array[22],
@@ -1631,8 +1631,8 @@ namespace xsimd
         shorts_array[1], shorts_array[0]);
     }
 
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    void words_array_to_batch(batch<T, A>& vec, std::array<int32_t, 16>& words_array, requires_arch<avx512f>) {
+    template<class A>
+    void words_array_to_batch(batch<uint8_t, A>& vec, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<avx512f>) {
       vec = _mm512_set_epi32(
         words_array[15], words_array[14], words_array[13], words_array[12],
         words_array[11], words_array[10], words_array[9],  words_array[8],
@@ -1640,12 +1640,13 @@ namespace xsimd
         words_array[3], words_array[2], words_array[1], words_array[0]);
     }
 
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    void longs_array_to_batch(batch<T, A>& vec, std::array<int64_t, 8>& longs_array, requires_arch<avx512f>) {
+    template<class A>
+    void longs_array_to_batch(batch<uint8_t, A>& vec, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<avx512f>) {
       vec = _mm512_set_epi64(
         longs_array[7], longs_array[6], longs_array[5], longs_array[4],
         longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
     }
+
   }
 }
 

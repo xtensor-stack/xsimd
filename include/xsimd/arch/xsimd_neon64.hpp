@@ -723,8 +723,8 @@ namespace xsimd
          * array to batch *
          ******************/
 
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        void bytes_array_to_batch(batch<T, A>& vec, std::array<int8_t, 16>& bytes_array, requires_arch<neon64>)
+        template <class A>
+        void bytes_array_to_batch(batch<uint8_t, A>& vec, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<neon64>)
         {
             int8_t bytes_buf[16] = {
                 bytes_array[0], bytes_array[1], bytes_array[2], bytes_array[3],
@@ -735,8 +735,8 @@ namespace xsimd
             vec = vreinterpretq_u8_s8(vld1q_s8(bytes_buf));
         }
 
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        void shorts_array_to_batch(batch<T, A>& vec, std::array<int16_t, 8>& shorts_array, requires_arch<neon64>)
+        template <class A>
+        void shorts_array_to_batch(batch<uint8_t, A>& vec, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<neon64>)
         {
             int16_t shorts_buf[8] = {
                 shorts_array[0], shorts_array[1], shorts_array[2], shorts_array[3],
@@ -746,15 +746,15 @@ namespace xsimd
 
         }
 
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        void words_array_to_batch(batch<T, A>& vec, std::array<int32_t, 4>& words_array, requires_arch<neon64>)
+        template <class A>
+        void words_array_to_batch(batch<uint8_t, A>& vec, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<neon64>)
         {
             int32_t words_buf[4] = {words_array[0], words_array[1], words_array[2], words_array[3]};
             vec = vreinterpretq_u8_s32(vld1q_s32(words_buf));
         }
 
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        void longs_array_to_batch(batch<T, A>& vec, std::array<int64_t, 2>& longs_array, requires_arch<neon64>)
+        template <class A>
+        void longs_array_to_batch(batch<uint8_t, A>& vec, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<neon64>)
         {
             vec = vreinterpretq_u8_s64(
                 vcombine_s64(vcreate_s64(longs_array[0]), vcreate_s64(longs_array[1])));
