@@ -1733,8 +1733,8 @@ namespace xsimd {
         // to v. That's not what we want, so prevent compiler optimization here.
         // FIXME: it may be better to emit a memory barrier here (?).
 #ifdef __FAST_MATH__
-        volatile batch_type d0 = v + t2n;
-        batch_type d = *(batch_type*)(void*)(&d0) - t2n;
+        volatile auto d0 = (v + t2n).data;
+        batch_type d = batch_type(d0) - t2n;
 #else
         batch_type d0 = v + t2n;
         batch_type d = d0 - t2n;
