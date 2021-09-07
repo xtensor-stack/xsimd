@@ -1602,12 +1602,12 @@ namespace xsimd
 
     // array to batch
     template<class A>
-    void bytes_array_to_batch(batch<uint8_t, A>& vec, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<avx512f>) {
+    batch<uint8_t, A> bytes_array_to_batch(batch<uint8_t, A>&, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<avx512f>) {
 
     //vec =  IF GCC <= 8, the compiler will consequently produce will error:
     // "there are no arguments to depend on a template parameter X ..."
 #if defined(__GNUC__)
-      vec = __extension__ (__m512i)(__v64qu)
+      return __extension__ (__m512i)(__v64qi)
       {
         bytes_array[63], bytes_array[62], bytes_array[61], bytes_array[60], bytes_array[59],
         bytes_array[58], bytes_array[57], bytes_array[56], bytes_array[55], bytes_array[54],
@@ -1623,9 +1623,8 @@ namespace xsimd
         bytes_array[8], bytes_array[7], bytes_array[6], bytes_array[5], bytes_array[4],
         bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]
       };
-
 #else
-      vec = _mm512_set_epi8(
+      return _mm512_set_epi8(
         bytes_array[63], bytes_array[62], bytes_array[61], bytes_array[60], bytes_array[59],
         bytes_array[58], bytes_array[57], bytes_array[56], bytes_array[55], bytes_array[54],
         bytes_array[53], bytes_array[52], bytes_array[51], bytes_array[50], bytes_array[49],
@@ -1643,9 +1642,9 @@ namespace xsimd
     }
 
     template<class A>
-    void shorts_array_to_batch(batch<uint8_t, A>& vec, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<avx512f>) {
+    batch<uint8_t, A> shorts_array_to_batch(batch<uint8_t, A>&, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<avx512f>) {
 #if defined(__GNUC__)
-      vec = __extension__ (__m512i)(__v32hu)
+      return __extension__ (__m512i)(__v32hi)
       {
         shorts_array[31], shorts_array[30], shorts_array[29], shorts_array[28], shorts_array[27],
         shorts_array[26], shorts_array[25], shorts_array[24], shorts_array[23], shorts_array[22],
@@ -1656,7 +1655,7 @@ namespace xsimd
         shorts_array[1], shorts_array[0]
       };
 #else
-      vec = _mm512_set_epi16(
+      return _mm512_set_epi16(
         shorts_array[31], shorts_array[30], shorts_array[29], shorts_array[28], shorts_array[27],
         shorts_array[26], shorts_array[25], shorts_array[24], shorts_array[23], shorts_array[22],
         shorts_array[21], shorts_array[20], shorts_array[19], shorts_array[18], shorts_array[17],
@@ -1668,8 +1667,8 @@ namespace xsimd
     }
 
     template<class A>
-    void words_array_to_batch(batch<uint8_t, A>& vec, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<avx512f>) {
-      vec = _mm512_set_epi32(
+    batch<uint8_t, A> words_array_to_batch(batch<uint8_t, A>&, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<avx512f>) {
+      return _mm512_set_epi32(
         words_array[15], words_array[14], words_array[13], words_array[12],
         words_array[11], words_array[10], words_array[9],  words_array[8],
         words_array[7], words_array[6], words_array[5], words_array[4],
@@ -1677,8 +1676,8 @@ namespace xsimd
     }
 
     template<class A>
-    void longs_array_to_batch(batch<uint8_t, A>& vec, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<avx512f>) {
-      vec = _mm512_set_epi64(
+    batch<uint8_t, A> longs_array_to_batch(batch<uint8_t, A>&, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<avx512f>) {
+      return _mm512_set_epi64(
         longs_array[7], longs_array[6], longs_array[5], longs_array[4],
         longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
     }

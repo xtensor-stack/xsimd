@@ -724,7 +724,7 @@ namespace xsimd
          ******************/
 
         template <class A>
-        void bytes_array_to_batch(batch<uint8_t, A>& vec, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<neon64>)
+        batch<uint8_t, A> bytes_array_to_batch(batch<uint8_t, A>&, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<neon64>)
         {
             int8_t bytes_buf[16] = {
                 bytes_array[0], bytes_array[1], bytes_array[2], bytes_array[3],
@@ -732,31 +732,31 @@ namespace xsimd
                 bytes_array[8], bytes_array[9], bytes_array[10], bytes_array[11],
                 bytes_array[12], bytes_array[13], bytes_array[14], bytes_array[15]};
 
-            vec = vreinterpretq_u8_s8(vld1q_s8(bytes_buf));
+            return vreinterpretq_u8_s8(vld1q_s8(bytes_buf));
         }
 
         template <class A>
-        void shorts_array_to_batch(batch<uint8_t, A>& vec, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<neon64>)
+        batch<uint8_t, A> shorts_array_to_batch(batch<uint8_t, A>&, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<neon64>)
         {
             int16_t shorts_buf[8] = {
                 shorts_array[0], shorts_array[1], shorts_array[2], shorts_array[3],
                 shorts_array[4], shorts_array[5], shorts_array[6], shorts_array[7]};
 
-            vec = vreinterpretq_u8_s16(vld1q_s16(shorts_buf));
+            return vreinterpretq_u8_s16(vld1q_s16(shorts_buf));
 
         }
 
         template <class A>
-        void words_array_to_batch(batch<uint8_t, A>& vec, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<neon64>)
+        batch<uint8_t, A> words_array_to_batch(batch<uint8_t, A>&, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<neon64>)
         {
             int32_t words_buf[4] = {words_array[0], words_array[1], words_array[2], words_array[3]};
-            vec = vreinterpretq_u8_s32(vld1q_s32(words_buf));
+            return vreinterpretq_u8_s32(vld1q_s32(words_buf));
         }
 
         template <class A>
-        void longs_array_to_batch(batch<uint8_t, A>& vec, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<neon64>)
+        batch<uint8_t, A> longs_array_to_batch(batch<uint8_t, A>&, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<neon64>)
         {
-            vec = vreinterpretq_u8_s64(
+            return vreinterpretq_u8_s64(
                 vcombine_s64(vcreate_s64(longs_array[0]), vcreate_s64(longs_array[1])));
         }
 

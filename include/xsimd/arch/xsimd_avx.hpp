@@ -1253,8 +1253,8 @@ namespace xsimd
 
     // array_to_batch
     template<class A>
-    void bytes_array_to_batch(batch<uint8_t, A>& vec, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<avx>) {
-      vec = _mm256_set_epi8(
+    batch<uint8_t, A> bytes_array_to_batch(batch<uint8_t, A>&, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<avx>) {
+      return _mm256_set_epi8(
         bytes_array[31], bytes_array[30], bytes_array[29], bytes_array[28], bytes_array[27],
         bytes_array[26], bytes_array[25], bytes_array[24], bytes_array[23], bytes_array[22],
         bytes_array[21], bytes_array[20], bytes_array[19], bytes_array[18], bytes_array[17],
@@ -1265,8 +1265,8 @@ namespace xsimd
     }
 
     template<class A>
-    void shorts_array_to_batch(batch<uint8_t, A>& vec, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<avx>) {
-      vec = _mm256_set_epi16(
+    batch<uint8_t, A> shorts_array_to_batch(batch<uint8_t, A>&, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<avx>) {
+      return _mm256_set_epi16(
         shorts_array[15], shorts_array[14], shorts_array[13], shorts_array[12],
         shorts_array[11], shorts_array[10], shorts_array[9], shorts_array[8],
         shorts_array[7], shorts_array[6], shorts_array[5], shorts_array[4],
@@ -1274,15 +1274,15 @@ namespace xsimd
     }
 
     template<class A>
-    void words_array_to_batch(batch<uint8_t, A>& vec, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<avx>) {
-      vec = _mm256_set_epi32(
+    batch<uint8_t, A> words_array_to_batch(batch<uint8_t, A>&, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<avx>) {
+      return _mm256_set_epi32(
         words_array[7], words_array[6], words_array[5], words_array[4],
         words_array[3], words_array[2], words_array[1], words_array[0]);
     }
 
     template<class A>
-    void longs_array_to_batch(batch<uint8_t, A>& vec, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<avx>) {
-      vec = _mm256_set_epi64x(longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
+    batch<uint8_t, A> longs_array_to_batch(batch<uint8_t, A>&, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<avx>) {
+      return _mm256_set_epi64x(longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
     }
   }
 

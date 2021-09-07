@@ -1549,22 +1549,22 @@ batch<as_integer_t<T>, A> to_int(batch<T, A> const& x) {
  * @return \c  \c T
  */
 template<class A>
-void bytes_array_to_batch(batch<uint8_t, A>& x, std::array<int8_t, batch<int8_t>::size>& y) {
+batch<uint8_t, A> bytes_array_to_batch(batch<uint8_t, A>& x, std::array<int8_t, batch<int8_t>::size>& y) {
   return kernel::bytes_array_to_batch<A>(x, y, A{});
 }
 
 template<class A>
-void shorts_array_to_batch(batch<uint8_t, A>& x, std::array<int16_t, batch<int16_t>::size>& y) {
+batch<uint8_t, A> shorts_array_to_batch(batch<uint8_t, A>& x, std::array<int16_t, batch<int16_t>::size>& y) {
   return kernel::shorts_array_to_batch<A>(x, y, A{});
 }
 
 template<class A>
-void words_array_to_batch(batch<uint8_t, A>& x, std::array<int32_t, batch<int32_t>::size>& y) {
+batch<uint8_t, A> words_array_to_batch(batch<uint8_t, A>& x, std::array<int32_t, batch<int32_t>::size>& y) {
   return kernel::words_array_to_batch<A>(x, y, A{});
 }
 
 template<class A>
-void longs_array_to_batch(batch<uint8_t, A>& x, std::array<int64_t, batch<int64_t>::size>& y) {
+batch<uint8_t, A> longs_array_to_batch(batch<uint8_t, A>& x, std::array<int64_t, batch<int64_t>::size>& y) {
   return kernel::longs_array_to_batch<A>(x, y, A{});
 }
 

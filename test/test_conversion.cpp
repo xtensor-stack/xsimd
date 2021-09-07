@@ -164,7 +164,7 @@ protected:
         {
             std::array<int8_t, uint8_batch::size> bytes_arr;
             bytes_arr.fill(2);
-            xsimd::bytes_array_to_batch(batch_ui8_op, bytes_arr);
+            batch_ui8_op = xsimd::bytes_array_to_batch(batch_ui8_op, bytes_arr);
             EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("bytes to vector");
         }
         {
@@ -172,7 +172,7 @@ protected:
             batch_ui8_exp = xsimd::bitwise_cast<uint8_batch>(batch_ui16);
             std::array<int16_t, uint16_batch::size> shorts_arr;
             shorts_arr.fill(2);
-            xsimd::shorts_array_to_batch(batch_ui8_op, shorts_arr);
+            batch_ui8_op = xsimd::shorts_array_to_batch(batch_ui8_op, shorts_arr);
             EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("shorts to vedctor");
         }
         {
@@ -180,7 +180,7 @@ protected:
             batch_ui8_exp = xsimd::bitwise_cast<uint8_batch>(batch_ui32);
             std::array<int32_t, uint32_batch::size> words_arr;
             words_arr.fill(2);
-            xsimd::words_array_to_batch(batch_ui8_op, words_arr);
+            batch_ui8_op = xsimd::words_array_to_batch(batch_ui8_op, words_arr);
             EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("words to vector");
         }
         {
@@ -188,7 +188,7 @@ protected:
             batch_ui8_exp = xsimd::bitwise_cast<uint8_batch>(batch_ui64);
             std::array<int64_t, uint64_batch::size> longs_arr;
             longs_arr.fill(2);
-            xsimd::longs_array_to_batch(batch_ui8_op, longs_arr);
+            batch_ui8_op = xsimd::longs_array_to_batch(batch_ui8_op, longs_arr);
             EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("longs to vector");
         }
     }
