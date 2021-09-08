@@ -148,10 +148,10 @@ namespace xsimd {
       else {
         switch(sizeof(T)) {
           case 1: {
-            uint64_t mask_low0 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x000000FF), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x000000FF), Cmp);
-            uint64_t mask_low1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x0000FF00), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x0000FF00), Cmp);
-            uint64_t mask_high0 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x00FF0000), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x00FF0000), Cmp);
-            uint64_t mask_high1 = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFF000000), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0xFF000000), Cmp);
+            uint64_t mask_low0 = _mm512_cmp_epu32_mask((batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x000000FF)), (batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x000000FF)), Cmp);
+            uint64_t mask_low1 = _mm512_cmp_epu32_mask((batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x0000FF00)), (batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x0000FF00)), Cmp);
+            uint64_t mask_high0 = _mm512_cmp_epu32_mask((batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x00FF0000)), (batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x00FF0000)), Cmp);
+            uint64_t mask_high1 = _mm512_cmp_epu32_mask((batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFF000000)), (batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0xFF000000)), Cmp);
             uint64_t mask = 0;
             for(unsigned i = 0; i < 16; ++i) {
               mask |= (mask_low0 & (uint64_t(1) << i)) << (3 * i + 0);
@@ -162,8 +162,8 @@ namespace xsimd {
             return (register_type)mask;
           }
           case 2: {
-            uint16_t mask_low = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x0000FFFF), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x0000FFFF), Cmp);
-            uint16_t mask_high = _mm512_cmp_epu32_mask(batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFFFF0000), batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0xFFFF0000), Cmp);
+            uint16_t mask_low = _mm512_cmp_epu32_mask((batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0x0000FFFF)), (batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0x0000FFFF)), Cmp);
+            uint16_t mask_high = _mm512_cmp_epu32_mask((batch<uint32_t, A>(self.data) & batch<uint32_t, A>(0xFFFF0000)), (batch<uint32_t, A>(other.data)  & batch<uint32_t, A>(0xFFFF0000)), Cmp);
             return static_cast<register_type>(morton(mask_low, mask_high));
           }
           case 4: return (register_type)_mm512_cmp_epu32_mask(self, other, Cmp);

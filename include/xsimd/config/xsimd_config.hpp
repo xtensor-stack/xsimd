@@ -130,7 +130,10 @@
 #ifdef __AVX512F__
     // AVX512 instructions are supported starting with gcc 6
     // see https://www.gnu.org/software/gcc/gcc-6/changes.html
-    #if defined(__GNUC__) && __GNUC__ < 6
+    // check clang first, newer clang always defines __GNUC__ = 4
+    #if defined(__clang__) && __clang_major__ >= 6
+        #define XSIMD_WITH_AVX512F 1
+    #elif defined(__GNUC__) && __GNUC__ < 6
         #define XSIMD_WITH_AVX512F 0
     #else
         #define XSIMD_WITH_AVX512F 1
