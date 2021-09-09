@@ -74,6 +74,13 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    vectorized_code
 
 .. toctree::
+   :caption: MIGRATION GUIDE
+   :maxdepth: 1
+
+   migration_guide
+
+
+.. toctree::
    :caption: API REFERENCE
    :maxdepth: 2
 
