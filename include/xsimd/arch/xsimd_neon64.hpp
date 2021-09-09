@@ -658,7 +658,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_f64(lhs, rhs, n);
+                    return vextq_f64(lhs, rhs, I);
                 }
                 else
                 {
