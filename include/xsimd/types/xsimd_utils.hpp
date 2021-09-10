@@ -14,6 +14,7 @@
 #include <complex>
 #include <cstdint>
 #include <cstring>
+#include <tuple>
 #include <type_traits>
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
