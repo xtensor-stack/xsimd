@@ -5,6 +5,11 @@
 
 namespace xsimd {
 
+  /**
+   * @ingroup arch
+   *
+   * AVX instructions
+   */
   struct avx : generic {
     static constexpr bool supported() { return XSIMD_WITH_AVX; }
     static constexpr bool available() { return true; }

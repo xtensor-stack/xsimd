@@ -3,9 +3,13 @@
 
 #include "./xsimd_avx2_register.hpp"
 
-// Fake instruction set, maps to AVX2 + FMA
 namespace xsimd {
 
+  /**
+   * @ingroup arch
+   *
+   * AVX2 + FMA instructions
+   */
   struct fma5 : avx2 {
     static constexpr bool supported() { return XSIMD_WITH_FMA5; }
     static constexpr bool available() { return true; }

@@ -9,6 +9,11 @@
 
 namespace xsimd
 {
+    /**
+     * @ingroup arch
+     *
+     * SSE3 instructions
+     */
     struct sse3 : sse2
     {
         static constexpr bool supported() { return XSIMD_WITH_SSE3; }

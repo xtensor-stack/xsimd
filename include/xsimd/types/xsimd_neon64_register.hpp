@@ -5,6 +5,11 @@
 
 namespace xsimd
 {
+    /**
+     * @ingroup arch
+     *
+     * NEON instructions for arm64
+     */
     struct neon64 : neon
     {
         static constexpr bool supported() { return XSIMD_WITH_NEON64; }

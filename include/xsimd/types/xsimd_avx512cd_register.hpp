@@ -5,6 +5,11 @@
 
 namespace xsimd {
 
+  /**
+   * @ingroup arch
+   *
+   * AVX512CD instrutions
+   */
   struct avx512cd : avx512f {
     static constexpr bool supported() { return XSIMD_WITH_AVX512BW; }
     static constexpr bool available() { return true; }
