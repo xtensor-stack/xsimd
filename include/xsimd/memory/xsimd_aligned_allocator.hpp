@@ -22,6 +22,7 @@
 #endif
 
 #include <cassert>
+#include <memory>
 
 namespace xsimd
 {
