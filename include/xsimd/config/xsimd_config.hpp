@@ -222,6 +222,10 @@
 #define XSIMD_WITH_SSE4_2 1
 #endif
 
+#if !defined(__clang__) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))
+#define XSIMD_WITH_SSE4_2 1
+#endif
+
 #if XSIMD_WITH_SSE4_2
 #define XSIMD_WITH_SSE4_1 1
 #endif
