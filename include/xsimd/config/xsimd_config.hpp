@@ -210,6 +210,9 @@
 // Workaround for MSVC compiler
 #ifdef _MSC_VER
 
+// NB: MSVC does not define __SSEn__
+#define XSIMD_WITH_SSE4_2 1
+
 #if XSIMD_WITH_AVX512
 #define XSIMD_WITH_AVX2 1
 #endif
