@@ -8,6 +8,12 @@ namespace xsimd {
   namespace kernel {
     using namespace types;
 
+    // load_unaligned
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<sse3>) {
+      return _mm_lddqu_si128((__m128i const*)mem);
+    }
+
     // hadd
     template<class A> float hadd(batch<float, A> const& self, requires_arch<sse3>) {
       __m128 tmp0 = _mm_hadd_ps(self, self);
