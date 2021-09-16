@@ -14,7 +14,7 @@ Assume that we have a simple function that computes the mean of two vectors, som
     #include <cstddef>
     #include <vector>
 
-    void mean(const std:vector<double>& a, const std::vector<double>& b, std::vector<double>& res)
+    void mean(const std::vector<double>& a, const std::vector<double>& b, std::vector<double>& res)
     {
         std::size_t size = res.size();
         for(std::size_t i = 0; i < size; ++i)
