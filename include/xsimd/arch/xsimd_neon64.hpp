@@ -9,6 +9,61 @@ namespace xsimd
     namespace kernel
     {
         using namespace types;
+        /*******
+         * all *
+         *******/
+
+        template <class A, class T, detail::enable_sized_t<T, 1> = 0>
+        bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return vminvq_u8(arg);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 2> = 0>
+        bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return vminvq_u16(arg);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return vminvq_u32(arg);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 8> = 0>
+        bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return all(batch_bool<uint32_t, A>(vreinterpretq_u32_u64(arg)), neon64{});
+        }
+
+        /*******
+         * any *
+         *******/
+
+        template <class A, class T, detail::enable_sized_t<T, 1> = 0>
+        bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return vmaxvq_u8(arg);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 2> = 0>
+        bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return vmaxvq_u16(arg);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return vmaxvq_u32(arg);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 8> = 0>
+        bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        {
+            return any(batch_bool<uint32_t, A>(vreinterpretq_u32_u64(arg)), neon64{});
+        }
 
         /*************
          * broadcast *
