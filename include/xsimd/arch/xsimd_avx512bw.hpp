@@ -256,6 +256,19 @@ namespace xsimd {
       }
     }
 
+    // Shuffle_nbit
+    namespace detail
+    {
+      template <class T, size_t S>
+      using enable_nbit_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == S, int>::type;
+    }
+    // Shuffle 16-bit integers by shuffle mask
+    template<class A, class T, detail::enable_nbit_sized_t<T, 2> = 0>
+    batch<T, A> shuffle_nbit(batch<T, A>& s_mask, batch<T, A>& self, requires_arch<avx512bw>) {
+      return _mm512_permutexvar_epi16(s_mask, self);
+    }
+
   }
 
 }

@@ -1208,6 +1208,32 @@ namespace xsimd {
       return _mm512_unpacklo_pd(self, other);
     }
 
+    // Shuffle_nbit
+    namespace detail
+    {
+      template <class T, size_t S>
+      using enable_nbit_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == S, int>::type;
+    }
+    // 32-bit
+    template<class A, class T, detail::enable_nbit_sized_t<T, 4> = 0>
+    batch<T, A> shuffle_nbit(batch<T, A>& s_mask, batch<T, A>& self, requires_arch<avx512f>) {
+      return _mm512_permutexvar_epi32(s_mask, self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<float, A> shuffle_nbit(batch<T, A>& s_mask, batch<float, A>& self, requires_arch<avx512f>) {
+      return _mm512_permutexvar_ps(s_mask, self);
+    }
+    // 64-bit
+    template<class A, class T, detail::enable_nbit_sized_t<T, 8> = 0>
+    batch<T, A> shuffle_nbit(batch<T, A>& s_mask, batch<T, A>& self, requires_arch<avx512f>) {
+      return _mm512_permutexvar_epi64(s_mask, self);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<double, A> shuffle_nbit(batch<T, A>& s_mask, batch<double, A>& self, requires_arch<avx512f>) {
+      return _mm512_permutexvar_pd(s_mask, self);
+    }
+
   }
 
 }

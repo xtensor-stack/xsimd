@@ -335,7 +335,21 @@ namespace xsimd {
       }
     }
 
-
+    // Shuffle_nbit
+    namespace detail
+    {
+      template <class T, size_t S>
+      using enable_nbit_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == S, int>::type;
+    }
+    template<class A, class T, detail::enable_nbit_sized_t<T, 4> = 0>
+    batch<T, A> shuffle_nbit(batch<T, A>& s_mask, batch<T, A>& self, requires_arch<avx2>) {
+      return _mm256_permutevar8x32_epi32(self, s_mask);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<float, A> shuffle_nbit(batch<T, A>& s_mask, batch<float, A>& self, requires_arch<avx2>) {
+      return _mm256_permutevar8x32_ps(self, s_mask);
+    }
 
   }
 

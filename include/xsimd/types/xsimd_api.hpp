@@ -1529,6 +1529,19 @@ batch<as_integer_t<T>, A> to_int(batch<T, A> const& x) {
 }
 
 /**
+ * Shuffle 16/32/64 bit integers in \c y
+ * across lanes using the corresponding index in idx: \c x
+ * and store the results in dst.
+ * @param x index mask
+ * @param y batch of target values.
+ * @return.
+ */
+template <class T, class A>
+batch<T, A> shuffle_nbit(batch<T, A>& x, batch<T, A>& y) {
+  return kernel::shuffle_nbit<A>(x, y, A{});
+}
+
+/**
  * @ingroup batch_rounding
  *
  * Computes the batch of nearest integer values not greater in magnitude
