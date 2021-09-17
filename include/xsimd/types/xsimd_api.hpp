@@ -1528,6 +1528,7 @@ batch<as_integer_t<T>, A> to_int(batch<T, A> const& x) {
   return kernel::to_int<A>(x, A{});
 }
 
+#if XSIMD_WITH_AVX2 || XSIMD_WITH_AVX512
 /**
  * Shuffle 16/32/64 bit integers in \c y
  * across lanes using the corresponding index in idx: \c x
@@ -1540,6 +1541,7 @@ template <class T, class A>
 batch<T, A> shuffle_nbit(batch<T, A>& x, batch<T, A>& y) {
   return kernel::shuffle_nbit<A>(x, y, A{});
 }
+#endif
 
 /**
  * @ingroup batch_rounding

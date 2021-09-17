@@ -92,3 +92,79 @@ TYPED_TEST(shuffle_128_test, shuffle_128_low_high)
 {
     this->shuffle_128_low_high();
 }
+
+
+#if XSIMD_WITH_AVX2 || XSIMD_WITH_AVX512
+template <class B>
+class shuffle_nbit_test : public testing::Test
+{
+  protected:
+    using batch_type = B;
+    using value_type = typename B::value_type;
+    static constexpr size_t b_size = B::size;
+
+    using int32_batch = xsimd::batch<int32_t>;
+    using int32_vector = std::vector<int32_t, xsimd::default_allocator<int32_t>>;
+
+    shuffle_nbit_test()
+    {
+        std::cout << "shuffle-nbit test" << std::endl;
+    }
+
+    void shuffle_32bit()
+    {
+        if((sizeof(value_type) * b_size) == 64) {
+            int input[16] = {0x01020304, 0x05060708, 0x09101112, 0x13141516,
+                             0x17181920, 0x21222324, 0x25262728, 0x29303132,
+                             0x33343536, 0x37383940, 0x41262728, 0x29303148,
+                             0x49505152, 0x53545556, 0x57585960, 0x61626364,};
+            int mask[16] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+            int expected[16] = {0x05060708, 0x01020304, 0x01020304, 0x01020304,
+                                0x01020304, 0x01020304, 0x01020304, 0x01020304,
+                                0x01020304, 0x01020304, 0x01020304, 0x01020304,
+                                0x01020304, 0x01020304, 0x01020304, 0x01020304,};
+
+            int32_vector v_input(input, input + int32_batch::size);
+            int32_vector v_mask(mask, mask + int32_batch::size);
+            int32_vector v_expected(expected, expected + int32_batch::size);
+
+            int32_batch b_input = int32_batch::load_unaligned(v_input.data());
+            int32_batch b_mask = int32_batch::load_unaligned(v_mask.data());
+            int32_batch b_expected = int32_batch::load_unaligned(v_expected.data());
+
+            int32_batch b_op = xsimd::shuffle_nbit(b_mask, b_input);
+            EXPECT_BATCH_EQ(b_op, b_expected) << print_function_name("shuffle_nbit: 32bit");
+
+        } else if((sizeof(value_type) * b_size) == 32) {
+            int input[8] = {0x01020304, 0x05060708, 0x09101112, 0x13141516,
+                            0x17181920, 0x21222324, 0x25262728, 0x29303132,};
+            int mask[8] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,};
+            int expected[8] = {0x05060708, 0x01020304, 0x01020304, 0x01020304,
+                               0x01020304, 0x01020304, 0x01020304, 0x01020304,};
+
+            int32_vector v_input(input, input + int32_batch::size);
+            int32_vector v_mask(mask, mask + int32_batch::size);
+            int32_vector v_expected(expected, expected + int32_batch::size);
+
+            int32_batch b_input = int32_batch::load_unaligned(v_input.data());
+            int32_batch b_mask = int32_batch::load_unaligned(v_mask.data());
+            int32_batch b_expected = int32_batch::load_unaligned(v_expected.data());
+
+            int32_batch b_op = xsimd::shuffle_nbit(b_mask, b_input);
+            EXPECT_BATCH_EQ(b_op, b_expected) << print_function_name("shuffle_nbit: 32bit");
+
+        } else {
+            return;
+        }
+    }
+};
+
+TYPED_TEST_SUITE(shuffle_nbit_test, batch_types, simd_test_names);
+
+TYPED_TEST(shuffle_nbit_test, shuffle_32bit)
+{
+    this->shuffle_32bit();
+}
+#endif // XSIMD_WITH_AVX2 || XSIMD_WITH_AVX512
+
