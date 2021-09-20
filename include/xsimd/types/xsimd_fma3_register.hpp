@@ -3,9 +3,13 @@
 
 #include "./xsimd_sse4_2_register.hpp"
 
-// Fake instruction set, maps to SSE4.2 + FMA
 namespace xsimd {
 
+  /**
+   * @ingroup arch
+   *
+   * SSE4.2 + FMA instructions
+   */
   struct fma3 : sse4_2 {
     static constexpr bool supported() { return XSIMD_WITH_FMA3; }
     static constexpr bool available() { return true; }

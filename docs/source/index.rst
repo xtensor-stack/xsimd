@@ -90,6 +90,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    api/batch_manip
    api/math_index
    api/aligned_allocator
+   api/arch
    api/dispatching
 
 .. _The C++ Scientist: http://johanmabille.github.io/blog/archives/

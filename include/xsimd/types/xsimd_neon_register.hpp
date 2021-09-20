@@ -10,6 +10,11 @@
 
 namespace xsimd
 {
+    /**
+     * @ingroup arch
+     *
+     * NEON instructions for arm32
+     */
     struct neon : generic
     {
         static constexpr bool supported() { return XSIMD_WITH_NEON; }

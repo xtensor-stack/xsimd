@@ -11,6 +11,11 @@
 
 namespace xsimd
 {
+    /**
+     * @ingroup arch
+     *
+     * SSE2 instructions
+     */
     struct sse2 : generic
     {
         static constexpr bool supported() { return XSIMD_WITH_SSE2; }

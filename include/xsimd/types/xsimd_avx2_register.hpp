@@ -5,6 +5,11 @@
 
 namespace xsimd
 {
+    /**
+     * @ingroup arch
+     *
+     * AVX2 instructions
+     */
     struct avx2 : avx
     {
         static constexpr bool supported() { return XSIMD_WITH_AVX2; }
