@@ -25,10 +25,10 @@ namespace xsimd {
 
           for (std::size_t j = 0 ; j < (size - i); ++j)
           {
-              concat_buffer[j] = self_buffer[i + j];
+              concat_buffer[j] = other_buffer[i + j];
               if(j < i)
               {
-                  concat_buffer[size - 1 - j] = other_buffer[i - 1 - j];
+                  concat_buffer[size - 1 - j] = self_buffer[i - 1 - j];
               }
           }
           return batch<T, A>::load_aligned(concat_buffer);
