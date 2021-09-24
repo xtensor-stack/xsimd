@@ -1411,7 +1411,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_u8(lhs, rhs, I);
+                    return vextq_u8(rhs, lhs, I);
                 }
                 else
                 {
@@ -1424,7 +1424,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s8(lhs, rhs, I);
+                    return vextq_s8(rhs, lhs, I);
                 }
                 else
                 {
@@ -1437,7 +1437,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_u16(lhs, rhs, I);
+                    return vextq_u16(rhs, lhs, I);
                 }
                 else
                 {
@@ -1450,7 +1450,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s16(lhs, rhs, I);
+                    return vextq_s16(rhs, lhs, I);
                 }
                 else
                 {
@@ -1463,7 +1463,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_u32(lhs, rhs, I);
+                    return vextq_u32(rhs, lhs, I);
                 }
                 else
                 {
@@ -1476,7 +1476,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s32(lhs, rhs, I);
+                    return vextq_s32(rhs, lhs, I);
                 }
                 else
                 {
@@ -1489,7 +1489,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_u64(lhs, rhs, I);
+                    return vextq_u64(rhs, lhs, I);
                 }
                 else
                 {
@@ -1502,7 +1502,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_s64(lhs, rhs, I);
+                    return vextq_s64(rhs, lhs, I);
                 }
                 else
                 {
@@ -1515,7 +1515,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_f32(lhs, rhs, I);
+                    return vextq_f32(rhs, lhs, I);
                 }
                 else
                 {
