@@ -34,10 +34,10 @@ namespace xsimd
             /* Expected shuffle data */
             for (int i = 0 ; i < (num - index); ++i)
             {
-                exped[i] = lhs_in[i + index];
+                exped[i] = rhs_in[i + index];
                 if(i < index)
                 {
-                    exped[num - 1 - i] = rhs_in[index - 1 - i];
+                    exped[num - 1 - i] = lhs_in[index - 1 - i];
                 }
             }
             vects.push_back(std::move(exped));

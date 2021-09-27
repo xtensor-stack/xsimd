@@ -9,6 +9,10 @@ environment:
   global:
     MINICONDA: C:\xsimd-conda
   matrix:
+    - JOB: "SSE2"
+      CXXFLAGS: ""
+      VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"
+      RUNTEST: ".\\test_xsimd"
     - JOB: "AVX2"
       CXXFLAGS: "/arch:AVX2"
       VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat"

@@ -713,7 +713,7 @@ namespace xsimd
             {
                 if (n == I)
                 {
-                    return vextq_f64(lhs, rhs, I);
+                    return vextq_f64(rhs, lhs, I);
                 }
                 else
                 {
