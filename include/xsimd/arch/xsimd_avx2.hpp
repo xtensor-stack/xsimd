@@ -173,7 +173,15 @@ namespace xsimd {
                 __m256i tmp2 = _mm256_add_epi64(self, tmp1);
                 __m128i tmp3 = _mm256_extracti128_si256(tmp2, 1);
                 __m128i res = _mm_add_epi64(_mm256_castsi256_si128(tmp2), tmp3);
+#if defined(__x86_64__)
                 return _mm_cvtsi128_si64(res);
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, res);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
           }
           default: return hadd(self, avx{});
       }
