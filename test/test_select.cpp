@@ -57,7 +57,7 @@ class select_test : public testing::Test
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("pow");
+        EXPECT_EQ(diff, 0) << print_function_name("select_dynamic");
     }
     struct pattern
     {
@@ -83,7 +83,7 @@ class select_test : public testing::Test
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("pow");
+        EXPECT_EQ(diff, 0) << print_function_name("select_static");
     }
 };
 
