@@ -29,6 +29,9 @@ jobs:
           enable_xtl_complex: 1
         gcc_9:
           gcc_version: '9'
+        gcc_9_m32:
+          gcc_version: '9'
+          i686: 1
     pool:
       vmImage: ubuntu-16.04
     variables:
@@ -48,6 +51,12 @@ jobs:
               sudo apt-get --no-install-suggests --no-install-recommends install g++-4.9-aarch64-linux-gnu gcc-4.9-aarch64-linux-gnu
               sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-aarch64
             fi
+          fi
+          if [[ $(i686) ]]; then
+            sudo dpkg --add-architecture i386
+            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+            sudo apt-get update
+            sudo apt-get --no-install-suggests --no-install-recommends install gcc-$(gcc_version)-multilib g++-$(gcc_version)-multilib linux-libc-dev:i386
           fi
         displayName: Install build toolchain
 
