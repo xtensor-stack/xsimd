@@ -14,6 +14,7 @@
 #include "../config/xsimd_arch.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <utility>
 #ifdef _WIN32
 #include <malloc.h>
