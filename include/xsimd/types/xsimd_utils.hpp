@@ -240,6 +240,7 @@ namespace xsimd
 
             template <typename... Ts>
             using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
+        #endif
 
 
             template <int... Is>
@@ -272,8 +273,6 @@ namespace xsimd
 
             template <typename... Ts>
             using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
-
-        #endif
     }
 
     /***********************************
