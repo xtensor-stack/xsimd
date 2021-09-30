@@ -762,6 +762,24 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
+        #define WRAP_CAST(SUFFIX, TYPE)                                                                           \
+            namespace wrap {                                                                                      \
+                inline float64x2_t vreinterpretq_f64_##SUFFIX(TYPE a) { return ::vreinterpretq_f64_##SUFFIX(a); }     \
+                inline TYPE vreinterpretq_##SUFFIX##_f64(float64x2_t a) { return ::vreinterpretq_##SUFFIX##_f64(a); } \
+            }
+
+        WRAP_CAST(u8, uint8x16_t)
+        WRAP_CAST(s8, int8x16_t)
+        WRAP_CAST(u16, uint16x8_t)
+        WRAP_CAST(s16, int16x8_t)
+        WRAP_CAST(u32, uint32x4_t)
+        WRAP_CAST(s32, int32x4_t)
+        WRAP_CAST(u64, uint64x2_t)
+        WRAP_CAST(s64, int64x2_t)
+        WRAP_CAST(f32, float32x4_t)
+
+        #undef WRAP_CAST
+
         template <class A, class T>
         batch<double, A> bitwise_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<neon64>)
         {
@@ -772,9 +790,9 @@ namespace xsimd
                                                             uint64x2_t, int64x2_t,
                                                             float32x4_t>;
             constexpr caster_type caster = {
-                std::make_tuple(vreinterpretq_f64_u8,  vreinterpretq_f64_s8,  vreinterpretq_f64_u16, vreinterpretq_f64_s16,
-                                vreinterpretq_f64_u32, vreinterpretq_f64_s32, vreinterpretq_f64_u64, vreinterpretq_f64_s64,
-                                vreinterpretq_f64_f32)
+                std::make_tuple(wrap::vreinterpretq_f64_u8,  wrap::vreinterpretq_f64_s8,  wrap::vreinterpretq_f64_u16, wrap::vreinterpretq_f64_s16,
+                                wrap::vreinterpretq_f64_u32, wrap::vreinterpretq_f64_s32, wrap::vreinterpretq_f64_u64, wrap::vreinterpretq_f64_s64,
+                                wrap::vreinterpretq_f64_f32)
             };
             using register_type = typename batch<T, A>::register_type;
             return caster.apply(register_type(arg));
@@ -808,9 +826,9 @@ namespace xsimd
                                                               uint64x2_t, int64x2_t,
                                                               float32x4_t>;
             constexpr caster_type caster = {
-                std::make_tuple(vreinterpretq_u8_f64,  vreinterpretq_s8_f64,  vreinterpretq_u16_f64, vreinterpretq_s16_f64,
-                                vreinterpretq_u32_f64, vreinterpretq_s32_f64, vreinterpretq_u64_f64, vreinterpretq_s64_f64,
-                                vreinterpretq_f32_f64)
+                std::make_tuple(wrap::vreinterpretq_u8_f64,  wrap::vreinterpretq_s8_f64,  wrap::vreinterpretq_u16_f64, wrap::vreinterpretq_s16_f64,
+                                wrap::vreinterpretq_u32_f64, wrap::vreinterpretq_s32_f64, wrap::vreinterpretq_u64_f64, wrap::vreinterpretq_s64_f64,
+                                wrap::vreinterpretq_f32_f64)
             };
             using src_register_type = typename batch<double, A>::register_type;
             using dst_register_type = typename batch<R, A>::register_type;
