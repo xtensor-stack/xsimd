@@ -200,80 +200,65 @@ namespace xsimd
 
         #ifdef __cpp_lib_integer_sequence
             using std::integer_sequence;
+            using std::make_integer_sequence;
             using std::index_sequence;
             using std::make_index_sequence;
+
             using std::index_sequence_for;
         #else
             template <typename T, T... Is>
             struct integer_sequence {
-            using value_type = T;
-            static constexpr std::size_t size() noexcept { return sizeof...(Is); }
+              using value_type = T;
+              static constexpr std::size_t size() noexcept { return sizeof...(Is); }
             };
+
+            template <typename Lhs, typename Rhs>
+            struct make_integer_sequence_concat;
+
+            template <typename T, T... Lhs, T... Rhs>
+            struct make_integer_sequence_concat<integer_sequence<T, Lhs...>,
+                                                integer_sequence<T, Rhs...>>
+              : identity<integer_sequence<T, Lhs..., (sizeof...(Lhs) + Rhs)...>> {};
+
+            template <typename T>
+            struct make_integer_sequence_impl;
+
+            template <typename T>
+            struct make_integer_sequence_impl<std::integral_constant<T, (T)0>> : identity<integer_sequence<T>> {};
+
+            template <typename T>
+            struct make_integer_sequence_impl<std::integral_constant<T, (T)1>> : identity<integer_sequence<T, 0>> {};
+
+            template <typename T, T N>
+            struct make_integer_sequence_impl<std::integral_constant<T, N>>
+              : make_integer_sequence_concat<typename make_integer_sequence_impl<std::integral_constant<T, N / 2>>::type,
+                                             typename make_integer_sequence_impl<std::integral_constant<T, N - (N / 2)>>::type> {};
+
+
+            template <typename T, T N>
+            using make_integer_sequence = typename make_integer_sequence_impl<std::integral_constant<T, N>>::type;
+
 
             template <std::size_t... Is>
             using index_sequence = integer_sequence<std::size_t, Is...>;
 
-            template <typename Lhs, typename Rhs>
-            struct make_index_sequence_concat;
-
-            template <std::size_t... Lhs, std::size_t... Rhs>
-            struct make_index_sequence_concat<index_sequence<Lhs...>,
-                                            index_sequence<Rhs...>>
-              : identity<index_sequence<Lhs..., (sizeof...(Lhs) + Rhs)...>> {};
-
             template <std::size_t N>
-            struct make_index_sequence_impl;
-
-            template <std::size_t N>
-            using make_index_sequence = typename make_index_sequence_impl<N>::type;
-
-            template <std::size_t N>
-            struct make_index_sequence_impl
-              : make_index_sequence_concat<make_index_sequence<N / 2>,
-                                           make_index_sequence<N - (N / 2)>> {};
-
-            template <>
-            struct make_index_sequence_impl<0> : identity<index_sequence<>> {};
-
-            template <>
-            struct make_index_sequence_impl<1> : identity<index_sequence<0>> {};
+            using make_index_sequence = make_integer_sequence<std::size_t, N>;
 
             template <typename... Ts>
             using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
 
-
-            template <int... Is>
-            using int_sequence = integer_sequence<int, Is...>;
-
-            template <typename Lhs, typename Rhs>
-            struct make_int_sequence_concat;
-
-            template <int... Lhs, int... Rhs>
-            struct make_int_sequence_concat<int_sequence<Lhs...>,
-                                            int_sequence<Rhs...>>
-              : identity<int_sequence<Lhs..., int(sizeof...(Lhs) + Rhs)...>> {};
-
-            template <std::size_t N>
-            struct make_int_sequence_impl;
-
-            template <std::size_t N>
-            using make_int_sequence = typename make_int_sequence_impl<N>::type;
-
-            template <std::size_t N>
-            struct make_int_sequence_impl
-              : make_int_sequence_concat<make_int_sequence<N / 2>,
-                                         make_int_sequence<N - (N / 2)>> {};
-
-            template <>
-            struct make_int_sequence_impl<0> : identity<int_sequence<>> {};
-
-            template <>
-            struct make_int_sequence_impl<1> : identity<int_sequence<0>> {};
-
-            template <typename... Ts>
-            using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
-
         #endif
+
+          template <int... Is>
+          using int_sequence = integer_sequence<int, Is...>;
+
+          template <int N>
+          using make_int_sequence = make_integer_sequence<int, N>;
+
+          template <typename... Ts>
+          using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
+
     }
 
     /***********************************
