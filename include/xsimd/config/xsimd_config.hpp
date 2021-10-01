@@ -245,7 +245,7 @@
 #define XSIMD_WITH_SSE3 1
 #endif
 
-#if XSIMD_WITH_SSE3
+#if XSIMD_WITH_SSE3 || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
 #undef XSIMD_WITH_SSE2
 #define XSIMD_WITH_SSE2 1
 #endif
