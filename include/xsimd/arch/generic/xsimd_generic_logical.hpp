@@ -77,6 +77,18 @@ namespace xsimd {
     template<class A, class T> batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return !(other == self);
     }
+
+    // logical_and
+    template <class A, class T>
+    batch<T, A> logical_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+      return detail::apply([](T x, T y) { return x && y;}, self, other);
+    }
+
+    // logical_or
+    template <class A, class T>
+    batch<T, A> logical_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+      return detail::apply([](T x, T y) { return x || y;}, self, other);
+    }
   }
 }
 
