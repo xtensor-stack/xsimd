@@ -228,6 +228,7 @@ struct batch<std::complex<T>, A> {
   using real_batch = batch<T, A>;
   using arch_type = A;
   static constexpr std::size_t size = real_batch::size;
+  using batch_bool_type = batch_bool<T, A>;
 
   batch() = default;
   batch(value_type const& val) : m_real(val.real()), m_imag(val.imag()) {}
