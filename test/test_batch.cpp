@@ -408,6 +408,42 @@ protected:
         }
     }
 
+    void test_logical() const
+    {
+        // batch && batch
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(), std::logical_and<value_type>());
+            batch_type res = batch_lhs() && batch_rhs();
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("batch && batch");
+        }
+        // batch && scalar
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(std::logical_and<value_type>(), _1, scalar));
+            batch_type lres = batch_lhs() && scalar;
+            EXPECT_BATCH_EQ(lres, expected) << print_function_name("batch && scalar");
+            batch_type rres = scalar && batch_lhs();
+            EXPECT_BATCH_EQ(rres, expected) << print_function_name("scalar && batch");
+        }
+        // batch || batch
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(), std::logical_or<value_type>());
+            batch_type res = batch_lhs() || batch_rhs();
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("batch && batch");
+        }
+        // batch || scalar
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), std::bind(std::logical_or<value_type>(), _1, scalar));
+            batch_type lres = batch_lhs() || scalar;
+            EXPECT_BATCH_EQ(lres, expected) << print_function_name("batch || scalar");
+            batch_type rres = scalar || batch_lhs();
+            EXPECT_BATCH_EQ(rres, expected) << print_function_name("scalar || batch");
+        }
+    }
+
     void test_min_max() const
     {
         // min
@@ -687,6 +723,10 @@ TYPED_TEST(batch_test, computed_assignment)
 TYPED_TEST(batch_test, comparison)
 {
     this->test_comparison();
+}
+TYPED_TEST(batch_test, logical)
+{
+    this->test_logical();
 }
 
 TYPED_TEST(batch_test, min_max)

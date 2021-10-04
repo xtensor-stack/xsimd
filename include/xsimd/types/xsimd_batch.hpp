@@ -124,6 +124,14 @@ struct batch : types::simd_register<T, A> {
     return batch(self) <<= other;
   }
 
+  friend batch operator&&(batch const& self, batch const& other) {
+    return batch(self).logical_and(other);
+  }
+
+  friend batch operator||(batch const& self, batch const& other) {
+    return batch(self).logical_or(other);
+  }
+
   // Update operators
   batch& operator+=(batch const& other);
   batch& operator-=(batch const& other);
@@ -147,6 +155,9 @@ struct batch : types::simd_register<T, A> {
   private:
   template<size_t... Is>
   batch(T const* data, detail::index_sequence<Is...>);
+
+  batch logical_and(batch const& other) const;
+  batch logical_or(batch const& other) const;
 };
 
 template <class T, class A>
@@ -430,6 +441,16 @@ batch_bool<T, A> batch<T, A>::operator>(batch<T, A> const& other) const { return
 
 template<class T, class A>
 batch_bool<T, A> batch<T, A>::operator<(batch<T, A> const& other) const { return kernel::lt<A>(*this, other, A{}); }
+
+template<class T, class A>
+batch<T, A> batch<T, A>::logical_and(batch<T, A> const& other) const {
+  return kernel::logical_and<A>(*this, other, A());
+}
+
+template<class T, class A>
+batch<T, A> batch<T, A>::logical_or(batch<T, A> const& other) const {
+  return kernel::logical_or<A>(*this, other, A());
+}
 
 template<class T, class A>
 batch<T, A>& batch<T, A>::operator+=(batch<T, A> const& other) { return *this = kernel::add<A>(*this, other, A{}); }
