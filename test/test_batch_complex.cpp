@@ -21,7 +21,7 @@ class batch_complex_test : public testing::Test
 {
 protected:
 
-    using batch_type = B;
+    using batch_type = xsimd::simd_type<typename B::value_type>;
     using arch_type = typename B::arch_type;
     using real_batch_type = typename B::real_batch;
     using value_type = typename B::value_type;
