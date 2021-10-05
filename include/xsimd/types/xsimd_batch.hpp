@@ -33,7 +33,7 @@ struct batch : types::simd_register<T, A> {
   batch() = default;
   batch(T val);
   batch(std::initializer_list<T> data) : batch(data.begin(), detail::make_index_sequence<size>()) {}
-  explicit batch(batch_bool_type b);
+  explicit batch(batch_bool_type const &b);
   batch(register_type reg) : types::simd_register<T, A>({reg}) {}
 
   template<class U>
@@ -363,7 +363,7 @@ template<class T, class A>
 batch<T, A>::batch(T val) : types::simd_register<T, A>(kernel::broadcast<A>(val, A{})) {}
 
 template<class T, class A>
-batch<T, A>::batch(batch_bool<T, A> b) : batch(kernel::from_bool(b, A{})) {}
+batch<T, A>::batch(batch_bool<T, A> const &b) : batch(kernel::from_bool(b, A{})) {}
 
 template<class T, class A>
 template<size_t... Is>

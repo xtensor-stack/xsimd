@@ -3,6 +3,7 @@ build: false
 os: Visual Studio 2015
 
 platform:
+  - x86
   - x64
 
 environment:
@@ -40,7 +41,8 @@ install:
   - conda update -q conda
   - conda info -a
   - conda install cmake xtl -c conda-forge
-  - cmake -G "NMake Makefiles" -D DOWNLOAD_GTEST=1 -D ENABLE_XTL_COMPLEX=1 -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -D CMAKE_BUILD_TYPE=Release .
+  - ps: if($env:Platform -eq "x64"){$env:EnableXTL=1} else {$env:EnableXTL=0}
+  - cmake -G "NMake Makefiles" -D DOWNLOAD_GTEST=1 -D ENABLE_XTL_COMPLEX=%EnableXTL% -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -D CMAKE_BUILD_TYPE=Release .
   - nmake test_xsimd
   - cd test
 
