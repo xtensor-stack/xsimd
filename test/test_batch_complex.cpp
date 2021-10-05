@@ -533,6 +533,18 @@ protected:
         }
     }
 
+    void test_boolean_conversion() const
+    {
+        // !batch
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                            [](const value_type& l) { return l == value_type(0); });
+            batch_type res = (batch_type)!batch_lhs();
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("!batch");
+        }
+    }
+
 private:
 
     batch_type batch_lhs() const
@@ -595,4 +607,9 @@ TYPED_TEST(batch_complex_test, horizontal_operations)
 TYPED_TEST(batch_complex_test, fused_operations)
 {
     this->test_fused_operations();
+}
+
+TYPED_TEST(batch_complex_test, boolean_conversion)
+{
+    this->test_boolean_conversion();
 }
