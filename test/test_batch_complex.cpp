@@ -486,6 +486,35 @@ protected:
         }
     }
 
+    void test_conj_norm_proj_real() const
+    {
+        // conj real batch
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                           [](const value_type& v) { return std::conj(std::real(v)); });
+            batch_type res = conj(real(batch_lhs()));
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("conj(real batch)");
+            
+        }
+        // norm real batch
+        {
+            real_array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                            [](const value_type& v) {  return std::norm(std::real(v)); });
+            real_batch_type res = norm(real(batch_lhs()));
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("norm(real_batch)");
+        }
+        // proj real batch
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                            [](const value_type& v) { return std::proj(std::real(v)); });
+            batch_type res = proj(real(batch_lhs()));
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("proj(real_batch)");
+        }
+    }
+
     void test_horizontal_operations() const
     {
         // hadd
@@ -597,6 +626,11 @@ TYPED_TEST(batch_complex_test, computed_assignment)
 TYPED_TEST(batch_complex_test, conj_norm_proj)
 {
     this->test_conj_norm_proj();
+}
+
+TYPED_TEST(batch_complex_test, conj_norm_proj_real)
+{
+    this->test_conj_norm_proj_real();
 }
 
 TYPED_TEST(batch_complex_test, horizontal_operations)

@@ -350,6 +350,45 @@ struct batch<std::complex<T>, A> {
 template <class T, class A>
 constexpr std::size_t batch<std::complex<T>, A>::size;
 
+        /*******************
+         * real_batch_type *
+         *******************/
+
+        template <class B>
+        struct real_batch_type
+        {
+            using type = B;
+        };
+
+        template <class T, class A>
+        struct real_batch_type<batch<std::complex<T>, A>>
+        {
+            using type = batch<T, A>;
+        };
+
+        template <class B>
+        using real_batch_type_t = typename real_batch_type<B>::type;
+
+        /**********************
+         * complex_batch_type *
+         **********************/
+
+        template <class B>
+        struct complex_batch_type
+        {
+            using real_value_type = typename B::value_type;
+            using arch_type = typename B::arch_type;
+            using type = batch<std::complex<real_value_type>, arch_type>;
+        };
+
+        template <class T, class A>
+        struct complex_batch_type<batch<std::complex<T>, A>>
+        {
+            using type = batch<std::complex<T>, A>;
+        };
+
+        template <class B>
+        using complex_batch_type_t = typename complex_batch_type<B>::type;
 }
 
 #include "../types/xsimd_batch_constant.hpp"
