@@ -247,7 +247,7 @@ struct batch<std::complex<T>, A> {
   batch(real_batch const& real) : m_real(real), m_imag(0) {}
   batch(T val) : m_real(val), m_imag(0) {}
   batch(std::initializer_list<value_type> data) { *this = load_unaligned(data.begin()); }
-  explicit batch(batch_bool_type b);
+  explicit batch(batch_bool_type const& b);
 
   static XSIMD_NO_DISCARD batch load_aligned(const T* real_src, const T* imag_src=nullptr);
   static XSIMD_NO_DISCARD batch load_unaligned(const T* real_src, const T* imag_src=nullptr);
@@ -568,7 +568,7 @@ batch_bool<T, A> batch_bool<T, A>::load_unaligned(bool const* mem) {
 //
 
 template <class T, class A>
-batch<std::complex<T>, A>::batch(batch_bool_type b)
+batch<std::complex<T>, A>::batch(batch_bool_type const& b)
     : m_real(b), m_imag(0)
 {
 }
