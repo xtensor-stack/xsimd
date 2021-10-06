@@ -574,6 +574,17 @@ protected:
         }
     }
 
+    void test_isnan() const
+    {
+        {
+            bool_array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                            [](const value_type& l) { return std::isnan(l.real()) || std::isnan(l.imag()); });
+            typename batch_type::batch_bool_type res = isnan(batch_lhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("isnan");
+        }
+    }
+
 private:
 
     batch_type batch_lhs() const
@@ -646,4 +657,9 @@ TYPED_TEST(batch_complex_test, fused_operations)
 TYPED_TEST(batch_complex_test, boolean_conversion)
 {
     this->test_boolean_conversion();
+}
+
+TYPED_TEST(batch_complex_test, isnan)
+{
+    this->test_isnan();
 }

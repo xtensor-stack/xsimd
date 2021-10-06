@@ -148,6 +148,12 @@ namespace xsimd
         {
         };
 
+        template <class T2, class A>
+        struct simd_return_type_impl<bool, std::complex<T2>, A>
+            : std::enable_if<simd_condition<bool, T2>::value, batch_bool<T2, A>>
+        {
+        };
+
         template <class T1, class T2, class A>
         struct simd_return_type_impl<std::complex<T1>, T2, A>
             : std::enable_if<simd_condition<T1, T2>::value, batch<std::complex<T2>, A>>
