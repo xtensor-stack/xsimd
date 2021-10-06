@@ -9,57 +9,28 @@ namespace xsimd {
 
     using namespace types;
 
-    namespace detail
-    {
-      template <class B, bool is_complex>
-      struct real_imag_kernel
-      {
-        using return_type = typename B::real_batch;
-
-        static return_type real(B const& z)
-        {
-          return z.real();
-        }
-
-        static return_type imag(B const& z)
-        {
-          return z.imag();
-        }
-      };
-
-      template <class B>
-      struct real_imag_kernel<B, false>
-      {
-        using return_type = B;
-
-        static return_type real(B const& z)
-        {
-          return z;
-        }
-
-        static return_type imag(B const&)
-        {
-          return B(typename B::value_type(0));
-        }
-      };
-    }
-
     // real
     template <class A, class T>
-    real_batch_type_t<batch<T, A>> real(batch<T, A> const& self, requires_arch<generic>) {
-      using batch_type = batch<T, A>;
-      constexpr bool is_cplx = xsimd::detail::is_complex<typename batch_type::value_type>::value;
-      return detail::real_imag_kernel<batch_type, is_cplx>::real(self);
+    batch<T, A> real(batch<T, A> const& self, requires_arch<generic>) {
+      return self;
+    }
+
+    template <class A, class T>
+    batch<T, A> real(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
+      return self.real();
     }
 
     // imag
     template <class A, class T>
-    real_batch_type_t<batch<T, A>> imag(batch<T, A> const& self, requires_arch<generic>) {
-      using batch_type = batch<T, A>;
-      constexpr bool is_cplx = xsimd::detail::is_complex<typename batch_type::value_type>::value;
-      return detail::real_imag_kernel<batch_type, is_cplx>::imag(self);
+    batch<T, A> imag(batch<T, A> const& /*self*/, requires_arch<generic>) {
+      return batch<T, A>(T(0));
     }
 
+    template <class A, class T>
+    batch<T, A> imag(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
+      return self.imag();
+    }
+    
     // arg
     template<class A, class T>
     real_batch_type_t<batch<T, A>> arg(batch<T, A> const& self, requires_arch<generic>) {
