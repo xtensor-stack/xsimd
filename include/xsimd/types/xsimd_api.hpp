@@ -96,11 +96,11 @@ batch<T, A> acosh(batch<T, A> const& x) {
  * @ingroup batch_complex
  *
  * Computes the argument of the batch \c z.
- * @param z batch of complex values.
+ * @param z batch of complex or real values.
  * @return the argument of \c z.
  */
 template<class T, class A>
-batch<T, A> arg(batch<std::complex<T>, A> const& z) {
+real_batch_type_t<batch<T, A>> arg(batch<T, A> const& z) {
   return kernel::arg<A>(z, A{});
 }
 
@@ -358,7 +358,7 @@ batch<T, A> clip(batch<T, A> const& x, batch<T, A> const& lo, batch<T, A> const&
  * @return the argument of \c z.
  */
 template<class A, class T>
-batch<std::complex<T>, A> conj(batch<std::complex<T>, A> const& z) {
+complex_batch_type_t<batch<T, A>> conj(batch<T, A> const& z) {
   return kernel::conj(z, A{});
 }
 
@@ -758,6 +758,17 @@ batch<T, A> hypot(batch<T, A> const& x, batch<T, A> const& y) {
   return kernel::hypot<A>(x, y, A{});
 }
 
+/**
+ * @ingroup batch_complex
+ *
+ * Computes the imaginary part of the batch \c z.
+ * @param z batch of complex or real values.
+ * @return the argument of \c z.
+ */
+template <class T, class A>
+real_batch_type_t<batch<T, A>> imag(batch<T, A> const& x) {
+  return kernel::imag<A>(x, A{});
+}
 
 /**
  * @ingroup batch_constant
@@ -1115,11 +1126,11 @@ batch<T, A> nextafter(batch<T, A> const& x, batch<T, A> const& y) {
  * @ingroup batch_complex
  *
  * Computes the norm of the batch \c x.
- * @param x batch of complex values.
+ * @param x batch of complex or real values.
  * @return the norm of \c x.
  */
 template<class A, class T>
-batch<T, A> norm(batch<std::complex<T>, A> const& x) {
+real_batch_type_t<batch<T, A>> norm(batch<T, A> const& x) {
   return kernel::norm(x, A{});
 }
 
@@ -1167,12 +1178,24 @@ batch<T, A> pow(batch<T, A> const& x, ITy y) {
  * @ingroup batch_complex
  *
  * Computes the projection of the batch \c x.
- * @param x batch of complex values.
+ * @param x batch of complex or real values.
  * @return the projection of \c x.
  */
 template<class A, class T>
-batch<std::complex<T>, A> proj(batch<std::complex<T>, A> const& x) {
+complex_batch_type_t<batch<T, A>> proj(batch<T, A> const& x) {
   return kernel::proj(x, A{});
+}
+
+/**
+ * @ingroup batch_complex
+ *
+ * Computes the real part of the batch \c z.
+ * @param z batch of complex or real values.
+ * @return the argument of \c z.
+ */
+template <class T, class A>
+real_batch_type_t<batch<T, A>> real(batch<T, A> const& x) {
+  return kernel::real<A>(x, A{});
 }
 
 /**
