@@ -110,7 +110,7 @@ protected:
         EXPECT_TRUE(res1);
 
         using rtype2 = xsimd::simd_return_type<bool, value_type>;
-        constexpr bool res2 = std::is_same<rtype2, xsimd::batch_bool<value_type>>::value;
+        constexpr bool res2 = std::is_same<rtype2, xsimd::batch_bool<typename value_type::value_type>>::value;
         EXPECT_TRUE(res2);
     }
 };

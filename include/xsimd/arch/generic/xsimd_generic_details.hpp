@@ -59,7 +59,7 @@ namespace xsimd {
   template<class T, class A>
   batch_bool<T, A> isinf(batch<T, A> const& self);
   template<class T, class A>
-  batch_bool<T, A> isnan(batch<T, A> const& self);
+  typename batch<T, A>::batch_bool_type isnan(batch<T, A> const& self);
   template<class T, class A>
   batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e);
   template<class T, class A>

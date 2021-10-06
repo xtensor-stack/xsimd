@@ -61,6 +61,11 @@ namespace xsimd {
                                copysign(real_batch(real_value_type(0)), imag(self))),
                     batch_type(self));
     }
+
+    template <class A, class T>
+    batch_bool<T, A> isnan(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
+      return batch_bool<T, A>(isnan(self.real()) || isnan(self.imag()));
+    }
   }
 }
 

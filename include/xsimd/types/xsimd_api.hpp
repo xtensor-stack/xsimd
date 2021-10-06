@@ -852,7 +852,7 @@ batch_bool<T, A> isfinite(batch<T, A> const& x) {
  * @return a batch of booleans.
  */
 template<class T, class A>
-batch_bool<T, A> isnan(batch<T, A> const& x) {
+typename batch<T, A>::batch_bool_type isnan(batch<T, A> const& x) {
   return kernel::isnan<A>(x, A{});
 }
 
