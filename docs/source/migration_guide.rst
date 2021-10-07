@@ -66,6 +66,15 @@ Loading Batches
 to update an existing batch through its ``load`` method. The regular assign
 operator can be used instead.
 
+Indexing Batches
+****************
+
+``xsimd::batch<T>::operator[](size_t)`` has been replaced with
+``xsimd::batch<T>::get(size_t)``. Keep in mind that this method implies a register
+load *for each call*, so it's wise not to use it in performance-critical
+section. When needed, do an explicit store of the batch into an array and work
+from there.
+
 Architecture Detection
 **********************
 
