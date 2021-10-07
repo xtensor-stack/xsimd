@@ -6,13 +6,6 @@
 
 namespace xsimd
 {
-
-    template<class T, class A>
-    struct batch;
-
-    template<class T, class A>
-    struct batch_bool;
-
     namespace types
     {
 
