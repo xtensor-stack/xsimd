@@ -25,10 +25,10 @@ namespace xsimd
 {
 
     template <class T, class A>
-    struct batch;
+    class batch;
 
     template <class T, class A>
-    struct batch_bool;
+    class batch_bool;
 
     /**************
      * as_integer *
