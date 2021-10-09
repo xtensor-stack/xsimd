@@ -762,8 +762,8 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
-        #define WRAP_CAST(SUFFIX, TYPE)                                                                           \
-            namespace wrap {                                                                                      \
+        #define WRAP_CAST(SUFFIX, TYPE)                                                                               \
+            namespace wrap {                                                                                          \
                 inline float64x2_t vreinterpretq_f64_##SUFFIX(TYPE a) { return ::vreinterpretq_f64_##SUFFIX(a); }     \
                 inline TYPE vreinterpretq_##SUFFIX##_f64(float64x2_t a) { return ::vreinterpretq_##SUFFIX##_f64(a); } \
             }
