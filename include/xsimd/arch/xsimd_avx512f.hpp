@@ -1600,89 +1600,131 @@ namespace xsimd
             return _mm512_unpacklo_pd(self, other);
         }
 
-    // array to batch
-    template<class A>
-    batch<uint8_t, A> bytes_array_to_batch(batch<uint8_t, A>&, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<avx512f>) {
+        // array to batch
+        namespace detail {
+            template <class T>
+            using enable_char_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 1, int8_t>::type;
+            template <class T>
+            using enable_short_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 2, int16_t>::type;
+            template <class T>
+            using enable_int_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 4, int32_t>::type;
+            template <class T>
+            using enable_long_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 8, int64_t>::type;
 
-    //vec =  IF GCC <= 8, the compiler will consequently produce will error:
-    // "there are no arguments to depend on a template parameter X ..."
+            template<class A, class It, class T, enable_char_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx512_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                std::vector<char> bytes_array(i_size);
+
+                for(int i = 0; i < i_size; i++) {
+                    bytes_array[i] = *(begin + i);
+                }
+
+                //vec =  IF GCC <= 8, the compiler will consequently produce will error:
+                // "there are no arguments to depend on a template parameter X ..."
 #if defined(__GNUC__)
-      return __extension__ (__m512i)(__v64qi)
-      {
-        bytes_array[63], bytes_array[62], bytes_array[61], bytes_array[60], bytes_array[59],
-        bytes_array[58], bytes_array[57], bytes_array[56], bytes_array[55], bytes_array[54],
-        bytes_array[53], bytes_array[52], bytes_array[51], bytes_array[50], bytes_array[49],
-        bytes_array[48], bytes_array[47], bytes_array[46], bytes_array[45], bytes_array[44],
-        bytes_array[43], bytes_array[42], bytes_array[41], bytes_array[40], bytes_array[39],
-        bytes_array[38], bytes_array[37], bytes_array[36], bytes_array[35], bytes_array[34],
-        bytes_array[33], bytes_array[32], bytes_array[31], bytes_array[30], bytes_array[29],
-        bytes_array[28], bytes_array[27], bytes_array[26], bytes_array[25], bytes_array[24],
-        bytes_array[23], bytes_array[22], bytes_array[21], bytes_array[20], bytes_array[19],
-        bytes_array[18], bytes_array[17], bytes_array[16], bytes_array[15], bytes_array[14],
-        bytes_array[13], bytes_array[12], bytes_array[11], bytes_array[10], bytes_array[9],
-        bytes_array[8], bytes_array[7], bytes_array[6], bytes_array[5], bytes_array[4],
-        bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]
-      };
+                return __extension__ (__m512i)(__v64qi) {
+                    bytes_array[63], bytes_array[62], bytes_array[61], bytes_array[60], bytes_array[59],
+                    bytes_array[58], bytes_array[57], bytes_array[56], bytes_array[55], bytes_array[54],
+                    bytes_array[53], bytes_array[52], bytes_array[51], bytes_array[50], bytes_array[49],
+                    bytes_array[48], bytes_array[47], bytes_array[46], bytes_array[45], bytes_array[44],
+                    bytes_array[43], bytes_array[42], bytes_array[41], bytes_array[40], bytes_array[39],
+                    bytes_array[38], bytes_array[37], bytes_array[36], bytes_array[35], bytes_array[34],
+                    bytes_array[33], bytes_array[32], bytes_array[31], bytes_array[30], bytes_array[29],
+                    bytes_array[28], bytes_array[27], bytes_array[26], bytes_array[25], bytes_array[24],
+                    bytes_array[23], bytes_array[22], bytes_array[21], bytes_array[20], bytes_array[19],
+                    bytes_array[18], bytes_array[17], bytes_array[16], bytes_array[15], bytes_array[14],
+                    bytes_array[13], bytes_array[12], bytes_array[11], bytes_array[10], bytes_array[9],
+                    bytes_array[8], bytes_array[7], bytes_array[6], bytes_array[5], bytes_array[4],
+                    bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]
+                };
 #else
-      return _mm512_set_epi8(
-        bytes_array[63], bytes_array[62], bytes_array[61], bytes_array[60], bytes_array[59],
-        bytes_array[58], bytes_array[57], bytes_array[56], bytes_array[55], bytes_array[54],
-        bytes_array[53], bytes_array[52], bytes_array[51], bytes_array[50], bytes_array[49],
-        bytes_array[48], bytes_array[47], bytes_array[46], bytes_array[45], bytes_array[44],
-        bytes_array[43], bytes_array[42], bytes_array[41], bytes_array[40], bytes_array[39],
-        bytes_array[38], bytes_array[37], bytes_array[36], bytes_array[35], bytes_array[34],
-        bytes_array[33], bytes_array[32], bytes_array[31], bytes_array[30], bytes_array[29],
-        bytes_array[28], bytes_array[27], bytes_array[26], bytes_array[25], bytes_array[24],
-        bytes_array[23], bytes_array[22], bytes_array[21], bytes_array[20], bytes_array[19],
-        bytes_array[18], bytes_array[17], bytes_array[16], bytes_array[15], bytes_array[14],
-        bytes_array[13], bytes_array[12], bytes_array[11], bytes_array[10], bytes_array[9],
-        bytes_array[8], bytes_array[7], bytes_array[6], bytes_array[5], bytes_array[4],
-        bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]);
+                return _mm512_set_epi8(
+                    bytes_array[63], bytes_array[62], bytes_array[61], bytes_array[60], bytes_array[59],
+                    bytes_array[58], bytes_array[57], bytes_array[56], bytes_array[55], bytes_array[54],
+                    bytes_array[53], bytes_array[52], bytes_array[51], bytes_array[50], bytes_array[49],
+                    bytes_array[48], bytes_array[47], bytes_array[46], bytes_array[45], bytes_array[44],
+                    bytes_array[43], bytes_array[42], bytes_array[41], bytes_array[40], bytes_array[39],
+                    bytes_array[38], bytes_array[37], bytes_array[36], bytes_array[35], bytes_array[34],
+                    bytes_array[33], bytes_array[32], bytes_array[31], bytes_array[30], bytes_array[29],
+                    bytes_array[28], bytes_array[27], bytes_array[26], bytes_array[25], bytes_array[24],
+                    bytes_array[23], bytes_array[22], bytes_array[21], bytes_array[20], bytes_array[19],
+                    bytes_array[18], bytes_array[17], bytes_array[16], bytes_array[15], bytes_array[14],
+                    bytes_array[13], bytes_array[12], bytes_array[11], bytes_array[10], bytes_array[9],
+                    bytes_array[8], bytes_array[7], bytes_array[6], bytes_array[5], bytes_array[4],
+                    bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]);
 #endif
-    }
+            }
 
-    template<class A>
-    batch<uint8_t, A> shorts_array_to_batch(batch<uint8_t, A>&, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<avx512f>) {
+            template<class A, class It, class T, enable_short_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx512_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                std::vector<short> shorts_array(i_size);
+
+                for(int i = 0; i < i_size; i++) {
+                    shorts_array[i] = *(begin + i);
+                }
 #if defined(__GNUC__)
-      return __extension__ (__m512i)(__v32hi)
-      {
-        shorts_array[31], shorts_array[30], shorts_array[29], shorts_array[28], shorts_array[27],
-        shorts_array[26], shorts_array[25], shorts_array[24], shorts_array[23], shorts_array[22],
-        shorts_array[21], shorts_array[20], shorts_array[19], shorts_array[18], shorts_array[17],
-        shorts_array[16], shorts_array[15], shorts_array[14], shorts_array[13], shorts_array[12],
-        shorts_array[11], shorts_array[10], shorts_array[9],  shorts_array[8], shorts_array[7],
-        shorts_array[6], shorts_array[5], shorts_array[4], shorts_array[3], shorts_array[2],
-        shorts_array[1], shorts_array[0]
-      };
+                return __extension__ (__m512i)(__v32hi) {
+                    shorts_array[31], shorts_array[30], shorts_array[29], shorts_array[28], shorts_array[27],
+                    shorts_array[26], shorts_array[25], shorts_array[24], shorts_array[23], shorts_array[22],
+                    shorts_array[21], shorts_array[20], shorts_array[19], shorts_array[18], shorts_array[17],
+                    shorts_array[16], shorts_array[15], shorts_array[14], shorts_array[13], shorts_array[12],
+                    shorts_array[11], shorts_array[10], shorts_array[9],  shorts_array[8], shorts_array[7],
+                    shorts_array[6], shorts_array[5], shorts_array[4], shorts_array[3], shorts_array[2],
+                    shorts_array[1], shorts_array[0]
+                };
 #else
-      return _mm512_set_epi16(
-        shorts_array[31], shorts_array[30], shorts_array[29], shorts_array[28], shorts_array[27],
-        shorts_array[26], shorts_array[25], shorts_array[24], shorts_array[23], shorts_array[22],
-        shorts_array[21], shorts_array[20], shorts_array[19], shorts_array[18], shorts_array[17],
-        shorts_array[16], shorts_array[15], shorts_array[14], shorts_array[13], shorts_array[12],
-        shorts_array[11], shorts_array[10], shorts_array[9],  shorts_array[8], shorts_array[7],
-        shorts_array[6], shorts_array[5], shorts_array[4], shorts_array[3], shorts_array[2],
-        shorts_array[1], shorts_array[0]);
+                return _mm512_set_epi16(
+                    shorts_array[31], shorts_array[30], shorts_array[29], shorts_array[28], shorts_array[27],
+                    shorts_array[26], shorts_array[25], shorts_array[24], shorts_array[23], shorts_array[22],
+                    shorts_array[21], shorts_array[20], shorts_array[19], shorts_array[18], shorts_array[17],
+                    shorts_array[16], shorts_array[15], shorts_array[14], shorts_array[13], shorts_array[12],
+                    shorts_array[11], shorts_array[10], shorts_array[9],  shorts_array[8], shorts_array[7],
+                    shorts_array[6], shorts_array[5], shorts_array[4], shorts_array[3], shorts_array[2],
+                    shorts_array[1], shorts_array[0]);
 #endif
+            }
+
+            template<class A, class It, class T, enable_int_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx512_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                std::vector<int> words_array(i_size);
+
+                for(int i = 0; i < i_size; i++) {
+                    words_array[i] = *(begin + i);
+                }
+                return _mm512_set_epi32(
+                    words_array[15], words_array[14], words_array[13], words_array[12],
+                    words_array[11], words_array[10], words_array[9],  words_array[8],
+                    words_array[7], words_array[6], words_array[5], words_array[4],
+                    words_array[3], words_array[2], words_array[1], words_array[0]);
+            }
+
+            template<class A, class It, class T, enable_long_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx512_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                std::vector<long> longs_array(i_size);
+
+                for(int i = 0; i < i_size; i++) {
+                    longs_array[i] = *(begin + i);
+                }
+                return _mm512_set_epi64(
+                    longs_array[7], longs_array[6], longs_array[5], longs_array[4],
+                    longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
+            }
+        }
+        template <class A, class It, class T>
+        batch<T, A> array_to_batch(batch<T, A>& bt, It begin, It end, requires_arch<avx512f>) {
+           return detail::array_to_batch_avx512_impl(bt, begin, end);
+        }
+
     }
 
-    template<class A>
-    batch<uint8_t, A> words_array_to_batch(batch<uint8_t, A>&, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<avx512f>) {
-      return _mm512_set_epi32(
-        words_array[15], words_array[14], words_array[13], words_array[12],
-        words_array[11], words_array[10], words_array[9],  words_array[8],
-        words_array[7], words_array[6], words_array[5], words_array[4],
-        words_array[3], words_array[2], words_array[1], words_array[0]);
-    }
-
-    template<class A>
-    batch<uint8_t, A> longs_array_to_batch(batch<uint8_t, A>&, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<avx512f>) {
-      return _mm512_set_epi64(
-        longs_array[7], longs_array[6], longs_array[5], longs_array[4],
-        longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
-    }
-
-  }
 }
 
 #endif

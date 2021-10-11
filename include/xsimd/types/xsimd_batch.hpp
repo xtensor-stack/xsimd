@@ -49,7 +49,10 @@ namespace xsimd
         explicit batch(batch_bool_type const& b);
         batch(register_type reg);
 
-        template <class U>
+        template <class It>
+        batch(It b, It e);
+
+        template<class U>
         static XSIMD_NO_DISCARD batch broadcast(U val);
 
         // memory operators
@@ -422,6 +425,13 @@ namespace xsimd
     inline XSIMD_NO_DISCARD batch<T, A> batch<T, A>::broadcast(U val)
     {
         return batch(static_cast<T>(val));
+    }
+
+    template <class T, class A>
+    template <class It>
+    batch<T, A>::batch(It b, It e)
+        : batch(kernel::array_to_batch<A>(batch{}, b, e, A{}))
+    {
     }
 
     /**************************

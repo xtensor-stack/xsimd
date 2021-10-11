@@ -1243,48 +1243,89 @@ namespace xsimd
             return _mm256_unpacklo_pd(self, other);
         }
 
-    }
-    template<class A> batch<float, A> zip_lo(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) {
-      return _mm256_unpacklo_ps(self, other);
-    }
-    template<class A> batch<double, A> zip_lo(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx>) {
-      return _mm256_unpacklo_pd(self, other);
-    }
+        // array_to_batch
+        namespace detail {
+            template <class T>
+            using enable_char_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 1, int8_t>::type;
+            template <class T>
+            using enable_short_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 2, int16_t>::type;
+            template <class T>
+            using enable_int_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 4, int32_t>::type;
+            template <class T>
+            using enable_long_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                          sizeof(T) == 8, int64_t>::type;
 
-    // array_to_batch
-    template<class A>
-    batch<uint8_t, A> bytes_array_to_batch(batch<uint8_t, A>&, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<avx>) {
-      return _mm256_set_epi8(
-        bytes_array[31], bytes_array[30], bytes_array[29], bytes_array[28], bytes_array[27],
-        bytes_array[26], bytes_array[25], bytes_array[24], bytes_array[23], bytes_array[22],
-        bytes_array[21], bytes_array[20], bytes_array[19], bytes_array[18], bytes_array[17],
-        bytes_array[16], bytes_array[15], bytes_array[14], bytes_array[13], bytes_array[12],
-        bytes_array[11], bytes_array[10], bytes_array[9], bytes_array[8], bytes_array[7],
-        bytes_array[6], bytes_array[5], bytes_array[4], bytes_array[3], bytes_array[2],
-        bytes_array[1], bytes_array[0]);
-    }
+            template<class A, class It, class T, enable_char_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                //int8_t bytes_array[i_size];
+                std::vector<char> bytes_array(i_size);
 
-    template<class A>
-    batch<uint8_t, A> shorts_array_to_batch(batch<uint8_t, A>&, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<avx>) {
-      return _mm256_set_epi16(
-        shorts_array[15], shorts_array[14], shorts_array[13], shorts_array[12],
-        shorts_array[11], shorts_array[10], shorts_array[9], shorts_array[8],
-        shorts_array[7], shorts_array[6], shorts_array[5], shorts_array[4],
-        shorts_array[3], shorts_array[2], shorts_array[1], shorts_array[0]);
-    }
+                for(int i = 0; i < i_size; i++) {
+                    bytes_array[i] = *(begin + i);
+                }
 
-    template<class A>
-    batch<uint8_t, A> words_array_to_batch(batch<uint8_t, A>&, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<avx>) {
-      return _mm256_set_epi32(
-        words_array[7], words_array[6], words_array[5], words_array[4],
-        words_array[3], words_array[2], words_array[1], words_array[0]);
-    }
+                return _mm256_set_epi8(
+                    bytes_array[31], bytes_array[30], bytes_array[29], bytes_array[28], bytes_array[27],
+                    bytes_array[26], bytes_array[25], bytes_array[24], bytes_array[23], bytes_array[22],
+                    bytes_array[21], bytes_array[20], bytes_array[19], bytes_array[18], bytes_array[17],
+                    bytes_array[16], bytes_array[15], bytes_array[14], bytes_array[13], bytes_array[12],
+                    bytes_array[11], bytes_array[10], bytes_array[9], bytes_array[8], bytes_array[7],
+                    bytes_array[6], bytes_array[5], bytes_array[4], bytes_array[3], bytes_array[2],
+                    bytes_array[1], bytes_array[0]);
+            }
 
-    template<class A>
-    batch<uint8_t, A> longs_array_to_batch(batch<uint8_t, A>&, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<avx>) {
-      return _mm256_set_epi64x(longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
+            template<class A, class It, class T, enable_short_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                //int16_t shorts_array[i_size];
+                std::vector<short> shorts_array(i_size);
+
+                for(int i = 0; i < i_size; i++) {
+                    shorts_array[i] = *(begin + i);
+                }
+                return _mm256_set_epi16(
+                    shorts_array[15], shorts_array[14], shorts_array[13], shorts_array[12],
+                    shorts_array[11], shorts_array[10], shorts_array[9], shorts_array[8],
+                    shorts_array[7], shorts_array[6], shorts_array[5], shorts_array[4],
+                    shorts_array[3], shorts_array[2], shorts_array[1], shorts_array[0]);
+            }
+
+            template<class A, class It, class T, enable_int_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                //int32_t words_array[i_size];
+                std::vector<int> words_array(i_size);
+
+                for(int i = 0; i < i_size; i++) {
+                    words_array[i] = *(begin + i);
+                }
+                return _mm256_set_epi32(
+                    words_array[7], words_array[6], words_array[5], words_array[4],
+                    words_array[3], words_array[2], words_array[1], words_array[0]);
+            }
+
+            template<class A, class It, class T, enable_long_sized_t<T> = 0>
+            batch<T, A> array_to_batch_avx_impl(batch<T, A>&, It begin, It end) {
+                const int i_size = std::distance(begin, end);
+                //int64_t longs_array[i_size];
+                std::vector<long> longs_array(i_size);
+
+                for(int i = 0; i < i_size; i++) {
+                    longs_array[i] = *(begin + i);
+                }
+                return _mm256_set_epi64x(longs_array[3], longs_array[2], longs_array[1], longs_array[0]);
+            }
+        }
+        template <class A, class It, class T>
+        batch<T, A> array_to_batch(batch<T, A>& bt, It begin, It end, requires_arch<avx>) {
+            return detail::array_to_batch_avx_impl(bt, begin, end);
+       }
+
     }
-  }
 
 }
 

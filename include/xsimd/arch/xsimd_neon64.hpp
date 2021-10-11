@@ -722,42 +722,69 @@ namespace xsimd
         /******************
          * array to batch *
          ******************/
+        namespace detail {
+            template <class T>
+            using enable_char_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                                sizeof(T) == 1, int8_t>::type;
+            template <class T>
+            using enable_short_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                                 sizeof(T) == 2, int16_t>::type;
+            template <class T>
+            using enable_int_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                               sizeof(T) == 4, int32_t>::type;
+            template <class T>
+            using enable_long_sized_t = typename std::enable_if<std::is_integral<T>::value &&
+                                                                sizeof(T) == 8, int64_t>::type;
 
-        template <class A>
-        batch<uint8_t, A> bytes_array_to_batch(batch<uint8_t, A>&, std::array<int8_t, batch<int8_t>::size>& bytes_array, requires_arch<neon64>)
-        {
-            int8_t bytes_buf[16] = {
-                bytes_array[0], bytes_array[1], bytes_array[2], bytes_array[3],
-                bytes_array[4], bytes_array[5], bytes_array[6], bytes_array[7],
-                bytes_array[8], bytes_array[9], bytes_array[10], bytes_array[11],
-                bytes_array[12], bytes_array[13], bytes_array[14], bytes_array[15]};
+            template<class A, class It, class T, enable_char_sized_t<T> = 0>
+            batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
+            {
+                int i_size = std::distance(begin, end);
+                uint8_t bytes_array[i_size];
 
-            return vreinterpretq_u8_s8(vld1q_s8(bytes_buf));
+                for(int i = 0; i < i_size; i++)
+                {
+                    bytes_array[i] = *(begin + i);
+                }
+                return vld1q_u8(bytes_array);
+            }
+
+            template<class A, class It, class T, enable_short_sized_t<T> = 0>
+            batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
+            {
+                int i_size = std::distance(begin, end);
+                uint16_t shorts_array[i_size];
+
+                for(int i = 0; i < i_size; i++)
+                {
+                    shorts_array[i] = *(begin + i);
+                }
+                return vld1q_u16(shorts_array);
+            }
+
+            template<class A, class It, class T, enable_int_sized_t<T> = 0>
+            batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
+            {
+                int i_size = std::distance(begin, end);
+                uint32_t words_array[i_size];
+
+                for(int i = 0; i < i_size; i++)
+                {
+                    words_array[i] = *(begin + i);
+                }
+                return vld1q_u32(words_array);
+            }
+
+            template<class A, class It, class T, enable_long_sized_t<T> = 0>
+            batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
+            {
+                return vcombine_u64(vcreate_u64(*begin), vcreate_u64(*(end - 1)));
+            }
         }
-
-        template <class A>
-        batch<uint8_t, A> shorts_array_to_batch(batch<uint8_t, A>&, std::array<int16_t, batch<int16_t>::size>& shorts_array, requires_arch<neon64>)
+        template <class A, class It, class T>
+        batch<T, A> array_to_batch(batch<T, A>& bt, It begin, It end, requires_arch<neon64>)
         {
-            int16_t shorts_buf[8] = {
-                shorts_array[0], shorts_array[1], shorts_array[2], shorts_array[3],
-                shorts_array[4], shorts_array[5], shorts_array[6], shorts_array[7]};
-
-            return vreinterpretq_u8_s16(vld1q_s16(shorts_buf));
-
-        }
-
-        template <class A>
-        batch<uint8_t, A> words_array_to_batch(batch<uint8_t, A>&, std::array<int32_t, batch<int32_t>::size>& words_array, requires_arch<neon64>)
-        {
-            int32_t words_buf[4] = {words_array[0], words_array[1], words_array[2], words_array[3]};
-            return vreinterpretq_u8_s32(vld1q_s32(words_buf));
-        }
-
-        template <class A>
-        batch<uint8_t, A> longs_array_to_batch(batch<uint8_t, A>&, std::array<int64_t, batch<int64_t>::size>& longs_array, requires_arch<neon64>)
-        {
-            return vreinterpretq_u8_s64(
-                vcombine_s64(vcreate_s64(longs_array[0]), vcreate_s64(longs_array[1])));
+            return detail::array_to_batch_neon64_impl(bt, begin, end);
         }
 
         /****************
@@ -948,7 +975,6 @@ namespace xsimd
         {
             return !(arg == arg);
         }
-
     }
 }
 
