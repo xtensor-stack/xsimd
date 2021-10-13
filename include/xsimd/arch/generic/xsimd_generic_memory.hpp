@@ -70,10 +70,6 @@ namespace xsimd {
     batch<T_out, A> load_aligned(T_in const* mem, convert<T_out> cvt, requires_arch<generic>) {
       return detail::load_aligned<A>(mem, cvt, A{}, detail::conversion_type<A, T_in, T_out>{});
     }
-    template<class A, class T>
-    batch<std::complex<T>, A> load_aligned(std::complex<T> const* mem, convert<std::complex<T>>, requires_arch<generic>) {
-      return batch<std::complex<T>, A>::load_aligned(mem);
-    }
 
     // load_unaligned
     namespace detail {
@@ -93,10 +89,6 @@ namespace xsimd {
     template<class A, class T_in, class T_out>
     batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out> cvt, requires_arch<generic>) {
       return detail::load_unaligned<A>(mem, cvt, generic{}, detail::conversion_type<A, T_in, T_out>{});
-    }
-    template<class A, class T>
-    batch<std::complex<T>, A> load_unaligned(std::complex<T> const* mem, convert<std::complex<T>>, requires_arch<generic>) {
-      return batch<std::complex<T>, A>::load_unaligned(mem);
     }
 
     // store
@@ -147,39 +139,43 @@ namespace xsimd {
     }
 
     // load_complex_aligned
-    template <class A, class T> batch<std::complex<T>, A> load_complex_aligned(std::complex<T> const* mem, requires_arch<generic>) {
-      using real_batch = batch<T, A>;
-      T const *buffer = reinterpret_cast<T const *>(mem);
+    template <class A, class T_out, class T_in>
+    batch<std::complex<T_out>, A> load_complex_aligned(std::complex<T_in> const* mem, convert<std::complex<T_out>>, requires_arch<generic>) {
+      using real_batch = batch<T_out, A>;
+      T_in const* buffer = reinterpret_cast<T_in const*>(mem);
       real_batch hi = real_batch::load_aligned(buffer),
                  lo = real_batch::load_aligned(buffer + real_batch::size);
       return detail::load_complex(hi, lo, A{});
     }
 
     // load_complex_unaligned
-    template <class A, class T> batch<std::complex<T>, A> load_complex_unaligned(std::complex<T> const* mem, requires_arch<generic>) {
-      using real_batch = batch<T, A>;
-      T const *buffer = reinterpret_cast<T const *>(mem);
+    template <class A, class T_out, class T_in>
+    batch<std::complex<T_out>, A> load_complex_unaligned(std::complex<T_in> const* mem, convert<std::complex<T_out>> ,requires_arch<generic>) {
+      using real_batch = batch<T_out, A>;
+      T_in const* buffer = reinterpret_cast<T_in const*>(mem);
       real_batch hi = real_batch::load_unaligned(buffer),
                  lo = real_batch::load_unaligned(buffer + real_batch::size);
       return detail::load_complex(hi, lo, A{});
     }
 
     // store_complex_aligned
-    template <class A, class T> void store_complex_aligned(std::complex<T>* dst, batch<std::complex<T>, A> const& src, requires_arch<generic>) {
-        using real_batch = batch<T, A>;
+    template <class A, class T_out, class T_in>
+    void store_complex_aligned(std::complex<T_out>* dst, batch<std::complex<T_in>, A> const& src, requires_arch<generic>) {
+        using real_batch = batch<T_in, A>;
         real_batch hi = detail::complex_high(src, A{});
         real_batch lo = detail::complex_low(src, A{});
-        T * buffer = reinterpret_cast<T*>(dst);
+        T_out* buffer = reinterpret_cast<T_out*>(dst);
         lo.store_aligned(buffer);
         hi.store_aligned(buffer + real_batch::size);
     }
 
     // store_compelx_unaligned
-    template <class A, class T> void store_complex_unaligned(std::complex<T>* dst, batch<std::complex<T>, A> const& src, requires_arch<generic>) {
-        using real_batch = batch<T, A>;
+    template <class A, class T_out, class T_in>
+    void store_complex_unaligned(std::complex<T_out>* dst, batch<std::complex<T_in>, A> const& src, requires_arch<generic>) {
+        using real_batch = batch<T_in, A>;
         real_batch hi = detail::complex_high(src, A{});
         real_batch lo = detail::complex_low(src, A{});
-        T * buffer = reinterpret_cast<T *>(dst);
+        T_out* buffer = reinterpret_cast<T_out*>(dst);
         lo.store_unaligned(buffer);
         hi.store_unaligned(buffer + real_batch::size);
     }

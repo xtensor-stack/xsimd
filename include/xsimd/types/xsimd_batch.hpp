@@ -952,13 +952,13 @@ namespace xsimd
     template<class T, class A>
     batch<std::complex<T>, A> batch<std::complex<T>, A>::load_aligned(const value_type* src)
     {
-        return kernel::load_complex_aligned<A>(src, A{});
+        return kernel::load_complex_aligned<A>(src, kernel::convert<value_type>{}, A{});
     }
 
     template<class T, class A>
     batch<std::complex<T>, A> batch<std::complex<T>, A>::load_unaligned(const value_type* src)
     {
-        return kernel::load_complex_unaligned<A>(src, A{});
+        return kernel::load_complex_unaligned<A>(src, kernel::convert<value_type>{}, A{});
     }
 
     template<class T, class A>

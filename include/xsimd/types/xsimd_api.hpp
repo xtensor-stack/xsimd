@@ -18,6 +18,7 @@
 #include <ostream>
 
 #include "../types/xsimd_batch.hpp"
+#include "../types/xsimd_traits.hpp"
 #include "../arch/xsimd_isa.hpp"
 
 namespace xsimd {
@@ -321,6 +322,23 @@ batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& x) {
 template<class T, class A=default_arch>
 batch<T, A> broadcast(T v) {
   return kernel::broadcast<A>(v, A{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Creates a batch from the single value \c v and
+ * the specified batch value type \c To.
+ * @param v the value used to initialize the batch
+ * @return a new batch instance
+ */
+template <class To, class A=default_arch, class From>
+simd_return_type<From, To> broadcast_as(From v) {
+    using batch_value_type = typename simd_return_type<From, To>::value_type;
+    using value_type = typename std::conditional<std::is_same<From, bool>::value,
+                                                 bool,
+                                                 batch_value_type>::type;
+    return simd_return_type<From, To>(value_type(v));
 }
 
 /**
@@ -960,6 +978,58 @@ batch<From, A> load_unaligned(From const* ptr) {
 }
 
 /**
+ * @ingroup batch_data_transfer
+ *
+ * Creates a batch from the buffer \c ptr and the specifed
+ * batch value type \c To. The memory needs to be aligned.
+ * @param ptr the memory buffer to read
+ * @return a new batch instance
+ */
+template <class To, class A=default_arch, class From>
+simd_return_type<From, To> load_as(From const* ptr, aligned_mode) {
+  using batch_value_type = typename simd_return_type<From, To>::value_type;
+  return kernel::load_aligned<A>(ptr, kernel::convert<batch_value_type>{}, A{});
+}
+
+template <class To, class A = default_arch>
+simd_return_type<bool, To> load_as(bool const* ptr, aligned_mode) {
+  return simd_return_type<bool, To>::load_aligned(ptr);
+}
+
+template <class To, class A=default_arch, class From>
+simd_return_type<std::complex<From>, To> load_as(std::complex<From> const* ptr, aligned_mode)
+{
+  using batch_value_type = typename simd_return_type<std::complex<From>, To>::value_type;
+  return kernel::load_complex_aligned<A>(ptr, kernel::convert<batch_value_type>{}, A{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Creates a batch from the buffer \c ptr and the specifed
+ * batch value type \c To. The memory does not need to be aligned.
+ * @param ptr the memory buffer to read
+ * @return a new batch instance
+ */
+template <class To, class A=default_arch, class From>
+simd_return_type<From, To> load_as(From const* ptr, unaligned_mode) {
+  using batch_value_type = typename simd_return_type<From, To>::value_type;
+  return kernel::load_unaligned<A>(ptr, kernel::convert<batch_value_type>{}, A{});
+}
+
+template <class To, class A = default_arch>
+simd_return_type<bool, To> load_as(bool const* ptr, unaligned_mode) {
+  return simd_return_type<bool, To>::load_unaligned(ptr);
+}
+
+template <class To, class A=default_arch, class From>
+simd_return_type<std::complex<From>, To> load_as(std::complex<From> const* ptr, unaligned_mode)
+{
+  using batch_value_type = typename simd_return_type<std::complex<From>, To>::value_type;
+  return kernel::load_complex_unaligned<A>(ptr, kernel::convert<batch_value_type>{}, A{});
+}
+
+/**
  * @ingroup batch_math
  *
  * Computes the natural logarithm of the batch \c x.
@@ -1423,8 +1493,8 @@ auto ssub(T const& x, Tp const& y) -> decltype(x - y) {
  * @param mem the memory buffer to write to
  * @param val the batch to copy from
  */
-template<class To, class A, class From>
-void store(From* mem, batch<To, A> const& val, aligned_mode={}) {
+template<class A, class T>
+void store(T* mem, batch<T, A> const& val, aligned_mode={}) {
   return kernel::store_aligned<A>(mem, val, A{});
 }
 
@@ -1436,8 +1506,8 @@ void store(From* mem, batch<To, A> const& val, aligned_mode={}) {
  * @param mem the memory buffer to write to
  * @param val the batch to copy from
  */
-template<class To, class A, class From>
-void store(To* mem, batch<From, A> const& val, unaligned_mode) {
+template<class A, class T>
+void store(T* mem, batch<T, A> const& val, unaligned_mode) {
   return kernel::store_unaligned<A>(mem, val, A{});
 }
 
@@ -1449,8 +1519,8 @@ void store(To* mem, batch<From, A> const& val, unaligned_mode) {
  * @param mem the memory buffer to write to
  * @param val the batch to copy from
  */
-template<class To, class A, class From>
-void store_aligned(To* mem, batch<From, A> const& val) {
+template<class A, class T>
+void store_aligned(T* mem, batch<T, A> const& val) {
   return kernel::store_aligned<A>(mem, val, A{});
 }
 
@@ -1462,11 +1532,82 @@ void store_aligned(To* mem, batch<From, A> const& val) {
  * @param mem the memory buffer to write to
  * @param val the batch to copy
  */
-template<class To, class A, class From>
-void store_unaligned(To* mem, batch<From, A> const& val) {
+template<class A, class T>
+void store_unaligned(T* mem, batch<T, A> const& val) {
   return kernel::store_unaligned<A>(mem, val, A{});
 }
 
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Copy content of batch \c src to the buffer \c dst. The
+ * memory needs to be aligned.
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy
+ */
+template <class To, class A=default_arch, class From>
+void store_as(To* dst, batch<From, A> const& src, aligned_mode) {
+  kernel::store_aligned(dst, src, A{});
+}
+
+template <class A=default_arch, class From>
+void store_as(bool* dst, batch_bool<From, A> const& src, aligned_mode) {
+  kernel::store(src, dst, A{});
+}
+
+template <class To, class A=default_arch, class From>
+void store_as(std::complex<To>* dst, batch<std::complex<From>,A> const& src, aligned_mode) {
+  kernel::store_complex_aligned(dst, src, A{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Copy content of batch \c src to the buffer \c dst. The
+ * memory does not need to be aligned.
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy
+ */
+template <class To, class A=default_arch, class From>
+void store_as(To* dst, batch<From, A> const& src, unaligned_mode) {
+  kernel::store_unaligned(dst, src, A{});
+}
+
+template <class A=default_arch, class From>
+void store_as(bool* dst, batch_bool<From, A> const& src, unaligned_mode) {
+  kernel::store(src, dst, A{});
+}
+
+template <class To, class A=default_arch, class From>
+void store_as(std::complex<To>* dst, batch<std::complex<From>, A> const& src, unaligned_mode) {
+  kernel::store_complex_unaligned(dst, src, A{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Copy content of batch of boolean \c src to the buffer \c dst. The
+ * memory needs to be aligned.
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy
+ */
+template <class To, class A=default_arch, class From>
+void store_batch(To* dst, batch_bool<From, A> const& src, aligned_mode) {
+  kernel::store(src, dst, A{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Copy content of batch of boolean \c src to the buffer \c dst. The
+ * memory does not need to be aligned.
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy
+ */
+template <class To, class A=default_arch, class From>
+void store_batch(To* dst, batch_bool<From, A> const& src, unaligned_mode) {
+  kernel::store(src, dst, A{});
+}
 /**
  * @ingroup batch_arithmetic
  *

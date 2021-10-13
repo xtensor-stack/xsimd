@@ -123,6 +123,12 @@ private:
 
         b = batch_type::load_aligned(v.data());
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned");
+
+        b = xsimd::load_as<value_type>(v.data(), xsimd::unaligned_mode());
+        EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " unaligned (load_as)");
+
+        b = xsimd::load_as<value_type>(v.data(), xsimd::aligned_mode());
+        EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned (load_as)");
     }
 
     template <class V>
@@ -136,6 +142,12 @@ private:
 
         b.store_aligned(res.data());
         EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " aligned");
+
+        xsimd::store_as(res.data(), b, xsimd::unaligned_mode());
+        EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " unaligned (store_as)");
+
+        xsimd::store_as(res.data(), b, xsimd::aligned_mode());
+        EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " aligned (store_as)");
     }
 
     template <class V>

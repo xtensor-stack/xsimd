@@ -14,7 +14,7 @@
 
 #include <type_traits>
 
-#include "xsimd_api.hpp"
+#include "xsimd_batch.hpp"
 
 namespace xsimd
 {
