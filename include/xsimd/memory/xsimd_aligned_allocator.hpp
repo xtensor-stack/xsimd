@@ -12,8 +12,6 @@
 #ifndef XSIMD_ALIGNED_ALLOCATOR_HPP
 #define XSIMD_ALIGNED_ALLOCATOR_HPP
 
-#include "../config/xsimd_arch.hpp"
-
 #include <algorithm>
 #include <cstddef>
 #include <utility>
@@ -25,6 +23,8 @@
 
 #include <cassert>
 #include <memory>
+
+#include "../config/xsimd_arch.hpp"
 
 namespace xsimd
 {

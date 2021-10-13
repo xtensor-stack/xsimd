@@ -12,8 +12,10 @@
 #ifndef XSIMD_GENERIC_ARITHMETIC_HPP
 #define XSIMD_GENERIC_ARITHMETIC_HPP
 
-#include "./xsimd_generic_details.hpp"
+#include <complex>
+#include <type_traits>
 
+#include "./xsimd_generic_details.hpp"
 
 namespace xsimd {
 

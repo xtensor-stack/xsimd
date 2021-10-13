@@ -12,6 +12,10 @@
 #ifndef XSIMD_GENERIC_MEMORY_HPP
 #define XSIMD_GENERIC_MEMORY_HPP
 
+#include <algorithm>
+#include <complex>
+#include <stdexcept>
+
 #include "./xsimd_generic_details.hpp"
 
 

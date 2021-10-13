@@ -13,14 +13,16 @@
 #define XSIMD_SCALAR_HPP
 
 #include <cmath>
+#include <complex>
 #include <limits>
+#include <type_traits>
 
 namespace xsimd
 {
 
     using std::abs;
 
-using std::acos;
+    using std::acos;
     using std::acosh;
     using std::asin;
     using std::asinh;

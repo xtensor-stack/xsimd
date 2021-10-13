@@ -12,6 +12,8 @@
 #ifndef XSIMD_GENERIC_MATH_HPP
 #define XSIMD_GENERIC_MATH_HPP
 
+#include <type_traits>
+
 #include "./xsimd_generic_details.hpp"
 #include "./xsimd_generic_trigo.hpp"
 #include "../xsimd_scalar.hpp"
