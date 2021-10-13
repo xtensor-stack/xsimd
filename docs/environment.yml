@@ -5,3 +5,4 @@ channels:
 
 dependencies:
   - breathe==4.25.1
+  - doxygen==1.9.1
