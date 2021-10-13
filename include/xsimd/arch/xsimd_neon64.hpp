@@ -18,6 +18,7 @@
 
 #include "../types/xsimd_neon64_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "xsimd_neon_dispatcher.hpp"
 
 namespace xsimd
 {
@@ -779,8 +780,8 @@ namespace xsimd
 
         #define WRAP_CAST(SUFFIX, TYPE)                                                                               \
             namespace wrap {                                                                                          \
-                inline float64x2_t vreinterpretq_f64_##SUFFIX(TYPE a) { return ::vreinterpretq_f64_##SUFFIX(a); }     \
-                inline TYPE vreinterpretq_##SUFFIX##_f64(float64x2_t a) { return ::vreinterpretq_##SUFFIX##_f64(a); } \
+                inline float64x2_t _vreinterpretq_f64_##SUFFIX(TYPE a) { return vreinterpretq_f64_##SUFFIX(a); }      \
+                inline TYPE _vreinterpretq_##SUFFIX##_f64(float64x2_t a) { return vreinterpretq_##SUFFIX##_f64(a); }  \
             }
 
         WRAP_CAST(u8, uint8x16_t)
@@ -798,19 +799,13 @@ namespace xsimd
         template <class A, class T>
         batch<double, A> bitwise_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<neon64>)
         {
-            using caster_type = detail::bitwise_caster_impl<float64x2_t,
-                                                            uint8x16_t, int8x16_t,
-                                                            uint16x8_t, int16x8_t,
-                                                            uint32x4_t, int32x4_t,
-                                                            uint64x2_t, int64x2_t,
-                                                            float32x4_t>;
-            const caster_type caster = {
-                std::make_tuple(wrap::vreinterpretq_f64_u8,  wrap::vreinterpretq_f64_s8,  wrap::vreinterpretq_f64_u16, wrap::vreinterpretq_f64_s16,
-                                wrap::vreinterpretq_f64_u32, wrap::vreinterpretq_f64_s32, wrap::vreinterpretq_f64_u64, wrap::vreinterpretq_f64_s64,
-                                wrap::vreinterpretq_f64_f32)
-            };
             using register_type = typename batch<T, A>::register_type;
-            return caster.apply(register_type(arg));
+            register_type result;
+            NEON_DISPATCHER_UNARY(wrap::_vreinterpretq_f64_u8,  wrap::_vreinterpretq_f64_s8,  wrap::_vreinterpretq_f64_u16,
+                                  wrap::_vreinterpretq_f64_s16, wrap::_vreinterpretq_f64_u32, wrap::_vreinterpretq_f64_s32,
+                                  wrap::_vreinterpretq_f64_u64, wrap::_vreinterpretq_f64_s64, wrap::_vreinterpretq_f64_f32,
+                                  T, register_type(arg), result);
+            return result;
         }
 
         namespace detail
@@ -834,20 +829,13 @@ namespace xsimd
         template <class A, class R>
         batch<R, A> bitwise_cast(batch<double, A> const& arg, batch<R, A> const&, requires_arch<neon64>)
         {
-            using caster_type = detail::bitwise_caster_neon64<float64x2_t,
-                                                              uint8x16_t, int8x16_t,
-                                                              uint16x8_t, int16x8_t,
-                                                              uint32x4_t, int32x4_t,
-                                                              uint64x2_t, int64x2_t,
-                                                              float32x4_t>;
-            const caster_type caster = {
-                std::make_tuple(wrap::vreinterpretq_u8_f64,  wrap::vreinterpretq_s8_f64,  wrap::vreinterpretq_u16_f64, wrap::vreinterpretq_s16_f64,
-                                wrap::vreinterpretq_u32_f64, wrap::vreinterpretq_s32_f64, wrap::vreinterpretq_u64_f64, wrap::vreinterpretq_s64_f64,
-                                wrap::vreinterpretq_f32_f64)
-            };
             using src_register_type = typename batch<double, A>::register_type;
             using dst_register_type = typename batch<R, A>::register_type;
-            return caster.apply<dst_register_type>(src_register_type(arg));
+            src_register_type result;
+            NEON_DISPATCHER_UNARY(wrap::_vreinterpretq_u8_f64,  wrap::_vreinterpretq_s8_f64,  wrap::_vreinterpretq_u16_f64, wrap::_vreinterpretq_s16_f64,
+                                     wrap::_vreinterpretq_u32_f64, wrap::_vreinterpretq_s32_f64, wrap::_vreinterpretq_u64_f64, wrap::_vreinterpretq_s64_f64,
+                                     wrap::_vreinterpretq_f32_f64, R, src_register_type(arg), result);
+            return dst_register_type(result);
         }
 
         template <class A>

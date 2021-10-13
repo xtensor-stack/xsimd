@@ -150,6 +150,37 @@ namespace xsimd
             : detail::neon_bool_simd_register<T, neon>
         {
         };
+
+        // Few macros and function to support MSVC
+        #if defined(_MSC_VER) && !defined(__clang__)
+            #define INITIALIZER_LIST_TO_NEON_VECTOR(T, args) (neon_vector_initializer_constructor<T>(args))
+            // Convert an initialiser list to neon vector type 
+            // Note: MSVC does not provide a initialiser_list constructor for neon vector type.
+            template<class S, class T>
+            S neon_vector_initializer_constructor(std::initializer_list<T> data){
+                S target;
+                if (std::is_signed<T>::value) {
+                    switch(data.size()) {
+                        case 16: std::copy(data.begin(), data.end(), target.n128_i8); break;
+                        case 8:  std::copy(data.begin(), data.end(), target.n128_i16); break;
+                        case 4:  std::copy(data.begin(), data.end(), target.n128_i32); break;
+                        case 2:  std::copy(data.begin(), data.end(), target.n128_i64); break;
+                    }
+                } else {
+                    switch(data.size()) {
+                        case 16: std::copy(data.begin(), data.end(), target.n128_u8); break;
+                        case 8:  std::copy(data.begin(), data.end(), target.n128_u16); break;
+                        case 4:  std::copy(data.begin(), data.end(), target.n128_u32); break;
+                        case 2:  std::copy(data.begin(), data.end(), target.n128_u64); break;
+                    }
+                }
+                return target;
+            }
+            #define REINTERPRET_CAST(T, R) (R)
+        #else
+            #define INITIALIZER_LIST_TO_NEON_VECTOR(T, args) (T args)
+            #define REINTERPRET_CAST(T, R) reinterpret_cast<T>(R)
+        #endif
         
     }
 #endif
