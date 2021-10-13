@@ -9,7 +9,7 @@ batch_bool
 
 .. _xsimd-batch-bool-ref:
 
-.. doxygenstruct:: xsimd::batch_bool
+.. doxygenclass:: xsimd::batch_bool
    :project: xsimd
    :members:
 
