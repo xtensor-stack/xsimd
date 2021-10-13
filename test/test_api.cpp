@@ -123,10 +123,10 @@ private:
         batch_type b = batch_type::load(v.data(), xsimd::aligned_mode());
         V res(size);
 
-        xsimd::store(res.data(), b, xsimd::unaligned_mode());
+        xsimd::store_as(res.data(), b, xsimd::unaligned_mode());
         EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " unaligned");
 
-        xsimd::store(res.data(), b, xsimd::aligned_mode());
+        xsimd::store_as(res.data(), b, xsimd::aligned_mode());
         EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " aligned");
     }
 

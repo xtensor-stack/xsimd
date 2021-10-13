@@ -163,7 +163,7 @@ namespace xsimd
          ****************/
 
         template <class A>
-        batch<std::complex<double>, A> load_complex_aligned(std::complex<double> const* mem, requires_arch<neon64>)
+        batch<std::complex<double>, A> load_complex_aligned(std::complex<double> const* mem, convert<std::complex<double>>, requires_arch<neon64>)
         {
             using real_batch = batch<double, A>;
             const double* buf = reinterpret_cast<const double*>(mem);
@@ -174,9 +174,9 @@ namespace xsimd
         }
 
         template <class A>
-        batch<std::complex<double>, A> load_complex_unaligned(std::complex<double> const* mem, requires_arch<neon64>)
+        batch<std::complex<double>, A> load_complex_unaligned(std::complex<double> const* mem, convert<std::complex<double>> cvt, requires_arch<neon64>)
         {
-            return load_complex_aligned<A>(mem, A{});
+            return load_complex_aligned<A>(mem, cvt, A{});
         }
 
         /*****************
