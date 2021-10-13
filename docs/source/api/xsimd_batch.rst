@@ -9,7 +9,7 @@ batch
 
 .. _xsimd-batch-ref:
 
-.. doxygenstruct:: xsimd::batch
+.. doxygenclass:: xsimd::batch
    :project: xsimd
    :members:
 

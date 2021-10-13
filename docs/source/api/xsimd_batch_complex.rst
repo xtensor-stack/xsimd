@@ -7,7 +7,7 @@
 xsimd_batch_complex
 ===================
 
-.. doxygenstruct:: xsimd::batch< std::complex< T >, A >
+.. doxygenclass:: xsimd::batch< std::complex< T >, A >
    :project: xsimd
    :members:
 
