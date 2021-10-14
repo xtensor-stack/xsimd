@@ -630,7 +630,7 @@ namespace xsimd
         batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::neon_dispatcher::binary dispatcher =
+            const detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vaddq_u8, wrap::vaddq_s8, wrap::vaddq_u16, wrap::vaddq_s16,
                                 wrap::vaddq_u32, wrap::vaddq_s32, wrap::vaddq_u64, wrap::vaddq_s64,
@@ -649,7 +649,7 @@ namespace xsimd
         batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::neon_dispatcher::binary dispatcher =
+            const detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vqaddq_u8, wrap::vqaddq_s8, wrap::vqaddq_u16, wrap::vqaddq_s16,
                                 wrap::vqaddq_u32, wrap::vqaddq_s32, wrap::vqaddq_u64, wrap::vqaddq_s64,
@@ -669,7 +669,7 @@ namespace xsimd
         batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::neon_dispatcher::binary dispatcher =
+            const detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vsubq_u8, wrap::vsubq_s8, wrap::vsubq_u16, wrap::vsubq_s16,
                                 wrap::vsubq_u32, wrap::vsubq_s32, wrap::vsubq_u64, wrap::vsubq_s64,
@@ -688,7 +688,7 @@ namespace xsimd
         batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::neon_dispatcher::binary dispatcher =
+            const detail::neon_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vqsubq_u8, wrap::vqsubq_s8, wrap::vqsubq_u16, wrap::vqsubq_s16,
                                 wrap::vqsubq_u32, wrap::vqsubq_s32, wrap::vqsubq_u64, wrap::vqsubq_s64,
@@ -709,7 +709,7 @@ namespace xsimd
         batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_dispatcher::binary dispatcher =
+            const detail::excluding_int64_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vmulq_u8, wrap::vmulq_s8, wrap::vmulq_u16, wrap::vmulq_s16,
                                 wrap::vmulq_u32, wrap::vmulq_s32, wrap::vmulq_f32)
@@ -763,7 +763,7 @@ namespace xsimd
         batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
+            const detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vceqq_u8, wrap::vceqq_s8, wrap::vceqq_u16, wrap::vceqq_s16,
                                 wrap::vceqq_u32, wrap::vceqq_s32, wrap::vceqq_f32)
@@ -776,7 +776,7 @@ namespace xsimd
         {
             using register_type = typename batch_bool<T, A>::register_type;
             using dispatcher_type = detail::neon_comp_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary;
-            constexpr dispatcher_type dispatcher =
+            const dispatcher_type dispatcher =
             {
                 std::make_tuple(wrap::vceqq_u8, wrap::vceqq_u16, wrap::vceqq_u32)
             };
@@ -806,7 +806,7 @@ namespace xsimd
         batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
+            const detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vcltq_u8, wrap::vcltq_s8, wrap::vcltq_u16, wrap::vcltq_s16,
                                 wrap::vcltq_u32, wrap::vcltq_s32, wrap::vcltq_f32)
@@ -831,7 +831,7 @@ namespace xsimd
         batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
+            const detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vcleq_u8, wrap::vcleq_s8, wrap::vcleq_u16, wrap::vcleq_s16,
                                 wrap::vcleq_u32, wrap::vcleq_s32, wrap::vcleq_f32)
@@ -856,7 +856,7 @@ namespace xsimd
         batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
+            const detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vcgtq_u8, wrap::vcgtq_s8, wrap::vcgtq_u16, wrap::vcgtq_s16,
                                 wrap::vcgtq_u32, wrap::vcgtq_s32, wrap::vcgtq_f32)
@@ -881,7 +881,7 @@ namespace xsimd
         batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_comp_dispatcher::binary dispatcher =
+            const detail::excluding_int64_comp_dispatcher::binary dispatcher =
             {
                 std::make_tuple(wrap::vcgeq_u8, wrap::vcgeq_s8, wrap::vcgeq_u16, wrap::vcgeq_s16,
                                 wrap::vcgeq_u32, wrap::vcgeq_s32, wrap::vcgeq_f32)
@@ -912,7 +912,7 @@ namespace xsimd
             template <class V>
             V bitwise_and_neon(V const& lhs, V const& rhs)
             {
-                constexpr neon_dispatcher::binary dispatcher =
+                const neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(wrap::vandq_u8, wrap::vandq_s8, wrap::vandq_u16, wrap::vandq_s16,
                                     wrap::vandq_u32, wrap::vandq_s32, wrap::vandq_u64, wrap::vandq_s64,
@@ -953,7 +953,7 @@ namespace xsimd
             template <class V>
             V bitwise_or_neon(V const& lhs, V const& rhs)
             {
-                constexpr neon_dispatcher::binary dispatcher =
+                const neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(wrap::vorrq_u8, wrap::vorrq_s8, wrap::vorrq_u16, wrap::vorrq_s16,
                                     wrap::vorrq_u32, wrap::vorrq_s32, wrap::vorrq_u64, wrap::vorrq_s64,
@@ -994,7 +994,7 @@ namespace xsimd
             template <class V>
             V bitwise_xor_neon(V const& lhs, V const& rhs)
             {
-                constexpr neon_dispatcher::binary dispatcher =
+                const neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(wrap::veorq_u8, wrap::veorq_s8, wrap::veorq_u16, wrap::veorq_s16,
                                     wrap::veorq_u32, wrap::veorq_s32, wrap::veorq_u64, wrap::veorq_s64,
@@ -1054,7 +1054,7 @@ namespace xsimd
             template <class V>
             V bitwise_not_neon(V const& arg)
             {
-                constexpr neon_dispatcher::unary dispatcher =
+                const neon_dispatcher::unary dispatcher =
                 {
                     std::make_tuple(wrap::vmvnq_u8, wrap::vmvnq_s8, wrap::vmvnq_u16, wrap::vmvnq_s16,
                                     wrap::vmvnq_u32, wrap::vmvnq_s32,
@@ -1095,7 +1095,7 @@ namespace xsimd
             template <class V>
             V bitwise_andnot_neon(V const& lhs, V const& rhs)
             {
-                constexpr detail::neon_dispatcher::binary dispatcher =
+                const detail::neon_dispatcher::binary dispatcher =
                 {
                     std::make_tuple(wrap::vbicq_u8, wrap::vbicq_s8, wrap::vbicq_u16, wrap::vbicq_s16,
                                     wrap::vbicq_u32, wrap::vbicq_s32, wrap::vbicq_u64, wrap::vbicq_s64,
@@ -1130,7 +1130,7 @@ namespace xsimd
         batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_dispatcher::binary dispatcher = 
+            const detail::excluding_int64_dispatcher::binary dispatcher = 
             {
                 std::make_tuple(wrap::vminq_u8, wrap::vminq_s8, wrap::vminq_u16, wrap::vminq_s16,
                                 wrap::vminq_u32, wrap::vminq_s32, wrap::vminq_f32)
@@ -1155,7 +1155,7 @@ namespace xsimd
         batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_dispatcher::binary dispatcher = 
+            const detail::excluding_int64_dispatcher::binary dispatcher = 
             {
                 std::make_tuple(wrap::vmaxq_u8, wrap::vmaxq_s8, wrap::vmaxq_u16, wrap::vmaxq_s16,
                                 wrap::vmaxq_u32, wrap::vmaxq_s32, wrap::vmaxq_f32)
@@ -1202,7 +1202,7 @@ namespace xsimd
         batch<T, A> abs(batch<T, A> const& arg, requires_arch<neon>)
         {
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::excluding_int64_dispatcher::unary dispatcher = 
+            const detail::excluding_int64_dispatcher::unary dispatcher = 
             {
                 std::make_tuple(detail::abs_u8, wrap::vabsq_s8, detail::abs_u16, wrap::vabsq_s16,
                                 detail::abs_u32, wrap::vabsq_s32, wrap::vabsq_f32)
@@ -1389,7 +1389,7 @@ namespace xsimd
         {
             using bool_register_type = typename batch_bool<T, A>::register_type;
             using register_type = typename batch<T, A>::register_type;
-            constexpr detail::neon_select_dispatcher dispatcher =
+            const detail::neon_select_dispatcher dispatcher =
             {
                 std::make_tuple(wrap::vbslq_u8, wrap::vbslq_s8, wrap::vbslq_u16, wrap::vbslq_s16,
                                 wrap::vbslq_u32, wrap::vbslq_s32, wrap::vbslq_u64, wrap::vbslq_s64,
@@ -2171,7 +2171,7 @@ namespace xsimd
             };
 
             template <class R, class... T>
-            constexpr bitwise_caster_impl<R, T...> make_bitwise_caster_impl(R (*...arg)(T))
+            const bitwise_caster_impl<R, T...> make_bitwise_caster_impl(R (*...arg)(T))
             {
                 return {std::make_tuple(arg...)};
             }
@@ -2210,7 +2210,7 @@ namespace xsimd
         template <class A, class T, class R>
         batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<neon>)
         {
-            constexpr detail::neon_bitwise_caster caster = {
+            const detail::neon_bitwise_caster caster = {
                 std::make_tuple(
                 detail::make_bitwise_caster_impl(wrap::vreinterpretq_u8_u8,  wrap::vreinterpretq_u8_s8,  wrap::vreinterpretq_u8_u16, wrap::vreinterpretq_u8_s16,
                                                  wrap::vreinterpretq_u8_u32, wrap::vreinterpretq_u8_s32, wrap::vreinterpretq_u8_u64, wrap::vreinterpretq_u8_s64,
