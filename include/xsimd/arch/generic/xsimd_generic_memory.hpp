@@ -130,19 +130,19 @@ namespace xsimd {
         template <class A, class T>
         batch<std::complex<T>, A> load_complex(batch<T, A> const& /*hi*/, batch<T, A> const& /*lo*/, requires_arch<generic>)
         {
-            throw std::runtime_error("load_complex not implemented");
+            static_assert(std::is_same<T, void>::value, "load_complex not implemented for the required architecture");
         }
 
         template <class A, class T>
         batch<T, A> complex_high(batch<std::complex<T>, A> const& /*src*/, requires_arch<generic>)
         {
-            throw std::runtime_error("complex_high not implemented");
+            static_assert(std::is_same<T, void>::value, "complex_high not implemented for the required architecture");
         }
 
         template <class A, class T>
         batch<T, A> complex_low(batch<std::complex<T>, A> const& /*src*/, requires_arch<generic>)
         {
-            throw std::runtime_error("complex_low not implemented");
+            static_assert(std::is_same<T, void>::value, "complex_low not implemented for the required architecture");
         }
     }
 
