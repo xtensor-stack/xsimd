@@ -12,9 +12,8 @@
 #ifndef XSIMD_CPUID_HPP
 #define XSIMD_CPUID_HPP
 
-#include <cstring>
 #include <algorithm>
-#include <array>
+#include <cstring>
 
 #if defined(__linux__) && (defined(__ARM_NEON) || defined(_M_ARM))
 #include <sys/auxv.h>

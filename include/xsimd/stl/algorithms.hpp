@@ -12,6 +12,11 @@
 #ifndef XSIMD_ALGORITHMS_HPP
 #define XSIMD_ALGORITHMS_HPP
 
+#include <array>
+#include <cstddef>
+#include <iterator>
+#include <type_traits>
+
 #include "../types/xsimd_api.hpp"
 
 namespace xsimd

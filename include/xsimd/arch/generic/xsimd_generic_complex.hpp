@@ -12,6 +12,8 @@
 #ifndef XSIMD_GENERIC_COMPLEX_HPP
 #define XSIMD_GENERIC_COMPLEX_HPP
 
+#include <complex>
+
 #include "./xsimd_generic_details.hpp"
 
 namespace xsimd {

@@ -12,6 +12,10 @@
 #ifndef XSIMD_SSE2_HPP
 #define XSIMD_SSE2_HPP
 
+#include <complex>
+#include <limits>
+#include <type_traits>
+
 #include "../types/xsimd_sse2_register.hpp"
 
 namespace xsimd {

@@ -12,11 +12,9 @@
 #ifndef XSIMD_NUMERICAL_CONSTANT_HPP
 #define XSIMD_NUMERICAL_CONSTANT_HPP
 
-#include "../types/xsimd_utils.hpp"
-
 #include <limits>
-#include <cstring>
 
+#include "../types/xsimd_utils.hpp"
 
 namespace xsimd
 {

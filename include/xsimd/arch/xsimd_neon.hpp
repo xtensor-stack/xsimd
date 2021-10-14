@@ -12,7 +12,10 @@
 #ifndef XSIMD_NEON_HPP
 #define XSIMD_NEON_HPP
 
+#include <algorithm>
+#include <complex>
 #include <tuple>
+#include <type_traits>
 
 #include "../types/xsimd_neon_register.hpp"
 #include "../types/xsimd_utils.hpp"

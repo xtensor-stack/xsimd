@@ -12,6 +12,10 @@
 #ifndef XSIMD_AVX512F_HPP
 #define XSIMD_AVX512F_HPP
 
+#include <complex>
+#include <limits>
+#include <type_traits>
+
 #include "../types/xsimd_avx512f_register.hpp"
 
 namespace xsimd {

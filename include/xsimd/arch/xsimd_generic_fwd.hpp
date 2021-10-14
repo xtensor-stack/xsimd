@@ -11,6 +11,9 @@
 
 #ifndef XSIMD_GENERIC_FWD_HPP
 #define XSIMD_GENERIC_FWD_HPP
+
+#include <type_traits>
+
 namespace xsimd {
 
   namespace kernel {

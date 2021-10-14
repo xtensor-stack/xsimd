@@ -12,7 +12,6 @@
 #ifndef XSIMD_REGISTER_HPP
 #define XSIMD_REGISTER_HPP
 
-#include <complex>
 #include <type_traits>
 
 namespace xsimd
