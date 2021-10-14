@@ -70,6 +70,18 @@ To get started with using `xsimd`, check out the full documentation
 
 http://xsimd.readthedocs.io/
 
+## Dependencies
+
+`xsimd` has an optional dependency on the [xtl](https://github.com/xtensor-stack/xtl) library:
+
+| `xsimd` | `xtl` (optional) |
+|---------|------------------|
+|  master |     ^0.7.0       |
+|  8.0.0  |     ^0.7.0       |
+|  7.x    |     ^0.7.0       |
+
+The dependency on `xtl` is required if you want to support vectorization for `xtl::xcomplex`. In this case, you must build your project with C++14 support enabled.
+
 ## Usage
 
 The version 8 of the library is a complete rewrite and there are some slight differences with 7.x versions.

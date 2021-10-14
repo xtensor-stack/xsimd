@@ -96,7 +96,7 @@ endif()
 
 if(ENABLE_XTL_COMPLEX)
     add_definitions(-DXSIMD_ENABLE_XTL_COMPLEX=1)
-    find_package(xtl 0.4.11 REQUIRED)
+    find_package(xtl 0.7.0 REQUIRED)
     target_link_libraries(xsimd INTERFACE xtl)
 endif()
 
