@@ -4,5 +4,5 @@ channels:
   - conda-forge
 
 dependencies:
-  - breathe==4.25.1
-  - doxygen==1.9.1
+  - breathe
+    #- docutils<0.17

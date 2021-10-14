@@ -6,7 +6,6 @@ INPUT             = ../include/xsimd/types/xsimd_api.hpp \
                     ../include/xsimd/config/xsimd_config.hpp \
                     ../include/xsimd/memory/xsimd_alignment.hpp \
                     ../include/xsimd/memory/xsimd_aligned_allocator.hpp \
-                    \
                     ../include/xsimd/types/xsimd_generic_arch.hpp \
                     ../include/xsimd/types/xsimd_avx2_register.hpp \
                     ../include/xsimd/types/xsimd_avx512bw_register.hpp \
