@@ -928,58 +928,6 @@ batch<T, A> lgamma(batch<T, A> const& x) {
 /**
  * @ingroup batch_data_transfer
  *
- * Creates a batch from the buffer \c ptr. The
- * memory needs to be aligned.
- * @param ptr the memory buffer to read
- * @return a new batch instance
- */
-template<class A=default_arch, class From>
-batch<From, A> load(From const* ptr, aligned_mode= {}) {
-  return kernel::load_aligned<A>(ptr, kernel::convert<From>{}, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
- * Creates a batch from the buffer \c ptr. The
- * memory does not need to be aligned.
- * @param ptr the memory buffer to read
- * @return a new batch instance
- */
-template<class A=default_arch, class From>
-batch<From, A> load(From const* ptr, unaligned_mode) {
-  return kernel::load_unaligned<A>(ptr, kernel::convert<From>{}, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
- * Creates a batch from the buffer \c ptr. The
- * memory needs to be aligned.
- * @param ptr the memory buffer to read
- * @return a new batch instance
- */
-template<class A=default_arch, class From>
-batch<From, A> load_aligned(From const* ptr) {
-  return kernel::load_aligned<A>(ptr, kernel::convert<From>{}, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
- * Creates a batch from the buffer \c ptr. The
- * memory does not need to be aligned.
- * @param ptr the memory buffer to read
- * @return a new batch instance
- */
-template<class A=default_arch, class From>
-batch<From, A> load_unaligned(From const* ptr) {
-  return kernel::load_unaligned<A>(ptr, kernel::convert<From>{}, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
  * Creates a batch from the buffer \c ptr and the specifed
  * batch value type \c To. The memory needs to be aligned.
  * @param ptr the memory buffer to read
@@ -1027,6 +975,58 @@ simd_return_type<std::complex<From>, To> load_as(std::complex<From> const* ptr, 
 {
   using batch_value_type = typename simd_return_type<std::complex<From>, To>::value_type;
   return kernel::load_complex_unaligned<A>(ptr, kernel::convert<batch_value_type>{}, A{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Creates a batch from the buffer \c ptr. The
+ * memory needs to be aligned.
+ * @param ptr the memory buffer to read
+ * @return a new batch instance
+ */
+template<class A=default_arch, class From>
+batch<From, A> load(From const* ptr, aligned_mode= {}) {
+  return load_as<From, A>(ptr, aligned_mode{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Creates a batch from the buffer \c ptr. The
+ * memory does not need to be aligned.
+ * @param ptr the memory buffer to read
+ * @return a new batch instance
+ */
+template<class A=default_arch, class From>
+batch<From, A> load(From const* ptr, unaligned_mode) {
+  return load_as<From, A>(ptr, unaligned_mode{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Creates a batch from the buffer \c ptr. The
+ * memory needs to be aligned.
+ * @param ptr the memory buffer to read
+ * @return a new batch instance
+ */
+template<class A=default_arch, class From>
+batch<From, A> load_aligned(From const* ptr) {
+  return load_as<From, A>(ptr, aligned_mode{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Creates a batch from the buffer \c ptr. The
+ * memory does not need to be aligned.
+ * @param ptr the memory buffer to read
+ * @return a new batch instance
+ */
+template <class A=default_arch, class From>
+batch<From, A> load_unaligned(From const* ptr) {
+  return load_as<From, A>(ptr, unaligned_mode{});
 }
 
 /**
@@ -1488,58 +1488,6 @@ auto ssub(T const& x, Tp const& y) -> decltype(x - y) {
 /**
  * @ingroup batch_data_transfer
  *
- * Copy content of batch \c val to the buffer \c mem. The
- * memory does not need to be aligned.
- * @param mem the memory buffer to write to
- * @param val the batch to copy from
- */
-template<class A, class T>
-void store(T* mem, batch<T, A> const& val, aligned_mode={}) {
-  return kernel::store_aligned<A>(mem, val, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
- * Copy content of batch \c val to the buffer \c mem. The
- * memory does not need to be aligned.
- * @param mem the memory buffer to write to
- * @param val the batch to copy from
- */
-template<class A, class T>
-void store(T* mem, batch<T, A> const& val, unaligned_mode) {
-  return kernel::store_unaligned<A>(mem, val, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
- * Copy content of batch \c val to the buffer \c mem. The
- * memory needs to be aligned.
- * @param mem the memory buffer to write to
- * @param val the batch to copy from
- */
-template<class A, class T>
-void store_aligned(T* mem, batch<T, A> const& val) {
-  return kernel::store_aligned<A>(mem, val, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
- * Copy content of batch \c val to the buffer \c mem. The
- * memory does not need to be aligned.
- * @param mem the memory buffer to write to
- * @param val the batch to copy
- */
-template<class A, class T>
-void store_unaligned(T* mem, batch<T, A> const& val) {
-  return kernel::store_unaligned<A>(mem, val, A{});
-}
-
-/**
- * @ingroup batch_data_transfer
- *
  * Copy content of batch \c src to the buffer \c dst. The
  * memory needs to be aligned.
  * @param mem the memory buffer to write to
@@ -1586,28 +1534,55 @@ void store_as(std::complex<To>* dst, batch<std::complex<From>, A> const& src, un
 /**
  * @ingroup batch_data_transfer
  *
- * Copy content of batch of boolean \c src to the buffer \c dst. The
- * memory needs to be aligned.
+ * Copy content of batch \c val to the buffer \c mem. The
+ * memory does not need to be aligned.
  * @param mem the memory buffer to write to
- * @param val the batch to copy
+ * @param val the batch to copy from
  */
-template <class To, class A=default_arch, class From>
-void store_batch(To* dst, batch_bool<From, A> const& src, aligned_mode) {
-  kernel::store(src, dst, A{});
+template<class A, class T>
+void store(T* mem, batch<T, A> const& val, aligned_mode={}) {
+  store_as<T, A>(mem, val, aligned_mode{});
 }
 
 /**
  * @ingroup batch_data_transfer
  *
- * Copy content of batch of boolean \c src to the buffer \c dst. The
+ * Copy content of batch \c val to the buffer \c mem. The
+ * memory does not need to be aligned.
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy from
+ */
+template<class A, class T>
+void store(T* mem, batch<T, A> const& val, unaligned_mode) {
+  store_as<T, A>(mem, val, unaligned_mode{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Copy content of batch \c val to the buffer \c mem. The
+ * memory needs to be aligned.
+ * @param mem the memory buffer to write to
+ * @param val the batch to copy from
+ */
+template<class A, class T>
+void store_aligned(T* mem, batch<T, A> const& val) {
+  store_as<T, A>(mem, val, aligned_mode{});
+}
+
+/**
+ * @ingroup batch_data_transfer
+ *
+ * Copy content of batch \c val to the buffer \c mem. The
  * memory does not need to be aligned.
  * @param mem the memory buffer to write to
  * @param val the batch to copy
  */
-template <class To, class A=default_arch, class From>
-void store_batch(To* dst, batch_bool<From, A> const& src, unaligned_mode) {
-  kernel::store(src, dst, A{});
+template<class A, class T>
+void store_unaligned(T* mem, batch<T, A> const& val) {
+  store_as<T, A>(mem, val, unaligned_mode{});
 }
+
 /**
  * @ingroup batch_arithmetic
  *
