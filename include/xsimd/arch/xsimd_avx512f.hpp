@@ -1234,6 +1234,29 @@ namespace xsimd {
       return _mm512_permutexvar_pd(s_mask, self);
     }
 
+    // Shuffle nx128-bit
+    namespace detail {
+      template<class T, class A>
+      batch<T, A> shuffle_nx128bit_avx512(batch<T, A>& self, batch<T, A>&, std::size_t, ::xsimd::detail::index_sequence<>) {
+        return self;
+      }
+
+      template<class T, class A, std::size_t I, std::size_t... Is>
+      batch<T, A> shuffle_nx128bit_avx512(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, ::xsimd::detail::index_sequence<I, Is...>) {
+        if(i == I) {
+          return _mm512_shuffle_i32x4(self, other, I);
+        }
+        else
+          return shuffle_nx128bit_avx512(self, other, i, ::xsimd::detail::index_sequence<Is...>());
+      }
+    }
+    template<class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> shuffle_nx128bit(batch<T, A>& self, batch<T, A>& other, std::size_t i, requires_arch<avx512f>) {
+      constexpr std::size_t size = std::numeric_limits<unsigned char>::max();
+      assert(0<= i && i< size && "index in bounds");
+      return detail::shuffle_nx128bit_avx512(self, other, i, ::xsimd::detail::make_index_sequence<size>());
+    }
+
   }
 
 }

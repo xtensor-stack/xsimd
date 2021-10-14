@@ -1541,6 +1541,18 @@ template <class T, class A>
 batch<T, A> shuffle_nbit(batch<T, A>& x, batch<T, A>& y) {
   return kernel::shuffle_nbit<A>(x, y, A{});
 }
+
+/**
+ * Shuffle 128 bit selected by i
+ * from \c x and \c y
+ * and store the results in dst.
+ * @return.
+ */
+
+template <class T, class A>
+batch<T, A> shuffle_nx128bit(batch<T, A>& x, batch<T, A>& y, std::size_t i) {
+  return kernel::shuffle_nx128bit<A>(x, y, i, A{});
+}
 #endif
 
 /**
