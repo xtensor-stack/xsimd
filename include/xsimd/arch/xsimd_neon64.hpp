@@ -804,7 +804,7 @@ namespace xsimd
                                                             uint32x4_t, int32x4_t,
                                                             uint64x2_t, int64x2_t,
                                                             float32x4_t>;
-            constexpr caster_type caster = {
+            const caster_type caster = {
                 std::make_tuple(wrap::vreinterpretq_f64_u8,  wrap::vreinterpretq_f64_s8,  wrap::vreinterpretq_f64_u16, wrap::vreinterpretq_f64_s16,
                                 wrap::vreinterpretq_f64_u32, wrap::vreinterpretq_f64_s32, wrap::vreinterpretq_f64_u64, wrap::vreinterpretq_f64_s64,
                                 wrap::vreinterpretq_f64_f32)
@@ -840,7 +840,7 @@ namespace xsimd
                                                               uint32x4_t, int32x4_t,
                                                               uint64x2_t, int64x2_t,
                                                               float32x4_t>;
-            constexpr caster_type caster = {
+            const caster_type caster = {
                 std::make_tuple(wrap::vreinterpretq_u8_f64,  wrap::vreinterpretq_s8_f64,  wrap::vreinterpretq_u16_f64, wrap::vreinterpretq_s16_f64,
                                 wrap::vreinterpretq_u32_f64, wrap::vreinterpretq_s32_f64, wrap::vreinterpretq_u64_f64, wrap::vreinterpretq_s64_f64,
                                 wrap::vreinterpretq_f32_f64)
