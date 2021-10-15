@@ -215,7 +215,7 @@ namespace xsimd {
             return _mm256_or_si256(
                 _mm256_srli_epi64(self, other),
                 _mm256_slli_epi64(
-                    _mm256_srai_epi32(_mm256_shuffle_epi32(self, _MM_SHUFFLE(3, 3, 1, 1)), 32),
+                    detail::fwd_to_sse([](__m128i s, int32_t o) { return _mm_srai_epi32(s, o); }, _mm256_shuffle_epi32(self, _MM_SHUFFLE(3, 3, 1, 1)), 32),
                     64 - other));
           }
           default: assert(false && "unsupported arch/op combination"); return {};
@@ -422,7 +422,7 @@ namespace xsimd {
             __m256i tmp1 = detail::fwd_to_sse([](__m128i s, __m128i o) { return eq(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },self, other);
             __m256i tmp2 = _mm256_shuffle_epi32(tmp1, 0xB1);
             __m256i tmp3 = detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, tmp1, tmp2);
-            __m256i tmp4 = _mm256_srai_epi32(tmp3, 31);
+            __m256i tmp4 = detail::fwd_to_sse([](__m128i s, uint32_t o) { return _mm_srai_epi32(s, o); }, tmp3, 31);
             return _mm256_shuffle_epi32(tmp4, 0xF5);
         }
         default: assert(false && "unsupported arch/op combination"); return {};
