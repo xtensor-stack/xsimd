@@ -69,6 +69,16 @@ namespace xsimd {
       return _mm256_andnot_si256(self, other);
     }
 
+    // bitwise_not
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_not(batch<T, A> const& self, requires_arch<avx2>) {
+      return _mm256_xor_si256(self, _mm256_set1_epi32(-1));
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_not(batch_bool<T, A> const& self, requires_arch<avx2>) {
+      return _mm256_xor_si256(self, _mm256_set1_epi32(-1));
+    }
+
     // bitwise_lshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<avx2>) {
@@ -89,11 +99,30 @@ namespace xsimd {
       }
     }
 
+    // bitwise_or
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
+      return _mm256_or_si256(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch_bool<T, A> bitwise_or(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx2>) {
+      return _mm256_or_si256(self, other);
+    }
+
     // bitwise_rshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<avx2>) {
       if(std::is_signed<T>::value) {
         switch(sizeof(T)) {
+          case 1: {
+            __m256i sign_mask = _mm256_set1_epi16((0xFF00 >> other) & 0x00FF);
+            __m256i cmp_is_negative = _mm256_cmpgt_epi8(_mm256_setzero_si256(), self);
+            __m256i res = _mm256_srai_epi16(self, other);
+            return _mm256_or_si256(
+                detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2{}); },
+                                   sign_mask, cmp_is_negative),
+                _mm256_andnot_si256(sign_mask, res));
+          }
           case 2: return _mm256_srai_epi16(self, other);
           case 4: return _mm256_srai_epi32(self, other);
           default: return bitwise_rshift(self, other, avx{});
@@ -124,6 +153,16 @@ namespace xsimd {
           default: return bitwise_rshift(self, other, avx{});
         }
       }
+    }
+
+    // bitwise_xor
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_xor(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) {
+      return _mm256_xor_si256(self, other);
+    }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx2>) {
+      return _mm256_xor_si256(self, other);
     }
 
     // complex_low

@@ -4,6 +4,7 @@ steps:
       conda update -q conda
       conda create -n xsimd
       source activate xsimd
+      conda install cmake -c conda-forge
       if [[ $(enable_xtl_complex) == 1 ]]; then
         conda install xtl -c conda-forge
       fi

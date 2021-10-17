@@ -31,6 +31,14 @@ namespace xsimd {
       inline __m256i merge_sse(__m128i low, __m128i high) {
         return _mm256_insertf128_si256(_mm256_castsi128_si256(low), high, 1);
       }
+      template <class F>
+      __m256i fwd_to_sse(F f, __m256i self) {
+        __m128i self_low, self_high;
+        split_avx(self, self_low, self_high);
+        __m128i res_low = f(self_low);
+        __m128i res_high = f(self_high);
+        return merge_sse(res_low, res_high);
+      }
       template<class F>
       __m256i fwd_to_sse(F f, __m256i self, __m256i other) {
         __m128i self_low, self_high, other_low, other_high;
@@ -63,13 +71,7 @@ namespace xsimd {
     // add
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) {
-      switch(sizeof(T)) {
-        case 1: return _mm256_add_epi8(self, other);
-        case 2: return _mm256_add_epi16(self, other);
-        case 4: return detail::fwd_to_sse([](__m128i s, __m128i o) { return add(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
-        case 8: return detail::fwd_to_sse([](__m128i s, __m128i o) { return add(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
-        default: assert(false && "unsupported arch/op combination"); return {};
-      }
+        return detail::fwd_to_sse([](__m128i s, __m128i o) { return add(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
     }
     template<class A> batch<float, A> add(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) {
       return _mm256_add_ps(self, other);
@@ -153,24 +155,17 @@ namespace xsimd {
     // bitwise_lshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<avx>) {
-      switch(sizeof(T)) {
-        case 1: return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, _mm256_set1_epi8(0xFF << other), _mm256_slli_epi32(self, other));
-
-        case 2: return _mm256_slli_epi16(self, other);
-        case 4: return detail::fwd_to_sse([](__m128i s, int32_t o) { return bitwise_lshift(batch<T, sse4_2>(s), o, sse4_2{}); },self, other);
-        case 8: return _mm256_slli_epi64(self, other);
-        default: assert(false && "unsupported arch/op combination"); return {};
-      }
+        return detail::fwd_to_sse([](__m128i s, int32_t o) { return bitwise_lshift(batch<T, sse4_2>(s), o, sse4_2{}); },self, other);
     }
 
     // bitwise_not
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_not(batch<T, A> const& self, requires_arch<avx>) {
-      return _mm256_xor_si256(self, _mm256_set1_epi32(-1));
+      return detail::fwd_to_sse([](__m128i s) { return bitwise_not(batch<T, sse4_2>(s), sse4_2{}); }, self);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> bitwise_not(batch_bool<T, A> const& self, requires_arch<avx>) {
-      return _mm256_xor_si256(self, _mm256_set1_epi32(-1));
+      return detail::fwd_to_sse([](__m128i s) { return bitwise_not(batch_bool<T, sse4_2>(s), sse4_2{}); }, self);
     }
 
     // bitwise_or
@@ -188,48 +183,17 @@ namespace xsimd {
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) {
-      return _mm256_or_si256(self, other);
+      return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_or(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> bitwise_or(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) {
-      return _mm256_or_si256(self, other);
+      return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_or(batch_bool<T, sse4_2>(s), batch_bool<T, sse4_2>(o)); }, self, other);
     }
 
     // bitwise_rshift
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<avx>) {
-      if(std::is_signed<T>::value) {
-        switch(sizeof(T)) {
-          case 1: {
-            __m256i sign_mask = _mm256_set1_epi16((0xFF00 >> other) & 0x00FF);
-            __m256i cmp_is_negative = _mm256_cmpgt_epi8(_mm256_setzero_si256(), self);
-            __m256i res = _mm256_srai_epi16(self, other);
-            return _mm256_or_si256(
-                detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, sign_mask, cmp_is_negative),
-                _mm256_andnot_si256(sign_mask, res));
-          }
-          case 2: return _mm256_srai_epi16(self, other);
-          case 4: return detail::fwd_to_sse([](__m128i s, int32_t o) { return bitwise_rshift(batch<T, sse4_2>(s), o, sse4_2{}); }, self, other);
-          case 8: {
-            // from https://github.com/samyvilar/vect/blob/master/vect_128.h
-            return _mm256_or_si256(
-                _mm256_srli_epi64(self, other),
-                _mm256_slli_epi64(
-                    detail::fwd_to_sse([](__m128i s, int32_t o) { return _mm_srai_epi32(s, o); }, _mm256_shuffle_epi32(self, _MM_SHUFFLE(3, 3, 1, 1)), 32),
-                    64 - other));
-          }
-          default: assert(false && "unsupported arch/op combination"); return {};
-        }
-      }
-      else {
-        switch(sizeof(T)) {
-          case 1: return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, _mm256_set1_epi8(0xFF >> other), _mm256_srli_epi32(self, other));
-          case 2: return _mm256_srli_epi16(self, other);
-          case 4: return _mm256_srli_epi32(self, other);
-          case 8: return _mm256_srli_epi64(self, other);
-          default: assert(false && "unsupported arch/op combination"); return {};
-        }
-      }
+      return detail::fwd_to_sse([](__m128i s, int32_t o) { return bitwise_rshift(batch<T, sse4_2>(s), o, sse4_2{}); }, self, other);
     }
 
     // bitwise_xor
@@ -247,8 +211,15 @@ namespace xsimd {
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> bitwise_xor(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) {
-      return _mm256_xor_si256(self, other);
+      return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_xor(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2{}); },
+                                self, other);
     }
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    batch<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) {
+      return detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_xor(batch_bool<T, sse4_2>(s), batch_bool<T, sse4_2>(o), sse4_2{}); },
+                                self, other);
+    }
+
     // bitwise_cast
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<float, A> bitwise_cast(batch<T, A> const& self, batch<float, A> const &, requires_arch<avx>) {
@@ -414,20 +385,9 @@ namespace xsimd {
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) {
-      switch(sizeof(T)) {
-        case 1: return _mm256_cmpeq_epi8(self, other);
-        case 2: return _mm256_cmpeq_epi16(self, other);
-        case 4: return detail::fwd_to_sse([](__m128i s, __m128i o) { return eq(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2{}); },self, other);
-        case 8: {
-            __m256i tmp1 = detail::fwd_to_sse([](__m128i s, __m128i o) { return eq(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },self, other);
-            __m256i tmp2 = _mm256_shuffle_epi32(tmp1, 0xB1);
-            __m256i tmp3 = detail::fwd_to_sse([](__m128i s, __m128i o) { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, tmp1, tmp2);
-            __m256i tmp4 = detail::fwd_to_sse([](__m128i s, uint32_t o) { return _mm_srai_epi32(s, o); }, tmp3, 31);
-            return _mm256_shuffle_epi32(tmp4, 0xF5);
-        }
-        default: assert(false && "unsupported arch/op combination"); return {};
-      }
+      return detail::fwd_to_sse([](__m128i s, __m128i o) { return eq(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2{}); },self, other);
     }
+
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) {
       return eq(batch<T, A>(self.data), batch<T, A>(other.data));
@@ -868,13 +828,7 @@ namespace xsimd {
     // sub
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
     batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) {
-      switch(sizeof(T)) {
-        case 1: return _mm256_sub_epi8(self, other);
-        case 2: return _mm256_sub_epi16(self, other);
-        case 4: return detail::fwd_to_sse([](__m128i s, __m128i o) { return sub(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
-        case 8: return _mm256_sub_epi64(self, other);
-        default: assert(false && "unsupported arch/op combination"); return {};
-      }
+        return detail::fwd_to_sse([](__m128i s, __m128i o) { return sub(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); }, self, other);
     }
     template<class A> batch<float, A> sub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) {
       return _mm256_sub_ps(self, other);
