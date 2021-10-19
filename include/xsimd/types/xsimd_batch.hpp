@@ -183,7 +183,7 @@ namespace xsimd
     private:
   
         template<size_t... Is>
-        batch(T const* data, detail::index_sequence<Is...>);
+        batch(T const* data, xsimd::detail::index_sequence<Is...>);
 
         batch logical_and(batch const& other) const;
         batch logical_or(batch const& other) const;
@@ -242,13 +242,13 @@ namespace xsimd
     private:
 
         template<size_t... Is>
-        batch_bool(bool const* data, detail::index_sequence<Is...>);
+        batch_bool(bool const* data, xsimd::detail::index_sequence<Is...>);
 
         template <class U, class... V, size_t I, size_t... Is>
-        static register_type make_register(detail::index_sequence<I, Is...>, U u, V... v);
+        static register_type make_register(xsimd::detail::index_sequence<I, Is...>, U u, V... v);
 
         template <class... V>
-        static register_type make_register(detail::index_sequence<>, V... v);
+        static register_type make_register(xsimd::detail::index_sequence<>, V... v);
     };
 
     template <class T, class A>
