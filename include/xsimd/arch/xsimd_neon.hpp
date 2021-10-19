@@ -24,26 +24,26 @@
 // Wrap intrinsics so we can pass them as function pointers
 // - OP: intrinsics name prefix, e.g., vorrq
 // - RT: type traits to deduce intrinsics return types
-#define WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                                       \
+#define WRAP_BINARY_INT_EXCLUDING_64(OP)                                                       \
     namespace wrap {                                                                               \
-        inline RT<uint8x16_t> _##OP##_u8 (uint8x16_t a, uint8x16_t b) { return ::OP##_u8 (a, b); } \
-        inline RT<int8x16_t>  _##OP##_s8 (int8x16_t  a, int8x16_t  b) { return ::OP##_s8 (a, b); } \
-        inline RT<uint16x8_t> _##OP##_u16(uint16x8_t a, uint16x8_t b) { return ::OP##_u16(a, b); } \
-        inline RT<int16x8_t>  _##OP##_s16(int16x8_t  a, int16x8_t  b) { return ::OP##_s16(a, b); } \
-        inline RT<uint32x4_t> _##OP##_u32(uint32x4_t a, uint32x4_t b) { return ::OP##_u32(a, b); } \
-        inline RT<int32x4_t>  _##OP##_s32(int32x4_t  a, int32x4_t  b) { return ::OP##_s32(a, b); } \
+        inline uint8x16_t _##OP##_u8 (uint8x16_t a, uint8x16_t b) { return ::OP##_u8 (a, b); } \
+        inline int8x16_t  _##OP##_s8 (int8x16_t  a, int8x16_t  b) { return ::OP##_s8 (a, b); } \
+        inline uint16x8_t _##OP##_u16(uint16x8_t a, uint16x8_t b) { return ::OP##_u16(a, b); } \
+        inline int16x8_t  _##OP##_s16(int16x8_t  a, int16x8_t  b) { return ::OP##_s16(a, b); } \
+        inline uint32x4_t _##OP##_u32(uint32x4_t a, uint32x4_t b) { return ::OP##_u32(a, b); } \
+        inline int32x4_t  _##OP##_s32(int32x4_t  a, int32x4_t  b) { return ::OP##_s32(a, b); } \
     }
 
-#define WRAP_BINARY_INT(OP, RT)                                                                    \
-    WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                                           \
+#define WRAP_BINARY_INT(OP)                                                                    \
+    WRAP_BINARY_INT_EXCLUDING_64(OP)                                                           \
     namespace wrap {                                                                               \
-        inline RT<uint64x2_t> _##OP##_u64(uint64x2_t a, uint64x2_t b) { return ::OP##_u64(a, b); } \
-        inline RT<int64x2_t>  _##OP##_s64(int64x2_t  a, int64x2_t  b) { return ::OP##_s64(a, b); } \
+        inline uint64x2_t _##OP##_u64(uint64x2_t a, uint64x2_t b) { return ::OP##_u64(a, b); } \
+        inline int64x2_t  _##OP##_s64(int64x2_t  a, int64x2_t  b) { return ::OP##_s64(a, b); } \
     }
 
-#define WRAP_BINARY_FLOAT(OP, RT)                                                                     \
+#define WRAP_BINARY_FLOAT(OP)                                                                     \
     namespace wrap {                                                                                  \
-        inline RT<float32x4_t> _##OP##_f32(float32x4_t a, float32x4_t b) { return ::OP##_f32(a, b); } \
+        inline float32x4_t _##OP##_f32(float32x4_t a, float32x4_t b) { return ::OP##_f32(a, b); } \
     }
 
 #define WRAP_UNARY_INT_EXCLUDING_64(OP)                                       \
@@ -87,139 +87,6 @@ namespace xsimd
 
         namespace detail
         {
-            template <template <class> class return_type, class... T>
-            struct neon_dispatcher_base
-            {
-                struct unary
-                {
-                    using container_type = std::tuple<return_type<T> (*)(T)...>;
-                    const container_type m_func;
-
-                    template <class U>
-                    return_type<U> apply(U rhs) const
-                    {
-                        using func_type = return_type<U> (*)(U);
-                        auto func = xsimd::detail::get<func_type>(m_func);
-                        return func(rhs);
-                    }
-                };
-
-                struct binary
-                {
-                    using container_type = std::tuple<return_type<T> (*)(T, T) ...>;
-                    const container_type m_func;
-
-                    template <class U>
-                    return_type<U> apply(U lhs, U rhs) const
-                    {
-                        using func_type = return_type<U> (*)(U, U);
-                        auto func = xsimd::detail::get<func_type>(m_func);
-                        return func(lhs, rhs);
-                    }
-                };
-            };
-
-            /***************************
-             *  arithmetic dispatchers *
-             ***************************/
-
-            template <class T>
-            using identity_return_type = T;
-            
-            template <class... T>
-            struct neon_dispatcher_impl : neon_dispatcher_base<identity_return_type, T...>
-            {
-            };
-
-
-            using neon_dispatcher = neon_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                       uint16x8_t, int16x8_t,
-                                                       uint32x4_t, int32x4_t,
-                                                       uint64x2_t, int64x2_t,
-                                                       float32x4_t>;
-
-            using excluding_int64_dispatcher = neon_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                   uint16x8_t, int16x8_t,
-                                                                   uint32x4_t, int32x4_t,
-                                                                   float32x4_t>;
-
-            /**************************
-             * comparison dispatchers *
-             **************************/
-
-            template <class T>
-            struct comp_return_type_impl;
-
-            template <>
-            struct comp_return_type_impl<uint8x16_t>
-            {
-                using type = uint8x16_t;
-            };
-
-// MSVC uses same underlying type for all vector variants which would cause C++ function overload ambiguity
-#if !defined(_WIN32) || (defined(__clang__))
-            template <>
-            struct comp_return_type_impl<int8x16_t>
-            {
-                using type = uint8x16_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint16x8_t>
-            {
-                using type = uint16x8_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<int16x8_t>
-            {
-                using type = uint16x8_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<int32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint64x2_t>
-            {
-                using type = uint64x2_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<int64x2_t>
-            {
-                using type = uint64x2_t;
-            };
-            
-            template <>
-            struct comp_return_type_impl<float32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-#endif
-
-            template <class T>
-            using comp_return_type = typename comp_return_type_impl<T>::type;
-
-            template <class... T>
-            struct neon_comp_dispatcher_impl : neon_dispatcher_base<comp_return_type, T...>
-            {
-            };
-
-            using excluding_int64_comp_dispatcher = neon_comp_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                             uint16x8_t, int16x8_t,
-                                                                             uint32x4_t, int32x4_t,
-                                                                             float32x4_t>;
-
             /**************************************
              * enabling / disabling metafunctions *
              **************************************/
@@ -627,8 +494,8 @@ namespace xsimd
          * add *
          *******/
 
-        WRAP_BINARY_INT(vaddq, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vaddq, detail::identity_return_type)
+        WRAP_BINARY_INT(vaddq)
+        WRAP_BINARY_FLOAT(vaddq)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -645,7 +512,7 @@ namespace xsimd
          * sadd *
          ********/
 
-        WRAP_BINARY_INT(vqaddq, detail::identity_return_type)
+        WRAP_BINARY_INT(vqaddq)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -662,8 +529,8 @@ namespace xsimd
          * sub *
          *******/
 
-        WRAP_BINARY_INT(vsubq, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vsubq, detail::identity_return_type)
+        WRAP_BINARY_INT(vsubq)
+        WRAP_BINARY_FLOAT(vsubq)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -680,7 +547,7 @@ namespace xsimd
          * ssub *
          ********/
 
-        WRAP_BINARY_INT(vqsubq, detail::identity_return_type)
+        WRAP_BINARY_INT(vqsubq)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -698,8 +565,8 @@ namespace xsimd
          * mul *
          *******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vmulq, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vmulq, detail::identity_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vmulq)
+        WRAP_BINARY_FLOAT(vmulq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -751,8 +618,8 @@ namespace xsimd
          * eq *
          ******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vceqq, detail::comp_return_type)
-        WRAP_BINARY_FLOAT(vceqq, detail::comp_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vceqq)
+        WRAP_BINARY_FLOAT(vceqq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -797,8 +664,8 @@ namespace xsimd
          * lt *
          ******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vcltq, detail::comp_return_type)
-        WRAP_BINARY_FLOAT(vcltq, detail::comp_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vcltq)
+        WRAP_BINARY_FLOAT(vcltq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -821,8 +688,8 @@ namespace xsimd
          * le *
          ******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vcleq, detail::comp_return_type)
-        WRAP_BINARY_FLOAT(vcleq, detail::comp_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vcleq)
+        WRAP_BINARY_FLOAT(vcleq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -845,8 +712,8 @@ namespace xsimd
          * gt *
          ******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vcgtq, detail::comp_return_type)
-        WRAP_BINARY_FLOAT(vcgtq, detail::comp_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vcgtq)
+        WRAP_BINARY_FLOAT(vcgtq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -869,8 +736,8 @@ namespace xsimd
          * ge *
          ******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vcgeq, detail::comp_return_type)
-        WRAP_BINARY_FLOAT(vcgeq, detail::comp_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vcgeq)
+        WRAP_BINARY_FLOAT(vcgeq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch_bool<T, A> get(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -893,7 +760,7 @@ namespace xsimd
          * bitwise_and *
          ***************/
 
-        WRAP_BINARY_INT(vandq, detail::identity_return_type)
+        WRAP_BINARY_INT(vandq)
 
         namespace detail
         {
@@ -930,7 +797,7 @@ namespace xsimd
          * bitwise_or *
          **************/
 
-        WRAP_BINARY_INT(vorrq, detail::identity_return_type)
+        WRAP_BINARY_INT(vorrq)
 
         namespace detail
         {
@@ -967,7 +834,7 @@ namespace xsimd
          * bitwise_xor *
          ***************/
 
-        WRAP_BINARY_INT(veorq, detail::identity_return_type)
+        WRAP_BINARY_INT(veorq)
 
         namespace detail
         {
@@ -1085,7 +952,7 @@ namespace xsimd
          * bitwise_andnot *
          ******************/
 
-        WRAP_BINARY_INT(vbicq, detail::identity_return_type)
+        WRAP_BINARY_INT(vbicq)
 
         namespace detail
         {
@@ -1121,8 +988,8 @@ namespace xsimd
          * min *
          *******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vminq, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vminq, detail::identity_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vminq)
+        WRAP_BINARY_FLOAT(vminq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -1145,8 +1012,8 @@ namespace xsimd
          * max *
          *******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vmaxq, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vmaxq, detail::identity_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vmaxq)
+        WRAP_BINARY_FLOAT(vmaxq)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>)
@@ -1353,30 +1220,6 @@ namespace xsimd
             inline uint64x2_t  _vbslq_u64(uint64x2_t a, uint64x2_t  b, uint64x2_t  c) { return ::vbslq_u64(a, b, c); }
             inline int64x2_t   _vbslq_s64(uint64x2_t a, int64x2_t   b, int64x2_t   c) { return ::vbslq_s64(a, b, c); }
             inline float32x4_t _vbslq_f32(uint32x4_t a, float32x4_t b, float32x4_t c) { return ::vbslq_f32(a, b, c); }
-        }
-
-        namespace detail
-        {
-            template <class... T>
-            struct neon_select_dispatcher_impl
-            {
-                using container_type = std::tuple<T (*)(comp_return_type<T>, T, T)...>;
-                const container_type m_func;
-
-                template <class U>
-                U apply(comp_return_type<U> cond, U lhs, U rhs) const
-                {
-                    using func_type = U (*)(comp_return_type<U>, U, U);
-                    auto func = xsimd::detail::get<func_type>(m_func);
-                    return func(cond, lhs, rhs);
-                }
-            };
-
-            using neon_select_dispatcher = neon_select_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                     uint16x8_t, int16x8_t,
-                                                                     uint32x4_t, int32x4_t,
-                                                                     uint64x2_t, int64x2_t,
-                                                                     float32x4_t>;
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
