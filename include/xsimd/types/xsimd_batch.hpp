@@ -437,7 +437,9 @@ namespace xsimd
 
     template<class T, class A>
     batch<T, A>::batch(std::initializer_list<T> data)
-        : batch(data.begin(), detail::make_index_sequence<size>())
+        : batch(data.size() == 1u ?
+                *(data.begin()) :
+                batch(data.begin(), detail::make_index_sequence<size>()))
     {
     }
 
@@ -770,7 +772,9 @@ namespace xsimd
 
     template<class T, class A>
     batch_bool<T, A>::batch_bool(std::initializer_list<bool> data)
-        : batch_bool(data.begin(), detail::make_index_sequence<size>())
+        : batch_bool(data.size() == 1u ?
+                     *(data.begin()) : 
+                     batch_bool(data.begin(), detail::make_index_sequence<size>()))
     {
     }
 
@@ -925,7 +929,15 @@ namespace xsimd
     template <class T, class A>
     batch<std::complex<T>, A>::batch(std::initializer_list<value_type> data)
     { 
-        *this = load_unaligned(data.begin());
+        if (data.size() == 1u)
+        {
+            m_real = data.real();
+            m_imag = data.imag();
+        }
+        else
+        {
+            *this = load_unaligned(data.begin());
+        }
     }
 
     template <class T, class A>
