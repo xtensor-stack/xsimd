@@ -85,3 +85,11 @@ Likewise architecture-specific macros like ``XSIMD_X86_INSTR_SET_AVAILABLE`` has
 been replaced by ``xsimd::upported_architectures::contains<xsimd::sse3>()``. Macro like ``XSIMD_WITH_SSE3`` are still
 defined to ``0`` or ``1`` to guard architecture-specific code.
 
+Interaction with MSVC's ``/Ob1``
+********************************
+
+MSVC has a compiler switch, ``/Ob1`` that very strictly controls inlining
+behavior, by disabling inlining of functions not marked ``inline``. Since 8.0.0,
+most ``xsimd`` functions are very leightweight and do not carry the ``inline``
+qualifier. Using ``/Ob1`` very badly affects performance of ``xsimd``-based
+code, user should refrain from using it.
