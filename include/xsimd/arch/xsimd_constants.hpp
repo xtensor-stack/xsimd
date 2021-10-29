@@ -160,7 +160,7 @@ namespace constants {
     }
 
     template <class T>
-    constexpr T allbits() noexcept
+    inline constexpr T allbits() noexcept
     {
         return T(detail::allbits_impl<typename T::value_type>::get_value());
     }
@@ -170,19 +170,19 @@ namespace constants {
      *****************************/
 
     template <class T>
-    constexpr as_integer_t<T> mask1frexp() noexcept
+    inline constexpr as_integer_t<T> mask1frexp() noexcept
     {
         return as_integer_t<T>(mask1frexp<typename T::value_type>());
     }
 
     template <>
-    constexpr int32_t mask1frexp<float>() noexcept
+    inline constexpr int32_t mask1frexp<float>() noexcept
     {
         return 0x7f800000;
     }
 
     template <>
-    constexpr int64_t mask1frexp<double>() noexcept
+    inline constexpr int64_t mask1frexp<double>() noexcept
     {
         return 0x7ff0000000000000;
     }
@@ -192,19 +192,19 @@ namespace constants {
      *****************************/
 
     template <class T>
-    constexpr as_integer_t<T> mask2frexp() noexcept
+    inline constexpr as_integer_t<T> mask2frexp() noexcept
     {
         return as_integer_t<T>(mask2frexp<typename T::value_type>());
     }
 
     template <>
-    constexpr int32_t mask2frexp<float>() noexcept
+    inline constexpr int32_t mask2frexp<float>() noexcept
     {
         return 0x3f000000;
     }
 
     template <>
-    constexpr int64_t mask2frexp<double>() noexcept
+    inline constexpr int64_t mask2frexp<double>() noexcept
     {
         return 0x3fe0000000000000;
     }
@@ -214,19 +214,19 @@ namespace constants {
      ******************************/
 
     template <class T>
-    constexpr as_integer_t<T> maxexponent() noexcept
+    inline constexpr as_integer_t<T> maxexponent() noexcept
     {
         return as_integer_t<T>(maxexponent<typename T::value_type>());
     }
 
     template <>
-    constexpr int32_t maxexponent<float>() noexcept
+    inline constexpr int32_t maxexponent<float>() noexcept
     {
         return 127;
     }
 
     template <>
-    constexpr int64_t maxexponent<double>() noexcept
+    inline constexpr int64_t maxexponent<double>() noexcept
     {
         return 1023;
     }
@@ -236,19 +236,19 @@ namespace constants {
      ******************************/
 
     template <class T>
-    constexpr as_integer_t<T> maxexponentm1() noexcept
+    inline constexpr as_integer_t<T> maxexponentm1() noexcept
     {
         return as_integer_t<T>(maxexponentm1<typename T::value_type>());
     }
 
     template <>
-    constexpr int32_t maxexponentm1<float>() noexcept
+    inline constexpr int32_t maxexponentm1<float>() noexcept
     {
         return 126;
     }
 
     template <>
-    constexpr int64_t maxexponentm1<double>() noexcept
+    inline constexpr int64_t maxexponentm1<double>() noexcept
     {
         return 1022;
     }
@@ -258,19 +258,19 @@ namespace constants {
      **********************/
 
     template <class T>
-    constexpr int32_t nmb() noexcept
+    inline constexpr int32_t nmb() noexcept
     {
         return nmb<typename T::value_type>();
     }
 
     template <>
-    constexpr int32_t nmb<float>() noexcept
+    inline constexpr int32_t nmb<float>() noexcept
     {
         return 23;
     }
 
     template <>
-    constexpr int32_t nmb<double>() noexcept
+    inline constexpr int32_t nmb<double>() noexcept
     {
         return 52;
     }
@@ -280,7 +280,7 @@ namespace constants {
      ***********************/
 
     template <class T>
-    constexpr T zero() noexcept
+    inline constexpr T zero() noexcept
     {
         return T(typename T::value_type(0));
     }
@@ -346,7 +346,7 @@ namespace constants {
     }
 
     template <class T>
-    constexpr T minvalue() noexcept
+    inline constexpr T minvalue() noexcept
     {
         return T(detail::minvalue_impl<typename T::value_type>::get_value());
     }
@@ -356,7 +356,7 @@ namespace constants {
      ***************************/
 
     template <class T>
-    constexpr T maxvalue() noexcept
+    inline constexpr T maxvalue() noexcept
     {
         return T(std::numeric_limits<typename T::value_type>::max());
     }
@@ -365,4 +365,3 @@ namespace constants {
 }
 
 #endif
-

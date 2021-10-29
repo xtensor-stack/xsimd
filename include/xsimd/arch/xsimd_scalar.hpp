@@ -76,42 +76,42 @@ namespace xsimd
 #else
     // Windows defines catch all templates
     template <class T>
-    typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+    inline typename std::enable_if<std::is_floating_point<T>::value, bool>::type
     isfinite(T var)
     {
         return std::isfinite(var);
     }
 
     template <class T>
-    typename std::enable_if<std::is_integral<T>::value, bool>::type
+    inline typename std::enable_if<std::is_integral<T>::value, bool>::type
     isfinite(T var)
     {
         return isfinite(double(var));
     }
 
     template <class T>
-    typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+    inline typename std::enable_if<std::is_floating_point<T>::value, bool>::type
     isinf(T var)
     {
         return std::isinf(var);
     }
 
     template <class T>
-    typename std::enable_if<std::is_integral<T>::value, bool>::type
+    inline typename std::enable_if<std::is_integral<T>::value, bool>::type
     isinf(T var)
     {
         return isinf(double(var));
     }
 
     template <class T>
-    typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+    inline typename std::enable_if<std::is_floating_point<T>::value, bool>::type
     isnan(T var)
     {
         return std::isnan(var);
     }
 
     template <class T>
-    typename std::enable_if<std::is_integral<T>::value, bool>::type
+    inline typename std::enable_if<std::is_integral<T>::value, bool>::type
     isnan(T var)
     {
         return isnan(double(var));
@@ -120,13 +120,13 @@ namespace xsimd
 
 #ifdef XSIMD_ENABLE_NUMPY_COMPLEX
     template <class T>
-    bool isnan(std::complex<T> var)
+    inline bool isnan(std::complex<T> var)
     {
         return std::isnan(std::real(var)) || std::isnan(std::imag(var));
     }
 
     template <class T>
-    bool isinf(std::complex<T> var)
+    inline bool isinf(std::complex<T> var)
     {
         return std::isinf(std::real(var)) || std::isinf(std::imag(var));
     }
@@ -228,13 +228,13 @@ namespace xsimd
     }
 
     template <class T>
-    std::complex<T> log2(const std::complex<T>& val)
+    inline std::complex<T> log2(const std::complex<T>& val)
     {
         return log(val) / std::log(T(2));
     }
 
     template<typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
-    T sadd(const T& lhs, const T& rhs)
+    inline T sadd(const T& lhs, const T& rhs)
     {
         if (std::numeric_limits<T>::is_signed)
         {
@@ -265,7 +265,7 @@ namespace xsimd
     }
 
     template<typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
-    T ssub(const T& lhs, const T& rhs)
+    inline T ssub(const T& lhs, const T& rhs)
     {
         if (std::numeric_limits<T>::is_signed)
         {

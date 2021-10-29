@@ -178,7 +178,7 @@ namespace xsimd
      ********************/
 
     template<class To, class From>
-    To bit_cast(From val) {
+    inline To bit_cast(From val) {
       static_assert(sizeof(From) == sizeof(To), "casting between compatible layout");
       // FIXME: Some old version of GCC don't support that trait
       //static_assert(std::is_trivially_copyable<From>::value, "input type is trivially copyable");
@@ -269,20 +269,20 @@ namespace xsimd
     namespace detail
     {
         template <class T, class... Types, size_t I, size_t... Is>
-        const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, T>, index_sequence<I, Is...>)
+        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, T>, index_sequence<I, Is...>)
         {
             return std::get<I>(t);
         }
 
         template <class T, class U, class... Types, size_t I, size_t... Is>
-        const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, U>, index_sequence<I, Is...>)
+        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, U>, index_sequence<I, Is...>)
         {
             using tuple_elem = typename std::tuple_element<I+1, std::tuple<Types...>>::type;
             return get_impl<T>(t, std::is_same<T, tuple_elem>(), index_sequence<Is...>());
         }
 
         template <class T, class... Types>
-        const T& get(const std::tuple<Types...>& t)
+        inline const T& get(const std::tuple<Types...>& t)
         {
             using tuple_elem = typename std::tuple_element<0, std::tuple<Types...>>::type;
             return get_impl<T>(t, std::is_same<T, tuple_elem>(), make_index_sequence<sizeof...(Types)>());
@@ -329,7 +329,7 @@ namespace xsimd
     {
         // std::array constructor from scalar value ("broadcast")
         template <typename T, std::size_t... Is>
-        constexpr std::array<T, sizeof...(Is)>
+        inline constexpr std::array<T, sizeof...(Is)>
         array_from_scalar_impl(const T& scalar, index_sequence<Is...>)
         {
             // You can safely ignore this silly ternary, the "scalar" is all
@@ -338,7 +338,7 @@ namespace xsimd
         }
 
         template <typename T, std::size_t N>
-        constexpr std::array<T, N>
+        inline constexpr std::array<T, N>
         array_from_scalar(const T& scalar)
         {
             return array_from_scalar_impl(scalar, make_index_sequence<N>());
@@ -346,14 +346,14 @@ namespace xsimd
 
         // std::array constructor from C-style pointer (handled as an array)
         template <typename T, std::size_t... Is>
-        constexpr std::array<T, sizeof...(Is)>
+        inline constexpr std::array<T, sizeof...(Is)>
         array_from_pointer_impl(const T* c_array, index_sequence<Is...>)
         {
             return std::array<T, sizeof...(Is)>{ c_array[Is]... };
         }
 
         template <typename T, std::size_t N>
-        constexpr std::array<T, N>
+        inline constexpr std::array<T, N>
         array_from_pointer(const T* c_array)
         {
             return array_from_pointer_impl(c_array, make_index_sequence<N>());
