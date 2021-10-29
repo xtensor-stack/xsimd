@@ -65,13 +65,13 @@ namespace xsimd
     namespace detail
     {
         template <class batch_type, class G, std::size_t... Is>
-        constexpr auto make_batch_constant(detail::index_sequence<Is...>)
+        inline constexpr auto make_batch_constant(detail::index_sequence<Is...>)
             -> batch_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
         }
         template <class batch_type, class G, std::size_t... Is>
-        constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>)
+        inline constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>)
             -> batch_bool_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
@@ -80,14 +80,14 @@ namespace xsimd
     } // namespace detail
 
     template <class batch_type, class G>
-    constexpr auto make_batch_constant() -> decltype(
+    inline constexpr auto make_batch_constant() -> decltype(
         detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
     {
         return detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>());
     }
 
     template <class batch_type, class G>
-    constexpr auto make_batch_bool_constant()
+    inline constexpr auto make_batch_bool_constant()
         -> decltype(detail::make_batch_bool_constant<batch_type, G>(
             detail::make_index_sequence<batch_type::size>()))
     {

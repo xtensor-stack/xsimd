@@ -105,7 +105,7 @@ namespace xsimd {
 
     namespace detail {
       template<class F, class A, class T, class... Batches>
-      batch<T, A> apply(F&& func, batch<T, A> const& self, batch<T, A> const& other) {
+      inline batch<T, A> apply(F&& func, batch<T, A> const& self, batch<T, A> const& other) {
         constexpr std::size_t size = batch<T, A>::size;
         alignas(A::alignment()) T self_buffer[size];
         alignas(A::alignment()) T other_buffer[size];
@@ -206,8 +206,6 @@ namespace xsimd {
             return fma(x, horner1<B, c1, args...>(x), detail::coef<B, c0>());
         }
     }
-
-
 
   }
 

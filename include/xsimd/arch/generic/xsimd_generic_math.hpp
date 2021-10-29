@@ -26,7 +26,7 @@ namespace xsimd {
     using namespace types;
     // abs
     template<class A, class T, class/*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
-    batch<T, A> abs(batch<T, A> const& self, requires_arch<generic>)
+    inline batch<T, A> abs(batch<T, A> const& self, requires_arch<generic>)
     {
       if(std::is_unsigned<T>::value)
         return self;
@@ -38,22 +38,23 @@ namespace xsimd {
     }
 
     template<class A, class T>
-    batch<T, A> abs(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
+    inline batch<T, A> abs(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
       return hypot(z.real(), z.imag());
     }
 
     // batch_cast
-    template<class A, class T> batch<T, A> batch_cast(batch<T, A> const& self, batch<T, A> const&, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> batch_cast(batch<T, A> const& self, batch<T, A> const&, requires_arch<generic>) {
       return self;
     }
 
     namespace detail {
     template<class A, class T_out, class T_in>
-    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires_arch<generic>, with_fast_conversion) {
+    inline batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires_arch<generic>, with_fast_conversion) {
       return fast_cast(self, out, A{});
     }
     template<class A, class T_out, class T_in>
-    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires_arch<generic>, with_slow_conversion) {
+    inline batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires_arch<generic>, with_slow_conversion) {
       static_assert(!std::is_same<T_in, T_out>::value, "there should be no conversion for this type combination");
       using batch_type_in = batch<T_in, A>;
       using batch_type_out = batch<T_out, A>;
@@ -68,12 +69,13 @@ namespace xsimd {
     }
 
     template<class A, class T_out, class T_in>
-    batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires_arch<generic>) {
+    inline batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const& out, requires_arch<generic>) {
       return detail::batch_cast(self, out, A{}, detail::conversion_type<A, T_in, T_out>{});
     }
 
     // bitofsign
-    template<class A, class T> batch<T, A> bitofsign(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> bitofsign(batch<T, A> const& self, requires_arch<generic>) {
       static_assert(std::is_integral<T>::value, "int type implementation");
       if(std::is_unsigned<T>::value)
         return batch<T, A>(0);
@@ -81,10 +83,12 @@ namespace xsimd {
         return self >> (T)(8 * sizeof(T) - 1);
     }
 
-    template<class A> batch<float, A> bitofsign(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> bitofsign(batch<float, A> const& self, requires_arch<generic>) {
       return self & constants::minuszero<batch<float, A>>();
     }
-    template<class A> batch<double, A> bitofsign(batch<double, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<double, A> bitofsign(batch<double, A> const& self, requires_arch<generic>) {
       return self & constants::minuszero<batch<double, A>>();
     }
 
@@ -99,7 +103,8 @@ namespace xsimd {
          * (See copy at http://boost.org/LICENSE_1_0.txt)
          * ====================================================
          */
-    template<class A> batch<float, A> cbrt(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> cbrt(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type z = abs(self);
 #ifndef XSIMD_NO_DENORMALS
@@ -143,7 +148,9 @@ namespace xsimd {
                 return select(self == batch_type(0.), self, x);
 #endif
     }
-    template<class A> batch<double, A> cbrt(batch<double, A> const& self, requires_arch<generic>) {
+
+    template<class A>
+    inline batch<double, A> cbrt(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type z = abs(self);
 #ifndef XSIMD_NO_DENORMALS
@@ -190,13 +197,15 @@ namespace xsimd {
     }
 
     // clip
-    template<class A, class T> batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> const& hi, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> clip(batch<T, A> const& self, batch<T, A> const& lo, batch<T, A> const& hi, requires_arch<generic>) {
       return min(hi, max(self, lo));
     }
 
 
     // copysign
-    template<class A, class T> batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return abs(self) | bitofsign(other);
     }
 
@@ -375,7 +384,7 @@ namespace xsimd {
          */
 
     template<class A>
-    batch<float, A> erf(batch<float, A> const& self, requires_arch<generic>) {
+    inline batch<float, A> erf(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type x = abs(self);
                 batch_type r1(0.);
@@ -395,8 +404,10 @@ namespace xsimd {
                 r1 = select(xsimd::isinf(self), sign(self), r1);
 #endif
                 return r1;
-            }
-    template<class A> batch<double, A> erf(batch<double, A> const& self, requires_arch<generic>) {
+    }
+
+    template<class A>
+    inline batch<double, A> erf(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type x = abs(self);
                 batch_type xx = x * x;
@@ -430,7 +441,8 @@ namespace xsimd {
     }
 
     // erfc
-    template<class A> batch<float, A> erfc(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> erfc(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 batch_type x = abs(self);
                 auto test0 = self < batch_type(0.);
@@ -451,7 +463,9 @@ namespace xsimd {
 #endif
                 return select(test0, batch_type(2.) - r1, r1);
     }
-    template<class A> batch<double, A> erfc(batch<double, A> const& self, requires_arch<generic>) {
+
+    template<class A>
+    inline batch<double, A> erfc(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 batch_type x = abs(self);
                 batch_type xx = x * x;
@@ -547,8 +561,9 @@ namespace xsimd {
             }
         };
     }
+
     template <class T, class A, uint64_t... Coefs>
-    batch<T, A> estrin(const batch<T, A>& self) {
+    inline batch<T, A> estrin(const batch<T, A>& self) {
       using batch_type = batch<T, A>;
       return detail::estrin<batch_type>{self}(detail::coef<batch_type, Coefs>()...);
     }
@@ -786,7 +801,8 @@ namespace xsimd {
             }
         };
 
-      template<exp_reduction_tag Tag, class A> batch<float, A> exp(batch<float, A> const& self) {
+      template<exp_reduction_tag Tag, class A>
+      inline batch<float, A> exp(batch<float, A> const& self) {
         using batch_type = batch<float, A>;
         using reducer_t = exp_reduction<float, A, Tag>;
         batch_type x;
@@ -796,7 +812,9 @@ namespace xsimd {
         x = select(self >= reducer_t::maxlog(), constants::infinity<batch_type>(), x);
         return x;
       }
-      template<exp_reduction_tag Tag, class A> batch<double, A> exp(batch<double, A> const& self) {
+
+      template<exp_reduction_tag Tag, class A>
+      inline batch<double, A> exp(batch<double, A> const& self) {
         using batch_type = batch<double, A>;
         using reducer_t = exp_reduction<double, A, Tag>;
         batch_type hi, lo, x;
@@ -809,23 +827,27 @@ namespace xsimd {
       }
     }
 
-    template<class A, class T> batch<T, A> exp(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> exp(batch<T, A> const& self, requires_arch<generic>) {
       return detail::exp<detail::exp_tag>(self);
     }
 
-    template<class A, class T> batch<std::complex<T>, A> exp(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<std::complex<T>, A> exp(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       using batch_type = batch<std::complex<T>, A>;
       auto isincos = sincos(self.imag());
       return exp(self.real()) * batch_type(std::get<1>(isincos), std::get<0>(isincos));
     }
 
     // exp10
-    template<class A, class T> batch<T, A> exp10(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> exp10(batch<T, A> const& self, requires_arch<generic>) {
       return detail::exp<detail::exp10_tag>(self);
     }
 
     // exp2
-    template<class A, class T> batch<T, A> exp2(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> exp2(batch<T, A> const& self, requires_arch<generic>) {
       return detail::exp<detail::exp2_tag>(self);
     }
 
@@ -895,7 +917,8 @@ namespace xsimd {
 
     }
 
-    template<class A, class T> batch<T, A> expm1(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> expm1(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
       return select(self < constants::logeps<batch_type>(),
                     batch_type(-1.),
@@ -905,7 +928,7 @@ namespace xsimd {
     }
 
     template <class A, class T>
-    batch<std::complex<T>, A> expm1(const batch<std::complex<T>, A>& z, requires_arch<generic>)
+    inline batch<std::complex<T>, A> expm1(const batch<std::complex<T>, A>& z, requires_arch<generic>)
     {
         using batch_type = batch<std::complex<T>, A>;
         using real_batch = typename batch_type::real_batch;
@@ -917,12 +940,14 @@ namespace xsimd {
     }
 
     // fdim
-    template<class A, class T> batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return fmax(batch<T, A>(0), self - other);
     }
 
     // fmod
-    template<class A, class T> batch<T, A> fmod(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> fmod(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return fnma(trunc(self / other), other, self);
     }
 
@@ -937,7 +962,7 @@ namespace xsimd {
      * ====================================================
      */
     template <class A, class T>
-    batch<T, A> frexp(const batch<T, A>& self, batch<as_integer_t<T>, A>& exp, requires_arch<generic>) {
+    inline batch<T, A> frexp(const batch<T, A>& self, batch<as_integer_t<T>, A>& exp, requires_arch<generic>) {
         using batch_type = batch<T, A>;
         using i_type = batch<as_integer_t<T>, A>;
         i_type m1f = constants::mask1frexp<batch_type>();
@@ -950,28 +975,31 @@ namespace xsimd {
 
     // from bool
     template<class A, class T>
-    batch<T, A> from_bool(batch_bool<T, A> const& self, requires_arch<generic>) {
+    inline batch<T, A> from_bool(batch_bool<T, A> const& self, requires_arch<generic>) {
       return batch<T, A>(self.data) & batch<T,A>(1);
     }
 
     // hadd
-    template<class A, class T> std::complex<T> hadd(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline std::complex<T> hadd(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       return {hadd(self.real()), hadd(self.imag())};
     }
 
     // horner
     template <class T, class A, uint64_t... Coefs>
-    batch<T, A> horner(const batch<T, A>& self) {
+    inline batch<T, A> horner(const batch<T, A>& self) {
       return detail::horner<batch<T, A>, Coefs...>(self);
     }
 
     // hypot
-    template<class A, class T> batch<T, A> hypot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> hypot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return sqrt(fma(self, self, other * other));
     }
 
     // ipow
-    template<class A, class T, class ITy> batch<T, A> ipow(batch<T, A> const& self, ITy other, requires_arch<generic>) {
+    template<class A, class T, class ITy>
+    inline batch<T, A> ipow(batch<T, A> const& self, ITy other, requires_arch<generic>) {
       return ::xsimd::detail::ipow(self, other);
     }
 
@@ -987,7 +1015,7 @@ namespace xsimd {
       * ====================================================
       */
     template <class A, class T>
-    batch<T, A> ldexp(const batch<T, A>& self, const batch<as_integer_t<T>, A>& other, requires_arch<generic>) {
+    inline batch<T, A> ldexp(const batch<T, A>& self, const batch<as_integer_t<T>, A>& other, requires_arch<generic>) {
         using batch_type = batch<T, A>;
         using itype = as_integer_t<batch_type>;
         itype ik = other + constants::maxexponent<T>();
@@ -996,7 +1024,8 @@ namespace xsimd {
     }
 
     // lgamma
-    template<class A, class T> batch<T, A> lgamma(batch<T, A> const& self, requires_arch<generic>);
+    template<class A, class T>
+    inline batch<T, A> lgamma(batch<T, A> const& self, requires_arch<generic>);
 
     namespace detail {
     /* origin: boost/simd/arch/common/detail/generic/gammaln_kernel.hpp */
@@ -1009,77 +1038,79 @@ namespace xsimd {
      * ====================================================
      */
     template<class A>
-            static inline batch<float, A> gammalnB(const batch<float, A>& x)
-            {
-                return horner<batch<float, A>,
-                              0x3ed87730,  //    4.227843421859038E-001
-                              0x3ea51a64,  //    3.224669577325661E-001,
-                              0xbd89f07e,  //   -6.735323259371034E-002,
-                              0x3ca89ed8,  //    2.058355474821512E-002,
-                              0xbbf164fd,  //   -7.366775108654962E-003,
-                              0x3b3ba883,  //    2.863437556468661E-003,
-                              0xbaabeab1,  //   -1.311620815545743E-003,
-                              0x3a1ebb94  //    6.055172732649237E-004
-                              >(x);
-            }
+    static inline batch<float, A> gammalnB(const batch<float, A>& x)
+    {
+            return horner<batch<float, A>,
+                          0x3ed87730,  //    4.227843421859038E-001
+                          0x3ea51a64,  //    3.224669577325661E-001,
+                          0xbd89f07e,  //   -6.735323259371034E-002,
+                          0x3ca89ed8,  //    2.058355474821512E-002,
+                          0xbbf164fd,  //   -7.366775108654962E-003,
+                          0x3b3ba883,  //    2.863437556468661E-003,
+                          0xbaabeab1,  //   -1.311620815545743E-003,
+                          0x3a1ebb94  //    6.055172732649237E-004
+                          >(x);
+     }
 
     template<class A>
-            static inline batch<float, A> gammalnC(const batch<float, A>& x)
-            {
-                return horner<batch<float, A>,
-                              0xbf13c468,  //   -5.772156501719101E-001
-                              0x3f528d34,  //    8.224670749082976E-001,
-                              0xbecd27a8,  //   -4.006931650563372E-001,
-                              0x3e8a898b,  //    2.705806208275915E-001,
-                              0xbe53c04f,  //   -2.067882815621965E-001,
-                              0x3e2d4dab,  //    1.692415923504637E-001,
-                              0xbe22d329,  //   -1.590086327657347E-001,
-                              0x3e0c3c4f  //    1.369488127325832E-001
-                              >(x);
-            }
+    static inline batch<float, A> gammalnC(const batch<float, A>& x)
+    {
+        return horner<batch<float, A>,
+                      0xbf13c468,  //   -5.772156501719101E-001
+                      0x3f528d34,  //    8.224670749082976E-001,
+                      0xbecd27a8,  //   -4.006931650563372E-001,
+                      0x3e8a898b,  //    2.705806208275915E-001,
+                      0xbe53c04f,  //   -2.067882815621965E-001,
+                      0x3e2d4dab,  //    1.692415923504637E-001,
+                      0xbe22d329,  //   -1.590086327657347E-001,
+                      0x3e0c3c4f  //    1.369488127325832E-001
+                      >(x);
+    }
 
     template<class A>
-            static inline batch<float, A> gammaln2(const batch<float, A>& x)
-            {
-                return horner<batch<float, A>,
-                              0x3daaaa94,  //   8.333316229807355E-002f
-                              0xbb358701,  //  -2.769887652139868E-003f,
-                              0x3a31fd69  //   6.789774945028216E-004f
-                              >(x);
-            }
-    template<class A>
-            static inline batch<double, A> gammaln1(const batch<double, A>& x)
-            {
-                return horner<batch<double, A>,
-                              0xc12a0c675418055eull,  //  -8.53555664245765465627E5
-                              0xc13a45890219f20bull,  //  -1.72173700820839662146E6,
-                              0xc131bc82f994db51ull,  //  -1.16237097492762307383E6,
-                              0xc1143d73f89089e5ull,  //  -3.31612992738871184744E5,
-                              0xc0e2f234355bb93eull,  //  -3.88016315134637840924E4,
-                              0xc09589018ff36761ull  //  -1.37825152569120859100E3
-                              >(x) /
-                    horner<batch<double, A>,
-                           0xc13ece4b6a11e14aull,  //  -2.01889141433532773231E6
-                           0xc1435255892ff34cull,  //  -2.53252307177582951285E6,
-                           0xc131628671950043ull,  //  -1.13933444367982507207E6,
-                           0xc10aeb84b9744c9bull,  //  -2.20528590553854454839E5,
-                           0xc0d0aa0d7b89d757ull,  //  -1.70642106651881159223E4,
-                           0xc075fd0d1cf312b2ull,  //  -3.51815701436523470549E2,
-                           0x3ff0000000000000ull  //   1.00000000000000000000E0
-                           >(x);
-            }
+    static inline batch<float, A> gammaln2(const batch<float, A>& x)
+    {
+        return horner<batch<float, A>,
+                      0x3daaaa94,  //   8.333316229807355E-002f
+                      0xbb358701,  //  -2.769887652139868E-003f,
+                      0x3a31fd69  //   6.789774945028216E-004f
+                      >(x);
+    }
 
     template<class A>
-            static inline batch<double, A> gammalnA(const batch<double, A>& x)
-            {
-                return horner<batch<double, A>,
-                              0x3fb555555555554bull,  //    8.33333333333331927722E-2
-                              0xbf66c16c16b0a5a1ull,  //   -2.77777777730099687205E-3,
-                              0x3f4a019f20dc5ebbull,  //    7.93650340457716943945E-4,
-                              0xbf437fbdb580e943ull,  //   -5.95061904284301438324E-4,
-                              0x3f4a985027336661ull  //    8.11614167470508450300E-4
-                              >(x);
-            }
+    static inline batch<double, A> gammaln1(const batch<double, A>& x)
+    {
+        return horner<batch<double, A>,
+                      0xc12a0c675418055eull,  //  -8.53555664245765465627E5
+                      0xc13a45890219f20bull,  //  -1.72173700820839662146E6,
+                      0xc131bc82f994db51ull,  //  -1.16237097492762307383E6,
+                      0xc1143d73f89089e5ull,  //  -3.31612992738871184744E5,
+                      0xc0e2f234355bb93eull,  //  -3.88016315134637840924E4,
+                      0xc09589018ff36761ull  //  -1.37825152569120859100E3
+                      >(x) /
+            horner<batch<double, A>,
+                   0xc13ece4b6a11e14aull,  //  -2.01889141433532773231E6
+                   0xc1435255892ff34cull,  //  -2.53252307177582951285E6,
+                   0xc131628671950043ull,  //  -1.13933444367982507207E6,
+                   0xc10aeb84b9744c9bull,  //  -2.20528590553854454839E5,
+                   0xc0d0aa0d7b89d757ull,  //  -1.70642106651881159223E4,
+                   0xc075fd0d1cf312b2ull,  //  -3.51815701436523470549E2,
+                   0x3ff0000000000000ull  //   1.00000000000000000000E0
+                   >(x);
+    }
+
+    template<class A>
+    static inline batch<double, A> gammalnA(const batch<double, A>& x)
+    {
+        return horner<batch<double, A>,
+                      0x3fb555555555554bull,  //    8.33333333333331927722E-2
+                      0xbf66c16c16b0a5a1ull,  //   -2.77777777730099687205E-3,
+                      0x3f4a019f20dc5ebbull,  //    7.93650340457716943945E-4,
+                      0xbf437fbdb580e943ull,  //   -5.95061904284301438324E-4,
+                      0x3f4a985027336661ull  //    8.11614167470508450300E-4
+                      >(x);
+    }
+
     /* origin: boost/simd/arch/common/simd/function/gammaln.hpp */
     /*
      * ====================================================
@@ -1089,129 +1120,129 @@ namespace xsimd {
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-        template <class B>
-        struct lgamma_impl;
+      template <class B>
+      struct lgamma_impl;
 
-        template <class A>
-        struct lgamma_impl<batch<float, A>>
-        {
-          using batch_type = batch<float, A>;
-            static inline batch_type compute(const batch_type& a)
-            {
-                auto inf_result = (a <= batch_type(0.)) && is_flint(a);
-                batch_type x = select(inf_result, constants::nan<batch_type>(), a);
-                batch_type q = abs(x);
+      template <class A>
+      struct lgamma_impl<batch<float, A>>
+      {
+        using batch_type = batch<float, A>;
+          static inline batch_type compute(const batch_type& a)
+          {
+              auto inf_result = (a <= batch_type(0.)) && is_flint(a);
+              batch_type x = select(inf_result, constants::nan<batch_type>(), a);
+              batch_type q = abs(x);
 #ifndef XSIMD_NO_INFINITIES
-                inf_result = (x == constants::infinity<batch_type>()) || inf_result;
+              inf_result = (x == constants::infinity<batch_type>()) || inf_result;
 #endif
-                auto ltza = a < batch_type(0.);
-                batch_type r;
-                batch_type r1 = other(q);
-                if (any(ltza))
-                {
-                    r = select(inf_result, constants::infinity<batch_type>(), negative(q, r1));
-                    if (all(ltza))
-                        return r;
-                }
-                batch_type r2 = select(ltza, r, r1);
-                return select(a == constants::minusinfinity<batch_type>(), constants::nan<batch_type>(), select(inf_result, constants::infinity<batch_type>(), r2));
-            }
+              auto ltza = a < batch_type(0.);
+              batch_type r;
+              batch_type r1 = other(q);
+              if (any(ltza))
+              {
+                  r = select(inf_result, constants::infinity<batch_type>(), negative(q, r1));
+                  if (all(ltza))
+                      return r;
+              }
+              batch_type r2 = select(ltza, r, r1);
+              return select(a == constants::minusinfinity<batch_type>(), constants::nan<batch_type>(), select(inf_result, constants::infinity<batch_type>(), r2));
+          }
 
-        private:
+      private:
 
-            static inline batch_type negative(const batch_type& q, const batch_type& w)
-            {
-                batch_type p = floor(q);
-                batch_type z = q - p;
-                auto test2 = z < batch_type(0.5);
-                z = select(test2, z - batch_type(1.), z);
-                z = q * sin(z, trigo_pi_tag());
-                return -log(constants::invpi<batch_type>() * abs(z)) - w;
-            }
+          static inline batch_type negative(const batch_type& q, const batch_type& w)
+          {
+              batch_type p = floor(q);
+              batch_type z = q - p;
+              auto test2 = z < batch_type(0.5);
+              z = select(test2, z - batch_type(1.), z);
+              z = q * sin(z, trigo_pi_tag());
+              return -log(constants::invpi<batch_type>() * abs(z)) - w;
+          }
 
-            static inline batch_type other(const batch_type& x)
-            {
-                auto xlt650 = (x < batch_type(6.5));
-                batch_type r0x = x;
-                batch_type r0z = x;
-                batch_type r0s = batch_type(1.);
-                batch_type r1 = batch_type(0.);
-                batch_type p = constants::nan<batch_type>();
-                if (any(xlt650))
-                {
-                    batch_type z = batch_type(1.);
-                    batch_type tx = select(xlt650, x, batch_type(0.));
-                    batch_type nx = batch_type(0.);
-                    const batch_type _075 = batch_type(0.75);
-                    const batch_type _150 = batch_type(1.50);
-                    const batch_type _125 = batch_type(1.25);
-                    const batch_type _250 = batch_type(2.50);
-                    auto xge150 = (x >= _150);
-                    auto txgt250 = (tx > _250);
+          static inline batch_type other(const batch_type& x)
+          {
+              auto xlt650 = (x < batch_type(6.5));
+              batch_type r0x = x;
+              batch_type r0z = x;
+              batch_type r0s = batch_type(1.);
+              batch_type r1 = batch_type(0.);
+              batch_type p = constants::nan<batch_type>();
+              if (any(xlt650))
+              {
+                  batch_type z = batch_type(1.);
+                  batch_type tx = select(xlt650, x, batch_type(0.));
+                  batch_type nx = batch_type(0.);
+                  const batch_type _075 = batch_type(0.75);
+                  const batch_type _150 = batch_type(1.50);
+                  const batch_type _125 = batch_type(1.25);
+                  const batch_type _250 = batch_type(2.50);
+                  auto xge150 = (x >= _150);
+                  auto txgt250 = (tx > _250);
 
-                    // x >= 1.5
-                    while (any(xge150 && txgt250))
-                    {
-                        nx = select(txgt250, nx - batch_type(1.), nx);
-                        tx = select(txgt250, x + nx, tx);
-                        z = select(txgt250, z * tx, z);
-                        txgt250 = (tx > _250);
-                    }
-                    r0x = select(xge150, x + nx - batch_type(2.), x);
-                    r0z = select(xge150, z, r0z);
-                    r0s = select(xge150, batch_type(1.), r0s);
+                  // x >= 1.5
+                  while (any(xge150 && txgt250))
+                  {
+                      nx = select(txgt250, nx - batch_type(1.), nx);
+                      tx = select(txgt250, x + nx, tx);
+                      z = select(txgt250, z * tx, z);
+                      txgt250 = (tx > _250);
+                  }
+                  r0x = select(xge150, x + nx - batch_type(2.), x);
+                  r0z = select(xge150, z, r0z);
+                  r0s = select(xge150, batch_type(1.), r0s);
 
-                    // x >= 1.25 && x < 1.5
-                    auto xge125 = (x >= _125);
-                    auto xge125t = xge125 && !xge150;
-                    if (any(xge125))
-                    {
-                        r0x = select(xge125t, x - batch_type(1.), r0x);
-                        r0z = select(xge125t, z * x, r0z);
-                        r0s = select(xge125t, batch_type(-1.), r0s);
-                    }
+                  // x >= 1.25 && x < 1.5
+                  auto xge125 = (x >= _125);
+                  auto xge125t = xge125 && !xge150;
+                  if (any(xge125))
+                  {
+                      r0x = select(xge125t, x - batch_type(1.), r0x);
+                      r0z = select(xge125t, z * x, r0z);
+                      r0s = select(xge125t, batch_type(-1.), r0s);
+                  }
 
-                    // x >= 0.75 && x < 1.5
-                    batch_bool<float, A> kernelC(false);
-                    auto xge075 = (x >= _075);
-                    auto xge075t = xge075 && !xge125;
-                    if (any(xge075t))
-                    {
-                        kernelC = xge075t;
-                        r0x = select(xge075t, x - batch_type(1.), x);
-                        r0z = select(xge075t, batch_type(1.), r0z);
-                        r0s = select(xge075t, batch_type(-1.), r0s);
-                        p = gammalnC(r0x);
-                    }
+                  // x >= 0.75 && x < 1.5
+                  batch_bool<float, A> kernelC(false);
+                  auto xge075 = (x >= _075);
+                  auto xge075t = xge075 && !xge125;
+                  if (any(xge075t))
+                  {
+                      kernelC = xge075t;
+                      r0x = select(xge075t, x - batch_type(1.), x);
+                      r0z = select(xge075t, batch_type(1.), r0z);
+                      r0s = select(xge075t, batch_type(-1.), r0s);
+                      p = gammalnC(r0x);
+                  }
 
-                    // tx < 1.5 && x < 0.75
-                    auto txlt150 = (tx < _150) && !xge075;
-                    if (any(txlt150))
-                    {
-                        auto orig = txlt150;
-                        while (any(txlt150))
-                        {
-                            z = select(txlt150, z * tx, z);
-                            nx = select(txlt150, nx + batch_type(1.), nx);
-                            tx = select(txlt150, x + nx, tx);
-                            txlt150 = (tx < _150) && !xge075;
-                        }
-                        r0x = select(orig, r0x + nx - batch_type(2.), r0x);
-                        r0z = select(orig, z, r0z);
-                        r0s = select(orig, batch_type(-1.), r0s);
-                    }
-                    p = select(kernelC, p, gammalnB(r0x));
-                    if (all(xlt650))
-                        return fma(r0x, p, r0s * log(abs(r0z)));
-                }
-                r0z = select(xlt650, abs(r0z), x);
-                batch_type m = log(r0z);
-                r1 = fma(r0x, p, r0s * m);
-                batch_type r2 = fma(x - batch_type(0.5), m, constants::logsqrt2pi<batch_type>() - x);
-                r2 += gammaln2(batch_type(1.) / (x * x)) / x;
-                return select(xlt650, r1, r2);
-            }
-        };
+                  // tx < 1.5 && x < 0.75
+                  auto txlt150 = (tx < _150) && !xge075;
+                  if (any(txlt150))
+                  {
+                      auto orig = txlt150;
+                      while (any(txlt150))
+                      {
+                          z = select(txlt150, z * tx, z);
+                          nx = select(txlt150, nx + batch_type(1.), nx);
+                          tx = select(txlt150, x + nx, tx);
+                          txlt150 = (tx < _150) && !xge075;
+                      }
+                      r0x = select(orig, r0x + nx - batch_type(2.), r0x);
+                      r0z = select(orig, z, r0z);
+                      r0s = select(orig, batch_type(-1.), r0s);
+                  }
+                  p = select(kernelC, p, gammalnB(r0x));
+                  if (all(xlt650))
+                      return fma(r0x, p, r0s * log(abs(r0z)));
+              }
+              r0z = select(xlt650, abs(r0z), x);
+              batch_type m = log(r0z);
+              r1 = fma(r0x, p, r0s * m);
+              batch_type r2 = fma(x - batch_type(0.5), m, constants::logsqrt2pi<batch_type>() - x);
+              r2 += gammaln2(batch_type(1.) / (x * x)) / x;
+              return select(xlt650, r1, r2);
+          }
+      };
 
         template <class A>
         struct lgamma_impl<batch<double, A>>
@@ -1295,7 +1326,8 @@ namespace xsimd {
         };
     }
 
-    template<class A, class T> batch<T, A> lgamma(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> lgamma(batch<T, A> const& self, requires_arch<generic>) {
       return detail::lgamma_impl<batch<T, A>>::compute(self);
     }
 
@@ -1310,7 +1342,8 @@ namespace xsimd {
              * (See copy at http://boost.org/LICENSE_1_0.txt)
              * ====================================================
              */
-    template<class A> batch<float, A> log(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> log(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
       using i_type = as_integer_t<batch_type>;
       batch_type x = self;
@@ -1347,7 +1380,8 @@ namespace xsimd {
       return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
-    template<class A> batch<double, A> log(batch<double, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<double, A> log(batch<double, A> const& self, requires_arch<generic>) {
                using batch_type = batch<double, A>;
                 using i_type = as_integer_t<batch_type>;
 
@@ -1395,13 +1429,14 @@ namespace xsimd {
     }
 
     template <class A, class T>
-    batch<std::complex<T>, A> log(const batch<std::complex<T>, A>& z, requires_arch<generic>)
+    inline batch<std::complex<T>, A> log(const batch<std::complex<T>, A>& z, requires_arch<generic>)
     {
         return batch<std::complex<T>, A>(log(abs(z)), atan2(z.imag(), z.real()));
     }
 
     // log2
-    template<class A> batch<float, A> log2(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> log2(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 using i_type = as_integer_t<batch_type>;
                 batch_type x = self;
@@ -1437,7 +1472,9 @@ namespace xsimd {
 #endif
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
-    template<class A> batch<double, A> log2(batch<double, A> const& self, requires_arch<generic>) {
+
+    template<class A>
+    inline batch<double, A> log2(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 using i_type = as_integer_t<batch_type>;
                 batch_type x = self;
@@ -1488,6 +1525,7 @@ namespace xsimd {
 #endif
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
+
     namespace detail {
         template <class T, class A>
         inline batch<T, A> logN_complex_impl(const batch<T, A>& z, typename batch<T, A>::value_type base)
@@ -1498,7 +1536,8 @@ namespace xsimd {
         }
   }
 
-    template<class A, class T> batch<std::complex<T>, A> log2(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<std::complex<T>, A> log2(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
       return detail::logN_complex_impl(self, std::log(2));
     }
 
@@ -1514,7 +1553,8 @@ namespace xsimd {
              * is preserved.
              * ====================================================
              */
-    template<class A> batch<float, A> log10(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> log10(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 const batch_type
                     ivln10hi(4.3432617188e-01f),
@@ -1561,7 +1601,9 @@ namespace xsimd {
 #endif
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
-    template<class A> batch<double, A> log10(batch<double, A> const& self, requires_arch<generic>) {
+
+    template<class A>
+    inline batch<double, A> log10(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 const batch_type
                     ivln10hi(4.34294481878168880939e-01),
@@ -1619,8 +1661,8 @@ namespace xsimd {
                 return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
-        template <class A, class T>
-            batch<std::complex<T>, A> log10(const batch<std::complex<T>, A>& z, requires_arch<generic>)
+    template <class A, class T>
+    inline batch<std::complex<T>, A> log10(const batch<std::complex<T>, A>& z, requires_arch<generic>)
             {
                 return detail::logN_complex_impl(z, std::log(10));
             }
@@ -1635,7 +1677,8 @@ namespace xsimd {
              * (See copy at http://boost.org/LICENSE_1_0.txt)
              * ====================================================
              */
-    template<class A> batch<float, A> log1p(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> log1p(batch<float, A> const& self, requires_arch<generic>) {
       using batch_type = batch<float, A>;
                 using i_type = as_integer_t<batch_type>;
                 const batch_type uf = self + batch_type(1.);
@@ -1663,7 +1706,9 @@ namespace xsimd {
 #endif
                 return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
-    template<class A> batch<double, A> log1p(batch<double, A> const& self, requires_arch<generic>) {
+
+    template<class A>
+    inline batch<double, A> log1p(batch<double, A> const& self, requires_arch<generic>) {
       using batch_type = batch<double, A>;
                 using i_type = as_integer_t<batch_type>;
                 const batch_type uf = self + batch_type(1.);
@@ -1700,7 +1745,8 @@ namespace xsimd {
                 return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
     }
 
-    template<class A, class T> batch<std::complex<T>, A> log1p(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<std::complex<T>, A> log1p(batch<std::complex<T>, A> const& self, requires_arch<generic>) {
         using batch_type = batch<std::complex<T>, A>;
         using real_batch = typename batch_type::real_batch;
         batch_type u = 1 + self;
@@ -1715,18 +1761,19 @@ namespace xsimd {
 
     // mod
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> mod(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+    inline batch<T, A> mod(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       return detail::apply([](T x, T y) -> T { return x % y;}, self, other);
     }
 
 
     // nearbyint
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> nearbyint(batch<T, A> const& self, requires_arch<generic>) {
+    inline batch<T, A> nearbyint(batch<T, A> const& self, requires_arch<generic>) {
       return self;
     }
     namespace detail {
-      template<class A, class T> batch<T, A> nearbyintf(batch<T, A> const& self) {
+      template<class A, class T>
+      inline batch<T, A> nearbyintf(batch<T, A> const& self) {
         using batch_type = batch<T, A>;
         batch_type s = bitofsign(self);
         batch_type v = self ^ s;
@@ -1744,10 +1791,12 @@ namespace xsimd {
         return s ^ select(v < t2n, d, v);
       }
     }
-    template<class A> batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<generic>) {
       return detail::nearbyintf(self);
     }
-    template<class A> batch<double, A> nearbyint(batch<double, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<double, A> nearbyint(batch<double, A> const& self, requires_arch<generic>) {
       return detail::nearbyintf(self);
     }
 
@@ -1805,7 +1854,8 @@ namespace xsimd {
             }
         };
     }
-    template<class A, class T> batch<T, A> nextafter(batch<T, A> const& from, batch<T, A> const& to, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> nextafter(batch<T, A> const& from, batch<T, A> const& to, requires_arch<generic>) {
       using kernel = detail::nextafter_kernel<T, A>;
       return select(from == to, from,
                     select(to > from, kernel::next(from), kernel::prev(from)));
@@ -1822,7 +1872,8 @@ namespace xsimd {
      * (See copy at http://boost.org/LICENSE_1_0.txt)
      * ====================================================
      */
-    template<class A, class T> batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
         using batch_type = batch<T, A>;
         auto negx = self < batch_type(0.);
         batch_type z = exp(other * log(abs(self)));
@@ -1831,55 +1882,57 @@ namespace xsimd {
         return select(invalid, constants::nan<batch_type>(), z);
     }
 
-        template <class A, class T>
-        inline batch<std::complex<T>, A> pow(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& z, requires_arch<generic>)
-        {
-            using cplx_batch = batch<std::complex<T>, A>;
-            using real_batch = typename cplx_batch::real_batch;
-            real_batch absa = abs(a);
-            real_batch arga = arg(a);
-            real_batch x = z.real();
-            real_batch y = z.imag();
-            real_batch r = pow(absa, x);
-            real_batch theta = x * arga;
-            real_batch ze(0);
-            auto cond = (y == ze);
-            r = select(cond, r, r * exp(-y * arga));
-            theta = select(cond, theta, theta + y * log(absa));
-            return select(absa == ze, cplx_batch(ze), cplx_batch(r * cos(theta), r * sin(theta)));
-        }
+    template <class A, class T>
+    inline batch<std::complex<T>, A> pow(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& z, requires_arch<generic>)
+    {
+        using cplx_batch = batch<std::complex<T>, A>;
+        using real_batch = typename cplx_batch::real_batch;
+        real_batch absa = abs(a);
+        real_batch arga = arg(a);
+        real_batch x = z.real();
+        real_batch y = z.imag();
+        real_batch r = pow(absa, x);
+        real_batch theta = x * arga;
+        real_batch ze(0);
+        auto cond = (y == ze);
+        r = select(cond, r, r * exp(-y * arga));
+        theta = select(cond, theta, theta + y * log(absa));
+        return select(absa == ze, cplx_batch(ze), cplx_batch(r * cos(theta), r * sin(theta)));
+    }
 
 
     // remainder
     template<class A>
-    batch<float, A> remainder(batch<float, A> const& self, batch<float, A> const& other, requires_arch<generic>) {
+    inline batch<float, A> remainder(batch<float, A> const& self, batch<float, A> const& other, requires_arch<generic>) {
       return fnma(nearbyint(self / other), other, self);
     }
     template<class A>
-    batch<double, A> remainder(batch<double, A> const& self, batch<double, A> const& other, requires_arch<generic>) {
+    inline batch<double, A> remainder(batch<double, A> const& self, batch<double, A> const& other, requires_arch<generic>) {
       return fnma(nearbyint(self / other), other, self);
     }
     template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
-    batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
+    inline batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) {
       auto mod = self % other;
       return select(mod <= other / 2, mod, mod - other);
     }
 
     // select
     template<class A, class T>
-    batch<std::complex<T>, A> select(batch_bool<T, A> const& cond, batch<std::complex<T>, A> const& true_br, batch<std::complex<T>, A> const& false_br, requires_arch<generic>) {
+    inline batch<std::complex<T>, A> select(batch_bool<T, A> const& cond, batch<std::complex<T>, A> const& true_br, batch<std::complex<T>, A> const& false_br, requires_arch<generic>) {
       return {select(cond, true_br.real(), false_br.real()), select(cond, true_br.imag(), false_br.imag())};
     }
 
     // sign
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> sign(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    inline batch<T, A> sign(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
       batch_type res = select(self > batch_type(0), batch_type(1), batch_type(0)) - select(self < batch_type(0), batch_type(1), batch_type(0));
       return res;
     }
 
     namespace detail {
-    template<class T, class A> batch<T, A> signf(batch<T, A> const& self) {
+    template<class T, class A>
+    inline batch<T, A> signf(batch<T, A> const& self) {
       using batch_type = batch<T, A>;
       batch_type res = select(self > batch_type(0.f), batch_type(1.f), batch_type(0.f)) - select(self < batch_type(0.f), batch_type(1.f), batch_type(0.f));
 #ifdef XSIMD_NO_NANS
@@ -1890,10 +1943,12 @@ namespace xsimd {
     }
     }
 
-    template<class A> batch<float, A> sign(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> sign(batch<float, A> const& self, requires_arch<generic>) {
       return detail::signf(self);
     }
-    template<class A> batch<double, A> sign(batch<double, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<double, A> sign(batch<double, A> const& self, requires_arch<generic>) {
       return detail::signf(self);
     }
         template <class A, class T>
@@ -1909,13 +1964,15 @@ namespace xsimd {
         }
 
     // signnz
-    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type> batch<T, A> signnz(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T, class=typename std::enable_if<std::is_integral<T>::value, void>::type>
+    inline batch<T, A> signnz(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
       return (self >> (sizeof(T) * 8 - 1)) | batch_type(1.);
     }
 
     namespace detail {
-    template<class T, class A> batch<T, A> signnzf(batch<T, A> const& self) {
+    template<class T, class A>
+    inline batch<T, A> signnzf(batch<T, A> const& self) {
       using batch_type = batch<T, A>;
 #ifndef XSIMD_NO_NANS
                 return select(isnan(self), constants::nan<batch_type>(), batch_type(1.) | (constants::signmask<batch_type>() & self));
@@ -1925,15 +1982,18 @@ namespace xsimd {
     }
     }
 
-    template<class A> batch<float, A> signnz(batch<float, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<float, A> signnz(batch<float, A> const& self, requires_arch<generic>) {
       return detail::signnzf(self);
     }
-    template<class A> batch<double, A> signnz(batch<double, A> const& self, requires_arch<generic>) {
+    template<class A>
+    inline batch<double, A> signnz(batch<double, A> const& self, requires_arch<generic>) {
       return detail::signnzf(self);
     }
 
     // sqrt
-    template<class A, class T> batch<std::complex<T>, A> sqrt(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<std::complex<T>, A> sqrt(batch<std::complex<T>, A> const& z, requires_arch<generic>) {
 
                 constexpr T csqrt_scale_factor = std::is_same<T, float>::value?6.7108864e7f:1.8014398509481984e16;
                 constexpr T csqrt_scale = std::is_same<T, float>::value?1.220703125e-4f:7.450580596923828125e-9;
@@ -2134,7 +2194,7 @@ namespace xsimd {
      * ====================================================
      */
         template <class B>
-        B tgamma_large_negative(const B& a)
+        inline B tgamma_large_negative(const B& a)
         {
             B st = stirling(a);
             B p = floor(a);
@@ -2148,7 +2208,7 @@ namespace xsimd {
         }
 
         template <class B, class BB>
-        B tgamma_other(const B& a, const BB& test)
+        inline B tgamma_other(const B& a, const BB& test)
         {
             B x = select(test, B(2.), a);
 #ifndef XSIMD_NO_INFINITIES
@@ -2186,7 +2246,8 @@ namespace xsimd {
         }
     }
 
-    template<class A, class T> batch<T, A> tgamma(batch<T, A> const& self, requires_arch<generic>) {
+    template<class A, class T>
+    inline batch<T, A> tgamma(batch<T, A> const& self, requires_arch<generic>) {
       using batch_type = batch<T, A>;
             auto nan_result = (self < batch_type(0.) && is_flint(self));
 #ifndef XSIMD_NO_INVALIDS
