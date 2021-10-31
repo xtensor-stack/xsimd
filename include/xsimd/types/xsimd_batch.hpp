@@ -439,6 +439,7 @@ namespace xsimd
     batch<T, A>::batch(std::initializer_list<T> data)
         : batch(data.begin(), detail::make_index_sequence<size>())
     {
+        assert(data.size() == size && "consistent initialization");
     }
 
     template<class T, class A>
@@ -772,6 +773,7 @@ namespace xsimd
     batch_bool<T, A>::batch_bool(std::initializer_list<bool> data)
         : batch_bool(data.begin(), detail::make_index_sequence<size>())
     {
+        assert(data.size() == size && "consistent initialization");
     }
 
     /*******************************
@@ -925,6 +927,7 @@ namespace xsimd
     template <class T, class A>
     batch<std::complex<T>, A>::batch(std::initializer_list<value_type> data)
     { 
+        assert(data.size() == size && "consistent initialization");
         *this = load_unaligned(data.begin());
     }
 
@@ -1052,6 +1055,7 @@ namespace xsimd
     template<bool i3ec>
     batch<std::complex<T>, A>::batch(std::initializer_list<xtl::xcomplex<T, T, i3ec>> data)
     {
+        assert(data.size() == size && "consistent initialization");
         *this = load_unaligned(data.begin());
     }
 
