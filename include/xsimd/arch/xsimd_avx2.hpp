@@ -242,6 +242,26 @@ namespace xsimd
             __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(3, 2, 2, 0));
             return _mm256_blend_pd(tmp0, tmp1, 10);
         }
+        // convert
+        namespace detail
+        {
+
+            template <class A>
+            inline batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<avx2>)
+            {
+                // see https://stackoverflow.com/questions/34066228/how-to-perform-uint32-float-conversion-with-sse
+                __m256i msk_lo = _mm256_set1_epi32(0xFFFF);
+                __m256 cnst65536f = _mm256_set1_ps(65536.0f);
+
+                __m256i v_lo = _mm256_and_si256(v, msk_lo); /* extract the 16 lowest significant bits of self                             */
+                __m256i v_hi = _mm256_srli_epi32(v, 16); /* 16 most significant bits of v                                                 */
+                __m256 v_lo_flt = _mm256_cvtepi32_ps(v_lo); /* No rounding                                                                   */
+                __m256 v_hi_flt = _mm256_cvtepi32_ps(v_hi); /* No rounding                                                                   */
+                v_hi_flt = _mm256_mul_ps(cnst65536f, v_hi_flt); /* No rounding                                                                   */
+                return _mm256_add_ps(v_hi_flt, v_lo_flt); /* Rounding may occur here, mul and add may fuse to fma for haswell and newer    */
+            }
+
+        }
 
         // eq
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>

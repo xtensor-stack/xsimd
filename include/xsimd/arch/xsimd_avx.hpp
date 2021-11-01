@@ -491,6 +491,7 @@ namespace xsimd
                 return get_half_complex_d<1>(self.real(), self.imag());
             }
         }
+
         // convert
         namespace detail
         {
@@ -499,11 +500,28 @@ namespace xsimd
             {
                 return _mm256_cvtepi32_ps(self);
             }
+
+            template <class A>
+            inline batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<avx>)
+            {
+                // see https://stackoverflow.com/questions/34066228/how-to-perform-uint32-float-conversion-with-sse
+                __m256i msk_lo = _mm256_set1_epi32(0xFFFF);
+                __m256 cnst65536f = _mm256_set1_ps(65536.0f);
+
+                __m256i v_lo = bitwise_and(batch<uint32_t, A>(v), batch<uint32_t, A>(msk_lo)); /* extract the 16 lowest significant bits of self                             */
+                __m256i v_hi = bitwise_rshift(batch<uint32_t, A>(v), 16, avx {}); /* 16 most significant bits of v                                                 */
+                __m256 v_lo_flt = _mm256_cvtepi32_ps(v_lo); /* No rounding                                                                   */
+                __m256 v_hi_flt = _mm256_cvtepi32_ps(v_hi); /* No rounding                                                                   */
+                v_hi_flt = _mm256_mul_ps(cnst65536f, v_hi_flt); /* No rounding                                                                   */
+                return _mm256_add_ps(v_hi_flt, v_lo_flt); /* Rounding may occur here, mul and add may fuse to fma for haswell and newer    */
+            }
+
             template <class A>
             inline batch<int32_t, A> fast_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires_arch<avx>)
             {
                 return _mm256_cvttps_epi32(self);
             }
+
         }
 
         // div
