@@ -15,7 +15,7 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     project(xsimd-benchmark)
 
     find_package(xsimd REQUIRED CONFIG)
-    set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIR})
+    set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIRS})
 endif ()
 
 if(NOT CMAKE_BUILD_TYPE)
