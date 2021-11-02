@@ -51,6 +51,10 @@ namespace detail
     {
         return true;
     }
+
+    template <typename Arch, typename From, typename To>
+    using uses_fast_cast = std::is_same<xsimd::kernel::detail::conversion_type<Arch, From, To>,
+                                        xsimd::kernel::detail::with_fast_conversion>;
 }
 
 template <class CP>
@@ -347,5 +351,16 @@ TYPED_TEST(batch_cast_test, cast_sizeshift1)
 TYPED_TEST(batch_cast_test, cast_sizeshift2)
 {
     this->test_cast_sizeshift2();
+}
+#endif
+
+#if XSIMD_WITH_SSE2
+TEST(batch_cast, uses_fast_cast)
+{
+    using A = xsimd::default_arch;
+    static_assert(detail::uses_fast_cast<A, int32_t, float>::value,
+                  "expected int32 to float conversion to use fast_cast");
+    static_assert(detail::uses_fast_cast<A, float, int32_t>::value,
+                  "expected float to int32 conversion to use fast_cast");
 }
 #endif
