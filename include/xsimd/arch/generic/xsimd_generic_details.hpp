@@ -136,7 +136,9 @@ namespace xsimd {
 
       template <class A, class From, class To>
       struct conversion_type_impl<A, From, To,
-                void_t<decltype(fast_cast(std::declval<const From&>(), std::declval<const To&>(), std::declval<const A&>()))>>
+                void_t<decltype(fast_cast(std::declval<const batch<From, A>&>(),
+                                          std::declval<const batch<To, A>&>(),
+                                          std::declval<const A&>()))>>
       {
           using type = with_fast_conversion;
       };
