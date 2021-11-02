@@ -2283,19 +2283,6 @@ namespace xsimd
             return vcvtq_f32_s32(x);
         }
 
-        /*************
-         * fast_cast *
-         *************/
-
-        namespace detail
-        {
-            template <class Tin, class Tout, class A>
-            inline batch<Tout, A> fast_cast(batch<Tin, A> const& in, batch<Tout, A> const& out, requires_arch<neon>)
-            {
-                return bitwise_cast(in, out, A{});
-            }
-        }
-
         /*********
          * isnan *
          *********/
