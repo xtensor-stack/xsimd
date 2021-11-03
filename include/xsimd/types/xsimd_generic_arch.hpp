@@ -12,6 +12,8 @@
 #ifndef XSIMD_GENERIC_ARCH_HPP
 #define XSIMD_GENERIC_ARCH_HPP
 
+#include "../config/xsimd_config.hpp"
+
 /**
  * @defgroup arch
  * */

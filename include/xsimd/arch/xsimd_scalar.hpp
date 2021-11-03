@@ -17,8 +17,16 @@
 #include <limits>
 #include <type_traits>
 
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+#include "xtl/xcomplex.hpp"
+#endif
+
 namespace xsimd
 {
+    template <class T, class A>
+    class batch;
+    template <class T, class A>
+    class batch_bool;
 
     using std::abs;
 

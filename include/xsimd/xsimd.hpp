@@ -20,8 +20,10 @@
 
 #include "arch/xsimd_scalar.hpp"
 #include "memory/xsimd_aligned_allocator.hpp"
-#include "types/xsimd_api.hpp"
 #include "types/xsimd_batch.hpp"
 #include "types/xsimd_batch_constant.hpp"
 #include "types/xsimd_traits.hpp"
+
+// This include must come last
+#include "types/xsimd_api.hpp"
 #endif

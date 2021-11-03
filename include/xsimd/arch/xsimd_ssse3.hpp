@@ -16,6 +16,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_ssse3_register.hpp"
+#include "../types/xsimd_utils.hpp"
 
 namespace xsimd
 {

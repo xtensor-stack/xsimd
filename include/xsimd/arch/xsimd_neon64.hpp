@@ -21,6 +21,9 @@
 
 namespace xsimd
 {
+    template <class batch_type, bool... Values>
+    struct batch_bool_constant;
+
     namespace kernel
     {
         using namespace types;
