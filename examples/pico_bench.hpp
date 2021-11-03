@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 // This file is derived from tsimd (MIT License)
 // https://github.com/ospray/tsimd/blob/master/benchmarks/pico_bench.h
@@ -72,14 +72,15 @@ namespace pico_bench
             std::transform(std::begin(samples),
                            std::end(samples),
                            std::back_inserter(deviations),
-                           [&m](const T& t) { return T{ std::abs((t - m).count()) }; });
+                           [&m](const T& t)
+                           { return T { std::abs((t - m).count()) }; });
             std::sort(std::begin(deviations), std::end(deviations));
             return percentile(50.0, deviations);
         }
 
         T mean() const
         {
-            const auto m = std::accumulate(std::begin(samples), std::end(samples), T{ 0 });
+            const auto m = std::accumulate(std::begin(samples), std::end(samples), T { 0 });
             return m / samples.size();
         }
 
@@ -87,11 +88,10 @@ namespace pico_bench
         {
             const auto m = mean();
             auto val = std::accumulate(
-                std::begin(samples), std::end(samples), T{ 0 }, [&m](const T& p, const T& t) {
-                    return T{ static_cast<rep>(p.count() + std::pow((t - m).count(), 2)) };
-                });
-            return T{ static_cast<rep>(std::sqrt(1.0 / static_cast<double>(samples.size())
-                                                 * static_cast<double>(val.count()))) };
+                std::begin(samples), std::end(samples), T { 0 }, [&m](const T& p, const T& t)
+                { return T { static_cast<rep>(p.count() + std::pow((t - m).count(), 2)) }; });
+            return T { static_cast<rep>(std::sqrt(1.0 / static_cast<double>(samples.size())
+                                                  * static_cast<double>(val.count()))) };
         }
 
         T min() const
@@ -152,7 +152,7 @@ namespace pico_bench
             const size_t k = static_cast<size_t>(low_r);
             const auto low = samples[k];
             const auto high = samples[k + 1];
-            return T{ static_cast<rep>(low.count() + (high - low).count() * dist) };
+            return T { static_cast<rep>(low.count() + (high - low).count() * dist) };
         }
     };
 
@@ -206,7 +206,7 @@ namespace pico_bench
                                 stats_type>::type
         operator()(Fn fn) const
         {
-            return (*this)(BenchWrapper<Fn>{ fn });
+            return (*this)(BenchWrapper<Fn> { fn });
         }
 
         template <typename Fn>
@@ -216,17 +216,17 @@ namespace pico_bench
         {
             // Do a single un-timed warm up run
             fn();
-            T elapsed{ 0 };
+            T elapsed { 0 };
             std::vector<T> samples;
             for (size_t i = 0; i < MAX_ITER && (MAX_RUNTIME.count() == 0 || elapsed < MAX_RUNTIME);
                  ++i, elapsed += samples.back())
             {
                 samples.push_back(fn());
             }
-            return stats_type{ samples };
+            return stats_type { samples };
         }
     };
-}  // namespace pico_bench
+} // namespace pico_bench
 
 template <typename T>
 std::ostream&

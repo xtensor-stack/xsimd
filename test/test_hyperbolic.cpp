@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -15,7 +15,6 @@ template <class B>
 class hyperbolic_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -49,7 +48,8 @@ protected:
         // sinh
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::sinh(v); });
+                           [](const value_type& v)
+                           { return std::sinh(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -63,7 +63,8 @@ protected:
         // cosh
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::cosh(v); });
+                           [](const value_type& v)
+                           { return std::cosh(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -77,7 +78,8 @@ protected:
         // tanh
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::tanh(v); });
+                           [](const value_type& v)
+                           { return std::tanh(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -95,7 +97,8 @@ protected:
         // asinh
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::asinh(v); });
+                           [](const value_type& v)
+                           { return std::asinh(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -109,7 +112,8 @@ protected:
         // acosh
         {
             std::transform(acosh_input.cbegin(), acosh_input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::acosh(v); });
+                           [](const value_type& v)
+                           { return std::acosh(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -123,7 +127,8 @@ protected:
         // atanh
         {
             std::transform(atanh_input.cbegin(), atanh_input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::atanh(v); });
+                           [](const value_type& v)
+                           { return std::atanh(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {

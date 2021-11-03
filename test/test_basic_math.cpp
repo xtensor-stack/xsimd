@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -49,12 +49,11 @@ template <class B>
 class basic_math_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
-    
+
     array_type lhs;
     array_type rhs;
     array_type clip_input;
@@ -77,7 +76,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return std::fmod(l, r); });
+                           [](const value_type& l, const value_type& r)
+                           { return std::fmod(l, r); });
             batch_type res = xsimd::fmod(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fmod");
         }
@@ -85,7 +85,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return std::remainder(l, r); });
+                           [](const value_type& l, const value_type& r)
+                           { return std::remainder(l, r); });
             batch_type res = xsimd::remainder(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("remainder");
         }
@@ -93,7 +94,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return std::fdim(l, r); });
+                           [](const value_type& l, const value_type& r)
+                           { return std::fdim(l, r); });
             batch_type res = xsimd::fdim(batch_lhs(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("fdim");
         }
@@ -103,8 +105,10 @@ protected:
             value_type clip_hi = static_cast<value_type>(1.);
             array_type expected;
             std::transform(clip_input.cbegin(), clip_input.cend(), expected.begin(),
-                           [clip_lo, clip_hi](const value_type& l) {
-                               return l < clip_lo ? clip_lo : clip_hi < l ? clip_hi : l;
+                           [clip_lo, clip_hi](const value_type& l)
+                           {
+                               return l < clip_lo ? clip_lo : clip_hi < l ? clip_hi
+                                                                          : l;
                            });
             batch_type res = xsimd::clip(batch_clip_input(), batch_type(clip_lo), batch_type(clip_hi));
             EXPECT_BATCH_EQ(res, expected) << print_function_name("clip");
@@ -121,14 +125,14 @@ protected:
         {
             array_type expected;
             std::transform(from_input.cbegin(), from_input.cend(), rhs.cbegin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return std::nextafter(l, r); });
+                           [](const value_type& l, const value_type& r)
+                           { return std::nextafter(l, r); });
             batch_type res = xsimd::nextafter(batch_from_input(), batch_rhs());
             EXPECT_BATCH_EQ(res, expected) << print_function_name("nextafter");
         }
     }
 
 private:
-
     batch_type batch_lhs() const
     {
         return batch_type::load_unaligned(lhs.data());
@@ -156,4 +160,3 @@ TYPED_TEST(basic_math_test, basic_functions)
 {
     this->test_basic_functions();
 }
-

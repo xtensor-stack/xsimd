@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include <cmath>
 #include <cstdint>
@@ -36,7 +36,7 @@ namespace xsimd
 #define ONCE0 while (0)
 #endif
 
-/*
+        /*
          * ====================================================
          * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
          *
@@ -52,11 +52,9 @@ namespace xsimd
 #define XSIMD_LITTLE_ENDIAN
 #endif
 #elif defined(_WIN32)
-    // We can safely assume that Windows is always little endian
-    #define XSIMD_LITTLE_ENDIAN
-#elif defined(i386) || defined(i486) ||                 \
-    defined(intel) || defined(x86) || defined(i86pc) || \
-    defined(__alpha) || defined(__osf__)
+// We can safely assume that Windows is always little endian
+#define XSIMD_LITTLE_ENDIAN
+#elif defined(i386) || defined(i486) || defined(intel) || defined(x86) || defined(i86pc) || defined(__alpha) || defined(__osf__)
 #define XSIMD_LITTLE_ENDIAN
 #endif
 
@@ -68,53 +66,49 @@ namespace xsimd
 #define HIGH_WORD_IDX 0
 #endif
 
-#define GET_HIGH_WORD(i, d)                             \
-    do                                                  \
-    {                                                   \
-        double f = (d);                                 \
-        std::memcpy(&(i), reinterpret_cast<char*>(&f) + \
-                        HIGH_WORD_IDX,                  \
-                    sizeof(std::uint32_t));             \
-    }                                                   \
-    ONCE0                                               \
-/**/
+#define GET_HIGH_WORD(i, d)                                            \
+    do                                                                 \
+    {                                                                  \
+        double f = (d);                                                \
+        std::memcpy(&(i), reinterpret_cast<char*>(&f) + HIGH_WORD_IDX, \
+                    sizeof(std::uint32_t));                            \
+    }                                                                  \
+    ONCE0                                                              \
+    /**/
 
-#define GET_LOW_WORD(i, d)                              \
-    do                                                  \
-    {                                                   \
-        double f = (d);                                 \
-        std::memcpy(&(i), reinterpret_cast<char*>(&f) + \
-                        LOW_WORD_IDX,                   \
-                    sizeof(std::uint32_t));             \
-    }                                                   \
-    ONCE0                                               \
-/**/
+#define GET_LOW_WORD(i, d)                                            \
+    do                                                                \
+    {                                                                 \
+        double f = (d);                                               \
+        std::memcpy(&(i), reinterpret_cast<char*>(&f) + LOW_WORD_IDX, \
+                    sizeof(std::uint32_t));                           \
+    }                                                                 \
+    ONCE0                                                             \
+    /**/
 
-#define SET_HIGH_WORD(d, v)                         \
-    do                                              \
-    {                                               \
-        double f = (d);                             \
-        std::uint32_t value = (v);                  \
-        std::memcpy(reinterpret_cast<char*>(&f) +   \
-                        HIGH_WORD_IDX,              \
-                    &value, sizeof(std::uint32_t)); \
-        (d) = f;                                    \
-    }                                               \
-    ONCE0                                           \
-/**/
+#define SET_HIGH_WORD(d, v)                                      \
+    do                                                           \
+    {                                                            \
+        double f = (d);                                          \
+        std::uint32_t value = (v);                               \
+        std::memcpy(reinterpret_cast<char*>(&f) + HIGH_WORD_IDX, \
+                    &value, sizeof(std::uint32_t));              \
+        (d) = f;                                                 \
+    }                                                            \
+    ONCE0                                                        \
+    /**/
 
-#define SET_LOW_WORD(d, v)                          \
-    do                                              \
-    {                                               \
-        double f = (d);                             \
-        std::uint32_t value = (v);                  \
-        std::memcpy(reinterpret_cast<char*>(&f) +   \
-                        LOW_WORD_IDX,               \
-                    &value, sizeof(std::uint32_t)); \
-        (d) = f;                                    \
-    }                                               \
-    ONCE0                                           \
-        /**/
+#define SET_LOW_WORD(d, v)                                      \
+    do                                                          \
+    {                                                           \
+        double f = (d);                                         \
+        std::uint32_t value = (v);                              \
+        std::memcpy(reinterpret_cast<char*>(&f) + LOW_WORD_IDX, \
+                    &value, sizeof(std::uint32_t));             \
+        (d) = f;                                                \
+    }                                                           \
+    ONCE0                                                       \
+    /**/
 
         /*
          * __kernel_rem_pio2(x,y,e0,nx,prec,ipio2)
@@ -225,7 +219,7 @@ namespace xsimd
 
         inline int32_t __kernel_rem_pio2(double* x, double* y, int32_t e0, int32_t nx, int32_t prec, const int32_t* ipio2)
         {
-            static const int32_t init_jk[] = {2, 3, 4, 6}; /* initial value for jk */
+            static const int32_t init_jk[] = { 2, 3, 4, 6 }; /* initial value for jk */
 
             static const double PIo2[] = {
                 1.57079625129699707031e+00, /* 0x3FF921FB, 0x40000000 */
@@ -239,7 +233,8 @@ namespace xsimd
             };
 
             static const double
-                zero = 0.0,
+                zero
+                = 0.0,
                 one = 1.0,
                 two24 = 1.67772160000000000000e+07, /* 0x41700000, 0x00000000 */
                 twon24 = 5.96046447753906250000e-08; /* 0x3E700000, 0x00000000 */
@@ -455,44 +450,125 @@ namespace xsimd
             return n & 7;
         }
 
-
         inline std::int32_t __ieee754_rem_pio2(double x, double* y)
         {
             static const std::int32_t two_over_pi[] = {
-                0xA2F983, 0x6E4E44, 0x1529FC, 0x2757D1, 0xF534DD, 0xC0DB62,
-                0x95993C, 0x439041, 0xFE5163, 0xABDEBB, 0xC561B7, 0x246E3A,
-                0x424DD2, 0xE00649, 0x2EEA09, 0xD1921C, 0xFE1DEB, 0x1CB129,
-                0xA73EE8, 0x8235F5, 0x2EBB44, 0x84E99C, 0x7026B4, 0x5F7E41,
-                0x3991D6, 0x398353, 0x39F49C, 0x845F8B, 0xBDF928, 0x3B1FF8,
-                0x97FFDE, 0x05980F, 0xEF2F11, 0x8B5A0A, 0x6D1F6D, 0x367ECF,
-                0x27CB09, 0xB74F46, 0x3F669E, 0x5FEA2D, 0x7527BA, 0xC7EBE5,
-                0xF17B3D, 0x0739F7, 0x8A5292, 0xEA6BFB, 0x5FB11F, 0x8D5D08,
-                0x560330, 0x46FC7B, 0x6BABF0, 0xCFBC20, 0x9AF436, 0x1DA9E3,
-                0x91615E, 0xE61B08, 0x659985, 0x5F14A0, 0x68408D, 0xFFD880,
-                0x4D7327, 0x310606, 0x1556CA, 0x73A8C9, 0x60E27B, 0xC08C6B,
+                0xA2F983,
+                0x6E4E44,
+                0x1529FC,
+                0x2757D1,
+                0xF534DD,
+                0xC0DB62,
+                0x95993C,
+                0x439041,
+                0xFE5163,
+                0xABDEBB,
+                0xC561B7,
+                0x246E3A,
+                0x424DD2,
+                0xE00649,
+                0x2EEA09,
+                0xD1921C,
+                0xFE1DEB,
+                0x1CB129,
+                0xA73EE8,
+                0x8235F5,
+                0x2EBB44,
+                0x84E99C,
+                0x7026B4,
+                0x5F7E41,
+                0x3991D6,
+                0x398353,
+                0x39F49C,
+                0x845F8B,
+                0xBDF928,
+                0x3B1FF8,
+                0x97FFDE,
+                0x05980F,
+                0xEF2F11,
+                0x8B5A0A,
+                0x6D1F6D,
+                0x367ECF,
+                0x27CB09,
+                0xB74F46,
+                0x3F669E,
+                0x5FEA2D,
+                0x7527BA,
+                0xC7EBE5,
+                0xF17B3D,
+                0x0739F7,
+                0x8A5292,
+                0xEA6BFB,
+                0x5FB11F,
+                0x8D5D08,
+                0x560330,
+                0x46FC7B,
+                0x6BABF0,
+                0xCFBC20,
+                0x9AF436,
+                0x1DA9E3,
+                0x91615E,
+                0xE61B08,
+                0x659985,
+                0x5F14A0,
+                0x68408D,
+                0xFFD880,
+                0x4D7327,
+                0x310606,
+                0x1556CA,
+                0x73A8C9,
+                0x60E27B,
+                0xC08C6B,
             };
 
             static const std::int32_t npio2_hw[] = {
-                0x3FF921FB, 0x400921FB, 0x4012D97C, 0x401921FB, 0x401F6A7A, 0x4022D97C,
-                0x4025FDBB, 0x402921FB, 0x402C463A, 0x402F6A7A, 0x4031475C, 0x4032D97C,
-                0x40346B9C, 0x4035FDBB, 0x40378FDB, 0x403921FB, 0x403AB41B, 0x403C463A,
-                0x403DD85A, 0x403F6A7A, 0x40407E4C, 0x4041475C, 0x4042106C, 0x4042D97C,
-                0x4043A28C, 0x40446B9C, 0x404534AC, 0x4045FDBB, 0x4046C6CB, 0x40478FDB,
-                0x404858EB, 0x404921FB,
+                0x3FF921FB,
+                0x400921FB,
+                0x4012D97C,
+                0x401921FB,
+                0x401F6A7A,
+                0x4022D97C,
+                0x4025FDBB,
+                0x402921FB,
+                0x402C463A,
+                0x402F6A7A,
+                0x4031475C,
+                0x4032D97C,
+                0x40346B9C,
+                0x4035FDBB,
+                0x40378FDB,
+                0x403921FB,
+                0x403AB41B,
+                0x403C463A,
+                0x403DD85A,
+                0x403F6A7A,
+                0x40407E4C,
+                0x4041475C,
+                0x4042106C,
+                0x4042D97C,
+                0x4043A28C,
+                0x40446B9C,
+                0x404534AC,
+                0x4045FDBB,
+                0x4046C6CB,
+                0x40478FDB,
+                0x404858EB,
+                0x404921FB,
             };
 
             /*
-            * invpio2:  53 bits of 2/pi
-            * pio2_1:   first  33 bit of pi/2
-            * pio2_1t:  pi/2 - pio2_1
-            * pio2_2:   second 33 bit of pi/2
-            * pio2_2t:  pi/2 - (pio2_1+pio2_2)
-            * pio2_3:   third  33 bit of pi/2
-            * pio2_3t:  pi/2 - (pio2_1+pio2_2+pio2_3)
-            */
+             * invpio2:  53 bits of 2/pi
+             * pio2_1:   first  33 bit of pi/2
+             * pio2_1t:  pi/2 - pio2_1
+             * pio2_2:   second 33 bit of pi/2
+             * pio2_2t:  pi/2 - (pio2_1+pio2_2)
+             * pio2_3:   third  33 bit of pi/2
+             * pio2_3t:  pi/2 - (pio2_1+pio2_2+pio2_3)
+             */
 
             static const double
-                zero = 0.00000000000000000000e+00, /* 0x00000000, 0x00000000 */
+                zero
+                = 0.00000000000000000000e+00, /* 0x00000000, 0x00000000 */
                 half = 5.00000000000000000000e-01, /* 0x3FE00000, 0x00000000 */
                 two24 = 1.67772160000000000000e+07, /* 0x41700000, 0x00000000 */
                 invpio2 = 6.36619772367581382433e-01, /* 0x3FE45F30, 0x6DC9C883 */
@@ -600,8 +676,8 @@ namespace xsimd
                     return n;
             }
             /*
-            * all other (large) arguments
-            */
+             * all other (large) arguments
+             */
             if (ix >= 0x7ff00000)
             { /* x is inf or NaN */
                 y[0] = y[1] = x - x;

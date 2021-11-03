@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -16,7 +16,7 @@ using namespace std::placeholders;
 template <class B>
 class constant_batch_test : public testing::Test
 {
-  protected:
+protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -37,7 +37,8 @@ class constant_batch_test : public testing::Test
         array_type expected;
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
-                      [&i]() { return generator::get(i++, size); });
+                      [&i]()
+                      { return generator::get(i++, size); });
         constexpr auto b = xsimd::make_batch_constant<batch_type, generator>();
         EXPECT_BATCH_EQ((batch_type)b, expected)
             << print_function_name("batch(value_type)");
@@ -56,7 +57,8 @@ class constant_batch_test : public testing::Test
         array_type expected;
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
-                      [&i]() { return arange::get(i++, size); });
+                      [&i]()
+                      { return arange::get(i++, size); });
         constexpr auto b = xsimd::make_batch_constant<batch_type, arange>();
         EXPECT_BATCH_EQ((batch_type)b, expected)
             << print_function_name("batch(value_type)");
@@ -100,7 +102,7 @@ TYPED_TEST(constant_batch_test, init_from_constant)
 template <class B>
 class constant_bool_batch_test : public testing::Test
 {
-  protected:
+protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -121,7 +123,8 @@ class constant_bool_batch_test : public testing::Test
         bool_array_type expected;
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
-                      [&i]() { return generator::get(i++, size); });
+                      [&i]()
+                      { return generator::get(i++, size); });
         constexpr auto b = xsimd::make_batch_bool_constant<batch_type, generator>();
         EXPECT_BATCH_EQ((batch_bool_type)b, expected)
             << print_function_name("batch_bool_constant(value_type)");
@@ -140,9 +143,9 @@ class constant_bool_batch_test : public testing::Test
         bool_array_type expected;
         size_t i = 0;
         std::generate(expected.begin(), expected.end(),
-                      [&i]() { return split::get(i++, size); });
-        constexpr auto b =
-            xsimd::make_batch_bool_constant<batch_type, split>();
+                      [&i]()
+                      { return split::get(i++, size); });
+        constexpr auto b = xsimd::make_batch_bool_constant<batch_type, split>();
         EXPECT_BATCH_EQ((batch_bool_type)b, expected)
             << print_function_name("batch_bool_constant(value_type)");
     }

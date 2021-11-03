@@ -1,22 +1,22 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include <array>
 #include <climits>
+#include <cmath>
+#include <complex>
 #include <limits>
 #include <sstream>
 #include <type_traits>
 #include <vector>
-#include <cmath>
-#include <complex>
 
 #include "gtest/gtest.h"
 
@@ -32,7 +32,6 @@
 class simd_test_names
 {
 public:
-
     template <class T>
     static std::string GetName(int)
     {
@@ -59,21 +58,63 @@ public:
             prefix = "arm_";
         }
 #endif
-        if (std::is_same<value_type, uint8_t>::value) { return prefix + "uint8_t"; }
-        if (std::is_same<value_type, int8_t>::value) { return prefix + "int8_t"; }
-        if (std::is_same<value_type, uint16_t>::value) { return prefix + "uint16_t"; }
-        if (std::is_same<value_type, int16_t>::value) { return prefix + "int16_t"; }
-        if (std::is_same<value_type, uint32_t>::value) { return prefix + "uint32_t"; }
-        if (std::is_same<value_type, int32_t>::value) { return prefix + "int32_t"; }
-        if (std::is_same<value_type, uint64_t>::value) { return prefix + "uint64_t"; }
-        if (std::is_same<value_type, int64_t>::value) { return prefix + "int64_t"; }
-        if (std::is_same<value_type, float>::value) { return prefix + "float"; }
-        if (std::is_same<value_type, double>::value) { return prefix + "double"; }
-        if (std::is_same<value_type, std::complex<float>>::value) { return prefix + "complex<float>"; }
-        if (std::is_same<value_type, std::complex<double>>::value) { return prefix + "complex<double>"; }
+        if (std::is_same<value_type, uint8_t>::value)
+        {
+            return prefix + "uint8_t";
+        }
+        if (std::is_same<value_type, int8_t>::value)
+        {
+            return prefix + "int8_t";
+        }
+        if (std::is_same<value_type, uint16_t>::value)
+        {
+            return prefix + "uint16_t";
+        }
+        if (std::is_same<value_type, int16_t>::value)
+        {
+            return prefix + "int16_t";
+        }
+        if (std::is_same<value_type, uint32_t>::value)
+        {
+            return prefix + "uint32_t";
+        }
+        if (std::is_same<value_type, int32_t>::value)
+        {
+            return prefix + "int32_t";
+        }
+        if (std::is_same<value_type, uint64_t>::value)
+        {
+            return prefix + "uint64_t";
+        }
+        if (std::is_same<value_type, int64_t>::value)
+        {
+            return prefix + "int64_t";
+        }
+        if (std::is_same<value_type, float>::value)
+        {
+            return prefix + "float";
+        }
+        if (std::is_same<value_type, double>::value)
+        {
+            return prefix + "double";
+        }
+        if (std::is_same<value_type, std::complex<float>>::value)
+        {
+            return prefix + "complex<float>";
+        }
+        if (std::is_same<value_type, std::complex<double>>::value)
+        {
+            return prefix + "complex<double>";
+        }
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
-        if (std::is_same<value_type, xtl::xcomplex<float>>::value) { return prefix + "xcomplex<float>"; }
-        if (std::is_same<value_type, xtl::xcomplex<double>>::value) { return prefix + "xcomplex<double>"; }
+        if (std::is_same<value_type, xtl::xcomplex<float>>::value)
+        {
+            return prefix + "xcomplex<float>";
+        }
+        if (std::is_same<value_type, xtl::xcomplex<double>>::value)
+        {
+            return prefix + "xcomplex<double>";
+        }
 #endif
 
         return prefix + "unknow_type";
@@ -196,9 +237,7 @@ namespace detail
         {
             return (std::numeric_limits<T>::max)();
         }
-        if ((lhs == static_cast<T>(0)) ||
-            (rhs > static_cast<T>(1) &&
-                lhs < rhs * (std::numeric_limits<T>::min)()))
+        if ((lhs == static_cast<T>(0)) || (rhs > static_cast<T>(1) && lhs < rhs * (std::numeric_limits<T>::min)()))
         {
             return static_cast<T>(0);
         }
@@ -221,8 +260,8 @@ namespace detail
     {
         static bool run(const T& lhs, const T& rhs)
         {
-            using std::max;
             using std::abs;
+            using std::max;
 
             // direct compare integers -- but need tolerance for inexact double conversion
             if (std::is_integral<T>::value && lhs < 10e6 && rhs < 10e6)
@@ -280,8 +319,7 @@ namespace detail
         static bool run(const std::complex<T>& lhs, const std::complex<T>& rhs)
         {
             using real_comparison = scalar_comparison<T>;
-            return real_comparison::run(lhs.real(), rhs.real()) &&
-                real_comparison::run(lhs.imag(), rhs.imag());
+            return real_comparison::run(lhs.real(), rhs.real()) && real_comparison::run(lhs.imag(), rhs.imag());
         }
     };
 
@@ -292,8 +330,7 @@ namespace detail
         static bool run(const xtl::xcomplex<T, T, i3ec>& lhs, const xtl::xcomplex<T, T, i3ec>& rhs)
         {
             using real_comparison = scalar_comparison<T>;
-            return real_comparison::run(lhs.real(), rhs.real()) &&
-                real_comparison::run(lhs.imag(), rhs.imag());
+            return real_comparison::run(lhs.real(), rhs.real()) && real_comparison::run(lhs.imag(), rhs.imag());
         }
     };
 #endif
@@ -404,7 +441,6 @@ namespace detail
         std::array<T, N> tmp;
         rhs.store_unaligned(tmp.data());
         return expect_array_near(lhs_expression, rhs_expression, lhs, tmp);
-
     }
 
     template <class T, class A>
@@ -519,7 +555,9 @@ namespace xsimd
          * types_list *
          **************/
         template <class... T>
-        struct type_list {};
+        struct type_list
+        {
+        };
 
         /***************
          * concatenate *
@@ -571,15 +609,14 @@ using to_testing_types = xsimd::mpl::cast_t<T, testing::Types>;
 namespace xsimd
 {
     using batch_int_type_list = mpl::type_list<
-                                    batch<uint8_t>,
-                                    batch<int8_t>,
-                                    batch<uint16_t>,
-                                    batch<int16_t>,
-                                    batch<uint32_t>,
-                                    batch<int32_t>,
-                                    batch<uint64_t>,
-                                    batch<int64_t>
-                              >;
+        batch<uint8_t>,
+        batch<int8_t>,
+        batch<uint16_t>,
+        batch<int16_t>,
+        batch<uint32_t>,
+        batch<int32_t>,
+        batch<uint64_t>,
+        batch<int64_t>>;
 
 #if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
     using batch_float_type_list = mpl::type_list<batch<float>>;
@@ -588,18 +625,15 @@ namespace xsimd
 #endif
 
     using batch_int32_type_list = mpl::type_list<
-      batch<int32_t>
-    >;
+        batch<int32_t>>;
 
 #if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
     using batch_complex_type_list = mpl::type_list<
-                                    batch<std::complex<float>>
-    >;
+        batch<std::complex<float>>>;
 #else
     using batch_complex_type_list = mpl::type_list<
-                                    batch<std::complex<float>>,
-                                    batch<std::complex<double>>
-    >;
+        batch<std::complex<float>>,
+        batch<std::complex<double>>>;
 #endif
     using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
     using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
@@ -610,7 +644,6 @@ using batch_float_types = to_testing_types<xsimd::batch_float_type_list>;
 using batch_complex_types = to_testing_types<xsimd::batch_complex_type_list>;
 using batch_math_types = to_testing_types<xsimd::batch_math_type_list>;
 using batch_types = to_testing_types<xsimd::batch_type_list>;
-
 
 /********************
  * conversion utils *
@@ -625,7 +658,6 @@ struct conversion_param
 class conversion_test_names
 {
 public:
-
     template <class T>
     static std::string GetName(int)
     {
@@ -638,9 +670,7 @@ public:
 };
 
 using conversion_type_list = xsimd::mpl::type_list<
-                               conversion_param<sizeof(xsimd::types::simd_register<int, xsimd::default_arch>) / sizeof(double), xsimd::default_arch::alignment()>
-                               >;
+    conversion_param<sizeof(xsimd::types::simd_register<int, xsimd::default_arch>) / sizeof(double), xsimd::default_arch::alignment()>>;
 using conversion_types = to_testing_types<conversion_type_list>;
 
 #endif // XXSIMD_TEST_UTILS_HPP
-

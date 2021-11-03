@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -33,22 +33,22 @@ namespace xsimd
 
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
-            std::array<T, 2> maxmin_cmp{{max, min}};
-            B maxmin({max, min});
+            std::array<T, 2> maxmin_cmp { { max, min } };
+            B maxmin({ max, min });
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
-            B a({1, 3});
+            B a({ 1, 3 });
             B b(2);
-            B c({2, 3});
+            B c({ 2, 3 });
 
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
 
-            EXPECT_BATCH_EQ(r1, (A{{2, 3}})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, (A{{1, 3}})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A { { 2, 3 } })) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A { { 1, 3 } })) << print_function_name("min");
 
             auto r4 = a < b; // test lt
-            BB e4({1, 0});
+            BB e4({ 1, 0 });
             EXPECT_TRUE(xsimd::all(r4 == e4));
         }
     };
@@ -62,18 +62,18 @@ namespace xsimd
             using BB = batch_bool<T>;
             using A = std::array<T, 4>;
 
-            B a({1,3,1,1});
+            B a({ 1, 3, 1, 1 });
             B b(2);
-            B c({2,3,2,3});
+            B c({ 2, 3, 2, 3 });
 
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
 
-            EXPECT_BATCH_EQ(r1, (A{{2, 3, 2, 3}})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, (A{{1, 3, 1, 1}})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A { { 2, 3, 2, 3 } })) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A { { 1, 3, 1, 1 } })) << print_function_name("min");
 
             auto r4 = a < b; // test lt
-            BB e4({1,0,1,1});
+            BB e4({ 1, 0, 1, 1 });
             EXPECT_TRUE(xsimd::all(r4 == e4));
         }
     };
@@ -89,21 +89,21 @@ namespace xsimd
 
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
-            std::array<T, 8> maxmin_cmp{{0, 0, max, 0, min, 0, 0, 0}};
-            B maxmin({0, 0, max, 0, min, 0, 0, 0});
+            std::array<T, 8> maxmin_cmp { { 0, 0, max, 0, min, 0, 0, 0 } };
+            B maxmin({ 0, 0, max, 0, min, 0, 0, 0 });
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
-            B a({1,3,1,3, 1,1,3,3});
+            B a({ 1, 3, 1, 3, 1, 1, 3, 3 });
             B b(2);
-            B c({2,3,2,3, 2,3,2,3});
+            B c({ 2, 3, 2, 3, 2, 3, 2, 3 });
 
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
             auto r4 = a < b; // test lt
-            EXPECT_BATCH_EQ(r1, (A{{2, 3, 2, 3, 2, 3, 3, 3}})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, (A{{1, 3, 1, 3, 1, 1, 2, 3}})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A { { 2, 3, 2, 3, 2, 3, 3, 3 } })) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A { { 1, 3, 1, 3, 1, 1, 2, 3 } })) << print_function_name("min");
 
-            BB e4({1,0,1,0, 1,1,0,0});
+            BB e4({ 1, 0, 1, 0, 1, 1, 0, 0 });
             EXPECT_TRUE(xsimd::all(r4 == e4));
         }
     };
@@ -119,26 +119,26 @@ namespace xsimd
 
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
-            std::array<T, 16> maxmin_cmp{{0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0}};
-            B maxmin({0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0});
+            std::array<T, 16> maxmin_cmp { { 0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0 } };
+            B maxmin({ 0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0 });
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
-            B a({1,3,1,3, 1,3,1,3, 3,3,3,3, min,max,max,min});
+            B a({ 1, 3, 1, 3, 1, 3, 1, 3, 3, 3, 3, 3, min, max, max, min });
             B b(2);
-            B c({2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3});
+            B c({ 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3 });
             auto r1 = xsimd::max(a, b);
             auto r3 = xsimd::min(a, b);
             auto r4 = a < b; // test lt
             auto r5 = a == c;
             auto r6 = a != c;
 
-            EXPECT_BATCH_EQ(r1, (A{{2,3,2,3, 2,3,2,3, 3,3,3,3, 2,max,max,2}})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, (A{{1,2,1,2, 1,2,1,2, 2,2,2,2, min,2,2,min}})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A { { 2, 3, 2, 3, 2, 3, 2, 3, 3, 3, 3, 3, 2, max, max, 2 } })) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A { { 1, 2, 1, 2, 1, 2, 1, 2, 2, 2, 2, 2, min, 2, 2, min } })) << print_function_name("min");
 
-            BB e4({1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1});
+            BB e4({ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1 });
             EXPECT_TRUE(xsimd::all(r4 == e4));
 
-            BB e5({0,1,0,1, 0,1,0,1, 0,1,0,1, 0,0,0,0});
+            BB e5({ 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 });
             EXPECT_TRUE(xsimd::all(r5 == e5));
             EXPECT_TRUE(xsimd::all(r6 == !e5));
         }
@@ -155,16 +155,16 @@ namespace xsimd
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
 
-            B a({1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 1,3,1,3, 3,3,3,3, min,max,max,min});
+            B a({ 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 3, 3, 3, 3, min, max, max, min });
             B b(2);
 
             auto r1 = xsimd::max(a, b);
             auto r3 = xsimd::min(a, b);
             auto r4 = a < b; // test lt
-            EXPECT_BATCH_EQ(r1, (A{{2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 2,3,2,3, 3,3,3,3, 2,max,max,2}})) << print_function_name("max");
-            EXPECT_BATCH_EQ(r3, (A{{1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 1,2,1,2, 2,2,2,2, min,2,2,min}})) << print_function_name("min");
+            EXPECT_BATCH_EQ(r1, (A { { 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 3, 3, 3, 3, 2, max, max, 2 } })) << print_function_name("max");
+            EXPECT_BATCH_EQ(r3, (A { { 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 2, 2, 2, 2, min, 2, 2, min } })) << print_function_name("min");
 
-            BB e4({1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 0,0,0,0, 1,0,0,1});
+            BB e4({ 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1 });
             EXPECT_TRUE(xsimd::all(r4 == e4));
         }
     };
@@ -174,7 +174,6 @@ template <class B>
 class batch_int_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -207,7 +206,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return l % r; });
+                           [](const value_type& l, const value_type& r)
+                           { return l % r; });
             batch_type res = batch_lhs() % batch_rhs();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch % batch");
         }
@@ -220,7 +220,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
-                            [nb_sh](const value_type& v) { return v << nb_sh; });
+                           [nb_sh](const value_type& v)
+                           { return v << nb_sh; });
             batch_type res = batch_lhs() << nb_sh;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch << scalar");
         }
@@ -228,7 +229,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), shift.cbegin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return l << r; });
+                           [](const value_type& l, const value_type& r)
+                           { return l << r; });
             batch_type res = batch_lhs() << batch_shift();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch << batch");
         }
@@ -236,7 +238,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
-                            [nb_sh](const value_type& v) { return v >> nb_sh; });
+                           [nb_sh](const value_type& v)
+                           { return v >> nb_sh; });
             batch_type res = batch_lhs() >> nb_sh;
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch >> scalar");
         }
@@ -244,7 +247,8 @@ protected:
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), shift.cbegin(), expected.begin(),
-                            [](const value_type& l, const value_type& r) { return l >> r; });
+                           [](const value_type& l, const value_type& r)
+                           { return l >> r; });
             batch_type res = batch_lhs() >> batch_shift();
             EXPECT_BATCH_EQ(res, expected) << print_function_name("batch >> batch");
         }
@@ -297,7 +301,6 @@ protected:
     }
 
 private:
-
     batch_type batch_lhs() const
     {
         return batch_type::load_unaligned(lhs.data());
@@ -340,4 +343,3 @@ TYPED_TEST(batch_int_test, less_than_underflow)
 {
     this->test_less_than_underflow();
 }
-

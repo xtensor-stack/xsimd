@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -15,7 +15,6 @@ template <class B>
 class error_gamma_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -49,7 +48,8 @@ protected:
         // erf
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::erf(v); });
+                           [](const value_type& v)
+                           { return std::erf(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -63,7 +63,8 @@ protected:
         // erfc
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::erfc(v); });
+                           [](const value_type& v)
+                           { return std::erfc(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -81,7 +82,8 @@ protected:
         // tgamma
         {
             std::transform(gamma_input.cbegin(), gamma_input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::tgamma(v); });
+                           [](const value_type& v)
+                           { return std::tgamma(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -95,7 +97,8 @@ protected:
         // tgamma (negative input)
         {
             std::transform(gamma_neg_input.cbegin(), gamma_neg_input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::tgamma(v); });
+                           [](const value_type& v)
+                           { return std::tgamma(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -109,7 +112,8 @@ protected:
         // lgamma
         {
             std::transform(gamma_input.cbegin(), gamma_input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::lgamma(v); });
+                           [](const value_type& v)
+                           { return std::lgamma(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -120,11 +124,12 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("lgamma");
         }
-#if not (XSIMD_WITH_AVX and not XSIMD_WITH_AVX2) 
+#if not(XSIMD_WITH_AVX and not XSIMD_WITH_AVX2)
         // tgamma (negative input)
         {
             std::transform(gamma_neg_input.cbegin(), gamma_neg_input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::lgamma(v); });
+                           [](const value_type& v)
+                           { return std::lgamma(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -150,4 +155,3 @@ TYPED_TEST(error_gamma_test, gamma)
 {
     this->test_gamma_functions();
 }
-

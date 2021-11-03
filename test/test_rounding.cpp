@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -15,7 +15,6 @@ template <class B>
 class rounding_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -43,7 +42,8 @@ protected:
         // ceil
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::ceil(v); });
+                           [](const value_type& v)
+                           { return std::ceil(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
@@ -61,7 +61,8 @@ protected:
         // floor
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::floor(v); });
+                           [](const value_type& v)
+                           { return std::floor(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
@@ -79,7 +80,8 @@ protected:
         // trunc
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::trunc(v); });
+                           [](const value_type& v)
+                           { return std::trunc(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
@@ -97,7 +99,8 @@ protected:
         // round
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::round(v); });
+                           [](const value_type& v)
+                           { return std::round(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
@@ -115,7 +118,8 @@ protected:
         // nearbyint
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::nearbyint(v); });
+                           [](const value_type& v)
+                           { return std::nearbyint(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
@@ -133,7 +137,8 @@ protected:
         // rint
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                        [](const value_type& v) { return std::rint(v); });
+                           [](const value_type& v)
+                           { return std::rint(v); });
             batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
@@ -157,4 +162,3 @@ TYPED_TEST(rounding_test, rounding)
 {
     this->test_rounding_functions();
 }
-

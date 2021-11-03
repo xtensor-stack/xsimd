@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -15,7 +15,6 @@ template <class B>
 class complex_trigonometric_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using real_batch_type = typename B::real_batch;
     using value_type = typename B::value_type;
@@ -52,7 +51,8 @@ protected:
     void test_sin()
     {
         std::transform(input.cbegin(), input.cend(), expected.begin(),
-                    [](const value_type& v) { using std::sin; return sin(v); });
+                       [](const value_type& v)
+                       { using std::sin; return sin(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -67,7 +67,8 @@ protected:
     void test_cos()
     {
         std::transform(input.cbegin(), input.cend(), expected.begin(),
-                    [](const value_type& v) { using std::cos; return cos(v); });
+                       [](const value_type& v)
+                       { using std::cos; return cos(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -83,9 +84,11 @@ protected:
     {
         vector_type expected2(nb_input), res2(nb_input);
         std::transform(input.cbegin(), input.cend(), expected.begin(),
-                    [](const value_type& v) { using std::sin; return sin(v); });
+                       [](const value_type& v)
+                       { using std::sin; return sin(v); });
         std::transform(input.cbegin(), input.cend(), expected2.begin(),
-                    [](const value_type& v) { using std::cos; return cos(v); });
+                       [](const value_type& v)
+                       { using std::cos; return cos(v); });
         batch_type in, out1, out2;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -108,7 +111,8 @@ protected:
     void test_asin()
     {
         std::transform(ainput.cbegin(), ainput.cend(), expected.begin(),
-                    [](const value_type& v) { using std::asin; return asin(v); });
+                       [](const value_type& v)
+                       { using std::asin; return asin(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -123,7 +127,8 @@ protected:
     void test_acos()
     {
         std::transform(ainput.cbegin(), ainput.cend(), expected.begin(),
-                    [](const value_type& v) { using std::acos; return acos(v); });
+                       [](const value_type& v)
+                       { using std::acos; return acos(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -138,7 +143,8 @@ protected:
     void test_atan()
     {
         std::transform(atan_input.cbegin(), atan_input.cend(), expected.begin(),
-                    [](const value_type& v) { using std::atan; return atan(v); });
+                       [](const value_type& v)
+                       { using std::atan; return atan(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -149,12 +155,13 @@ protected:
         size_t diff = detail::get_nb_diff(res, expected);
         EXPECT_EQ(diff, 0) << print_function_name("atan");
     }
-private:
 
+private:
     void test_tan_impl()
     {
         std::transform(input.cbegin(), input.cend(), expected.begin(),
-                    [](const value_type& v) { using std::tan; return tan(v); });
+                       [](const value_type& v)
+                       { using std::tan; return tan(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {

@@ -1,20 +1,20 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "xsimd_benchmark.hpp"
 #include <map>
 
 void benchmark_operation()
 {
-    //std::size_t size = 9984;
+    // std::size_t size = 9984;
     std::size_t size = 20000;
     xsimd::run_benchmark_2op(xsimd::add_fn(), std::cout, size, 1000);
     xsimd::run_benchmark_2op(xsimd::sub_fn(), std::cout, size, 1000);
@@ -111,16 +111,16 @@ void benchmark_basic_math()
 
 int main(int argc, char* argv[])
 {
-    const std::map<std::string, std::pair<std::string, void(*)()>> fn_map = {
-        {"op", {"arithmetic", benchmark_operation}},
-        {"exp", {"exponential and logarithm", benchmark_exp_log}},
-        {"trigo", {"trigonometric", benchmark_trigo}},
-        {"hyperbolic", {"hyperbolic", benchmark_hyperbolic}},
-        {"power", {"power", benchmark_power}},
-        {"basic_math", {"basic math", benchmark_basic_math}},
-        {"rounding", {"rounding", benchmark_rounding}},
+    const std::map<std::string, std::pair<std::string, void (*)()>> fn_map = {
+        { "op", { "arithmetic", benchmark_operation } },
+        { "exp", { "exponential and logarithm", benchmark_exp_log } },
+        { "trigo", { "trigonometric", benchmark_trigo } },
+        { "hyperbolic", { "hyperbolic", benchmark_hyperbolic } },
+        { "power", { "power", benchmark_power } },
+        { "basic_math", { "basic math", benchmark_basic_math } },
+        { "rounding", { "rounding", benchmark_rounding } },
 #ifdef XSIMD_POLY_BENCHMARKS
-        {"utils", {"polynomial evaluation", benchmark_poly_evaluation}},
+        { "utils", { "polynomial evaluation", benchmark_poly_evaluation } },
 #endif
     };
 
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
         if (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h")
         {
             std::cout << "Available options:" << std::endl;
-            for(auto const& kv : fn_map)
+            for (auto const& kv : fn_map)
             {
                 std::cout << kv.first << ": run benchmark on " << kv.second.first << " functions" << std::endl;
             }
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        for(auto const& kv : fn_map)
+        for (auto const& kv : fn_map)
         {
             kv.second.second();
         }

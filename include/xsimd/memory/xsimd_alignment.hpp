@@ -1,34 +1,34 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_ALIGNMENT_HPP
 #define XSIMD_ALIGNMENT_HPP
 
-#include "xsimd_aligned_allocator.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "xsimd_aligned_allocator.hpp"
 
 namespace xsimd
 {
     /**
-    * @struct aligned_mode
-    * @brief tag for load and store of aligned memory.
-    */
+     * @struct aligned_mode
+     * @brief tag for load and store of aligned memory.
+     */
     struct aligned_mode
     {
     };
 
     /**
-    * @struct unaligned_mode
-    * @brief tag for load and store of unaligned memory.
-    */
+     * @struct unaligned_mode
+     * @brief tag for load and store of unaligned memory.
+     */
     struct unaligned_mode
     {
     };

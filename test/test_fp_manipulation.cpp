@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -15,7 +15,6 @@ template <class B>
 class fp_manipulation_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using arch_type = typename B::arch_type;
     using value_type = typename B::value_type;
@@ -43,7 +42,8 @@ protected:
         {
             array_type expected;
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                            [this](const value_type& v) { return std::ldexp(v, exponent); });
+                           [this](const value_type& v)
+                           { return std::ldexp(v, exponent); });
             batch_type res = xsimd::ldexp(batch_input(), bexp);
             EXPECT_BATCH_EQ(res, expected) << print_function_name("ldexp");
         }
@@ -51,20 +51,19 @@ protected:
         {
             array_type expected;
             std::transform(input.cbegin(), input.cend(), expected.begin(),
-                            [](const value_type& v) { int tmp; return std::frexp(v, &tmp); });
+                           [](const value_type& v)
+                           { int tmp; return std::frexp(v, &tmp); });
             batch_type res = xsimd::frexp(batch_input(), bexp);
             EXPECT_BATCH_EQ(res, expected) << print_function_name("frexp");
         }
     }
 
 private:
-
     batch_type batch_input() const
     {
         return batch_type::load_unaligned(input.data());
     }
 };
-
 
 TYPED_TEST_SUITE(fp_manipulation_test, batch_float_types, simd_test_names);
 
@@ -72,4 +71,3 @@ TYPED_TEST(fp_manipulation_test, fp_manipulations)
 {
     this->test_fp_manipulations();
 }
-

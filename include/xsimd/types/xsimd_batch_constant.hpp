@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_BATCH_CONSTANT_HPP
 #define XSIMD_BATCH_CONSTANT_HPP
@@ -25,11 +25,11 @@ namespace xsimd
         using value_type = bool;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
-        operator batch_bool<typename batch_type::value_type, arch_type>() const { return {Values...}; }
+        operator batch_bool<typename batch_type::value_type, arch_type>() const { return { Values... }; }
 
         bool get(size_t i) const
         {
-            return std::array<value_type, size>{{Values...}}[i];
+            return std::array<value_type, size> { { Values... } }[i];
         }
 
         static constexpr int mask()
@@ -37,7 +37,7 @@ namespace xsimd
             return mask_helper(0, static_cast<int>(Values)...);
         }
 
-      private:
+    private:
         static constexpr int mask_helper(int acc) { return acc; }
         template <class... Tys>
         static constexpr int mask_helper(int acc, int mask, Tys... masks)
@@ -54,11 +54,11 @@ namespace xsimd
         using value_type = typename batch_type::value_type;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
-        operator batch_type() const { return {Values...}; }
+        operator batch_type() const { return { Values... }; }
 
         constexpr value_type get(size_t i) const
         {
-            return std::array<value_type, size>{Values...}[i];
+            return std::array<value_type, size> { Values... }[i];
         }
     };
 
@@ -80,8 +80,7 @@ namespace xsimd
     } // namespace detail
 
     template <class batch_type, class G>
-    inline constexpr auto make_batch_constant() -> decltype(
-        detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
+    inline constexpr auto make_batch_constant() -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
     {
         return detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>());
     }

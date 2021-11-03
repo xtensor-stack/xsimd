@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -16,7 +16,6 @@ template <class CP>
 class conversion_test : public testing::Test
 {
 protected:
-
     static constexpr size_t N = CP::size;
     static constexpr size_t A = CP::alignment;
 
@@ -58,10 +57,15 @@ protected:
     uint8_vector ui8res;
 
     conversion_test()
-        : fposres(2 * N, 7), fnegres(2 * N, -6), dposres(N, 5), dnegres(N, -1),
-          i32posres(2 * N, float(2)), i32negres(2 * N, float(-3)),
-          i64posres(N, double(2)), i64negres(N, double(-3)),
-          ui8res(8 * N, 4)
+        : fposres(2 * N, 7)
+        , fnegres(2 * N, -6)
+        , dposres(N, 5)
+        , dnegres(N, -1)
+        , i32posres(2 * N, float(2))
+        , i32negres(2 * N, float(-3))
+        , i64posres(N, double(2))
+        , i64negres(N, double(-3))
+        , ui8res(8 * N, 4)
     {
     }
 
