@@ -131,12 +131,12 @@ namespace xsimd
                 avx = regs[2] >> 28 & 1;
                 best = std::max(best, avx::version() * avx);
 
-                // fma3 = regs[2] >> 12 & 1;
-                // best = std::max(best, XSIMD_X86_FMA3_VERSION * fma3);
+                fma3 = regs[2] >> 12 & 1;
 
                 get_cpuid(regs, 0x7);
                 avx2 = regs[1] >> 5 & 1;
                 best = std::max(best, avx2::version() * avx2);
+                best = std::max(best, fma5::version() * avx2 * fma3);
 
                 avx512f = regs[1] >> 16 & 1;
                 best = std::max(best, avx512f::version() * avx512f);
