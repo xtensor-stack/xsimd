@@ -229,6 +229,8 @@
 #if XSIMD_WITH_AVX2
 #undef XSIMD_WITH_AVX
 #define XSIMD_WITH_AVX 1
+#undef XSIMD_WITH_FMA5
+#define XSIMD_WITH_FMA5 1
 #endif
 
 #if XSIMD_WITH_AVX

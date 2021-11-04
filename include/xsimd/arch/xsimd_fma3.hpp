@@ -12,7 +12,7 @@
 #ifndef XSIMD_FMA3_HPP
 #define XSIMD_FMA3_HPP
 
-#include "../types/xsimd_sse_register.hpp"
+#include "../types/xsimd_fma3_register.hpp"
 
 namespace xsimd
 {
