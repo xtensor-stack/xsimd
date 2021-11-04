@@ -193,7 +193,7 @@ namespace xsimd
             auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
             {
                 static_assert(Arch::supported(), "dispatching on supported architecture");
-                if (Arch::version() == best_arch)
+                if (Arch::version() <= best_arch)
                     return functor(Arch {}, std::forward<Tys>(args)...);
                 else
                     return walk_archs(arch_list<ArchNext, Archs...> {}, std::forward<Tys>(args)...);
