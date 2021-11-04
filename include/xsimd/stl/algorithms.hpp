@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_ALGORITHMS_HPP
 #define XSIMD_ALGORITHMS_HPP
@@ -21,7 +21,7 @@
 
 namespace xsimd
 {
-    template <class Arch=default_arch, class I1, class I2, class O1, class UF>
+    template <class Arch = default_arch, class I1, class I2, class O1, class UF>
     void transform(I1 first, I2 last, O1 out_first, UF&& f)
     {
         using value_type = typename std::decay<decltype(*first)>::type;
@@ -75,7 +75,7 @@ namespace xsimd
         }
     }
 
-    template <class Arch=default_arch, class I1, class I2, class I3, class O1, class UF>
+    template <class Arch = default_arch, class I1, class I2, class I3, class O1, class UF>
     void transform(I1 first_1, I2 last_1, I3 first_2, O1 out_first, UF&& f)
     {
         using value_type = typename std::decay<decltype(*first_1)>::type;
@@ -93,24 +93,24 @@ namespace xsimd
         std::size_t out_align = xsimd::get_alignment_offset(ptr_out, size, simd_size);
         std::size_t align_end = align_begin_1 + ((size - align_begin_1) & ~(simd_size - 1));
 
-        #define XSIMD_LOOP_MACRO(A1, A2, A3)                                    \
-            for (std::size_t i = 0; i < align_begin_1; ++i)                     \
-            {                                                                   \
-                out_first[i] = f(first_1[i], first_2[i]);                       \
-            }                                                                   \
-                                                                                \
-            batch_type batch_1, batch_2;                                        \
-            for (std::size_t i = align_begin_1; i < align_end; i += simd_size)  \
-            {                                                                   \
-                batch_1 = batch_type::A1(&first_1[i]);                                \
-                batch_2 = batch_type::A2(&first_2[i]);                                \
-                xsimd::A3(&out_first[i], f(batch_1, batch_2));                  \
-            }                                                                   \
-                                                                                \
-            for (std::size_t i = align_end; i < size; ++i)                      \
-            {                                                                   \
-                out_first[i] = f(first_1[i], first_2[i]);                       \
-            }                                                                   \
+#define XSIMD_LOOP_MACRO(A1, A2, A3)                                   \
+    for (std::size_t i = 0; i < align_begin_1; ++i)                    \
+    {                                                                  \
+        out_first[i] = f(first_1[i], first_2[i]);                      \
+    }                                                                  \
+                                                                       \
+    batch_type batch_1, batch_2;                                       \
+    for (std::size_t i = align_begin_1; i < align_end; i += simd_size) \
+    {                                                                  \
+        batch_1 = batch_type::A1(&first_1[i]);                         \
+        batch_2 = batch_type::A2(&first_2[i]);                         \
+        xsimd::A3(&out_first[i], f(batch_1, batch_2));                 \
+    }                                                                  \
+                                                                       \
+    for (std::size_t i = align_end; i < size; ++i)                     \
+    {                                                                  \
+        out_first[i] = f(first_1[i], first_2[i]);                      \
+    }
 
         if (align_begin_1 == out_align && align_begin_1 == align_begin_2)
         {
@@ -129,9 +129,8 @@ namespace xsimd
             XSIMD_LOOP_MACRO(load_aligned, load_unaligned, store_unaligned);
         }
 
-        #undef XSIMD_LOOP_MACRO
+#undef XSIMD_LOOP_MACRO
     }
-
 
     // TODO: Remove this once we drop C++11 support
     namespace detail
@@ -143,9 +142,8 @@ namespace xsimd
         };
     }
 
-
-    template <class Arch=default_arch, class Iterator1, class Iterator2, class Init, class BinaryFunction = detail::plus>
-    Init reduce(Iterator1 first, Iterator2 last, Init init, BinaryFunction&& binfun = detail::plus{})
+    template <class Arch = default_arch, class Iterator1, class Iterator2, class Init, class BinaryFunction = detail::plus>
+    Init reduce(Iterator1 first, Iterator2 last, Init init, BinaryFunction&& binfun = detail::plus {})
     {
         using value_type = typename std::decay<decltype(*first)>::type;
         using batch_type = batch<value_type, Arch>;
@@ -153,9 +151,9 @@ namespace xsimd
         std::size_t size = static_cast<std::size_t>(std::distance(first, last));
         constexpr std::size_t simd_size = batch_type::size;
 
-        if(size < simd_size)
+        if (size < simd_size)
         {
-            while(first != last)
+            while (first != last)
             {
                 init = binfun(init, *first++);
             }
@@ -186,7 +184,8 @@ namespace xsimd
         // reduce across batch
         alignas(batch_type) std::array<value_type, simd_size> arr;
         xsimd::store_aligned(arr.data(), batch_init);
-        for (auto x : arr) init = binfun(init, x);
+        for (auto x : arr)
+            init = binfun(init, x);
 
         // reduce final unaligned part
         for (std::size_t i = align_end; i < size; ++i)

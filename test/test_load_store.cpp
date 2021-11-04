@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include <random>
 
@@ -17,10 +17,9 @@ template <class B>
 class load_store_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
-    template<class T>
+    template <class T>
     using allocator = xsimd::default_allocator<T, typename B::arch_type>;
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
@@ -108,11 +107,9 @@ protected:
 #endif
         test_store_impl(f_vec, "load float");
         test_store_impl(d_vec, "load double");
-
     }
 
 private:
-
     template <class V>
     void test_load_impl(const V& v, const std::string& name)
     {
@@ -161,7 +158,8 @@ private:
         std::default_random_engine generator;
         std::uniform_int_distribution<int> distribution(min, max);
 
-        auto gen = [&distribution, &generator](){
+        auto gen = [&distribution, &generator]()
+        {
             return static_cast<value_type>(distribution(generator));
         };
 
@@ -180,4 +178,3 @@ TYPED_TEST(load_store_test, store)
 {
     this->test_store();
 }
-

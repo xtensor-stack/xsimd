@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_TRAITS_HPP
 #define XSIMD_TRAITS_HPP
@@ -113,21 +113,7 @@ namespace xsimd
         template <class T1, class T2>
         struct simd_condition
         {
-            static constexpr bool value =
-                (std::is_same<T1, T2>::value && !std::is_same<T1, bool>::value) ||
-                (std::is_same<T1, bool>::value && !std::is_same<T2, bool>::value) ||
-                std::is_same<T1, float>::value ||
-                std::is_same<T1, double>::value ||
-                std::is_same<T1, int8_t>::value ||
-                std::is_same<T1, uint8_t>::value ||
-                std::is_same<T1, int16_t>::value ||
-                std::is_same<T1, uint16_t>::value ||
-                std::is_same<T1, int32_t>::value ||
-                std::is_same<T1, uint32_t>::value ||
-                std::is_same<T1, int64_t>::value ||
-                std::is_same<T1, uint64_t>::value ||
-                std::is_same<T1, char>::value ||
-                detail::is_complex<T1>::value;
+            static constexpr bool value = (std::is_same<T1, T2>::value && !std::is_same<T1, bool>::value) || (std::is_same<T1, bool>::value && !std::is_same<T2, bool>::value) || std::is_same<T1, float>::value || std::is_same<T1, double>::value || std::is_same<T1, int8_t>::value || std::is_same<T1, uint8_t>::value || std::is_same<T1, int16_t>::value || std::is_same<T1, uint16_t>::value || std::is_same<T1, int32_t>::value || std::is_same<T1, uint32_t>::value || std::is_same<T1, int64_t>::value || std::is_same<T1, uint64_t>::value || std::is_same<T1, char>::value || detail::is_complex<T1>::value;
         };
 
         template <class T1, class T2, class A>

@@ -27,20 +27,20 @@ namespace
             /* Generate input data: lhs, rhs */
             for (size_t i = 0; i < N; ++i)
             {
-                lhs_in[i] = 2*i + 1;
-                rhs_in[i] = 2*i + 2;
+                lhs_in[i] = 2 * i + 1;
+                rhs_in[i] = 2 * i + 2;
             }
             vects.push_back(std::move(lhs_in));
             vects.push_back(std::move(rhs_in));
 
             /* Expected shuffle data */
-            for (size_t i = 0, j= 0; i < N/2; ++i, j=j+2)
+            for (size_t i = 0, j = 0; i < N / 2; ++i, j = j + 2)
             {
                 exp_lo[j] = lhs_in[i];
-                exp_hi[j] = lhs_in[i + N/2];
+                exp_hi[j] = lhs_in[i + N / 2];
 
                 exp_lo[j + 1] = rhs_in[i];
-                exp_hi[j + 1] = rhs_in[i + N/2];
+                exp_hi[j + 1] = rhs_in[i + N / 2];
             }
             vects.push_back(std::move(exp_lo));
             vects.push_back(std::move(exp_hi));
@@ -53,7 +53,7 @@ namespace
 template <class B>
 class shuffle_128_test : public testing::Test
 {
-  protected:
+protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;

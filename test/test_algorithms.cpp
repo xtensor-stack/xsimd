@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 #include "xsimd/stl/algorithms.hpp"
@@ -48,44 +48,43 @@ TEST(algorithms, binary_transform)
     std::vector<test_value_type, test_allocator_type<test_value_type>> aa(93, 123), ba(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), b.begin(), expected.begin(),
-                    binary_functor{});
+                   binary_functor {});
 
     xsimd::transform(a.begin(), a.end(), b.begin(), c.begin(),
-                     binary_functor{});
+                     binary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), c.begin()) && expected.size() == c.size());
     std::fill(c.begin(), c.end(), -1); // erase
 
     xsimd::transform(aa.begin(), aa.end(), ba.begin(), c.begin(),
-                     binary_functor{});
+                     binary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), c.begin()) && expected.size() == c.size());
     std::fill(c.begin(), c.end(), -1); // erase
 
     xsimd::transform(aa.begin(), aa.end(), b.begin(), c.begin(),
-                     binary_functor{});
+                     binary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), c.begin()) && expected.size() == c.size());
     std::fill(c.begin(), c.end(), -1); // erase
 
     xsimd::transform(a.begin(), a.end(), ba.begin(), c.begin(),
-                     binary_functor{});
+                     binary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), c.begin()) && expected.size() == c.size());
     std::fill(c.begin(), c.end(), -1); // erase
 
     xsimd::transform(aa.begin(), aa.end(), ba.begin(), ca.begin(),
-                     binary_functor{});
+                     binary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), ca.begin()) && expected.size() == ca.size());
     std::fill(ca.begin(), ca.end(), -1); // erase
 
     xsimd::transform(aa.begin(), aa.end(), b.begin(), ca.begin(),
-                     binary_functor{});
+                     binary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), ca.begin()) && expected.size() == ca.size());
     std::fill(ca.begin(), ca.end(), -1); // erase
 
     xsimd::transform(a.begin(), a.end(), ba.begin(), ca.begin(),
-                     binary_functor{});
+                     binary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), ca.begin()) && expected.size() == ca.size());
     std::fill(ca.begin(), ca.end(), -1); // erase
 }
-
 
 TEST(algorithms, unary_transform)
 {
@@ -94,25 +93,25 @@ TEST(algorithms, unary_transform)
     std::vector<test_value_type, test_allocator_type<test_value_type>> aa(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), expected.begin(),
-                   unary_functor{});
+                   unary_functor {});
 
     xsimd::transform(a.begin(), a.end(), c.begin(),
-                     unary_functor{});
+                     unary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), c.begin()) && expected.size() == c.size());
     std::fill(c.begin(), c.end(), -1); // erase
 
     xsimd::transform(aa.begin(), aa.end(), c.begin(),
-                     unary_functor{});
+                     unary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), c.begin()) && expected.size() == c.size());
     std::fill(c.begin(), c.end(), -1); // erase
 
     xsimd::transform(a.begin(), a.end(), ca.begin(),
-                     unary_functor{});
+                     unary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), ca.begin()) && expected.size() == ca.size());
     std::fill(ca.begin(), ca.end(), -1); // erase
 
     xsimd::transform(aa.begin(), aa.end(), ca.begin(),
-                     unary_functor{});
+                     unary_functor {});
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), ca.begin()) && expected.size() == ca.size());
     std::fill(ca.begin(), ca.end(), -1); // erase
 }
@@ -146,7 +145,7 @@ TEST_F(xsimd_reduce, unaligned_begin_unaligned_end)
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
 
-    if(small_vec.size() > 1)
+    if (small_vec.size() > 1)
     {
         auto const sbegin = std::next(small_vec.begin());
         auto const send = std::prev(small_vec.end());
@@ -162,7 +161,7 @@ TEST_F(xsimd_reduce, unaligned_begin_aligned_end)
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
 
-    if(small_vec.size() > 1)
+    if (small_vec.size() > 1)
     {
         auto const sbegin = std::next(small_vec.begin());
         auto const send = small_vec.end();
@@ -178,7 +177,7 @@ TEST_F(xsimd_reduce, aligned_begin_unaligned_end)
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
 
-    if(small_vec.size() > 1)
+    if (small_vec.size() > 1)
     {
         auto const sbegin = small_vec.begin();
         auto const send = std::prev(small_vec.end());
@@ -194,7 +193,7 @@ TEST_F(xsimd_reduce, aligned_begin_aligned_end)
 
     EXPECT_EQ(std::accumulate(begin, end, init), xsimd::reduce(begin, end, init));
 
-    if(small_vec.size() > 1)
+    if (small_vec.size() > 1)
     {
         auto const sbegin = small_vec.begin();
         auto const send = small_vec.end();
@@ -210,25 +209,25 @@ TEST_F(xsimd_reduce, using_custom_binary_function)
 
     if (std::is_same<aligned_vec_t::value_type, double>::value)
     {
-        EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+        EXPECT_DOUBLE_EQ(std::accumulate(begin, end, init, multiply {}), xsimd::reduce(begin, end, init, multiply {}));
     }
     else
     {
-        EXPECT_FLOAT_EQ(std::accumulate(begin, end, init, multiply{}), xsimd::reduce(begin, end, init, multiply{}));
+        EXPECT_FLOAT_EQ(std::accumulate(begin, end, init, multiply {}), xsimd::reduce(begin, end, init, multiply {}));
     }
 
-    if(small_vec.size() > 1)
+    if (small_vec.size() > 1)
     {
         auto const sbegin = small_vec.begin();
         auto const send = small_vec.end();
 
         if (std::is_same<aligned_vec_t::value_type, double>::value)
         {
-            EXPECT_DOUBLE_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+            EXPECT_DOUBLE_EQ(std::accumulate(sbegin, send, init, multiply {}), xsimd::reduce(sbegin, send, init, multiply {}));
         }
         else
         {
-            EXPECT_FLOAT_EQ(std::accumulate(sbegin, send, init, multiply{}), xsimd::reduce(sbegin, send, init, multiply{}));
+            EXPECT_FLOAT_EQ(std::accumulate(sbegin, send, init, multiply {}), xsimd::reduce(sbegin, send, init, multiply {}));
         }
     }
 }
@@ -244,7 +243,7 @@ TEST(algorithms, iterator)
     using batch_type = xsimd::batch<float>;
     auto begin = xsimd::aligned_iterator<batch_type>(&a[0]);
     auto end = xsimd::aligned_iterator<batch_type>(&a[0] + a.size());
- 
+
     for (; begin != end; ++begin)
     {
         *begin = *begin / 2.f;
@@ -267,7 +266,7 @@ TEST(algorithms, iterator)
 
 #if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
     std::vector<std::complex<double>, test_allocator_type<std::complex<double>>> ca(10 * 16, std::complex<double>(0.2));
-    using cbatch_type = xsimd::batch_type<std::complex<double>;
+    using cbatch_type = xsimd::batch_type < std::complex<double>;
     auto cbegin = xsimd::aligned_iterator<cbatch_type>(&ca[0]);
     auto cend = xsimd::aligned_iterator<cbatch_type>(&ca[0] + a.size());
 
@@ -282,6 +281,5 @@ TEST(algorithms, iterator)
     auto real_part = abs(*(cbegin));
     (void)real_part;
 #endif
-
 }
 #endif

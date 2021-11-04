@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -15,7 +15,6 @@ template <class B>
 class complex_power_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using real_batch_type = typename B::real_batch;
     using value_type = typename B::value_type;
@@ -43,7 +42,7 @@ protected:
         rhs.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
-            real_value_type real = (real_value_type(i) / 4 + real_value_type(1.2) * std::sqrt(real_value_type(i + 0.25)))/ 100;
+            real_value_type real = (real_value_type(i) / 4 + real_value_type(1.2) * std::sqrt(real_value_type(i + 0.25))) / 100;
             real_value_type imag = (real_value_type(i) / 7 + real_value_type(1.7) * std::sqrt(real_value_type(i + 0.37))) / 100;
             lhs_nn[i] = value_type(-real, -imag);
             lhs_pn[i] = value_type(real, -imag);
@@ -55,12 +54,13 @@ protected:
         expected.resize(nb_input);
         res.resize(nb_input);
     }
-    
+
     void test_abs()
     {
         real_vector_type real_expected(nb_input), real_res(nb_input);
         std::transform(lhs_np.cbegin(), lhs_np.cend(), real_expected.begin(),
-                    [](const value_type& v) { using std::abs; return abs(v); });
+                       [](const value_type& v)
+                       { using std::abs; return abs(v); });
         batch_type in;
         real_batch_type out;
         for (size_t i = 0; i < nb_input; i += size)
@@ -77,7 +77,8 @@ protected:
     {
         real_vector_type real_expected(nb_input), real_res(nb_input);
         std::transform(lhs_np.cbegin(), lhs_np.cend(), real_expected.begin(),
-                    [](const value_type& v) { using std::arg; return arg(v); });
+                       [](const value_type& v)
+                       { using std::arg; return arg(v); });
         batch_type in;
         real_batch_type out;
         for (size_t i = 0; i < nb_input; i += size)
@@ -98,7 +99,8 @@ protected:
     void test_sqrt_nn()
     {
         std::transform(lhs_nn.cbegin(), lhs_nn.cend(), expected.begin(),
-                    [](const value_type& v) { using std::sqrt; return sqrt(v); });
+                       [](const value_type& v)
+                       { using std::sqrt; return sqrt(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -113,7 +115,8 @@ protected:
     void test_sqrt_pn()
     {
         std::transform(lhs_pn.cbegin(), lhs_pn.cend(), expected.begin(),
-                    [](const value_type& v) { using std::sqrt; return sqrt(v); });
+                       [](const value_type& v)
+                       { using std::sqrt; return sqrt(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -128,7 +131,8 @@ protected:
     void test_sqrt_np()
     {
         std::transform(lhs_np.cbegin(), lhs_np.cend(), expected.begin(),
-                    [](const value_type& v) { using std::sqrt; return sqrt(v); });
+                       [](const value_type& v)
+                       { using std::sqrt; return sqrt(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -143,7 +147,8 @@ protected:
     void test_sqrt_pp()
     {
         std::transform(lhs_pp.cbegin(), lhs_pp.cend(), expected.begin(),
-                    [](const value_type& v) { using std::sqrt; return sqrt(v); });
+                       [](const value_type& v)
+                       { using std::sqrt; return sqrt(v); });
         batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -156,11 +161,11 @@ protected:
     }
 
 private:
-
     void test_pow_impl()
     {
         std::transform(lhs_np.cbegin(), lhs_np.cend(), rhs.cbegin(), expected.begin(),
-                    [](const value_type& l, const value_type& r) { using std::pow; return pow(l, r); });
+                       [](const value_type& l, const value_type& r)
+                       { using std::pow; return pow(l, r); });
         batch_type lhs_in, rhs_in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
@@ -215,7 +220,6 @@ TYPED_TEST(complex_power_test, sqrt_nn)
     this->test_sqrt_nn();
 }
 
-
 TYPED_TEST(complex_power_test, sqrt_pn)
 {
     this->test_sqrt_pn();
@@ -225,7 +229,6 @@ TYPED_TEST(complex_power_test, sqrt_np)
 {
     this->test_sqrt_np();
 }
-
 
 TYPED_TEST(complex_power_test, sqrt_pp)
 {

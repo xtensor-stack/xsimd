@@ -1,19 +1,19 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_NEON_REGISTER_HPP
 #define XSIMD_NEON_REGISTER_HPP
 
-#include "xsimd_register.hpp"
 #include "xsimd_generic_arch.hpp"
+#include "xsimd_register.hpp"
 
 #if XSIMD_WITH_NEON
 #include <arm_neon.h>
@@ -73,21 +73,19 @@ namespace xsimd
             };
 
             template <class T>
-            using signed_neon_vector_type = typename neon_vector_type_impl<8*sizeof(T)>::signed_type;
+            using signed_neon_vector_type = typename neon_vector_type_impl<8 * sizeof(T)>::signed_type;
 
             template <class T>
-            using unsigned_neon_vector_type = typename neon_vector_type_impl<8*sizeof(T)>::unsigned_type;
+            using unsigned_neon_vector_type = typename neon_vector_type_impl<8 * sizeof(T)>::unsigned_type;
 
             template <class T>
             using neon_vector_type = typename std::conditional<std::is_signed<T>::value,
-                                                              signed_neon_vector_type<T>,
-                                                              unsigned_neon_vector_type<T>
-                                                             >::type;
+                                                               signed_neon_vector_type<T>,
+                                                               unsigned_neon_vector_type<T>>::type;
 
             using char_neon_vector_type = typename std::conditional<std::is_signed<char>::value,
-                                                                   signed_neon_vector_type<char>,
-                                                                   unsigned_neon_vector_type<char>
-                                                                  >::type;
+                                                                    signed_neon_vector_type<char>,
+                                                                    unsigned_neon_vector_type<char>>::type;
         }
 
         XSIMD_DECLARE_SIMD_REGISTER(signed char, neon, detail::neon_vector_type<signed char>);
@@ -103,7 +101,9 @@ namespace xsimd
         XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, neon, detail::neon_vector_type<unsigned long long int>);
         XSIMD_DECLARE_SIMD_REGISTER(float, neon, float32x4_t);
 
-        struct invalid_register {};
+        struct invalid_register
+        {
+        };
         XSIMD_DECLARE_SIMD_REGISTER(double, neon, invalid_register);
 
         namespace detail
@@ -132,7 +132,7 @@ namespace xsimd
             template <>
             struct get_unsigned_type<8>
             {
-                using type  = uint64_t;
+                using type = uint64_t;
             };
 
             template <size_t S>
@@ -150,11 +150,10 @@ namespace xsimd
             : detail::neon_bool_simd_register<T, neon>
         {
         };
-        
+
     }
 #endif
 
 }
 
 #endif
-

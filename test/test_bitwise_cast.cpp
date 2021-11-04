@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -16,7 +16,6 @@ template <class CP>
 class bitwise_cast_test : public testing::Test
 {
 protected:
-
     static constexpr size_t N = CP::size;
 
     using int32_batch = xsimd::batch<int32_t>;
@@ -41,9 +40,16 @@ protected:
     double_vector ftod_res;
 
     bitwise_cast_test()
-        : ftoi32_res(2 * N), dtoi32_res(2 * N), ftoi64_res(N), dtoi64_res(N),
-          i32tof_res(2 * N), i64tof_res(2 * N), dtof_res(2 * N),
-          i32tod_res(N), i64tod_res(N), ftod_res(N)
+        : ftoi32_res(2 * N)
+        , dtoi32_res(2 * N)
+        , ftoi64_res(N)
+        , dtoi64_res(N)
+        , i32tof_res(2 * N)
+        , i64tof_res(2 * N)
+        , dtof_res(2 * N)
+        , i32tod_res(N)
+        , i64tod_res(N)
+        , ftod_res(N)
     {
         {
             int32_batch input = i32_input();
@@ -77,7 +83,7 @@ protected:
             double_batch input = d_input();
             bitcast b;
             b.d = input.get(0);
-            //std::fill(dtoi32_res.begin(), dtoi32_res.end(), b.i32[0]);
+            // std::fill(dtoi32_res.begin(), dtoi32_res.end(), b.i32[0]);
             std::fill(dtoi64_res.begin(), dtoi64_res.end(), b.i64);
             for (size_t i = 0; i < N; ++i)
             {
@@ -160,7 +166,6 @@ protected:
     }
 
 private:
-
     int32_batch i32_input() const
     {
         return int32_batch(2);
@@ -212,4 +217,3 @@ TYPED_TEST(bitwise_cast_test, to_double)
     this->test_to_double();
 }
 #endif
-

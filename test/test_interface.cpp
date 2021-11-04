@@ -1,17 +1,17 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include <cstddef>
-#include <vector>
 #include <numeric>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -34,7 +34,10 @@ struct interface_tester
 };
 
 interface_tester::interface_tester()
-    : fvec(SIZE), ivec(SIZE), fres(SIZE), ires(SIZE)
+    : fvec(SIZE)
+    , ivec(SIZE)
+    , fres(SIZE)
+    , ires(SIZE)
 {
     std::iota(fvec.begin(), fvec.end(), 1.f);
     std::iota(ivec.begin(), ivec.end(), 1);

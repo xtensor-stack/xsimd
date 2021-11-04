@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_ALIGNED_ALLOCATOR_HPP
 #define XSIMD_ALIGNED_ALLOCATOR_HPP
@@ -39,11 +39,10 @@ namespace xsimd
      * @tparam T type of objects to allocate.
      * @tparam Align alignment in bytes.
      */
-    template <class T, size_t Align=default_arch::alignment()>
+    template <class T, size_t Align = default_arch::alignment()>
     class aligned_allocator
     {
     public:
-
         using value_type = T;
         using pointer = T*;
         using const_pointer = const T*;
@@ -92,13 +91,11 @@ namespace xsimd
     bool operator!=(const aligned_allocator<T1, Align1>& lhs,
                     const aligned_allocator<T2, Align2>& rhs) noexcept;
 
-
     void* aligned_malloc(size_t size, size_t alignment);
     void aligned_free(void* ptr);
 
     template <class T>
     size_t get_alignment_offset(const T* p, size_t size, size_t block_size);
-
 
     /************************************
      * aligned_allocator implementation *
@@ -258,7 +255,7 @@ namespace xsimd
     }
 
     /**
-    * @ingroup allocator_comparison
+     * @ingroup allocator_comparison
      * Compares two aligned memory allocator for inequality. Since allocators
      * are stateless, return \c true iff <tt>A1 != A2</tt>.
      * @param lhs aligned_allocator to compare.
@@ -271,7 +268,6 @@ namespace xsimd
     {
         return !(lhs == rhs);
     }
-
 
     /****************************************
      * aligned malloc / free implementation *
@@ -287,7 +283,7 @@ namespace xsimd
 #ifdef _WIN32
             res = _aligned_malloc(size, alignment);
 #else
-            if(posix_memalign(&res, alignment, size) != 0)
+            if (posix_memalign(&res, alignment, size) != 0)
             {
                 res = nullptr;
             }
@@ -342,11 +338,10 @@ namespace xsimd
         }
     }
 
-    template<class T, class A=default_arch>
+    template <class T, class A = default_arch>
     using default_allocator = typename std::conditional<A::requires_alignment(),
-              aligned_allocator<T, A::alignment()>,
-              std::allocator<T>
-            >::type;
+                                                        aligned_allocator<T, A::alignment()>,
+                                                        std::allocator<T>>::type;
 }
 
 #endif

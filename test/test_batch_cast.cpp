@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -26,8 +26,7 @@ namespace detail
     is_convertible(T_in value)
     {
         int64_t signed_value = static_cast<int64_t>(value);
-        return signed_value <= static_cast<int64_t>(std::numeric_limits<T_out>::max()) &&
-               signed_value >= static_cast<int64_t>(std::numeric_limits<T_out>::lowest());
+        return signed_value <= static_cast<int64_t>(std::numeric_limits<T_out>::max()) && signed_value >= static_cast<int64_t>(std::numeric_limits<T_out>::lowest());
     }
 
     template <class T_out, class T_in>
@@ -41,8 +40,7 @@ namespace detail
     inline typename std::enable_if<std::is_floating_point<T_in>::value && std::is_integral<T_out>::value, bool>::type
     is_convertible(T_in value)
     {
-        return value <= static_cast<T_in>(std::numeric_limits<T_out>::max()) &&
-               value >= static_cast<T_in>(std::numeric_limits<T_out>::lowest());
+        return value <= static_cast<T_in>(std::numeric_limits<T_out>::max()) && value >= static_cast<T_in>(std::numeric_limits<T_out>::lowest());
     }
 
     template <class T_out, class T_in>
@@ -61,7 +59,6 @@ template <class CP>
 class batch_cast_test : public testing::Test
 {
 protected:
-
     static constexpr size_t N = CP::size;
     static constexpr size_t A = CP::alignment;
 
@@ -82,8 +79,7 @@ protected:
 
     batch_cast_test()
     {
-        int_test_values =
-        {
+        int_test_values = {
             0,
             0x01,
             0x7f,
@@ -103,8 +99,7 @@ protected:
             0xffffffffffffffff
         };
 
-        float_test_values =
-        {
+        float_test_values = {
             0.0f,
             1.0f,
             -1.0f,
@@ -126,8 +121,7 @@ protected:
             4294967167.0f
         };
 
-        double_test_values =
-        {
+        double_test_values = {
             0.0,
             1.0,
             -1.0,
@@ -315,7 +309,6 @@ protected:
 #endif
 
 private:
-
     template <class B_in, class B_out, class T>
     void test_cast_impl(T test_value, const std::string& name) const
     {

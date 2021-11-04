@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_CPUID_HPP
 #define XSIMD_CPUID_HPP
@@ -16,8 +16,8 @@
 #include <cstring>
 
 #if defined(__linux__) && (defined(__ARM_NEON) || defined(_M_ARM))
-#include <sys/auxv.h>
 #include <asm/hwcap.h>
+#include <sys/auxv.h>
 #endif
 
 #if defined(_MSC_VER)
@@ -54,101 +54,99 @@ namespace xsimd
 
             supported_arch()
             {
-                 memset(this, 0, sizeof(supported_arch));
+                memset(this, 0, sizeof(supported_arch));
 
 #if defined(__aarch64__) || defined(_M_ARM64)
-                 neon = 1;
-                 neon64 = 1;
-                 best = neon64::version();
+                neon = 1;
+                neon64 = 1;
+                best = neon64::version();
 #elif defined(__ARM_NEON) || defined(_M_ARM)
 #if defined(__linux__)
-                 neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
+                neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
 #else
-                 // that's very conservative :-/
-                 neon = 0;
+                // that's very conservative :-/
+                neon = 0;
 #endif
-                 neon64 = 0;
-                 best = neon::version() * neon;
+                neon64 = 0;
+                best = neon::version() * neon;
 
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
-                 auto get_cpuid = [](int reg[4], int func_id)
-                 {
+                auto get_cpuid = [](int reg[4], int func_id)
+                {
 
 #if defined(_MSC_VER)
-                     __cpuidex(reg, func_id, 0);
+                    __cpuidex(reg, func_id, 0);
 
 #elif defined(__INTEL_COMPILER)
-                     __cpuid(reg, func_id);
+                    __cpuid(reg, func_id);
 
 #elif defined(__GNUC__) || defined(__clang__)
 
-#if defined( __i386__ ) && defined(__PIC__)
-                     // %ebx may be the PIC register
-                     __asm__("xchg{l}\t{%%}ebx, %1\n\t"
-                             "cpuid\n\t"
-                             "xchg{l}\t{%%}ebx, %1\n\t"
-                             : "=a" (reg[0]), "=r" (reg[1]), "=c" (reg[2]),
-                               "=d" (reg[3])
-                             : "a" (func_id), "c" (0)
-                     );
+#if defined(__i386__) && defined(__PIC__)
+                    // %ebx may be the PIC register
+                    __asm__("xchg{l}\t{%%}ebx, %1\n\t"
+                            "cpuid\n\t"
+                            "xchg{l}\t{%%}ebx, %1\n\t"
+                            : "=a"(reg[0]), "=r"(reg[1]), "=c"(reg[2]),
+                              "=d"(reg[3])
+                            : "a"(func_id), "c"(0));
 
 #else
-                     __asm__("cpuid\n\t"
-                             : "=a" (reg[0]), "=b" (reg[1]), "=c" (reg[2]),
-                               "=d" (reg[3])
-                             : "a" (func_id), "c" (0)
-                     );
+                    __asm__("cpuid\n\t"
+                            : "=a"(reg[0]), "=b"(reg[1]), "=c"(reg[2]),
+                              "=d"(reg[3])
+                            : "a"(func_id), "c"(0));
 #endif
 
 #else
 #error "Unsupported configuration"
 #endif
-                 };
+                };
 
-                 int regs[4];
+                int regs[4];
 
-                 get_cpuid(regs, 0x1);
+                get_cpuid(regs, 0x1);
 
-                 sse2 = regs[2] >> 26 & 1;
-                 best = std::max(best, sse2::version() * sse2);
+                sse2 = regs[2] >> 26 & 1;
+                best = std::max(best, sse2::version() * sse2);
 
-                 sse3 = regs[2] >> 0 & 1;
-                 best = std::max(best, sse3::version() * sse3);
+                sse3 = regs[2] >> 0 & 1;
+                best = std::max(best, sse3::version() * sse3);
 
-                 //ssse3 = regs[2] >> 9 & 1;
-                 //best = std::max(best, ssse3::version() * ssse3);
+                // ssse3 = regs[2] >> 9 & 1;
+                // best = std::max(best, ssse3::version() * ssse3);
 
-                 sse4_1 = regs[2] >> 19 & 1;
-                 best = std::max(best, sse4_1::version() * sse4_1);
+                sse4_1 = regs[2] >> 19 & 1;
+                best = std::max(best, sse4_1::version() * sse4_1);
 
-                 sse4_2 = regs[2] >> 20 & 1;
-                 best = std::max(best, sse4_2::version() * sse4_2);
+                sse4_2 = regs[2] >> 20 & 1;
+                best = std::max(best, sse4_2::version() * sse4_2);
 
-                 //sse4a = regs[2] >> 6 & 1;
-                 //best = std::max(best, XSIMD_X86_AMD_SSE4A_VERSION * sse4a);
+                // sse4a = regs[2] >> 6 & 1;
+                // best = std::max(best, XSIMD_X86_AMD_SSE4A_VERSION * sse4a);
 
-                 //xop = regs[2] >> 11 & 1;
-                 //best = std::max(best, XSIMD_X86_AMD_XOP_VERSION * xop);
+                // xop = regs[2] >> 11 & 1;
+                // best = std::max(best, XSIMD_X86_AMD_XOP_VERSION * xop);
 
-                 avx = regs[2] >> 28 & 1;
-                 best = std::max(best, avx::version() * avx);
+                avx = regs[2] >> 28 & 1;
+                best = std::max(best, avx::version() * avx);
 
-                 //fma3 = regs[2] >> 12 & 1;
-                 //best = std::max(best, XSIMD_X86_FMA3_VERSION * fma3);
+                // fma3 = regs[2] >> 12 & 1;
+                // best = std::max(best, XSIMD_X86_FMA3_VERSION * fma3);
 
-                 get_cpuid(regs, 0x7);
-                 avx2 = regs[1] >> 5 & 1;
-                 best = std::max(best, avx2::version() * avx2);
+                get_cpuid(regs, 0x7);
+                avx2 = regs[1] >> 5 & 1;
+                best = std::max(best, avx2::version() * avx2);
 
-                 avx512f = regs[1] >> 16 & 1;
-                 best = std::max(best, avx512f::version() * avx512f);
+                avx512f = regs[1] >> 16 & 1;
+                best = std::max(best, avx512f::version() * avx512f);
 
-                 avx512bw = regs[1] >> 30 & 1;
-                 best = std::max(best, avx512bw::version() * avx512bw);
+                avx512bw = regs[1] >> 30 & 1;
+                best = std::max(best, avx512bw::version() * avx512bw);
 
-                 //get_cpuid(regs, 0x80000001);
-                 //fma4 = regs[2] >> 16 & 1;
-                 //best = std::max(best, XSIMD_X86_AMD_FMA4_VERSION * fma4);
+                // get_cpuid(regs, 0x80000001);
+                // fma4 = regs[2] >> 16 & 1;
+                // best = std::max(best, XSIMD_X86_AMD_FMA4_VERSION * fma4);
 #endif
             }
         };

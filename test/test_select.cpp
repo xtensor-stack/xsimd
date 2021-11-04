@@ -14,7 +14,7 @@
 template <class B>
 class select_test : public testing::Test
 {
-  protected:
+protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -33,8 +33,7 @@ class select_test : public testing::Test
         rhs_input.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
-            lhs_input[i] = value_type(i) / 4 +
-                           value_type(1.2) * std::sqrt(value_type(i + 0.25));
+            lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
         }
         expected.resize(nb_input);
@@ -45,8 +44,7 @@ class select_test : public testing::Test
     {
         for (size_t i = 0; i < nb_input; ++i)
         {
-            expected[i] =
-                lhs_input[i] > value_type(3) ? lhs_input[i] : rhs_input[i];
+            expected[i] = lhs_input[i] > value_type(3) ? lhs_input[i] : rhs_input[i];
         }
 
         batch_type lhs_in, rhs_in, out;
@@ -67,8 +65,7 @@ class select_test : public testing::Test
 
     void test_select_static()
     {
-        constexpr auto mask =
-            xsimd::make_batch_bool_constant<batch_type, pattern>();
+        constexpr auto mask = xsimd::make_batch_bool_constant<batch_type, pattern>();
 
         for (size_t i = 0; i < nb_input; ++i)
         {

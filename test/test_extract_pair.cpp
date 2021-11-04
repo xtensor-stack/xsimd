@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -28,17 +28,17 @@ namespace xsimd
             /* Generate input data: lhs, rhs */
             for (int i = 0; i < num; ++i)
             {
-                lhs_in[i] = 2*i + 1;
-                rhs_in[i] = 2*i + 2;
+                lhs_in[i] = 2 * i + 1;
+                rhs_in[i] = 2 * i + 2;
             }
             vects.push_back(std::move(lhs_in));
             vects.push_back(std::move(rhs_in));
 
             /* Expected shuffle data */
-            for (int i = 0 ; i < (num - index); ++i)
+            for (int i = 0; i < (num - index); ++i)
             {
                 exped[i] = rhs_in[i + index];
-                if(i < index)
+                if (i < index)
                 {
                     exped[num - 1 - i] = lhs_in[index - 1 - i];
                 }
@@ -53,7 +53,7 @@ namespace xsimd
 template <class B>
 class extract_pair_test : public testing::Test
 {
-  protected:
+protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;

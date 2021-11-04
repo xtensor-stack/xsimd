@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include "test_utils.hpp"
 
@@ -15,7 +15,6 @@ template <class B>
 class power_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -46,7 +45,8 @@ protected:
         // pow
         {
             std::transform(lhs_input.cbegin(), lhs_input.cend(), rhs_input.cbegin(), expected.begin(),
-                        [](const value_type& l, const value_type& r) { return std::pow(l, r); });
+                           [](const value_type& l, const value_type& r)
+                           { return std::pow(l, r); });
             batch_type lhs_in, rhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -62,12 +62,13 @@ protected:
         {
             long k = 0;
             std::transform(lhs_input.cbegin(), lhs_input.cend(), expected.begin(),
-                        [&k, this](const value_type& l) { auto arg = k / size - nb_input / size / 2; ++k; return std::pow(l, arg); });
+                           [&k, this](const value_type& l)
+                           { auto arg = k / size - nb_input / size / 2; ++k; return std::pow(l, arg); });
             batch_type lhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
                 detail::load_batch(lhs_in, lhs_input, i);
-                out = pow(lhs_in, i/size - nb_input / size / 2);
+                out = pow(lhs_in, i / size - nb_input / size / 2);
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
@@ -76,7 +77,8 @@ protected:
         // hypot
         {
             std::transform(lhs_input.cbegin(), lhs_input.cend(), rhs_input.cbegin(), expected.begin(),
-                        [](const value_type& l, const value_type& r) { return std::hypot(l, r); });
+                           [](const value_type& l, const value_type& r)
+                           { return std::hypot(l, r); });
             batch_type lhs_in, rhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
@@ -91,7 +93,8 @@ protected:
         // cbrt
         {
             std::transform(lhs_input.cbegin(), lhs_input.cend(), expected.begin(),
-                        [](const value_type& l) { return std::cbrt(l); });
+                           [](const value_type& l)
+                           { return std::cbrt(l); });
             batch_type lhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {

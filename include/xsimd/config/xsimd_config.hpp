@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_CONFIG_HPP
 #define XSIMD_CONFIG_HPP
@@ -106,7 +106,7 @@
  */
 #ifdef __FMA__
 
-#if defined(__SSE__) && ! defined(__AVX__)
+#if defined(__SSE__) && !defined(__AVX__)
 #define XSIMD_WITH_FMA3 1
 #else
 #define XSIMD_WITH_FMA3 0
@@ -139,19 +139,19 @@
  * Set to 1 if AVX512F is available at compile-time, to 0 otherwise.
  */
 #ifdef __AVX512F__
-    // AVX512 instructions are supported starting with gcc 6
-    // see https://www.gnu.org/software/gcc/gcc-6/changes.html
-    // check clang first, newer clang always defines __GNUC__ = 4
-    #if defined(__clang__) && __clang_major__ >= 6
-        #define XSIMD_WITH_AVX512F 1
-    #elif defined(__GNUC__) && __GNUC__ < 6
-        #define XSIMD_WITH_AVX512F 0
-    #else
-        #define XSIMD_WITH_AVX512F 1
-        #if __GNUC__ == 6
-            #define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
-        #endif
-    #endif
+// AVX512 instructions are supported starting with gcc 6
+// see https://www.gnu.org/software/gcc/gcc-6/changes.html
+// check clang first, newer clang always defines __GNUC__ = 4
+#if defined(__clang__) && __clang_major__ >= 6
+#define XSIMD_WITH_AVX512F 1
+#elif defined(__GNUC__) && __GNUC__ < 6
+#define XSIMD_WITH_AVX512F 0
+#else
+#define XSIMD_WITH_AVX512F 1
+#if __GNUC__ == 6
+#define XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY 1
+#endif
+#endif
 #else
 #define XSIMD_WITH_AVX512F 0
 #endif
@@ -197,25 +197,25 @@
  *
  * Set to 1 if NEON is available at compile-time, to 0 otherwise.
  */
-    #if __ARM_ARCH >= 7
-        #define XSIMD_WITH_NEON 1
-    #else
-        #define XSIMD_WITH_NEON 0
-    #endif
+#if __ARM_ARCH >= 7
+#define XSIMD_WITH_NEON 1
+#else
+#define XSIMD_WITH_NEON 0
+#endif
 
 /**
  * @ingroup xsimd_config_macro
  *
  * Set to 1 if NEON64 is available at compile-time, to 0 otherwise.
  */
-    #ifdef __aarch64__
-        #define XSIMD_WITH_NEON64 1
-    #else
-        #define XSIMD_WITH_NEON64 0
-    #endif
+#ifdef __aarch64__
+#define XSIMD_WITH_NEON64 1
 #else
-    #define XSIMD_WITH_NEON 0
-    #define XSIMD_WITH_NEON64 0
+#define XSIMD_WITH_NEON64 0
+#endif
+#else
+#define XSIMD_WITH_NEON 0
+#define XSIMD_WITH_NEON64 0
 #endif
 
 // Workaround for MSVC compiler

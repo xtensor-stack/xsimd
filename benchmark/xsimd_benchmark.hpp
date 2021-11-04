@@ -1,34 +1,40 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #ifndef XSIMD_BENCHMARK_HPP
 #define XSIMD_BENCHMARK_HPP
 
+#include "xsimd/xsimd.hpp"
 #include <chrono>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include "xsimd/xsimd.hpp"
 
 namespace xsimd
 {
     template <class T>
     std::string batch_name();
 
-    template <> inline std::string batch_name<batch<float, 4>>() { return "sse/neon float"; }
-    template <> inline std::string batch_name<batch<double, 2>>() { return "sse/neon double"; }
-    template <> inline std::string batch_name<batch<float, 8>>() { return "avx float"; }
-    template <> inline std::string batch_name<batch<double, 4>>() { return "avx double"; }
-    template <> inline std::string batch_name<batch<float, 7>>() { return "fallback float"; }
-    template <> inline std::string batch_name<batch<double, 3>>() { return "fallback double"; }
+    template <>
+    inline std::string batch_name<batch<float, 4>>() { return "sse/neon float"; }
+    template <>
+    inline std::string batch_name<batch<double, 2>>() { return "sse/neon double"; }
+    template <>
+    inline std::string batch_name<batch<float, 8>>() { return "avx float"; }
+    template <>
+    inline std::string batch_name<batch<double, 4>>() { return "avx double"; }
+    template <>
+    inline std::string batch_name<batch<float, 7>>() { return "fallback float"; }
+    template <>
+    inline std::string batch_name<batch<double, 3>>() { return "fallback double"; }
 
     using duration_type = std::chrono::duration<double, std::milli>;
 
@@ -111,7 +117,7 @@ namespace xsimd
             auto start = std::chrono::steady_clock::now();
             for (size_t i = 0; i < s; ++i)
             {
-               res[i] = f(lhs[i], rhs[i]);
+                res[i] = f(lhs[i], rhs[i]);
             }
             auto end = std::chrono::steady_clock::now();
             auto tmp = end - start;
@@ -130,7 +136,7 @@ namespace xsimd
             auto start = std::chrono::steady_clock::now();
             for (size_t i = 0; i < s; ++i)
             {
-               res[i] = f(op0[i], op1[i], op2[i]);
+                res[i] = f(op0[i], op1[i], op2[i]);
             }
             auto end = std::chrono::steady_clock::now();
             auto tmp = end - start;
@@ -175,7 +181,7 @@ namespace xsimd
                 size_t k = j + B::size;
                 size_t l = k + B::size;
                 B blhs(&lhs[i], aligned_mode()), blhs2(&lhs[j], aligned_mode()),
-                  blhs3(&lhs[k], aligned_mode()), blhs4(&lhs[l], aligned_mode());
+                    blhs3(&lhs[k], aligned_mode()), blhs4(&lhs[l], aligned_mode());
                 B bres = f(blhs);
                 B bres2 = f(blhs2);
                 B bres3 = f(blhs3);
@@ -228,9 +234,9 @@ namespace xsimd
                 size_t k = j + B::size;
                 size_t l = k + B::size;
                 B blhs(&lhs[i], aligned_mode()), brhs(&rhs[i], aligned_mode()),
-                  blhs2(&lhs[j], aligned_mode()), brhs2(&rhs[j], aligned_mode());
+                    blhs2(&lhs[j], aligned_mode()), brhs2(&rhs[j], aligned_mode());
                 B blhs3(&lhs[k], aligned_mode()), brhs3(&rhs[k], aligned_mode()),
-                  blhs4(&lhs[l], aligned_mode()), brhs4(&rhs[l], aligned_mode());
+                    blhs4(&lhs[l], aligned_mode()), brhs4(&rhs[l], aligned_mode());
                 B bres = f(blhs, brhs);
                 B bres2 = f(blhs2, brhs2);
                 B bres3 = f(blhs3, brhs3);
@@ -247,7 +253,6 @@ namespace xsimd
         return t_res;
     }
 
-
     template <class B, class F, class V>
     duration_type benchmark_simd(F f, V& op0, V& op1, V& op2, V& res, std::size_t number)
     {
@@ -259,8 +264,8 @@ namespace xsimd
             for (std::size_t i = 0; i <= (s - B::size); i += B::size)
             {
                 B bop0(&op0[i], aligned_mode()),
-                  bop1(&op1[i], aligned_mode()),
-                  bop2(&op2[i], aligned_mode());
+                    bop1(&op1[i], aligned_mode()),
+                    bop2(&op2[i], aligned_mode());
                 B bres = f(bop0, bop1, bop2);
                 bres.store_aligned(&res[i]);
             }
@@ -558,85 +563,105 @@ namespace xsimd
         out << "============================" << std::endl;
     }
 
-
-#define DEFINE_OP_FUNCTOR_2OP(OP, NAME)\
-    struct NAME##_fn {\
-        template <class T>\
-        inline T operator()(const T& lhs, const T& rhs) const { return lhs OP rhs; }\
-        inline std::string name() const { return #NAME; }\
+#define DEFINE_OP_FUNCTOR_2OP(OP, NAME)                                              \
+    struct NAME##_fn                                                                 \
+    {                                                                                \
+        template <class T>                                                           \
+        inline T operator()(const T& lhs, const T& rhs) const { return lhs OP rhs; } \
+        inline std::string name() const { return #NAME; }                            \
     }
 
-#define DEFINE_FUNCTOR_1OP(FN)\
-    struct FN##_fn {\
-        template <class T>\
-        inline T operator()(const T& x) const { using xsimd::FN; return FN(x); }\
-        inline std::string name() const { return #FN; }\
+#define DEFINE_FUNCTOR_1OP(FN)                          \
+    struct FN##_fn                                      \
+    {                                                   \
+        template <class T>                              \
+        inline T operator()(const T& x) const           \
+        {                                               \
+            using xsimd::FN;                            \
+            return FN(x);                               \
+        }                                               \
+        inline std::string name() const { return #FN; } \
     }
 
-#define DEFINE_FUNCTOR_1OP_TEMPLATE(FN, N, ...)\
-    struct FN##_##N##_fn {\
-        template <class T>\
-        inline T operator()(const T& x) const { using xsimd::FN; return FN<T, __VA_ARGS__>(x); }\
-        inline std::string name() const { return #FN " " #N ; }\
+#define DEFINE_FUNCTOR_1OP_TEMPLATE(FN, N, ...)                \
+    struct FN##_##N##_fn                                       \
+    {                                                          \
+        template <class T>                                     \
+        inline T operator()(const T& x) const                  \
+        {                                                      \
+            using xsimd::FN;                                   \
+            return FN<T, __VA_ARGS__>(x);                      \
+        }                                                      \
+        inline std::string name() const { return #FN " " #N; } \
     }
 
-#define DEFINE_FUNCTOR_2OP(FN)\
-    struct FN##_fn{\
-        template <class T>\
-        inline T operator()(const T&lhs, const T& rhs) const { using xsimd::FN; return FN(lhs, rhs); }\
-        inline std::string name() const { return #FN; }\
+#define DEFINE_FUNCTOR_2OP(FN)                                \
+    struct FN##_fn                                            \
+    {                                                         \
+        template <class T>                                    \
+        inline T operator()(const T& lhs, const T& rhs) const \
+        {                                                     \
+            using xsimd::FN;                                  \
+            return FN(lhs, rhs);                              \
+        }                                                     \
+        inline std::string name() const { return #FN; }       \
     }
 
-#define DEFINE_FUNCTOR_3OP(FN)\
-    struct FN##_fn{\
-        template <class T>\
-        inline T operator()(const T& op0, const T& op1, const T& op2) const { using xsimd::FN; return FN(op0, op1, op2); }\
-        inline std::string name() const { return #FN; }\
+#define DEFINE_FUNCTOR_3OP(FN)                                              \
+    struct FN##_fn                                                          \
+    {                                                                       \
+        template <class T>                                                  \
+        inline T operator()(const T& op0, const T& op1, const T& op2) const \
+        {                                                                   \
+            using xsimd::FN;                                                \
+            return FN(op0, op1, op2);                                       \
+        }                                                                   \
+        inline std::string name() const { return #FN; }                     \
     }
 
-DEFINE_OP_FUNCTOR_2OP(+, add);
-DEFINE_OP_FUNCTOR_2OP(-, sub);
-DEFINE_OP_FUNCTOR_2OP(*, mul);
-DEFINE_OP_FUNCTOR_2OP(/, div);
+    DEFINE_OP_FUNCTOR_2OP(+, add);
+    DEFINE_OP_FUNCTOR_2OP(-, sub);
+    DEFINE_OP_FUNCTOR_2OP(*, mul);
+    DEFINE_OP_FUNCTOR_2OP(/, div);
 
-DEFINE_FUNCTOR_1OP(exp);
-DEFINE_FUNCTOR_1OP(exp2);
-DEFINE_FUNCTOR_1OP(expm1);
-DEFINE_FUNCTOR_1OP(log);
-DEFINE_FUNCTOR_1OP(log10);
-DEFINE_FUNCTOR_1OP(log2);
-DEFINE_FUNCTOR_1OP(log1p);
+    DEFINE_FUNCTOR_1OP(exp);
+    DEFINE_FUNCTOR_1OP(exp2);
+    DEFINE_FUNCTOR_1OP(expm1);
+    DEFINE_FUNCTOR_1OP(log);
+    DEFINE_FUNCTOR_1OP(log10);
+    DEFINE_FUNCTOR_1OP(log2);
+    DEFINE_FUNCTOR_1OP(log1p);
 
-DEFINE_FUNCTOR_1OP(sin);
-DEFINE_FUNCTOR_1OP(cos);
-DEFINE_FUNCTOR_1OP(tan);
-DEFINE_FUNCTOR_1OP(asin);
-DEFINE_FUNCTOR_1OP(acos);
-DEFINE_FUNCTOR_1OP(atan);
+    DEFINE_FUNCTOR_1OP(sin);
+    DEFINE_FUNCTOR_1OP(cos);
+    DEFINE_FUNCTOR_1OP(tan);
+    DEFINE_FUNCTOR_1OP(asin);
+    DEFINE_FUNCTOR_1OP(acos);
+    DEFINE_FUNCTOR_1OP(atan);
 
-DEFINE_FUNCTOR_1OP(sinh);
-DEFINE_FUNCTOR_1OP(cosh);
-DEFINE_FUNCTOR_1OP(tanh);
-DEFINE_FUNCTOR_1OP(asinh);
-DEFINE_FUNCTOR_1OP(acosh);
-DEFINE_FUNCTOR_1OP(atanh);
+    DEFINE_FUNCTOR_1OP(sinh);
+    DEFINE_FUNCTOR_1OP(cosh);
+    DEFINE_FUNCTOR_1OP(tanh);
+    DEFINE_FUNCTOR_1OP(asinh);
+    DEFINE_FUNCTOR_1OP(acosh);
+    DEFINE_FUNCTOR_1OP(atanh);
 
-DEFINE_FUNCTOR_2OP(pow);
-DEFINE_FUNCTOR_1OP(sqrt);
-DEFINE_FUNCTOR_1OP(cbrt);
-DEFINE_FUNCTOR_2OP(hypot);
+    DEFINE_FUNCTOR_2OP(pow);
+    DEFINE_FUNCTOR_1OP(sqrt);
+    DEFINE_FUNCTOR_1OP(cbrt);
+    DEFINE_FUNCTOR_2OP(hypot);
 
-DEFINE_FUNCTOR_1OP(ceil);
-DEFINE_FUNCTOR_1OP(floor);
-DEFINE_FUNCTOR_1OP(trunc);
-DEFINE_FUNCTOR_1OP(round);
-DEFINE_FUNCTOR_1OP(nearbyint);
-DEFINE_FUNCTOR_1OP(rint);
+    DEFINE_FUNCTOR_1OP(ceil);
+    DEFINE_FUNCTOR_1OP(floor);
+    DEFINE_FUNCTOR_1OP(trunc);
+    DEFINE_FUNCTOR_1OP(round);
+    DEFINE_FUNCTOR_1OP(nearbyint);
+    DEFINE_FUNCTOR_1OP(rint);
 
-DEFINE_FUNCTOR_2OP(fmod);
-DEFINE_FUNCTOR_2OP(remainder);
-DEFINE_FUNCTOR_2OP(fdim);
-DEFINE_FUNCTOR_3OP(clip);
+    DEFINE_FUNCTOR_2OP(fmod);
+    DEFINE_FUNCTOR_2OP(remainder);
+    DEFINE_FUNCTOR_2OP(fdim);
+    DEFINE_FUNCTOR_3OP(clip);
 #if 0
 DEFINE_FUNCTOR_1OP(isfinite);
 DEFINE_FUNCTOR_1OP(isinf);
@@ -646,16 +671,16 @@ DEFINE_FUNCTOR_1OP(is_even);
 #endif
 
 #ifdef XSIMD_POLY_BENCHMARKS
-DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 5, 1, 2, 3, 4, 5);
-DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 5, 1, 2, 3, 4, 5);
-DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
-DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
-DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 5, 1, 2, 3, 4, 5);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 5, 1, 2, 3, 4, 5);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
 #endif
 
 }

@@ -1,13 +1,13 @@
 /***************************************************************************
-* Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
-* Martin Renou                                                             *
-* Copyright (c) QuantStack                                                 *
-* Copyright (c) Serge Guelton                                              *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
+ * Martin Renou                                                             *
+ * Copyright (c) QuantStack                                                 *
+ * Copyright (c) Serge Guelton                                              *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
 #include <vector>
 
@@ -43,7 +43,7 @@ namespace xsimd
 
         void flip(vector_type& vec)
         {
-            std::transform(vec.begin(), vec.end(), vec.begin(), std::logical_not<bool>{});
+            std::transform(vec.begin(), vec.end(), vec.begin(), std::logical_not<bool> {});
         }
 
         void flip(std::vector<vector_type>& vectors)
@@ -55,7 +55,7 @@ namespace xsimd
         }
     };
 
-    template <class T, size_t N=T::size>
+    template <class T, size_t N = T::size>
     struct get_bool;
 
     template <class T>
@@ -64,9 +64,9 @@ namespace xsimd
         using type = batch_bool<T>;
         type all_true = type(true);
         type all_false = type(false);
-        type half = {0, 1};
-        type ihalf = {1, 0};
-        type interspersed = {0, 1};
+        type half = { 0, 1 };
+        type ihalf = { 1, 0 };
+        type interspersed = { 0, 1 };
     };
 
     template <class T>
@@ -76,9 +76,9 @@ namespace xsimd
 
         type all_true = true;
         type all_false = false;
-        type half = {0, 0, 1, 1};
-        type ihalf = {1, 1, 0, 0};
-        type interspersed = {0, 1, 0, 1};
+        type half = { 0, 0, 1, 1 };
+        type ihalf = { 1, 1, 0, 0 };
+        type interspersed = { 0, 1, 0, 1 };
     };
 
     template <class T>
@@ -87,9 +87,9 @@ namespace xsimd
         using type = batch_bool<T>;
         type all_true = true;
         type all_false = false;
-        type half = {0, 0, 0, 0, 1, 1, 1, 1};
-        type ihalf = {1, 1, 1, 1, 0, 0, 0, 0};
-        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1};
+        type half = { 0, 0, 0, 0, 1, 1, 1, 1 };
+        type ihalf = { 1, 1, 1, 1, 0, 0, 0, 0 };
+        type interspersed = { 0, 1, 0, 1, 0, 1, 0, 1 };
     };
 
     template <class T>
@@ -98,9 +98,9 @@ namespace xsimd
         using type = batch_bool<T>;
         type all_true = true;
         type all_false = false;
-        type half = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1};
-        type ihalf = {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
-        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
+        type half = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 };
+        type ihalf = { 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+        type interspersed = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
     };
 
     template <class T>
@@ -109,9 +109,9 @@ namespace xsimd
         using type = batch_bool<T>;
         type all_true = true;
         type all_false = false;
-        type half = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-        type ihalf = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
+        type half = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+        type ihalf = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        type interspersed = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
     };
 
     template <class T>
@@ -120,9 +120,9 @@ namespace xsimd
         using type = batch_bool<T>;
         type all_true = true;
         type all_false = false;
-        type half = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-        type ihalf = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        type interspersed = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
+        type half = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+        type ihalf = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        type interspersed = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
     };
 
 }
@@ -131,7 +131,6 @@ template <class B>
 class batch_bool_test : public testing::Test
 {
 protected:
-
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -148,8 +147,8 @@ protected:
         for (size_t i = 0; i < size; ++i)
         {
             lhs[i] = value_type(i);
-            rhs[i] = i == 0%2 ? lhs[i] : lhs[i] * 2;
-            ba[i] = i == 0%2 ? true : false;
+            rhs[i] = i == 0 % 2 ? lhs[i] : lhs[i] * 2;
+            ba[i] = i == 0 % 2 ? true : false;
         }
     }
 
@@ -169,7 +168,7 @@ protected:
 
     void test_any_all() const
     {
-        auto bool_g = xsimd::get_bool<batch_bool_type>{};
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
         // any
         {
             auto any_check_false = (batch_lhs() != batch_lhs());
@@ -223,7 +222,7 @@ protected:
 
     void test_logical_operations() const
     {
-        auto bool_g = xsimd::get_bool<batch_bool_type>{};
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
         size_t s = size;
         // operator!=
         {
@@ -263,7 +262,7 @@ protected:
 
     void test_bitwise_operations() const
     {
-        auto bool_g = xsimd::get_bool<batch_bool_type>{};
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
         // operator~
         {
             bool res = xsimd::all(bool_g.half == ~bool_g.ihalf);
@@ -282,7 +281,6 @@ protected:
     }
 
 private:
-
     batch_type batch_lhs() const
     {
         return batch_type::load_unaligned(lhs.data());
@@ -315,4 +313,3 @@ TYPED_TEST(batch_bool_test, bitwise_operations)
 {
     this->test_bitwise_operations();
 }
-
