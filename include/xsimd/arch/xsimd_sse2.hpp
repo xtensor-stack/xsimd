@@ -1288,26 +1288,25 @@ namespace xsimd
         }
 
         // array to batch
-        namespace detail {
+        namespace detail
+        {
             template <class T>
-            using enable_char_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                          sizeof(T) == 1, int8_t>::type;
+            using enable_char_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 1, int8_t>::type;
             template <class T>
-            using enable_short_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                          sizeof(T) == 2, int16_t>::type;
+            using enable_short_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 2, int16_t>::type;
             template <class T>
-            using enable_int_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                          sizeof(T) == 4, int32_t>::type;
+            using enable_int_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 4, int32_t>::type;
             template <class T>
-            using enable_long_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                          sizeof(T) == 8, int64_t>::type;
+            using enable_long_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 8, int64_t>::type;
 
-            template<class A, class It, class T, enable_char_sized_t<T> = 0>
-            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end) {
+            template <class A, class It, class T, enable_char_sized_t<T> = 0>
+            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end)
+            {
                 const int i_size = std::distance(begin, end);
                 std::vector<char> bytes_array(i_size);
 
-                for(int i = 0; i < i_size; i++) {
+                for (int i = 0; i < i_size; i++)
+                {
                     bytes_array[i] = *(begin + i);
                 }
                 return _mm_set_epi8(
@@ -1317,12 +1316,14 @@ namespace xsimd
                     bytes_array[3], bytes_array[2], bytes_array[1], bytes_array[0]);
             }
 
-            template<class A, class It, class T, enable_short_sized_t<T> = 0>
-            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end) {
+            template <class A, class It, class T, enable_short_sized_t<T> = 0>
+            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end)
+            {
                 const int i_size = std::distance(begin, end);
                 std::vector<short> shorts_array(i_size);
 
-                for(int i = 0; i < i_size; i++) {
+                for (int i = 0; i < i_size; i++)
+                {
                     shorts_array[i] = *(begin + i);
                 }
                 return _mm_set_epi16(
@@ -1330,30 +1331,35 @@ namespace xsimd
                     shorts_array[3], shorts_array[2], shorts_array[1], shorts_array[0]);
             }
 
-            template<class A, class It, class T, enable_int_sized_t<T> = 0>
-            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end) {
+            template <class A, class It, class T, enable_int_sized_t<T> = 0>
+            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end)
+            {
                 const int i_size = std::distance(begin, end);
                 std::vector<int> words_array(i_size);
 
-                for(int i = 0; i < i_size; i++) {
+                for (int i = 0; i < i_size; i++)
+                {
                     words_array[i] = *(begin + i);
                 }
                 return _mm_set_epi32(words_array[3], words_array[2], words_array[1], words_array[0]);
             }
 
-            template<class A, class It, class T, enable_long_sized_t<T> = 0>
-            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end) {
+            template <class A, class It, class T, enable_long_sized_t<T> = 0>
+            batch<T, A> array_to_batch_sse2_impl(batch<T, A>&, It begin, It end)
+            {
                 const int i_size = std::distance(begin, end);
                 std::vector<long> longs_array(i_size);
 
-                for(int i = 0; i < i_size; i++) {
+                for (int i = 0; i < i_size; i++)
+                {
                     longs_array[i] = *(begin + i);
                 }
                 return _mm_set_epi64x(longs_array[1], longs_array[0]);
             }
         }
         template <class A, class It, class T>
-        batch<T, A> array_to_batch(batch<T, A>& bt, It begin, It end, requires_arch<sse2>) {
+        batch<T, A> array_to_batch(batch<T, A>& bt, It begin, It end, requires_arch<sse2>)
+        {
             return detail::array_to_batch_sse2_impl(bt, begin, end);
         }
 

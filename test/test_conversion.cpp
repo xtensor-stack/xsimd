@@ -164,7 +164,6 @@ protected:
             using array_byte_type_t = std::array<uint8_t, uint8_batch::size>;
             array_byte_type_t bytes_arr;
             bytes_arr.fill(1);
-            //batch_ui8_op = xsimd::bytes_array_to_batch(batch_ui8_op, bytes_arr);
             uint8_batch batch_ui8_op = xsimd::array_to_batch(batch_ui8_op, bytes_arr.begin(), bytes_arr.end());
             EXPECT_BATCH_EQ(batch_ui8_op, batch_ui8_exp) << print_function_name("bytes to vector");
         }
@@ -192,7 +191,6 @@ protected:
             uint64_batch batch_ui64_op = xsimd::array_to_batch(batch_ui64_op, longs_arr.begin(), longs_arr.end());
             EXPECT_BATCH_EQ(batch_ui64_op, batch_ui64_exp) << print_function_name("longs to vector");
         }
-
     }
 };
 

@@ -52,7 +52,7 @@ namespace xsimd
         template <class It>
         batch(It b, It e);
 
-        template<class U>
+        template <class U>
         static XSIMD_NO_DISCARD batch broadcast(U val);
 
         // memory operators
@@ -430,7 +430,7 @@ namespace xsimd
     template <class T, class A>
     template <class It>
     batch<T, A>::batch(It b, It e)
-        : batch(kernel::array_to_batch<A>(batch{}, b, e, A{}))
+        : batch(kernel::array_to_batch<A>(batch {}, b, e, A {}))
     {
     }
 

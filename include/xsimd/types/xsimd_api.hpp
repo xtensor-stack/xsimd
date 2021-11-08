@@ -1787,8 +1787,9 @@ namespace xsimd
      * @return \c  \c T
      */
     template <class T, class A, class It>
-    batch<T, A> array_to_batch(batch<T, A>& x, It y, It z) {
-        return kernel::array_to_batch<A>(x, y, z, A{});
+    batch<T, A> array_to_batch(batch<T, A>& x, It y, It z)
+    {
+        return kernel::array_to_batch<A>(x, y, z, A {});
     }
 
     /**

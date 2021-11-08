@@ -722,60 +722,57 @@ namespace xsimd
         /******************
          * array to batch *
          ******************/
-        namespace detail {
+        namespace detail
+        {
             template <class T>
-            using enable_char_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                                sizeof(T) == 1, int8_t>::type;
+            using enable_char_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 1, int8_t>::type;
             template <class T>
-            using enable_short_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                                 sizeof(T) == 2, int16_t>::type;
+            using enable_short_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 2, int16_t>::type;
             template <class T>
-            using enable_int_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                               sizeof(T) == 4, int32_t>::type;
+            using enable_int_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 4, int32_t>::type;
             template <class T>
-            using enable_long_sized_t = typename std::enable_if<std::is_integral<T>::value &&
-                                                                sizeof(T) == 8, int64_t>::type;
+            using enable_long_sized_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == 8, int64_t>::type;
 
-            template<class A, class It, class T, enable_char_sized_t<T> = 0>
+            template <class A, class It, class T, enable_char_sized_t<T> = 0>
             batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
             {
                 int i_size = std::distance(begin, end);
                 uint8_t bytes_array[i_size];
 
-                for(int i = 0; i < i_size; i++)
+                for (int i = 0; i < i_size; i++)
                 {
                     bytes_array[i] = *(begin + i);
                 }
                 return vld1q_u8(bytes_array);
             }
 
-            template<class A, class It, class T, enable_short_sized_t<T> = 0>
+            template <class A, class It, class T, enable_short_sized_t<T> = 0>
             batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
             {
                 int i_size = std::distance(begin, end);
                 uint16_t shorts_array[i_size];
 
-                for(int i = 0; i < i_size; i++)
+                for (int i = 0; i < i_size; i++)
                 {
                     shorts_array[i] = *(begin + i);
                 }
                 return vld1q_u16(shorts_array);
             }
 
-            template<class A, class It, class T, enable_int_sized_t<T> = 0>
+            template <class A, class It, class T, enable_int_sized_t<T> = 0>
             batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
             {
                 int i_size = std::distance(begin, end);
                 uint32_t words_array[i_size];
 
-                for(int i = 0; i < i_size; i++)
+                for (int i = 0; i < i_size; i++)
                 {
                     words_array[i] = *(begin + i);
                 }
                 return vld1q_u32(words_array);
             }
 
-            template<class A, class It, class T, enable_long_sized_t<T> = 0>
+            template <class A, class It, class T, enable_long_sized_t<T> = 0>
             batch<T, A> array_to_batch_neon64_impl(batch<T, A>&, It begin, It end)
             {
                 return vcombine_u64(vcreate_u64(*begin), vcreate_u64(*(end - 1)));
