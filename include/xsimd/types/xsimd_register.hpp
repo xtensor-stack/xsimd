@@ -20,7 +20,10 @@ namespace xsimd
     {
 
         template <class T, class Arch>
-        struct simd_register;
+        struct simd_register
+        {
+            static_assert(Arch::supported(), "usage of simd_register with unsupported architecture");
+        };
 
         template <class T, class A>
         struct has_simd_register : std::false_type

@@ -45,6 +45,8 @@ namespace xsimd
             unsigned avx : 1;
             unsigned avx2 : 1;
             unsigned avx512f : 1;
+            unsigned avx512cd : 1;
+            unsigned avx512dq : 1;
             unsigned avx512bw : 1;
             unsigned neon : 1;
             unsigned neon64 : 1;
@@ -131,18 +133,24 @@ namespace xsimd
                 avx = regs[2] >> 28 & 1;
                 best = std::max(best, avx::version() * avx);
 
-                // fma3 = regs[2] >> 12 & 1;
-                // best = std::max(best, XSIMD_X86_FMA3_VERSION * fma3);
+                fma3 = regs[2] >> 12 & 1;
 
                 get_cpuid(regs, 0x7);
                 avx2 = regs[1] >> 5 & 1;
                 best = std::max(best, avx2::version() * avx2);
+                best = std::max(best, fma5::version() * avx2 * fma3);
 
                 avx512f = regs[1] >> 16 & 1;
                 best = std::max(best, avx512f::version() * avx512f);
 
+                avx512cd = regs[1] >> 28 & 1;
+                best = std::max(best, avx512cd::version() * avx512cd * avx512f);
+
+                avx512dq = regs[1] >> 17 & 1;
+                best = std::max(best, avx512dq::version() * avx512dq * avx512cd * avx512f);
+
                 avx512bw = regs[1] >> 30 & 1;
-                best = std::max(best, avx512bw::version() * avx512bw);
+                best = std::max(best, avx512bw::version() * avx512bw * avx512dq * avx512cd * avx512f);
 
                 // get_cpuid(regs, 0x80000001);
                 // fma4 = regs[2] >> 16 & 1;

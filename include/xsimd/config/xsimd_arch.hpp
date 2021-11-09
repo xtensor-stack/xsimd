@@ -184,7 +184,6 @@ namespace xsimd
             template <class Arch, class... Tys>
             auto walk_archs(arch_list<Arch>, Tys&&... args) -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
             {
-                static_assert(Arch::supported(), "dispatching on supported architecture");
                 assert(Arch::available() && "At least one arch must be supported during dispatch");
                 return functor(Arch {}, std::forward<Tys>(args)...);
             }
@@ -192,8 +191,7 @@ namespace xsimd
             template <class Arch, class ArchNext, class... Archs, class... Tys>
             auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
             {
-                static_assert(Arch::supported(), "dispatching on supported architecture");
-                if (Arch::version() == best_arch)
+                if (Arch::version() <= best_arch)
                     return functor(Arch {}, std::forward<Tys>(args)...);
                 else
                     return walk_archs(arch_list<ArchNext, Archs...> {}, std::forward<Tys>(args)...);
