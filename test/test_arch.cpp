@@ -53,6 +53,18 @@ TEST(arch, available)
     EXPECT_TRUE(xsimd::default_arch::available());
 }
 
+TEST(arch, arch_list_alignment)
+{
+    static_assert(xsimd::arch_list<xsimd::generic>::alignment() == 0,
+                  "generic");
+    static_assert(xsimd::arch_list<xsimd::sse2>::alignment()
+                      == xsimd::sse2::alignment(),
+                  "one architecture");
+    static_assert(xsimd::arch_list<xsimd::avx512f, xsimd::sse2>::alignment()
+                      == xsimd::avx512f::alignment(),
+                  "two architectures");
+}
+
 struct sum
 {
     template <class Arch, class T>

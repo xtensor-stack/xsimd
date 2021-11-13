@@ -23,6 +23,7 @@ namespace xsimd
     {
         static constexpr bool supported() { return true; }
         static constexpr bool available() { return true; }
+        static constexpr std::size_t alignment() { return 0; }
         static constexpr bool requires_alignment() { return false; }
 
     protected:
