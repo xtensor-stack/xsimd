@@ -262,29 +262,29 @@ namespace xsimd
             }
         }
 
-        // gt
+        // lt
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>)
+        inline batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>)
         {
             if (std::is_signed<T>::value)
             {
                 switch (sizeof(T))
                 {
                 case 1:
-                    return _mm256_cmpgt_epi8(self, other);
+                    return _mm256_cmpgt_epi8(other, self);
                 case 2:
-                    return _mm256_cmpgt_epi16(self, other);
+                    return _mm256_cmpgt_epi16(other, self);
                 case 4:
-                    return _mm256_cmpgt_epi32(self, other);
+                    return _mm256_cmpgt_epi32(other, self);
                 case 8:
-                    return _mm256_cmpgt_epi64(self, other);
+                    return _mm256_cmpgt_epi64(other, self);
                 default:
-                    return gt(self, other, avx {});
+                    return lt(self, other, avx {});
                 }
             }
             else
             {
-                return gt(self, other, avx {});
+                return lt(self, other, avx {});
             }
         }
 

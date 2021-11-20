@@ -569,44 +569,6 @@ namespace xsimd
             return _mm256_floor_pd(self);
         }
 
-        // ge
-        template <class A>
-        inline batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>)
-        {
-            return _mm256_cmp_ps(self, other, _CMP_GE_OQ);
-        }
-        template <class A>
-        inline batch_bool<double, A> ge(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx>)
-        {
-            return _mm256_cmp_pd(self, other, _CMP_GE_OQ);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>)
-        {
-            return detail::fwd_to_sse([](__m128i s, __m128i o)
-                                      { return ge(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
-        }
-
-        // gt
-        template <class A>
-        inline batch_bool<float, A> gt(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>)
-        {
-            return _mm256_cmp_ps(self, other, _CMP_GT_OQ);
-        }
-        template <class A>
-        inline batch_bool<double, A> gt(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx>)
-        {
-            return _mm256_cmp_pd(self, other, _CMP_GT_OQ);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>)
-        {
-            return detail::fwd_to_sse([](__m128i s, __m128i o)
-                                      { return gt(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
-        }
-
         // hadd
         template <class A>
         inline float hadd(batch<float, A> const& rhs, requires_arch<avx>)
