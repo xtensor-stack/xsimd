@@ -625,6 +625,34 @@ namespace xsimd
             return _mm512_roundscale_pd(self, _MM_FROUND_TO_POS_INF);
         }
 
+        // convert
+        namespace detail
+        {
+            template <class A>
+            inline batch<float, A> fast_cast(batch<int32_t, A> const& self, batch<float, A> const&, requires_arch<avx512f>)
+            {
+                return _mm512_cvtepi32_ps(self);
+            }
+
+            template <class A>
+            inline batch<int32_t, A> fast_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires_arch<avx512f>)
+            {
+                return _mm512_cvttps_epi32(self);
+            }
+
+            template <class A>
+            inline batch<float, A> fast_cast(batch<uint32_t, A> const& self, batch<float, A> const&, requires_arch<avx512f>)
+            {
+                return _mm512_cvtepu32_ps(self);
+            }
+
+            template <class A>
+            batch<uint32_t, A> fast_cast(batch<float, A> const& self, batch<uint32_t, A> const&, requires_arch<avx512f>)
+            {
+                return _mm512_cvttps_epu32(self);
+            }
+        }
+
         namespace detail
         {
             // complex_low
@@ -653,21 +681,6 @@ namespace xsimd
             {
                 __m512i idx = _mm512_setr_epi64(4, 12, 5, 13, 6, 14, 7, 15);
                 return _mm512_permutex2var_pd(self.real(), idx, self.imag());
-            }
-        }
-
-        // convert
-        namespace detail
-        {
-            template <class A>
-            inline batch<float, A> fast_cast(batch<int32_t, A> const& self, batch<float, A> const&, requires_arch<avx512f>)
-            {
-                return _mm512_cvtepi32_ps(self);
-            }
-            template <class A>
-            inline batch<int32_t, A> fast_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires_arch<avx512f>)
-            {
-                return _mm512_cvttps_epi32(self);
             }
         }
 
