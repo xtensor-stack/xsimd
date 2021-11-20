@@ -54,7 +54,7 @@ namespace xsimd
             // version number of the best arch available
             unsigned best;
 
-            supported_arch()
+            supported_arch() noexcept
             {
                 memset(this, 0, sizeof(supported_arch));
 
@@ -73,7 +73,7 @@ namespace xsimd
                 best = neon::version() * neon;
 
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
-                auto get_cpuid = [](int reg[4], int func_id)
+                auto get_cpuid = [](int reg[4], int func_id) noexcept
                 {
 
 #if defined(_MSC_VER)
@@ -160,7 +160,7 @@ namespace xsimd
         };
     }
 
-    inline detail::supported_arch available_architectures()
+    inline detail::supported_arch available_architectures() noexcept
     {
         static detail::supported_arch supported;
         return supported;

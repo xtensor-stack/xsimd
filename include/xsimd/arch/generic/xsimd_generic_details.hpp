@@ -23,83 +23,83 @@ namespace xsimd
 {
     // Forward declaration. Should we put them in a separate file?
     template <class T, class A>
-    batch<T, A> abs(batch<T, A> const& self);
+    inline batch<T, A> abs(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> abs(batch<std::complex<T>, A> const& self);
+    inline batch<T, A> abs(batch<std::complex<T>, A> const& self) noexcept;
     template <class T, class A>
-    bool any(batch_bool<T, A> const& self);
+    inline bool any(batch_bool<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other);
+    inline batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other) noexcept;
     template <class T, class A>
-    batch<T, A> bitofsign(batch<T, A> const& self);
+    inline batch<T, A> bitofsign(batch<T, A> const& self) noexcept;
     template <class B, class T, class A>
-    B bitwise_cast(batch<T, A> const& self);
+    inline B bitwise_cast(batch<T, A> const& self) noexcept;
     template <class A>
-    batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self);
+    inline batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self) noexcept;
     template <class A>
-    batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self);
+    inline batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self) noexcept;
     template <class A>
-    batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self);
+    inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self) noexcept;
     template <class A>
-    batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self);
+    inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> cos(batch<T, A> const& self);
+    inline batch<T, A> cos(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> cosh(batch<T, A> const& self);
+    inline batch<T, A> cosh(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> exp(batch<T, A> const& self);
+    inline batch<T, A> exp(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z);
+    inline batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
     template <class T, class A>
-    batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z);
+    inline batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
     template <class T, class A>
-    batch<T, A> frexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e);
+    inline batch<T, A> frexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e) noexcept;
     template <class T, class A>
-    T hadd(batch<T, A> const&);
+    inline T hadd(batch<T, A> const&) noexcept;
     template <class T, class A, uint64_t... Coefs>
-    batch<T, A> horner(const batch<T, A>& self);
+    inline batch<T, A> horner(const batch<T, A>& self) noexcept;
     template <class T, class A>
-    batch<T, A> hypot(const batch<T, A>& self);
+    inline batch<T, A> hypot(const batch<T, A>& self) noexcept;
     template <class T, class A>
-    batch_bool<T, A> is_even(batch<T, A> const& self);
+    inline batch_bool<T, A> is_even(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch_bool<T, A> is_flint(batch<T, A> const& self);
+    inline batch_bool<T, A> is_flint(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch_bool<T, A> is_odd(batch<T, A> const& self);
+    inline batch_bool<T, A> is_odd(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch_bool<T, A> isinf(batch<T, A> const& self);
+    inline batch_bool<T, A> isinf(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    typename batch<T, A>::batch_bool_type isnan(batch<T, A> const& self);
+    inline typename batch<T, A>::batch_bool_type isnan(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e);
+    inline batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e) noexcept;
     template <class T, class A>
-    batch<T, A> log(batch<T, A> const& self);
+    inline batch<T, A> log(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> nearbyint(batch<T, A> const& self);
+    inline batch<T, A> nearbyint(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&);
+    inline batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&) noexcept;
     template <class T, class A>
-    batch<std::complex<T>, A> select(batch_bool<T, A> const&, batch<std::complex<T>, A> const&, batch<std::complex<T>, A> const&);
+    inline batch<std::complex<T>, A> select(batch_bool<T, A> const&, batch<std::complex<T>, A> const&, batch<std::complex<T>, A> const&) noexcept;
     template <class T, class A>
-    batch<T, A> sign(batch<T, A> const& self);
+    inline batch<T, A> sign(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> signnz(batch<T, A> const& self);
+    inline batch<T, A> signnz(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> sin(batch<T, A> const& self);
+    inline batch<T, A> sin(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> sinh(batch<T, A> const& self);
+    inline batch<T, A> sinh(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self);
+    inline std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> sqrt(batch<T, A> const& self);
+    inline batch<T, A> sqrt(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> tan(batch<T, A> const& self);
+    inline batch<T, A> tan(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<as_float_t<T>, A> to_float(batch<T, A> const& self);
+    inline batch<as_float_t<T>, A> to_float(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<as_integer_t<T>, A> to_int(batch<T, A> const& self);
+    inline batch<as_integer_t<T>, A> to_int(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    batch<T, A> trunc(batch<T, A> const& self);
+    inline batch<T, A> trunc(batch<T, A> const& self) noexcept;
 
     namespace kernel
     {
@@ -107,7 +107,7 @@ namespace xsimd
         namespace detail
         {
             template <class F, class A, class T, class... Batches>
-            inline batch<T, A> apply(F&& func, batch<T, A> const& self, batch<T, A> const& other)
+            inline batch<T, A> apply(F&& func, batch<T, A> const& self, batch<T, A> const& other) noexcept
             {
                 constexpr std::size_t size = batch<T, A>::size;
                 alignas(A::alignment()) T self_buffer[size];

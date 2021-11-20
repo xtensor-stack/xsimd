@@ -32,25 +32,25 @@ namespace xsimd
          *******/
 
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
-        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vminvq_u8(arg);
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
-        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vminvq_u16(arg);
         }
 
         template <class A, class T, detail::enable_sized_t<T, 4> = 0>
-        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vminvq_u32(arg);
         }
 
         template <class A, class T, detail::enable_sized_t<T, 8> = 0>
-        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return all(batch_bool<uint32_t, A>(vreinterpretq_u32_u64(arg)), neon64 {});
         }
@@ -60,25 +60,25 @@ namespace xsimd
          *******/
 
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
-        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vmaxvq_u8(arg);
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
-        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vmaxvq_u16(arg);
         }
 
         template <class A, class T, detail::enable_sized_t<T, 4> = 0>
-        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vmaxvq_u32(arg);
         }
 
         template <class A, class T, detail::enable_sized_t<T, 8> = 0>
-        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>)
+        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return any(batch_bool<uint32_t, A>(vreinterpretq_u32_u64(arg)), neon64 {});
         }
@@ -89,13 +89,13 @@ namespace xsimd
 
         // Required to avoid ambiguous call
         template <class A, class T>
-        inline batch<T, A> broadcast(T val, requires_arch<neon64>)
+        inline batch<T, A> broadcast(T val, requires_arch<neon64>) noexcept
         {
             return broadcast<neon64>(val, neon {});
         }
 
         template <class A>
-        inline batch<double, A> broadcast(double val, requires_arch<neon64>)
+        inline batch<double, A> broadcast(double val, requires_arch<neon64>) noexcept
         {
             return vdupq_n_f64(val);
         }
@@ -105,13 +105,13 @@ namespace xsimd
          *******/
 
         template <class A>
-        inline batch<double, A> set(batch<double, A> const&, requires_arch<neon64>, double d0, double d1)
+        inline batch<double, A> set(batch<double, A> const&, requires_arch<neon64>, double d0, double d1) noexcept
         {
             return float64x2_t { d0, d1 };
         }
 
         template <class A>
-        inline batch_bool<double, A> set(batch_bool<double, A> const&, requires_arch<neon64>, bool b0, bool b1)
+        inline batch_bool<double, A> set(batch_bool<double, A> const&, requires_arch<neon64>, bool b0, bool b1) noexcept
         {
             using register_type = typename batch_bool<double, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<double>;
@@ -124,7 +124,7 @@ namespace xsimd
          *************/
 
         template <class A>
-        inline batch<double, A> from_bool(batch_bool<double, A> const& arg, requires_arch<neon64>)
+        inline batch<double, A> from_bool(batch_bool<double, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vreinterpretq_f64_u64(vandq_u64(arg, vreinterpretq_u64_f64(vdupq_n_f64(1.))));
         }
@@ -134,13 +134,13 @@ namespace xsimd
          ********/
 
         template <class A>
-        inline batch<double, A> load_aligned(double const* src, convert<double>, requires_arch<neon64>)
+        inline batch<double, A> load_aligned(double const* src, convert<double>, requires_arch<neon64>) noexcept
         {
             return vld1q_f64(src);
         }
 
         template <class A>
-        inline batch<double, A> load_unaligned(double const* src, convert<double>, requires_arch<neon64>)
+        inline batch<double, A> load_unaligned(double const* src, convert<double>, requires_arch<neon64>) noexcept
         {
             return load_aligned<A>(src, convert<double>(), A {});
         }
@@ -150,13 +150,13 @@ namespace xsimd
          *********/
 
         template <class A>
-        inline void store_aligned(double* dst, batch<double, A> const& src, requires_arch<neon64>)
+        inline void store_aligned(double* dst, batch<double, A> const& src, requires_arch<neon64>) noexcept
         {
             vst1q_f64(dst, src);
         }
 
         template <class A>
-        inline void store_unaligned(double* dst, batch<double, A> const& src, requires_arch<neon64>)
+        inline void store_unaligned(double* dst, batch<double, A> const& src, requires_arch<neon64>) noexcept
         {
             return store_aligned<A>(dst, src, A {});
         }
@@ -166,7 +166,7 @@ namespace xsimd
          ****************/
 
         template <class A>
-        inline batch<std::complex<double>, A> load_complex_aligned(std::complex<double> const* mem, convert<std::complex<double>>, requires_arch<neon64>)
+        inline batch<std::complex<double>, A> load_complex_aligned(std::complex<double> const* mem, convert<std::complex<double>>, requires_arch<neon64>) noexcept
         {
             using real_batch = batch<double, A>;
             const double* buf = reinterpret_cast<const double*>(mem);
@@ -177,7 +177,7 @@ namespace xsimd
         }
 
         template <class A>
-        inline batch<std::complex<double>, A> load_complex_unaligned(std::complex<double> const* mem, convert<std::complex<double>> cvt, requires_arch<neon64>)
+        inline batch<std::complex<double>, A> load_complex_unaligned(std::complex<double> const* mem, convert<std::complex<double>> cvt, requires_arch<neon64>) noexcept
         {
             return load_complex_aligned<A>(mem, cvt, A {});
         }
@@ -187,7 +187,7 @@ namespace xsimd
          *****************/
 
         template <class A>
-        inline void store_complex_aligned(std::complex<double>* dst, batch<std::complex<double>, A> const& src, requires_arch<neon64>)
+        inline void store_complex_aligned(std::complex<double>* dst, batch<std::complex<double>, A> const& src, requires_arch<neon64>) noexcept
         {
             float64x2x2_t tmp;
             tmp.val[0] = src.real();
@@ -197,7 +197,7 @@ namespace xsimd
         }
 
         template <class A>
-        inline void store_complex_unaligned(std::complex<double>* dst, batch<std::complex<double>, A> const& src, requires_arch<neon64>)
+        inline void store_complex_unaligned(std::complex<double>* dst, batch<std::complex<double>, A> const& src, requires_arch<neon64>) noexcept
         {
             store_complex_aligned(dst, src, A {});
         }
@@ -207,19 +207,19 @@ namespace xsimd
          *******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vreinterpretq_u64_s64(vnegq_s64(vreinterpretq_s64_u64(rhs)));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vnegq_s64(rhs);
         }
 
         template <class A>
-        inline batch<double, A> neg(batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> neg(batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vnegq_f64(rhs);
         }
@@ -229,7 +229,7 @@ namespace xsimd
          *******/
 
         template <class A>
-        inline batch<double, A> add(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> add(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vaddq_f64(lhs, rhs);
         }
@@ -239,7 +239,7 @@ namespace xsimd
          ********/
 
         template <class A>
-        inline batch<double, A> sadd(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> sadd(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return add(lhs, rhs, neon64 {});
         }
@@ -249,7 +249,7 @@ namespace xsimd
          *******/
 
         template <class A>
-        inline batch<double, A> sub(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> sub(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vsubq_f64(lhs, rhs);
         }
@@ -259,7 +259,7 @@ namespace xsimd
          ********/
 
         template <class A>
-        inline batch<double, A> ssub(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> ssub(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return sub(lhs, rhs, neon64 {});
         }
@@ -269,7 +269,7 @@ namespace xsimd
          *******/
 
         template <class A>
-        inline batch<double, A> mul(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> mul(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vmulq_f64(lhs, rhs);
         }
@@ -280,19 +280,19 @@ namespace xsimd
 
 #if defined(XSIMD_FAST_INTEGER_DIVISION)
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcvtq_u64_f64(vcvtq_f64_u64(lhs) / vcvtq_f64_u64(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcvtq_s64_f64(vcvtq_f64_s64(lhs) / vcvtq_f64_s64(rhs));
         }
 #endif
         template <class A>
-        inline batch<double, A> div(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> div(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vdivq_f64(lhs, rhs);
         }
@@ -302,37 +302,37 @@ namespace xsimd
          ******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vceqq_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vceqq_s64(lhs, rhs);
         }
 
         template <class A>
-        inline batch_bool<double, A> eq(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> eq(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vceqq_f64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vceqq_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vceqq_u64(lhs, rhs);
         }
 
         template <class A>
-        inline batch_bool<double, A> eq(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> eq(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vceqq_u64(lhs, rhs);
         }
@@ -342,19 +342,19 @@ namespace xsimd
          ******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcltq_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcltq_s64(lhs, rhs);
         }
 
         template <class A>
-        inline batch_bool<double, A> lt(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> lt(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcltq_f64(lhs, rhs);
         }
@@ -364,19 +364,19 @@ namespace xsimd
          ******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcleq_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcleq_s64(lhs, rhs);
         }
 
         template <class A>
-        inline batch_bool<double, A> le(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> le(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcleq_f64(lhs, rhs);
         }
@@ -386,19 +386,19 @@ namespace xsimd
          ******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcgtq_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcgtq_s64(lhs, rhs);
         }
 
         template <class A>
-        inline batch_bool<double, A> gt(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> gt(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcgtq_f64(lhs, rhs);
         }
@@ -408,19 +408,19 @@ namespace xsimd
          ******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcgeq_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcgeq_s64(lhs, rhs);
         }
 
         template <class A>
-        inline batch_bool<double, A> ge(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> ge(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vcgeq_f64(lhs, rhs);
         }
@@ -430,14 +430,14 @@ namespace xsimd
          ***************/
 
         template <class A>
-        inline batch<double, A> bitwise_and(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> bitwise_and(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vreinterpretq_f64_u64(vandq_u64(vreinterpretq_u64_f64(lhs),
                                                    vreinterpretq_u64_f64(rhs)));
         }
 
         template <class A>
-        inline batch_bool<double, A> bitwise_and(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> bitwise_and(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vandq_u64(lhs, rhs);
         }
@@ -447,14 +447,14 @@ namespace xsimd
          **************/
 
         template <class A>
-        inline batch<double, A> bitwise_or(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> bitwise_or(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vreinterpretq_f64_u64(vorrq_u64(vreinterpretq_u64_f64(lhs),
                                                    vreinterpretq_u64_f64(rhs)));
         }
 
         template <class A>
-        inline batch_bool<double, A> bitwise_or(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> bitwise_or(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vorrq_u64(lhs, rhs);
         }
@@ -464,14 +464,14 @@ namespace xsimd
          ***************/
 
         template <class A>
-        inline batch<double, A> bitwise_xor(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> bitwise_xor(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vreinterpretq_f64_u64(veorq_u64(vreinterpretq_u64_f64(lhs),
                                                    vreinterpretq_u64_f64(rhs)));
         }
 
         template <class A>
-        inline batch_bool<double, A> bitwise_xor(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> bitwise_xor(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return veorq_u64(lhs, rhs);
         }
@@ -481,7 +481,7 @@ namespace xsimd
          *******/
 
         template <class A>
-        inline batch_bool<double, A> neq(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> neq(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return bitwise_xor(lhs, rhs, A {});
         }
@@ -491,13 +491,13 @@ namespace xsimd
          ***************/
 
         template <class A>
-        inline batch<double, A> bitwise_not(batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> bitwise_not(batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vreinterpretq_f64_u32(vmvnq_u32(vreinterpretq_u32_f64(rhs)));
         }
 
         template <class A>
-        inline batch_bool<double, A> bitwise_not(batch_bool<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> bitwise_not(batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return detail::bitwise_not_u64(rhs);
         }
@@ -507,14 +507,14 @@ namespace xsimd
          ******************/
 
         template <class A>
-        inline batch<double, A> bitwise_andnot(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> bitwise_andnot(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vreinterpretq_f64_u64(vbicq_u64(vreinterpretq_u64_f64(lhs),
                                                    vreinterpretq_u64_f64(rhs)));
         }
 
         template <class A>
-        inline batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>)
+        inline batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& lhs, batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vbicq_u64(lhs, rhs);
         }
@@ -524,7 +524,7 @@ namespace xsimd
          *******/
 
         template <class A>
-        inline batch<double, A> min(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> min(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vminq_f64(lhs, rhs);
         }
@@ -534,7 +534,7 @@ namespace xsimd
          *******/
 
         template <class A>
-        inline batch<double, A> max(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> max(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vmaxq_f64(lhs, rhs);
         }
@@ -544,19 +544,19 @@ namespace xsimd
          *******/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch<T, A> abs(batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> abs(batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return rhs;
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch<T, A> abs(batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> abs(batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vabsq_s64(rhs);
         }
 
         template <class A>
-        inline batch<double, A> abs(batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> abs(batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vabsq_f64(rhs);
         }
@@ -566,7 +566,7 @@ namespace xsimd
          ********/
 
         template <class A>
-        inline batch<double, A> sqrt(batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> sqrt(batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vsqrtq_f64(rhs);
         }
@@ -577,13 +577,13 @@ namespace xsimd
 
 #ifdef __ARM_FEATURE_FMA
         template <class A>
-        inline batch<double, A> fma(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<neon64>)
+        inline batch<double, A> fma(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<neon64>) noexcept
         {
             return vfmaq_f64(z, x, y);
         }
 
         template <class A>
-        inline batch<double, A> fms(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<neon64>)
+        inline batch<double, A> fms(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<neon64>) noexcept
         {
             return vfmaq_f64(-z, x, y);
         }
@@ -594,55 +594,55 @@ namespace xsimd
          ********/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_u8(arg);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_s8(arg);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_u16(arg);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_s16(arg);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_u32(arg);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_s32(arg);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_u64(arg);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>)
+        inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_s64(arg);
         }
 
         template <class A>
-        inline double hadd(batch<double, A> const& arg, requires_arch<neon64>)
+        inline double hadd(batch<double, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_f64(arg);
         }
@@ -652,7 +652,7 @@ namespace xsimd
          *********/
 
         template <class A>
-        inline batch<double, A> haddp(const batch<double, A>* row, requires_arch<neon64>)
+        inline batch<double, A> haddp(const batch<double, A>* row, requires_arch<neon64>) noexcept
         {
             return vpaddq_f64(row[0], row[1]);
         }
@@ -662,7 +662,7 @@ namespace xsimd
          **********/
 
         template <class A>
-        inline batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& a, batch<double, A> const& b, requires_arch<neon64>)
+        inline batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& a, batch<double, A> const& b, requires_arch<neon64>) noexcept
         {
             return vbslq_f64(cond, a, b);
         }
@@ -671,7 +671,7 @@ namespace xsimd
         inline batch<double, A> select(batch_bool_constant<batch<double, A>, b...> const&,
                                        batch<double, A> const& true_br,
                                        batch<double, A> const& false_br,
-                                       requires_arch<neon64>)
+                                       requires_arch<neon64>) noexcept
         {
             return select(batch_bool<double, A> { b... }, true_br, false_br, neon64 {});
         }
@@ -680,19 +680,19 @@ namespace xsimd
          **********/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vzip1q_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vzip1q_s64(lhs, rhs);
         }
 
         template <class A>
-        inline batch<double, A> zip_lo(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> zip_lo(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vzip1q_f64(lhs, rhs);
         }
@@ -702,19 +702,19 @@ namespace xsimd
          **********/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vzip2q_u64(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vzip2q_s64(lhs, rhs);
         }
 
         template <class A>
-        inline batch<double, A> zip_hi(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>)
+        inline batch<double, A> zip_hi(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vzip2q_f64(lhs, rhs);
         }
@@ -727,7 +727,7 @@ namespace xsimd
         {
             template <class A, size_t I, size_t... Is>
             inline batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n,
-                                                 ::xsimd::detail::index_sequence<I, Is...>)
+                                                 ::xsimd::detail::index_sequence<I, Is...>) noexcept
             {
                 if (n == I)
                 {
@@ -741,7 +741,7 @@ namespace xsimd
         }
 
         template <class A>
-        inline batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n, requires_arch<neon64>)
+        inline batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n, requires_arch<neon64>) noexcept
         {
             constexpr std::size_t size = batch<double, A>::size;
             assert(0 <= n && n < size && "index in bounds");
@@ -753,25 +753,25 @@ namespace xsimd
          ******************/
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires_arch<neon64>)
+        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires_arch<neon64>) noexcept
         {
             return bitwise_rshift<A>(lhs, n, neon {});
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vshlq_u64(lhs, vnegq_s64(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires_arch<neon64>)
+        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, int n, requires_arch<neon64>) noexcept
         {
             return bitwise_rshift<A>(lhs, n, neon {});
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>)
+        inline batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return vshlq_s64(lhs, vnegq_s64(rhs));
         }
@@ -780,11 +780,11 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
-#define WRAP_CAST(SUFFIX, TYPE)                                                                               \
-    namespace wrap                                                                                            \
-    {                                                                                                         \
-        inline float64x2_t vreinterpretq_f64_##SUFFIX(TYPE a) { return ::vreinterpretq_f64_##SUFFIX(a); }     \
-        inline TYPE vreinterpretq_##SUFFIX##_f64(float64x2_t a) { return ::vreinterpretq_##SUFFIX##_f64(a); } \
+#define WRAP_CAST(SUFFIX, TYPE)                                                                                        \
+    namespace wrap                                                                                                     \
+    {                                                                                                                  \
+        inline float64x2_t vreinterpretq_f64_##SUFFIX(TYPE a) noexcept { return ::vreinterpretq_f64_##SUFFIX(a); }     \
+        inline TYPE vreinterpretq_##SUFFIX##_f64(float64x2_t a) noexcept { return ::vreinterpretq_##SUFFIX##_f64(a); } \
     }
 
         WRAP_CAST(u8, uint8x16_t)
@@ -800,7 +800,7 @@ namespace xsimd
 #undef WRAP_CAST
 
         template <class A, class T>
-        inline batch<double, A> bitwise_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<neon64>)
+        inline batch<double, A> bitwise_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<neon64>) noexcept
         {
             using caster_type = detail::bitwise_caster_impl<float64x2_t,
                                                             uint8x16_t, int8x16_t,
@@ -836,7 +836,7 @@ namespace xsimd
         }
 
         template <class A, class R>
-        inline batch<R, A> bitwise_cast(batch<double, A> const& arg, batch<R, A> const&, requires_arch<neon64>)
+        inline batch<R, A> bitwise_cast(batch<double, A> const& arg, batch<R, A> const&, requires_arch<neon64>) noexcept
         {
             using caster_type = detail::bitwise_caster_neon64<float64x2_t,
                                                               uint8x16_t, int8x16_t,
@@ -855,7 +855,7 @@ namespace xsimd
         }
 
         template <class A>
-        inline batch<double, A> bitwise_cast(batch<double, A> const& arg, batch<double, A> const&, requires_arch<neon64>)
+        inline batch<double, A> bitwise_cast(batch<double, A> const& arg, batch<double, A> const&, requires_arch<neon64>) noexcept
         {
             return arg;
         }
@@ -865,14 +865,14 @@ namespace xsimd
          *************/
 
         template <class A>
-        inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& arg, requires_arch<neon64>)
+        inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& arg, requires_arch<neon64>) noexcept
         {
             using register_type = typename batch_bool<int64_t, A>::register_type;
             return register_type(arg);
         }
 
         template <class A>
-        inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& arg, requires_arch<neon64>)
+        inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& arg, requires_arch<neon64>) noexcept
         {
             using register_type = typename batch_bool<double, A>::register_type;
             return register_type(arg);
@@ -883,7 +883,7 @@ namespace xsimd
          **********/
 
         template <class A>
-        inline batch<int64_t, A> to_int(const batch<double, A>& x, requires_arch<neon64>)
+        inline batch<int64_t, A> to_int(const batch<double, A>& x, requires_arch<neon64>) noexcept
         {
             return vcvtq_s64_f64(x);
         }
@@ -893,7 +893,7 @@ namespace xsimd
          ************/
 
         template <class A>
-        inline batch<double, A> to_float(batch<int64_t, A> const& x, requires_arch<neon64>)
+        inline batch<double, A> to_float(batch<int64_t, A> const& x, requires_arch<neon64>) noexcept
         {
             return vcvtq_f64_s64(x);
         }
@@ -903,7 +903,7 @@ namespace xsimd
          *********/
 
         template <class A>
-        inline batch_bool<double, A> isnan(batch<double, A> const& arg, requires_arch<neon64>)
+        inline batch_bool<double, A> isnan(batch<double, A> const& arg, requires_arch<neon64>) noexcept
         {
             return !(arg == arg);
         }

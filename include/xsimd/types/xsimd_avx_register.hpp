@@ -24,12 +24,12 @@ namespace xsimd
      */
     struct avx : generic
     {
-        static constexpr bool supported() { return XSIMD_WITH_AVX; }
-        static constexpr bool available() { return true; }
-        static constexpr unsigned version() { return generic::version(2, 1, 0); }
-        static constexpr std::size_t alignment() { return 32; }
-        static constexpr bool requires_alignment() { return true; }
-        static constexpr char const* name() { return "avx"; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr unsigned version() noexcept { return generic::version(2, 1, 0); }
+        static constexpr std::size_t alignment() noexcept { return 32; }
+        static constexpr bool requires_alignment() noexcept { return true; }
+        static constexpr char const* name() noexcept { return "avx"; }
     };
 }
 

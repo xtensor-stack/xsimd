@@ -27,7 +27,7 @@ namespace xsimd
 
         // abs
         template <class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, void>::type>
-        inline batch<T, A> abs(batch<T, A> const& self, requires_arch<ssse3>)
+        inline batch<T, A> abs(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             switch (sizeof(T))
             {
@@ -50,13 +50,13 @@ namespace xsimd
         {
 
             template <class T, class A>
-            inline batch<T, A> extract_pair(batch<T, A> const&, batch<T, A> const& other, std::size_t, ::xsimd::detail::index_sequence<>)
+            inline batch<T, A> extract_pair(batch<T, A> const&, batch<T, A> const& other, std::size_t, ::xsimd::detail::index_sequence<>) noexcept
             {
                 return other;
             }
 
             template <class T, class A, std::size_t I, std::size_t... Is>
-            inline batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, ::xsimd::detail::index_sequence<I, Is...>)
+            inline batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, ::xsimd::detail::index_sequence<I, Is...>) noexcept
             {
                 if (i == I)
                 {
@@ -68,7 +68,7 @@ namespace xsimd
         }
 
         template <class A, class T, class _ = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<ssse3>)
+        inline batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<ssse3>) noexcept
         {
             constexpr std::size_t size = batch<T, A>::size;
             assert(0 <= i && i < size && "index in bounds");
@@ -77,7 +77,7 @@ namespace xsimd
 
         // hadd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline T hadd(batch<T, A> const& self, requires_arch<ssse3>)
+        inline T hadd(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             switch (sizeof(T))
             {
