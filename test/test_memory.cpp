@@ -14,8 +14,7 @@
 
 #include "gtest/gtest.h"
 
-#include "xsimd/memory/xsimd_aligned_allocator.hpp"
-#include "xsimd/memory/xsimd_alignment.hpp"
+#include "xsimd/xsimd.hpp"
 
 struct mock_container
 {

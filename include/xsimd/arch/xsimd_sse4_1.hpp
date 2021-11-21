@@ -24,25 +24,25 @@ namespace xsimd
         using namespace types;
         // any
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline bool any(batch<T, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE bool any(batch<T, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return !_mm_testz_si128(self, self);
         }
         // ceil
         template <class A>
-        inline batch<float, A> ceil(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<float, A> ceil(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_ceil_ps(self);
         }
         template <class A>
-        inline batch<double, A> ceil(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<double, A> ceil(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_ceil_pd(self);
         }
 
         // eq
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             switch (sizeof(T))
             {
@@ -55,19 +55,19 @@ namespace xsimd
 
         // floor
         template <class A>
-        inline batch<float, A> floor(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<float, A> floor(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_floor_ps(self);
         }
         template <class A>
-        inline batch<double, A> floor(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<double, A> floor(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_floor_pd(self);
         }
 
         // max
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             if (std::is_signed<T>::value)
             {
@@ -101,7 +101,7 @@ namespace xsimd
 
         // min
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             if (std::is_signed<T>::value)
             {
@@ -135,7 +135,7 @@ namespace xsimd
 
         // mul
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             switch (sizeof(T))
             {
@@ -163,12 +163,12 @@ namespace xsimd
 
         // nearbyint
         template <class A>
-        inline batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_round_ps(self, _MM_FROUND_TO_NEAREST_INT);
         }
         template <class A>
-        inline batch<double, A> nearbyint(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<double, A> nearbyint(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_round_pd(self, _MM_FROUND_TO_NEAREST_INT);
         }
@@ -177,30 +177,30 @@ namespace xsimd
         namespace detail
         {
             template <class T>
-            inline constexpr T interleave(T const& cond) noexcept
+            XSIMD_INLINE constexpr T interleave(T const& cond) noexcept
             {
                 return (((cond * 0x0101010101010101ULL & 0x8040201008040201ULL) * 0x0102040810204081ULL >> 49) & 0x5555) | (((cond * 0x0101010101010101ULL & 0x8040201008040201ULL) * 0x0102040810204081ULL >> 48) & 0xAAAA);
             }
         }
 
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             return _mm_blendv_epi8(false_br, true_br, cond);
         }
         template <class A>
-        inline batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             return _mm_blendv_ps(false_br, true_br, cond);
         }
         template <class A>
-        inline batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             return _mm_blendv_pd(false_br, true_br, cond);
         }
 
         template <class A, class T, bool... Values, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
             switch (sizeof(T))
@@ -223,13 +223,13 @@ namespace xsimd
             }
         }
         template <class A, bool... Values>
-        inline batch<float, A> select(batch_bool_constant<batch<float, A>, Values...> const&, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<float, A> select(batch_bool_constant<batch<float, A>, Values...> const&, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             constexpr int mask = batch_bool_constant<batch<float, A>, Values...>::mask();
             return _mm_blend_ps(false_br, true_br, mask);
         }
         template <class A, bool... Values>
-        inline batch<double, A> select(batch_bool_constant<batch<double, A>, Values...> const&, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<double, A> select(batch_bool_constant<batch<double, A>, Values...> const&, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             constexpr int mask = batch_bool_constant<batch<double, A>, Values...>::mask();
             return _mm_blend_pd(false_br, true_br, mask);
@@ -237,12 +237,12 @@ namespace xsimd
 
         // trunc
         template <class A>
-        inline batch<float, A> trunc(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<float, A> trunc(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_round_ps(self, _MM_FROUND_TO_ZERO);
         }
         template <class A>
-        inline batch<double, A> trunc(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch<double, A> trunc(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_round_pd(self, _MM_FROUND_TO_ZERO);
         }
