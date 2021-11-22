@@ -23,10 +23,10 @@ namespace xsimd
      */
     struct avx2 : avx
     {
-        static constexpr bool supported() { return XSIMD_WITH_AVX2; }
-        static constexpr bool available() { return true; }
-        static constexpr unsigned version() { return generic::version(2, 2, 0); }
-        static constexpr char const* name() { return "avx2"; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX2; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr unsigned version() noexcept { return generic::version(2, 2, 0); }
+        static constexpr char const* name() noexcept { return "avx2"; }
     };
 
 #if XSIMD_WITH_AVX2

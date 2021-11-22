@@ -27,10 +27,10 @@ namespace xsimd
      */
     struct ssse3 : sse3
     {
-        static constexpr bool supported() { return XSIMD_WITH_SSSE3; }
-        static constexpr bool available() { return true; }
-        static constexpr unsigned version() { return generic::version(1, 3, 1); }
-        static constexpr char const* name() { return "ssse3"; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_SSSE3; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr unsigned version() noexcept { return generic::version(1, 3, 1); }
+        static constexpr char const* name() noexcept { return "ssse3"; }
     };
 
 #if XSIMD_WITH_SSSE3

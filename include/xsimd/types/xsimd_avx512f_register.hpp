@@ -24,12 +24,12 @@ namespace xsimd
      */
     struct avx512f : generic
     {
-        static constexpr bool supported() { return XSIMD_WITH_AVX512F; }
-        static constexpr bool available() { return true; }
-        static constexpr unsigned version() { return generic::version(3, 1, 0); }
-        static constexpr std::size_t alignment() { return 64; }
-        static constexpr bool requires_alignment() { return true; }
-        static constexpr char const* name() { return "avx512f"; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512F; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr unsigned version() noexcept { return generic::version(3, 1, 0); }
+        static constexpr std::size_t alignment() noexcept { return 64; }
+        static constexpr bool requires_alignment() noexcept { return true; }
+        static constexpr char const* name() noexcept { return "avx512f"; }
     };
 
 #if XSIMD_WITH_AVX512F
@@ -45,7 +45,7 @@ namespace xsimd
             register_type data;
             simd_avx512_bool_register() = default;
             simd_avx512_bool_register(register_type r) { data = r; }
-            operator register_type() const { return data; }
+            operator register_type() const noexcept { return data; }
         };
         template <class T>
         struct get_bool_simd_register<T, avx512f>

@@ -28,12 +28,12 @@ namespace xsimd
      */
     struct neon : generic
     {
-        static constexpr bool supported() { return XSIMD_WITH_NEON; }
-        static constexpr bool available() { return true; }
-        static constexpr bool requires_alignment() { return true; }
-        static constexpr std::size_t alignment() { return 16; }
-        static constexpr unsigned version() { return generic::version(7, 0, 0); }
-        static constexpr char const* name() { return "arm32+neon"; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_NEON; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr bool requires_alignment() noexcept { return true; }
+        static constexpr std::size_t alignment() noexcept { return 16; }
+        static constexpr unsigned version() noexcept { return generic::version(7, 0, 0); }
+        static constexpr char const* name() noexcept { return "arm32+neon"; }
     };
 
 #if XSIMD_WITH_NEON

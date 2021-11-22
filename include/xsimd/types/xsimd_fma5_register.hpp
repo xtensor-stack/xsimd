@@ -24,10 +24,10 @@ namespace xsimd
      */
     struct fma5 : avx2
     {
-        static constexpr bool supported() { return XSIMD_WITH_FMA5; }
-        static constexpr bool available() { return true; }
-        static constexpr unsigned version() { return generic::version(2, 3, 0); }
-        static constexpr char const* name() { return "avx2+fma"; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_FMA5; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr unsigned version() noexcept { return generic::version(2, 3, 0); }
+        static constexpr char const* name() noexcept { return "avx2+fma"; }
     };
 
 #if XSIMD_WITH_FMA5

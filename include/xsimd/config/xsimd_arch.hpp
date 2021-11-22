@@ -62,13 +62,13 @@ namespace xsimd
         };
 
         template <typename T>
-        constexpr T max_of(T value)
+        inline constexpr T max_of(T value) noexcept
         {
             return value;
         }
 
         template <typename T, typename... Ts>
-        constexpr T max_of(T head0, T head1, Ts... tail)
+        inline constexpr T max_of(T head0, T head1, Ts... tail) noexcept
         {
             return max_of((head0 > head1 ? head0 : head1), tail...);
         }
@@ -91,18 +91,18 @@ namespace xsimd
         using extend = arch_list<Archs..., OtherArchs...>;
 
         template <class Arch>
-        static constexpr bool contains()
+        static constexpr bool contains() noexcept
         {
             return detail::contains<Arch, Archs...>::value;
         }
 
         template <class F>
-        static void for_each(F&& f)
+        static void for_each(F&& f) noexcept
         {
             (void)std::initializer_list<bool> { (f(Archs {}), true)... };
         }
 
-        static constexpr std::size_t alignment()
+        static constexpr std::size_t alignment() noexcept
         {
             // all alignments are a power of two
             return detail::max_of(Archs::alignment()..., static_cast<size_t>(0));
@@ -200,14 +200,14 @@ namespace xsimd
             F functor;
 
             template <class Arch, class... Tys>
-            auto walk_archs(arch_list<Arch>, Tys&&... args) -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
+            auto walk_archs(arch_list<Arch>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
             {
                 assert(Arch::available() && "At least one arch must be supported during dispatch");
                 return functor(Arch {}, std::forward<Tys>(args)...);
             }
 
             template <class Arch, class ArchNext, class... Archs, class... Tys>
-            auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
+            auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
             {
                 if (Arch::version() <= best_arch)
                     return functor(Arch {}, std::forward<Tys>(args)...);
@@ -216,14 +216,14 @@ namespace xsimd
             }
 
         public:
-            dispatcher(F f)
+            dispatcher(F f) noexcept
                 : best_arch(available_architectures().best)
                 , functor(f)
             {
             }
 
             template <class... Tys>
-            auto operator()(Tys&&... args) -> decltype(functor(default_arch {}, std::forward<Tys>(args)...))
+            auto operator()(Tys&&... args) noexcept -> decltype(functor(default_arch {}, std::forward<Tys>(args)...))
             {
                 return walk_archs(ArchList {}, std::forward<Tys>(args)...);
             }
@@ -232,7 +232,7 @@ namespace xsimd
 
     // Generic function dispatch, à la ifunc
     template <class F, class ArchList = supported_architectures>
-    inline detail::dispatcher<F, ArchList> dispatch(F&& f)
+    inline detail::dispatcher<F, ArchList> dispatch(F&& f) noexcept
     {
         return { std::forward<F>(f) };
     }

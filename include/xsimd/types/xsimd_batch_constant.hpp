@@ -25,22 +25,22 @@ namespace xsimd
         using value_type = bool;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
-        operator batch_bool<typename batch_type::value_type, arch_type>() const { return { Values... }; }
+        operator batch_bool<typename batch_type::value_type, arch_type>() const noexcept { return { Values... }; }
 
-        bool get(size_t i) const
+        bool get(size_t i) const noexcept
         {
             return std::array<value_type, size> { { Values... } }[i];
         }
 
-        static constexpr int mask()
+        static constexpr int mask() noexcept
         {
             return mask_helper(0, static_cast<int>(Values)...);
         }
 
     private:
-        static constexpr int mask_helper(int acc) { return acc; }
+        static constexpr int mask_helper(int acc) noexcept { return acc; }
         template <class... Tys>
-        static constexpr int mask_helper(int acc, int mask, Tys... masks)
+        static constexpr int mask_helper(int acc, int mask, Tys... masks) noexcept
         {
             return mask_helper(acc | mask, (masks << 1)...);
         }
@@ -54,9 +54,9 @@ namespace xsimd
         using value_type = typename batch_type::value_type;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
-        operator batch_type() const { return { Values... }; }
+        operator batch_type() const noexcept { return { Values... }; }
 
-        constexpr value_type get(size_t i) const
+        constexpr value_type get(size_t i) const noexcept
         {
             return std::array<value_type, size> { Values... }[i];
         }
@@ -65,13 +65,13 @@ namespace xsimd
     namespace detail
     {
         template <class batch_type, class G, std::size_t... Is>
-        inline constexpr auto make_batch_constant(detail::index_sequence<Is...>)
+        inline constexpr auto make_batch_constant(detail::index_sequence<Is...>) noexcept
             -> batch_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
         }
         template <class batch_type, class G, std::size_t... Is>
-        inline constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>)
+        inline constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
             -> batch_bool_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
@@ -80,13 +80,13 @@ namespace xsimd
     } // namespace detail
 
     template <class batch_type, class G>
-    inline constexpr auto make_batch_constant() -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
+    inline constexpr auto make_batch_constant() noexcept -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
     {
         return detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>());
     }
 
     template <class batch_type, class G>
-    inline constexpr auto make_batch_bool_constant()
+    inline constexpr auto make_batch_bool_constant() noexcept
         -> decltype(detail::make_batch_bool_constant<batch_type, G>(
             detail::make_index_sequence<batch_type::size>()))
     {

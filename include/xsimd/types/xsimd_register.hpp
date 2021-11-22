@@ -36,7 +36,7 @@ namespace xsimd
     {                                                              \
         using register_type = VECTOR_TYPE;                         \
         register_type data;                                        \
-        operator register_type() const { return data; }            \
+        operator register_type() const noexcept { return data; }   \
     };                                                             \
     template <>                                                    \
     struct has_simd_register<SCALAR_TYPE, ISA> : std::true_type    \
@@ -48,7 +48,7 @@ namespace xsimd
     struct simd_register<T, ISA> : simd_register<T, ISA_BASE>                     \
     {                                                                             \
         using register_type = typename simd_register<T, ISA_BASE>::register_type; \
-        simd_register(register_type reg)                                          \
+        simd_register(register_type reg) noexcept                                 \
             : simd_register<T, ISA_BASE> { reg }                                  \
         {                                                                         \
         }                                                                         \
