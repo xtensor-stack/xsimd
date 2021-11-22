@@ -13,6 +13,10 @@ batch
    :project: xsimd
    :members:
 
+.. doxygenstruct:: xsimd::make_sized_batch
+   :project: xsimd
+   :members:
+
 
 Arithmetic operators
 --------------------

@@ -11,6 +11,7 @@
 
 #include <numeric>
 #include <random>
+#include <type_traits>
 
 #include "test_utils.hpp"
 
@@ -117,6 +118,53 @@ TEST(arch, dispatcher)
             : xsimd::sse2::version();
         EXPECT_EQ(expected, dispatched());
     }
+#endif
+}
+
+TEST(arch, fixed_size_types)
+{
+    using batch4f = xsimd::make_sized_batch_t<float, 4>;
+    using batch2d = xsimd::make_sized_batch_t<double, 2>;
+    using batch4i32 = xsimd::make_sized_batch_t<int32_t, 4>;
+    using batch4u32 = xsimd::make_sized_batch_t<uint32_t, 4>;
+
+    using batch8f = xsimd::make_sized_batch_t<float, 8>;
+    using batch4d = xsimd::make_sized_batch_t<double, 4>;
+    using batch8i32 = xsimd::make_sized_batch_t<int32_t, 8>;
+    using batch8u32 = xsimd::make_sized_batch_t<uint32_t, 8>;
+
+#if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON || XSIMD_WITH_NEON64
+    EXPECT_EQ(4, size_t(batch4f::size));
+    EXPECT_EQ(4, size_t(batch4i32::size));
+    EXPECT_EQ(4, size_t(batch4u32::size));
+
+    EXPECT_TRUE(bool(std::is_same<float, batch4f::value_type>::value));
+    EXPECT_TRUE(bool(std::is_same<int32_t, batch4i32::value_type>::value));
+    EXPECT_TRUE(bool(std::is_same<uint32_t, batch4u32::value_type>::value));
+
+#if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON64
+    EXPECT_EQ(2, size_t(batch2d::size));
+    EXPECT_TRUE(bool(std::is_same<double, batch2d::value_type>::value));
+#else
+    EXPECT_TRUE(bool(std::is_same<void, batch2d>::value));
+#endif
+
+#endif
+#if !XSIMD_WITH_AVX && !XSIMD_WITH_FMA3
+    EXPECT_TRUE(bool(std::is_same<void, batch8f>::value));
+    EXPECT_TRUE(bool(std::is_same<void, batch4d>::value));
+    EXPECT_TRUE(bool(std::is_same<void, batch8i32>::value));
+    EXPECT_TRUE(bool(std::is_same<void, batch8u32>::value));
+#else
+    EXPECT_EQ(8, size_t(batch8f::size));
+    EXPECT_EQ(8, size_t(batch8i32::size));
+    EXPECT_EQ(8, size_t(batch8u32::size));
+    EXPECT_EQ(4, size_t(batch4d::size));
+
+    EXPECT_TRUE(bool(std::is_same<float, batch8f::value_type>::value));
+    EXPECT_TRUE(bool(std::is_same<double, batch4d::value_type>::value));
+    EXPECT_TRUE(bool(std::is_same<int32_t, batch8i32::value_type>::value));
+    EXPECT_TRUE(bool(std::is_same<uint32_t, batch8u32::value_type>::value));
 #endif
 }
 
