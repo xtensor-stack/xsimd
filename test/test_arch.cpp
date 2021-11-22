@@ -11,6 +11,7 @@
 
 #include <numeric>
 #include <random>
+#include <type_traits>
 
 #include "test_utils.hpp"
 
@@ -118,6 +119,38 @@ TEST(arch, dispatcher)
         EXPECT_EQ(expected, dispatched());
     }
 #endif
+}
+
+TEST(arch, fixed_size_types)
+{
+    #if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON || XSIMD_WITH_NEON64
+        EXPECT_EQ(4, size_t(xsimd::batch4f::size));
+        EXPECT_EQ(4, size_t(xsimd::batch4i32::size));
+        EXPECT_EQ(4, size_t(xsimd::batch4u32::size));
+        EXPECT_EQ(2, size_t(xsimd::batch2d::size));
+
+        EXPECT_TRUE(bool(std::is_same<float, xsimd::batch4f::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<double, xsimd::batch2d::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<int, xsimd::batch4i32::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<unsigned, xsimd::batch4u32::value_type>::value));
+    #endif
+    #if !XSIMD_WITH_AVX && !XSIMD_WITH_FMA3
+        EXPECT_TRUE(bool(std::is_same<void, xsimd::batch8f::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<void, xsimd::batch4d::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<void, xsimd::batch8i32::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<void, xsimd::batch8u32::value_type>::value));
+    #else
+        EXPECT_EQ(8, size_t(xsimd::batch8f::size));
+        EXPECT_EQ(8, size_t(xsimd::batch8i32::size));
+        EXPECT_EQ(8, size_t(xsimd::batch8u32::size));
+        EXPECT_EQ(4, size_t(xsimd::batch4d::size));
+
+        EXPECT_TRUE(bool(std::is_same<float, xsimd::batch8f::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<double, xsimd::batch4d::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<int, xsimd::batch8i32::value_type>::value));
+        EXPECT_TRUE(bool(std::is_same<unsigned, xsimd::batch8u32::value_type>::value));
+    #endif
+        
 }
 
 template <class T>

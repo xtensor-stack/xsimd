@@ -1170,6 +1170,182 @@ namespace xsimd
     {
         return { +m_real, +m_imag };
     }
+
+    /**********************************
+     * size type aliases
+     **********************************/
+
+    namespace details
+    {
+        // batch of 4 floats
+        ////////////////////////////
+        template <class ArchList>
+        struct batch4f;
+
+        template <>
+        struct batch4f<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch4f<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<float, Arch>::size == 4, xsimd::batch<float, Arch>,
+                                                   typename batch4f<xsimd::arch_list<Archs...>>::type>::type;
+        };
+        ////////////////////////////
+
+        // batch of 8 floats
+        ////////////////////////////
+        template <class ArchList>
+        struct batch8f;
+
+        template <>
+        struct batch8f<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch8f<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<float, Arch>::size == 8, xsimd::batch<float, Arch>,
+                                                   typename batch8f<xsimd::arch_list<Archs...>>::type>::type;
+        };
+        ////////////////////////////
+
+        // batch of 2 doubles
+        ////////////////////////////
+        template <class ArchList>
+        struct batch2d;
+
+        template <>
+        struct batch2d<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch2d<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<double, Arch>::size == 2, xsimd::batch<double, Arch>,
+                                                   typename batch2d<xsimd::arch_list<Archs...>>::type>::type;
+        };
+
+        ////////////////////////////
+
+        // batch of 4 doubles
+        ////////////////////////////
+        template <class ArchList>
+        struct batch4d;
+
+        template <>
+        struct batch4d<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch4d<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<double, Arch>::size == 4, xsimd::batch<double, Arch>,
+                                                   typename batch4d<xsimd::arch_list<Archs...>>::type>::type;
+        };
+        ////////////////////////////
+
+        ////////////////////////////
+        // batch of 4 ints
+        ////////////////////////////
+        template <class ArchList>
+        struct batch4i32;
+
+        template <>
+        struct batch4i32<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch4i32<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<int32_t, Arch>::size == 4, xsimd::batch<int32_t, Arch>,
+                                                   typename batch4i32<xsimd::arch_list<Archs...>>::type>::type;
+        };
+        ////////////////////////////
+
+        ////////////////////////////
+        // batch of 8 ints
+        ////////////////////////////
+        template <class ArchList>
+        struct batch8i32;
+
+        template <>
+        struct batch8i32<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch8i32<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<int32_t, Arch>::size == 8, xsimd::batch<int32_t, Arch>,
+                                                   typename batch8i32<xsimd::arch_list<Archs...>>::type>::type;
+        };
+        ////////////////////////////
+
+        ////////////////////////////
+        // batch of 8 uints
+        ////////////////////////////
+        template <class ArchList>
+        struct batch8u32;
+
+        template <>
+        struct batch8u32<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch8u32<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<uint32_t, Arch>::size == 8, xsimd::batch<uint32_t, Arch>,
+                                                   typename batch8u32<xsimd::arch_list<Archs...>>::type>::type;
+        };
+        ////////////////////////////
+
+        ////////////////////////////
+        // batch of 4 uints
+        ////////////////////////////
+        template <class ArchList>
+        struct batch4u32;
+
+        template <>
+        struct batch4u32<xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <class Arch, class... Archs>
+        struct batch4u32<xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<uint32_t, Arch>::size == 4, xsimd::batch<uint32_t, Arch>,
+                                                   typename batch4u32<xsimd::arch_list<Archs...>>::type>::type;
+        };
+        ////////////////////////////
+    } // namespace details
+
+    //type aliases
+    using batch4f = typename details::batch4f<supported_architectures>::type;
+    using batch2d = typename details::batch2d<supported_architectures>::type;
+    using batch4i32 = typename details::batch4i32<supported_architectures>::type;
+    using batch4u32 = typename details::batch4u32<supported_architectures>::type;
+
+    // WARNING -- ONLY AVAILABLE ON AVX
+    using batch8f = typename details::batch8f<supported_architectures>::type;
+    using batch4d = typename details::batch4d<supported_architectures>::type;
+    using batch8i32 = typename details::batch8i32<supported_architectures>::type;
+    using batch8u32 = typename details::batch8u32<supported_architectures>::type;
 }
 
 #endif
