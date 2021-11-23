@@ -1335,7 +1335,7 @@ namespace xsimd
         ////////////////////////////
     } // namespace details
 
-    //type aliases
+    // type aliases
     using batch4f = typename details::batch4f<supported_architectures>::type;
     using batch2d = typename details::batch2d<supported_architectures>::type;
     using batch4i32 = typename details::batch4i32<supported_architectures>::type;
