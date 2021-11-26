@@ -1508,6 +1508,43 @@ namespace xsimd
             return _mm512_sub_pd(self, other);
         }
 
+        // swizzle
+        template <class A, uint32_t... Vs>
+        inline batch<float, A> swizzle(batch<float, A> const& self, batch_constant<batch<uint32_t, A>, Vs...> mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_permutexvar_ps((batch<uint32_t, A>)mask, self);
+        }
+
+        template <class A, uint64_t... Vs>
+        inline batch<double, A> swizzle(batch<double, A> const& self, batch_constant<batch<uint64_t, A>, Vs...> mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_permutexvar_pd((batch<uint64_t, A>)mask, self);
+        }
+
+        template <class A, uint64_t... Vs>
+        inline batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch_constant<batch<uint64_t, A>, Vs...> mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_permutexvar_epi64((batch<uint64_t, A>)mask, self);
+        }
+
+        template <class A, uint64_t... Vs>
+        inline batch<int64_t, A> swizzle(batch<int64_t, A> const& self, batch_constant<batch<uint64_t, A>, Vs...> mask, requires_arch<avx512f>) noexcept
+        {
+            return bitwise_cast<batch<int64_t, A>>(swizzle(bitwise_cast<batch<uint64_t, A>>(self), mask, avx512f {}));
+        }
+
+        template <class A, uint32_t... Vs>
+        inline batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch_constant<batch<uint32_t, A>, Vs...> mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_permutexvar_epi32((batch<uint32_t, A>)mask, self);
+        }
+
+        template <class A, uint32_t... Vs>
+        inline batch<int32_t, A> swizzle(batch<int32_t, A> const& self, batch_constant<batch<uint32_t, A>, Vs...> mask, requires_arch<avx512f>) noexcept
+        {
+            return bitwise_cast<batch<int32_t, A>>(swizzle(bitwise_cast<batch<uint32_t, A>>(self), mask, avx512f {}));
+        }
+
         // trunc
         template <class A>
         inline batch<float, A> trunc(batch<float, A> const& self, requires_arch<avx512f>) noexcept

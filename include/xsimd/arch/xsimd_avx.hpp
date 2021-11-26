@@ -1126,7 +1126,54 @@ namespace xsimd
             return _mm256_sub_pd(self, other);
         }
 
-        // to_int
+        // swizzle
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
+        inline batch<float, A> swizzle(batch<float, A> const& self, batch_constant<batch<uint32_t, A>, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<avx>) noexcept
+        {
+            // duplicate low and high part of input
+            __m256 hi = _mm256_castps128_ps256(_mm256_extractf128_ps(self, 1));
+            __m256 hi_hi = _mm256_insertf128_ps(self, _mm256_castps256_ps128(hi), 0);
+
+            __m256 low = _mm256_castps128_ps256(_mm256_castps256_ps128(self));
+            __m256 low_low = _mm256_insertf128_ps(self, _mm256_castps256_ps128(low), 1);
+
+            // normalize mask
+            batch_constant<batch<uint32_t, A>, (V0 % 4), (V1 % 4), (V2 % 4), (V3 % 4), (V4 % 4), (V5 % 4), (V6 % 4), (V7 % 4)> half_mask;
+
+            // permute within each lane
+            __m256 r0 = _mm256_permutevar_ps(low_low, (batch<uint32_t, A>)half_mask);
+            __m256 r1 = _mm256_permutevar_ps(hi_hi, (batch<uint32_t, A>)half_mask);
+
+            // mask to choose the right lane
+            batch_bool_constant<batch<uint32_t, A>, (V0 >= 4), (V1 >= 4), (V2 >= 4), (V3 >= 4), (V4 >= 4), (V5 >= 4), (V6 >= 4), (V7 >= 4)> blend_mask;
+
+            // blend the two permutes
+            return _mm256_blend_ps(r0, r1, blend_mask.mask());
+        }
+
+        template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
+        inline batch<double, A> swizzle(batch<double, A> const& self, batch_constant<batch<uint64_t, A>, V0, V1, V2, V3>, requires_arch<avx>) noexcept
+        {
+            // duplicate low and high part of input
+            __m256d hi = _mm256_castpd128_pd256(_mm256_extractf128_pd(self, 1));
+            __m256d hi_hi = _mm256_insertf128_pd(self, _mm256_castpd256_pd128(hi), 0);
+
+            __m256d low = _mm256_castpd128_pd256(_mm256_castpd256_pd128(self));
+            __m256d low_low = _mm256_insertf128_pd(self, _mm256_castpd256_pd128(low), 1);
+
+            // normalize mask
+            batch_constant<batch<uint64_t, A>, (V0 % 2) * -1, (V1 % 2) * -1, (V2 % 2) * -1, (V3 % 2) * -1> half_mask;
+
+            // permute within each lane
+            __m256d r0 = _mm256_permutevar_pd(low_low, (batch<uint64_t, A>)half_mask);
+            __m256d r1 = _mm256_permutevar_pd(hi_hi, (batch<uint64_t, A>)half_mask);
+
+            // mask to choose the right lane
+            batch_bool_constant<batch<uint64_t, A>, (V0 >= 2), (V1 >= 2), (V2 >= 2), (V3 >= 2)> blend_mask;
+
+            // blend the two permutes
+            return _mm256_blend_pd(r0, r1, blend_mask.mask());
+        }
 
         // trunc
         template <class A>
