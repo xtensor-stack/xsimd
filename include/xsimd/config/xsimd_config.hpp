@@ -102,11 +102,11 @@
 /**
  * @ingroup xsimd_config_macro
  *
- * Set to 1 if FMA for SSE or AVX is available at compile-time, to 0 otherwise.
+ * Set to 1 if FMA for SSE4.2 or AVX is available at compile-time, to 0 otherwise.
  */
 #ifdef __FMA__
 
-#if defined(__SSE__) || defined(__AVX__)
+#if defined(__SSE4_2__) || defined(__AVX__)
 #define XSIMD_WITH_FMA3 1
 #else
 #define XSIMD_WITH_FMA3 0
