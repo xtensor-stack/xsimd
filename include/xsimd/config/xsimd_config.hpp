@@ -123,7 +123,7 @@
  */
 #ifdef __FMA__
 
-#if defined(__AVX2__)
+#ifdef __AVX2__
 #define XSIMD_WITH_FMA5 1
 #else
 #define XSIMD_WITH_FMA5 0
@@ -241,13 +241,13 @@
 #if !defined(__clang__) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))
 #undef XSIMD_WITH_SSE4_2
 #define XSIMD_WITH_SSE4_2 1
-#undef XSIMD_WITH_FMA3
-#define XSIMD_WITH_FMA3 1
 #endif
 
 #if XSIMD_WITH_SSE4_2
 #undef XSIMD_WITH_SSE4_1
 #define XSIMD_WITH_SSE4_1 1
+#undef XSIMD_WITH_FMA3
+#define XSIMD_WITH_FMA3 1
 #endif
 
 #if XSIMD_WITH_SSE4_1
