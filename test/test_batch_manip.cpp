@@ -11,8 +11,6 @@
 
 #include "test_utils.hpp"
 
-#if !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
-
 namespace xsimd
 {
     template <typename T, std::size_t N>
@@ -49,25 +47,28 @@ namespace xsimd
     };
 }
 
+template <class T>
 struct Reversor
 {
-    static constexpr unsigned get(unsigned i, unsigned n)
+    static constexpr T get(T i, T n)
     {
         return n - 1 - i;
     }
 };
 
+template <class T>
 struct Last
 {
-    static constexpr unsigned get(unsigned, unsigned n)
+    static constexpr T get(T, T n)
     {
         return n - 1;
     }
 };
 
+template <class T>
 struct Dup
 {
-    static constexpr unsigned get(unsigned i, unsigned)
+    static constexpr T get(T i, T)
     {
         return 2 * (i / 2);
     }
@@ -159,7 +160,8 @@ protected:
         B b_lhs = B::load_unaligned(v_lhs.data());
         B b_exped = B::load_unaligned(v_exped.data());
 
-        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<typename as_index<batch_type>::type, Reversor>());
+        using index_type = typename as_index<batch_type>::type;
+        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Reversor<typename index_type::value_type>>());
         EXPECT_BATCH_EQ(b_res, b_exped) << print_function_name("swizzle reverse test");
     }
 
@@ -173,7 +175,8 @@ protected:
         B b_lhs = B::load_unaligned(v_lhs.data());
         B b_exped = B::load_unaligned(v_exped.data());
 
-        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<typename as_index<batch_type>::type, Last>());
+        using index_type = typename as_index<batch_type>::type;
+        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Last<typename index_type::value_type>>());
         EXPECT_BATCH_EQ(b_res, b_exped) << print_function_name("swizzle fill test");
     }
 
@@ -187,7 +190,8 @@ protected:
         B b_lhs = B::load_unaligned(v_lhs.data());
         B b_exped = B::load_unaligned(v_exped.data());
 
-        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<typename as_index<batch_type>::type, Dup>());
+        using index_type = typename as_index<batch_type>::type;
+        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Dup<typename index_type::value_type>>());
         EXPECT_BATCH_EQ(b_res, b_exped) << print_function_name("swizzle dup test");
     }
 };
@@ -208,5 +212,3 @@ TYPED_TEST(swizzle_test, swizzle_dup)
 {
     this->swizzle_dup();
 }
-
-#endif

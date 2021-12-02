@@ -929,6 +929,157 @@ namespace xsimd
             return !(arg == arg);
         }
     }
+
+    template <class batch_type, typename batch_type::value_type... Values>
+    struct batch_constant;
+
+    namespace kernel
+    {
+        /***********
+         * swizzle *
+         ***********/
+
+        namespace detail
+        {
+            using ::xsimd::batch_constant;
+            using ::xsimd::detail::integer_sequence;
+            using ::xsimd::detail::make_integer_sequence;
+
+            template <class CB1, class CB2, class IS>
+            struct index_burst_impl;
+
+            template <class B1, class B2, typename B2::value_type... V,
+                      typename B2::value_type... incr>
+            struct index_burst_impl<batch_constant<B1>, batch_constant<B2, V...>,
+                                    integer_sequence<typename B2::value_type, incr...>>
+            {
+                using type = batch_constant<B2, V...>;
+            };
+
+            template <class B1, typename B1::value_type V0, typename B1::value_type... V1,
+                      class B2, typename B2::value_type... V2,
+                      typename B2::value_type... incr>
+            struct index_burst_impl<batch_constant<B1, V0, V1...>, batch_constant<B2, V2...>,
+                                    integer_sequence<typename B2::value_type, incr...>>
+            {
+                using value_type = typename B2::value_type;
+                using next_input = batch_constant<B1, V1...>;
+                using next_output = batch_constant<B2, V2..., (V0 + incr)...>;
+                using type = typename index_burst_impl<next_input, next_output, integer_sequence<value_type, incr...>>::type;
+            };
+
+            template <class B, class T>
+            struct index_burst;
+
+            template <class B, typename B::value_type... V, class T>
+            struct index_burst<batch_constant<B, V...>, T>
+            {
+                static constexpr size_t mul = sizeof(typename B::value_type) / sizeof(T);
+                using input = batch_constant<B, (mul * V)...>;
+                using output = batch_constant<batch<T, typename B::arch_type>>;
+                using type = typename index_burst_impl<input, output, make_integer_sequence<T, mul>>::type;
+            };
+
+            template <class B, class T>
+            using index_burst_t = typename index_burst<B, T>::type;
+
+            template <class T, class B>
+            inline index_burst_t<B, T> burst_index(B)
+            {
+                return index_burst_t<B, T>();
+            }
+        }
+
+        template <class A, uint8_t V0, uint8_t V1, uint8_t V2, uint8_t V3, uint8_t V4, uint8_t V5, uint8_t V6, uint8_t V7,
+                  uint8_t V8, uint8_t V9, uint8_t V10, uint8_t V11, uint8_t V12, uint8_t V13, uint8_t V14, uint8_t V15>
+        inline batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self,
+                                         batch_constant<batch<uint8_t, A>, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
+                                         requires_arch<neon64>) noexcept
+        {
+            return vqtbl1q_u8(self, batch<uint8_t, A>(idx));
+        }
+
+        template <class A, uint8_t V0, uint8_t V1, uint8_t V2, uint8_t V3, uint8_t V4, uint8_t V5, uint8_t V6, uint8_t V7,
+                  uint8_t V8, uint8_t V9, uint8_t V10, uint8_t V11, uint8_t V12, uint8_t V13, uint8_t V14, uint8_t V15>
+        inline batch<int8_t, A> swizzle(batch<int8_t, A> const& self,
+                                        batch_constant<batch<uint8_t, A>, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
+                                        requires_arch<neon64>) noexcept
+        {
+            return vqtbl1q_s8(self, batch<uint8_t, A>(idx));
+        }
+
+        template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
+        inline batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self,
+                                          batch_constant<batch<uint16_t, A>, V0, V1, V2, V3, V4, V5, V6, V7> idx,
+                                          requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<uint8_t, A>;
+            return vreinterpretq_u16_u8(swizzle<A>(batch_type(vreinterpretq_u8_u16(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+
+        template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
+        inline batch<int16_t, A> swizzle(batch<int16_t, A> const& self,
+                                         batch_constant<batch<uint16_t, A>, V0, V1, V2, V3, V4, V5, V6, V7> idx,
+                                         requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<int8_t, A>;
+            return vreinterpretq_s16_s8(swizzle<A>(batch_type(vreinterpretq_s8_s16(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
+        inline batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self,
+                                          batch_constant<batch<uint32_t, A>, V0, V1, V2, V3> idx,
+                                          requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<uint8_t, A>;
+            return vreinterpretq_u32_u8(swizzle<A>(batch_type(vreinterpretq_u8_u32(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
+        inline batch<int32_t, A> swizzle(batch<int32_t, A> const& self,
+                                         batch_constant<batch<uint32_t, A>, V0, V1, V2, V3> idx,
+                                         requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<int8_t, A>;
+            return vreinterpretq_s32_s8(swizzle<A>(batch_type(vreinterpretq_s8_s32(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+
+        template <class A, uint64_t V0, uint64_t V1>
+        inline batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self,
+                                          batch_constant<batch<uint64_t, A>, V0, V1> idx,
+                                          requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<uint8_t, A>;
+            return vreinterpretq_u64_u8(swizzle<A>(batch_type(vreinterpretq_u8_u64(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+
+        template <class A, uint64_t V0, uint64_t V1>
+        inline batch<int64_t, A> swizzle(batch<int64_t, A> const& self,
+                                         batch_constant<batch<uint64_t, A>, V0, V1> idx,
+                                         requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<int8_t, A>;
+            return vreinterpretq_s64_s8(swizzle<A>(batch_type(vreinterpretq_s8_s64(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
+        inline batch<float, A> swizzle(batch<float, A> const& self,
+                                       batch_constant<batch<uint32_t, A>, V0, V1, V2, V3> idx,
+                                       requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<uint8_t, A>;
+            return vreinterpretq_f32_u8(swizzle<A>(batch_type(vreinterpretq_u8_f32(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+
+        template <class A, uint64_t V0, uint64_t V1>
+        inline batch<double, A> swizzle(batch<double, A> const& self,
+                                        batch_constant<batch<uint64_t, A>, V0, V1> idx,
+                                        requires_arch<neon64>) noexcept
+        {
+            using batch_type = batch<uint8_t, A>;
+            return vreinterpretq_f64_u8(swizzle<A>(batch_type(vreinterpretq_u8_f64(self)), detail::burst_index<uint8_t>(idx), A()));
+        }
+    }
 }
 
 #endif

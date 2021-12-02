@@ -2296,6 +2296,34 @@ namespace xsimd
             return !(arg == arg);
         }
     }
+
+    template <class batch_type, typename batch_type::value_type... Values>
+    struct batch_constant;
+
+    namespace kernel
+    {
+        /***********
+         * swizzle *
+         ***********/
+
+        template <class A, class T, class I, I... idx>
+        inline batch<T, A> swizzle(batch<T, A> const& self,
+                                   batch_constant<batch<I, A>, idx...>,
+                                   requires_arch<neon>) noexcept
+        {
+            std::array<T, batch<T, A>::size> data;
+            store_aligned(data.data(), self, A());
+            return set(batch<T, A>(), A(), data[idx]...);
+        }
+
+        template <class A, class T, class I, I... idx>
+        inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& self,
+                                                 batch_constant<batch<I, A>, idx...> mask,
+                                                 requires_arch<neon>) noexcept
+        {
+            return { swizzle(self.real(), mask), swizzle(self.imag(), mask) };
+        }
+    }
 }
 
 #undef WRAP_BINARY_INT_EXCLUDING_64
