@@ -1742,7 +1742,6 @@ namespace xsimd
         return x - y;
     }
 
-#if !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
     /**
      * @ingroup batch_data_transfer
      *
@@ -1764,7 +1763,6 @@ namespace xsimd
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
         return kernel::swizzle<A>(x, mask, A {});
     }
-#endif
 
     /**
      * @ingroup batch_trigo
