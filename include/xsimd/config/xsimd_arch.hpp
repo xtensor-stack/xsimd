@@ -111,6 +111,12 @@ namespace xsimd
 
     struct unavailable
     {
+        static constexpr bool supported() noexcept { return false; }
+        static constexpr bool available() noexcept { return false; }
+        static constexpr unsigned version() noexcept { return 0; }
+        static constexpr std::size_t alignment() noexcept { return 0; }
+        static constexpr bool requires_alignment() noexcept { return false; }
+        static constexpr char const* name() noexcept { return "<none>"; }
     };
 
     namespace detail
