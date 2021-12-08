@@ -1249,28 +1249,38 @@ namespace xsimd
         inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
             uint8x8_t tmp = vpadd_u8(vget_low_u8(arg), vget_high_u8(arg));
-            return detail::sum_batch<T, A>(tmp);
+            tmp = vpadd_u8(tmp, tmp);
+            tmp = vpadd_u8(tmp, tmp);
+            tmp = vpadd_u8(tmp, tmp);
+            return vget_lane_u8(tmp, 0);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
         inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
             int8x8_t tmp = vpadd_s8(vget_low_s8(arg), vget_high_s8(arg));
-            return detail::sum_batch<T, A>(tmp);
+            tmp = vpadd_s8(tmp, tmp);
+            tmp = vpadd_s8(tmp, tmp);
+            tmp = vpadd_s8(tmp, tmp);
+            return vget_lane_s8(tmp, 0);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
         inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
             uint16x4_t tmp = vpadd_u16(vget_low_u16(arg), vget_high_u16(arg));
-            return detail::sum_batch<T, A>(tmp);
+            tmp = vpadd_u16(tmp, tmp);
+            tmp = vpadd_u16(tmp, tmp);
+            return vget_lane_u16(tmp, 0);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
         inline typename batch<T, A>::value_type hadd(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
             int16x4_t tmp = vpadd_s16(vget_low_s16(arg), vget_high_s16(arg));
-            return detail::sum_batch<T, A>(tmp);
+            tmp = vpadd_s16(tmp, tmp);
+            tmp = vpadd_s16(tmp, tmp);
+            return vget_lane_s16(tmp, 0);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
