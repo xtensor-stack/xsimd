@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 template <class B>
@@ -89,3 +92,4 @@ TYPED_TEST_SUITE(select_test, batch_types, simd_test_names);
 
 TYPED_TEST(select_test, select_dynamic) { this->test_select_dynamic(); }
 TYPED_TEST(select_test, select_static) { this->test_select_static(); }
+#endif

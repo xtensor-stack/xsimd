@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include <cstddef>
 #include <numeric>
 #include <vector>
@@ -117,3 +120,4 @@ TEST(xsimd, load_store_simd_unaligned)
     EXPECT_EQ(t.ivec, t.ires);
 }
 #endif // XSIMD_INSTR_SET_AVAILABLE
+#endif

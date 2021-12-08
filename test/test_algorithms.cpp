@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 #include "xsimd/stl/algorithms.hpp"
 #include <numeric>
@@ -282,4 +285,5 @@ TEST(algorithms, iterator)
     (void)real_part;
 #endif
 }
+#endif
 #endif

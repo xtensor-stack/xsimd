@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include <random>
 
 #include "test_utils.hpp"
@@ -178,3 +181,4 @@ TYPED_TEST(load_store_test, store)
 {
     this->test_store();
 }
+#endif

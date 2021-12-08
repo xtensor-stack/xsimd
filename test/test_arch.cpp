@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include <numeric>
 #include <random>
 
@@ -154,4 +157,5 @@ TEST(arch, scalar)
     float res = sum {}(xsimd::arch::scalar {}, data, 17);
     EXPECT_EQ(ref, res);
 }
+#endif
 #endif

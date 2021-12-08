@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 namespace detail
@@ -160,3 +163,4 @@ TYPED_TEST(basic_math_test, basic_functions)
 {
     this->test_basic_functions();
 }
+#endif

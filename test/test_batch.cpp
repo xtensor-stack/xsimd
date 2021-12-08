@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include <cmath>
 #include <functional>
 #include <numeric>
@@ -784,3 +787,4 @@ TYPED_TEST(batch_test, iterator)
 {
     this->test_iterator();
 }
+#endif
