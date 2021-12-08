@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 using namespace std::placeholders;
@@ -162,3 +165,4 @@ TYPED_TEST(constant_bool_batch_test, init_from_generator_split)
 {
     this->test_init_from_generator_split();
 }
+#endif

@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include <type_traits>
 #include <vector>
 
@@ -34,3 +37,4 @@ TEST(xsimd, alignment)
     EXPECT_TRUE((std::is_same<a_vector_align, xsimd::aligned_mode>::value));
     EXPECT_TRUE((std::is_same<mock_align, xsimd::unaligned_mode>::value));
 }
+#endif

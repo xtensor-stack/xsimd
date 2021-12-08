@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 namespace xsimd
@@ -90,3 +93,4 @@ TYPED_TEST(extract_pair_test, extract_pair_128)
 {
     this->extract_pair_128();
 }
+#endif

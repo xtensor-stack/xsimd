@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 namespace xsimd
@@ -343,3 +346,4 @@ TYPED_TEST(batch_int_test, less_than_underflow)
 {
     this->test_less_than_underflow();
 }
+#endif

@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 #if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
@@ -216,4 +219,5 @@ TYPED_TEST(bitwise_cast_test, to_double)
 {
     this->test_to_double();
 }
+#endif
 #endif

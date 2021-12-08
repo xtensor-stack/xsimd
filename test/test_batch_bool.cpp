@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include <vector>
 
 #include "test_utils.hpp"
@@ -313,3 +316,4 @@ TYPED_TEST(batch_bool_test, bitwise_operations)
 {
     this->test_bitwise_operations();
 }
+#endif

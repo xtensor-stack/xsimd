@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 #if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
@@ -356,4 +359,5 @@ TEST(batch_cast, uses_fast_cast)
     static_assert(detail::uses_fast_cast<A, float, int32_t>::value,
                   "expected float to int32 conversion to use fast_cast");
 }
+#endif
 #endif

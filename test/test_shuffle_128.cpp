@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 namespace
@@ -95,3 +98,4 @@ TYPED_TEST(shuffle_128_test, shuffle_128_low_high)
 {
     this->shuffle_128_low_high();
 }
+#endif

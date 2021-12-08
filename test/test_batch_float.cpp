@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 template <class B>
@@ -101,3 +104,4 @@ TYPED_TEST(batch_float_test, haddp)
 {
     this->test_haddp();
 }
+#endif
