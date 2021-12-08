@@ -18,6 +18,14 @@
 #define XSIMD_NO_DISCARD
 #endif
 
+#if defined(__GNUC__)
+#define XSIMD_INLINE inline __attribute__((always_inline))
+#elif defined(_MSC_VER)
+#define XSIMD_INLINE inline __forceinline
+#else
+#define XSIMD_INLINE inline
+#endif
+
 #include "arch/xsimd_scalar.hpp"
 #include "memory/xsimd_aligned_allocator.hpp"
 #include "types/xsimd_batch.hpp"

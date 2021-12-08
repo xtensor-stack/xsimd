@@ -65,13 +65,13 @@ namespace xsimd
     namespace detail
     {
         template <class batch_type, class G, std::size_t... Is>
-        inline constexpr auto make_batch_constant(detail::index_sequence<Is...>) noexcept
+        XSIMD_INLINE constexpr auto make_batch_constant(detail::index_sequence<Is...>) noexcept
             -> batch_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
         }
         template <class batch_type, class G, std::size_t... Is>
-        inline constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
+        XSIMD_INLINE constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
             -> batch_bool_constant<batch_type, G::get(Is, sizeof...(Is))...>
         {
             return {};
@@ -80,13 +80,13 @@ namespace xsimd
     } // namespace detail
 
     template <class batch_type, class G>
-    inline constexpr auto make_batch_constant() noexcept -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
+    XSIMD_INLINE constexpr auto make_batch_constant() noexcept -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
     {
         return detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>());
     }
 
     template <class batch_type, class G>
-    inline constexpr auto make_batch_bool_constant() noexcept
+    XSIMD_INLINE constexpr auto make_batch_bool_constant() noexcept
         -> decltype(detail::make_batch_bool_constant<batch_type, G>(
             detail::make_index_sequence<batch_type::size>()))
     {

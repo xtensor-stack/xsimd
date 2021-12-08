@@ -160,7 +160,7 @@ namespace xsimd
         };
     }
 
-    inline detail::supported_arch available_architectures() noexcept
+    XSIMD_INLINE detail::supported_arch available_architectures() noexcept
     {
         static detail::supported_arch supported;
         return supported;

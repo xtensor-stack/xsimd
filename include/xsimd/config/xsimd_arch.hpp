@@ -62,13 +62,13 @@ namespace xsimd
         };
 
         template <typename T>
-        inline constexpr T max_of(T value) noexcept
+        XSIMD_INLINE constexpr T max_of(T value) noexcept
         {
             return value;
         }
 
         template <typename T, typename... Ts>
-        inline constexpr T max_of(T head0, T head1, Ts... tail) noexcept
+        XSIMD_INLINE constexpr T max_of(T head0, T head1, Ts... tail) noexcept
         {
             return max_of((head0 > head1 ? head0 : head1), tail...);
         }
@@ -232,7 +232,7 @@ namespace xsimd
 
     // Generic function dispatch, à la ifunc
     template <class F, class ArchList = supported_architectures>
-    inline detail::dispatcher<F, ArchList> dispatch(F&& f) noexcept
+    XSIMD_INLINE detail::dispatcher<F, ArchList> dispatch(F&& f) noexcept
     {
         return { std::forward<F>(f) };
     }

@@ -105,7 +105,7 @@ namespace xsimd
      * Default constructor.
      */
     template <class T, size_t A>
-    inline aligned_allocator<T, A>::aligned_allocator() noexcept
+    XSIMD_INLINE aligned_allocator<T, A>::aligned_allocator() noexcept
     {
     }
 
@@ -113,7 +113,7 @@ namespace xsimd
      * Copy constructor.
      */
     template <class T, size_t A>
-    inline aligned_allocator<T, A>::aligned_allocator(const aligned_allocator&) noexcept
+    XSIMD_INLINE aligned_allocator<T, A>::aligned_allocator(const aligned_allocator&) noexcept
     {
     }
 
@@ -122,7 +122,7 @@ namespace xsimd
      */
     template <class T, size_t A>
     template <class U>
-    inline aligned_allocator<T, A>::aligned_allocator(const aligned_allocator<U, A>&) noexcept
+    XSIMD_INLINE aligned_allocator<T, A>::aligned_allocator(const aligned_allocator<U, A>&) noexcept
     {
     }
 
@@ -130,7 +130,7 @@ namespace xsimd
      * Destructor.
      */
     template <class T, size_t A>
-    inline aligned_allocator<T, A>::~aligned_allocator()
+    XSIMD_INLINE aligned_allocator<T, A>::~aligned_allocator()
     {
     }
 
@@ -140,7 +140,7 @@ namespace xsimd
      * @return the actual address of \c r.
      */
     template <class T, size_t A>
-    inline auto
+    XSIMD_INLINE auto
     aligned_allocator<T, A>::address(reference r) noexcept -> pointer
     {
         return &r;
@@ -152,7 +152,7 @@ namespace xsimd
      * @return the actual address of \c r.
      */
     template <class T, size_t A>
-    inline auto
+    XSIMD_INLINE auto
     aligned_allocator<T, A>::address(const_reference r) const noexcept -> const_pointer
     {
         return &r;
@@ -167,7 +167,7 @@ namespace xsimd
      * hold an array of \c n objects of type \c T.
      */
     template <class T, size_t A>
-    inline auto
+    XSIMD_INLINE auto
     aligned_allocator<T, A>::allocate(size_type n, const void*) -> pointer
     {
         pointer res = reinterpret_cast<pointer>(aligned_malloc(sizeof(T) * n, A));
@@ -184,7 +184,7 @@ namespace xsimd
      * @param n number of objects earlier passed to allocate().
      */
     template <class T, size_t A>
-    inline void aligned_allocator<T, A>::deallocate(pointer p, size_type)
+    XSIMD_INLINE void aligned_allocator<T, A>::deallocate(pointer p, size_type)
     {
         aligned_free(p);
     }
@@ -195,7 +195,7 @@ namespace xsimd
      * @return the maximum supported allocated size.
      */
     template <class T, size_t A>
-    inline auto
+    XSIMD_INLINE auto
     aligned_allocator<T, A>::max_size() const noexcept -> size_type
     {
         return size_type(-1) / sizeof(T);
@@ -205,7 +205,7 @@ namespace xsimd
      * This method is deprecated, use max_size() instead
      */
     template <class T, size_t A>
-    inline auto
+    XSIMD_INLINE auto
     aligned_allocator<T, A>::size_max() const noexcept -> size_type
     {
         return size_type(-1) / sizeof(T);
@@ -219,7 +219,7 @@ namespace xsimd
      */
     template <class T, size_t A>
     template <class U, class... Args>
-    inline void aligned_allocator<T, A>::construct(U* p, Args&&... args)
+    XSIMD_INLINE void aligned_allocator<T, A>::construct(U* p, Args&&... args)
     {
         new ((void*)p) U(std::forward<Args>(args)...);
     }
@@ -230,7 +230,7 @@ namespace xsimd
      */
     template <class T, size_t A>
     template <class U>
-    inline void aligned_allocator<T, A>::destroy(U* p)
+    XSIMD_INLINE void aligned_allocator<T, A>::destroy(U* p)
     {
         p->~U();
     }
@@ -248,8 +248,8 @@ namespace xsimd
      * @return true if the allocators have the same alignment.
      */
     template <class T1, size_t A1, class T2, size_t A2>
-    inline bool operator==(const aligned_allocator<T1, A1>& lhs,
-                           const aligned_allocator<T2, A2>& rhs) noexcept
+    XSIMD_INLINE bool operator==(const aligned_allocator<T1, A1>& lhs,
+                                 const aligned_allocator<T2, A2>& rhs) noexcept
     {
         return lhs.alignment == rhs.alignment;
     }
@@ -263,8 +263,8 @@ namespace xsimd
      * @return true if the allocators have different alignments.
      */
     template <class T1, size_t A1, class T2, size_t A2>
-    inline bool operator!=(const aligned_allocator<T1, A1>& lhs,
-                           const aligned_allocator<T2, A2>& rhs) noexcept
+    XSIMD_INLINE bool operator!=(const aligned_allocator<T1, A1>& lhs,
+                                 const aligned_allocator<T2, A2>& rhs) noexcept
     {
         return !(lhs == rhs);
     }
@@ -275,7 +275,7 @@ namespace xsimd
 
     namespace detail
     {
-        inline void* xaligned_malloc(size_t size, size_t alignment)
+        XSIMD_INLINE void* xaligned_malloc(size_t size, size_t alignment)
         {
             assert(((alignment & (alignment - 1)) == 0) && "alignment must be a power of two");
             assert((alignment >= sizeof(void*)) && "alignment must be at least the size of a pointer");
@@ -291,7 +291,7 @@ namespace xsimd
             return res;
         }
 
-        inline void xaligned_free(void* ptr)
+        XSIMD_INLINE void xaligned_free(void* ptr)
         {
 #ifdef _WIN32
             _aligned_free(ptr);
@@ -301,18 +301,18 @@ namespace xsimd
         }
     }
 
-    inline void* aligned_malloc(size_t size, size_t alignment)
+    XSIMD_INLINE void* aligned_malloc(size_t size, size_t alignment)
     {
         return detail::xaligned_malloc(size, alignment);
     }
 
-    inline void aligned_free(void* ptr)
+    XSIMD_INLINE void aligned_free(void* ptr)
     {
         detail::xaligned_free(ptr);
     }
 
     template <class T>
-    inline size_t get_alignment_offset(const T* p, size_t size, size_t block_size)
+    XSIMD_INLINE size_t get_alignment_offset(const T* p, size_t size, size_t block_size)
     {
         // size_t block_size = simd_traits<T>::size;
         if (block_size == 1)
