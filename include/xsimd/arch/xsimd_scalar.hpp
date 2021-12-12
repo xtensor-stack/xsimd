@@ -39,6 +39,7 @@ namespace xsimd
     using std::atanh;
     using std::cbrt;
     using std::ceil;
+    using std::conj;
     using std::copysign;
     using std::cos;
     using std::cosh;
@@ -63,6 +64,7 @@ namespace xsimd
     using std::modf;
     using std::nearbyint;
     using std::nextafter;
+    using std::norm;
     using std::proj;
     using std::remainder;
     using std::rint;
