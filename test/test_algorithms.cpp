@@ -43,9 +43,9 @@ public:
 };
 
 #if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
-using algorithms_types = ::testing::Types<float>;
+using algorithms_types = ::testing::Types<float, std::complex<float>>;
 #else
-using algorithms_types = ::testing::Types<float, double>;
+using algorithms_types = ::testing::Types<float, double, std::complex<float>, std::complex<double>>;
 #endif
 
 TYPED_TEST_SUITE(algorithms, algorithms_types);
