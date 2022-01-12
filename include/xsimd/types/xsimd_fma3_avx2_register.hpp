@@ -9,34 +9,38 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_FMA3_REGISTER_HPP
-#define XSIMD_FMA3_REGISTER_HPP
+#ifndef XSIMD_FMA3_AVX2_REGISTER_HPP
+#define XSIMD_FMA3_AVX2_REGISTER_HPP
 
-#include "./xsimd_sse4_2_register.hpp"
+#include "./xsimd_avx2_register.hpp"
 
 namespace xsimd
 {
+    template <typename arch>
+    struct fma3;
 
     /**
      * @ingroup arch
      *
-     * SSE4.2 + FMA instructions
+     * AVX2 + FMA instructions
      */
-    struct fma3 : sse4_2
+    template <>
+    struct fma3<avx2> : avx2
     {
-        static constexpr bool supported() noexcept { return XSIMD_WITH_FMA3; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_FMA3_AVX2; }
         static constexpr bool available() noexcept { return true; }
-        static constexpr unsigned version() noexcept { return generic::version(1, 5, 0); }
-        static constexpr char const* name() noexcept { return "sse4.2+fma"; }
+        static constexpr unsigned version() noexcept { return generic::version(2, 2, 1); }
+        static constexpr char const* name() noexcept { return "fma3+avx2"; }
     };
 
-#if XSIMD_WITH_FMA3
+#if XSIMD_WITH_FMA3_AVX2
     namespace types
     {
 
-        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(fma3, sse4_2);
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(fma3<avx2>, avx2);
 
     }
 #endif
+
 }
 #endif

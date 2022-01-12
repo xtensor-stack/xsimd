@@ -102,35 +102,55 @@
 /**
  * @ingroup xsimd_config_macro
  *
- * Set to 1 if FMA  for SSE is available at compile-time, to 0 otherwise.
+ * Set to 1 if FMA3 for SSE is available at compile-time, to 0 otherwise.
  */
 #ifdef __FMA__
 
 #if defined(__SSE__) && !defined(__AVX__)
-#define XSIMD_WITH_FMA3 1
+#define XSIMD_WITH_FMA3_SSE 1
 #else
-#define XSIMD_WITH_FMA3 0
+#define XSIMD_WITH_FMA3_SSE 0
 #endif
 
 #else
-#define XSIMD_WITH_FMA3 0
+#define XSIMD_WITH_FMA3_SSE 0
 #endif
 
 /**
  * @ingroup xsimd_config_macro
  *
- * Set to 1 if FMA for AVX is available at compile-time, to 0 otherwise.
+ * Set to 1 if FMA3 for AVX is available at compile-time, to 0 otherwise.
  */
 #ifdef __FMA__
 
 #if defined(__AVX__)
-#define XSIMD_WITH_FMA5 1
+#define XSIMD_WITH_FMA3_AVX 1
 #else
-#define XSIMD_WITH_FMA5 0
+#define XSIMD_WITH_FMA3_AVX 0
+#endif
+
+#if defined(__AVX2__)
+#define XSIMD_WITH_FMA3_AVX2 1
+#else
+#define XSIMD_WITH_FMA3_AVX2 0
 #endif
 
 #else
-#define XSIMD_WITH_FMA5 0
+
+#define XSIMD_WITH_FMA3_AVX 0
+#define XSIMD_WITH_FMA3_AVX2 0
+
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if FMA4 is available at compile-time, to 0 otherwise.
+ */
+#ifdef __FMA4__
+#define XSIMD_WITH_FMA4 1
+#else
+#define XSIMD_WITH_FMA4 0
 #endif
 
 /**
@@ -229,8 +249,10 @@
 #if XSIMD_WITH_AVX2
 #undef XSIMD_WITH_AVX
 #define XSIMD_WITH_AVX 1
-#undef XSIMD_WITH_FMA5
-#define XSIMD_WITH_FMA5 1
+#undef XSIMD_WITH_FMA3_AVX
+#define XSIMD_WITH_FMA3_AVX 1
+#undef XSIMD_WITH_FMA3_AVX2
+#define XSIMD_WITH_FMA3_AVX2 1
 #endif
 
 #if XSIMD_WITH_AVX
@@ -265,7 +287,7 @@
 
 #endif
 
-#if !XSIMD_WITH_SSE2 && !XSIMD_WITH_SSE3 && !XSIMD_WITH_SSSE3 && !XSIMD_WITH_SSE4_1 && !XSIMD_WITH_SSE4_2 && !XSIMD_WITH_AVX && !XSIMD_WITH_AVX2 && !XSIMD_WITH_FMA3 && !XSIMD_WITH_FMA5 && !XSIMD_WITH_AVX512F && !XSIMD_WITH_AVX512CD && !XSIMD_WITH_AVX512DQ && !XSIMD_WITH_AVX512BW && !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+#if !XSIMD_WITH_SSE2 && !XSIMD_WITH_SSE3 && !XSIMD_WITH_SSSE3 && !XSIMD_WITH_SSE4_1 && !XSIMD_WITH_SSE4_2 && !XSIMD_WITH_AVX && !XSIMD_WITH_AVX2 && !XSIMD_WITH_FMA3_SSE && !XSIMD_WITH_FMA4 && !XSIMD_WITH_FMA3_AVX && !XSIMD_WITH_FMA3_AVX2 && !XSIMD_WITH_AVX512F && !XSIMD_WITH_AVX512CD && !XSIMD_WITH_AVX512DQ && !XSIMD_WITH_AVX512BW && !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
 #define XSIMD_NO_SUPPORTED_ARCHITECTURE
 #endif
 

@@ -39,11 +39,13 @@ namespace xsimd
             unsigned sse4_1 : 1;
             unsigned sse4_2 : 1;
             unsigned sse4a : 1;
-            unsigned fma3 : 1;
+            unsigned fma3_sse : 1;
             unsigned fma4 : 1;
             unsigned xop : 1;
             unsigned avx : 1;
+            unsigned fma3_avx : 1;
             unsigned avx2 : 1;
+            unsigned fma3_avx2 : 1;
             unsigned avx512f : 1;
             unsigned avx512cd : 1;
             unsigned avx512dq : 1;
@@ -115,14 +117,22 @@ namespace xsimd
                 sse3 = regs[2] >> 0 & 1;
                 best = std::max(best, sse3::version() * sse3);
 
-                // ssse3 = regs[2] >> 9 & 1;
-                // best = std::max(best, ssse3::version() * ssse3);
+                ssse3 = regs[2] >> 9 & 1;
+                best = std::max(best, ssse3::version() * ssse3);
 
                 sse4_1 = regs[2] >> 19 & 1;
                 best = std::max(best, sse4_1::version() * sse4_1);
 
                 sse4_2 = regs[2] >> 20 & 1;
                 best = std::max(best, sse4_2::version() * sse4_2);
+
+                fma3_sse = regs[2] >> 12 & 1;
+                if (sse4_2)
+                    best = std::max(best, fma3<xsimd::sse4_2>::version() * fma3_sse);
+
+                get_cpuid(regs, 0x80000001);
+                fma4 = regs[2] >> 16 & 1;
+                best = std::max(best, fma4::version() * fma4);
 
                 // sse4a = regs[2] >> 6 & 1;
                 // best = std::max(best, XSIMD_X86_AMD_SSE4A_VERSION * sse4a);
@@ -133,12 +143,15 @@ namespace xsimd
                 avx = regs[2] >> 28 & 1;
                 best = std::max(best, avx::version() * avx);
 
-                fma3 = regs[2] >> 12 & 1;
+                fma3_avx = avx && fma3_sse;
+                best = std::max(best, fma3<xsimd::avx>::version() * fma3_avx);
 
                 get_cpuid(regs, 0x7);
                 avx2 = regs[1] >> 5 & 1;
                 best = std::max(best, avx2::version() * avx2);
-                best = std::max(best, fma5::version() * avx2 * fma3);
+
+                fma3_avx2 = avx2 && fma3_sse;
+                best = std::max(best, fma3<xsimd::avx2>::version() * fma3_avx2);
 
                 avx512f = regs[1] >> 16 & 1;
                 best = std::max(best, avx512f::version() * avx512f);
@@ -152,9 +165,6 @@ namespace xsimd
                 avx512bw = regs[1] >> 30 & 1;
                 best = std::max(best, avx512bw::version() * avx512bw * avx512dq * avx512cd * avx512f);
 
-                // get_cpuid(regs, 0x80000001);
-                // fma4 = regs[2] >> 16 & 1;
-                // best = std::max(best, XSIMD_X86_AMD_FMA4_VERSION * fma4);
 #endif
             }
         };

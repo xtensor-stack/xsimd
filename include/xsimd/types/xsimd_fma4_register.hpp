@@ -9,34 +9,34 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_FMA5_REGISTER_HPP
-#define XSIMD_FMA5_REGISTER_HPP
+#ifndef XSIMD_FMA4_REGISTER_HPP
+#define XSIMD_FMA4_REGISTER_HPP
 
-#include "./xsimd_avx2_register.hpp"
+#include "./xsimd_sse4_2_register.hpp"
 
 namespace xsimd
 {
-
     /**
      * @ingroup arch
      *
-     * AVX2 + FMA instructions
+     * FMA4 instructions
      */
-    struct fma5 : avx2
+    struct fma4 : sse4_2
     {
-        static constexpr bool supported() noexcept { return XSIMD_WITH_FMA5; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_FMA4; }
         static constexpr bool available() noexcept { return true; }
-        static constexpr unsigned version() noexcept { return generic::version(2, 3, 0); }
-        static constexpr char const* name() noexcept { return "avx2+fma"; }
+        static constexpr unsigned version() noexcept { return generic::version(1, 4, 4); }
+        static constexpr char const* name() noexcept { return "fma4"; }
     };
 
-#if XSIMD_WITH_FMA5
+#if XSIMD_WITH_FMA4
     namespace types
     {
 
-        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(fma5, avx2);
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(fma4, sse4_2);
 
     }
 #endif
+
 }
 #endif

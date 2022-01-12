@@ -9,22 +9,38 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#include "../types/xsimd_fma3_sse_register.hpp"
-#include "../types/xsimd_fma4_register.hpp"
-#include "../types/xsimd_sse2_register.hpp"
-#include "../types/xsimd_sse3_register.hpp"
-#include "../types/xsimd_sse4_1_register.hpp"
-#include "../types/xsimd_sse4_2_register.hpp"
+#ifndef XSIMD_FMA3_AVX2_HPP
+#define XSIMD_FMA3_AVX2_HPP
 
-#include "../types/xsimd_avx2_register.hpp"
-#include "../types/xsimd_avx_register.hpp"
 #include "../types/xsimd_fma3_avx2_register.hpp"
-#include "../types/xsimd_fma3_avx_register.hpp"
 
-#include "../types/xsimd_avx512bw_register.hpp"
-#include "../types/xsimd_avx512cd_register.hpp"
-#include "../types/xsimd_avx512dq_register.hpp"
-#include "../types/xsimd_avx512f_register.hpp"
+// Allow inclusion of xsimd_fma3_avx.hpp
+#ifdef XSIMD_FMA3_AVX_HPP
+#undef XSIMD_FMA3_AVX_HPP
+#define XSIMD_FORCE_FMA3_AVX_HPP
+#endif
 
-#include "xsimd_neon64_register.hpp"
-#include "xsimd_neon_register.hpp"
+// Disallow inclusion of ./xsimd_fma3_avx_register.hpp
+#ifndef XSIMD_FMA3_AVX_REGISTER_HPP
+#define XSIMD_FMA3_AVX_REGISTER_HPP
+#define XSIMD_FORCE_FMA3_AVX_REGISTER_HPP
+#endif
+
+// Include ./xsimd_fma3_avx.hpp but s/avx/avx2
+#define avx avx2
+#include "./xsimd_fma3_avx.hpp"
+#undef avx
+#undef XSIMD_FMA3_AVX_HPP
+
+// Carefully restore guards
+#ifdef XSIMD_FORCE_FMA3_AVX_HPP
+#define XSIMD_FMA3_AVX_HPP
+#undef XSIMD_FORCE_FMA3_AVX_HPP
+#endif
+
+#ifdef XSIMD_FORCE_FMA3_AVX_REGISTER_HPP
+#undef XSIMD_FMA3_AVX_REGISTER_HPP
+#undef XSIMD_FORCE_FMA3_AVX_REGISTER_HPP
+#endif
+
+#endif
