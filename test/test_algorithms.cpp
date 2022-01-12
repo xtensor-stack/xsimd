@@ -34,21 +34,30 @@ struct unary_functor
     }
 };
 
-template <class T>
-using test_allocator_type = xsimd::aligned_allocator<T>;
+template <typename T>
+class algorithms : public testing::Test
+{
+public:
+    using vector = std::vector<T>;
+    using aligned_vector = std::vector<T, xsimd::aligned_allocator<T>>;
+};
 
 #if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
-using test_value_type = float;
+using algorithms_types = ::testing::Types<float, std::complex<float>>;
 #else
-using test_value_type = double;
+using algorithms_types = ::testing::Types<float, double, std::complex<float>, std::complex<double>>;
 #endif
 
-TEST(algorithms, binary_transform)
-{
-    std::vector<test_value_type> expected(93);
+TYPED_TEST_SUITE(algorithms, algorithms_types);
 
-    std::vector<test_value_type> a(93, 123), b(93, 123), c(93);
-    std::vector<test_value_type, test_allocator_type<test_value_type>> aa(93, 123), ba(93, 123), ca(93);
+TYPED_TEST(algorithms, binary_transform)
+{
+    using vector = typename TestFixture::vector;
+    using aligned_vector = typename TestFixture::aligned_vector;
+
+    vector expected(93);
+    vector a(93, 123), b(93, 123), c(93);
+    aligned_vector aa(93, 123), ba(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), b.begin(), expected.begin(),
                    binary_functor {});
@@ -89,11 +98,14 @@ TEST(algorithms, binary_transform)
     std::fill(ca.begin(), ca.end(), -1); // erase
 }
 
-TEST(algorithms, unary_transform)
+TYPED_TEST(algorithms, unary_transform)
 {
-    std::vector<test_value_type> expected(93);
-    std::vector<test_value_type> a(93, 123), c(93);
-    std::vector<test_value_type, test_allocator_type<test_value_type>> aa(93, 123), ca(93);
+    using vector = typename TestFixture::vector;
+    using aligned_vector = typename TestFixture::aligned_vector;
+
+    vector expected(93);
+    vector a(93, 123), c(93);
+    aligned_vector aa(93, 123), ca(93);
 
     std::transform(a.begin(), a.end(), expected.begin(),
                    unary_functor {});
@@ -118,6 +130,15 @@ TEST(algorithms, unary_transform)
     EXPECT_TRUE(std::equal(expected.begin(), expected.end(), ca.begin()) && expected.size() == ca.size());
     std::fill(ca.begin(), ca.end(), -1); // erase
 }
+
+template <class T>
+using test_allocator_type = xsimd::aligned_allocator<T>;
+
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+using test_value_type = float;
+#else
+using test_value_type = double;
+#endif
 
 class xsimd_reduce : public ::testing::Test
 {
