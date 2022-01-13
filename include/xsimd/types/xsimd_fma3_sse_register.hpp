@@ -9,22 +9,38 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#include "../types/xsimd_fma3_sse_register.hpp"
-#include "../types/xsimd_fma4_register.hpp"
-#include "../types/xsimd_sse2_register.hpp"
-#include "../types/xsimd_sse3_register.hpp"
-#include "../types/xsimd_sse4_1_register.hpp"
-#include "../types/xsimd_sse4_2_register.hpp"
+#ifndef XSIMD_FMA3_SSE_REGISTER_HPP
+#define XSIMD_FMA3_SSE_REGISTER_HPP
 
-#include "../types/xsimd_avx2_register.hpp"
-#include "../types/xsimd_avx_register.hpp"
-#include "../types/xsimd_fma3_avx2_register.hpp"
-#include "../types/xsimd_fma3_avx_register.hpp"
+#include "./xsimd_sse4_2_register.hpp"
 
-#include "../types/xsimd_avx512bw_register.hpp"
-#include "../types/xsimd_avx512cd_register.hpp"
-#include "../types/xsimd_avx512dq_register.hpp"
-#include "../types/xsimd_avx512f_register.hpp"
+namespace xsimd
+{
+    template <typename arch>
+    struct fma3;
 
-#include "xsimd_neon64_register.hpp"
-#include "xsimd_neon_register.hpp"
+    /**
+     * @ingroup arch
+     *
+     * SSE4.2 + FMA instructions
+     */
+    template <>
+    struct fma3<sse4_2> : sse4_2
+    {
+        static constexpr bool supported() noexcept { return XSIMD_WITH_FMA3_SSE; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr unsigned version() noexcept { return generic::version(1, 4, 3); }
+        static constexpr char const* name() noexcept { return "fma3+sse4.2"; }
+    };
+
+#if XSIMD_WITH_FMA3_SSE
+    namespace types
+    {
+
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(fma3<sse4_2>, sse4_2);
+
+    }
+#endif
+
+}
+#endif

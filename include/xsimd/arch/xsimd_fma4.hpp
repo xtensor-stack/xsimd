@@ -9,10 +9,10 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_FMA3_HPP
-#define XSIMD_FMA3_HPP
+#ifndef XSIMD_FMA4_HPP
+#define XSIMD_FMA4_HPP
 
-#include "../types/xsimd_sse_register.hpp"
+#include "../types/xsimd_fma4_register.hpp"
 
 namespace xsimd
 {

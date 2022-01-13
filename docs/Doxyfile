@@ -13,8 +13,10 @@ INPUT             = ../include/xsimd/types/xsimd_api.hpp \
                     ../include/xsimd/types/xsimd_avx512dq_register.hpp \
                     ../include/xsimd/types/xsimd_avx512f_register.hpp \
                     ../include/xsimd/types/xsimd_avx_register.hpp \
-                    ../include/xsimd/types/xsimd_fma3_register.hpp \
-                    ../include/xsimd/types/xsimd_fma5_register.hpp \
+                    ../include/xsimd/types/xsimd_fma3_avx_register.hpp \
+                    ../include/xsimd/types/xsimd_fma3_avx2_register.hpp \
+                    ../include/xsimd/types/xsimd_fma3_sse_register.hpp \
+                    ../include/xsimd/types/xsimd_fma4_register.hpp \
                     ../include/xsimd/types/xsimd_neon64_register.hpp \
                     ../include/xsimd/types/xsimd_neon_register.hpp \
                     ../include/xsimd/types/xsimd_sse2_register.hpp \
