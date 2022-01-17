@@ -234,8 +234,14 @@ namespace xsimd
         batch_bool operator!() const noexcept;
         batch_bool operator&(batch_bool const& other) const noexcept;
         batch_bool operator|(batch_bool const& other) const noexcept;
+        batch_bool operator^(batch_bool const& other) const noexcept;
         batch_bool operator&&(batch_bool const& other) const noexcept;
         batch_bool operator||(batch_bool const& other) const noexcept;
+
+        // update operators
+        batch_bool& operator&=(batch_bool const& other) const noexcept { return (*this) = (*this) & other; }
+        batch_bool& operator|=(batch_bool const& other) const noexcept { return (*this) = (*this) | other; }
+        batch_bool& operator^=(batch_bool const& other) const noexcept { return (*this) = (*this) ^ other; }
 
     private:
         template <size_t... Is>
@@ -813,6 +819,12 @@ namespace xsimd
     inline batch_bool<T, A> batch_bool<T, A>::operator|(batch_bool<T, A> const& other) const noexcept
     {
         return kernel::bitwise_or<A>(*this, other, A {}).data;
+    }
+
+    template <class T, class A>
+    inline batch_bool<T, A> batch_bool<T, A>::operator^(batch_bool<T, A> const& other) const noexcept
+    {
+        return kernel::bitwise_xor<A>(*this, other, A {}).data;
     }
 
     template <class T, class A>
