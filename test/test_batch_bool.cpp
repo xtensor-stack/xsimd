@@ -253,6 +253,14 @@ protected:
             size_t nb_true = std::count(ares.cbegin(), ares.cend(), true);
             EXPECT_EQ(nb_true, s) << print_function_name("operator||");
         }
+        // operator ^
+        {
+            batch_bool_type res = bool_g.half ^ bool_g.ihalf;
+            bool_array_type ares;
+            res.store_unaligned(ares.data());
+            size_t nb_true = std::count(ares.cbegin(), ares.cend(), true);
+            EXPECT_EQ(nb_true, s) << print_function_name("operator^");
+        }
         // bitwise_andnot
         {
             batch_bool_type res = xsimd::bitwise_andnot(bool_g.half, bool_g.half);
