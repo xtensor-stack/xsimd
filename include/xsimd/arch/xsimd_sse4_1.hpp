@@ -235,6 +235,19 @@ namespace xsimd
             return _mm_blend_pd(false_br, true_br, mask);
         }
 
+        // to_float
+        template <class A>
+        inline batch<double, A> to_float(batch<int64_t, A> const& x, requires_arch<sse4_1>) noexcept
+        {
+            // from https://stackoverflow.com/questions/41144668/how-to-efficiently-perform-double-int64-conversions-with-sse-avx
+            __m128i xH = _mm_srai_epi32(x, 16);
+            xH = _mm_blend_epi16(xH, _mm_setzero_si128(), 0x33);
+            xH = _mm_add_epi64(xH, _mm_castpd_si128(_mm_set1_pd(442721857769029238784.))); //  3*2^67
+            __m128i xL = _mm_blend_epi16(x, _mm_castpd_si128(_mm_set1_pd(0x0010000000000000)), 0x88); //  2^52
+            __m128d f = _mm_sub_pd(_mm_castsi128_pd(xH), _mm_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
+            return _mm_add_pd(f, _mm_castsi128_pd(xL));
+        }
+
         // trunc
         template <class A>
         inline batch<float, A> trunc(batch<float, A> const& self, requires_arch<sse4_1>) noexcept

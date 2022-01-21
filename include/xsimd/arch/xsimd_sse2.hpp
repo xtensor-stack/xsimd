@@ -1220,12 +1220,17 @@ namespace xsimd
             return _mm_cvtepi32_ps(self);
         }
         template <class A>
-        inline batch<double, A> to_float(batch<int64_t, A> const& self, requires_arch<sse2>) noexcept
+        inline batch<double, A> to_float(batch<int64_t, A> const& x, requires_arch<sse2>) noexcept
         {
-            // FIXME: call _mm_cvtepi64_pd
-            alignas(A::alignment()) int64_t buffer[batch<int64_t, A>::size];
-            self.store_aligned(&buffer[0]);
-            return { (double)buffer[0], (double)buffer[1] };
+            // from https://stackoverflow.com/questions/41144668/how-to-efficiently-perform-double-int64-conversions-with-sse-avx
+            // adapted to sse2
+            __m128i xH = _mm_srai_epi32(x, 16);
+            xH = _mm_and_si128(xH, _mm_setr_epi16(0x00, 0x00, 0xFFFF, 0xFFFF, 0x00, 0x00, 0xFFFF, 0xFFFF));
+            xH = _mm_add_epi64(xH, _mm_castpd_si128(_mm_set1_pd(442721857769029238784.))); //  3*2^67
+            __m128i mask = _mm_setr_epi16(0xFFFF, 0xFFFF, 0xFFFF, 0x00, 0xFFFF, 0xFFFF, 0xFFFF, 0x00);
+            __m128i xL = _mm_or_si128(_mm_and_si128(mask, x), _mm_andnot_si128(mask, _mm_castpd_si128(_mm_set1_pd(0x0010000000000000)))); //  2^52
+            __m128d f = _mm_sub_pd(_mm_castsi128_pd(xH), _mm_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
+            return _mm_add_pd(f, _mm_castsi128_pd(xL));
         }
 
         // to_int
