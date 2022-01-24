@@ -492,7 +492,7 @@ namespace xsimd
             }
         }
 
-        // convert
+        // fast_cast
         namespace detail
         {
             template <class A>
@@ -505,6 +505,7 @@ namespace xsimd
             inline batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<avx>) noexcept
             {
                 // see https://stackoverflow.com/questions/34066228/how-to-perform-uint32-float-conversion-with-sse
+                // adapted to avx
                 __m256i msk_lo = _mm256_set1_epi32(0xFFFF);
                 __m256 cnst65536f = _mm256_set1_ps(65536.0f);
 
