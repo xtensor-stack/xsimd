@@ -18,16 +18,18 @@ namespace xsimd
 {
     namespace types
     {
+        template <class T, class A>
+        struct has_simd_register : std::false_type
+        {
+        };
 
         template <class T, class Arch>
         struct simd_register
         {
-            static_assert(Arch::supported(), "usage of simd_register with unsupported architecture");
-        };
-
-        template <class T, class A>
-        struct has_simd_register : std::false_type
-        {
+            static_assert(Arch::supported(),
+                          "usage of simd_register with unsupported architecture");
+            static_assert(!Arch::supported() || has_simd_register<T, Arch>::value,
+                          "usage of simd_register with unsupported type");
         };
 
 #define XSIMD_DECLARE_SIMD_REGISTER(SCALAR_TYPE, ISA, VECTOR_TYPE) \
