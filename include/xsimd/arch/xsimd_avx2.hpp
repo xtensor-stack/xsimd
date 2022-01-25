@@ -290,6 +290,7 @@ namespace xsimd
                 __m256d f = _mm256_sub_pd(_mm256_castsi256_pd(xH), _mm256_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
                 return _mm256_add_pd(f, _mm256_castsi256_pd(xL));
             }
+
         }
 
         // eq
