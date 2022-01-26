@@ -790,6 +790,38 @@ namespace xsimd
             return batch_bool<T, A>({ lhs.get(0) == rhs.get(0), lhs.get(1) == rhs.get(1) });
         }
 
+        /*************
+         * fast_cast *
+         *************/
+
+        namespace detail
+        {
+            template <class A>
+            inline batch<float, A> fast_cast(batch<int32_t, A> const& self, batch<float, A> const&, requires_arch<neon>) noexcept
+            {
+                return vcvtq_f32_s32(self);
+            }
+
+            template <class A>
+            inline batch<float, A> fast_cast(batch<uint32_t, A> const& self, batch<float, A> const&, requires_arch<neon>) noexcept
+            {
+                return vcvtq_f32_u32(self);
+            }
+
+            template <class A>
+            inline batch<int32_t, A> fast_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires_arch<neon>) noexcept
+            {
+                return vcvtq_s32_f32(self);
+            }
+
+            template <class A>
+            inline batch<uint32_t, A> fast_cast(batch<float, A> const& self, batch<uint32_t, A> const&, requires_arch<neon>) noexcept
+            {
+                return vcvtq_u32_f32(self);
+            }
+
+        }
+
         /******
          * lt *
          ******/
@@ -2258,26 +2290,6 @@ namespace xsimd
         {
             using register_type = typename batch_bool<float, A>::register_type;
             return register_type(arg);
-        }
-
-        /**********
-         * to_int *
-         **********/
-
-        template <class A>
-        inline batch<int32_t, A> to_int(const batch<float, A>& x, requires_arch<neon>) noexcept
-        {
-            return vcvtq_s32_f32(x);
-        }
-
-        /************
-         * to_float *
-         ************/
-
-        template <class A>
-        inline batch<float, A> to_float(const batch<int32_t, A>& x, requires_arch<neon>) noexcept
-        {
-            return vcvtq_f32_s32(x);
         }
 
         /*********

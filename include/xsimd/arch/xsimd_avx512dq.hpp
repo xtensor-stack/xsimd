@@ -76,18 +76,21 @@ namespace xsimd
             return _mm512_xor_pd(self, other);
         }
 
-        // to_float
-        template <class A>
-        inline batch<double, A> to_float(batch<int64_t, A> const& self, requires_arch<avx512dq>) noexcept
+        // convert
+        namespace detail
         {
-            return _mm512_cvtepi64_pd(self);
-        }
+            template <class A>
+            inline batch<double, A> fast_cast(batch<int64_t, A> const& x, batch<double, A> const&, requires_arch<avx512dq>) noexcept
+            {
+                return _mm512_cvtepi64_pd(self);
+            }
 
-        // to_int
-        template <class A>
-        inline batch<int64_t, A> to_int(batch<double, A> const& self, requires_arch<avx512dq>) noexcept
-        {
-            return _mm512_cvttpd_epi64(self);
+            template <class A>
+            inline batch<int64_t, A> fast_cast(batch<double, A> const& self, batch<int64_t, A> const&, requires_arch<avx512dq>) noexcept
+            {
+                return _mm512_cvttpd_epi64(self);
+            }
+
         }
 
     }

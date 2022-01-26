@@ -1756,27 +1756,29 @@ namespace xsimd
     /**
      * @ingroup batch_conversion
      *
-     * Perform a conversion from \c i to a value of an floating point type of the same size as \c T
+     * Perform a conversion from \c i to a value of an floating point type of the same size as \c T.
+     * This is equivalent to \c batch_cast<as_float_t<T>>(i)
      * @param i batch of integers.
      * @return \c i converted to a value of an floating point type of the same size as \c T
      */
     template <class T, class A>
     inline batch<as_float_t<T>, A> to_float(batch<T, A> const& i) noexcept
     {
-        return kernel::to_float<A>(i, A {});
+        return batch_cast<as_float_t<T>>(i);
     }
 
     /**
      * @ingroup batch_conversion
      *
      * Perform a conversion from \c x to a value of an integer type of the same size as \c T
+     * This is equivalent to \c batch_cast<as_integer_t<T>>(x)
      * @param x batch.
      * @return \c x converted to a value of an integer type of the same size as \c T
      */
     template <class T, class A>
     inline batch<as_integer_t<T>, A> to_int(batch<T, A> const& x) noexcept
     {
-        return kernel::to_int<A>(x, A {});
+        return batch_cast<as_integer_t<T>>(x);
     }
 
     /**
