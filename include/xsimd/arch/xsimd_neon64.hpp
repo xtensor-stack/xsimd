@@ -349,9 +349,21 @@ namespace xsimd
             }
 
             template <class A>
+            inline batch<double, A> fast_cast(batch<uint64_t, A> const& x, batch<double, A> const&, requires_arch<neon64>) noexcept
+            {
+                return vcvtq_f64_u64(x);
+            }
+
+            template <class A>
             inline batch<int64_t, A> fast_cast(batch<double, A> const& x, batch<int64_t, A> const&, requires_arch<neon64>) noexcept
             {
                 return vcvtq_s64_f64(x);
+            }
+
+            template <class A>
+            inline batch<uint64_t, A> fast_cast(batch<double, A> const& x, batch<uint64_t, A> const&, requires_arch<neon64>) noexcept
+            {
+                return vcvtq_u64_f64(x);
             }
 
         }

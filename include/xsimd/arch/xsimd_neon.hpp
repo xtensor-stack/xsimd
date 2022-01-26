@@ -803,9 +803,21 @@ namespace xsimd
             }
 
             template <class A>
+            inline batch<float, A> fast_cast(batch<uint32_t, A> const& self, batch<float, A> const&, requires_arch<neon>) noexcept
+            {
+                return vcvtq_f32_u32(self);
+            }
+
+            template <class A>
             inline batch<int32_t, A> fast_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires_arch<neon>) noexcept
             {
                 return vcvtq_s32_f32(self);
+            }
+
+            template <class A>
+            inline batch<uint32_t, A> fast_cast(batch<float, A> const& self, batch<uint32_t, A> const&, requires_arch<neon>) noexcept
+            {
+                return vcvtq_u32_f32(self);
             }
 
         }
