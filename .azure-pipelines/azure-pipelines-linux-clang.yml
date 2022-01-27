@@ -20,6 +20,7 @@ jobs:
           llvm_version: '8'
         clang_9:
           llvm_version: '9'
+          avx: 1
         clang_10_avx512:
           llvm_version: '10'
           avx512: 1
