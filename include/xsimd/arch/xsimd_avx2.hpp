@@ -596,6 +596,46 @@ namespace xsimd
                 return sub(self, other, avx {});
             }
         }
+
+        // zip_hi
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept
+        {
+            switch (sizeof(T))
+            {
+            case 1:
+                return _mm256_unpackhi_epi8(self, other);
+            case 2:
+                return _mm256_unpackhi_epi16(self, other);
+            case 4:
+                return _mm256_unpackhi_epi32(self, other);
+            case 8:
+                return _mm256_unpackhi_epi64(self, other);
+            default:
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+
+        // zip_lo
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept
+        {
+            switch (sizeof(T))
+            {
+            case 1:
+                return _mm256_unpacklo_epi8(self, other);
+            case 2:
+                return _mm256_unpacklo_epi16(self, other);
+            case 4:
+                return _mm256_unpacklo_epi32(self, other);
+            case 8:
+                return _mm256_unpacklo_epi64(self, other);
+            default:
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
     }
 
 }

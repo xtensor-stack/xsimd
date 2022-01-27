@@ -1146,14 +1146,10 @@ namespace xsimd
         {
             switch (sizeof(T))
             {
-            case 1:
-                return _mm256_unpackhi_epi8(self, other);
-            case 2:
-                return _mm256_unpackhi_epi16(self, other);
             case 4:
-                return _mm256_unpackhi_epi32(self, other);
+                return _mm256_castps_si256(_mm256_unpackhi_ps(_mm256_castsi256_ps(self), _mm256_castsi256_ps(other)));
             case 8:
-                return _mm256_unpackhi_epi64(self, other);
+                return _mm256_castpd_si256(_mm256_unpackhi_pd(_mm256_castsi256_pd(self), _mm256_castsi256_pd(other)));
             default:
                 assert(false && "unsupported arch/op combination");
                 return {};
@@ -1176,19 +1172,16 @@ namespace xsimd
         {
             switch (sizeof(T))
             {
-            case 1:
-                return _mm256_unpacklo_epi8(self, other);
-            case 2:
-                return _mm256_unpacklo_epi16(self, other);
             case 4:
-                return _mm256_unpacklo_epi32(self, other);
+                return _mm256_castps_si256(_mm256_unpacklo_ps(_mm256_castsi256_ps(self), _mm256_castsi256_ps(other)));
             case 8:
-                return _mm256_unpacklo_epi64(self, other);
+                return _mm256_castpd_si256(_mm256_unpacklo_pd(_mm256_castsi256_pd(self), _mm256_castsi256_pd(other)));
             default:
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
         }
+
         template <class A>
         inline batch<float, A> zip_lo(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept
         {
