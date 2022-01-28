@@ -1146,6 +1146,37 @@ namespace xsimd
         {
             switch (sizeof(T))
             {
+            case 1:
+            case 2:
+            {
+                // extract low word
+                __m128i self_lo = _mm256_extractf128_si256(self, 0);
+                __m128i self_hi = _mm256_extractf128_si256(self, 1);
+                // extract high word
+                __m128i other_lo = _mm256_extractf128_si256(other, 0);
+                __m128i other_hi = _mm256_extractf128_si256(other, 1);
+
+                // interleave
+                __m128i res_lo, res_hi;
+                if (sizeof(T) == 1)
+                {
+                    res_lo = _mm_unpackhi_epi8(self_lo, other_lo);
+                    res_hi = _mm_unpackhi_epi8(self_hi, other_hi);
+                }
+                else
+                {
+                    res_lo = _mm_unpackhi_epi16(self_lo, other_lo);
+                    res_hi = _mm_unpackhi_epi16(self_hi, other_hi);
+                }
+
+                // fuse
+                return _mm256_castps_si256(
+                    _mm256_insertf128_ps(
+                        _mm256_castsi256_ps(_mm256_castsi128_si256(res_lo)),
+                        _mm_castsi128_ps(res_hi),
+                        1));
+            }
+
             case 4:
                 return _mm256_castps_si256(_mm256_unpackhi_ps(_mm256_castsi256_ps(self), _mm256_castsi256_ps(other)));
             case 8:
@@ -1172,6 +1203,36 @@ namespace xsimd
         {
             switch (sizeof(T))
             {
+            case 1:
+            case 2:
+            {
+                // extract low word
+                __m128i self_lo = _mm256_extractf128_si256(self, 0);
+                __m128i self_hi = _mm256_extractf128_si256(self, 1);
+                // extract high word
+                __m128i other_lo = _mm256_extractf128_si256(other, 0);
+                __m128i other_hi = _mm256_extractf128_si256(other, 1);
+
+                // interleave
+                __m128i res_lo, res_hi;
+                if (sizeof(T) == 1)
+                {
+                    res_lo = _mm_unpacklo_epi8(self_lo, other_lo);
+                    res_hi = _mm_unpacklo_epi8(self_hi, other_hi);
+                }
+                else
+                {
+                    res_lo = _mm_unpacklo_epi16(self_lo, other_lo);
+                    res_hi = _mm_unpacklo_epi16(self_hi, other_hi);
+                }
+
+                // fuse
+                return _mm256_castps_si256(
+                    _mm256_insertf128_ps(
+                        _mm256_castsi256_ps(_mm256_castsi128_si256(res_lo)),
+                        _mm_castsi128_ps(res_hi),
+                        1));
+            }
             case 4:
                 return _mm256_castps_si256(_mm256_unpacklo_ps(_mm256_castsi256_ps(self), _mm256_castsi256_ps(other)));
             case 8:
@@ -1192,9 +1253,7 @@ namespace xsimd
         {
             return _mm256_unpacklo_pd(self, other);
         }
-
     }
-
 }
 
 #endif
