@@ -82,6 +82,7 @@ namespace xsimd
     using std::isinf;
     using std::isnan;
 #else
+
     // Windows defines catch all templates
     template <class T>
     inline typename std::enable_if<std::is_floating_point<T>::value, bool>::type
@@ -162,6 +163,12 @@ namespace xsimd
     using xtl::tan;
     using xtl::tanh;
 #endif
+
+    template <typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    inline T clip(const T& val, const T& low, const T& hi) noexcept
+    {
+        return low > val ? low : (hi < val ? hi : val);
+    }
 
     template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
     inline bool is_flint(const T& x) noexcept
