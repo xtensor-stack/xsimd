@@ -1,0 +1,19 @@
+name: benchmark
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt install g++ cmake
+    - name: Setup
+      run: |
+        mkdir _build
+        cd _build && cmake .. -DBUILD_BENCHMARK=ON -DCMAKE_BUILD_TYPE=Release
+    - name: Build
+      run: cmake --build _build
+    - name: Testing sequential
+      run: cmake --build _build --target xbenchmark
+
