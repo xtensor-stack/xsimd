@@ -20,6 +20,8 @@
 
 namespace xsimd
 {
+    template <class batch_type, typename batch_type::value_type... Values>
+    struct batch_constant;
 
     namespace kernel
     {
@@ -130,6 +132,13 @@ namespace xsimd
         {
             static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct store for this type combination");
             return store_aligned<A>(mem, self, generic {});
+        }
+
+        // swizzle
+        template <class A, class T, class ITy, ITy... Vs>
+        inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& self, batch_constant<batch<ITy, A>, Vs...> mask, requires_arch<generic>) noexcept
+        {
+            return { swizzle(self.real(), mask), swizzle(self.imag(), mask) };
         }
 
         namespace detail

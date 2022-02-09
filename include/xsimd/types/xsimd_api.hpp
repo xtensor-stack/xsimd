@@ -1714,6 +1714,30 @@ namespace xsimd
         return x - y;
     }
 
+#if !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Rearrange elements from \c x according to mask \c mask
+     * @param x batch
+     * @param mask constant batch mask of integer elements of the same size as
+     * element of \c x
+     * @return swizzled batch
+     */
+    template <class T, class A, class Vt, Vt... Values>
+    inline batch<T, A> swizzle(batch<T, A> const& x, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    {
+        static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
+        return kernel::swizzle<A>(x, mask, A {});
+    }
+    template <class T, class A, class Vt, Vt... Values>
+    inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& x, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    {
+        static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
+        return kernel::swizzle<A>(x, mask, A {});
+    }
+#endif
+
     /**
      * @ingroup batch_trigo
      *

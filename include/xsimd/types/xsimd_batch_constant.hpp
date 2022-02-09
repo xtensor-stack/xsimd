@@ -58,7 +58,13 @@ namespace xsimd
 
         constexpr value_type get(size_t i) const noexcept
         {
-            return std::array<value_type, size> { Values... }[i];
+            return get(i, std::array<value_type, size> { Values... });
+        }
+
+    private:
+        constexpr value_type get(size_t i, std::array<value_type, size> const& values) const noexcept
+        {
+            return values[i];
         }
     };
 
@@ -66,7 +72,7 @@ namespace xsimd
     {
         template <class batch_type, class G, std::size_t... Is>
         inline constexpr auto make_batch_constant(detail::index_sequence<Is...>) noexcept
-            -> batch_constant<batch_type, G::get(Is, sizeof...(Is))...>
+            -> batch_constant<batch_type, (typename batch_type::value_type)G::get(Is, sizeof...(Is))...>
         {
             return {};
         }

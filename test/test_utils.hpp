@@ -636,6 +636,13 @@ namespace xsimd
         batch<std::complex<double>>>;
 #endif
     using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
+    using batch_swizzle_type_list = mpl::type_list<
+        batch<float>, batch<double>,
+#if !XSIMD_WITH_AVX || XSIMD_WITH_AVX2
+        batch<uint32_t>, batch<int32_t>,
+        batch<uint64_t>, batch<int64_t>,
+#endif
+        batch<std::complex<float>>, batch<std::complex<double>>>;
     using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
 }
 
@@ -644,6 +651,7 @@ using batch_float_types = to_testing_types<xsimd::batch_float_type_list>;
 using batch_complex_types = to_testing_types<xsimd::batch_complex_type_list>;
 using batch_math_types = to_testing_types<xsimd::batch_math_type_list>;
 using batch_types = to_testing_types<xsimd::batch_type_list>;
+using batch_swizzle_types = to_testing_types<xsimd::batch_swizzle_type_list>;
 
 /********************
  * conversion utils *
