@@ -31,22 +31,22 @@ namespace xsimd
          * all *
          *******/
 
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
+        {
+            return vminvq_u32(arg) == ~0U;
+        }
+
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
         inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
-            return vminvq_u8(arg);
+            return all(batch_bool<uint32_t, A>(vreinterpretq_u32_u8(arg)), neon64 {});
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
         inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
-            return vminvq_u16(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
-        inline bool all(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vminvq_u32(arg);
+            return all(batch_bool<uint32_t, A>(vreinterpretq_u32_u16(arg)), neon64 {});
         }
 
         template <class A, class T, detail::enable_sized_t<T, 8> = 0>
@@ -59,22 +59,22 @@ namespace xsimd
          * any *
          *******/
 
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
+        {
+            return vmaxvq_u32(arg) != 0;
+        }
+
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
         inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
-            return vmaxvq_u8(arg);
+            return any(batch_bool<uint32_t, A>(vreinterpretq_u32_u8(arg)), neon64 {});
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
         inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
         {
-            return vmaxvq_u16(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
-        inline bool any(batch_bool<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vmaxvq_u32(arg);
+            return any(batch_bool<uint32_t, A>(vreinterpretq_u32_u16(arg)), neon64 {});
         }
 
         template <class A, class T, detail::enable_sized_t<T, 8> = 0>
