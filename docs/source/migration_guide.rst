@@ -50,6 +50,9 @@ Batch Types
 The second argument of :cpp:class:`xsimd::batch` is now a type that represents
 an architecture, instead of an integer.
 
+The previous behavior can be emulated through the
+:cpp:struct:`xsimd::make_sized_batch` utility.
+
 Batch of Complex Types
 **********************
 

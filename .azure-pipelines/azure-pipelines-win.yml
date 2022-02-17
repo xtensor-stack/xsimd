@@ -55,8 +55,7 @@ jobs:
           setlocal EnableDelayedExpansion
           call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
           mkdir build & cd build
-          cmake -G Ninja ^
-                -DCMAKE_BUILD_TYPE=Release ^
+          cmake -DCMAKE_BUILD_TYPE=Release ^
                 -DCMAKE_C_COMPILER=clang-cl ^
                 -DCMAKE_CXX_COMPILER=clang-cl ^
                 -DDOWNLOAD_GTEST=ON ^
@@ -69,16 +68,15 @@ jobs:
       - script: |
           call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
           cmake --build . ^
-                --config Release ^
-                --target test_xsimd ^
-                -- -v
+                --config release ^
+                --target test_xsimd
         displayName: "Build xsimd"
         workingDirectory: $(Build.BinariesDirectory)/build
 
       # Test
       - script: |
-          setlocal EnableDelayedExpansion
-          cd test
-          .\test_xsimd
+          cmake --build . ^
+                --config Release ^
+                --target xtest
         displayName: "Test xsimd"
-        workingDirectory: $(Build.BinariesDirectory)/build/test
+        workingDirectory: $(Build.BinariesDirectory)/build

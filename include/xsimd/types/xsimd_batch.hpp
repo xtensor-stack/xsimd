@@ -1182,6 +1182,48 @@ namespace xsimd
     {
         return { +m_real, +m_imag };
     }
+
+    /**********************************
+     * size type aliases
+     **********************************/
+
+    namespace details
+    {
+        template <typename T, std::size_t N, class ArchList>
+        struct sized_batch;
+
+        template <typename T, std::size_t N>
+        struct sized_batch<T, N, xsimd::arch_list<>>
+        {
+            using type = void;
+        };
+
+        template <typename T, std::size_t N, class Arch, class... Archs>
+        struct sized_batch<T, N, xsimd::arch_list<Arch, Archs...>>
+        {
+            using type = typename std::conditional<xsimd::batch<T, Arch>::size == N, xsimd::batch<T, Arch>,
+                                                   typename sized_batch<T, N, xsimd::arch_list<Archs...>>::type>::type;
+        };
+    }
+
+    /**
+     * @brief type utility to select a batch of given type and size
+     *
+     * If one of the available architectures has a native vector type of the
+     * given type and size, sets the @p type member to the appropriate batch
+     * type. Otherwise set its to @p void.
+     *
+     * @tparam T the type of the underlying values.
+     * @tparam N the number of elements of that type in the batch.
+     **/
+    template <typename T, std::size_t N>
+    struct make_sized_batch
+    {
+        using type = typename details::sized_batch<T, N, supported_architectures>::type;
+    };
+
+    template <typename T, std::size_t N>
+    using make_sized_batch_t = typename make_sized_batch<T, N>::type;
 }
 
 #endif
