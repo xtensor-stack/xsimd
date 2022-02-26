@@ -237,7 +237,7 @@ namespace xsimd
     }
 
     // Generic function dispatch, à la ifunc
-    template <class F, class ArchList = supported_architectures>
+    template <class ArchList = supported_architectures, class F>
     inline detail::dispatcher<F, ArchList> dispatch(F&& f) noexcept
     {
         return { std::forward<F>(f) };
