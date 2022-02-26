@@ -1148,7 +1148,8 @@ namespace xsimd
             batch_bool_constant<batch<uint32_t, A>, (V0 >= 4), (V1 >= 4), (V2 >= 4), (V3 >= 4), (V4 >= 4), (V5 >= 4), (V6 >= 4), (V7 >= 4)> blend_mask;
 
             // blend the two permutes
-            return _mm256_blend_ps(r0, r1, blend_mask.mask());
+            constexpr auto mask = blend_mask.mask();
+            return _mm256_blend_ps(r0, r1, mask);
         }
 
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
@@ -1172,7 +1173,8 @@ namespace xsimd
             batch_bool_constant<batch<uint64_t, A>, (V0 >= 2), (V1 >= 2), (V2 >= 2), (V3 >= 2)> blend_mask;
 
             // blend the two permutes
-            return _mm256_blend_pd(r0, r1, blend_mask.mask());
+            constexpr auto mask = blend_mask.mask();
+            return _mm256_blend_pd(r0, r1, mask);
         }
 
         // trunc
