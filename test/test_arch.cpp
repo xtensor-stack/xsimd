@@ -16,6 +16,7 @@
 #include <random>
 #include <type_traits>
 
+#include "test_sum.hpp"
 #include "test_utils.hpp"
 
 static_assert(xsimd::default_arch::supported(), "default arch must be supported");
@@ -69,23 +70,6 @@ TEST(arch, arch_list_alignment)
                   "two architectures");
 }
 
-struct sum
-{
-    template <class Arch, class T>
-    T operator()(Arch, T const* data, unsigned size)
-    {
-        using batch = xsimd::batch<T, Arch>;
-        batch acc(static_cast<T>(0));
-        const unsigned n = size / batch::size * batch::size;
-        for (unsigned i = 0; i != n; i += batch::size)
-            acc += batch::load_unaligned(data + i);
-        T star_acc = xsimd::hadd(acc);
-        for (unsigned i = n; i < size; ++i)
-            star_acc += data[i];
-        return star_acc;
-    }
-};
-
 struct get_arch_version
 {
     template <class Arch>
@@ -107,15 +91,14 @@ TEST(arch, dispatcher)
 #if XSIMD_WITH_AVX && XSIMD_WITH_SSE2
     static_assert(xsimd::supported_architectures::contains<xsimd::avx>() && xsimd::supported_architectures::contains<xsimd::sse2>(), "consistent supported architectures");
     {
-        auto dispatched = xsimd::dispatch<sum, xsimd::arch_list<xsimd::avx, xsimd::sse2>>(sum {});
+        auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::avx, xsimd::sse2>>(sum {});
         float res = dispatched(data, 17);
         EXPECT_EQ(ref, res);
     }
 
     // check that we pick the most appropriate version
     {
-        auto dispatched = xsimd::dispatch<get_arch_version,
-                                          xsimd::arch_list<xsimd::sse3, xsimd::sse2>>(get_arch_version {});
+        auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::sse3, xsimd::sse2>>(get_arch_version {});
         unsigned expected = xsimd::available_architectures().best >= xsimd::sse3::version()
             ? xsimd::sse3::version()
             : xsimd::sse2::version();
