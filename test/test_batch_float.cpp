@@ -40,6 +40,19 @@ protected:
         }
     }
 
+    void test_rsqrt() const
+    {
+        // rsqrt
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                           [](const value_type& l)
+                           { return value_type(1) / std::sqrt(l); });
+            batch_type res = rsqrt(batch_lhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("rsqrt");
+        }
+    }
+
     void test_sqrt() const
     {
         // sqrt

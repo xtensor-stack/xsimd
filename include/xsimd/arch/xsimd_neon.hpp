@@ -1227,6 +1227,16 @@ namespace xsimd
         }
 
         /********
+         * rsqrt *
+         ********/
+
+        template <class A>
+        inline batch<float, A> rsqrt(batch<float, A> const& arg, requires_arch<neon>) noexcept
+        {
+            return vrsqrteq_f32(arg);
+        }
+
+        /********
          * sqrt *
          ********/
 

@@ -1417,6 +1417,19 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_math
+     *
+     * Computes the inverse square root of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the inverse square root of \c x.
+     */
+    template <class T, class A>
+    inline batch<T, A> rsqrt(batch<T, A> const& x) noexcept
+    {
+        return kernel::rsqrt<A>(x, A {});
+    }
+
+    /**
      * @ingroup batch_arithmetic
      *
      * Computes the saturate sum of the batch \c x and the batch \c y.

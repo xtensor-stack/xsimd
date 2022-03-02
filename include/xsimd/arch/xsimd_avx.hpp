@@ -908,6 +908,18 @@ namespace xsimd
             return ~(self == other);
         }
 
+        // rsqrt
+        template <class A>
+        inline batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<avx>) noexcept
+        {
+            return _mm256_rsqrt_ps(val);
+        }
+        template <class A>
+        inline batch<double, A> rsqrt(batch<double, A> const& val, requires_arch<avx>) noexcept
+        {
+            return _mm256_cvtps_pd(_mm_rsqrt_ps(_mm256_cvtpd_ps(val)));
+        }
+
         // sadd
         template <class A>
         inline batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept

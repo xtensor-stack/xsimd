@@ -195,6 +195,13 @@ namespace xsimd
         return std::pow(T(10), x);
     }
 
+    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    inline auto rsqrt(const T& x) noexcept -> decltype(std::sqrt(x))
+    {
+        using float_type = decltype(std::sqrt(x));
+        return static_cast<float_type>(1) / std::sqrt(x);
+    }
+
     namespace detail
     {
         template <class C>

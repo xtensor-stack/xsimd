@@ -969,6 +969,18 @@ namespace xsimd
             return _mm_cmpneq_pd(self, other);
         }
 
+        // rsqrt
+        template <class A>
+        inline batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<sse2>) noexcept
+        {
+            return _mm_rsqrt_ps(val);
+        }
+        template <class A>
+        inline batch<double, A> rsqrt(batch<double, A> const& val, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtps_pd(_mm_rsqrt_ps(_mm_cvtpd_ps(val)));
+        }
+
         // select
         template <class A>
         inline batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<sse2>) noexcept
@@ -1003,6 +1015,7 @@ namespace xsimd
         {
             return _mm_sqrt_pd(val);
         }
+
         // sadd
         template <class A>
         inline batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept

@@ -11,6 +11,10 @@ Power functions
 .. doxygenfunction:: pow(batch<T, A> const &x, batch<T, A> const &y)
    :project: xsimd
 
+.. _rsqrt-function-reference:
+.. doxygenfunction:: rsqrt(batch<T, A> const &)
+   :project: xsimd
+
 .. _sqrt-function-reference:
 .. doxygenfunction:: sqrt(batch<T, A> const &)
    :project: xsimd
