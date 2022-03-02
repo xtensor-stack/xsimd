@@ -15,7 +15,7 @@
 #include "../config/xsimd_config.hpp"
 
 /**
- * @defgroup arch
+ * @defgroup arch Architecture description
  * */
 namespace xsimd
 {

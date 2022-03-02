@@ -848,9 +848,9 @@ namespace xsimd
     /**
      * @ingroup batch_complex
      *
-     * Computes the imaginary part of the batch \c z.
-     * @param z batch of complex or real values.
-     * @return the argument of \c z.
+     * Computes the imaginary part of the batch \c x.
+     * @param x batch of complex or real values.
+     * @return the argument of \c x.
      */
     template <class T, class A>
     inline real_batch_type_t<batch<T, A>> imag(batch<T, A> const& x) noexcept
@@ -1350,14 +1350,14 @@ namespace xsimd
     /**
      * @ingroup batch_complex
      *
-     * Computes the projection of the batch \c x.
-     * @param x batch of complex or real values.
-     * @return the projection of \c x.
+     * Computes the projection of the batch \c z.
+     * @param z batch of complex or real values.
+     * @return the projection of \c z.
      */
     template <class A, class T>
-    inline complex_batch_type_t<batch<T, A>> proj(batch<T, A> const& x) noexcept
+    inline complex_batch_type_t<batch<T, A>> proj(batch<T, A> const& z) noexcept
     {
-        return kernel::proj(x, A {});
+        return kernel::proj(z, A {});
     }
 
     /**
@@ -1368,9 +1368,9 @@ namespace xsimd
      * @return the argument of \c z.
      */
     template <class T, class A>
-    inline real_batch_type_t<batch<T, A>> real(batch<T, A> const& x) noexcept
+    inline real_batch_type_t<batch<T, A>> real(batch<T, A> const& z) noexcept
     {
-        return kernel::real<A>(x, A {});
+        return kernel::real<A>(z, A {});
     }
 
     /**
@@ -1609,8 +1609,8 @@ namespace xsimd
      *
      * Copy content of batch \c src to the buffer \c dst. The
      * memory needs to be aligned.
-     * @param mem the memory buffer to write to
-     * @param val the batch to copy
+     * @param dst the memory buffer to write to
+     * @param src the batch to copy
      */
     template <class To, class A = default_arch, class From>
     inline void store_as(To* dst, batch<From, A> const& src, aligned_mode) noexcept
@@ -1635,8 +1635,8 @@ namespace xsimd
      *
      * Copy content of batch \c src to the buffer \c dst. The
      * memory does not need to be aligned.
-     * @param mem the memory buffer to write to
-     * @param val the batch to copy
+     * @param dst the memory buffer to write to
+     * @param src the batch to copy
      */
     template <class To, class A = default_arch, class From>
     inline void store_as(To* dst, batch<From, A> const& src, unaligned_mode) noexcept

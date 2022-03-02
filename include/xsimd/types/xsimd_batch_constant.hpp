@@ -17,6 +17,14 @@
 
 namespace xsimd
 {
+    /**
+     * @brief batch of boolean constant
+     *
+     * Abstract representation of a batch of boolean constants.
+     *
+     * @tparam batch_type the type of the associated batch values.
+     * @tparam Values boolean constant represented by this batch
+     **/
     template <class batch_type, bool... Values>
     struct batch_bool_constant
     {
@@ -46,6 +54,14 @@ namespace xsimd
         }
     };
 
+    /**
+     * @brief batch of integral constants
+     *
+     * Abstract representation of a batch of integral constants.
+     *
+     * @tparam batch_type the type of the associated batch values.
+     * @tparam Values constants represented by this batch
+     **/
     template <class batch_type, typename batch_type::value_type... Values>
     struct batch_constant
     {
@@ -54,8 +70,14 @@ namespace xsimd
         using value_type = typename batch_type::value_type;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
+        /**
+         * @brief Generate a batch of @p batch_type from this @p batch_constant
+         */
         operator batch_type() const noexcept { return { Values... }; }
 
+        /**
+         * @brief Get the @p i th element of this @p batch_constant
+         */
         constexpr value_type get(size_t i) const noexcept
         {
             return get(i, std::array<value_type, size> { Values... });
@@ -85,6 +107,26 @@ namespace xsimd
 
     } // namespace detail
 
+    /**
+     * @brief Build a @c batch_constant out of a generator function
+     *
+     * @tparam batch_type type of the (non-constant) batch to build
+     * @tparam G type used to generate that batch. That type must have a static
+     * member @c get that's used to generate the batch constant. Conversely, the
+     * generated batch_constant has value `{G::get(0, batch_size), ... , G::get(batch_size - 1, batch_size)}`
+     *
+     * The following generator produces a batch of `(n - 1, 0, 1, ... n-2)`
+     *
+     * @code
+     * struct Rot
+     * {
+     *     static constexpr unsigned get(unsigned i, unsigned n)
+     *     {
+     *         return (i + n - 1) % n;
+     *     }
+     * };
+     * @endcode
+     */
     template <class batch_type, class G>
     inline constexpr auto make_batch_constant() noexcept -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
     {
