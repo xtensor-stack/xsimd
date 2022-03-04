@@ -8,7 +8,7 @@ Power functions
 ===============
 
 .. _pow-function-reference:
-.. doxygenfunction:: pow(batch<T, A> const &x, batch<T, A> const &y)
+.. doxygenfunction:: pow(batch<T, A> const &x, batch<T, A> const &y) noexcept
    :project: xsimd
 
 .. _rsqrt-function-reference:
