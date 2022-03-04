@@ -8,7 +8,7 @@ Basic functions
 ===============
 
 .. _abs-function-reference:
-.. doxygenfunction:: abs(batch<T, A> const &x)
+.. doxygenfunction:: abs(batch<T, A> const &x) noexcept
    :project: xsimd
 
 .. _fabs-function-reference:

@@ -15,6 +15,6 @@ Batch manipulation functions
 
 
 .. _select-function-reference:
-.. doxygenfunction:: select(batch_bool<T, A> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br)
+.. doxygenfunction:: select(batch_bool<T, A> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
    :project: xsimd
 
