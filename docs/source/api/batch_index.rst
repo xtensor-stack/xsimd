@@ -12,4 +12,5 @@ Batch types
    xsimd_batch
    xsimd_batch_bool
    xsimd_batch_complex
+   xsimd_batch_constant
    available_wrappers

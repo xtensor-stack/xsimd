@@ -2,6 +2,7 @@ PROJECT_NAME      = "xsimd"
 XML_OUTPUT        = xml
 INPUT             = ../include/xsimd/types/xsimd_api.hpp \
                     ../include/xsimd/types/xsimd_batch.hpp \
+                    ../include/xsimd/types/xsimd_batch_constant.hpp \
                     ../include/xsimd/config/xsimd_arch.hpp \
                     ../include/xsimd/config/xsimd_config.hpp \
                     ../include/xsimd/memory/xsimd_alignment.hpp \
