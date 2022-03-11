@@ -18,37 +18,3 @@ batch
    :members:
 
 
-Arithmetic operators
---------------------
-
-.. doxygengroup:: batch_arithmetic
-   :project: xsimd
-   :content-only:
-
-Comparison operators
---------------------
-
-.. doxygengroup:: batch_logical
-   :project: xsimd
-   :content-only:
-
-Bitwise operators
------------------
-
-.. doxygengroup:: batch_bitwise
-   :project: xsimd
-   :content-only:
-
-Reducers
---------
-
-.. doxygengroup:: batch_reducers
-   :project: xsimd
-   :content-only:
-
-Miscellaneous
--------------
-
-.. doxygengroup:: batch_miscellaneous
-   :project: xsimd
-   :content-only:
