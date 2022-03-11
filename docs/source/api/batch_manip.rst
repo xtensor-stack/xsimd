@@ -4,8 +4,8 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Batch manipulation functions
-============================
+Conditional expression
+======================
 
 .. toctree::
 
