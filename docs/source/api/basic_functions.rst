@@ -8,66 +8,66 @@ Basic functions
 ===============
 
 .. _abs-function-reference:
-.. doxygenfunction:: abs(batch<T, A> const &x) noexcept
+.. doxygenfunction:: xsimd::abs(batch<T, A> const&)
    :project: xsimd
 
 .. _fabs-function-reference:
-.. doxygenfunction:: fabs(const batch<T, A>& )
+.. doxygenfunction:: fabs
    :project: xsimd
 
 .. _fmod-function-reference:
-.. doxygenfunction:: fmod(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fmod
    :project: xsimd
 
 .. _remainder-func-ref:
-.. doxygenfunction:: remainder(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: remainder
    :project: xsimd
 
 .. _fma-function-reference:
-.. doxygenfunction:: fma(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fma
    :project: xsimd
 
 .. _fms-function-reference:
-.. doxygenfunction:: fms(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fms
    :project: xsimd
 
 .. _fnma-function-reference:
-.. doxygenfunction:: fnma(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fnma
    :project: xsimd
 
 .. _fnms-function-reference:
-.. doxygenfunction:: fnms(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fnms
    :project: xsimd
 
 .. _min-function-reference:
-.. doxygenfunction:: min(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: min
    :project: xsimd
 
 .. _max-function-reference:
-.. doxygenfunction:: max(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: max
    :project: xsimd
 
 .. _fmin-function-reference:
-.. doxygenfunction:: fmin(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fmin
    :project: xsimd
 
 .. _fmax-function-reference:
-.. doxygenfunction:: fmax(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fmax
    :project: xsimd
 
 .. _fdim-function-reference:
-.. doxygenfunction:: fdim(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: fdim
    :project: xsimd
 
 .. _sadd-function-reference:
-.. doxygenfunction:: sadd(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: sadd
    :project: xsimd
 
 .. _ssub-function-reference:
-.. doxygenfunction:: ssub(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: ssub
    :project: xsimd
 
 .. _clip-function-reference:
-.. doxygenfunction:: clip(const batch<T, A>&, const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: clip
    :project: xsimd
 
