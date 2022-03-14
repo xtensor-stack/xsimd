@@ -233,6 +233,10 @@ namespace detail
     template <class T>
     T safe_division(const T& lhs, const T& rhs)
     {
+        if (rhs == T(0))
+        {
+            return (std::numeric_limits<T>::max)();
+        }
         if (rhs < static_cast<T>(1) && lhs > rhs * (std::numeric_limits<T>::max)())
         {
             return (std::numeric_limits<T>::max)();

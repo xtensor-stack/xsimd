@@ -1895,8 +1895,12 @@ namespace xsimd
         inline batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
         {
             using batch_type = batch<T, A>;
-            auto negx = self < batch_type(0.);
-            batch_type z = exp(other * log(abs(self)));
+            const auto zero = batch_type(0.);
+            auto negx = self < zero;
+            auto iszero = self == zero;
+            auto adj_self = select(iszero, batch_type(2.718281828459045), abs(self));
+            batch_type z = exp(other * log(adj_self));
+            z = select(iszero, zero, z);
             z = select(is_odd(other) && negx, -z, z);
             auto invalid = negx && !(is_flint(other) || isinf(other));
             return select(invalid, constants::nan<batch_type>(), z);
