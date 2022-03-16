@@ -139,7 +139,7 @@ mechanism that allows you to easily write such a generic code:
         }
     }
 
-Here, the ``Tag`` template parameter can be :cpp:struct:`xsimd::aligned_mode` or :cpp:struct:`xsimd::unaligned_mode`. Assuming the existence
+Here, the ``Tag`` template parameter can be :cpp:class:`xsimd::aligned_mode` or :cpp:class:`xsimd::unaligned_mode`. Assuming the existence
 of a ``get_alignment_tag`` meta-function in the code, the previous code can be invoked this way:
 
 .. code::

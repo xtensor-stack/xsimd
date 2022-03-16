@@ -17,4 +17,3 @@ batch
    :project: xsimd
    :members:
 
-

@@ -8,15 +8,15 @@ Power functions
 ===============
 
 .. _pow-function-reference:
-.. doxygenfunction:: pow(batch<T, A> const &x, batch<T, A> const &y) noexcept
+.. doxygenfunction:: xsimd::pow(batch<T, A> const&, batch<T, A> const&)
    :project: xsimd
 
 .. _rsqrt-function-reference:
-.. doxygenfunction:: rsqrt(batch<T, A> const &)
+.. doxygenfunction:: rsqrt
    :project: xsimd
 
 .. _sqrt-function-reference:
-.. doxygenfunction:: sqrt(batch<T, A> const &)
+.. doxygenfunction:: sqrt
    :project: xsimd
 
 .. _cbrt-function-reference:

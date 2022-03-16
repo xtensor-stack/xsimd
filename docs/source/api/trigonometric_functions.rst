@@ -8,34 +8,34 @@ Trigonometric functions
 =======================
 
 .. _sin-function-reference:
-.. doxygenfunction:: sin(const batch<T, A>&)
+.. doxygenfunction:: sin
    :project: xsimd
 
 .. _cos-function-reference:
-.. doxygenfunction:: cos(const batch<T, A>&)
+.. doxygenfunction:: cos
    :project: xsimd
 
 .. _sincos-func-ref:
-.. doxygenfunction:: sincos(const batch<T, A>&, batch_type_t<B>&, batch_type_t<B>&)
+.. doxygenfunction:: sincos
    :project: xsimd
 
 .. _tan-function-reference:
-.. doxygenfunction:: tan(const batch<T, A>&)
+.. doxygenfunction:: tan
    :project: xsimd
 
 .. _asin-function-reference:
-.. doxygenfunction:: asin(const batch<T, A>&)
+.. doxygenfunction:: asin
    :project: xsimd
 
 .. _acos-function-reference:
-.. doxygenfunction:: acos(const batch<T, A>&)
+.. doxygenfunction:: acos
    :project: xsimd
 
 .. _atan-function-reference:
-.. doxygenfunction:: atan(const batch<T, A>&)
+.. doxygenfunction:: atan
    :project: xsimd
 
 .. _atan2-func-ref:
-.. doxygenfunction:: atan2(const batch<T, A>&, const batch<T, A>&)
+.. doxygenfunction:: atan2
    :project: xsimd
 

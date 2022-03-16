@@ -387,16 +387,23 @@ namespace xsimd
 namespace xsimd
 {
 
-    /**********************
-     * batch constructors *
-     **********************/
-
+    /**
+     * Create a batch with all element initialized to \c val.
+     *
+     * @param val broadcast value
+     */
     template <class T, class A>
     inline batch<T, A>::batch(T val) noexcept
         : types::simd_register<T, A>(kernel::broadcast<A>(val, A {}))
     {
     }
 
+    /**
+     * Create a batch with elements initialized from \c data.
+     * It is an error to have `data.size() != size.
+     *
+     * @param data sequence of elements
+     */
     template <class T, class A>
     inline batch<T, A>::batch(std::initializer_list<T> data) noexcept
         : batch(data.begin(), detail::make_index_sequence<size>())
@@ -404,12 +411,25 @@ namespace xsimd
         assert(data.size() == size && "consistent initialization");
     }
 
+    /**
+     * Converts a \c bool_batch to a \c batch where each element is
+     * set to 0xFF..FF (resp. 0x00..00) if the corresponding element is `true`
+     * (resp. `false`).
+     *
+     * @param b batch of bool
+     */
     template <class T, class A>
     inline batch<T, A>::batch(batch_bool<T, A> const& b) noexcept
         : batch(kernel::from_bool(b, A {}))
     {
     }
 
+    /**
+     * Wraps a compatible native simd register as a \c batch. This is generally not needed but
+     * becomes handy when doing architecture-specific operations.
+     *
+     * @param reg native simd register to wrap
+     */
     template <class T, class A>
     inline batch<T, A>::batch(register_type reg) noexcept
         : types::simd_register<T, A>({ reg })
