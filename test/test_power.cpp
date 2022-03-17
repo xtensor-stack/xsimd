@@ -14,6 +14,8 @@
 
 #include "test_utils.hpp"
 
+#include <cfenv>
+
 template <class B>
 class power_test : public testing::Test
 {
@@ -24,6 +26,7 @@ protected:
     using vector_type = std::vector<value_type>;
 
     size_t nb_input;
+    vector_type zlhs_input;
     vector_type lhs_input;
     vector_type rhs_input;
     vector_type expected;
@@ -32,13 +35,16 @@ protected:
     power_test()
     {
         nb_input = size * 10000;
+        zlhs_input.resize(nb_input);
         lhs_input.resize(nb_input);
         rhs_input.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
             lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
+            zlhs_input[i] = lhs_input[i] * (i % 2);
             rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
         }
+
         expected.resize(nb_input);
         res.resize(nb_input);
     }
@@ -60,6 +66,38 @@ protected:
             }
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("pow");
+        }
+        // pow zero
+        {
+            std::transform(zlhs_input.cbegin(), zlhs_input.cend(), rhs_input.cbegin(), expected.begin(),
+                           [](const value_type& l, const value_type& r)
+                           { return std::pow(l, r); });
+            batch_type zlhs_in, rhs_in, out;
+            for (size_t i = 0; i < nb_input; i += size)
+            {
+                detail::load_batch(zlhs_in, zlhs_input, i);
+                detail::load_batch(rhs_in, rhs_input, i);
+                out = pow(zlhs_in, rhs_in);
+                detail::store_batch(out, res, i);
+            }
+            size_t diff = detail::get_nb_diff(res, expected);
+            EXPECT_EQ(diff, 0) << print_function_name("pow");
+
+#ifdef __SSE__
+            // Test with FE_INVALID...
+            unsigned mask = _MM_GET_EXCEPTION_MASK();
+            _MM_SET_EXCEPTION_MASK(mask & ~_MM_MASK_INVALID);
+            for (size_t i = 0; i < nb_input; i += size)
+            {
+                detail::load_batch(zlhs_in, zlhs_input, i);
+                detail::load_batch(rhs_in, rhs_input, i);
+                out = pow(zlhs_in, rhs_in);
+                detail::store_batch(out, res, i);
+            }
+            _MM_SET_EXCEPTION_MASK(mask);
+            diff = detail::get_nb_diff(res, expected);
+            EXPECT_EQ(diff, 0) << print_function_name("pow");
+#endif
         }
         // ipow
         {
