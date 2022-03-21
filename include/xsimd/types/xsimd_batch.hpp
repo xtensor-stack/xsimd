@@ -74,38 +74,38 @@ namespace xsimd
         T get(std::size_t i) const noexcept;
 
         // comparison operators
-        batch_bool_type operator==(batch const& other) const noexcept;
-        batch_bool_type operator!=(batch const& other) const noexcept;
-        batch_bool_type operator>=(batch const& other) const noexcept;
-        batch_bool_type operator<=(batch const& other) const noexcept;
-        batch_bool_type operator>(batch const& other) const noexcept;
-        batch_bool_type operator<(batch const& other) const noexcept;
+        inline batch_bool_type operator==(batch const& other) const noexcept;
+        inline batch_bool_type operator!=(batch const& other) const noexcept;
+        inline batch_bool_type operator>=(batch const& other) const noexcept;
+        inline batch_bool_type operator<=(batch const& other) const noexcept;
+        inline batch_bool_type operator>(batch const& other) const noexcept;
+        inline batch_bool_type operator<(batch const& other) const noexcept;
 
         // Update operators
-        batch& operator+=(batch const& other) noexcept;
-        batch& operator-=(batch const& other) noexcept;
-        batch& operator*=(batch const& other) noexcept;
-        batch& operator/=(batch const& other) noexcept;
-        batch& operator%=(batch const& other) noexcept;
-        batch& operator&=(batch const& other) noexcept;
-        batch& operator|=(batch const& other) noexcept;
-        batch& operator^=(batch const& other) noexcept;
-        batch& operator>>=(int32_t other) noexcept;
-        batch& operator>>=(batch const& other) noexcept;
-        batch& operator<<=(int32_t other) noexcept;
-        batch& operator<<=(batch const& other) noexcept;
+        inline batch& operator+=(batch const& other) noexcept;
+        inline batch& operator-=(batch const& other) noexcept;
+        inline batch& operator*=(batch const& other) noexcept;
+        inline batch& operator/=(batch const& other) noexcept;
+        inline batch& operator%=(batch const& other) noexcept;
+        inline batch& operator&=(batch const& other) noexcept;
+        inline batch& operator|=(batch const& other) noexcept;
+        inline batch& operator^=(batch const& other) noexcept;
+        inline batch& operator>>=(int32_t other) noexcept;
+        inline batch& operator>>=(batch const& other) noexcept;
+        inline batch& operator<<=(int32_t other) noexcept;
+        inline batch& operator<<=(batch const& other) noexcept;
 
         // incr/decr operators
-        batch& operator++() noexcept;
-        batch& operator--() noexcept;
-        batch operator++(int) noexcept;
-        batch operator--(int) noexcept;
+        inline batch& operator++() noexcept;
+        inline batch& operator--() noexcept;
+        inline batch operator++(int) noexcept;
+        inline batch operator--(int) noexcept;
 
         // unary operators
-        batch_bool_type operator!() const noexcept;
-        batch operator~() const noexcept;
-        batch operator-() const noexcept;
-        batch operator+() const noexcept;
+        inline batch_bool_type operator!() const noexcept;
+        inline batch operator~() const noexcept;
+        inline batch operator-() const noexcept;
+        inline batch operator+() const noexcept;
 
         // arithmetic operators. They are defined as friend to enable automatic
         // conversion of parameters from scalar to batch. Inline implementation

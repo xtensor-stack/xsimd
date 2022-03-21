@@ -7,7 +7,7 @@ import subprocess
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if on_rtd:
-    subprocess.call('cd ..; doxygen', shell=True)
+    subprocess.check_call('cd ..; doxygen', shell=True)
 
 import sphinx_rtd_theme
 
