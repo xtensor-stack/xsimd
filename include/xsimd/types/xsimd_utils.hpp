@@ -32,6 +32,13 @@ namespace xsimd
     class batch_bool;
 
     /**************
+     * index      *
+     **************/
+
+    template <size_t I>
+    using index = std::integral_constant<size_t, I>;
+
+    /**************
      * as_integer *
      **************/
 

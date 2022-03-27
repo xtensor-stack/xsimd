@@ -872,6 +872,21 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_data_transfer
+     *
+     * Create a new batch equivalent to \c x but with element \c val set at position \c pos
+     * @param x batch
+     * @param val value to set
+     * @param pos index of the updated slot
+     * @return copy of \c x with position \c pos set to \c val
+     */
+    template <class T, class A, size_t I>
+    inline batch<T, A> insert(batch<T, A> const& x, T val, index<I> pos) noexcept
+    {
+        return kernel::insert<A>(x, val, pos, A {});
+    }
+
+    /**
      * @ingroup batch_logical
      *
      * Determines if the scalars in the given batch \c x represent an even integer value

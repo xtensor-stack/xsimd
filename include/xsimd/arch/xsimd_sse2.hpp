@@ -30,6 +30,10 @@ namespace xsimd
     {
         using namespace types;
 
+        // fwd
+        template <class A, class T, size_t I>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
+
         // abs
         template <class A>
         inline batch<double, A> abs(batch<double, A> const& self, requires_arch<sse2>) noexcept
@@ -726,6 +730,19 @@ namespace xsimd
         {
             return _mm_add_pd(_mm_unpacklo_pd(row[0], row[1]),
                               _mm_unpackhi_pd(row[0], row[1]));
+        }
+
+        // insert
+        template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<sse2>) noexcept
+        {
+            switch (sizeof(T))
+            {
+            case 2:
+                return _mm_insert_epi16(self, val, I);
+            default:
+                return insert(self, val, pos, generic {});
+            }
         }
 
         // isnan
