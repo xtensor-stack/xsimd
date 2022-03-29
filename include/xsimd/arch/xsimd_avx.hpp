@@ -25,6 +25,10 @@ namespace xsimd
     {
         using namespace types;
 
+        // fwd
+        template <class A, class T, size_t I>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
+
         namespace detail
         {
             inline void split_avx(__m256i val, __m128i& low, __m128i& high) noexcept
@@ -678,6 +682,25 @@ namespace xsimd
             // tmp1 = (a2+a3, b2+b3, c2+c3, d2+d3)
             tmp1 = _mm256_permute2f128_pd(tmp0, tmp1, 0x21);
             return _mm256_add_pd(tmp1, tmp2);
+        }
+
+        // insert
+        template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<avx>) noexcept
+        {
+            switch (sizeof(T))
+            {
+#ifndef _WIN32
+            case 1:
+                return _mm256_insert_epi8(self, val, I);
+            case 2:
+                return _mm256_insert_epi16(self, val, I);
+            case 4:
+                return _mm256_insert_epi32(self, val, I);
+#endif
+            default:
+                return insert(self, val, pos, generic {});
+            }
         }
 
         // isnan

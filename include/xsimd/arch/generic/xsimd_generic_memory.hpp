@@ -16,6 +16,7 @@
 #include <complex>
 #include <stdexcept>
 
+#include "../../types/xsimd_batch_constant.hpp"
 #include "./xsimd_generic_details.hpp"
 
 namespace xsimd
@@ -52,6 +53,21 @@ namespace xsimd
                 }
             }
             return batch<T, A>::load_aligned(concat_buffer);
+        }
+
+        // insert
+        template <class A, class T, size_t I>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept
+        {
+            struct index_mask
+            {
+                static constexpr bool get(size_t index, size_t /* size*/)
+                {
+                    return index != I;
+                }
+            };
+            batch<T, A> tmp(val);
+            return select(make_batch_bool_constant<batch<T, A>, index_mask>(), self, tmp);
         }
 
         // load_aligned

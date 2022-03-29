@@ -103,6 +103,25 @@ namespace xsimd
             return _mm_floor_pd(self);
         }
 
+        // insert
+        template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<sse4_1>) noexcept
+        {
+            switch (sizeof(T))
+            {
+            case 1:
+                return _mm_insert_epi8(self, val, I);
+            case 4:
+                return _mm_insert_epi32(self, val, I);
+#ifndef _WIN32
+            case 8:
+                return _mm_insert_epi64(self, val, I);
+#endif
+            default:
+                return insert(self, val, pos, ssse3 {});
+            }
+        }
+
         // max
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept

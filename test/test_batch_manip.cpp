@@ -85,6 +85,58 @@ struct as_index<xsimd::batch<std::complex<T>, A>> : as_index<xsimd::batch<T, A>>
 };
 
 template <class B>
+class insert_test : public testing::Test
+{
+protected:
+    using batch_type = B;
+    using value_type = typename B::value_type;
+    static constexpr size_t size = B::size;
+
+    insert_test()
+    {
+        std::cout << "insert tests" << std::endl;
+    }
+
+    void insert_first()
+    {
+        value_type fill_value = 0;
+        value_type sentinel_value = 1;
+        batch_type v(fill_value);
+        batch_type w = insert(v, sentinel_value, ::xsimd::index<0>());
+        std::array<value_type, batch_type::size> data;
+        w.store_unaligned(data.data());
+        EXPECT_SCALAR_EQ(data.front(), sentinel_value);
+        for (size_t i = 1; i < batch_type::size; ++i)
+            EXPECT_SCALAR_EQ(data[i], fill_value);
+    }
+
+    void insert_last()
+    {
+        value_type fill_value = 0;
+        value_type sentinel_value = 1;
+        batch_type v(fill_value);
+        batch_type w = insert(v, sentinel_value, ::xsimd::index<batch_type::size - 1>());
+        std::array<value_type, batch_type::size> data;
+        w.store_unaligned(data.data());
+        for (size_t i = 0; i < batch_type::size - 1; ++i)
+            EXPECT_SCALAR_EQ(data[i], fill_value);
+        EXPECT_SCALAR_EQ(data.back(), sentinel_value);
+    }
+};
+
+TYPED_TEST_SUITE(insert_test, batch_types, simd_test_names);
+
+TYPED_TEST(insert_test, insert_first)
+{
+    this->insert_first();
+}
+
+TYPED_TEST(insert_test, insert_last)
+{
+    this->insert_last();
+}
+
+template <class B>
 class swizzle_test : public testing::Test
 {
 protected:

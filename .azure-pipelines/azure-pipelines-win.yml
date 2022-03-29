@@ -3,7 +3,7 @@ jobs:
   # Configure, build, install, and test job
   - job: 'Windows_clangcl'
     pool:
-      vmImage: 'vs2017-win2016'
+        vmImage: 'windows-latest'
     timeoutInMinutes: 360
     steps:
 
