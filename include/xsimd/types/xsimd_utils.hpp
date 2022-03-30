@@ -275,7 +275,7 @@ namespace xsimd
         using make_int_sequence = make_integer_sequence<int, N>;
 
         template <typename... Ts>
-        using int_sequence_for = make_int_sequence<sizeof...(Ts)>;
+        using int_sequence_for = make_int_sequence<(int)sizeof...(Ts)>;
 
     }
 
