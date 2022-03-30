@@ -1898,7 +1898,8 @@ namespace xsimd
             const auto zero = batch_type(0.);
             auto negx = self < zero;
             auto iszero = self == zero;
-            auto adj_self = select(iszero, batch_type(2.718281828459045), abs(self));
+            constexpr T e = static_cast<T>(2.718281828459045);
+            auto adj_self = select(iszero, batch_type(e), abs(self));
             batch_type z = exp(other * log(adj_self));
             z = select(iszero, zero, z);
             z = select(is_odd(other) && negx, -z, z);
