@@ -283,7 +283,7 @@ namespace detail
                 return utils::isinf(rhs) && (lhs * rhs > 0) /* same sign */;
             }
 
-            T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
+            T relative_precision = 8192 * std::numeric_limits<T>::epsilon();
             T absolute_zero_prox = 2048 * std::numeric_limits<T>::epsilon();
 
             if (max(uabs(lhs), uabs(rhs)) < T(1e-3))
