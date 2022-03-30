@@ -107,12 +107,24 @@
 #ifdef __FMA__
 
 #if defined(__SSE__) && !defined(__AVX__)
+#ifndef XSIMD_WITH_FMA3_SSE // Leave the opportunity to manually disable it, see #643
 #define XSIMD_WITH_FMA3_SSE 1
+#endif
 #else
+
+#if XSIMD_WITH_FMA3_SSE
+#error "Manually set XSIMD_WITH_FMA3_SSE is incompatible with current compiler flags"
+#endif
+
 #define XSIMD_WITH_FMA3_SSE 0
 #endif
 
 #else
+
+#if XSIMD_WITH_FMA3_SSE
+#error "Manually set XSIMD_WITH_FMA3_SSE is incompatible with current compiler flags"
+#endif
+
 #define XSIMD_WITH_FMA3_SSE 0
 #endif
 
@@ -124,18 +136,40 @@
 #ifdef __FMA__
 
 #if defined(__AVX__)
+#ifndef XSIMD_WITH_FMA3_AVX // Leave the opportunity to manually disable it, see #643
 #define XSIMD_WITH_FMA3_AVX 1
+#endif
 #else
+
+#if XSIMD_WITH_FMA3_AVX
+#error "Manually set XSIMD_WITH_FMA3_AVX is incompatible with current compiler flags"
+#endif
+
 #define XSIMD_WITH_FMA3_AVX 0
 #endif
 
 #if defined(__AVX2__)
+#ifndef XSIMD_WITH_FMA3_AVX2 // Leave the opportunity to manually disable it, see #643
 #define XSIMD_WITH_FMA3_AVX2 1
+#endif
 #else
+
+#if XSIMD_WITH_FMA3_AVX2
+#error "Manually set XSIMD_WITH_FMA3_AVX2 is incompatible with current compiler flags"
+#endif
+
 #define XSIMD_WITH_FMA3_AVX2 0
 #endif
 
 #else
+
+#if XSIMD_WITH_FMA3_AVX
+#error "Manually set XSIMD_WITH_FMA3_AVX is incompatible with current compiler flags"
+#endif
+
+#if XSIMD_WITH_FMA3_AVX2
+#error "Manually set XSIMD_WITH_FMA3_AVX2 is incompatible with current compiler flags"
+#endif
 
 #define XSIMD_WITH_FMA3_AVX 0
 #define XSIMD_WITH_FMA3_AVX2 0
