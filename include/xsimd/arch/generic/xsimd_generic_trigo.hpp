@@ -14,6 +14,8 @@
 
 #include "./xsimd_generic_details.hpp"
 
+#include <array>
+
 namespace xsimd
 {
 
