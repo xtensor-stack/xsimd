@@ -42,11 +42,12 @@ OPTION(CROSS_COMPILE_ARM "cross compile for ARM targets" OFF)
 # Note: to compile on ARM (or cross compile), you may need to add the following:
 # -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
 set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
-set(ARM_ARCH_DIRECTORY "arm-linux-gnueabi" CACHE STRING "ARM arch header dir")
-set(ARM_GCC_VER "4.7.3" CACHE STRING "ARM GCC header dir")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    if (CROSS_COMPILE_ARM)
+    if (ANDROID)
+        # Nothing to do here, we assume the cmake Android NDK toolchain sets the
+        # correct options for arm and neon.
+    elseif (CROSS_COMPILE_ARM)
         # We're cross-compiling with clang++ on Azure Pipelines, this is all pretty specific and just for testing
         set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
         set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
@@ -56,6 +57,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set(CMAKE_C_COMPILER_TARGET arm-linux-gnueabi)
         set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabi)
 
+        set(ARM_ARCH_DIRECTORY "arm-linux-gnueabi" CACHE STRING "ARM arch header dir")
+        set(ARM_GCC_VER "4.7.3" CACHE STRING "ARM GCC header dir")
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/${ARM_ARCH_DIRECTORY}/)
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/)
         include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/)
