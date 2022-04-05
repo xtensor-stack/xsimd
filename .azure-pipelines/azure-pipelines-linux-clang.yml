@@ -14,35 +14,41 @@ jobs:
           arm_arch_target: 'armv8-a'
         clang_6:
           llvm_version: '6.0'
-        clang_7:
-          llvm_version: '7'
         clang_8:
           llvm_version: '8'
-        clang_9:
-          llvm_version: '9'
-          avx: 1
         clang_10_avx512:
           llvm_version: '10'
           avx512: 1
+        clang_12:
+          llvm_version: '12'
+          avx: 1
+        clang_14:
+          llvm_version: '14'
+          avx: 1
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     variables:
       CC: clang-$(llvm_version)
       CXX: clang++-$(llvm_version)
     timeoutInMinutes: 30
     steps:
       - script: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test || exit 1
           LLVM_VERSION=$(llvm_version)
-          get -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo add-apt-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-$LLVM_VERSION main"
-          sudo apt-get update
-          sudo apt-get --no-install-suggests --no-install-recommends install clang-$(llvm_version)
-          if [[ $(cross_compile) == 1 ]]; then
-            sudo apt-get --no-install-suggests --no-install-recommends install g++-6-arm-linux-gnueabi
-            sudo apt-get --no-install-suggests --no-install-recommends install g++-6-multilib gcc-6-multilib
-            sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-arm
-          fi
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - || exit 1
+          if [[ $LLVM_VERSION -ge 13 ]]; then
+            sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-$LLVM_VERSION main" || exit 1
+          else
+            sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal main" || exit 1
+          fi || exit 1
+          sudo apt-get update || exit 1
+          sudo apt-get --no-install-suggests --no-install-recommends install clang-$(llvm_version) || exit 1
+          sudo apt-get --no-install-suggests --no-install-recommends install libc++-dev || exit 1
+          if [[ ${cross_compile} == 1 ]]; then
+            sudo apt-get --no-install-suggests --no-install-recommends install g++-6-arm-linux-gnueabi || exit 1
+            sudo apt-get --no-install-suggests --no-install-recommends install g++-6-multilib gcc-6-multilib || exit 1
+            sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-arm || exit 1
+          fi || exit 1
         displayName: Install build toolchain
 
       - bash: echo "##vso[task.prependpath]$CONDA/bin"
