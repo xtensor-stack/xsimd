@@ -84,12 +84,12 @@ namespace xsimd
         template <class A>
         inline batch_bool<float, A> isfinite(batch<float, A> const& self, requires_arch<generic>) noexcept
         {
-            return (self - self) == 0;
+            return (self - self) == 0.f;
         }
         template <class A>
         inline batch_bool<double, A> isfinite(batch<double, A> const& self, requires_arch<generic>) noexcept
         {
-            return (self - self) == 0;
+            return (self - self) == 0.;
         }
 
         // isnan

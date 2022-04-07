@@ -21,13 +21,13 @@ namespace detail
     {
         static void test_isfinite()
         {
-            T input(1.);
+            T input(1);
             EXPECT_TRUE(xsimd::all(xsimd::isfinite(input))) << print_function_name("isfinite");
         }
 
         static void test_isinf()
         {
-            T input(1.);
+            T input(1);
             EXPECT_FALSE(xsimd::any(xsimd::isinf(input))) << print_function_name("isfinite");
         }
     };

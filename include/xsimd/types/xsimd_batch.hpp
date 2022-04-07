@@ -217,6 +217,9 @@ namespace xsimd
         batch_bool(register_type reg) noexcept;
         batch_bool(std::initializer_list<bool> data) noexcept;
 
+        template <class Tp>
+        batch_bool(Tp const*) = delete;
+
         // memory operators
         void store_aligned(bool* mem) const noexcept;
         void store_unaligned(bool* mem) const noexcept;
