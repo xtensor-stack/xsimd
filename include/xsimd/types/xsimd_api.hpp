@@ -1752,7 +1752,8 @@ namespace xsimd
      * @return swizzled batch
      */
     template <class T, class A, class Vt, Vt... Values>
-    inline batch<T, A> swizzle(batch<T, A> const& x, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    inline typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+    swizzle(batch<T, A> const& x, batch_constant<batch<Vt, A>, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
         return kernel::swizzle<A>(x, mask, A {});
