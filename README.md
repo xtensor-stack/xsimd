@@ -31,10 +31,10 @@ The following SIMD instruction set extensions are supported:
 
 Architecture | Instruction set extensions
 -------------|-----------------------------------------------------
-x86          | SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, FMA3, AVX2
-x86          | AVX512 (gcc7 and higher)
-x86 AMD      | same as above + SSE4A, FMA4, XOP
-ARM          | ARMv7, ARMv8
+x86          | SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2, FMA3+SSE, FMA3+AVX, FMA3+AVX2
+x86          | AVX512BW, AVX512CD, AVX512DQ, AVX512F (gcc7 and higher)
+x86 AMD      | FMA4
+ARM          | NEON, NEON64
 
 ## Installation
 
