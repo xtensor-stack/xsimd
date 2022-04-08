@@ -2315,14 +2315,6 @@ namespace xsimd
             store_aligned(data.data(), self, A());
             return set(batch<T, A>(), A(), data[idx]...);
         }
-
-        template <class A, class T, class I, I... idx>
-        inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& self,
-                                                 batch_constant<batch<I, A>, idx...> mask,
-                                                 requires_arch<neon>) noexcept
-        {
-            return { swizzle(self.real(), mask), swizzle(self.imag(), mask) };
-        }
     }
 }
 
