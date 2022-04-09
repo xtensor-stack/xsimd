@@ -77,6 +77,8 @@ namespace xsimd
     template <class T, class A>
     inline batch<T, A> nearbyint(batch<T, A> const& self) noexcept;
     template <class T, class A>
+    inline batch<as_integer_t<T>, A> nearbyint_as_int(const batch<T, A>& x) noexcept;
+    template <class T, class A>
     inline batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&) noexcept;
     template <class T, class A>
     inline batch<std::complex<T>, A> select(batch_bool<T, A> const&, batch<std::complex<T>, A> const&, batch<std::complex<T>, A> const&) noexcept;

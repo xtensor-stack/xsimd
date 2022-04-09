@@ -76,6 +76,14 @@ namespace xsimd
             return _mm512_xor_pd(self, other);
         }
 
+        // nearbyint_as_int
+        template <class A>
+        inline batch<int64_t, A> nearbyint_as_int(batch<double, A> const& self,
+                                                  requires_arch<avx512dq>) noexcept
+        {
+            return _mm512_cvtps_epi64(self);
+        }
+
         // convert
         namespace detail
         {
