@@ -1255,13 +1255,28 @@ namespace xsimd
      *
      * Rounds the scalars in \c x to integer values (in floating point format), using
      * the current rounding mode.
-     * @param x batch of flaoting point values.
+     * @param x batch of floating point values.
      * @return the batch of nearest integer values.
      */
     template <class T, class A>
     inline batch<T, A> nearbyint(batch<T, A> const& x) noexcept
     {
         return kernel::nearbyint<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_rounding
+     *
+     * Rounds the scalars in \c x to integer values (in integer format) using
+     * the current rounding mode.
+     * @param x batch of floating point values.
+     * @return the batch of nearest integer values.
+     */
+    template <class T, class A>
+    inline batch<as_integer_t<T>, A>
+    nearbyint_as_int(batch<T, A> const& x) noexcept
+    {
+        return kernel::nearbyint_as_int(x, A {});
     }
 
     /**

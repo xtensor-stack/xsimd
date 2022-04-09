@@ -934,6 +934,14 @@ namespace xsimd
             return _mm_mul_pd(self, other);
         }
 
+        // nearbyint_as_int
+        template <class A>
+        inline batch<int32_t, A> nearbyint_as_int(batch<float, A> const& self,
+                                                  requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtps_epi32(self);
+        }
+
         // neg
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> neg(batch<T, A> const& self, requires_arch<sse2>) noexcept

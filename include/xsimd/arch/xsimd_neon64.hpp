@@ -592,6 +592,20 @@ namespace xsimd
             return vabsq_f64(rhs);
         }
 
+        template <class A>
+        inline batch<int32_t, A> nearbyint_as_int(batch<float, A> const& self,
+                                                  requires_arch<neon64>) noexcept
+        {
+            return vcvtnq_s32_f32(self);
+        }
+
+        template <class A>
+        inline batch<int64_t, A> nearbyint_as_int(batch<double, A> const& self,
+                                                  requires_arch<neon64>) noexcept
+        {
+            return vcvtnq_s64_f64(self);
+        }
+
         /**************
          * reciprocal *
          **************/

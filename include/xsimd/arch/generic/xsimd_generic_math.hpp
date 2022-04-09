@@ -1819,6 +1819,21 @@ namespace xsimd
             return detail::nearbyintf(self);
         }
 
+        // nearbyint_as_int
+        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> nearbyint_as_int(batch<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            return self;
+        }
+
+        // nearbyint_as_int
+        template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+        inline batch<as_integer_t<T>, A>
+        nearbyint_as_int(batch<T, A> const& x, requires_arch<generic>) noexcept
+        {
+            return to_int(round(x));
+        }
+
         // nextafter
         namespace detail
         {

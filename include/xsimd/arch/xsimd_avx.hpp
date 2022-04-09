@@ -881,6 +881,14 @@ namespace xsimd
             return _mm256_round_pd(self, _MM_FROUND_TO_NEAREST_INT);
         }
 
+        // nearbyint_as_int
+        template <class A>
+        inline batch<int32_t, A> nearbyint_as_int(batch<float, A> const& self,
+                                                  requires_arch<avx>) noexcept
+        {
+            return _mm256_cvtps_epi32(self);
+        }
+
         // neg
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> neg(batch<T, A> const& self, requires_arch<avx>) noexcept
