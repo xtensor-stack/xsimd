@@ -690,7 +690,7 @@ namespace xsimd
         {
             switch (sizeof(T))
             {
-#ifndef _WIN32
+#if !defined(_MSC_VER) || _MSC_VER > 1900
             case 1:
                 return _mm256_insert_epi8(self, val, I);
             case 2:
