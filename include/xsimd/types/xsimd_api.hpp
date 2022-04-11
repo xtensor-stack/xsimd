@@ -1376,6 +1376,21 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_arithmetic
+     *
+     * Computes the approximate reciprocal of the batch \c x.
+     * The maximum relative error for this approximation is
+     * less than 1.5*2^-12.
+     * @param x batch of floating point numbers.
+     * @return the reciprocal.
+     */
+    template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+    inline batch<T, A> reciprocal(batch<T, A> const& x) noexcept
+    {
+        return kernel::reciprocal(x, A {});
+    }
+
+    /**
      * @ingroup batch_complex
      *
      * Computes the real part of the batch \c z.

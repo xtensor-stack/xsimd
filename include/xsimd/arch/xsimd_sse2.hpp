@@ -986,6 +986,14 @@ namespace xsimd
             return _mm_cmpneq_pd(self, other);
         }
 
+        // reciprocal
+        template <class A>
+        inline batch<float, A> reciprocal(batch<float, A> const& self,
+                                          kernel::requires_arch<sse2>)
+        {
+            return _mm_rcp_ps(self);
+        }
+
         // rsqrt
         template <class A>
         inline batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<sse2>) noexcept

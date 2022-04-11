@@ -737,7 +737,7 @@ namespace xsimd
         {
             // from stackoverflow & https://projectne10.github.io/Ne10/doc/NE10__divc_8neon_8c_source.html
             // get an initial estimate of 1/b.
-            float32x4_t reciprocal = vrecpeq_f32(rhs);
+            float32x4_t reciprocal = reciprocal(rhs);
 
             // use a couple Newton-Raphson steps to refine the estimate.  Depending on your
             // application's accuracy requirements, you may be able to get away with only
@@ -1378,6 +1378,18 @@ namespace xsimd
             tmp2 = vpadd_f32(tmp2, tmp3);
             // return = (a0..3, b0..3, c0..3, d0..3)
             return vcombine_f32(tmp1, tmp2);
+        }
+
+        /**************
+         * reciprocal *
+         **************/
+
+        template <class A>
+        inline batch<float, A>
+        reciprocal(const batch<float, A>& x,
+                   kernel::requires_arch<neon>) noexcept
+        {
+            return vrecpeq_f32(x);
         }
 
         /**********

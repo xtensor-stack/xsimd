@@ -1157,6 +1157,23 @@ namespace xsimd
             return register_type(self.data ^ other.data);
         }
 
+        // reciprocal
+        template <class A>
+        inline batch<float, A>
+        reciprocal(batch<float, A> const& self,
+                   kernel::requires_arch<avx512f>) noexcept
+        {
+            return _mm512_rcp14_ps(self);
+        }
+
+        template <class A>
+        inline batch<double, A>
+        reciprocal(batch<double, A> const& self,
+                   kernel::requires_arch<avx512f>) noexcept
+        {
+            return _mm512_rcp14_pd(self);
+        }
+
         // rsqrt
         template <class A>
         inline batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<avx512f>) noexcept

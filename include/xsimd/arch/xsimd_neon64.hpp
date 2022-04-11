@@ -592,6 +592,18 @@ namespace xsimd
             return vabsq_f64(rhs);
         }
 
+        /**************
+         * reciprocal *
+         **************/
+
+        template <class A>
+        inline batch<double, A>
+        reciprocal(const batch<double, A>& x,
+                   kernel::requires_arch<neon64>) noexcept
+        {
+            return vrecpeq_f64(x);
+        }
+
         /********
          * rsqrt *
          ********/

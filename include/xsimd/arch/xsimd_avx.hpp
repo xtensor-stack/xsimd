@@ -931,6 +931,14 @@ namespace xsimd
             return ~(self == other);
         }
 
+        // reciprocal
+        template <class A>
+        inline batch<float, A> reciprocal(batch<float, A> const& self,
+                                          kernel::requires_arch<avx>) noexcept
+        {
+            return _mm256_rcp_ps(self);
+        }
+
         // rsqrt
         template <class A>
         inline batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<avx>) noexcept

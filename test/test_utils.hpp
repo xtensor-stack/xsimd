@@ -520,6 +520,34 @@ namespace detail
         return get_nb_diff(lhs.begin(), lhs.end(), rhs.begin());
     }
 
+    template <class T, class A>
+    size_t get_nb_diff_near(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs, float precision)
+    {
+        size_t i = 0;
+        for (size_t i = 0; i < lhs.size(); i++)
+        {
+            if (std::abs(lhs[i] - rhs[i]) > precision)
+            {
+                i++;
+            }
+        }
+        return i;
+    }
+
+    template <class T, size_t N>
+    size_t get_nb_diff_near(const std::array<T, N>& lhs, const std::array<T, N>& rhs, float precision)
+    {
+        size_t i = 0;
+        for (size_t i = 0; i < lhs.size(); i++)
+        {
+            if (std::abs(lhs[i] - rhs[i]) > precision)
+            {
+                i++;
+            }
+        }
+        return i;
+    }
+
     template <class B, class S>
     void load_batch(B& b, const S& src, size_t i = 0)
     {
