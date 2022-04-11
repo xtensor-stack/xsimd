@@ -1393,6 +1393,40 @@ namespace xsimd
         }
 
         /**********
+         * insert *
+         **********/
+
+        template <class A, class T, size_t I, detail::enable_integral_t<T> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<neon>) noexcept
+        {
+            switch (sizeof(T))
+            {
+            case 1:
+                return vsetq_lane_u8(val, self, I);
+            case 2:
+                return vsetq_lane_u16(val, self, I);
+            case 4:
+                return vsetq_lane_u32(val, self, I);
+            case 8:
+                return vsetq_lane_u64(val, self, I);
+            default:
+                return insert(self, val, pos, generic {});
+            }
+        }
+
+        template <class A, size_t I>
+        inline batch<float, A> insert(batch<float, A> const& self, float val, index<I> pos, requires_arch<neon>) noexcept
+        {
+            return vset_lane_f32(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<double, A> insert(batch<double, A> const& self, double val, index<I> pos, requires_arch<neon>) noexcept
+        {
+            return vset_lane_f64(val, self, I);
+        }
+
+        /**********
          * select *
          **********/
 
