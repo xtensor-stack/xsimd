@@ -126,7 +126,7 @@ namespace xsimd
 
                 // implement masked store!
                 // xsimd::store_aligned(result, output + base_index, active);
-                int_batch_type prev_data(output + base_index);
+                int_batch_type prev_data = int_batch_type::load_unaligned(output + base_index);
                 select(bool_cast(active), result, prev_data)
                     .store_aligned(output + base_index);
             }
