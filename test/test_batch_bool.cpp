@@ -221,6 +221,29 @@ protected:
                 EXPECT_FALSE(all_res) << print_function_name("all (almost_all_true)");
             }
         }
+        // none
+        {
+            auto none_check_false = (batch_lhs() == batch_rhs());
+            bool none_res_false = xsimd::none(none_check_false);
+            EXPECT_FALSE(none_res_false) << print_function_name("none (false)");
+            auto none_check_true = (batch_lhs() != batch_lhs());
+            bool none_res_true = xsimd::none(none_check_true);
+            EXPECT_TRUE(none_res_true) << print_function_name("none (true)");
+
+            for (const auto& vec : bool_g.almost_all_false())
+            {
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
+                bool none_res = xsimd::none(b);
+                EXPECT_FALSE(none_res) << print_function_name("none (almost_all_false)");
+            }
+
+            for (const auto& vec : bool_g.almost_all_true())
+            {
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
+                bool none_res = xsimd::none(b);
+                EXPECT_FALSE(none_res) << print_function_name("none (almost_all_true)");
+            }
+        }
     }
 
     void test_logical_operations() const
