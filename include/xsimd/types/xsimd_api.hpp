@@ -1938,6 +1938,20 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_bool_reducers
+     *
+     * Return true if none of the boolean values in the batch is true,
+     * false otherwise.
+     * @param x the batch to reduce.
+     * @return a boolean scalar.
+     */
+    template <class T, class A>
+    inline bool none(batch_bool<T, A> const& x) noexcept
+    {
+        return !xsimd::any(x);
+    }
+
+    /**
      * @ingroup batch_miscellaneous
      *
      * Dump the content of batch \c x to stream \c o
