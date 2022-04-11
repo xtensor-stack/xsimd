@@ -1925,6 +1925,15 @@ namespace xsimd
             return select(absa == ze, cplx_batch(ze), cplx_batch(r * cos(theta), r * sin(theta)));
         }
 
+        // reciprocal
+        template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+        inline batch<T, A> reciprocal(batch<T, A> const& self,
+                                      requires_arch<generic>) noexcept
+        {
+            using batch_type = batch<T, A>;
+            return div(batch_type(1), self);
+        }
+
         // remainder
         template <class A>
         inline batch<float, A> remainder(batch<float, A> const& self, batch<float, A> const& other, requires_arch<generic>) noexcept
