@@ -739,6 +739,41 @@ namespace xsimd
             return select(self, batch<T, A>(1), batch<T, A>(0));
         }
 
+        // gather
+        template <class A, class T,
+                  typename std::enable_if<std::is_same<uint32_t, T>::value || std::is_same<int32_t, T>::value,
+                                          void>::type>
+        inline batch<T, A> gather(T const* src, batch<int32_t, A> const& index,
+                                  kernel::requires_arch<avx512f>) noexcept
+        {
+            return _mm512_i32gather_epi32(index, src, 1);
+        }
+
+        template <class A, class T,
+                  typename std::enable_if<std::is_same<uint64_t, T>::value || std::is_same<int64_t, T>::value,
+                                          void>::type>
+        inline batch<T, A> gather(T const* src, batch<int64_t, A> const& index,
+                                  kernel::requires_arch<avx512f>) noexcept
+        {
+            return _mm512_i64gather_epi64(index, src, 1);
+        }
+
+        template <class A>
+        inline batch<float, A> gather(float const* src,
+                                      batch<int, A> const& index,
+                                      kernel::requires_arch<avx512f>) noexcept
+        {
+            return _mm512_i32gather_ps(index, src, 1);
+        }
+
+        template <class A>
+        inline batch<double, A>
+        gather(double const* src, batch<int64_t, A> const& index,
+               kernel::requires_arch<avx512f>) noexcept
+        {
+            return _mm512_i64gather_pd(index, src, 1);
+        }
+
         // ge
         template <class A>
         inline batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
@@ -1221,6 +1256,43 @@ namespace xsimd
                 const auto mindiff = min(diffmax, other);
                 return self + mindiff;
             }
+        }
+
+        // scatter
+        template <class A, class T,
+                  typename std::enable_if<std::is_same<uint32_t, T>::value || std::is_same<int32_t, T>::value,
+                                          void>::type>
+        inline void scatter(batch<T, A> const& src, T* dst,
+                            batch<int32_t, A> const& index,
+                            kernel::requires_arch<avx512f>) noexcept
+        {
+            _mm512_i32scatter_epi32(dst, index, src, 1);
+        }
+
+        template <class T, class A,
+                  typename std::enable_if<std::is_same<uint64_t, T>::value || std::is_same<int64_t, T>::value,
+                                          void>::type>
+        inline void scatter(batch<T, A> const& src, T* dst,
+                            batch<int64_t, A> const& index,
+                            kernel::requires_arch<avx512f>) noexcept
+        {
+            _mm512_i64scatter_epi64(dst, index, src, 1);
+        }
+
+        template <class A>
+        inline void scatter(batch<float, A> const& src, float* dst,
+                            batch<int32_t, A> const& index,
+                            kernel::requires_arch<avx512f>) noexcept
+        {
+            _mm512_i32scatter_ps(dst, index, src, 1);
+        }
+
+        template <class A>
+        inline void scatter(batch<double, A> const& src, double* dst,
+                            batch<int64_t, A> const& index,
+                            kernel::requires_arch<avx512f>) noexcept
+        {
+            _mm512_i64scatter_pd(dst, index, src, 1);
         }
 
         // select

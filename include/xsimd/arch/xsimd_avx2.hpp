@@ -312,6 +312,45 @@ namespace xsimd
             }
         }
 
+        // gather
+        template <class A, class T,
+                  typename std::enable_if<std::is_same<uint32_t, T>::value || std::is_same<int32_t, T>::value,
+                                          void>::type>
+        inline batch<T, A> gather(T const* src, batch<int32_t, A> const& index,
+                                  kernel::requires_arch<avx2>) noexcept
+        {
+            // scatter for this one is AVX512F+AVX512VL
+            return _mm256_i32gather_epi32(src, index, 1);
+        }
+
+        template <class A, class T,
+                  typename std::enable_if<std::is_same<uint64_t, T>::value || std::is_same<int64_t, T>::value,
+                                          void>::type>
+        inline batch<T, A> gather(T const* src, batch<int64_t, A> const& index,
+                                  kernel::requires_arch<avx2>) noexcept
+        {
+            // scatter for this one is AVX512F+AVX512VL
+            return _mm256_i64gather_epi64(src, index, 1);
+        }
+
+        template <class A>
+        inline batch<float, A> gather(float const* src,
+                                      batch<int32_t, A> const& index,
+                                      kernel::requires_arch<avx2>) noexcept
+        {
+            // scatter for this one is AVX512F+AVX512VL
+            return _mm256_i32gather_ps(src, index, 1);
+        }
+
+        template <class A>
+        inline batch<double, A> gather(double const* src,
+                                       batch<int64_t, A> const& index,
+                                       kernel::requires_arch<avx2>) noexcept
+        {
+            // scatter for this one is AVX512F+AVX512VL
+            return _mm256_i64gather_pd(src, index, 1);
+        }
+
         // lt
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept

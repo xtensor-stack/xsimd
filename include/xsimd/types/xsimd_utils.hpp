@@ -277,6 +277,18 @@ namespace xsimd
         template <typename... Ts>
         using int_sequence_for = make_int_sequence<(int)sizeof...(Ts)>;
 
+        // Type-casted index sequence.
+        template <class P, size_t... Is>
+        inline P indexes_from(index_sequence<Is...>) noexcept
+        {
+            return { static_cast<typename P::value_type>(Is)... };
+        }
+
+        template <class P>
+        inline P make_sequence_as_batch() noexcept
+        {
+            return indexes_from<P>(make_index_sequence<P::size>());
+        }
     }
 
     /***********************************
