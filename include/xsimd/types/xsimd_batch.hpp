@@ -71,6 +71,11 @@ namespace xsimd
         template <class U>
         static XSIMD_NO_DISCARD batch load(U const* mem, unaligned_mode) noexcept;
 
+        template <class U, class V>
+        static XSIMD_NO_DISCARD batch gather(U const* src, batch<V, arch_type> const& index) noexcept;
+        template <class U, class V>
+        void scatter(U* dst, batch<V, arch_type> const& index) const noexcept;
+
         T get(std::size_t i) const noexcept;
 
         // comparison operators
@@ -535,6 +540,34 @@ namespace xsimd
     inline batch<T, A> batch<T, A>::load(U const* mem, unaligned_mode) noexcept
     {
         return load_unaligned(mem);
+    }
+
+    /**
+     * Create a new batch gathering elements starting at address \c src and
+     * offset by each element in \c index. The scale is always 1.
+     * @param src Starting address.
+     * @param index Indexes of the elements to gather.
+     * @return a batch containing the gathered elements.
+     */
+    template <class T, class A>
+    template <typename U, typename V>
+    inline batch<T, A> batch<T, A>::gather(U const* src, batch<V, A> const& index) noexcept
+    {
+        return kernel::gather<A, T>(src, index, A {});
+    }
+
+    /**
+     * Scatter elements from the batch \c src at addresses starting at \c dst
+     * and offset by each element in \c index. The scale is always 1.
+     * @param src Batch of elements to scatter.
+     * @param dst Destination address
+     * @param index Indexes in which to store the elements to.
+     */
+    template <class T, class A>
+    template <class U, class V>
+    inline void batch<T, A>::scatter(U* dst, batch<V, A> const& index) const noexcept
+    {
+        kernel::scatter<A>(*this, dst, index, A {});
     }
 
     template <class T, class A>

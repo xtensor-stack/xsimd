@@ -22,6 +22,7 @@ class load_store_test : public testing::Test
 protected:
     using batch_type = B;
     using value_type = typename B::value_type;
+    using index_type = typename xsimd::as_integer_t<batch_type>;
     template <class T>
     using allocator = xsimd::default_allocator<T, typename B::arch_type>;
     static constexpr size_t size = B::size;
@@ -112,6 +113,42 @@ protected:
         test_store_impl(d_vec, "load double");
     }
 
+    void test_gather()
+    {
+        test_gather_impl(i8_vec, "gather int8_t");
+        test_gather_impl(ui8_vec, "gather uint8_t");
+        test_gather_impl(i16_vec, "gather int16_t");
+        test_gather_impl(ui16_vec, "gather uint16_t");
+        test_gather_impl(i32_vec, "gather int32_t");
+        test_gather_impl(ui32_vec, "gather uint32_t");
+        test_gather_impl(i64_vec, "gather int64_t");
+        test_gather_impl(ui64_vec, "gather uint64_t");
+#ifdef XSIMD_32_BIT_ABI
+        test_gather_impl(l_vec, "gather long");
+        test_gather_impl(ul_vec, "gather unsigned long");
+#endif
+        test_gather_impl(f_vec, "gather float");
+        test_gather_impl(d_vec, "gather double");
+    }
+
+    void test_scatter()
+    {
+        test_scatter_impl(i8_vec, "scatter int8_t");
+        test_scatter_impl(ui8_vec, "scatter uint8_t");
+        test_scatter_impl(i16_vec, "scatter int16_t");
+        test_scatter_impl(ui16_vec, "scatter uint16_t");
+        test_scatter_impl(i32_vec, "scatter int32_t");
+        test_scatter_impl(ui32_vec, "scatter uint32_t");
+        test_scatter_impl(i64_vec, "scatter int64_t");
+        test_scatter_impl(ui64_vec, "scatter uint64_t");
+#ifdef XSIMD_32_BIT_ABI
+        test_scatter_impl(l_vec, "scatter long");
+        test_scatter_impl(ul_vec, "scatter unsigned long");
+#endif
+        test_scatter_impl(f_vec, "scatter float");
+        test_scatter_impl(d_vec, "scatter double");
+    }
+
 private:
     template <class V>
     void test_load_impl(const V& v, const std::string& name)
@@ -151,6 +188,43 @@ private:
     }
 
     template <class V>
+    void test_gather_impl(const V& v, const std::string& name)
+    {
+        std::copy(v.cbegin(), v.cend(), expected.begin());
+        index_type index = xsimd::detail::make_sequence_as_batch<index_type>();
+        batch_type b = batch_type::gather(v.data(), index);
+        EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " (in order)");
+
+        std::reverse_copy(v.cbegin(), v.cend(), expected.begin());
+        std::array<typename index_type::value_type, index_type::size> index_reverse;
+        index.store_unaligned(index_reverse.data());
+        std::reverse(index_reverse.begin(), index_reverse.end());
+        index = index_type::load_unaligned(index_reverse.data());
+        b = batch_type::gather(v.data(), index);
+        EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " (in reverse order)");
+    }
+
+    template <class V>
+    void test_scatter_impl(const V& v, const std::string& name)
+    {
+        batch_type b = batch_type::load_aligned(v.data());
+        index_type index = xsimd::detail::make_sequence_as_batch<index_type>();
+        V res(size);
+
+        b.scatter(res.data(), index);
+        EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " (in order)");
+
+        V reverse_v(size);
+        std::reverse_copy(v.cbegin(), v.cend(), reverse_v.begin());
+        std::array<typename index_type::value_type, index_type::size> reverse_index;
+        index.store_unaligned(reverse_index.data());
+        std::reverse(reverse_index.begin(), reverse_index.end());
+        index = index_type::load_unaligned(reverse_index.data());
+        b.scatter(res.data(), index);
+        EXPECT_VECTOR_EQ(res, reverse_v) << print_function_name(name + " (in reverse order)");
+    }
+
+    template <class V>
     void init_test_vector(V& vec)
     {
         vec.resize(size);
@@ -180,5 +254,15 @@ TYPED_TEST(load_store_test, load)
 TYPED_TEST(load_store_test, store)
 {
     this->test_store();
+}
+
+TYPED_TEST(load_store_test, gather)
+{
+    this->test_gather();
+}
+
+TYPED_TEST(load_store_test, scatter)
+{
+    this->test_scatter();
 }
 #endif
