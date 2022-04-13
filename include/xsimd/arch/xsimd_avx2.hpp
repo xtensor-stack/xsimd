@@ -320,7 +320,7 @@ namespace xsimd
                                   kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
-            return _mm256_i32gather_epi32(src, index, 1);
+            return _mm256_i32gather_epi32(src, index, sizeof(T));
         }
 
         template <class A, class T,
@@ -330,7 +330,7 @@ namespace xsimd
                                   kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
-            return _mm256_i64gather_epi64(src, index, 1);
+            return _mm256_i64gather_epi64(src, index, sizeof(T));
         }
 
         template <class A>
@@ -339,7 +339,7 @@ namespace xsimd
                                       kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
-            return _mm256_i32gather_ps(src, index, 1);
+            return _mm256_i32gather_ps(src, index, sizeof(float));
         }
 
         template <class A>
@@ -348,7 +348,7 @@ namespace xsimd
                                        kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
-            return _mm256_i64gather_pd(src, index, 1);
+            return _mm256_i64gather_pd(src, index, sizeof(double));
         }
 
         // lt

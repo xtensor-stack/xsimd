@@ -746,7 +746,7 @@ namespace xsimd
         inline batch<T, A> gather(T const* src, batch<int32_t, A> const& index,
                                   kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i32gather_epi32(index, src, 1);
+            return _mm512_i32gather_epi32(index, src, sizeof(T));
         }
 
         template <class A, class T,
@@ -755,7 +755,7 @@ namespace xsimd
         inline batch<T, A> gather(T const* src, batch<int64_t, A> const& index,
                                   kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i64gather_epi64(index, src, 1);
+            return _mm512_i64gather_epi64(index, src, sizeof(T));
         }
 
         template <class A>
@@ -763,7 +763,7 @@ namespace xsimd
                                       batch<int, A> const& index,
                                       kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i32gather_ps(index, src, 1);
+            return _mm512_i32gather_ps(index, src, sizeof(float));
         }
 
         template <class A>
@@ -771,7 +771,7 @@ namespace xsimd
         gather(double const* src, batch<int64_t, A> const& index,
                kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i64gather_pd(index, src, 1);
+            return _mm512_i64gather_pd(index, src, sizeof(double));
         }
 
         // ge
@@ -1266,7 +1266,7 @@ namespace xsimd
                             batch<int32_t, A> const& index,
                             kernel::requires_arch<avx512f>) noexcept
         {
-            _mm512_i32scatter_epi32(dst, index, src, 1);
+            _mm512_i32scatter_epi32(dst, index, src, sizeof(T));
         }
 
         template <class T, class A,
@@ -1276,7 +1276,7 @@ namespace xsimd
                             batch<int64_t, A> const& index,
                             kernel::requires_arch<avx512f>) noexcept
         {
-            _mm512_i64scatter_epi64(dst, index, src, 1);
+            _mm512_i64scatter_epi64(dst, index, src, sizeof(T));
         }
 
         template <class A>
@@ -1284,7 +1284,7 @@ namespace xsimd
                             batch<int32_t, A> const& index,
                             kernel::requires_arch<avx512f>) noexcept
         {
-            _mm512_i32scatter_ps(dst, index, src, 1);
+            _mm512_i32scatter_ps(dst, index, src, sizeof(float));
         }
 
         template <class A>
@@ -1292,7 +1292,7 @@ namespace xsimd
                             batch<int64_t, A> const& index,
                             kernel::requires_arch<avx512f>) noexcept
         {
-            _mm512_i64scatter_pd(dst, index, src, 1);
+            _mm512_i64scatter_pd(dst, index, src, sizeof(double));
         }
 
         // select
