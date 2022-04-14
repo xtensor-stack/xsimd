@@ -555,6 +555,7 @@ namespace xsimd
     template <typename U, typename V>
     inline batch<T, A> batch<T, A>::gather(U const* src, batch<V, A> const& index) noexcept
     {
+        static_assert(std::is_convertible<T, U>::value, "Can't convert from src to this batch's type!");
         return kernel::gather<A, T>(src, index, A {});
     }
 
@@ -571,6 +572,7 @@ namespace xsimd
     template <class U, class V>
     inline void batch<T, A>::scatter(U* dst, batch<V, A> const& index) const noexcept
     {
+        static_assert(std::is_convertible<T, U>::value, "Can't convert from this batch's type to dst!");
         kernel::scatter<A>(*this, dst, index, A {});
     }
 
