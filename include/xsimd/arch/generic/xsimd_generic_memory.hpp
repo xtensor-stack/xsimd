@@ -58,6 +58,12 @@ namespace xsimd
         // gather
         namespace detail
         {
+            template <class T, class U, class B>
+            using sizes_match_t = typename std::enable_if<sizeof(T) == sizeof(U), B>::type;
+
+            template <class T, class U, class B>
+            using sizes_mismatch_t = typename std::enable_if<sizeof(T) != sizeof(U), B>::type;
+
             template <typename T, typename A, typename U, typename V, size_t I>
             inline batch<T, A> gather(U const* src, batch<V, A> const& index,
                                       ::xsimd::detail::index_sequence<I>) noexcept
@@ -66,29 +72,42 @@ namespace xsimd
                               ::xsimd::index<I>());
             }
 
-            template <typename T, typename A, typename U, typename V, size_t I,
-                      size_t... Is,
-                      typename = typename std::enable_if<sizeof...(Is) != 0>::type>
+            template <typename T, typename A, typename U, typename V, size_t I0, size_t I1, size_t... Is>
             inline batch<T, A>
             gather(U const* src, batch<V, A> const& index,
-                   ::xsimd::detail::index_sequence<I, Is...>) noexcept
+                   ::xsimd::detail::index_sequence<I0, I1, Is...>) noexcept
             {
                 const auto test = kernel::detail::gather<T, A, U, V>(
-                    src, index, ::xsimd::detail::index_sequence<Is...>());
-                return insert(test, static_cast<T>(src[index.get(I)]),
-                              ::xsimd::index<I>());
+                    src, index, ::xsimd::detail::index_sequence<I1, Is...>());
+                return insert(test, static_cast<T>(src[index.get(I0)]),
+                              ::xsimd::index<I0>());
             }
         } // namespace detail
 
         template <typename A, typename T, typename U, typename V>
-        inline batch<T, A> gather(U const* src, batch<V, A> const& index,
-                                  kernel::requires_arch<generic>) noexcept
+        inline typename detail::sizes_mismatch_t<T, U, batch<T, A>>
+        gather(U const* src, batch<V, A> const& index,
+               kernel::requires_arch<generic>) noexcept
         {
             static_assert(batch<T, A>::size <= batch<V, A>::size,
-                          "Need matching sizes for indexing!");
+                          "Not enough indexes for gathering!");
             return kernel::detail::gather<T, A, U, V>(
                 src, index,
                 ::xsimd::detail::make_index_sequence<xsimd::batch<T, A>::size>());
+        }
+
+        template <typename A, typename T, typename U, typename V>
+        inline typename detail::sizes_match_t<T, U, batch<T, A>>
+        gather(U const* src, batch<V, A> const& index,
+               kernel::requires_arch<generic>) noexcept
+        {
+            static_assert(batch<T, A>::size <= batch<V, A>::size,
+                          "Not enough indexes for gathering!");
+            const auto dst = kernel::detail::gather<U, A, U, V>(
+                src, index,
+                ::xsimd::detail::make_index_sequence<batch<U, A>::size>());
+
+            return batch_cast<T>(dst);
         }
 
         // insert
@@ -167,28 +186,41 @@ namespace xsimd
                 dst[index.get(I)] = static_cast<U>(src.get(I));
             }
 
-            template <typename T, typename A, typename U, typename V, size_t I,
-                      size_t... Is,
-                      typename = typename std::enable_if<sizeof...(Is) != 0>::type>
+            template <typename T, typename A, typename U, typename V, size_t I0, size_t I1, size_t... Is>
             inline void
             scatter(batch<T, A> const& src, U* dst, batch<V, A> const& index,
-                    ::xsimd::detail::index_sequence<I, Is...>) noexcept
+                    ::xsimd::detail::index_sequence<I0, I1, Is...>) noexcept
             {
-                dst[index.get(I)] = static_cast<U>(src.get(I));
+                dst[index.get(I0)] = static_cast<U>(src.get(I0));
                 kernel::detail::scatter<T, A, U, V>(
-                    src, dst, index, ::xsimd::detail::index_sequence<Is...>());
+                    src, dst, index, ::xsimd::detail::index_sequence<I1, Is...>());
             }
         } // namespace detail
 
         template <typename A, typename T, typename U, typename V>
-        inline void scatter(batch<T, A> const& src, U* dst,
-                            batch<V, A> const& index,
-                            kernel::requires_arch<generic>) noexcept
+        inline typename detail::sizes_mismatch_t<T, U, void>
+        scatter(batch<T, A> const& src, U* dst,
+                batch<V, A> const& index,
+                kernel::requires_arch<generic>) noexcept
         {
             static_assert(batch<T, A>::size <= batch<V, A>::size,
-                          "Need matching sizes for indexing!");
+                          "Not enough indexes for scattering!");
             kernel::detail::scatter<T, A, U, V>(
                 src, dst, index,
+                ::xsimd::detail::make_index_sequence<batch<T, A>::size>());
+        }
+
+        template <typename A, typename T, typename U, typename V>
+        inline typename detail::sizes_match_t<T, U, void>
+        scatter(batch<T, A> const& src, U* dst,
+                batch<V, A> const& index,
+                kernel::requires_arch<generic>) noexcept
+        {
+            static_assert(batch<T, A>::size <= batch<V, A>::size,
+                          "Not enough indexes for scattering!");
+            const auto tmp = batch_cast<U>(src);
+            kernel::detail::scatter<U, A, U, V>(
+                tmp, dst, index,
                 ::xsimd::detail::make_index_sequence<batch<T, A>::size>());
         }
 
