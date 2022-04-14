@@ -544,7 +544,9 @@ namespace xsimd
 
     /**
      * Create a new batch gathering elements starting at address \c src and
-     * offset by each element in \c index. The scale is always 1.
+     * offset by each element in \c index.
+     * If \c T is not of the same size as \c U, a \c static_cast is performed
+     * at element gather time.
      * @param src Starting address.
      * @param index Indexes of the elements to gather.
      * @return a batch containing the gathered elements.
@@ -558,7 +560,9 @@ namespace xsimd
 
     /**
      * Scatter elements from the batch \c src at addresses starting at \c dst
-     * and offset by each element in \c index. The scale is always 1.
+     * and offset by each element in \c index.
+     * If \c T is not of the same size as \c U, a \c static_cast is performed
+     * at element scatter time.
      * @param src Batch of elements to scatter.
      * @param dst Destination address
      * @param index Indexes in which to store the elements to.
