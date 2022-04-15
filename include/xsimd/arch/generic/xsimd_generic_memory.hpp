@@ -89,8 +89,8 @@ namespace xsimd
         gather(U const* src, batch<V, A> const& index,
                kernel::requires_arch<generic>) noexcept
         {
-            static_assert(batch<T, A>::size <= batch<V, A>::size,
-                          "Not enough indexes for gathering!");
+            static_assert(batch<T, A>::size == batch<V, A>::size,
+                          "Index and destination sizes must match");
             return kernel::detail::gather<T, A, U, V>(
                 src, index,
                 ::xsimd::detail::make_index_sequence<xsimd::batch<T, A>::size>());
@@ -101,8 +101,8 @@ namespace xsimd
         gather(U const* src, batch<V, A> const& index,
                kernel::requires_arch<generic>) noexcept
         {
-            static_assert(batch<T, A>::size <= batch<V, A>::size,
-                          "Not enough indexes for gathering!");
+            static_assert(batch<T, A>::size == batch<V, A>::size,
+                          "Index and destination sizes must match");
             const auto dst = kernel::detail::gather<U, A, U, V>(
                 src, index,
                 ::xsimd::detail::make_index_sequence<batch<U, A>::size>());
@@ -203,8 +203,8 @@ namespace xsimd
                 batch<V, A> const& index,
                 kernel::requires_arch<generic>) noexcept
         {
-            static_assert(batch<T, A>::size <= batch<V, A>::size,
-                          "Not enough indexes for scattering!");
+            static_assert(batch<T, A>::size == batch<V, A>::size,
+                          "Source and index sizes must match");
             kernel::detail::scatter<T, A, U, V>(
                 src, dst, index,
                 ::xsimd::detail::make_index_sequence<batch<T, A>::size>());
@@ -216,8 +216,8 @@ namespace xsimd
                 batch<V, A> const& index,
                 kernel::requires_arch<generic>) noexcept
         {
-            static_assert(batch<T, A>::size <= batch<V, A>::size,
-                          "Not enough indexes for scattering!");
+            static_assert(batch<T, A>::size == batch<V, A>::size,
+                          "Source and index sizes must match");
             const auto tmp = batch_cast<U>(src);
             kernel::detail::scatter<U, A, U, V>(
                 tmp, dst, index,
