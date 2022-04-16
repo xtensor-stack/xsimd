@@ -25,6 +25,22 @@
 #ifndef XSIMD_TEST_UTILS_HPP
 #define XSIMD_TEST_UTILS_HPP
 
+/**************************
+ * AppleClang workarounds *
+ *************************/
+
+// AppleClang is known for having precision issues
+// between AVX and AVX2. This also seems to happen
+// in M1.
+struct precision_t
+{
+#if defined(__apple_build_version__) && (XSIMD_WITH_AVX2 || XSIMD_WITH_NEON64)
+    static constexpr size_t max = 8192;
+#else
+    static constexpr size_t max = 2048;
+#endif
+};
+
 /*******************
  * Pretty printers *
  *******************/
@@ -283,8 +299,8 @@ namespace detail
                 return utils::isinf(rhs) && (lhs * rhs > 0) /* same sign */;
             }
 
-            T relative_precision = 2048 * std::numeric_limits<T>::epsilon();
-            T absolute_zero_prox = 2048 * std::numeric_limits<T>::epsilon();
+            T relative_precision = precision_t::max * std::numeric_limits<T>::epsilon();
+            T absolute_zero_prox = precision_t::max * std::numeric_limits<T>::epsilon();
 
             if (max(uabs(lhs), uabs(rhs)) < T(1e-3))
             {
