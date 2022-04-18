@@ -560,11 +560,10 @@ namespace xsimd
     }
 
     /**
-     * Scatter elements from the batch \c src at addresses starting at \c dst
+     * Scatter elements from this batch into addresses starting at \c dst
      * and offset by each element in \c index.
      * If \c T is not of the same size as \c U, a \c static_cast is performed
      * at element scatter time.
-     * @param src Batch of elements to scatter.
      * @param dst Destination address
      * @param index Indexes in which to store the elements to.
      */
