@@ -41,32 +41,20 @@ jobs:
           conda list
         displayName: "Install conda packages"
 
-      # Install LLVM
-      # Note: LLVM distributed by conda is too old
-      - script: |
-          choco install llvm --yes
-          set PATH=C:\Program Files\LLVM\bin;%PATH%
-          echo '##vso[task.setvariable variable=PATH]%PATH%'
-          clang-cl --version
-        displayName: "Install LLVM"
-
       # Configure
       - script: |
           setlocal EnableDelayedExpansion
-          call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
           mkdir build & cd build
           cmake -DCMAKE_BUILD_TYPE=Release ^
-                -DCMAKE_C_COMPILER=clang-cl ^
-                -DCMAKE_CXX_COMPILER=clang-cl ^
                 -DDOWNLOAD_GTEST=ON ^
                 -DXSIMD_REFACTORING=ON ^
+                -T ClangCL ^
                 $(Build.SourcesDirectory)
         displayName: "Configure xsimd"
         workingDirectory: $(Build.BinariesDirectory)
 
       # Build
       - script: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
           cmake --build . ^
                 --config release ^
                 --target test_xsimd
