@@ -1317,7 +1317,7 @@ namespace xsimd
                 alignas(avx2::alignment()) uint8_t buffer[64];
                 // FIXME: ultra inefficient
                 for (int i = 0; i < 64; ++i)
-                    buffer[i] = cond.data & ((uint64_t)1 << i) ? 0xFF : 0;
+                    buffer[i] = cond.data & (1ull << i) ? 0xFF : 0;
                 __m256i cond_low = batch<uint8_t, avx2>::load_aligned(&buffer[0]);
                 __m256i cond_hi = batch<uint8_t, avx2>::load_aligned(&buffer[32]);
 
