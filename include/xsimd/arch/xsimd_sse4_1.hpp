@@ -73,7 +73,7 @@ namespace xsimd
                     _mm_blendv_ps(_mm_castsi128_ps(_mm_cvttps_epi32(self)),
                                   _mm_castsi128_ps(_mm_xor_si128(
                                       _mm_cvttps_epi32(_mm_sub_ps(self, _mm_set1_ps(1u << 31))),
-                                      _mm_set1_epi32(1 << 31))),
+                                      _mm_set1_epi32(1u << 31))),
                                   _mm_cmpge_ps(self, _mm_set1_ps(1u << 31))));
             }
         }
