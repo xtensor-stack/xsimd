@@ -55,7 +55,7 @@ jobs:
           if [[ $(cross_compile) == 1 ]]; then
             sudo apt-get --no-install-suggests --no-install-recommends install g++-8-arm-linux-gnueabi || exit 1
             sudo apt-get --no-install-suggests --no-install-recommends install g++-8-multilib gcc-8-multilib || exit 1
-            sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-arm || exit 1
+            sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-arm qemu-user || exit 1
           fi || exit 1
         displayName: Install build toolchain
 

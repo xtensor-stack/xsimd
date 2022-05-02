@@ -77,7 +77,7 @@ namespace xsimd
             gather(U const* src, batch<V, A> const& index,
                    ::xsimd::detail::index_sequence<I0, I1, Is...>) noexcept
             {
-                const auto test = gather<T, A, U, V>(
+                const auto test = kernel::detail::gather<T, A, U, V>(
                     src, index, ::xsimd::detail::index_sequence<I1, Is...>());
                 return insert(test, static_cast<T>(src[index.get(I0)]),
                               ::xsimd::index<I0>());
@@ -91,7 +91,7 @@ namespace xsimd
         {
             static_assert(batch<T, A>::size == batch<V, A>::size,
                           "Index and destination sizes must match");
-            return detail::gather<T, A, U, V>(
+            return kernel::detail::gather<T, A, U, V>(
                 src, index,
                 ::xsimd::detail::make_index_sequence<xsimd::batch<T, A>::size>());
         }
@@ -103,7 +103,7 @@ namespace xsimd
         {
             static_assert(batch<T, A>::size == batch<V, A>::size,
                           "Index and destination sizes must match");
-            const auto dst = detail::gather<U, A, U, V>(
+            const auto dst = kernel::detail::gather<U, A, U, V>(
                 src, index,
                 ::xsimd::detail::make_index_sequence<batch<U, A>::size>());
 

@@ -66,7 +66,6 @@ steps:
       if [[ $(avx512) == 1 ]]; then
         ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd
       elif [[ $(cross_compile) == 1 ]]; then
-        echo $(arm_arch_dir);
         if [[ $(arm_arch_dir) == 'aarch64-linux-gnu' ]]; then
           qemu-aarch64 -L /usr/aarch64-linux-gnu/ ./test_xsimd
         else
