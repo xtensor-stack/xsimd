@@ -1049,6 +1049,20 @@ namespace xsimd
             return _mm_sqrt_pd(val);
         }
 
+        // slide_left
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_left(batch<T, A> const& x, requires_arch<sse2>) noexcept
+        {
+            return _mm_slli_si128(x, N);
+        }
+
+        // slide_right
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_right(batch<T, A> const& x, requires_arch<sse2>) noexcept
+        {
+            return _mm_srli_si128(x, N);
+        }
+
         // sadd
         template <class A>
         inline batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept

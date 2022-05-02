@@ -290,7 +290,6 @@ namespace xsimd
                 __m256d f = _mm256_sub_pd(_mm256_castsi256_pd(xH), _mm256_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
                 return _mm256_add_pd(f, _mm256_castsi256_pd(xL));
             }
-
         }
 
         // eq
@@ -572,9 +571,9 @@ namespace xsimd
             constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
             switch (sizeof(T))
             {
-            // FIXME: for some reason mask here is not considered as an immediate,
-            // but it's okay for _mm256_blend_epi32
-            // case 2: return _mm256_blend_epi16(false_br, true_br, mask);
+                // FIXME: for some reason mask here is not considered as an immediate,
+                // but it's okay for _mm256_blend_epi32
+                // case 2: return _mm256_blend_epi16(false_br, true_br, mask);
             case 4:
                 return _mm256_blend_epi32(false_br, true_br, mask);
             case 8:
@@ -585,6 +584,68 @@ namespace xsimd
             default:
                 return select(batch_bool<T, A> { Values... }, true_br, false_br, avx2 {});
             }
+        }
+
+        // slide_left
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_left(batch<T, A> const& x, requires_arch<avx2>) noexcept
+        {
+            constexpr unsigned BitCount = N * 8;
+            if (BitCount == 0)
+            {
+                return x;
+            }
+            if (BitCount >= 256)
+            {
+                return batch<T, A>(T(0));
+            }
+            if (BitCount > 128)
+            {
+                constexpr unsigned M = (BitCount - 128) / 8;
+                auto y = _mm256_bslli_epi128(x, M);
+                return _mm256_permute2x128_si256(y, y, 0x28);
+            }
+            if (BitCount == 128)
+            {
+                return _mm256_permute2x128_si256(x, x, 0x28);
+            }
+            // shifting by [0, 128[ bits
+            constexpr unsigned M = BitCount / 8;
+            auto y = _mm256_bslli_epi128(x, M);
+            auto z = _mm256_bsrli_epi128(x, 16 - M);
+            auto w = _mm256_permute2x128_si256(z, z, 0x28);
+            return _mm256_or_si256(y, w);
+        }
+
+        // slide_right
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_right(batch<T, A> const& x, requires_arch<avx2>) noexcept
+        {
+            constexpr unsigned BitCount = N * 8;
+            if (BitCount == 0)
+            {
+                return x;
+            }
+            if (BitCount >= 256)
+            {
+                return batch<T, A>(T(0));
+            }
+            if (BitCount > 128)
+            {
+                constexpr unsigned M = (BitCount - 128) / 8;
+                auto y = _mm256_bsrli_epi128(x, M);
+                return _mm256_permute2x128_si256(y, y, 0x81);
+            }
+            if (BitCount == 128)
+            {
+                return _mm256_permute2x128_si256(x, x, 0x81);
+            }
+            // shifting by [0, 128[ bits
+            constexpr unsigned M = BitCount / 8;
+            auto y = _mm256_bsrli_epi128(x, M);
+            auto z = _mm256_bslli_epi128(x, 16 - M);
+            auto w = _mm256_permute2x128_si256(z, z, 0x81);
+            return _mm256_or_si256(y, w);
         }
 
         // ssub
@@ -712,7 +773,6 @@ namespace xsimd
             }
         }
     }
-
 }
 
 #endif

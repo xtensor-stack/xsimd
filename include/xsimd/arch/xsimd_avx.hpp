@@ -1077,6 +1077,87 @@ namespace xsimd
             return _mm256_castsi256_pd(set(batch<int64_t, A>(), A {}, static_cast<int64_t>(values ? -1LL : 0LL)...).data);
         }
 
+        // slide_left
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_left(batch<T, A> const& x, requires_arch<avx>) noexcept
+        {
+            constexpr unsigned BitCount = N * 8;
+            if (BitCount == 0)
+            {
+                return x;
+            }
+            if (BitCount >= 256)
+            {
+                return batch<T, A>(T(0));
+            }
+            if (BitCount > 128)
+            {
+                constexpr unsigned M = (BitCount - 128) / 8;
+                __m128i low = _mm256_castsi256_si128(x);
+                auto y = _mm_slli_si128(low, M);
+                __m256i zero = _mm256_setzero_si256();
+                return _mm256_insertf128_si256(zero, y, 1);
+            }
+            if (BitCount == 128)
+            {
+                __m128i low = _mm256_castsi256_si128(x);
+                __m256i zero = _mm256_setzero_si256();
+                return _mm256_insertf128_si256(zero, low, 1);
+            }
+            // shifting by [0, 128[ bits
+            constexpr unsigned M = BitCount / 8;
+
+            __m128i low = _mm256_castsi256_si128(x);
+            auto ylow = _mm_slli_si128(low, M);
+            auto zlow = _mm_srli_si128(low, 16 - M);
+
+            __m128i high = _mm256_extractf128_si256(x, 1);
+            auto yhigh = _mm_slli_si128(high, M);
+
+            __m256i res = _mm256_castsi128_si256(ylow);
+            return _mm256_insertf128_si256(res, _mm_or_si128(yhigh, zlow), 1);
+        }
+
+        // slide_right
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_right(batch<T, A> const& x, requires_arch<avx>) noexcept
+        {
+            constexpr unsigned BitCount = N * 8;
+            if (BitCount == 0)
+            {
+                return x;
+            }
+            if (BitCount >= 256)
+            {
+                return batch<T, A>(T(0));
+            }
+            if (BitCount > 128)
+            {
+                constexpr unsigned M = (BitCount - 128) / 8;
+                __m128i high = _mm256_extractf128_si256(x, 1);
+                __m128i y = _mm_srli_si128(high, M);
+                __m256i zero = _mm256_setzero_si256();
+                return _mm256_insertf128_si256(zero, y, 0);
+            }
+            if (BitCount == 128)
+            {
+                __m128i high = _mm256_extractf128_si256(x, 1);
+                return _mm256_castsi128_si256(high);
+            }
+            // shifting by [0, 128[ bits
+            constexpr unsigned M = BitCount / 8;
+
+            __m128i low = _mm256_castsi256_si128(x);
+            auto ylow = _mm_srli_si128(low, M);
+
+            __m128i high = _mm256_extractf128_si256(x, 1);
+            auto yhigh = _mm_srli_si128(high, M);
+            auto zhigh = _mm_slli_si128(high, 16 - M);
+
+            __m256i res = _mm256_castsi128_si256(_mm_or_si128(ylow, zhigh));
+            return _mm256_insertf128_si256(res, yhigh, 1);
+        }
+
         // sqrt
         template <class A>
         inline batch<float, A> sqrt(batch<float, A> const& val, requires_arch<avx>) noexcept
