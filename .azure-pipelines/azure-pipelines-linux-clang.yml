@@ -30,6 +30,14 @@ jobs:
     variables:
       CC: clang-$(llvm_version)
       CXX: clang++-$(llvm_version)
+      cross_compile: 0
+      avx: 0
+      avx512: 0
+      i686: 0
+      enable_xtl_complex: 0
+      enable_fallback: 0
+      force_no_instr_set: 0
+
     timeoutInMinutes: 30
     steps:
       - script: |
@@ -44,9 +52,9 @@ jobs:
           sudo apt-get update || exit 1
           sudo apt-get --no-install-suggests --no-install-recommends install clang-$(llvm_version) || exit 1
           sudo apt-get --no-install-suggests --no-install-recommends install libc++-dev || exit 1
-          if [[ ${cross_compile} == 1 ]]; then
-            sudo apt-get --no-install-suggests --no-install-recommends install g++-6-arm-linux-gnueabi || exit 1
-            sudo apt-get --no-install-suggests --no-install-recommends install g++-6-multilib gcc-6-multilib || exit 1
+          if [[ $(cross_compile) == 1 ]]; then
+            sudo apt-get --no-install-suggests --no-install-recommends install g++-8-arm-linux-gnueabi || exit 1
+            sudo apt-get --no-install-suggests --no-install-recommends install g++-8-multilib gcc-8-multilib || exit 1
             sudo apt-get --no-install-suggests --no-install-recommends install qemu qemu-system-arm || exit 1
           fi || exit 1
         displayName: Install build toolchain
