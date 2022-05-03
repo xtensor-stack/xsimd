@@ -599,12 +599,14 @@ namespace xsimd
             return vcvtnq_s32_f32(self);
         }
 
+#if !defined(__GNUC__)
         template <class A>
         inline batch<int64_t, A> nearbyint_as_int(batch<double, A> const& self,
                                                   requires_arch<neon64>) noexcept
         {
             return vcvtnq_s64_f64(self);
         }
+#endif
 
         /**************
          * reciprocal *

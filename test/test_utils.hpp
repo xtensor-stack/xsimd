@@ -577,6 +577,16 @@ namespace detail
     {
         b.store_unaligned(dst.data() + i);
     }
+
+    inline xsimd::as_integer_t<float> nearbyint_as_int(float a)
+    {
+        return std::lroundf(a);
+    }
+
+    inline xsimd::as_integer_t<double> nearbyint_as_int(double a)
+    {
+        return std::llround(a);
+    }
 }
 
 #define EXPECT_BATCH_EQ(b1, b2) EXPECT_PRED_FORMAT2(::detail::expect_batch_near, b1, b2)

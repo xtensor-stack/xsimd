@@ -81,7 +81,7 @@ namespace xsimd
         inline batch<int64_t, A> nearbyint_as_int(batch<double, A> const& self,
                                                   requires_arch<avx512dq>) noexcept
         {
-            return _mm512_cvtps_epi64(self);
+            return _mm512_cvtpd_epi64(self);
         }
 
         // convert
