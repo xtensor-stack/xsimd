@@ -1105,6 +1105,22 @@ namespace xsimd
             using batch_type = batch<uint8_t, A>;
             return vreinterpretq_f64_u8(swizzle<A>(batch_type(vreinterpretq_u8_f64(self)), detail::burst_index<uint8_t>(idx), A()));
         }
+
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
+        inline batch<std::complex<float>, A> swizzle(batch<std::complex<float>, A> const& self,
+                                                     batch_constant<batch<uint32_t, A>, V0, V1, V2, V3> idx,
+                                                     requires_arch<neon64>) noexcept
+        {
+            return batch<std::complex<float>>(swizzle(self.real(), idx, A()), swizzle(self.imag(), idx, A()));
+        }
+
+        template <class A, uint64_t V0, uint64_t V1>
+        inline batch<std::complex<double>, A> swizzle(batch<std::complex<double>, A> const& self,
+                                                      batch_constant<batch<uint64_t, A>, V0, V1> idx,
+                                                      requires_arch<neon64>) noexcept
+        {
+            return batch<std::complex<double>>(swizzle(self.real(), idx, A()), swizzle(self.imag(), idx, A()));
+        }
     }
 }
 
