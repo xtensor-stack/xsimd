@@ -22,6 +22,17 @@
 namespace xsimd
 {
 
+    namespace details
+    {
+        template <class B>
+        void check_batch_init(B const&, std::initializer_list<typename B::value_type> data)
+        {
+            (void)data;
+            assert(data.size() == B::size && "consistent initialization");
+        }
+
+    }
+
     /**
      * @brief batch of integer or floating point values.
      *
@@ -416,7 +427,7 @@ namespace xsimd
     inline batch<T, A>::batch(std::initializer_list<T> data) noexcept
         : batch(data.begin(), detail::make_index_sequence<size>())
     {
-        assert(data.size() == size && "consistent initialization");
+        details::check_batch_init(*this, data);
     }
 
     /**
@@ -796,6 +807,7 @@ namespace xsimd
     inline batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) noexcept
         : batch_bool(data.begin(), detail::make_index_sequence<size>())
     {
+        details::check_batch_init(*this, data);
     }
 
     /*******************************
@@ -959,6 +971,7 @@ namespace xsimd
     template <class T, class A>
     inline batch<std::complex<T>, A>::batch(std::initializer_list<value_type> data) noexcept
     {
+        details::check_batch_init(*this, data);
         *this = load_unaligned(data.begin());
     }
 
@@ -1088,6 +1101,7 @@ namespace xsimd
     template <bool i3ec>
     inline batch<std::complex<T>, A>::batch(std::initializer_list<xtl::xcomplex<T, T, i3ec>> data) noexcept
     {
+        details::check_batch_init(*this, data);
         *this = load_unaligned(data.begin());
     }
 
