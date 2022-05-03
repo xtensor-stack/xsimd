@@ -335,9 +335,12 @@ namespace xsimd
         }
 
         template <class A>
-        inline batch<std::complex<float>, A> set(batch<std::complex<float>, A> const&, requires_arch<neon>, std::complex<float> c0, std::complex<float> c1) noexcept
+        inline batch<std::complex<float>, A> set(batch<std::complex<float>, A> const&, requires_arch<neon>,
+                                                 std::complex<float> c0, std::complex<float> c1,
+                                                 std::complex<float> c2, std::complex<float> c3) noexcept
         {
-            return float32x4_t { c0.real(), c0.imag(), c1.real(), c1.imag() };
+            return batch<std::complex<float>>(float32x4_t { c0.real(), c1.real(), c2.real(), c3.real() },
+                                              float32x4_t { c0.imag(), c1.imag(), c2.imag(), c3.imag() });
         }
 
         template <class A, class... Args>

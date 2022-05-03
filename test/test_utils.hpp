@@ -684,18 +684,23 @@ namespace xsimd
         batch<std::complex<double>>>;
 #endif
     using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
+
     using batch_swizzle_type_list = mpl::type_list<
-        batch<float>
+        batch<float>,
 #if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
-        ,
-        batch<double>
+        batch<double>,
 #endif
 #if !XSIMD_WITH_AVX || XSIMD_WITH_AVX2
-        ,
         batch<uint32_t>, batch<int32_t>,
-        batch<uint64_t>, batch<int64_t>
+        batch<uint64_t>, batch<int64_t>,
+#endif
+        batch<std::complex<float>>
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
+        ,
+        batch<std::complex<double>>
 #endif
         >;
+
     using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
 }
 
