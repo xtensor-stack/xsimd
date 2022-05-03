@@ -122,6 +122,23 @@ namespace xsimd
                 }
                 return batch<T, A>::load_aligned(self_buffer);
             }
+
+            template <class U, class F, class A, class T>
+            inline batch<U, A> apply_transform(F&& func, batch<T, A> const& self) noexcept
+            {
+                static_assert(batch<T, A>::size == batch<U, A>::size,
+                              "Source and destination sizes must match");
+                constexpr std::size_t src_size = batch<T, A>::size;
+                constexpr std::size_t dest_size = batch<U, A>::size;
+                alignas(A::alignment()) T self_buffer[src_size];
+                alignas(A::alignment()) U other_buffer[dest_size];
+                self.store_aligned(&self_buffer[0]);
+                for (std::size_t i = 0; i < src_size; ++i)
+                {
+                    other_buffer[i] = func(self_buffer[i]);
+                }
+                return batch<U, A>::load_aligned(other_buffer);
+            }
         }
 
         namespace detail

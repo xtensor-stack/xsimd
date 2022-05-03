@@ -141,13 +141,12 @@ protected:
             EXPECT_EQ(diff, 0) << print_function_name("nearbyint");
         }
         // nearbyint_as_int
-#if !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
         {
             std::array<int_value_type, nb_input> expected;
             std::array<int_value_type, nb_input> res;
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
-                           { return static_cast<int_value_type>(std::round(v)); });
+                           { return detail::nearbyint_as_int(v); });
             batch_type in;
             int_batch_type out;
             for (size_t i = 0; i < nb_batches; i += size)
@@ -158,12 +157,11 @@ protected:
             }
             for (size_t i = nb_batches; i < nb_input; ++i)
             {
-                res[i] = static_cast<int_value_type>(std::round(input[i]));
+                res[i] = detail::nearbyint_as_int(input[i]);
             }
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("nearbyint_as_int");
         }
-#endif
         // rint
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),

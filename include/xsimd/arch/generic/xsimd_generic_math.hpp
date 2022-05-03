@@ -1827,11 +1827,24 @@ namespace xsimd
         }
 
         // nearbyint_as_int
-        template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
-        inline batch<as_integer_t<T>, A>
-        nearbyint_as_int(batch<T, A> const& x, requires_arch<generic>) noexcept
+        template <class A>
+        inline batch<as_integer_t<float>, A>
+        nearbyint_as_int(batch<float, A> const& self, requires_arch<generic>) noexcept
         {
-            return to_int(round(x));
+            using U = as_integer_t<float>;
+            return kernel::detail::apply_transform<U>([](float x) noexcept -> U
+                                                      { return std::lroundf(x); },
+                                                      self);
+        }
+
+        template <class A>
+        inline batch<as_integer_t<double>, A>
+        nearbyint_as_int(batch<double, A> const& self, requires_arch<generic>) noexcept
+        {
+            using U = as_integer_t<double>;
+            return kernel::detail::apply_transform<U>([](double x) noexcept -> U
+                                                      { return std::llround(x); },
+                                                      self);
         }
 
         // nextafter
