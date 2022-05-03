@@ -30,11 +30,13 @@
  *************************/
 
 // AppleClang is known for having precision issues
-// between AVX and AVX2. This also seems to happen
-// in M1.
+// in the gamma function codegen. It's known to happen
+// between AVX and AVX2, but it also happens on SSE4.1
+// in GitHub Actions.
+// This also seems to happen in M1.
 struct precision_t
 {
-#if defined(__apple_build_version__) && (XSIMD_WITH_AVX2 || XSIMD_WITH_NEON64)
+#if defined(__apple_build_version__) && (XSIMD_WITH_SSE4_1 || XSIMD_WITH_NEON64)
     static constexpr size_t max = 8192;
 #else
     static constexpr size_t max = 2048;
