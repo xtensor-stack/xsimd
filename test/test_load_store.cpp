@@ -114,7 +114,6 @@ protected:
     }
     void test_gather()
     {
-#if !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
         test_gather_impl(i8_vec, "gather int8_t");
         test_gather_impl(ui8_vec, "gather uint8_t");
         test_gather_impl(i16_vec, "gather int16_t");
@@ -127,6 +126,9 @@ protected:
         test_gather_impl(l_vec, "gather long");
         test_gather_impl(ul_vec, "gather unsigned long");
 #endif
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+        test_gather_impl(f_vec, "gather float");
+#else
         test_gather_impl(f_vec, "gather float");
         test_gather_impl(d_vec, "gather double");
 #endif
@@ -134,7 +136,6 @@ protected:
 
     void test_scatter()
     {
-#if !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
         test_scatter_impl(i8_vec, "scatter int8_t");
         test_scatter_impl(ui8_vec, "scatter uint8_t");
         test_scatter_impl(i16_vec, "scatter int16_t");
@@ -147,6 +148,9 @@ protected:
         test_scatter_impl(l_vec, "scatter long");
         test_scatter_impl(ul_vec, "scatter unsigned long");
 #endif
+#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
+        test_scatter_impl(f_vec, "scatter float");
+#else
         test_scatter_impl(f_vec, "scatter float");
         test_scatter_impl(d_vec, "scatter double");
 #endif

@@ -725,6 +725,16 @@ namespace xsimd
         }
 
         /**********
+         * insert *
+         **********/
+
+        template <class A, size_t I>
+        inline batch<double, A> insert(batch<double, A> const& self, double val, index<I>, requires_arch<neon64>) noexcept
+        {
+            return vsetq_lane_f64(val, self, I);
+        }
+
+        /**********
          * select *
          **********/
 
