@@ -334,6 +334,12 @@ namespace xsimd
             return float32x4_t { f0, f1, f2, f3 };
         }
 
+        template <class A>
+        inline batch<std::complex<float>, A> set(batch<std::complex<float>, A> const&, requires_arch<neon>, std::complex<float> c0, std::complex<float> c1) noexcept
+        {
+            return float32x4_t { c0.real(), c0.imag(), c1.real(), c1.imag() };
+        }
+
         template <class A, class... Args>
         inline batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<neon>, Args... args) noexcept
         {
@@ -737,16 +743,16 @@ namespace xsimd
         {
             // from stackoverflow & https://projectne10.github.io/Ne10/doc/NE10__divc_8neon_8c_source.html
             // get an initial estimate of 1/b.
-            float32x4_t reciprocal = reciprocal(rhs);
+            float32x4_t rcp = reciprocal(rhs);
 
             // use a couple Newton-Raphson steps to refine the estimate.  Depending on your
             // application's accuracy requirements, you may be able to get away with only
             // one refinement (instead of the two used here).  Be sure to test!
-            reciprocal = vmulq_f32(vrecpsq_f32(rhs, reciprocal), reciprocal);
-            reciprocal = vmulq_f32(vrecpsq_f32(rhs, reciprocal), reciprocal);
+            rcp = vmulq_f32(vrecpsq_f32(rhs, rcp), rcp);
+            rcp = vmulq_f32(vrecpsq_f32(rhs, rcp), rcp);
 
             // and finally, compute a / b = a * (1 / b)
-            return vmulq_f32(lhs, reciprocal);
+            return vmulq_f32(lhs, rcp);
         }
 
         /******
@@ -1396,34 +1402,64 @@ namespace xsimd
          * insert *
          **********/
 
-        template <class A, class T, size_t I, detail::enable_integral_t<T> = 0>
-        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<neon>) noexcept
+        template <class A, size_t I>
+        inline batch<uint8_t, A> insert(batch<uint8_t, A> const& self, uint8_t val, index<I>, requires_arch<neon>) noexcept
         {
-            switch (sizeof(T))
-            {
-            case 1:
-                return vsetq_lane_u8(val, self, I);
-            case 2:
-                return vsetq_lane_u16(val, self, I);
-            case 4:
-                return vsetq_lane_u32(val, self, I);
-            case 8:
-                return vsetq_lane_u64(val, self, I);
-            default:
-                return insert(self, val, pos, generic {});
-            }
+            return vsetq_lane_u8(val, self, I);
         }
 
         template <class A, size_t I>
-        inline batch<float, A> insert(batch<float, A> const& self, float val, index<I> pos, requires_arch<neon>) noexcept
+        inline batch<int8_t, A> insert(batch<int8_t, A> const& self, int8_t val, index<I>, requires_arch<neon>) noexcept
         {
-            return vset_lane_f32(val, self, I);
+            return vsetq_lane_s8(val, self, I);
         }
 
         template <class A, size_t I>
-        inline batch<double, A> insert(batch<double, A> const& self, double val, index<I> pos, requires_arch<neon>) noexcept
+        inline batch<uint16_t, A> insert(batch<uint16_t, A> const& self, uint16_t val, index<I>, requires_arch<neon>) noexcept
         {
-            return vset_lane_f64(val, self, I);
+            return vsetq_lane_u16(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<int16_t, A> insert(batch<int16_t, A> const& self, int16_t val, index<I>, requires_arch<neon>) noexcept
+        {
+            return vsetq_lane_s16(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<uint32_t, A> insert(batch<uint32_t, A> const& self, uint32_t val, index<I>, requires_arch<neon>) noexcept
+        {
+            return vsetq_lane_u32(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<int32_t, A> insert(batch<int32_t, A> const& self, int32_t val, index<I>, requires_arch<neon>) noexcept
+        {
+            return vsetq_lane_s32(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<uint64_t, A> insert(batch<uint64_t, A> const& self, uint64_t val, index<I>, requires_arch<neon>) noexcept
+        {
+            return vsetq_lane_u64(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<int64_t, A> insert(batch<int64_t, A> const& self, int64_t val, index<I>, requires_arch<neon>) noexcept
+        {
+            return vsetq_lane_s64(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<float, A> insert(batch<float, A> const& self, float val, index<I>, requires_arch<neon>) noexcept
+        {
+            return vsetq_lane_f32(val, self, I);
+        }
+
+        template <class A, size_t I>
+        inline batch<double, A> insert(batch<double, A> const& self, double val, index<I>, requires_arch<neon>) noexcept
+        {
+            return vsetq_lane_f64(val, self, I);
         }
 
         /**********
@@ -2357,8 +2393,9 @@ namespace xsimd
                                    batch_constant<batch<I, A>, idx...>,
                                    requires_arch<neon>) noexcept
         {
+            static_assert(batch<T, A>::size == sizeof...(idx), "valid swizzle indices");
             std::array<T, batch<T, A>::size> data;
-            store_aligned(data.data(), self, A());
+            self.store_aligned(data.data());
             return set(batch<T, A>(), A(), data[idx]...);
         }
     }

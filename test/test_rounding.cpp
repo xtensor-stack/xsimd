@@ -141,6 +141,7 @@ protected:
             EXPECT_EQ(diff, 0) << print_function_name("nearbyint");
         }
         // nearbyint_as_int
+#if !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
         {
             std::array<int_value_type, nb_input> expected;
             std::array<int_value_type, nb_input> res;
@@ -162,6 +163,7 @@ protected:
             size_t diff = detail::get_nb_diff(res, expected);
             EXPECT_EQ(diff, 0) << print_function_name("nearbyint_as_int");
         }
+#endif
         // rint
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),

@@ -80,11 +80,6 @@ struct as_index
     using type = xsimd::as_unsigned_integer_t<T>;
 };
 
-template <class T, class A>
-struct as_index<xsimd::batch<std::complex<T>, A>> : as_index<xsimd::batch<T, A>>
-{
-};
-
 template <class B>
 class insert_test : public testing::Test
 {
