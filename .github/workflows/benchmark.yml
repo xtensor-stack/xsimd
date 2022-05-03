@@ -11,7 +11,7 @@ jobs:
     - name: Setup
       run: |
         mkdir _build
-        cd _build && cmake .. -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLE=ON -DCMAKE_BUILD_TYPE=Release
+        cd _build && cmake .. -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
     - name: Build
       run: cmake --build _build
     - name: Testing sequential
