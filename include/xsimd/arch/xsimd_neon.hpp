@@ -1405,50 +1405,50 @@ namespace xsimd
          * insert *
          **********/
 
-        template <class A, size_t I>
-        inline batch<uint8_t, A> insert(batch<uint8_t, A> const& self, uint8_t val, index<I>, requires_arch<neon>) noexcept
+        template <class A, class T, size_t I, detail::enable_sized_unsigned_t<T, 1> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_u8(val, self, I);
         }
 
-        template <class A, size_t I>
-        inline batch<int8_t, A> insert(batch<int8_t, A> const& self, int8_t val, index<I>, requires_arch<neon>) noexcept
+        template <class A, class T, size_t I, detail::enable_sized_signed_t<T, 1> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_s8(val, self, I);
         }
 
-        template <class A, size_t I>
-        inline batch<uint16_t, A> insert(batch<uint16_t, A> const& self, uint16_t val, index<I>, requires_arch<neon>) noexcept
+        template <class A, class T, size_t I, detail::enable_sized_unsigned_t<T, 2> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_u16(val, self, I);
         }
 
-        template <class A, size_t I>
+        template <class A, class T, size_t I, detail::enable_sized_signed_t<T, 2> = 0>
         inline batch<int16_t, A> insert(batch<int16_t, A> const& self, int16_t val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_s16(val, self, I);
         }
 
-        template <class A, size_t I>
-        inline batch<uint32_t, A> insert(batch<uint32_t, A> const& self, uint32_t val, index<I>, requires_arch<neon>) noexcept
+        template <class A, class T, size_t I, detail::enable_sized_unsigned_t<T, 4> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_u32(val, self, I);
         }
 
-        template <class A, size_t I>
-        inline batch<int32_t, A> insert(batch<int32_t, A> const& self, int32_t val, index<I>, requires_arch<neon>) noexcept
+        template <class A, class T, size_t I, detail::enable_sized_signed_t<T, 4> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_s32(val, self, I);
         }
 
-        template <class A, size_t I>
-        inline batch<uint64_t, A> insert(batch<uint64_t, A> const& self, uint64_t val, index<I>, requires_arch<neon>) noexcept
+        template <class A, class T, size_t I, detail::enable_sized_unsigned_t<T, 8> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_u64(val, self, I);
         }
 
-        template <class A, size_t I>
-        inline batch<int64_t, A> insert(batch<int64_t, A> const& self, int64_t val, index<I>, requires_arch<neon>) noexcept
+        template <class A, class T, size_t I, detail::enable_sized_signed_t<T, 8> = 0>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_s64(val, self, I);
         }
@@ -1457,12 +1457,6 @@ namespace xsimd
         inline batch<float, A> insert(batch<float, A> const& self, float val, index<I>, requires_arch<neon>) noexcept
         {
             return vsetq_lane_f32(val, self, I);
-        }
-
-        template <class A, size_t I>
-        inline batch<double, A> insert(batch<double, A> const& self, double val, index<I>, requires_arch<neon>) noexcept
-        {
-            return vsetq_lane_f64(val, self, I);
         }
 
         /**********
