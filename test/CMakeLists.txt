@@ -79,7 +79,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "riscv64")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -Wunused-parameter -Wextra -Wreorder -std=c++11")
     elseif(NOT WIN32)
-        if(NOT CMAKE_CXX_FLAGS MATCHES "-march")
+        if(NOT CMAKE_CXX_FLAGS MATCHES "-march" AND NOT CMAKE_CXX_FLAGS MATCHES "-arch" AND NOT CMAKE_OSX_ARCHITECTURES)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH}")
         endif()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC -Wunused-parameter -Wextra -Wreorder")
