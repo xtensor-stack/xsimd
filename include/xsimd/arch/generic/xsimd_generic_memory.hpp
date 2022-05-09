@@ -58,12 +58,6 @@ namespace xsimd
         // gather
         namespace detail
         {
-            template <class T, class U, class B>
-            using sizes_match_t = typename std::enable_if<sizeof(T) == sizeof(U), B>::type;
-
-            template <class T, class U, class B>
-            using sizes_mismatch_t = typename std::enable_if<sizeof(T) != sizeof(U), B>::type;
-
             template <typename T, typename A, typename U, typename V, size_t I>
             inline batch<T, A> gather(U const* src, batch<V, A> const& index,
                                       ::xsimd::detail::index_sequence<I>) noexcept

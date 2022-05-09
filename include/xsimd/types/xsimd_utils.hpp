@@ -196,6 +196,34 @@ namespace xsimd
         return res;
     }
 
+    namespace kernel
+    {
+        namespace detail
+        {
+            /**************************************
+             * enabling / disabling metafunctions *
+             **************************************/
+
+            template <class T>
+            using enable_integral_t = typename std::enable_if<std::is_integral<T>::value, int>::type;
+
+            template <class T, size_t S>
+            using enable_sized_signed_t = typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value && sizeof(T) == S, int>::type;
+
+            template <class T, size_t S>
+            using enable_sized_unsigned_t = typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value && sizeof(T) == S, int>::type;
+
+            template <class T, size_t S>
+            using enable_sized_integral_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == S, int>::type;
+
+            template <class T, size_t S>
+            using enable_sized_t = typename std::enable_if<sizeof(T) == S, int>::type;
+
+            template <class T, size_t S>
+            using enable_max_sized_integral_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) <= S, int>::type;
+        } // namespace detail
+    } // namespace kernel
+
     /*****************************************
      * Backport of index_sequence from c++14 *
      *****************************************/
@@ -484,6 +512,16 @@ namespace xsimd
 
     template <class B>
     using complex_batch_type_t = typename complex_batch_type<B>::type;
+
+    /********************************
+     * Matching & mismatching sizes *
+     ********************************/
+
+    template <class T, class U, class B>
+    using sizes_match_t = typename std::enable_if<sizeof(T) == sizeof(U), B>::type;
+
+    template <class T, class U, class B>
+    using sizes_mismatch_t = typename std::enable_if<sizeof(T) != sizeof(U), B>::type;
 }
 
 #endif
