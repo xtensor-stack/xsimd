@@ -589,9 +589,7 @@ namespace xsimd
     template <class T, class A>
     inline T batch<T, A>::get(std::size_t i) const noexcept
     {
-        alignas(A::alignment()) T buffer[size];
-        store_aligned(&buffer[0]);
-        return buffer[i];
+        return kernel::get(*this, i, A {});
     }
 
     /******************************
@@ -845,9 +843,7 @@ namespace xsimd
     template <class T, class A>
     inline bool batch_bool<T, A>::get(std::size_t i) const noexcept
     {
-        alignas(A::alignment()) bool buffer[size];
-        store_aligned(&buffer[0]);
-        return buffer[i];
+        return kernel::get(*this, i, A {});
     }
 
     /***********************************
@@ -1078,9 +1074,7 @@ namespace xsimd
     template <class T, class A>
     inline auto batch<std::complex<T>, A>::get(std::size_t i) const noexcept -> value_type
     {
-        alignas(A::alignment()) value_type buffer[size];
-        store_aligned(&buffer[0]);
-        return buffer[i];
+        return kernel::get(*this, i, A {});
     }
 
     /**************************************
