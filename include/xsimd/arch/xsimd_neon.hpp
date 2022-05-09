@@ -229,23 +229,8 @@ namespace xsimd
              **************************************/
 
             template <class T>
-            using enable_integral_t = typename std::enable_if<std::is_integral<T>::value, int>::type;
-
-            template <class T>
             using enable_neon_type_t = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value,
                                                                int>::type;
-
-            template <class T, size_t S>
-            using enable_sized_signed_t = typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value && sizeof(T) == S, int>::type;
-
-            template <class T, size_t S>
-            using enable_sized_unsigned_t = typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value && sizeof(T) == S, int>::type;
-
-            template <class T, size_t S>
-            using enable_sized_integral_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == S, int>::type;
-
-            template <class T, size_t S>
-            using enable_sized_t = typename std::enable_if<sizeof(T) == S, int>::type;
 
             template <class T>
             using exclude_int64_neon_t
