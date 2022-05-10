@@ -1227,6 +1227,47 @@ namespace xsimd
             constexpr auto mask = blend_mask.mask();
             return _mm256_blend_pd(r0, r1, mask);
         }
+        template <class A,
+                  typename T,
+                  uint32_t V0,
+                  uint32_t V1,
+                  uint32_t V2,
+                  uint32_t V3,
+                  uint32_t V4,
+                  uint32_t V5,
+                  uint32_t V6,
+                  uint32_t V7,
+                  detail::enable_sized_integral_t<T, 4> = 0>
+        inline batch<T, A> swizzle(batch<T, A> const& self,
+                                   batch_constant<batch<uint32_t, A>,
+                                                  V0,
+                                                  V1,
+                                                  V2,
+                                                  V3,
+                                                  V4,
+                                                  V5,
+                                                  V6,
+                                                  V7> const& mask,
+                                   requires_arch<avx>) noexcept
+        {
+            return bitwise_cast<batch<T, A>>(
+                swizzle(bitwise_cast<batch<float, A>>(self), mask));
+        }
+        template <class A,
+                  typename T,
+                  uint32_t V0,
+                  uint32_t V1,
+                  uint32_t V2,
+                  uint32_t V3,
+                  detail::enable_sized_integral_t<T, 8> = 0>
+        inline batch<T, A>
+        swizzle(batch<T, A> const& self,
+                batch_constant<batch<uint64_t, A>, V0, V1, V2, V3> const& mask,
+                requires_arch<avx>) noexcept
+        {
+            return bitwise_cast<batch<T, A>>(
+                swizzle(bitwise_cast<batch<double, A>>(self), mask));
+        }
 
         // trunc
         template <class A>
