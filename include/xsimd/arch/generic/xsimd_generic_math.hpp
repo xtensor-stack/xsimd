@@ -1953,6 +1953,36 @@ namespace xsimd
             return select(absa == ze, cplx_batch(ze), cplx_batch(r * cos(theta), r * sin(theta)));
         }
 
+        template <class A, class T>
+        inline batch<std::complex<T>, A> pow(const batch<std::complex<T>, A>& a, const batch<T, A>& z, requires_arch<generic>) noexcept
+        {
+            auto absa = abs(a);
+            auto arga = arg(a);
+            auto r = pow(absa, z);
+            auto theta = z * arga;
+            auto sincosTheta = xsimd::sincos(theta);
+            return { r * sincosTheta.second, r * sincosTheta.first };
+        }
+
+        template <class A, class T>
+        inline batch<std::complex<T>, A> pow(const batch<T, A>& a, const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        {
+            // same as the complex/complex implementation above, except that we can skip calling arg()!
+            using cplx_batch = batch<std::complex<T>, A>;
+            using real_batch = typename cplx_batch::real_batch;
+            real_batch absa = abs(a);
+            real_batch arga = select(a >= constants::zero<real_batch>(), constants::zero<real_batch>(), constants::pi<real_batch>()); // since a is real, we know arg must be either 0 or pi
+            real_batch x = z.real();
+            real_batch y = z.imag();
+            real_batch r = pow(absa, x);
+            real_batch theta = x * arga;
+            real_batch ze(0);
+            auto cond = (y == ze);
+            r = select(cond, r, r * exp(-y * arga));
+            theta = select(cond, theta, theta + y * log(absa));
+            return select(absa == ze, cplx_batch(ze), cplx_batch(r * cos(theta), r * sin(theta)));
+        }
+
         // reciprocal
         template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
         inline batch<T, A> reciprocal(batch<T, A> const& self,

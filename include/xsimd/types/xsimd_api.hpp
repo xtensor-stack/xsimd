@@ -1356,8 +1356,8 @@ namespace xsimd
      * @param y batch of floating point values.
      * @return \c x raised to the power \c y.
      */
-    template <class T, class A>
-    inline batch<T, A> pow(batch<T, A> const& x, batch<T, A> const& y) noexcept
+    template <class T1, class T2, class A>
+    inline simd_return_type<T1, T2, A> pow(batch<T1, A> const& x, batch<T2, A> const& y) noexcept
     {
         return kernel::pow<A>(x, y, A {});
     }
