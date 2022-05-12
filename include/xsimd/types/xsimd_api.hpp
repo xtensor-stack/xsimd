@@ -1701,6 +1701,38 @@ namespace xsimd
      *
      * Computes the value of the batch \c x raised to the power
      * \c y.
+     * @param x batch of complex floating point values.
+     * @param y batch of floating point values.
+     * @return \c x raised to the power \c y.
+     */
+    template <class T, class A>
+    XSIMD_INLINE batch<std::complex<T>, A> pow(batch<std::complex<T>, A> const& x, batch<T, A> const& y) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::pow<A>(x, y, A {});
+    }
+
+    /**
+     * @ingroup batch_math
+     *
+     * Computes the value of the batch \c x raised to the power
+     * \c y.
+     * @param x batch of complex floating point values.
+     * @param y batch of floating point values.
+     * @return \c x raised to the power \c y.
+     */
+    template <class T, class A>
+    XSIMD_INLINE batch<std::complex<T>, A> pow(batch<T, A> const& x, batch<std::complex<T>, A> const& y) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::pow<A>(x, y, A {});
+    }
+
+    /**
+     * @ingroup batch_math
+     *
+     * Computes the value of the batch \c x raised to the power
+     * \c y.
      * @param x batch of integral values.
      * @param y batch of integral values.
      * @return \c x raised to the power \c y.

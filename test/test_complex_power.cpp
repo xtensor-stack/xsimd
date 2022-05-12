@@ -26,6 +26,7 @@ struct complex_power_test
     using real_vector_type = std::vector<real_value_type>;
 
     size_t nb_input;
+    real_vector_type lhs_p;
     vector_type lhs_nn;
     vector_type lhs_pn;
     vector_type lhs_np;
@@ -37,6 +38,7 @@ struct complex_power_test
     complex_power_test()
     {
         nb_input = 10000 * size;
+        lhs_p.resize(nb_input);
         lhs_nn.resize(nb_input);
         lhs_pn.resize(nb_input);
         lhs_np.resize(nb_input);
@@ -46,6 +48,7 @@ struct complex_power_test
         {
             real_value_type real = (real_value_type(i) / 4 + real_value_type(1.2) * std::sqrt(real_value_type(i + 0.25))) / 100;
             real_value_type imag = (real_value_type(i) / 7 + real_value_type(1.7) * std::sqrt(real_value_type(i + 0.37))) / 100;
+            lhs_p[i] = real;
             lhs_nn[i] = value_type(-real, -imag);
             lhs_pn[i] = value_type(real, -imag);
             lhs_np[i] = value_type(-real, imag);
@@ -96,6 +99,42 @@ struct complex_power_test
     void test_pow()
     {
         test_conditional_pow<real_value_type>();
+    }
+
+    void test_pow_real_complex()
+    {
+        std::transform(lhs_p.cbegin(), lhs_p.cend(), lhs_pp.cbegin(), expected.begin(),
+                       [](const real_value_type& l, const value_type& r)
+                       { using std::pow; return pow(l, r); });
+        batch_type rhs_in, out;
+        real_batch_type lhs_in;
+        for (size_t i = 0; i < nb_input; i += size)
+        {
+            detail::load_batch(lhs_in, lhs_p, i);
+            detail::load_batch(rhs_in, lhs_pp, i);
+            out = pow(lhs_in, rhs_in);
+            detail::store_batch(out, res, i);
+        }
+        size_t diff = detail::get_nb_diff_near(res, expected, std::numeric_limits<real_value_type>::epsilon());
+        CHECK_EQ(diff, 0);
+    }
+
+    void test_pow_complex_real()
+    {
+        std::transform(lhs_pp.cbegin(), lhs_pp.cend(), lhs_p.cbegin(), expected.begin(),
+                       [](const value_type& l, const real_value_type& r)
+                       { using std::pow; return pow(l, r); });
+        batch_type rhs_in, out;
+        real_batch_type lhs_in;
+        for (size_t i = 0; i < nb_input; i += size)
+        {
+            detail::load_batch(lhs_in, lhs_p, i);
+            detail::load_batch(rhs_in, lhs_pp, i);
+            out = pow(lhs_in, rhs_in);
+            detail::store_batch(out, res, i);
+        }
+        size_t diff = detail::get_nb_diff_near(res, expected, std::numeric_limits<real_value_type>::epsilon());
+        CHECK_EQ(diff, 0);
     }
 
     void test_sqrt_nn()
@@ -216,6 +255,16 @@ TEST_CASE_TEMPLATE("[complex power]", B, BATCH_COMPLEX_TYPES)
     SUBCASE("pow")
     {
         Test.test_pow();
+    }
+
+    SUBCASE("pow real complex")
+    {
+        Test.test_pow_real_complex();
+    }
+
+    SUBCASE("pow complex real")
+    {
+        Test.test_pow_complex_real();
     }
 
     SUBCASE("sqrt_nn")
