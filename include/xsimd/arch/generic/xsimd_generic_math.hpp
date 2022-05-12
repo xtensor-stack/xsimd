@@ -2030,6 +2030,26 @@ namespace xsimd
             return select(absa == ze, cplx_batch(ze), cplx_batch(r * sincosTheta.second, r * sincosTheta.first));
         }
 
+        template <class A, class T>
+        inline batch<std::complex<T>, A> pow(const batch<std::complex<T>, A>& a, const batch<T, A>& z, requires_arch<generic>) noexcept
+        {
+            using cplx_batch = batch<std::complex<T>, A>;
+
+            auto absa = abs(a);
+            auto arga = arg(a);
+            auto r = pow(absa, z);
+
+            auto theta = z * arga;
+            auto sincosTheta = xsimd::sincos(theta);
+            return select(absa == 0, cplx_batch(0), cplx_batch(r * sincosTheta.second, r * sincosTheta.first));
+        }
+
+        template <class A, class T>
+        inline batch<std::complex<T>, A> pow(const batch<T, A>& a, const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        {
+            return pow(batch<std::complex<T>, A> { a, batch<T, A> {} }, z);
+        }
+
         // reciprocal
         template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> reciprocal(batch<T, A> const& self,
