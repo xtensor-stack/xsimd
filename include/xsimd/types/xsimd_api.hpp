@@ -1464,7 +1464,11 @@ namespace xsimd
     /**
      * @ingroup batch_math
      *
-     * Computes the inverse square root of the batch \c x.
+     * Computes an estimate of the inverse square root of the batch \c x.
+     *
+     * @warning Unlike most xsimd function, this does not return the same result as the
+     * equivalent scalar operation, trading accuracy for speed.
+     *
      * @param x batch of floating point values.
      * @return the inverse square root of \c x.
      */
