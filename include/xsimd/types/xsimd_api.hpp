@@ -1335,6 +1335,33 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_math
+     *
+     * Returns a complex batch with magnitude \c r and phase angle \c theta.
+     * @param r The magnitude of the desired complex result.
+     * @param theta The phase angle of the desired complex result.
+     * @return \c r exp(i * \c theta).
+     */
+    template <class T, class A>
+    inline complex_batch_type_t<batch<T, A>> polar(batch<T, A> const& r, batch<T, A> const& theta) noexcept
+    {
+        return kernel::polar<A>(r, theta, A {});
+    }
+
+    /**
+     * @ingroup batch_math
+     *
+     * Returns a complex batch with phase angle \c theta.
+     * @param theta The phase angle of the desired complex result.
+     * @return exp(i * \c theta).
+     */
+    template <class T, class A>
+    inline complex_batch_type_t<batch<T, A>> polar(batch<T, A> const& theta) noexcept
+    {
+        return kernel::polar<A>(theta, A {});
+    }
+
+    /**
      * @ingroup batch_arithmetic
      *
      * No-op on \c x.
