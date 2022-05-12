@@ -1780,6 +1780,19 @@ namespace xsimd
                                  self, other);
         }
 
+        // mul_real/imag
+        template <class A, class T>
+        inline batch<T, A> mul_real(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& b, requires_arch<generic>) noexcept
+        {
+            return (a.real() * b.real()) - (a.imag() * b.imag());
+        }
+
+        template <class A, class T>
+        inline batch<T, A> mul_imag(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& b, requires_arch<generic>) noexcept
+        {
+            return (a.real() * b.imag()) + (a.imag() * b.real());
+        }
+
         // nearbyint
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> nearbyint(batch<T, A> const& self, requires_arch<generic>) noexcept
