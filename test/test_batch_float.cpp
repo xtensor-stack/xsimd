@@ -62,8 +62,8 @@ protected:
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
                            [](const value_type& l)
-                           { return value_type(1) / std::sqrt(l); });
-            batch_type res = rsqrt(batch_lhs());
+                           { return std::ceil((value_type(1) / std::sqrt(l)) * value_type(100)); });
+            batch_type res = ceil(rsqrt(batch_lhs()) * value_type(100));
             EXPECT_BATCH_EQ(res, expected) << print_function_name("rsqrt");
         }
     }
@@ -131,6 +131,11 @@ TYPED_TEST(batch_float_test, reciprocal)
 TYPED_TEST(batch_float_test, sqrt)
 {
     this->test_sqrt();
+}
+
+TYPED_TEST(batch_float_test, rsqrt)
+{
+    this->test_rsqrt();
 }
 
 TYPED_TEST(batch_float_test, haddp)

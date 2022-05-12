@@ -1221,12 +1221,12 @@ namespace xsimd
         template <class A>
         inline batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<avx512f>) noexcept
         {
-            return _mm512_rsqrt23_ps(val);
+            return _mm512_rsqrt14_ps(val);
         }
         template <class A>
         inline batch<double, A> rsqrt(batch<double, A> const& val, requires_arch<avx512f>) noexcept
         {
-            return _mm512_rsqrt28_pd(val);
+            return _mm512_rsqrt14_pd(val);
         }
 
         // sadd
