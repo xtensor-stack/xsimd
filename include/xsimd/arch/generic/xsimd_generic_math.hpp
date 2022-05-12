@@ -962,6 +962,21 @@ namespace xsimd
             return { rem1 - 2. * re * si * si, re * isin };
         }
 
+        // polar
+        template <class A, class T>
+        inline batch<std::complex<T>, A> polar(const batch<T, A>& r, const batch<T, A>& theta, requires_arch<generic>) noexcept
+        {
+            auto sincosTheta = sincos(theta);
+            return { r * sincosTheta.second, r * sincosTheta.first };
+        }
+
+        template <class A, class T>
+        inline batch<std::complex<T>, A> polar(const batch<T, A>& theta, requires_arch<generic>) noexcept
+        {
+            auto sincosTheta = sincos(theta);
+            return { sincosTheta.second, sincosTheta.first };
+        }
+
         // fdim
         template <class A, class T>
         inline batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
