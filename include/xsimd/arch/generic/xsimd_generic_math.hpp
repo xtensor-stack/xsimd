@@ -977,6 +977,19 @@ namespace xsimd
             return { sincosTheta.second, sincosTheta.first };
         }
 
+        // mul_real/complex
+        template <class A, class T>
+        inline batch<T, A> mul_real(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& b, requires_arch<generic>) noexcept
+        {
+            return (a.real() * b.real()) - (a.imag() * b.imag());
+        }
+
+        template <class A, class T>
+        inline batch<T, A> mul_imag(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& b, requires_arch<generic>) noexcept
+        {
+            return (a.real() * b.imag()) + (a.imag() * b.real());
+        }
+
         // fdim
         template <class A, class T>
         inline batch<T, A> fdim(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept

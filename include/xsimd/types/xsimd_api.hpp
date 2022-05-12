@@ -1251,6 +1251,34 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_arithmetic
+     *
+     * Computes the real part product of the complex batches \c a and \c b.
+     * @param a batch involved in the product.
+     * @param b batch involved in the product.
+     * @return the result of the product.
+     */
+    template <class T, class A>
+    inline batch<T, A> mul_real(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& b) noexcept
+    {
+        return kernel::mul_real<A>(a, b, A {});
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
+     * Computes the imaginary part product of the complex batches \c a and \c b.
+     * @param a batch involved in the product.
+     * @param b batch involved in the product.
+     * @return the result of the product.
+     */
+    template <class T, class A>
+    inline batch<T, A> mul_imag(const batch<std::complex<T>, A>& a, const batch<std::complex<T>, A>& b) noexcept
+    {
+        return kernel::mul_imag<A>(a, b, A {});
+    }
+
+    /**
      * @ingroup batch_rounding
      *
      * Rounds the scalars in \c x to integer values (in floating point format), using

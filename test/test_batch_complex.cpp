@@ -284,6 +284,24 @@ protected:
             batch_type rres = real_scalar * batch_lhs();
             EXPECT_BATCH_EQ(rres, expected) << print_function_name("real_scalar * batch");
         }
+        // real(batch * batch)
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                           [](const value_type& l, const value_type& r)
+                           { return std::real(l * r); });
+            batch_type res = mul_real(batch_lhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("mul_real");
+        }
+        // imag(batch * batch)
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                           [](const value_type& l, const value_type& r)
+                           { return std::imag(l * r); });
+            batch_type res = mul_imag(batch_lhs(), batch_rhs());
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("mul_imag");
+        }
         // batch / batch
         {
             array_type expected;
