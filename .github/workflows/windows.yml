@@ -1,0 +1,50 @@
+name: Windows build
+on: [push, pull_request]
+jobs:
+  build:
+    name: 'Windows build (${{ matrix.os }}, msvc, ${{ matrix.target }}, ${{ matrix.sys.set }})'
+    defaults:
+      run:
+        shell: bash {0}
+    strategy:
+      matrix:
+        os:
+         - windows-2019
+         - windows-2022
+        target:
+          - x86
+          - x64
+        sys:
+         - { set: SSE, flags: "" }
+         - { set: AVX, flags: "/arch:AVX" }
+         - { set: AVX2, flags: "/arch:AVX2" }
+         - { set: AVX512, flags: "/arch:AVX512" }
+        exclude:
+          # AVX on both platforms has a codegen error
+          # On 2019 in _mm256_rsqrt_ps, on 2022 in _mm256_blend_p*
+          - { sys: { set: AVX } }
+          # On both platforms x86 + AVX512 triggers a compiler crash
+          - { target: x86, sys: { set: AVX512 } } 
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Setup compiler
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{ matrix.target }}
+    - name: Setup Ninja
+      run: |
+        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install ninja
+    - name: Checkout xsimd
+      uses: actions/checkout@v2
+    - name: Setup
+      run: |
+        mkdir _build
+        cd _build && cmake .. -DDOWNLOAD_GTEST=ON -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="${{ matrix.sys.flags }}" -G Ninja
+    - name: Build
+      run: |
+        cd _build && cmake --build .
+    - name: Testing xsimd
+      if: ${{ !startsWith(matrix.sys.set, 'AVX512') }}
+      run: |
+        cd _build && ./test/test_xsimd
