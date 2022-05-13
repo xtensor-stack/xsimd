@@ -9,6 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 #include "test_utils.hpp"
 
 namespace xsimd
@@ -212,3 +215,5 @@ TYPED_TEST(swizzle_test, swizzle_dup)
 {
     this->swizzle_dup();
 }
+
+#endif
