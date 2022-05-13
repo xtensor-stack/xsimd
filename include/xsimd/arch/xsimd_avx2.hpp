@@ -313,39 +313,36 @@ namespace xsimd
         }
 
         // gather
-        template <class A, class T,
-                  typename std::enable_if<std::is_same<uint32_t, T>::value || std::is_same<int32_t, T>::value,
-                                          void>::type>
-        inline batch<T, A> gather(T const* src, batch<int32_t, A> const& index,
+        template <class T, class A, class U, detail::enable_sized_integral_t<T, 4> = 0, detail::enable_sized_integral_t<U, 4> = 0>
+        inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                   kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
             return _mm256_i32gather_epi32(src, index, sizeof(T));
         }
 
-        template <class A, class T,
-                  typename std::enable_if<std::is_same<uint64_t, T>::value || std::is_same<int64_t, T>::value,
-                                          void>::type>
-        inline batch<T, A> gather(T const* src, batch<int64_t, A> const& index,
+        template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_sized_integral_t<U, 8> = 0>
+        inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                   kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
             return _mm256_i64gather_epi64(src, index, sizeof(T));
         }
 
-        template <class A>
-        inline batch<float, A> gather(float const* src,
-                                      batch<int32_t, A> const& index,
+        template <class A, class U,
+                  detail::enable_sized_integral_t<U, 4> = 0>
+        inline batch<float, A> gather(batch<float, A> const&, float const* src,
+                                      batch<U, A> const& index,
                                       kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
             return _mm256_i32gather_ps(src, index, sizeof(float));
         }
 
-        template <class A>
-        inline batch<double, A> gather(double const* src,
-                                       batch<int64_t, A> const& index,
-                                       kernel::requires_arch<avx2>) noexcept
+        template <class A, class U, detail::enable_sized_integral_t<U, 8> = 0>
+        inline batch<double, A> gather(batch<double, A> const&, double const* src,
+                                       batch<U, A> const& index,
+                                       requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
             return _mm256_i64gather_pd(src, index, sizeof(double));
