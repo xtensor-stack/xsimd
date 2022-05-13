@@ -744,14 +744,14 @@ namespace xsimd
         inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                   kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i32gather_epi32(index, src, sizeof(T));
+            return _mm512_i32gather_epi32(index, reinterpret_cast<const int32_t*>(src), sizeof(T));
         }
 
         template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_sized_integral_t<U, 8> = 0>
         inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                   kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i64gather_epi64(index, src, sizeof(T));
+            return _mm512_i64gather_epi64(index, reinterpret_cast<const long long int*>(src), sizeof(T));
         }
 
         template <class A, class U, detail::enable_sized_integral_t<U, 4> = 0>
@@ -768,6 +768,27 @@ namespace xsimd
                kernel::requires_arch<avx512f>) noexcept
         {
             return _mm512_i64gather_pd(index, src, sizeof(double));
+        }
+
+        // gather: handmade conversions
+        template <class A, class V, detail::enable_sized_integral_t<V, 4> = 0>
+        inline batch<float, A> gather(batch<float, A> const&, double const* src,
+                                      batch<V, A> const& index,
+                                      requires_arch<avx512f>) noexcept
+        {
+            const batch<double, A> low(_mm512_i32gather_pd(_mm512_castsi512_si256(index.data), src, sizeof(double)));
+            const batch<double, A> high(_mm512_i32gather_pd(_mm256_castpd_si256(_mm512_extractf64x4_pd(_mm512_castsi512_pd(index.data), 1)), src, sizeof(double)));
+            return detail::merge_avx(_mm512_cvtpd_ps(low.data), _mm512_cvtpd_ps(high.data));
+        }
+
+        template <class A, class V, detail::enable_sized_integral_t<V, 4> = 0>
+        inline batch<int32_t, A> gather(batch<int32_t, A> const&, double const* src,
+                                        batch<V, A> const& index,
+                                        requires_arch<avx512f>) noexcept
+        {
+            const batch<double, A> low(_mm512_i32gather_pd(_mm512_castsi512_si256(index.data), src, sizeof(double)));
+            const batch<double, A> high(_mm512_i32gather_pd(_mm256_castpd_si256(_mm512_extractf64x4_pd(_mm512_castsi512_pd(index.data), 1)), src, sizeof(double)));
+            return detail::merge_avx(_mm512_cvtpd_epi32(low.data), _mm512_cvtpd_epi32(high.data));
         }
 
         // ge

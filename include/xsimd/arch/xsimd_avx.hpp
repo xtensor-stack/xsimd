@@ -36,9 +36,27 @@ namespace xsimd
                 low = _mm256_castsi256_si128(val);
                 high = _mm256_extractf128_si256(val, 1);
             }
+            inline void split_avx(__m256 val, __m128& low, __m128& high) noexcept
+            {
+                low = _mm256_castps256_ps128(val);
+                high = _mm256_extractf128_ps(val, 1);
+            }
+            inline void split_avx(__m256d val, __m128d& low, __m128d& high) noexcept
+            {
+                low = _mm256_castpd256_pd128(val);
+                high = _mm256_extractf128_pd(val, 1);
+            }
             inline __m256i merge_sse(__m128i low, __m128i high) noexcept
             {
                 return _mm256_insertf128_si256(_mm256_castsi128_si256(low), high, 1);
+            }
+            inline __m256 merge_sse(__m128 low, __m128 high) noexcept
+            {
+                return _mm256_insertf128_ps(_mm256_castps128_ps256(low), high, 1);
+            }
+            inline __m256d merge_sse(__m128d low, __m128d high) noexcept
+            {
+                return _mm256_insertf128_pd(_mm256_castpd128_pd256(low), high, 1);
             }
             template <class F>
             inline __m256i fwd_to_sse(F f, __m256i self) noexcept
