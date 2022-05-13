@@ -1,5 +1,8 @@
 name: doc
 on: [push, pull_request]
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
