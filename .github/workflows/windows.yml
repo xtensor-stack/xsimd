@@ -51,3 +51,64 @@ jobs:
       if: ${{ !startsWith(matrix.sys.set, 'AVX512') }}
       run: |
         cd _build && ./test/test_xsimd
+
+  build-windows-mingw:
+    name: 'Windows build (${{ matrix.os }}, ${{ matrix.sys.abi }})'
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      matrix:
+        os:
+          - windows-2019
+        sys:
+          - { abi: mingw32, env: i686,         compiler: gcc }
+          - { abi: mingw64, env: x86_64,       compiler: gcc }
+          - { abi: ucrt64,  env: ucrt-x86_64,  compiler: gcc }
+          - { abi: clang32, env: clang-i686,   compiler: clang }
+          - { abi: clang64, env: clang-x86_64, compiler: clang }
+      fail-fast: false
+    steps:
+      - name: Use MinGW from MSYS
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys.abi }}
+          update: true
+          path-type: inherit
+          install: >-
+            mingw-w64-${{ matrix.sys.env }}-toolchain
+            mingw-w64-${{ matrix.sys.env }}-ninja
+      - name: Setup compiler
+        if: startsWith(matrix.sys.abi, 'mingw') || startsWith(matrix.sys.abi, 'ucrt64')
+        run: |
+          CXX=${CC/#gcc/g++}
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+        env:
+          CC: ${{ matrix.sys.compiler }}
+      - name: Setup compiler
+        if: startsWith(matrix.sys.abi, 'clang')
+        run: |
+          CXX=${CC/#clang/clang++}
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+        env:
+          CC: ${{ matrix.sys.compiler }}
+      - name: Checkout xsimd
+        uses: actions/checkout@v2
+      - name: Version tools
+        run: |
+          $CC --version
+          $CXX --version
+          ninja --version
+      - name: Configure
+        run: |
+          mkdir _build
+          cd _build
+          cmake .. -DDOWNLOAD_GTEST=ON -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
+      - name: Build
+        run: ninja -C _build
+      - name: Test
+        run: |
+          cd _build && ./test/test_xsimd
