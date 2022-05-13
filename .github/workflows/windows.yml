@@ -1,5 +1,8 @@
 name: Windows build
 on: [push, pull_request]
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     name: 'Windows build (${{ matrix.os }}, msvc, ${{ matrix.target }}, ${{ matrix.sys.set }})'
