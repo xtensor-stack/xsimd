@@ -1,6 +1,7 @@
 #ifndef XSIMD_TEST_SUM_HPP
 #define XSIMD_TEST_SUM_HPP
 #include "xsimd/xsimd.hpp"
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 struct sum
 {
@@ -26,6 +27,8 @@ T sum::operator()(Arch, T const* data, unsigned size)
 
 #if XSIMD_WITH_AVX
 extern template float sum::operator()(xsimd::avx, float const*, unsigned);
+#endif
+
 #endif
 
 #endif
