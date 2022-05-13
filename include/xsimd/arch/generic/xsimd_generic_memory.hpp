@@ -77,9 +77,9 @@ namespace xsimd
         } // namespace detail
 
         // Gather with runtime indexes and mismatched strides.
-        template <typename A, typename T, typename U, typename V>
-        inline typename ::xsimd::sizes_mismatch_t<T, U, batch<T, A>>
-        gather(U const* src, batch<V, A> const& index,
+        template <typename T, typename A, typename U, typename V>
+        inline detail::sizes_mismatch_t<T, U, batch<T, A>>
+        gather(batch<T, A> const&, U const* src, batch<V, A> const& index,
                kernel::requires_arch<generic>) noexcept
         {
             static_assert(batch<T, A>::size == batch<V, A>::size,
@@ -89,9 +89,9 @@ namespace xsimd
         }
 
         // Gather with runtime indexes and matching strides.
-        template <typename A, typename T, typename U, typename V>
-        inline typename ::xsimd::sizes_match_t<T, U, batch<T, A>>
-        gather(U const* src, batch<V, A> const& index,
+        template <typename T, typename A, typename U, typename V>
+        inline detail::sizes_match_t<T, U, batch<T, A>>
+        gather(batch<T, A> const&, U const* src, batch<V, A> const& index,
                kernel::requires_arch<generic>) noexcept
         {
             static_assert(batch<T, A>::size == batch<V, A>::size,
@@ -241,7 +241,7 @@ namespace xsimd
         } // namespace detail
 
         template <typename A, typename T, typename U, typename V>
-        inline typename ::xsimd::sizes_mismatch_t<T, U, void>
+        inline detail::sizes_mismatch_t<T, U, void>
         scatter(batch<T, A> const& src, U* dst,
                 batch<V, A> const& index,
                 kernel::requires_arch<generic>) noexcept
@@ -253,7 +253,7 @@ namespace xsimd
         }
 
         template <typename A, typename T, typename U, typename V>
-        inline typename ::xsimd::sizes_match_t<T, U, void>
+        inline detail::sizes_match_t<T, U, void>
         scatter(batch<T, A> const& src, U* dst,
                 batch<V, A> const& index,
                 kernel::requires_arch<generic>) noexcept

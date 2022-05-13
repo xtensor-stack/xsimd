@@ -567,7 +567,7 @@ namespace xsimd
     inline batch<T, A> batch<T, A>::gather(U const* src, batch<V, A> const& index) noexcept
     {
         static_assert(std::is_convertible<T, U>::value, "Can't convert from src to this batch's type!");
-        return kernel::gather<A, T>(src, index, A {});
+        return kernel::gather(batch {}, src, index, A {});
     }
 
     /**

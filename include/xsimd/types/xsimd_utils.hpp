@@ -221,6 +221,16 @@ namespace xsimd
 
             template <class T, size_t S>
             using enable_max_sized_integral_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) <= S, int>::type;
+
+            /********************************
+             * Matching & mismatching sizes *
+             ********************************/
+
+            template <class T, class U, class B = int>
+            using sizes_match_t = typename std::enable_if<sizeof(T) == sizeof(U), B>::type;
+
+            template <class T, class U, class B = int>
+            using sizes_mismatch_t = typename std::enable_if<sizeof(T) != sizeof(U), B>::type;
         } // namespace detail
     } // namespace kernel
 
@@ -512,16 +522,6 @@ namespace xsimd
 
     template <class B>
     using complex_batch_type_t = typename complex_batch_type<B>::type;
-
-    /********************************
-     * Matching & mismatching sizes *
-     ********************************/
-
-    template <class T, class U, class B>
-    using sizes_match_t = typename std::enable_if<sizeof(T) == sizeof(U), B>::type;
-
-    template <class T, class U, class B>
-    using sizes_mismatch_t = typename std::enable_if<sizeof(T) != sizeof(U), B>::type;
 }
 
 #endif
