@@ -231,6 +231,9 @@ namespace xsimd
 
             template <class T, class U, class B = int>
             using sizes_mismatch_t = typename std::enable_if<sizeof(T) != sizeof(U), B>::type;
+
+            template <class T, class U, class B = int>
+            using stride_match_t = typename std::enable_if<!std::is_same<T, U>::value && sizeof(T) == sizeof(U), B>::type;
         } // namespace detail
     } // namespace kernel
 

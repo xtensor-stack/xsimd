@@ -76,6 +76,17 @@ namespace xsimd
             }
         } // namespace detail
 
+        template <typename T, typename A, typename V>
+        inline batch<T, A>
+        gather(batch<T, A> const&, T const* src, batch<V, A> const& index,
+               kernel::requires_arch<generic>) noexcept
+        {
+            static_assert(batch<T, A>::size == batch<V, A>::size,
+                          "Index and destination sizes must match");
+
+            return detail::gather<batch<V, A>::size - 1, T, A>(src, index, {});
+        }
+
         // Gather with runtime indexes and mismatched strides.
         template <typename T, typename A, typename U, typename V>
         inline detail::sizes_mismatch_t<T, U, batch<T, A>>
@@ -90,15 +101,14 @@ namespace xsimd
 
         // Gather with runtime indexes and matching strides.
         template <typename T, typename A, typename U, typename V>
-        inline detail::sizes_match_t<T, U, batch<T, A>>
+        inline detail::stride_match_t<T, U, batch<T, A>>
         gather(batch<T, A> const&, U const* src, batch<V, A> const& index,
                kernel::requires_arch<generic>) noexcept
         {
             static_assert(batch<T, A>::size == batch<V, A>::size,
                           "Index and destination sizes must match");
 
-            const auto dst = detail::gather<batch<V, A>::size - 1, U, A>(src, index, {});
-            return batch_cast<T>(dst);
+            return batch_cast<T>(kernel::gather(batch<U, A> {}, src, index, A {}));
         }
 
         // insert
@@ -240,6 +250,18 @@ namespace xsimd
             }
         } // namespace detail
 
+        template <typename A, typename T, typename V>
+        inline void
+        scatter(batch<T, A> const& src, T* dst,
+                batch<V, A> const& index,
+                kernel::requires_arch<generic>) noexcept
+        {
+            static_assert(batch<T, A>::size == batch<V, A>::size,
+                          "Source and index sizes must match");
+            kernel::detail::scatter<batch<V, A>::size - 1, T, A, T, V>(
+                src, dst, index, {});
+        }
+
         template <typename A, typename T, typename U, typename V>
         inline detail::sizes_mismatch_t<T, U, void>
         scatter(batch<T, A> const& src, U* dst,
@@ -253,7 +275,7 @@ namespace xsimd
         }
 
         template <typename A, typename T, typename U, typename V>
-        inline detail::sizes_match_t<T, U, void>
+        inline detail::stride_match_t<T, U, void>
         scatter(batch<T, A> const& src, U* dst,
                 batch<V, A> const& index,
                 kernel::requires_arch<generic>) noexcept
@@ -261,8 +283,7 @@ namespace xsimd
             static_assert(batch<T, A>::size == batch<V, A>::size,
                           "Source and index sizes must match");
             const auto tmp = batch_cast<U>(src);
-            kernel::detail::scatter<batch<V, A>::size - 1, U, A, U, V>(
-                tmp, dst, index, {});
+            kernel::scatter<A>(tmp, dst, index, A {});
         }
 
         // store
