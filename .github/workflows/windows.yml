@@ -5,15 +5,15 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    name: 'Windows build (${{ matrix.os }}, msvc, ${{ matrix.target }}, ${{ matrix.sys.set }})'
+    name: 'MSVC ${{ matrix.os }}, ${{ matrix.target }} ${{ matrix.sys.set }}'
     defaults:
       run:
         shell: bash {0}
     strategy:
       matrix:
         os:
-         - windows-2019
-         - windows-2022
+         - 2019
+         - 2022
         target:
           - x86
           - x64
@@ -28,7 +28,7 @@ jobs:
           - { sys: { set: AVX } }
           # On both platforms x86 + AVX512 triggers a compiler crash
           - { target: x86, sys: { set: AVX512 } } 
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-${{ matrix.os }}
     steps:
     - name: Setup compiler
       uses: ilammy/msvc-dev-cmd@v1
@@ -53,15 +53,13 @@ jobs:
         cd _build && ./test/test_xsimd
 
   build-windows-mingw:
-    name: 'Windows build (${{ matrix.os }}, ${{ matrix.sys.abi }})'
-    runs-on: ${{ matrix.os }}
+    name: 'MSYS ${{ matrix.sys.abi }}'
+    runs-on: windows-2019
     defaults:
       run:
         shell: msys2 {0}
     strategy:
       matrix:
-        os:
-          - windows-2019
         sys:
           - { abi: mingw32, env: i686,         compiler: gcc }
           - { abi: mingw64, env: x86_64,       compiler: gcc }
