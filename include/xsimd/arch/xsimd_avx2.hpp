@@ -318,7 +318,7 @@ namespace xsimd
                                   kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
-            return _mm256_i32gather_epi32(reinterpret_cast<const int32_t*>(src), index, sizeof(T));
+            return _mm256_i32gather_epi32(reinterpret_cast<const int*>(src), index, sizeof(T));
         }
 
         template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_sized_integral_t<U, 8> = 0>
@@ -326,7 +326,6 @@ namespace xsimd
                                   kernel::requires_arch<avx2>) noexcept
         {
             // scatter for this one is AVX512F+AVX512VL
-            // Note: GCC for some reason defines this with long long int
             return _mm256_i64gather_epi64(reinterpret_cast<const long long int*>(src), index, sizeof(T));
         }
 

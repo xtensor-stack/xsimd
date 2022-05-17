@@ -744,14 +744,14 @@ namespace xsimd
         inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                   kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i32gather_epi32(index, reinterpret_cast<const int32_t*>(src), sizeof(T));
+            return _mm512_i32gather_epi32(index, static_cast<const void*>(src), sizeof(T));
         }
 
         template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_sized_integral_t<U, 8> = 0>
         inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                   kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i64gather_epi64(index, reinterpret_cast<const long long int*>(src), sizeof(T));
+            return _mm512_i64gather_epi64(index, static_cast<const void*>(src), sizeof(T));
         }
 
         template <class A, class U, detail::enable_sized_integral_t<U, 4> = 0>
