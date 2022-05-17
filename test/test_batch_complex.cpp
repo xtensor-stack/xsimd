@@ -539,17 +539,7 @@ protected:
                            [](const value_type& v_lhs, const value_type& v_rhs)
                            { return std::polar(std::real(v_lhs), std::real(v_rhs)); });
             batch_type res = polar(real(batch_lhs()), real(batch_rhs()));
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("polar(mag/phase)");
-        }
-
-        // polar w/ just phase
-        {
-            array_type expected;
-            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
-                           [](const value_type& v)
-                           { return std::exp(value_type(0, 1) * std::real(v)); });
-            batch_type res = polar(real(batch_lhs()));
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("polar(phase)");
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("polar");
         }
     }
 
