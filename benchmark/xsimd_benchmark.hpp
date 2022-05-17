@@ -355,9 +355,10 @@ namespace xsimd
 #ifndef XSIMD_POLY_BENCHMARKS
         out << "scalar double     : " << t_double_scalar.count() << "ms" << std::endl;
 #endif
-
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
         out << "vector double     : " << t_double_vector.count() << "ms" << std::endl;
         out << "vector double unr : " << t_double_vector_u.count() << "ms" << std::endl;
+#endif
         out << "============================" << std::endl;
     }
 
