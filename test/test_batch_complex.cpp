@@ -548,6 +548,19 @@ protected:
         }
     }
 
+    void test_polar() const
+    {
+        // polar w/ magnitude/phase
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.begin(), expected.begin(),
+                           [](const value_type& v_lhs, const value_type& v_rhs)
+                           { return std::polar(std::real(v_lhs), std::real(v_rhs)); });
+            batch_type res = polar(real(batch_lhs()), real(batch_rhs()));
+            EXPECT_BATCH_EQ(res, expected) << print_function_name("polar");
+        }
+    }
+
     void test_horizontal_operations() const
     {
         // hadd
@@ -680,6 +693,11 @@ TYPED_TEST(batch_complex_test, conj_norm_proj)
 TYPED_TEST(batch_complex_test, conj_norm_proj_real)
 {
     this->test_conj_norm_proj_real();
+}
+
+TYPED_TEST(batch_complex_test, polar)
+{
+    this->test_polar();
 }
 
 TYPED_TEST(batch_complex_test, horizontal_operations)
