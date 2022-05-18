@@ -113,7 +113,7 @@ namespace xsimd
                 return _mm_insert_epi8(self, val, I);
             case 4:
                 return _mm_insert_epi32(self, val, I);
-#if !defined(_MSC_VER) || _MSC_VER > 1900
+#if !defined(_MSC_VER) || _MSC_VER > 1900 && defined(_M_X64)
             case 8:
                 return _mm_insert_epi64(self, val, I);
 #endif
