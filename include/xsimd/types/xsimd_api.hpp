@@ -1664,6 +1664,44 @@ namespace xsimd
         return kernel::sincos<A>(x, A {});
     }
 
+#if XSIMD_WITH_SSE2
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Slide the whole batch to the left by \c n bytes. This is different from
+     * \c bitwise_lshift that shifts each batch element to the left.
+     *
+     * @tparam N Amount of bytes to slide to the left.
+     * @param x batch of integer values.
+     * @return slided batch.
+     */
+    template <size_t N, class T, class A>
+    inline batch<T, A> slide_left(batch<T, A> const& x) noexcept
+    {
+        static_assert(std::is_integral<T>::value, "can only slide batch of integers");
+        return kernel::slide_left<N, A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Slide the whole batch to the right by \c N bytes. This is different from
+     * \c bitwise_rshift that shifts each batch element to the right.
+     *
+     * @tparam N Amount of bytes to slide to the right.
+     * @param x batch of integer values.
+     * @return slided batch.
+     */
+    template <size_t N, class T, class A>
+    inline batch<T, A> slide_right(batch<T, A> const& x) noexcept
+    {
+        static_assert(std::is_integral<T>::value, "can only slide batch of integers");
+        return kernel::slide_right<N, A>(x, A {});
+    }
+
+#endif
+
     /**
      * @ingroup batch_math
      *
