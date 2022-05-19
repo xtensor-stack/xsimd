@@ -166,8 +166,6 @@ namespace
     };
 }
 
-#if XSIMD_WITH_SSE2
-
 template <class B>
 class slide_test : public testing::Test, init_slide_base<typename B::value_type, B::size>
 {
@@ -261,5 +259,4 @@ TYPED_TEST(slide_test, slide_right)
 {
     this->slide_right();
 }
-#endif
 #endif

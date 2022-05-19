@@ -2427,6 +2427,72 @@ namespace xsimd
         {
             return !(arg == arg);
         }
+
+        // slide_left
+        namespace detail
+        {
+            template <size_t N>
+            struct slider_left
+            {
+                template <class A, class T>
+                inline batch<T, A> operator()(batch<T, A> const& x, requires_arch<neon>) noexcept
+                {
+                    const auto left = vdupq_n_u8(0);
+                    const auto right = bitwise_cast<batch<uint8_t, A>>(x).data;
+                    const batch<uint8_t, A> res(vextq_u8(left, right, 16 - N));
+                    return bitwise_cast<batch<T, A>>(res);
+                }
+            };
+
+            template <>
+            struct slider_left<0>
+            {
+                template <class A, class T>
+                inline batch<T, A> operator()(batch<T, A> const& x, requires_arch<neon>) noexcept
+                {
+                    return x;
+                }
+            };
+        } // namespace detail
+
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_left(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return detail::slider_left<N> {}(x, A {});
+        }
+
+        // slide_right
+        namespace detail
+        {
+            template <size_t N>
+            struct slider_right
+            {
+                template <class A, class T>
+                inline batch<T, A> operator()(batch<T, A> const& x, requires_arch<neon>) noexcept
+                {
+                    const auto left = bitwise_cast<batch<uint8_t, A>>(x).data;
+                    const auto right = vdupq_n_u8(0);
+                    const batch<uint8_t, A> res(vextq_u8(left, right, N));
+                    return bitwise_cast<batch<T, A>>(res);
+                }
+            };
+
+            template <>
+            struct slider_right<16>
+            {
+                template <class A, class T>
+                inline batch<T, A> operator()(batch<T, A> const&, requires_arch<neon>) noexcept
+                {
+                    return batch<T, A> {};
+                }
+            };
+        } // namespace detail
+
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_right(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return detail::slider_right<N> {}(x, A {});
+        }
     }
 
     template <class batch_type, typename batch_type::value_type... Values>
