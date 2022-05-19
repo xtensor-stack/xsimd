@@ -1664,8 +1664,6 @@ namespace xsimd
         return kernel::sincos<A>(x, A {});
     }
 
-#if XSIMD_WITH_SSE2
-
     /**
      * @ingroup batch_data_transfer
      *
@@ -1699,8 +1697,6 @@ namespace xsimd
         static_assert(std::is_integral<T>::value, "can only slide batch of integers");
         return kernel::slide_right<N, A>(x, A {});
     }
-
-#endif
 
     /**
      * @ingroup batch_math
