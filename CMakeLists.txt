@@ -124,6 +124,8 @@ endif()
 # Installation
 # ============
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(JoinPaths)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
@@ -159,6 +161,8 @@ install(EXPORT ${PROJECT_NAME}-targets
         FILE ${PROJECT_NAME}Targets.cmake
         DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
 
+join_paths(libdir_for_pc_file "\${exec_prefix}" "${CMAKE_INSTALL_LIBDIR}")
+join_paths(includedir_for_pc_file "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
 configure_file(${PROJECT_NAME}.pc.in
                "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
                 @ONLY)
