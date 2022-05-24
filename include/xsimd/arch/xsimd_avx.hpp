@@ -1039,6 +1039,20 @@ namespace xsimd
             return select(batch_bool<T, A> { Values... }, true_br, false_br, avx2 {});
         }
 
+        template <class A, bool... Values>
+        inline batch<float, A> select(batch_bool_constant<batch<float, A>, Values...> const&, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<avx>) noexcept
+        {
+            constexpr auto mask = batch_bool_constant<batch<float, A>, Values...>::mask();
+            return _mm256_blend_ps(false_br, true_br, mask);
+        }
+
+        template <class A, bool... Values>
+        inline batch<double, A> select(batch_bool_constant<batch<double, A>, Values...> const&, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<avx>) noexcept
+        {
+            constexpr auto mask = batch_bool_constant<batch<double, A>, Values...>::mask();
+            return _mm256_blend_pd(false_br, true_br, mask);
+        }
+
         // set
         template <class A, class... Values>
         inline batch<float, A> set(batch<float, A> const&, requires_arch<avx>, Values... values) noexcept
