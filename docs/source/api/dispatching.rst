@@ -32,13 +32,13 @@ Arch Dispatching
 ================
 
 `xsimd` provides a generic way to dispatch a function call based on the architecture the code was compiled for and the architectures available at runtime.
-The :cpp:func::`xsimd::dispatch` function takes a functor whose call operator takes an architecture parameter as first operand, followed by any number of arguments ``Args...`` and turn it into a
+The :cpp:func:`xsimd::dispatch` function takes a functor whose call operator takes an architecture parameter as first operand, followed by any number of arguments ``Args...`` and turn it into a
 dispatching functor that takes ``Args...`` as arguments.
 
 .. doxygenfunction:: xsimd::dispatch
     :project: xsimd
 
-Following code showcases a usage of the :cpp:func::`xsimd::dispatch` function:
+Following code showcases a usage of the :cpp:func:`xsimd::dispatch` function:
 
 .. code-block:: c++
 
