@@ -33,18 +33,6 @@ The :ref:`batch <xsimd-batch-ref>` and :ref:`batch_bool <xsimd-batch-bool-ref>` 
 by default, only full specializations of these templates are available depending on the instruction set macros defined
 according to the instruction sets provided by the compiler.
 
-Fallback implementation
------------------------
-
-You may optionally enable a fallback implementation, which translates batch and batch_bool variants that do not exist in
-hardware into scalar loops. This is done by setting the XSIMD_ENABLE_FALLBACK preprocessor flag before including any xsimd
-header.
-
-This scalar fallback enables you to test the correctness of your computations without having matching hardware available, but
-you should be aware that it is only intended for use in validation scenarios. It has generally speaking not been tuned for
-performance, and its run-time characteristics may vary enormously from one compiler to another. Enabling it in
-performance-conscious production code is therefore strongly discouraged.
-
 XTL complex support
 -------------------
 

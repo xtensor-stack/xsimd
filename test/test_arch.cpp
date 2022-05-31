@@ -178,15 +178,4 @@ TEST(arch, default_load)
     try_loads<type_list>();
 }
 
-#ifdef XSIMD_ENABLE_FALLBACK
-// FIXME: this should be named scalar
-TEST(arch, scalar)
-{
-    float data[17] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
-    float ref = std::accumulate(std::begin(data), std::end(data), 0);
-
-    float res = sum {}(xsimd::arch::scalar {}, data, 17);
-    EXPECT_EQ(ref, res);
-}
-#endif
 #endif

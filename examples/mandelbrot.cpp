@@ -20,8 +20,6 @@
 
 #include "pico_bench.hpp"
 
-#define XSIMD_ENABLE_FALLBACK
-
 #include <xsimd/xsimd.hpp>
 
 // helper function to write the rendered image as PPM file

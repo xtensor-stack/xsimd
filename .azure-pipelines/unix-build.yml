@@ -32,9 +32,6 @@ steps:
       if [[ $(enable_xtl_complex) == 1 ]]; then
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_XTL_COMPLEX=ON";
       fi
-      if [[ $(enable_fallback) == 1 ]]; then
-        CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_FALLBACK=ON";
-      fi
       if [[ $(avx) == 1 ]]; then
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
       fi
