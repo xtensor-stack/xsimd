@@ -34,7 +34,6 @@ jobs:
       avx512: 0
       i686: 0
       enable_xtl_complex: 0
-      enable_fallback: 0
       force_no_instr_set: 0
     timeoutInMinutes: 30
     steps:
