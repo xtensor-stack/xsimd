@@ -130,6 +130,21 @@ namespace xsimd
                                  { return x || y; },
                                  self, other);
         }
+
+        // mask
+        template <class A, class T>
+        inline uint64_t mask(batch_bool<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            alignas(A::alignment()) bool buffer[batch_bool<T, A>::size];
+            self.store_aligned(buffer);
+            // This is inefficient but should never be called. It's just a
+            // temporary implementation until arm support is added.
+            uint64_t res = 0;
+            for (size_t i = 0; i < batch_bool<T, A>::size; ++i)
+                if (buffer[i])
+                    res |= 1ul << i;
+            return res;
+        }
     }
 }
 
