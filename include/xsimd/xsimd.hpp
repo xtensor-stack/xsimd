@@ -12,7 +12,7 @@
 #ifndef XSIMD_HPP
 #define XSIMD_HPP
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 #define XSIMD_NO_DISCARD __attribute__((warn_unused_result))
 #else
 #define XSIMD_NO_DISCARD
