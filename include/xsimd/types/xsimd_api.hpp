@@ -2065,6 +2065,26 @@ namespace xsimd
             o << buffer[i] << ", ";
         return o << buffer[size - 1] << ')';
     }
+
+    /**
+     * @ingroup batch_miscellaneous
+     *
+     * Dump the content of batch \c x to stream \c o
+     * @param o the stream where the batch is dumped
+     * @param x batch to dump.
+     * @return a reference to \c o
+     */
+    template <class T, class A>
+    inline std::ostream& operator<<(std::ostream& o, batch_bool<T, A> const& x) noexcept
+    {
+        constexpr auto size = batch_bool<T, A>::size;
+        alignas(A::alignment()) bool buffer[size];
+        x.store_aligned(&buffer[0]);
+        o << '(';
+        for (std::size_t i = 0; i < size - 1; ++i)
+            o << buffer[i] << ", ";
+        return o << buffer[size - 1] << ')';
+    }
 }
 
 #endif

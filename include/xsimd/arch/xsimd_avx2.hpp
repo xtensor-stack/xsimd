@@ -451,6 +451,23 @@ namespace xsimd
             batch_type imag = _mm256_permute4x64_pd(_mm256_unpackhi_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
             return { real, imag };
         }
+        // mask
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline uint64_t mask(batch_bool<T, A> const& self, requires_arch<avx2>) noexcept
+        {
+            switch (sizeof(T))
+            {
+            case 1:
+                return 0xFFFFFFFF & (uint64_t)_mm256_movemask_epi8(self);
+            case 2:
+            {
+                uint64_t mask8 = 0xFFFFFFFF & (uint64_t)_mm256_movemask_epi8(self);
+                return detail::mask_lut(mask8) | (detail::mask_lut(mask8 >> 8) << 4) | (detail::mask_lut(mask8 >> 16) << 8) | (detail::mask_lut(mask8 >> 24) << 12);
+            }
+            default:
+                return mask(self, avx {});
+            }
+        }
 
         // max
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
