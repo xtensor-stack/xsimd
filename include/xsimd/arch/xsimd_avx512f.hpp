@@ -1051,6 +1051,13 @@ namespace xsimd
             return detail::compare_int_avx512f<A, T, _MM_CMPINT_LT>(self, other);
         }
 
+        // mask
+        template <class A, class T>
+        inline uint64_t mask(batch_bool<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            return self.data;
+        }
+
         // max
         template <class A>
         inline batch<float, A> max(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept

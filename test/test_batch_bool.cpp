@@ -18,6 +18,18 @@
 
 namespace xsimd
 {
+
+    int popcount(int v)
+    {
+        // from https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan
+        int c; // c accumulates the total bits set in v
+        for (c = 0; v; c++)
+        {
+            v &= v - 1; // clear the least significant bit set
+        }
+        return c;
+    }
+
     template <class T, std::size_t N>
     struct get_bool_base
     {
@@ -314,6 +326,17 @@ protected:
         }
     }
 
+    void test_mask() const
+    {
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
+        const uint64_t full_mask = ((uint64_t)-1) >> (64 - batch_bool_type::size);
+        EXPECT_EQ(bool_g.all_false.mask(), 0);
+        EXPECT_EQ(bool_g.all_true.mask(), full_mask);
+        EXPECT_EQ(bool_g.half.mask(), full_mask & ((uint64_t)-1) << (batch_bool_type::size / 2));
+        EXPECT_EQ(bool_g.ihalf.mask(), full_mask & ~(((uint64_t)-1) << (batch_bool_type::size / 2)));
+        EXPECT_EQ(bool_g.interspersed.mask(), full_mask & 0xAAAAAAAAAAAAAAAAul);
+    }
+
 private:
     batch_type batch_lhs() const
     {
@@ -346,5 +369,10 @@ TYPED_TEST(batch_bool_test, logical_operations)
 TYPED_TEST(batch_bool_test, bitwise_operations)
 {
     this->test_bitwise_operations();
+}
+
+TYPED_TEST(batch_bool_test, mask)
+{
+    this->test_mask();
 }
 #endif

@@ -840,6 +840,39 @@ namespace xsimd
                                       { return lt(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
                                       self, other);
         }
+        // mask
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline uint64_t mask(batch_bool<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            switch (sizeof(T))
+            {
+            case 1:
+            case 2:
+            {
+                __m128i self_low, self_high;
+                detail::split_avx(self, self_low, self_high);
+                return mask(batch_bool<T, sse4_2>(self_low), sse4_2 {}) | (mask(batch_bool<T, sse4_2>(self_high), sse4_2 {}) << (128 / (8 * sizeof(T))));
+            }
+            case 4:
+                return _mm256_movemask_ps(_mm256_castsi256_ps(self));
+            case 8:
+                return _mm256_movemask_pd(_mm256_castsi256_pd(self));
+            default:
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A>
+        inline uint64_t mask(batch_bool<float, A> const& self, requires_arch<avx>) noexcept
+        {
+            return _mm256_movemask_ps(self);
+        }
+
+        template <class A>
+        inline uint64_t mask(batch_bool<double, A> const& self, requires_arch<avx>) noexcept
+        {
+            return _mm256_movemask_pd(self);
+        }
 
         // max
         template <class A>
