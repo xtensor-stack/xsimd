@@ -12,9 +12,26 @@
 #ifndef XSIMD_HPP
 #define XSIMD_HPP
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__has_cpp_attribute)
+// if this check passes, then the compiler supports feature test macros
+#if __has_cpp_attribute(nodiscard) >= 201603L
+// if this check passes, then the compiler supports [[nodiscard]] without a message
+#define XSIMD_NO_DISCARD [[nodiscard]]
+#endif
+#endif
+
+#if !defined(XSIMD_NO_DISCARD) && __cplusplus >= 201703L
+// this means that the previous tests failed, but we are using C++17 or higher
+#define XSIMD_NO_DISCARD [[nodiscard]]
+#endif
+
+#if !defined(XSIMD_NO_DISCARD) && (defined(__GNUC__) || defined(__clang__))
+// this means that the previous checks failed, but we are using GCC or Clang
 #define XSIMD_NO_DISCARD __attribute__((warn_unused_result))
-#else
+#endif
+
+#if !defined(XSIMD_NO_DISCARD)
+// this means that all the previous checks failed, so we fallback to doing nothing
 #define XSIMD_NO_DISCARD
 #endif
 
