@@ -620,6 +620,100 @@ namespace xsimd
             return _mm256_floor_pd(self);
         }
 
+        // from_mask
+        template <class A>
+        inline batch_bool<float, A> from_mask(batch_bool<float, A> const&, uint64_t mask, requires_arch<avx>) noexcept
+        {
+            alignas(A::alignment()) static const uint64_t lut32[] = {
+                0x0000000000000000ul,
+                0x00000000FFFFFFFFul,
+                0xFFFFFFFF00000000ul,
+                0xFFFFFFFFFFFFFFFFul,
+            };
+            assert(!(mask & ~0xFFul) && "inbound mask");
+            return _mm256_castsi256_ps(_mm256_setr_epi64x(lut32[mask & 0x3], lut32[(mask >> 2) & 0x3], lut32[(mask >> 4) & 0x3], lut32[mask >> 6]));
+        }
+        template <class A>
+        inline batch_bool<double, A> from_mask(batch_bool<double, A> const&, uint64_t mask, requires_arch<avx>) noexcept
+        {
+            alignas(A::alignment()) static const uint64_t lut64[][4] = {
+                { 0x0000000000000000ul, 0x0000000000000000ul, 0x0000000000000000ul, 0x0000000000000000ul },
+                { 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0x0000000000000000ul, 0x0000000000000000ul },
+                { 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0x0000000000000000ul },
+                { 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0x0000000000000000ul },
+                { 0x0000000000000000ul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul },
+                { 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul },
+                { 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul },
+                { 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul },
+                { 0x0000000000000000ul, 0x0000000000000000ul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul },
+                { 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul },
+                { 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul },
+                { 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul },
+                { 0x0000000000000000ul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul },
+                { 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul },
+                { 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul },
+                { 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul },
+            };
+            assert(!(mask & ~0xFul) && "inbound mask");
+            return _mm256_castsi256_pd(_mm256_load_si256((const __m256i*)lut64[mask]));
+        }
+        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<avx>) noexcept
+        {
+            alignas(A::alignment()) static const uint32_t lut32[] = {
+                0x00000000,
+                0x000000FF,
+                0x0000FF00,
+                0x0000FFFF,
+                0x00FF0000,
+                0x00FF00FF,
+                0x00FFFF00,
+                0x00FFFFFF,
+                0xFF000000,
+                0xFF0000FF,
+                0xFF00FF00,
+                0xFF00FFFF,
+                0xFFFF0000,
+                0xFFFF00FF,
+                0xFFFFFF00,
+                0xFFFFFFFF,
+            };
+            alignas(A::alignment()) static const uint64_t lut64[] = {
+                0x0000000000000000ul,
+                0x000000000000FFFFul,
+                0x00000000FFFF0000ul,
+                0x00000000FFFFFFFFul,
+                0x0000FFFF00000000ul,
+                0x0000FFFF0000FFFFul,
+                0x0000FFFFFFFF0000ul,
+                0x0000FFFFFFFFFFFFul,
+                0xFFFF000000000000ul,
+                0xFFFF00000000FFFFul,
+                0xFFFF0000FFFF0000ul,
+                0xFFFF0000FFFFFFFFul,
+                0xFFFFFFFF00000000ul,
+                0xFFFFFFFF0000FFFFul,
+                0xFFFFFFFFFFFF0000ul,
+                0xFFFFFFFFFFFFFFFFul,
+            };
+            switch (sizeof(T))
+            {
+            case 1:
+                assert(!(mask & ~0xFFFFFFFFul) && "inbound mask");
+                return _mm256_setr_epi32(lut32[mask & 0xF], lut32[(mask >> 4) & 0xF],
+                                         lut32[(mask >> 8) & 0xF], lut32[(mask >> 12) & 0xF],
+                                         lut32[(mask >> 16) & 0xF], lut32[(mask >> 20) & 0xF],
+                                         lut32[(mask >> 24) & 0xF], lut32[mask >> 28]);
+            case 2:
+                assert(!(mask & ~0xFFFFul) && "inbound mask");
+                return _mm256_setr_epi64x(lut64[mask & 0xF], lut64[(mask >> 4) & 0xF], lut64[(mask >> 8) & 0xF], lut64[(mask >> 12) & 0xF]);
+            case 4:
+                return _mm256_castps_si256(from_mask(batch_bool<float, A> {}, mask, avx {}));
+            case 8:
+                return _mm256_castpd_si256(from_mask(batch_bool<double, A> {}, mask, avx {}));
+            }
+        }
+
         // hadd
         template <class A>
         inline float hadd(batch<float, A> const& rhs, requires_arch<avx>) noexcept
@@ -840,6 +934,7 @@ namespace xsimd
                                       { return lt(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
                                       self, other);
         }
+
         // mask
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline uint64_t mask(batch_bool<T, A> const& self, requires_arch<avx>) noexcept

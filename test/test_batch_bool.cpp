@@ -331,10 +331,19 @@ protected:
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
         const uint64_t full_mask = ((uint64_t)-1) >> (64 - batch_bool_type::size);
         EXPECT_EQ(bool_g.all_false.mask(), 0);
+        EXPECT_EQ(batch_bool_type::from_mask(bool_g.all_false.mask()).mask(), bool_g.all_false.mask());
+
         EXPECT_EQ(bool_g.all_true.mask(), full_mask);
+        EXPECT_EQ(batch_bool_type::from_mask(bool_g.all_true.mask()).mask(), bool_g.all_true.mask());
+
         EXPECT_EQ(bool_g.half.mask(), full_mask & ((uint64_t)-1) << (batch_bool_type::size / 2));
+        EXPECT_EQ(batch_bool_type::from_mask(bool_g.half.mask()).mask(), bool_g.half.mask());
+
         EXPECT_EQ(bool_g.ihalf.mask(), full_mask & ~(((uint64_t)-1) << (batch_bool_type::size / 2)));
+        EXPECT_EQ(batch_bool_type::from_mask(bool_g.ihalf.mask()).mask(), bool_g.ihalf.mask());
+
         EXPECT_EQ(bool_g.interspersed.mask(), full_mask & 0xAAAAAAAAAAAAAAAAul);
+        EXPECT_EQ(batch_bool_type::from_mask(bool_g.interspersed.mask()).mask(), bool_g.interspersed.mask());
     }
 
 private:

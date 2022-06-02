@@ -243,7 +243,10 @@ namespace xsimd
         static XSIMD_NO_DISCARD batch_bool load_unaligned(bool const* mem) noexcept;
 
         bool get(std::size_t i) const noexcept;
+
+        // mask operations
         uint64_t mask() const noexcept;
+        static batch_bool from_mask(uint64_t mask) noexcept;
 
         // comparison operators
         batch_bool operator==(batch_bool const& other) const noexcept;
@@ -850,6 +853,17 @@ namespace xsimd
     inline uint64_t batch_bool<T, A>::mask() const noexcept
     {
         return kernel::mask(*this, A {});
+    }
+
+    /**
+     * Extract a scalar mask representation from this @c batch_bool.
+     *
+     * @return bit mask
+     */
+    template <class T, class A>
+    inline batch_bool<T, A> batch_bool<T, A>::from_mask(uint64_t mask) noexcept
+    {
+        return kernel::from_mask(batch_bool<T, A>(), mask, A {});
     }
 
     template <class T, class A>

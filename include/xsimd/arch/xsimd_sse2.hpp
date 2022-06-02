@@ -603,6 +603,97 @@ namespace xsimd
             return _mm_castsi128_pd(_mm_cmpeq_epi32(_mm_castpd_si128(self), _mm_castpd_si128(other)));
         }
 
+        // from_mask
+        template <class A>
+        inline batch_bool<float, A> from_mask(batch_bool<float, A> const&, uint64_t mask, requires_arch<sse2>) noexcept
+        {
+            alignas(A::alignment()) static const uint32_t lut[][4] = {
+                { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+                { 0xFFFFFFFF, 0x00000000, 0x00000000, 0x00000000 },
+                { 0x00000000, 0xFFFFFFFF, 0x00000000, 0x00000000 },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000 },
+                { 0x00000000, 0x00000000, 0xFFFFFFFF, 0x00000000 },
+                { 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000 },
+                { 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 },
+                { 0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0x00000000, 0x00000000, 0xFFFFFFFF },
+                { 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF },
+                { 0x00000000, 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF },
+                { 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF },
+            };
+            assert(!(mask & ~0xFul) && "inbound mask");
+            return _mm_castsi128_ps(_mm_load_si128((const __m128i*)lut[mask]));
+        }
+        template <class A>
+        inline batch_bool<double, A> from_mask(batch_bool<double, A> const&, uint64_t mask, requires_arch<sse2>) noexcept
+        {
+            alignas(A::alignment()) static const uint64_t lut[][4] = {
+                { 0x0000000000000000ul, 0x0000000000000000ul },
+                { 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul },
+                { 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul },
+                { 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul },
+            };
+            assert(!(mask & ~0x3ul) && "inbound mask");
+            return _mm_castsi128_pd(_mm_load_si128((const __m128i*)lut[mask]));
+        }
+        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<sse2>) noexcept
+        {
+            alignas(A::alignment()) static const uint64_t lut64[] = {
+                0x0000000000000000,
+                0x000000000000FFFF,
+                0x00000000FFFF0000,
+                0x00000000FFFFFFFF,
+                0x0000FFFF00000000,
+                0x0000FFFF0000FFFF,
+                0x0000FFFFFFFF0000,
+                0x0000FFFFFFFFFFFF,
+                0xFFFF000000000000,
+                0xFFFF00000000FFFF,
+                0xFFFF0000FFFF0000,
+                0xFFFF0000FFFFFFFF,
+                0xFFFFFFFF00000000,
+                0xFFFFFFFF0000FFFF,
+                0xFFFFFFFFFFFF0000,
+                0xFFFFFFFFFFFFFFFF,
+            };
+            alignas(A::alignment()) static const uint32_t lut32[] = {
+                0x00000000,
+                0x000000FF,
+                0x0000FF00,
+                0x0000FFFF,
+                0x00FF0000,
+                0x00FF00FF,
+                0x00FFFF00,
+                0x00FFFFFF,
+                0xFF000000,
+                0xFF0000FF,
+                0xFF00FF00,
+                0xFF00FFFF,
+                0xFFFF0000,
+                0xFFFF00FF,
+                0xFFFFFF00,
+                0xFFFFFFFF,
+            };
+            switch (sizeof(T))
+            {
+            case 1:
+                assert(!(mask & ~0xFFFF) && "inbound mask");
+                return _mm_setr_epi32(lut32[mask & 0xF], lut32[(mask >> 4) & 0xF], lut32[(mask >> 8) & 0xF], lut32[mask >> 12]);
+            case 2:
+                assert(!(mask & ~0xFF) && "inbound mask");
+                return _mm_set_epi64x(lut64[mask >> 4], lut64[mask & 0xF]);
+            case 4:
+                return _mm_castps_si128(from_mask(batch_bool<float, A> {}, mask, sse2 {}));
+            case 8:
+                return _mm_castpd_si128(from_mask(batch_bool<double, A> {}, mask, sse2 {}));
+            }
+        }
+
         // ge
         template <class A>
         inline batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept

@@ -22,6 +22,18 @@ namespace xsimd
 
         using namespace types;
 
+        // from  mask
+        template <class A, class T>
+        inline batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<generic>) noexcept
+        {
+            alignas(A::alignment()) bool buffer[batch_bool<T, A>::size];
+            // This is inefficient but should never be called. It's just a
+            // temporary implementation until arm support is added.
+            for (size_t i = 0; i < batch_bool<T, A>::size; ++i)
+                buffer[i] = mask & (1ull << i);
+            return batch_bool<T, A>::load_aligned(buffer);
+        }
+
         // ge
         template <class A, class T>
         inline batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept

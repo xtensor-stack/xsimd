@@ -739,6 +739,13 @@ namespace xsimd
             return select(self, batch<T, A>(1), batch<T, A>(0));
         }
 
+        // from_mask
+        template <class T, class A>
+        inline batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<avx512f>) noexcept
+        {
+            return static_cast<typename batch_bool<T, A>::register_type>(mask);
+        }
+
         // gather
         template <class T, class A, class U, detail::enable_sized_integral_t<T, 4> = 0, detail::enable_sized_integral_t<U, 4> = 0>
         inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
