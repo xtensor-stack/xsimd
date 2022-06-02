@@ -61,7 +61,7 @@ namespace xsimd
         batch(register_type reg) noexcept;
 
         template <class U>
-        static XSIMD_NO_DISCARD batch broadcast(U val) noexcept;
+        XSIMD_NO_DISCARD static batch broadcast(U val) noexcept;
 
         // memory operators
         template <class U>
@@ -74,16 +74,16 @@ namespace xsimd
         void store(U* mem, unaligned_mode) const noexcept;
 
         template <class U>
-        static XSIMD_NO_DISCARD batch load_aligned(U const* mem) noexcept;
+        XSIMD_NO_DISCARD static batch load_aligned(U const* mem) noexcept;
         template <class U>
-        static XSIMD_NO_DISCARD batch load_unaligned(U const* mem) noexcept;
+        XSIMD_NO_DISCARD static batch load_unaligned(U const* mem) noexcept;
         template <class U>
-        static XSIMD_NO_DISCARD batch load(U const* mem, aligned_mode) noexcept;
+        XSIMD_NO_DISCARD static batch load(U const* mem, aligned_mode) noexcept;
         template <class U>
-        static XSIMD_NO_DISCARD batch load(U const* mem, unaligned_mode) noexcept;
+        XSIMD_NO_DISCARD static batch load(U const* mem, unaligned_mode) noexcept;
 
         template <class U, class V>
-        static XSIMD_NO_DISCARD batch gather(U const* src, batch<V, arch_type> const& index) noexcept;
+        XSIMD_NO_DISCARD static batch gather(U const* src, batch<V, arch_type> const& index) noexcept;
         template <class U, class V>
         void scatter(U* dst, batch<V, arch_type> const& index) const noexcept;
 
@@ -239,8 +239,8 @@ namespace xsimd
         // memory operators
         void store_aligned(bool* mem) const noexcept;
         void store_unaligned(bool* mem) const noexcept;
-        static XSIMD_NO_DISCARD batch_bool load_aligned(bool const* mem) noexcept;
-        static XSIMD_NO_DISCARD batch_bool load_unaligned(bool const* mem) noexcept;
+        XSIMD_NO_DISCARD static batch_bool load_aligned(bool const* mem) noexcept;
+        XSIMD_NO_DISCARD static batch_bool load_unaligned(bool const* mem) noexcept;
 
         bool get(std::size_t i) const noexcept;
 
@@ -305,20 +305,20 @@ namespace xsimd
         explicit batch(batch_bool_type const& b) noexcept;
 
         // memory operators
-        static XSIMD_NO_DISCARD batch load_aligned(const T* real_src, const T* imag_src = nullptr) noexcept;
-        static XSIMD_NO_DISCARD batch load_unaligned(const T* real_src, const T* imag_src = nullptr) noexcept;
+        XSIMD_NO_DISCARD static batch load_aligned(const T* real_src, const T* imag_src = nullptr) noexcept;
+        XSIMD_NO_DISCARD static batch load_unaligned(const T* real_src, const T* imag_src = nullptr) noexcept;
         void store_aligned(T* real_dst, T* imag_dst) const noexcept;
         void store_unaligned(T* real_dst, T* imag_dst) const noexcept;
 
-        static XSIMD_NO_DISCARD batch load_aligned(const value_type* src) noexcept;
-        static XSIMD_NO_DISCARD batch load_unaligned(const value_type* src) noexcept;
+        XSIMD_NO_DISCARD static batch load_aligned(const value_type* src) noexcept;
+        XSIMD_NO_DISCARD static batch load_unaligned(const value_type* src) noexcept;
         void store_aligned(value_type* dst) const noexcept;
         void store_unaligned(value_type* dst) const noexcept;
 
         template <class U>
-        static XSIMD_NO_DISCARD batch load(U const* mem, aligned_mode) noexcept;
+        XSIMD_NO_DISCARD static batch load(U const* mem, aligned_mode) noexcept;
         template <class U>
-        static XSIMD_NO_DISCARD batch load(U const* mem, unaligned_mode) noexcept;
+        XSIMD_NO_DISCARD static batch load(U const* mem, unaligned_mode) noexcept;
         template <class U>
         void store(U* mem, aligned_mode) const noexcept;
         template <class U>
@@ -337,9 +337,9 @@ namespace xsimd
         batch(std::initializer_list<xtl::xcomplex<T, T, i3ec>> data) noexcept;
 
         template <bool i3ec>
-        static XSIMD_NO_DISCARD batch load_aligned(const xtl::xcomplex<T, T, i3ec>* src) noexcept;
+        XSIMD_NO_DISCARD static batch load_aligned(const xtl::xcomplex<T, T, i3ec>* src) noexcept;
         template <bool i3ec>
-        static XSIMD_NO_DISCARD batch load_unaligned(const xtl::xcomplex<T, T, i3ec>* src) noexcept;
+        XSIMD_NO_DISCARD static batch load_unaligned(const xtl::xcomplex<T, T, i3ec>* src) noexcept;
         template <bool i3ec>
         void store_aligned(xtl::xcomplex<T, T, i3ec>* dst) const noexcept;
         template <bool i3ec>
@@ -464,7 +464,7 @@ namespace xsimd
 
     template <class T, class A>
     template <class U>
-    inline XSIMD_NO_DISCARD batch<T, A> batch<T, A>::broadcast(U val) noexcept
+    XSIMD_NO_DISCARD inline batch<T, A> batch<T, A>::broadcast(U val) noexcept
     {
         return batch(static_cast<T>(val));
     }
