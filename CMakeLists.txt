@@ -15,7 +15,7 @@ option(XSIMD_REFACTORING ON)
 
 set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Versionning
+# Versioning
 # ===========
 
 file(STRINGS "${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp" xsimd_version_defines
