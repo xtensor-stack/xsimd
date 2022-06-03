@@ -16,7 +16,7 @@ option(XSIMD_REFACTORING ON)
 set(XSIMD_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Versioning
-# ===========
+# ==========
 
 file(STRINGS "${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp" xsimd_version_defines
      REGEX "#define XSIMD_VERSION_(MAJOR|MINOR|PATCH)")
