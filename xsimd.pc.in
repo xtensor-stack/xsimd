@@ -1,5 +1,5 @@
 prefix=@CMAKE_INSTALL_PREFIX@
-ibdir=@libdir_for_pc_file@
+libdir=@libdir_for_pc_file@
 includedir=@includedir_for_pc_file@
 
 Name: xsimd
