@@ -73,10 +73,9 @@ namespace xsimd
 
     namespace kernel
     {
-        // TODO: rename this, as it might conflict with C++20 keyword.
-        // We should use add_const and add_reference to build A const&
         template <class A>
-        using requires_arch = A const&;
+        // makes requires_arch equal to A const&, using type_traits functions
+        using requires_arch = typename std::add_lvalue_reference<typename std::add_const<A>::type>::type;
         template <class T>
         struct convert
         {
