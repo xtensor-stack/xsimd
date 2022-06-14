@@ -46,15 +46,15 @@ namespace xsimd
     class batch : public types::simd_register<T, A>
     {
     public:
-        static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T);
+        static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T); ///< Number of scalar elements in this batch.
 
-        using value_type = T;
-        using arch_type = A;
-        using register_type = typename types::simd_register<T, A>::register_type;
-        using batch_bool_type = batch_bool<T, A>;
+        using value_type = T; ///< Type of the scalar elements within this batch.
+        using arch_type = A; ///< SIMD Architecture abstracted by this batch.
+        using register_type = typename types::simd_register<T, A>::register_type; ///< SIMD register type abstracted by this batch.
+        using batch_bool_type = batch_bool<T, A>; ///< Associated batch type used to represented logical operations on this batch.
 
         // constructors
-        batch() = default;
+        batch() = default; ///< Create a batch initialized with undefined values.
         batch(T val) noexcept;
         batch(std::initializer_list<T> data) noexcept;
         explicit batch(batch_bool_type const& b) noexcept;
@@ -126,71 +126,86 @@ namespace xsimd
         // arithmetic operators. They are defined as friend to enable automatic
         // conversion of parameters from scalar to batch. Inline implementation
         // is required to avoid warnings.
+
+        /** Shorthand for xsimd::add() */
         friend batch operator+(batch const& self, batch const& other) noexcept
         {
             return batch(self) += other;
         }
 
+        /** Shorthand for xsimd::sub() */
         friend batch operator-(batch const& self, batch const& other) noexcept
         {
             return batch(self) -= other;
         }
 
+        /** Shorthand for xsimd::mul() */
         friend batch operator*(batch const& self, batch const& other) noexcept
         {
             return batch(self) *= other;
         }
 
+        /** Shorthand for xsimd::div() */
         friend batch operator/(batch const& self, batch const& other) noexcept
         {
             return batch(self) /= other;
         }
 
+        /** Shorthand for xsimd::mod() */
         friend batch operator%(batch const& self, batch const& other) noexcept
         {
             return batch(self) %= other;
         }
 
+        /** Shorthand for xsimd::bitwise_and() */
         friend batch operator&(batch const& self, batch const& other) noexcept
         {
             return batch(self) &= other;
         }
 
+        /** Shorthand for xsimd::bitwise_or() */
         friend batch operator|(batch const& self, batch const& other) noexcept
         {
             return batch(self) |= other;
         }
 
+        /** Shorthand for xsimd::bitwise_xor() */
         friend batch operator^(batch const& self, batch const& other) noexcept
         {
             return batch(self) ^= other;
         }
 
+        /** Shorthand for xsimd::bitwise_rshift() */
         friend batch operator>>(batch const& self, batch const& other) noexcept
         {
             return batch(self) >>= other;
         }
 
+        /** Shorthand for xsimd::bitwise_lshift() */
         friend batch operator<<(batch const& self, batch const& other) noexcept
         {
             return batch(self) <<= other;
         }
 
+        /** Shorthand for xsimd::bitwise_rshift() */
         friend batch operator>>(batch const& self, int32_t other) noexcept
         {
             return batch(self) >>= other;
         }
 
+        /** Shorthand for xsimd::bitwise_lshift() */
         friend batch operator<<(batch const& self, int32_t other) noexcept
         {
             return batch(self) <<= other;
         }
 
+        /** Shorthand for xsimd::logical_and() */
         friend batch operator&&(batch const& self, batch const& other) noexcept
         {
             return batch(self).logical_and(other);
         }
 
+        /** Shorthand for xsimd::logical_or() */
         friend batch operator||(batch const& self, batch const& other) noexcept
         {
             return batch(self).logical_or(other);
@@ -219,16 +234,18 @@ namespace xsimd
     template <class T, class A = default_arch>
     class batch_bool : public types::get_bool_simd_register_t<T, A>
     {
-    public:
-        static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T);
-
-        using value_type = bool;
         using base_type = types::get_bool_simd_register_t<T, A>;
-        using register_type = typename base_type::register_type;
-        using batch_type = batch<T, A>;
+
+    public:
+        static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T); ///< Number of scalar elements in this batch.
+
+        using value_type = bool; ///< Type of the scalar elements within this batch.
+        using arch_type = A; ///< SIMD Architecture abstracted by this batch.
+        using register_type = typename base_type::register_type; ///< SIMD register type abstracted by this batch.
+        using batch_type = batch<T, A>; ///< Associated batch type this batch represents logical operations for.
 
         // constructors
-        batch_bool() = default;
+        batch_bool() = default; ///< Create a batch initialized with undefined values.
         batch_bool(bool val) noexcept;
         batch_bool(register_type reg) noexcept;
         batch_bool(std::initializer_list<bool> data) noexcept;
@@ -292,14 +309,15 @@ namespace xsimd
     class batch<std::complex<T>, A>
     {
     public:
-        using value_type = std::complex<T>;
-        using real_batch = batch<T, A>;
-        using arch_type = A;
-        static constexpr std::size_t size = real_batch::size;
-        using batch_bool_type = batch_bool<T, A>;
+        using value_type = std::complex<T>; ///< Type of the complex elements within this batch.
+        using real_batch = batch<T, A>; ///< Type of the scalar elements within this batch.
+        using arch_type = A; ///< SIMD Architecture abstracted by this batch.
+        using batch_bool_type = batch_bool<T, A>; ///< Associated batch type used to represented logical operations on this batch.
+
+        static constexpr std::size_t size = real_batch::size; ///< Number of complex elements in this batch.
 
         // constructors
-        batch() = default;
+        batch() = default; ///< Create a batch initialized with undefined values.
         batch(value_type const& val) noexcept;
         batch(real_batch const& real, real_batch const& imag) noexcept;
 
@@ -374,21 +392,26 @@ namespace xsimd
 
         // arithmetic operators. They are defined as friend to enable automatic
         // conversion of parameters from scalar to batch
+
+        /** Shorthand for xsimd::add() */
         friend batch operator+(batch const& self, batch const& other) noexcept
         {
             return batch(self) += other;
         }
 
+        /** Shorthand for xsimd::sub() */
         friend batch operator-(batch const& self, batch const& other) noexcept
         {
             return batch(self) -= other;
         }
 
+        /** Shorthand for xsimd::mul() */
         friend batch operator*(batch const& self, batch const& other) noexcept
         {
             return batch(self) *= other;
         }
 
+        /** Shorthand for xsimd::div() */
         friend batch operator/(batch const& self, batch const& other) noexcept
         {
             return batch(self) /= other;
@@ -412,8 +435,6 @@ namespace xsimd
 
     /**
      * Create a batch with all element initialized to \c val.
-     *
-     * @param val broadcast value
      */
     template <class T, class A>
     inline batch<T, A>::batch(T val) noexcept
@@ -424,8 +445,6 @@ namespace xsimd
     /**
      * Create a batch with elements initialized from \c data.
      * It is an error to have `data.size() != size.
-     *
-     * @param data sequence of elements
      */
     template <class T, class A>
     inline batch<T, A>::batch(std::initializer_list<T> data) noexcept
@@ -438,8 +457,6 @@ namespace xsimd
      * Converts a \c bool_batch to a \c batch where each element is
      * set to 0xFF..FF (resp. 0x00..00) if the corresponding element is `true`
      * (resp. `false`).
-     *
-     * @param b batch of bool
      */
     template <class T, class A>
     inline batch<T, A>::batch(batch_bool<T, A> const& b) noexcept
@@ -450,8 +467,6 @@ namespace xsimd
     /**
      * Wraps a compatible native simd register as a \c batch. This is generally not needed but
      * becomes handy when doing architecture-specific operations.
-     *
-     * @param reg native simd register to wrap
      */
     template <class T, class A>
     inline batch<T, A>::batch(register_type reg) noexcept
@@ -466,6 +481,9 @@ namespace xsimd
     {
     }
 
+    /**
+     * Equivalent to batch::batch(T val).
+     */
     template <class T, class A>
     template <class U>
     XSIMD_NO_DISCARD inline batch<T, A> batch<T, A>::broadcast(U val) noexcept
@@ -480,7 +498,6 @@ namespace xsimd
     /**
      * Copy content of this batch to the buffer \c mem. The
      * memory needs to be aligned.
-     * @param mem the memory buffer to read
      */
     template <class T, class A>
     template <class U>
@@ -492,7 +509,6 @@ namespace xsimd
     /**
      * Copy content of this batch to the buffer \c mem. The
      * memory does not need to be aligned.
-     * @param mem the memory buffer to write to
      */
     template <class T, class A>
     template <class U>
@@ -501,6 +517,9 @@ namespace xsimd
         kernel::store_unaligned<A>(mem, *this, A {});
     }
 
+    /**
+     * Equivalent to batch::store_aligned()
+     */
     template <class T, class A>
     template <class U>
     inline void batch<T, A>::store(U* mem, aligned_mode) const noexcept
@@ -508,6 +527,9 @@ namespace xsimd
         return store_aligned(mem);
     }
 
+    /**
+     * Equivalent to batch::store_unaligned()
+     */
     template <class T, class A>
     template <class U>
     inline void batch<T, A>::store(U* mem, unaligned_mode) const noexcept
@@ -518,9 +540,6 @@ namespace xsimd
     /**
      * Loading from aligned memory. May involve a conversion if \c U is different
      * from \c T.
-     *
-     * @param mem the memory buffer to read from.
-     * @return a new batch instance.
      */
     template <class T, class A>
     template <class U>
@@ -532,9 +551,6 @@ namespace xsimd
     /**
      * Loading from unaligned memory. May involve a conversion if \c U is different
      * from \c T.
-     *
-     * @param mem the memory buffer to read from.
-     * @return a new batch instance.
      */
     template <class T, class A>
     template <class U>
@@ -543,6 +559,9 @@ namespace xsimd
         return kernel::load_unaligned<A>(mem, kernel::convert<T> {}, A {});
     }
 
+    /**
+     * Equivalent to batch::load_aligned()
+     */
     template <class T, class A>
     template <class U>
     inline batch<T, A> batch<T, A>::load(U const* mem, aligned_mode) noexcept
@@ -550,6 +569,9 @@ namespace xsimd
         return load_aligned(mem);
     }
 
+    /**
+     * Equivalent to batch::load_unaligned()
+     */
     template <class T, class A>
     template <class U>
     inline batch<T, A> batch<T, A>::load(U const* mem, unaligned_mode) noexcept
@@ -562,9 +584,6 @@ namespace xsimd
      * offset by each element in \c index.
      * If \c T is not of the same size as \c U, a \c static_cast is performed
      * at element gather time.
-     * @param src Starting address.
-     * @param index Indexes of the elements to gather.
-     * @return a batch containing the gathered elements.
      */
     template <class T, class A>
     template <typename U, typename V>
@@ -579,8 +598,6 @@ namespace xsimd
      * and offset by each element in \c index.
      * If \c T is not of the same size as \c U, a \c static_cast is performed
      * at element scatter time.
-     * @param dst Destination address
-     * @param index Indexes in which to store the elements to.
      */
     template <class T, class A>
     template <class U, class V>
@@ -590,6 +607,11 @@ namespace xsimd
         kernel::scatter<A>(*this, dst, index, A {});
     }
 
+    /**
+     * Retrieve the \c i th scalar element in this batch.
+     *
+     * \c warning This is very inefficient and should only be used for debugging purpose.
+     */
     template <class T, class A>
     inline T batch<T, A>::get(std::size_t i) const noexcept
     {
@@ -600,36 +622,54 @@ namespace xsimd
      * batch comparison operators *
      ******************************/
 
+    /**
+     * Shorthand for xsimd::eq()
+     */
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator==(batch<T, A> const& other) const noexcept
     {
         return kernel::eq<A>(*this, other, A {});
     }
 
+    /**
+     * Shorthand for xsimd::neq()
+     */
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator!=(batch<T, A> const& other) const noexcept
     {
         return kernel::neq<A>(*this, other, A {});
     }
 
+    /**
+     * Shorthand for xsimd::ge()
+     */
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator>=(batch<T, A> const& other) const noexcept
     {
         return kernel::ge<A>(*this, other, A {});
     }
 
+    /**
+     * Shorthand for xsimd::le()
+     */
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator<=(batch<T, A> const& other) const noexcept
     {
         return kernel::le<A>(*this, other, A {});
     }
 
+    /**
+     * Shorthand for xsimd::gt()
+     */
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator>(batch<T, A> const& other) const noexcept
     {
         return kernel::gt<A>(*this, other, A {});
     }
 
+    /**
+     * Shorthand for xsimd::lt()
+     */
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator<(batch<T, A> const& other) const noexcept
     {
