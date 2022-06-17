@@ -1,6 +1,6 @@
 name: doc
 on: [push, pull_request]
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:

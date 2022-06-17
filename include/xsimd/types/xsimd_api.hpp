@@ -1524,7 +1524,7 @@ namespace xsimd
      * @ingroup batch_arithmetic
      *
      * Computes the saturate sum of the batch \c x and the batch \c y.
-     * \c x.
+
      * @tparam X the actual type of batch.
      * @param x batch involved in the saturated addition.
      * @param y batch involved in the saturated addition.
@@ -1715,7 +1715,6 @@ namespace xsimd
      * @ingroup batch_arithmetic
      *
      * Computes the saturate difference of the batch \c x and the batch \c y.
-     * \c x.
      * @tparam X the actual type of batch.
      * @param x batch involved in the saturated difference.
      * @param y batch involved in the saturated difference.
