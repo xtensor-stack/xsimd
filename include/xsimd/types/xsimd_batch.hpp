@@ -425,6 +425,14 @@ namespace xsimd
     template <class T, class A>
     constexpr std::size_t batch<std::complex<T>, A>::size;
 
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+    template <typename T, bool i3ec, typename A>
+    struct batch<xtl::xcomplex<T, T, i3ec>, A>
+    {
+        static_assert(std::is_same<T, void>::value,
+                      "Please use batch<std::complex<T>, A> initialized from xtl::complex instead");
+    };
+#endif
 }
 
 #include "../arch/xsimd_isa.hpp"
