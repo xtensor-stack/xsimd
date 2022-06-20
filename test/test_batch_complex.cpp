@@ -123,6 +123,18 @@ protected:
         std::fill(tmp.begin(), tmp.end(), xtl_value_type(2, 3));
         batch_type b0(xtl_value_type(2, 3));
         EXPECT_EQ(b0, tmp) << print_function_name("batch(value_type)");
+
+        batch_type b1 = xsimd::load_as<xtl_value_type>(tmp.data(), xsimd::aligned_mode());
+        EXPECT_EQ(b1, tmp) << print_function_name("load_as<value_type> aligned");
+
+        batch_type b2 = xsimd::load_as<xtl_value_type>(tmp.data(), xsimd::unaligned_mode());
+        EXPECT_EQ(b2, tmp) << print_function_name("load_as<value_type> unaligned");
+
+        xsimd::store_as(tmp.data(), b1, xsimd::aligned_mode());
+        EXPECT_EQ(b1, tmp) << print_function_name("store_as<value_type> aligned");
+
+        xsimd::store_as(tmp.data(), b2, xsimd::unaligned_mode());
+        EXPECT_EQ(b2, tmp) << print_function_name("store_as<value_type> unaligned");
     }
 #endif
 
