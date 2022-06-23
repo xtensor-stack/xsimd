@@ -76,8 +76,11 @@ protected:
     {
         array_type tmp;
         std::fill(tmp.begin(), tmp.end(), value_type(2));
-        batch_type b0(2);
-        EXPECT_EQ(b0, tmp) << print_function_name("batch(value_type)");
+        batch_type b0a(2);
+        EXPECT_EQ(b0a, tmp) << print_function_name("batch(value_type)");
+
+        batch_type b0b { 2 };
+        EXPECT_EQ(b0b, tmp) << print_function_name("batch{value_type}");
 
         batch_type b1 = batch_type::load_unaligned(lhs.data());
         EXPECT_EQ(b1, lhs) << print_function_name("batch(value_type*)");
