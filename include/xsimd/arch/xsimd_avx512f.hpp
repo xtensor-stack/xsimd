@@ -307,6 +307,13 @@ namespace xsimd
             return self.data != register_type(0);
         }
 
+        // batch_bool_cast
+        template <class A, class T_out, class T_in>
+        inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& self, batch_bool<T_out, A> const&, requires_arch<avx512f>) noexcept
+        {
+            return self.data;
+        }
+
         // bitwise_and
         template <class A>
         inline batch<float, A> bitwise_and(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
@@ -559,28 +566,6 @@ namespace xsimd
         inline batch<T, A> bitwise_cast(batch<double, A> const& self, batch<T, A> const&, requires_arch<avx512f>) noexcept
         {
             return _mm512_castpd_si512(self);
-        }
-
-        // bool_cast
-        template <class A>
-        inline batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self, requires_arch<avx512f>) noexcept
-        {
-            return self.data;
-        }
-        template <class A>
-        inline batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self, requires_arch<avx512f>) noexcept
-        {
-            return self.data;
-        }
-        template <class A>
-        inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self, requires_arch<avx512f>) noexcept
-        {
-            return self.data;
-        }
-        template <class A>
-        inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self, requires_arch<avx512f>) noexcept
-        {
-            return self.data;
         }
 
         // broadcast

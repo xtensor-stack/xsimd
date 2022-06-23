@@ -30,18 +30,12 @@ namespace xsimd
     inline bool any(batch_bool<T, A> const& self) noexcept;
     template <class T, class A>
     inline batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other) noexcept;
+    template <class A, class T_out, class T_in>
+    inline batch<T_out, A> batch_cast(batch<T_in, A> const&, batch<T_out, A> const& out) noexcept;
     template <class T, class A>
     inline batch<T, A> bitofsign(batch<T, A> const& self) noexcept;
     template <class B, class T, class A>
     inline B bitwise_cast(batch<T, A> const& self) noexcept;
-    template <class A>
-    inline batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self) noexcept;
-    template <class A>
-    inline batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self) noexcept;
-    template <class A>
-    inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self) noexcept;
-    template <class A>
-    inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self) noexcept;
     template <class T, class A>
     inline batch<T, A> cos(batch<T, A> const& self) noexcept;
     template <class T, class A>

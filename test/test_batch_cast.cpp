@@ -153,6 +153,15 @@ protected:
         };
     }
 
+    void test_bool_cast() const
+    {
+        test_bool_cast_impl<float_batch, int32_batch>("batch bool cast float -> int32");
+        test_bool_cast_impl<float_batch, uint32_batch>("batch bool cast float -> uint32");
+        test_bool_cast_impl<int32_batch, float_batch>("batch bool cast int32 -> float");
+        test_bool_cast_impl<uint32_batch, float_batch>("batch bool cast uint32 -> float");
+        test_bool_cast_impl<float_batch, float_batch>("batch bool cast float -> float");
+    }
+
     void test_cast() const
     {
         for (const auto& test_value : int_test_values)
@@ -327,14 +336,37 @@ private:
             EXPECT_SCALAR_EQ(res.get(0), static_cast<T_out>(in_test_value)) << print_function_name(name);
         }
     }
+
+    template <class B_in, class B_out>
+    void test_bool_cast_impl(const std::string& name) const
+    {
+        using T_in = typename B_in::value_type;
+        using T_out = typename B_out::value_type;
+        using B_common_in = xsimd::batch_bool<T_in>;
+        using B_common_out = xsimd::batch_bool<T_out>;
+
+        B_common_in all_true_in(true);
+        B_common_out all_true_res = xsimd::batch_bool_cast<T_out>(all_true_in);
+        EXPECT_SCALAR_EQ(all_true_res.get(0), true) << print_function_name(name);
+
+        B_common_in all_false_in(false);
+        B_common_out all_false_res = xsimd::batch_bool_cast<T_out>(all_false_in);
+        EXPECT_SCALAR_EQ(all_false_res.get(0), false) << print_function_name(name);
+    }
 };
 
 TYPED_TEST_SUITE(batch_cast_test, conversion_types, conversion_test_names);
+
+TYPED_TEST(batch_cast_test, bool_cast)
+{
+    this->test_bool_cast();
+}
 
 TYPED_TEST(batch_cast_test, cast)
 {
     this->test_cast();
 }
+
 #endif
 #if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift1)
