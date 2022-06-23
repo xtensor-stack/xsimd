@@ -65,9 +65,9 @@ namespace xsimd
             using BB = batch_bool<T>;
             using A = std::array<T, 4>;
 
-            B a({ 1, 3, 1, 1 });
+            B a = { 1, 3, 1, 1 };
             B b(2);
-            B c({ 2, 3, 2, 3 });
+            B c = { 2, 3, 2, 3 };
 
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
@@ -93,12 +93,12 @@ namespace xsimd
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
             std::array<T, 8> maxmin_cmp { { 0, 0, max, 0, min, 0, 0, 0 } };
-            B maxmin({ 0, 0, max, 0, min, 0, 0, 0 });
+            B maxmin{{ 0, 0, max, 0, min, 0, 0, 0 }};
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
-            B a({ 1, 3, 1, 3, 1, 1, 3, 3 });
-            B b(2);
-            B c({ 2, 3, 2, 3, 2, 3, 2, 3 });
+            B a{ 1, 3, 1, 3, 1, 1, 3, 3 };
+            B b{2};
+            B c{ 2, 3, 2, 3, 2, 3, 2, 3 };
 
             auto r1 = xsimd::max(a, c);
             auto r3 = xsimd::min(a, c);
@@ -123,12 +123,12 @@ namespace xsimd
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
             std::array<T, 16> maxmin_cmp { { 0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0 } };
-            B maxmin({ 0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0 });
+            B maxmin = { 0, 0, max, 0, min, 0, 0, 0, 0, 0, max, 0, min, 0, 0, 0 };
             EXPECT_BATCH_EQ(maxmin, maxmin_cmp) << print_function_name("numeric max and min");
 
-            B a({ 1, 3, 1, 3, 1, 3, 1, 3, 3, 3, 3, 3, min, max, max, min });
+            B a = { 1, 3, 1, 3, 1, 3, 1, 3, 3, 3, 3, 3, min, max, max, min };
             B b(2);
-            B c({ 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3 });
+            B c = { 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3 };
             auto r1 = xsimd::max(a, b);
             auto r3 = xsimd::min(a, b);
             auto r4 = a < b; // test lt
@@ -138,10 +138,10 @@ namespace xsimd
             EXPECT_BATCH_EQ(r1, (A { { 2, 3, 2, 3, 2, 3, 2, 3, 3, 3, 3, 3, 2, max, max, 2 } })) << print_function_name("max");
             EXPECT_BATCH_EQ(r3, (A { { 1, 2, 1, 2, 1, 2, 1, 2, 2, 2, 2, 2, min, 2, 2, min } })) << print_function_name("min");
 
-            BB e4({ 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1 });
+            BB e4 = { 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1 };
             EXPECT_TRUE(xsimd::all(r4 == e4));
 
-            BB e5({ 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 });
+            BB e5 = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0 };
             EXPECT_TRUE(xsimd::all(r5 == e5));
             EXPECT_TRUE(xsimd::all(r6 == !e5));
         }
@@ -158,8 +158,8 @@ namespace xsimd
             T max = std::numeric_limits<T>::max();
             T min = std::numeric_limits<T>::min();
 
-            B a({ 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 3, 3, 3, 3, min, max, max, min });
-            B b(2);
+            B a = { 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 3, 3, 3, 3, min, max, max, min };
+            B b = 2;
 
             auto r1 = xsimd::max(a, b);
             auto r3 = xsimd::min(a, b);

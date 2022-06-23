@@ -22,17 +22,6 @@
 namespace xsimd
 {
 
-    namespace details
-    {
-        template <class B>
-        void check_batch_init(B const&, std::initializer_list<typename B::value_type> data)
-        {
-            (void)data;
-            assert((data.size() == 1 || data.size() == B::size) && "initialization through initializer list must have a single element (for broadcasting) or as many elements as the initialized batch.");
-        }
-
-    }
-
     /**
      * @brief batch of integer or floating point values.
      *
@@ -56,7 +45,8 @@ namespace xsimd
         // constructors
         batch() = default; ///< Create a batch initialized with undefined values.
         batch(T val) noexcept;
-        batch(std::initializer_list<T> data) noexcept;
+        template<class... Ts>
+        batch(T val0, T val1, Ts... vals) noexcept;
         explicit batch(batch_bool_type const& b) noexcept;
         batch(register_type reg) noexcept;
 
@@ -212,9 +202,6 @@ namespace xsimd
         }
 
     private:
-        template <size_t... Is>
-        batch(T const* data, detail::index_sequence<Is...>) noexcept;
-
         batch logical_and(batch const& other) const noexcept;
         batch logical_or(batch const& other) const noexcept;
     };
@@ -248,7 +235,8 @@ namespace xsimd
         batch_bool() = default; ///< Create a batch initialized with undefined values.
         batch_bool(bool val) noexcept;
         batch_bool(register_type reg) noexcept;
-        batch_bool(std::initializer_list<bool> data) noexcept;
+        template<class... Ts>
+        batch_bool(bool val0, bool val1, Ts... vals) noexcept;
 
         template <class Tp>
         batch_bool(Tp const*) = delete;
@@ -284,9 +272,6 @@ namespace xsimd
         batch_bool& operator^=(batch_bool const& other) const noexcept { return (*this) = (*this) ^ other; }
 
     private:
-        template <size_t... Is>
-        batch_bool(bool const* data, detail::index_sequence<Is...>) noexcept;
-
         template <class U, class... V, size_t I, size_t... Is>
         static register_type make_register(detail::index_sequence<I, Is...>, U u, V... v) noexcept;
 
@@ -323,7 +308,8 @@ namespace xsimd
 
         batch(real_batch const& real) noexcept;
         batch(T val) noexcept;
-        batch(std::initializer_list<value_type> data) noexcept;
+        template<class... Ts>
+        batch(value_type val0, value_type val1, Ts... vals) noexcept;
         explicit batch(batch_bool_type const& b) noexcept;
 
         // memory operators
@@ -355,8 +341,8 @@ namespace xsimd
         // xtl-related methods
         template <bool i3ec>
         batch(xtl::xcomplex<T, T, i3ec> const& val) noexcept;
-        template <bool i3ec>
-        batch(std::initializer_list<xtl::xcomplex<T, T, i3ec>> data) noexcept;
+        template <bool i3ec, class... Ts>
+        batch(xtl::xcomplex<T, T, i3ec> val0, xtl::xcomplex<T, T, i3ec> val1, Ts... vals) noexcept;
 
         template <bool i3ec>
         XSIMD_NO_DISCARD static batch load_aligned(const xtl::xcomplex<T, T, i3ec>* src) noexcept;
@@ -456,10 +442,11 @@ namespace xsimd
      * batch. Otherwise \c must have as many elements as the batch size.
      */
     template <class T, class A>
-    inline batch<T, A>::batch(std::initializer_list<T> data) noexcept
-        : batch(data.size() == 1 ? batch(*data.begin()) : batch(data.begin(), detail::make_index_sequence<size>()))
+    template<class... Ts>
+    inline batch<T, A>::batch(T val0, T val1, Ts... vals) noexcept
+        : batch(kernel::set<A>(batch {}, A {}, val0, val1, static_cast<T>(vals)...))
     {
-        details::check_batch_init(*this, data);
+        static_assert(sizeof...(Ts) + 2 == size, "as many arguments as batch elements");
     }
 
     /**
@@ -480,13 +467,6 @@ namespace xsimd
     template <class T, class A>
     inline batch<T, A>::batch(register_type reg) noexcept
         : types::simd_register<T, A>({ reg })
-    {
-    }
-
-    template <class T, class A>
-    template <size_t... Is>
-    inline batch<T, A>::batch(T const* data, detail::index_sequence<Is...>) noexcept
-        : batch(kernel::set<A>(batch {}, A {}, data[Is]...))
     {
     }
 
@@ -842,23 +822,17 @@ namespace xsimd
      ***************************/
 
     template <class T, class A>
-    template <size_t... Is>
-    inline batch_bool<T, A>::batch_bool(bool const* data, detail::index_sequence<Is...>) noexcept
-        : batch_bool(kernel::set<A>(batch_bool {}, A {}, data[Is]...))
-    {
-    }
-
-    template <class T, class A>
     inline batch_bool<T, A>::batch_bool(register_type reg) noexcept
         : types::get_bool_simd_register_t<T, A>({ reg })
     {
     }
 
     template <class T, class A>
-    inline batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) noexcept
-        : batch_bool(data.size() == 1 ? batch_bool(*data.begin()) : batch_bool(data.begin(), detail::make_index_sequence<size>()))
+    template <class... Ts>
+    inline batch_bool<T, A>::batch_bool(bool val0, bool val1, Ts... vals) noexcept
+        : batch_bool(kernel::set<A>(batch_bool {}, A {}, val0, val1, static_cast<bool>(vals)...))
     {
-        details::check_batch_init(*this, data);
+        static_assert(sizeof...(Ts) + 2 == size, "as many arguments as batch elements");
     }
 
     /*******************************
@@ -1040,13 +1014,11 @@ namespace xsimd
     }
 
     template <class T, class A>
-    inline batch<std::complex<T>, A>::batch(std::initializer_list<value_type> data) noexcept
+    template <class... Ts>
+    inline batch<std::complex<T>, A>::batch(value_type val0, value_type val1, Ts... vals) noexcept
+        : batch(kernel::set<A>(batch {}, A {}, val0, val1, static_cast<value_type>(vals)...))
     {
-        details::check_batch_init(*this, data);
-        if (data.size() == 1)
-            *this = broadcast(*data.begin());
-        else
-            *this = load_unaligned(data.begin());
+        static_assert(sizeof...(Ts) + 2 == size, "as many arguments as batch elements");
     }
 
     template <class T, class A>
@@ -1170,14 +1142,11 @@ namespace xsimd
     }
 
     template <class T, class A>
-    template <bool i3ec>
-    inline batch<std::complex<T>, A>::batch(std::initializer_list<xtl::xcomplex<T, T, i3ec>> data) noexcept
+    template <bool i3ec, class... Ts>
+    inline batch<std::complex<T>, A>::batch(xtl::xcomplex<T, T, i3ec> val0, xtl::xcomplex<T, T, i3ec> val1, Ts... vals) noexcept
+        : batch(kernel::set<A>(batch {}, A {}, val0, val1, static_cast<xtl::xcomplex<T, T, i3ec>>(vals)...))
     {
-        details::check_batch_init(*this, data);
-        if (data.size() == 1)
-            *this = broadcast(*data.begin());
-        else
-            *this = load_unaligned(data.begin());
+        static_assert(sizeof...(Ts) + 2 == size, "as many arguments as batch elements");
     }
 
     // Memory layout of an xcomplex and std::complex are the same when xcomplex
