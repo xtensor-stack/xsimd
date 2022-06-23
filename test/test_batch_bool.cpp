@@ -155,6 +155,7 @@ protected:
 
     array_type lhs;
     array_type rhs;
+    bool_array_type all_true;
     bool_array_type ba;
 
     batch_bool_test()
@@ -163,8 +164,21 @@ protected:
         {
             lhs[i] = value_type(i);
             rhs[i] = i == 0 % 2 ? lhs[i] : lhs[i] * 2;
+            all_true[i] = true;
             ba[i] = i == 0 % 2 ? true : false;
         }
+    }
+
+    void test_constructors() const
+    {
+        bool_array_type res;
+        batch_bool_type b(true);
+        b.store_unaligned(res.data());
+        EXPECT_EQ(res, all_true) << print_function_name("batch_bool(bool)");
+
+        batch_bool_type c { true };
+        c.store_unaligned(res.data());
+        EXPECT_EQ(res, all_true) << print_function_name("batch_bool{bool}");
     }
 
     void test_load_store() const
@@ -359,6 +373,11 @@ private:
 };
 
 TYPED_TEST_SUITE(batch_bool_test, batch_types, simd_test_names);
+
+TYPED_TEST(batch_bool_test, constructors)
+{
+    this->test_constructors();
+}
 
 TYPED_TEST(batch_bool_test, load_store)
 {

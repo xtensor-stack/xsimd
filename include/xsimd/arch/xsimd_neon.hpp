@@ -23,54 +23,108 @@
 // Wrap intrinsics so we can pass them as function pointers
 // - OP: intrinsics name prefix, e.g., vorrq
 // - RT: type traits to deduce intrinsics return types
-#define WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                                             \
-    namespace wrap                                                                                       \
-    {                                                                                                    \
-        inline RT<uint8x16_t> OP##_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::OP##_u8(a, b); }   \
-        inline RT<int8x16_t> OP##_s8(int8x16_t a, int8x16_t b) noexcept { return ::OP##_s8(a, b); }      \
-        inline RT<uint16x8_t> OP##_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::OP##_u16(a, b); } \
-        inline RT<int16x8_t> OP##_s16(int16x8_t a, int16x8_t b) noexcept { return ::OP##_s16(a, b); }    \
-        inline RT<uint32x4_t> OP##_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::OP##_u32(a, b); } \
-        inline RT<int32x4_t> OP##_s32(int32x4_t a, int32x4_t b) noexcept { return ::OP##_s32(a, b); }    \
+#define WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                \
+    namespace wrap                                                          \
+    {                                                                       \
+        inline RT<uint8x16_t> OP##_u8(uint8x16_t a, uint8x16_t b) noexcept  \
+        {                                                                   \
+            return ::OP##_u8(a, b);                                         \
+        }                                                                   \
+        inline RT<int8x16_t> OP##_s8(int8x16_t a, int8x16_t b) noexcept     \
+        {                                                                   \
+            return ::OP##_s8(a, b);                                         \
+        }                                                                   \
+        inline RT<uint16x8_t> OP##_u16(uint16x8_t a, uint16x8_t b) noexcept \
+        {                                                                   \
+            return ::OP##_u16(a, b);                                        \
+        }                                                                   \
+        inline RT<int16x8_t> OP##_s16(int16x8_t a, int16x8_t b) noexcept    \
+        {                                                                   \
+            return ::OP##_s16(a, b);                                        \
+        }                                                                   \
+        inline RT<uint32x4_t> OP##_u32(uint32x4_t a, uint32x4_t b) noexcept \
+        {                                                                   \
+            return ::OP##_u32(a, b);                                        \
+        }                                                                   \
+        inline RT<int32x4_t> OP##_s32(int32x4_t a, int32x4_t b) noexcept    \
+        {                                                                   \
+            return ::OP##_s32(a, b);                                        \
+        }                                                                   \
     }
 
-#define WRAP_BINARY_INT(OP, RT)                                                                          \
-    WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                                                 \
-    namespace wrap                                                                                       \
-    {                                                                                                    \
-        inline RT<uint64x2_t> OP##_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::OP##_u64(a, b); } \
-        inline RT<int64x2_t> OP##_s64(int64x2_t a, int64x2_t b) noexcept { return ::OP##_s64(a, b); }    \
+#define WRAP_BINARY_INT(OP, RT)                                             \
+    WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                    \
+    namespace wrap                                                          \
+    {                                                                       \
+        inline RT<uint64x2_t> OP##_u64(uint64x2_t a, uint64x2_t b) noexcept \
+        {                                                                   \
+            return ::OP##_u64(a, b);                                        \
+        }                                                                   \
+        inline RT<int64x2_t> OP##_s64(int64x2_t a, int64x2_t b) noexcept    \
+        {                                                                   \
+            return ::OP##_s64(a, b);                                        \
+        }                                                                   \
     }
 
-#define WRAP_BINARY_FLOAT(OP, RT)                                                                           \
-    namespace wrap                                                                                          \
-    {                                                                                                       \
-        inline RT<float32x4_t> OP##_f32(float32x4_t a, float32x4_t b) noexcept { return ::OP##_f32(a, b); } \
+#define WRAP_BINARY_FLOAT(OP, RT)                                              \
+    namespace wrap                                                             \
+    {                                                                          \
+        inline RT<float32x4_t> OP##_f32(float32x4_t a, float32x4_t b) noexcept \
+        {                                                                      \
+            return ::OP##_f32(a, b);                                           \
+        }                                                                      \
     }
 
-#define WRAP_UNARY_INT_EXCLUDING_64(OP)                                             \
-    namespace wrap                                                                  \
-    {                                                                               \
-        inline uint8x16_t OP##_u8(uint8x16_t a) noexcept { return ::OP##_u8(a); }   \
-        inline int8x16_t OP##_s8(int8x16_t a) noexcept { return ::OP##_s8(a); }     \
-        inline uint16x8_t OP##_u16(uint16x8_t a) noexcept { return ::OP##_u16(a); } \
-        inline int16x8_t OP##_s16(int16x8_t a) noexcept { return ::OP##_s16(a); }   \
-        inline uint32x4_t OP##_u32(uint32x4_t a) noexcept { return ::OP##_u32(a); } \
-        inline int32x4_t OP##_s32(int32x4_t a) noexcept { return ::OP##_s32(a); }   \
+#define WRAP_UNARY_INT_EXCLUDING_64(OP)                   \
+    namespace wrap                                        \
+    {                                                     \
+        inline uint8x16_t OP##_u8(uint8x16_t a) noexcept  \
+        {                                                 \
+            return ::OP##_u8(a);                          \
+        }                                                 \
+        inline int8x16_t OP##_s8(int8x16_t a) noexcept    \
+        {                                                 \
+            return ::OP##_s8(a);                          \
+        }                                                 \
+        inline uint16x8_t OP##_u16(uint16x8_t a) noexcept \
+        {                                                 \
+            return ::OP##_u16(a);                         \
+        }                                                 \
+        inline int16x8_t OP##_s16(int16x8_t a) noexcept   \
+        {                                                 \
+            return ::OP##_s16(a);                         \
+        }                                                 \
+        inline uint32x4_t OP##_u32(uint32x4_t a) noexcept \
+        {                                                 \
+            return ::OP##_u32(a);                         \
+        }                                                 \
+        inline int32x4_t OP##_s32(int32x4_t a) noexcept   \
+        {                                                 \
+            return ::OP##_s32(a);                         \
+        }                                                 \
     }
 
-#define WRAP_UNARY_INT(OP)                                                          \
-    WRAP_UNARY_INT_EXCLUDING_64(OP)                                                 \
-    namespace wrap                                                                  \
-    {                                                                               \
-        inline uint64x2_t OP##_u64(uint64x2_t a) noexcept { return ::OP##_u64(a); } \
-        inline int64x2_t OP##_s64(int64x2_t a) noexcept { return ::OP##_s64(a); }   \
+#define WRAP_UNARY_INT(OP)                                \
+    WRAP_UNARY_INT_EXCLUDING_64(OP)                       \
+    namespace wrap                                        \
+    {                                                     \
+        inline uint64x2_t OP##_u64(uint64x2_t a) noexcept \
+        {                                                 \
+            return ::OP##_u64(a);                         \
+        }                                                 \
+        inline int64x2_t OP##_s64(int64x2_t a) noexcept   \
+        {                                                 \
+            return ::OP##_s64(a);                         \
+        }                                                 \
     }
 
-#define WRAP_UNARY_FLOAT(OP)                                                          \
-    namespace wrap                                                                    \
-    {                                                                                 \
-        inline float32x4_t OP##_f32(float32x4_t a) noexcept { return ::OP##_f32(a); } \
+#define WRAP_UNARY_FLOAT(OP)                                \
+    namespace wrap                                          \
+    {                                                       \
+        inline float32x4_t OP##_f32(float32x4_t a) noexcept \
+        {                                                   \
+            return ::OP##_f32(a);                           \
+        }                                                   \
     }
 
 // Dummy identity caster to ease coding
@@ -601,13 +655,13 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
         inline batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch<T, A>({ -rhs.get(0), -rhs.get(1) });
+            return batch<T, A> { -rhs.get(0), -rhs.get(1) };
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         inline batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch<T, A>({ -rhs.get(0), -rhs.get(1) });
+            return batch<T, A> { -rhs.get(0), -rhs.get(1) };
         }
 
         template <class A>
@@ -2280,18 +2334,45 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
-#define WRAP_CAST(SUFFIX, TYPE)                                                                                        \
-    namespace wrap                                                                                                     \
-    {                                                                                                                  \
-        inline TYPE vreinterpretq_##SUFFIX##_u8(uint8x16_t a) noexcept { return ::vreinterpretq_##SUFFIX##_u8(a); }    \
-        inline TYPE vreinterpretq_##SUFFIX##_s8(int8x16_t a) noexcept { return ::vreinterpretq_##SUFFIX##_s8(a); }     \
-        inline TYPE vreinterpretq_##SUFFIX##_u16(uint16x8_t a) noexcept { return ::vreinterpretq_##SUFFIX##_u16(a); }  \
-        inline TYPE vreinterpretq_##SUFFIX##_s16(int16x8_t a) noexcept { return ::vreinterpretq_##SUFFIX##_s16(a); }   \
-        inline TYPE vreinterpretq_##SUFFIX##_u32(uint32x4_t a) noexcept { return ::vreinterpretq_##SUFFIX##_u32(a); }  \
-        inline TYPE vreinterpretq_##SUFFIX##_s32(int32x4_t a) noexcept { return ::vreinterpretq_##SUFFIX##_s32(a); }   \
-        inline TYPE vreinterpretq_##SUFFIX##_u64(uint64x2_t a) noexcept { return ::vreinterpretq_##SUFFIX##_u64(a); }  \
-        inline TYPE vreinterpretq_##SUFFIX##_s64(int64x2_t a) noexcept { return ::vreinterpretq_##SUFFIX##_s64(a); }   \
-        inline TYPE vreinterpretq_##SUFFIX##_f32(float32x4_t a) noexcept { return ::vreinterpretq_##SUFFIX##_f32(a); } \
+#define WRAP_CAST(SUFFIX, TYPE)                                          \
+    namespace wrap                                                       \
+    {                                                                    \
+        inline TYPE vreinterpretq_##SUFFIX##_u8(uint8x16_t a) noexcept   \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_u8(a);                     \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_s8(int8x16_t a) noexcept    \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_s8(a);                     \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_u16(uint16x8_t a) noexcept  \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_u16(a);                    \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_s16(int16x8_t a) noexcept   \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_s16(a);                    \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_u32(uint32x4_t a) noexcept  \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_u32(a);                    \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_s32(int32x4_t a) noexcept   \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_s32(a);                    \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_u64(uint64x2_t a) noexcept  \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_u64(a);                    \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_s64(int64x2_t a) noexcept   \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_s64(a);                    \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_f32(float32x4_t a) noexcept \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_f32(a);                    \
+        }                                                                \
     }
 
         WRAP_CAST(u8, uint8x16_t)
