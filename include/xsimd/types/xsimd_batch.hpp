@@ -28,7 +28,7 @@ namespace xsimd
         void check_batch_init(B const&, std::initializer_list<typename B::value_type> data)
         {
             (void)data;
-            assert(data.size() == B::size && "consistent initialization");
+            assert((data.size() == 1 || data.size() == B::size) && "initialization through initializer list must have a single element (for broadcasting) or as many elements as the initialized batch.");
         }
 
     }
@@ -452,11 +452,12 @@ namespace xsimd
 
     /**
      * Create a batch with elements initialized from \c data.
-     * It is an error to have `data.size() != size.
+     * If \c data has a single element, it is broadcast to each element of the
+     * batch. Otherwise \c must have as many elements as the batch size.
      */
     template <class T, class A>
     inline batch<T, A>::batch(std::initializer_list<T> data) noexcept
-        : batch(data.begin(), detail::make_index_sequence<size>())
+        : batch(data.size() == 1 ? batch(*data.begin()) : batch(data.begin(), detail::make_index_sequence<size>()))
     {
         details::check_batch_init(*this, data);
     }
@@ -855,7 +856,7 @@ namespace xsimd
 
     template <class T, class A>
     inline batch_bool<T, A>::batch_bool(std::initializer_list<bool> data) noexcept
-        : batch_bool(data.begin(), detail::make_index_sequence<size>())
+        : batch_bool(data.size() == 1 ? batch_bool(*data.begin()) : batch_bool(data.begin(), detail::make_index_sequence<size>()))
     {
         details::check_batch_init(*this, data);
     }
@@ -1042,7 +1043,10 @@ namespace xsimd
     inline batch<std::complex<T>, A>::batch(std::initializer_list<value_type> data) noexcept
     {
         details::check_batch_init(*this, data);
-        *this = load_unaligned(data.begin());
+        if (data.size() == 1)
+            *this = broadcast(*data.begin());
+        else
+            *this = load_unaligned(data.begin());
     }
 
     template <class T, class A>
@@ -1170,7 +1174,10 @@ namespace xsimd
     inline batch<std::complex<T>, A>::batch(std::initializer_list<xtl::xcomplex<T, T, i3ec>> data) noexcept
     {
         details::check_batch_init(*this, data);
-        *this = load_unaligned(data.begin());
+        if (data.size() == 1)
+            *this = broadcast(*data.begin());
+        else
+            *this = load_unaligned(data.begin());
     }
 
     // Memory layout of an xcomplex and std::complex are the same when xcomplex
