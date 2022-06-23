@@ -63,10 +63,10 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
                 endif()
             endif()
         endif()
-    endif()
 
-    if (NOT CROSS_COMPILE_ARM)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC") 
+        if (NOT CROSS_COMPILE_ARM)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC") 
+        endif()
     endif()
     
     if (ANDROID)
