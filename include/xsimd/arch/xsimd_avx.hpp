@@ -155,6 +155,13 @@ namespace xsimd
             return !_mm256_testz_si256(self, self);
         }
 
+        // batch_bool_cast
+        template <class A, class T_out, class T_in>
+        inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& self, batch_bool<T_out, A> const&, requires_arch<avx>) noexcept
+        {
+            return { bitwise_cast<batch<T_out, A>>(batch<T_in, A>(self.data)).data };
+        }
+
         // bitwise_and
         template <class A>
         inline batch<float, A> bitwise_and(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept
@@ -394,28 +401,6 @@ namespace xsimd
         inline batch_bool<double, A> bitwise_not(batch_bool<double, A> const& self, requires_arch<avx>) noexcept
         {
             return _mm256_xor_pd(self, _mm256_castsi256_pd(_mm256_set1_epi32(-1)));
-        }
-
-        // bool_cast
-        template <class A>
-        inline batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self, requires_arch<avx>) noexcept
-        {
-            return _mm256_castps_si256(self);
-        }
-        template <class A>
-        inline batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self, requires_arch<avx>) noexcept
-        {
-            return _mm256_castsi256_ps(self);
-        }
-        template <class A>
-        inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self, requires_arch<avx>) noexcept
-        {
-            return _mm256_castpd_si256(self);
-        }
-        template <class A>
-        inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self, requires_arch<avx>) noexcept
-        {
-            return _mm256_castsi256_pd(self);
         }
 
         // broadcast

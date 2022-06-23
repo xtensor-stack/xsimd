@@ -23,6 +23,9 @@ namespace xsimd
     template <class batch_type, bool... Values>
     struct batch_bool_constant;
 
+    template <class B, class T, class A>
+    inline B bitwise_cast(batch<T, A> const& x) noexcept;
+
     template <class batch_type, typename batch_type::value_type... Values>
     struct batch_constant;
 
@@ -112,6 +115,13 @@ namespace xsimd
         inline bool any(batch_bool<T, A> const& self, requires_arch<sse2>) noexcept
         {
             return _mm_movemask_epi8(self) != 0;
+        }
+
+        // batch_bool_cast
+        template <class A, class T_out, class T_in>
+        inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& self, batch_bool<T_out, A> const&, requires_arch<sse2>) noexcept
+        {
+            return { bitwise_cast<batch<T_out, A>>(batch<T_in, A>(self.data)).data };
         }
 
         // bitwise_and
@@ -388,28 +398,6 @@ namespace xsimd
         inline batch<T, A> bitwise_cast(batch<double, A> const& self, batch<T, A> const&, requires_arch<sse2>) noexcept
         {
             return _mm_castpd_si128(self);
-        }
-
-        // bool_cast
-        template <class A>
-        batch_bool<int32_t, A> inline bool_cast(batch_bool<float, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return _mm_castps_si128(self);
-        }
-        template <class A>
-        batch_bool<float, A> inline bool_cast(batch_bool<int32_t, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return _mm_castsi128_ps(self);
-        }
-        template <class A>
-        batch_bool<int64_t, A> inline bool_cast(batch_bool<double, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return _mm_castpd_si128(self);
-        }
-        template <class A>
-        batch_bool<double, A> inline bool_cast(batch_bool<int64_t, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return _mm_castsi128_pd(self);
         }
 
         // broadcast

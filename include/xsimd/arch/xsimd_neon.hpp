@@ -966,6 +966,17 @@ namespace xsimd
             return batch_bool<T, A>({ lhs.get(0) >= rhs.get(0), lhs.get(1) >= rhs.get(1) });
         }
 
+        /*******************
+         * batch_bool_cast *
+         *******************/
+
+        template <class A, class T_out, class T_in>
+        inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& self, batch_bool<T_out, A> const&, requires_arch<neon>) noexcept
+        {
+            using register_type = typename batch_bool<T_out, A>::register_type;
+            return register_type(self);
+        }
+
         /***************
          * bitwise_and *
          ***************/
@@ -2479,24 +2490,6 @@ namespace xsimd
             using src_register_type = typename batch<T, A>::register_type;
             using dst_register_type = typename batch<R, A>::register_type;
             return caster.apply<dst_register_type>(src_register_type(arg));
-        }
-
-        /*************
-         * bool_cast *
-         *************/
-
-        template <class A>
-        inline batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& arg, requires_arch<neon>) noexcept
-        {
-            using register_type = typename batch_bool<int32_t, A>::register_type;
-            return register_type(arg);
-        }
-
-        template <class A>
-        inline batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& arg, requires_arch<neon>) noexcept
-        {
-            using register_type = typename batch_bool<float, A>::register_type;
-            return register_type(arg);
         }
 
         /*********

@@ -196,6 +196,20 @@ namespace xsimd
      * @ingroup batch_conversion
      *
      * Perform a static_cast from \c T_in to \c T_out on \c \c x.
+     * @param x batch_bool of \c T_in
+     * @return \c x casted to \c T_out
+     */
+    template <class T_out, class T_in, class A>
+    inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& x) noexcept
+    {
+        static_assert(batch_bool<T_out, A>::size == batch_bool<T_in, A>::size, "Casting between incompatibles batch_bool types.");
+        return kernel::batch_bool_cast<A>(x, batch_bool<T_out, A> {}, A {});
+    }
+
+    /**
+     * @ingroup batch_conversion
+     *
+     * Perform a static_cast from \c T_in to \c T_out on \c \c x.
      * @param x batch of \c T_in
      * @return \c x casted to \c T_out
      */
@@ -312,28 +326,6 @@ namespace xsimd
     inline auto bitwise_xor(T const& x, Tp const& y) noexcept -> decltype(x ^ y)
     {
         return x ^ y;
-    }
-
-    // FIXME: check if these need to be exposed, or removed (?)
-    template <class A>
-    inline batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& x) noexcept
-    {
-        return kernel::bool_cast<A>(x, A {});
-    }
-    template <class A>
-    inline batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& x) noexcept
-    {
-        return kernel::bool_cast<A>(x, A {});
-    }
-    template <class A>
-    inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& x) noexcept
-    {
-        return kernel::bool_cast<A>(x, A {});
-    }
-    template <class A>
-    inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& x) noexcept
-    {
-        return kernel::bool_cast<A>(x, A {});
     }
 
     /**

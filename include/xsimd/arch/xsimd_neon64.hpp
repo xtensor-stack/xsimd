@@ -456,6 +456,17 @@ namespace xsimd
             return vcgeq_f64(lhs, rhs);
         }
 
+        /*******************
+         * batch_bool_cast *
+         *******************/
+
+        template <class A, class T_out, class T_in>
+        inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& self, batch_bool<T_out, A> const&, requires_arch<neon64>) noexcept
+        {
+            using register_type = typename batch_bool<T_out, A>::register_type;
+            return register_type(self);
+        }
+
         /***************
          * bitwise_and *
          ***************/
@@ -865,11 +876,17 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
-#define WRAP_CAST(SUFFIX, TYPE)                                                                                        \
-    namespace wrap                                                                                                     \
-    {                                                                                                                  \
-        inline float64x2_t vreinterpretq_f64_##SUFFIX(TYPE a) noexcept { return ::vreinterpretq_f64_##SUFFIX(a); }     \
-        inline TYPE vreinterpretq_##SUFFIX##_f64(float64x2_t a) noexcept { return ::vreinterpretq_##SUFFIX##_f64(a); } \
+#define WRAP_CAST(SUFFIX, TYPE)                                          \
+    namespace wrap                                                       \
+    {                                                                    \
+        inline float64x2_t vreinterpretq_f64_##SUFFIX(TYPE a) noexcept   \
+        {                                                                \
+            return ::vreinterpretq_f64_##SUFFIX(a);                      \
+        }                                                                \
+        inline TYPE vreinterpretq_##SUFFIX##_f64(float64x2_t a) noexcept \
+        {                                                                \
+            return ::vreinterpretq_##SUFFIX##_f64(a);                    \
+        }                                                                \
     }
 
         WRAP_CAST(u8, uint8x16_t)
@@ -943,24 +960,6 @@ namespace xsimd
         inline batch<double, A> bitwise_cast(batch<double, A> const& arg, batch<double, A> const&, requires_arch<neon64>) noexcept
         {
             return arg;
-        }
-
-        /*************
-         * bool_cast *
-         *************/
-
-        template <class A>
-        inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            using register_type = typename batch_bool<int64_t, A>::register_type;
-            return register_type(arg);
-        }
-
-        template <class A>
-        inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            using register_type = typename batch_bool<double, A>::register_type;
-            return register_type(arg);
         }
 
         /*********

@@ -103,6 +103,13 @@ namespace xsimd
             return self & constants::minuszero<batch<double, A>>();
         }
 
+        // bitwise_cast
+        template <class A, class T>
+        inline batch<T, A> bitwise_cast(batch<T, A> const& self, batch<T, A> const&, requires_arch<generic>) noexcept
+        {
+            return self;
+        }
+
         // cbrt
         /* origin: boost/simd/arch/common/simd/function/cbrt.hpp */
         /*
@@ -142,10 +149,10 @@ namespace xsimd
             e1 /= i_type(3);
             rem -= e1 * i_type(3);
             e = e1 * sign(e);
-            const batch_type cbrt2 = select(bool_cast(flag), CBRT2, CBRT2I);
-            const batch_type cbrt4 = select(bool_cast(flag), CBRT4, CBRT4I);
-            batch_type fact = select(bool_cast(rem == i_type(1)), cbrt2, batch_type(1.));
-            fact = select(bool_cast(rem == i_type(2)), cbrt4, fact);
+            const batch_type cbrt2 = select(batch_bool_cast<float>(flag), CBRT2, CBRT2I);
+            const batch_type cbrt4 = select(batch_bool_cast<float>(flag), CBRT4, CBRT4I);
+            batch_type fact = select(batch_bool_cast<float>(rem == i_type(1)), cbrt2, batch_type(1.));
+            fact = select(batch_bool_cast<float>(rem == i_type(2)), cbrt4, fact);
             x = ldexp(x * fact, e);
             x -= (x - z / (x * x)) * batch_type(1.f / 3.f);
 #ifndef XSIMD_NO_DENORMALS
@@ -189,10 +196,10 @@ namespace xsimd
             e1 /= i_type(3);
             rem -= e1 * i_type(3);
             e = e1 * sign(e);
-            const batch_type cbrt2 = select(bool_cast(flag), CBRT2, CBRT2I);
-            const batch_type cbrt4 = select(bool_cast(flag), CBRT4, CBRT4I);
-            batch_type fact = select(bool_cast(rem == i_type(1)), cbrt2, batch_type(1.));
-            fact = select(bool_cast(rem == i_type(2)), cbrt4, fact);
+            const batch_type cbrt2 = select(batch_bool_cast<double>(flag), CBRT2, CBRT2I);
+            const batch_type cbrt4 = select(batch_bool_cast<double>(flag), CBRT4, CBRT4I);
+            batch_type fact = select(batch_bool_cast<double>(rem == i_type(1)), cbrt2, batch_type(1.));
+            fact = select(batch_bool_cast<double>(rem == i_type(2)), cbrt4, fact);
             x = ldexp(x * fact, e);
             x -= (x - z / (x * x)) * batch_type(1. / 3.);
             x -= (x - z / (x * x)) * batch_type(1. / 3.);
@@ -1003,7 +1010,7 @@ namespace xsimd
             i_type r1 = m1f & ::xsimd::bitwise_cast<i_type>(self);
             batch_type x = self & ::xsimd::bitwise_cast<batch_type>(~m1f);
             exp = (r1 >> constants::nmb<batch_type>()) - constants::maxexponentm1<batch_type>();
-            exp = select(bool_cast(self != batch_type(0.)), exp, i_type(typename i_type::value_type(0)));
+            exp = select(batch_bool_cast<typename i_type::value_type>(self != batch_type(0.)), exp, i_type(typename i_type::value_type(0)));
             return select((self != batch_type(0.)), x | ::xsimd::bitwise_cast<batch_type>(constants::mask2frexp<batch_type>()), batch_type(0.));
         }
 
@@ -1392,7 +1399,7 @@ namespace xsimd
             auto test = (self < constants::smallestposval<batch_type>()) && isnez;
             if (any(test))
             {
-                k = select(bool_cast(test), k - i_type(23), k);
+                k = select(batch_bool_cast<typename i_type::value_type>(test), k - i_type(23), k);
                 x = select(test, x * batch_type(8388608ul), x);
             }
 #endif
@@ -1433,7 +1440,7 @@ namespace xsimd
             auto test = (self < constants::smallestposval<batch_type>()) && isnez;
             if (any(test))
             {
-                k = select(bool_cast(test), k - i_type(54), k);
+                k = select(batch_bool_cast<typename i_type::value_type>(test), k - i_type(54), k);
                 x = select(test, x * batch_type(18014398509481984ull), x);
             }
 #endif
@@ -1480,7 +1487,7 @@ namespace xsimd
             auto test = (self < constants::smallestposval<batch_type>()) && isnez;
             if (any(test))
             {
-                k = select(bool_cast(test), k - i_type(25), k);
+                k = select(batch_bool_cast<typename i_type::value_type>(test), k - i_type(25), k);
                 x = select(test, x * batch_type(33554432ul), x);
             }
 #endif
@@ -1520,7 +1527,7 @@ namespace xsimd
             auto test = (self < constants::smallestposval<batch_type>()) && isnez;
             if (any(test))
             {
-                k = select(bool_cast(test), k - i_type(54), k);
+                k = select(batch_bool_cast<typename i_type::value_type>(test), k - i_type(54), k);
                 x = select(test, x * batch_type(18014398509481984ull), x);
             }
 #endif
@@ -1600,7 +1607,7 @@ namespace xsimd
             auto test = (self < constants::smallestposval<batch_type>()) && isnez;
             if (any(test))
             {
-                k = select(bool_cast(test), k - i_type(25), k);
+                k = select(batch_bool_cast<typename i_type::value_type>(test), k - i_type(25), k);
                 x = select(test, x * batch_type(33554432ul), x);
             }
 #endif
@@ -1651,7 +1658,7 @@ namespace xsimd
             auto test = (self < constants::smallestposval<batch_type>()) && isnez;
             if (any(test))
             {
-                k = select(bool_cast(test), k - i_type(54), k);
+                k = select(batch_bool_cast<typename i_type::value_type>(test), k - i_type(54), k);
                 x = select(test, x * batch_type(18014398509481984ull), x);
             }
 #endif
@@ -1723,7 +1730,7 @@ namespace xsimd
             batch_type hfsq = batch_type(0.5) * f * f;
             batch_type dk = to_float(k);
             /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
-            batch_type c = select(bool_cast(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
+            batch_type c = select(batch_bool_cast<float>(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, (hfsq + R), dk * constants::log_2lo<batch_type>() + c) - hfsq + f);
 #ifndef XSIMD_NO_INFINITIES
             batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
@@ -1744,7 +1751,7 @@ namespace xsimd
             hu += 0x3ff00000 - 0x3fe6a09e;
             i_type k = (hu >> 20) - 0x3ff;
             /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
-            batch_type c = select(bool_cast(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
+            batch_type c = select(batch_bool_cast<double>(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
             hu = (hu & i_type(0x000fffff)) + 0x3fe6a09e;
             batch_type f = ::xsimd::bitwise_cast<batch_type>((hu << 32) | (i_type(0xffffffff) & ::xsimd::bitwise_cast<i_type>(uf)));
             f = --f;
