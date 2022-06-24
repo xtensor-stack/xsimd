@@ -85,7 +85,11 @@ target_include_directories(xsimd INTERFACE
     $<BUILD_INTERFACE:${XSIMD_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include>)
 
-target_compile_features(xsimd INTERFACE cxx_std_11)
+if (ENABLE_XTL_COMPLEX)
+    target_compile_features(xsimd INTERFACE cxx_std_14)
+else()
+    target_compile_features(xsimd INTERFACE cxx_std_11)
+endif()
 
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" OFF)
