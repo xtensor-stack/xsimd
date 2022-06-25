@@ -1959,6 +1959,7 @@ namespace xsimd
             auto absa = abs(a);
             auto arga = arg(a);
             auto r = pow(absa, z);
+            
             auto theta = z * arga;
             auto sincosTheta = xsimd::sincos(theta);
             return { r * sincosTheta.second, r * sincosTheta.first };
