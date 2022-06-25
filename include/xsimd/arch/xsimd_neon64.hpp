@@ -711,6 +711,12 @@ namespace xsimd
         }
 
         template <class A>
+        inline float hadd(batch<float, A> const& arg, requires_arch<neon64>) noexcept
+        {
+            return vaddvq_f32(arg);
+        }
+
+        template <class A>
         inline double hadd(batch<double, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_f64(arg);
