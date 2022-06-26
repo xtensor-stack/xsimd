@@ -23,120 +23,120 @@
 // Wrap intrinsics so we can pass them as function pointers
 // - OP: intrinsics name prefix, e.g., vorrq
 // - RT: type traits to deduce intrinsics return types
-#define WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                \
-    namespace wrap                                                          \
-    {                                                                       \
-        inline RT<uint8x16_t> OP##_u8(uint8x16_t a, uint8x16_t b) noexcept  \
-        {                                                                   \
-            return ::OP##_u8(a, b);                                         \
-        }                                                                   \
-        inline RT<int8x16_t> OP##_s8(int8x16_t a, int8x16_t b) noexcept     \
-        {                                                                   \
-            return ::OP##_s8(a, b);                                         \
-        }                                                                   \
-        inline RT<uint16x8_t> OP##_u16(uint16x8_t a, uint16x8_t b) noexcept \
-        {                                                                   \
-            return ::OP##_u16(a, b);                                        \
-        }                                                                   \
-        inline RT<int16x8_t> OP##_s16(int16x8_t a, int16x8_t b) noexcept    \
-        {                                                                   \
-            return ::OP##_s16(a, b);                                        \
-        }                                                                   \
-        inline RT<uint32x4_t> OP##_u32(uint32x4_t a, uint32x4_t b) noexcept \
-        {                                                                   \
-            return ::OP##_u32(a, b);                                        \
-        }                                                                   \
-        inline RT<int32x4_t> OP##_s32(int32x4_t a, int32x4_t b) noexcept    \
-        {                                                                   \
-            return ::OP##_s32(a, b);                                        \
-        }                                                                   \
+#define WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                               \
+    namespace wrap                                                                         \
+    {                                                                                      \
+        inline RT<uint8x16_t> XSIMD_CALLCONV OP##_u8(uint8x16_t a, uint8x16_t b) noexcept  \
+        {                                                                                  \
+            return ::OP##_u8(a, b);                                                        \
+        }                                                                                  \
+        inline RT<int8x16_t> XSIMD_CALLCONV OP##_s8(int8x16_t a, int8x16_t b) noexcept     \
+        {                                                                                  \
+            return ::OP##_s8(a, b);                                                        \
+        }                                                                                  \
+        inline RT<uint16x8_t> XSIMD_CALLCONV OP##_u16(uint16x8_t a, uint16x8_t b) noexcept \
+        {                                                                                  \
+            return ::OP##_u16(a, b);                                                       \
+        }                                                                                  \
+        inline RT<int16x8_t> XSIMD_CALLCONV OP##_s16(int16x8_t a, int16x8_t b) noexcept    \
+        {                                                                                  \
+            return ::OP##_s16(a, b);                                                       \
+        }                                                                                  \
+        inline RT<uint32x4_t> XSIMD_CALLCONV OP##_u32(uint32x4_t a, uint32x4_t b) noexcept \
+        {                                                                                  \
+            return ::OP##_u32(a, b);                                                       \
+        }                                                                                  \
+        inline RT<int32x4_t> XSIMD_CALLCONV OP##_s32(int32x4_t a, int32x4_t b) noexcept    \
+        {                                                                                  \
+            return ::OP##_s32(a, b);                                                       \
+        }                                                                                  \
     }
 
-#define WRAP_BINARY_INT(OP, RT)                                             \
-    WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                    \
-    namespace wrap                                                          \
-    {                                                                       \
-        inline RT<uint64x2_t> OP##_u64(uint64x2_t a, uint64x2_t b) noexcept \
-        {                                                                   \
-            return ::OP##_u64(a, b);                                        \
-        }                                                                   \
-        inline RT<int64x2_t> OP##_s64(int64x2_t a, int64x2_t b) noexcept    \
-        {                                                                   \
-            return ::OP##_s64(a, b);                                        \
-        }                                                                   \
+#define WRAP_BINARY_INT(OP, RT)                                                            \
+    WRAP_BINARY_INT_EXCLUDING_64(OP, RT)                                                   \
+    namespace wrap                                                                         \
+    {                                                                                      \
+        inline RT<uint64x2_t> XSIMD_CALLCONV OP##_u64(uint64x2_t a, uint64x2_t b) noexcept \
+        {                                                                                  \
+            return ::OP##_u64(a, b);                                                       \
+        }                                                                                  \
+        inline RT<int64x2_t> XSIMD_CALLCONV OP##_s64(int64x2_t a, int64x2_t b) noexcept    \
+        {                                                                                  \
+            return ::OP##_s64(a, b);                                                       \
+        }                                                                                  \
     }
 
-#define WRAP_BINARY_FLOAT(OP, RT)                                              \
-    namespace wrap                                                             \
-    {                                                                          \
-        inline RT<float32x4_t> OP##_f32(float32x4_t a, float32x4_t b) noexcept \
-        {                                                                      \
-            return ::OP##_f32(a, b);                                           \
-        }                                                                      \
+#define WRAP_BINARY_FLOAT(OP, RT)                                                             \
+    namespace wrap                                                                            \
+    {                                                                                         \
+        inline RT<float32x4_t> XSIMD_CALLCONV OP##_f32(float32x4_t a, float32x4_t b) noexcept \
+        {                                                                                     \
+            return ::OP##_f32(a, b);                                                          \
+        }                                                                                     \
     }
 
-#define WRAP_UNARY_INT_EXCLUDING_64(OP)                   \
-    namespace wrap                                        \
-    {                                                     \
-        inline uint8x16_t OP##_u8(uint8x16_t a) noexcept  \
-        {                                                 \
-            return ::OP##_u8(a);                          \
-        }                                                 \
-        inline int8x16_t OP##_s8(int8x16_t a) noexcept    \
-        {                                                 \
-            return ::OP##_s8(a);                          \
-        }                                                 \
-        inline uint16x8_t OP##_u16(uint16x8_t a) noexcept \
-        {                                                 \
-            return ::OP##_u16(a);                         \
-        }                                                 \
-        inline int16x8_t OP##_s16(int16x8_t a) noexcept   \
-        {                                                 \
-            return ::OP##_s16(a);                         \
-        }                                                 \
-        inline uint32x4_t OP##_u32(uint32x4_t a) noexcept \
-        {                                                 \
-            return ::OP##_u32(a);                         \
-        }                                                 \
-        inline int32x4_t OP##_s32(int32x4_t a) noexcept   \
-        {                                                 \
-            return ::OP##_s32(a);                         \
-        }                                                 \
+#define WRAP_UNARY_INT_EXCLUDING_64(OP)                                  \
+    namespace wrap                                                       \
+    {                                                                    \
+        inline uint8x16_t XSIMD_CALLCONV OP##_u8(uint8x16_t a) noexcept  \
+        {                                                                \
+            return ::OP##_u8(a);                                         \
+        }                                                                \
+        inline int8x16_t XSIMD_CALLCONV OP##_s8(int8x16_t a) noexcept    \
+        {                                                                \
+            return ::OP##_s8(a);                                         \
+        }                                                                \
+        inline uint16x8_t XSIMD_CALLCONV OP##_u16(uint16x8_t a) noexcept \
+        {                                                                \
+            return ::OP##_u16(a);                                        \
+        }                                                                \
+        inline int16x8_t XSIMD_CALLCONV OP##_s16(int16x8_t a) noexcept   \
+        {                                                                \
+            return ::OP##_s16(a);                                        \
+        }                                                                \
+        inline uint32x4_t XSIMD_CALLCONV OP##_u32(uint32x4_t a) noexcept \
+        {                                                                \
+            return ::OP##_u32(a);                                        \
+        }                                                                \
+        inline int32x4_t XSIMD_CALLCONV OP##_s32(int32x4_t a) noexcept   \
+        {                                                                \
+            return ::OP##_s32(a);                                        \
+        }                                                                \
     }
 
-#define WRAP_UNARY_INT(OP)                                \
-    WRAP_UNARY_INT_EXCLUDING_64(OP)                       \
-    namespace wrap                                        \
-    {                                                     \
-        inline uint64x2_t OP##_u64(uint64x2_t a) noexcept \
-        {                                                 \
-            return ::OP##_u64(a);                         \
-        }                                                 \
-        inline int64x2_t OP##_s64(int64x2_t a) noexcept   \
-        {                                                 \
-            return ::OP##_s64(a);                         \
-        }                                                 \
+#define WRAP_UNARY_INT(OP)                                               \
+    WRAP_UNARY_INT_EXCLUDING_64(OP)                                      \
+    namespace wrap                                                       \
+    {                                                                    \
+        inline uint64x2_t XSIMD_CALLCONV OP##_u64(uint64x2_t a) noexcept \
+        {                                                                \
+            return ::OP##_u64(a);                                        \
+        }                                                                \
+        inline int64x2_t XSIMD_CALLCONV OP##_s64(int64x2_t a) noexcept   \
+        {                                                                \
+            return ::OP##_s64(a);                                        \
+        }                                                                \
     }
 
-#define WRAP_UNARY_FLOAT(OP)                                \
-    namespace wrap                                          \
-    {                                                       \
-        inline float32x4_t OP##_f32(float32x4_t a) noexcept \
-        {                                                   \
-            return ::OP##_f32(a);                           \
-        }                                                   \
+#define WRAP_UNARY_FLOAT(OP)                                               \
+    namespace wrap                                                         \
+    {                                                                      \
+        inline float32x4_t XSIMD_CALLCONV OP##_f32(float32x4_t a) noexcept \
+        {                                                                  \
+            return ::OP##_f32(a);                                          \
+        }                                                                  \
     }
 
 // Dummy identity caster to ease coding
-inline uint8x16_t vreinterpretq_u8_u8(uint8x16_t arg) noexcept { return arg; }
-inline int8x16_t vreinterpretq_s8_s8(int8x16_t arg) noexcept { return arg; }
-inline uint16x8_t vreinterpretq_u16_u16(uint16x8_t arg) noexcept { return arg; }
-inline int16x8_t vreinterpretq_s16_s16(int16x8_t arg) noexcept { return arg; }
-inline uint32x4_t vreinterpretq_u32_u32(uint32x4_t arg) noexcept { return arg; }
-inline int32x4_t vreinterpretq_s32_s32(int32x4_t arg) noexcept { return arg; }
-inline uint64x2_t vreinterpretq_u64_u64(uint64x2_t arg) noexcept { return arg; }
-inline int64x2_t vreinterpretq_s64_s64(int64x2_t arg) noexcept { return arg; }
-inline float32x4_t vreinterpretq_f32_f32(float32x4_t arg) noexcept { return arg; }
+inline uint8x16_t XSIMD_CALLCONV vreinterpretq_u8_u8(uint8x16_t arg) noexcept { return arg; }
+inline int8x16_t XSIMD_CALLCONV vreinterpretq_s8_s8(int8x16_t arg) noexcept { return arg; }
+inline uint16x8_t XSIMD_CALLCONV vreinterpretq_u16_u16(uint16x8_t arg) noexcept { return arg; }
+inline int16x8_t XSIMD_CALLCONV vreinterpretq_s16_s16(int16x8_t arg) noexcept { return arg; }
+inline uint32x4_t XSIMD_CALLCONV vreinterpretq_u32_u32(uint32x4_t arg) noexcept { return arg; }
+inline int32x4_t XSIMD_CALLCONV vreinterpretq_s32_s32(int32x4_t arg) noexcept { return arg; }
+inline uint64x2_t XSIMD_CALLCONV vreinterpretq_u64_u64(uint64x2_t arg) noexcept { return arg; }
+inline int64x2_t XSIMD_CALLCONV vreinterpretq_s64_s64(int64x2_t arg) noexcept { return arg; }
+inline float32x4_t XSIMD_CALLCONV vreinterpretq_f32_f32(float32x4_t arg) noexcept { return arg; }
 
 namespace xsimd
 {

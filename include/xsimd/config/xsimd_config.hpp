@@ -319,10 +319,63 @@
 #define XSIMD_WITH_SSE2 1
 #endif
 
-#endif
+#endif // _MSC_VER
 
 #if !XSIMD_WITH_SSE2 && !XSIMD_WITH_SSE3 && !XSIMD_WITH_SSSE3 && !XSIMD_WITH_SSE4_1 && !XSIMD_WITH_SSE4_2 && !XSIMD_WITH_AVX && !XSIMD_WITH_AVX2 && !XSIMD_WITH_FMA3_SSE && !XSIMD_WITH_FMA4 && !XSIMD_WITH_FMA3_AVX && !XSIMD_WITH_FMA3_AVX2 && !XSIMD_WITH_AVX512F && !XSIMD_WITH_AVX512CD && !XSIMD_WITH_AVX512DQ && !XSIMD_WITH_AVX512BW && !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
 #define XSIMD_NO_SUPPORTED_ARCHITECTURE
 #endif
 
+// XSIMD_NO_DISCARD
+#if defined(__has_cpp_attribute)
+#if __has_cpp_attribute(nodiscard) >= 201603L //  compiler supports [[nodiscard]] without a message
+#define XSIMD_NO_DISCARD [[nodiscard]]
 #endif
+#endif
+#if !defined(XSIMD_NO_DISCARD) && __cplusplus >= 201703L // C++17 or higher
+#define XSIMD_NO_DISCARD [[nodiscard]]
+#endif
+#if !defined(XSIMD_NO_DISCARD) && (defined(__GNUC__) || defined(__clang__)) // GCC or Clang
+#define XSIMD_NO_DISCARD __attribute__((warn_unused_result))
+#endif
+#if !defined(XSIMD_NO_DISCARD) // fallback - do nothing
+#define XSIMD_NO_DISCARD
+#endif
+
+// on MSVC (and msvc-emulating compilers) the __vectorcall calling convention is supported on x86 and AMD64,
+// but not ARM64. Additionally it requires SSE2 or higher to be enabled.
+// see: https://docs.microsoft.com/en-us/cpp/cpp/vectorcall?view=msvc-170
+#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_AMD64)) && XSIMD_WITH_SSE2
+#define XSIMD_WITH_VECTORCALL 1
+#else
+#define XSIMD_WITH_VECTORCALL 0
+#endif
+
+// XSIMD_CALLCONV
+#ifndef XSIMD_CALLCONV
+#if XSIMD_WITH_VECTORCALL
+#define XSIMD_CALLCONV __vectorcall
+#ifndef XSIMD_CREF
+#define XSIMD_CREF // default to passing batches by value when using vectorcall
+#endif
+#else
+#define XSIMD_CALLCONV
+#endif
+#endif // XSIMD_CALLCONV
+
+// XSIMD_CREF
+#ifndef XSIMD_CREF
+#define XSIMD_CREF const&
+#endif
+
+// XSIMD_FORCEINLINE
+#ifndef XSIMD_FORCEINLINE
+#ifdef _MSC_VER
+#define XSIMD_FORCEINLINE __forceinline
+#elif defined(__GNUC__) || defined(__clang__)
+#define XSIMD_FORCEINLINE __attribute__((__always_inline__)) inline
+#else
+#define XSIMD_FORCEINLINE inline
+#endif
+#endif // XSIMD_FORCEINLINE
+
+#endif // XSIMD_CONFIG_HPP

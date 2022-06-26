@@ -22,7 +22,7 @@
 namespace xsimd
 {
     template <class Arch = default_arch, class I1, class I2, class O1, class UF>
-    void transform(I1 first, I2 last, O1 out_first, UF&& f) noexcept
+    void XSIMD_CALLCONV transform(I1 first, I2 last, O1 out_first, UF&& f) noexcept
     {
         using value_type = typename std::decay<decltype(*first)>::type;
         using batch_type = batch<value_type, Arch>;
@@ -76,7 +76,7 @@ namespace xsimd
     }
 
     template <class Arch = default_arch, class I1, class I2, class I3, class O1, class UF>
-    void transform(I1 first_1, I2 last_1, I3 first_2, O1 out_first, UF&& f) noexcept
+    void XSIMD_CALLCONV transform(I1 first_1, I2 last_1, I3 first_2, O1 out_first, UF&& f) noexcept
     {
         using value_type = typename std::decay<decltype(*first_1)>::type;
         using batch_type = batch<value_type, Arch>;
@@ -143,7 +143,7 @@ namespace xsimd
     }
 
     template <class Arch = default_arch, class Iterator1, class Iterator2, class Init, class BinaryFunction = detail::plus>
-    Init reduce(Iterator1 first, Iterator2 last, Init init, BinaryFunction&& binfun = detail::plus {}) noexcept
+    Init XSIMD_CALLCONV reduce(Iterator1 first, Iterator2 last, Init init, BinaryFunction&& binfun = detail::plus {}) noexcept
     {
         using value_type = typename std::decay<decltype(*first)>::type;
         using batch_type = batch<value_type, Arch>;

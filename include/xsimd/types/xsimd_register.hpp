@@ -14,6 +14,8 @@
 
 #include <type_traits>
 
+#include "../config/xsimd_config.hpp"
+
 namespace xsimd
 {
     namespace types
@@ -32,17 +34,17 @@ namespace xsimd
                           "usage of simd_register with unsupported type");
         };
 
-#define XSIMD_DECLARE_SIMD_REGISTER(SCALAR_TYPE, ISA, VECTOR_TYPE) \
-    template <>                                                    \
-    struct simd_register<SCALAR_TYPE, ISA>                         \
-    {                                                              \
-        using register_type = VECTOR_TYPE;                         \
-        register_type data;                                        \
-        operator register_type() const noexcept { return data; }   \
-    };                                                             \
-    template <>                                                    \
-    struct has_simd_register<SCALAR_TYPE, ISA> : std::true_type    \
-    {                                                              \
+#define XSIMD_DECLARE_SIMD_REGISTER(SCALAR_TYPE, ISA, VECTOR_TYPE)                                \
+    template <>                                                                                   \
+    struct simd_register<SCALAR_TYPE, ISA>                                                        \
+    {                                                                                             \
+        using register_type = VECTOR_TYPE;                                                        \
+        register_type data;                                                                       \
+        XSIMD_FORCEINLINE XSIMD_CALLCONV operator register_type() const noexcept { return data; } \
+    };                                                                                            \
+    template <>                                                                                   \
+    struct has_simd_register<SCALAR_TYPE, ISA> : std::true_type                                   \
+    {                                                                                             \
     }
 
 #define XSIMD_DECLARE_SIMD_REGISTER_ALIAS(ISA, ISA_BASE)                          \

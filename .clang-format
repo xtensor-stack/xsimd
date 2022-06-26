@@ -4,5 +4,9 @@ AlignAfterOpenBracket: Align
 AlignConsecutiveDeclarations: 'false'
 BreakBeforeBraces: Allman
 NamespaceIndentation: All
-
+AttributeMacros:
+  - XSIMD_CALLCONV
+  - XSIMD_CREF
+  - XSIMD_FORCEINLINE
+  - XSIMD_NODISCARD
 ...

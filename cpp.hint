@@ -1,0 +1,4 @@
+#define XSIMD_CALLCONV
+#define XSIMD_CREF          const&
+#define XSIMD_FORCEINLINE   inline
+#define XSIMD_NODISCARD     [[nodiscard]]

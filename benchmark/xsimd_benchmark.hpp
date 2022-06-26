@@ -425,60 +425,60 @@ namespace xsimd
         out << "============================" << std::endl;
     }
 
-#define DEFINE_OP_FUNCTOR_2OP(OP, NAME)                                              \
-    struct NAME##_fn                                                                 \
+#define DEFINE_OP_FUNCTOR_2OP(OP, NAME)                                                                     \
+    struct NAME##_fn                                                                                        \
+    {                                                                                                       \
+        template <class T>                                                                                  \
+        inline T XSIMD_CALLCONV operator()(T XSIMD_CREF lhs, T XSIMD_CREF rhs) const { return lhs OP rhs; } \
+        inline std::string name() const { return #NAME; }                                                   \
+    }
+
+#define DEFINE_FUNCTOR_1OP(FN)                                   \
+    struct FN##_fn                                               \
+    {                                                            \
+        template <class T>                                       \
+        inline T XSIMD_CALLCONV operator()(T XSIMD_CREF x) const \
+        {                                                        \
+            using xsimd::FN;                                     \
+            return FN(x);                                        \
+        }                                                        \
+        inline std::string name() const { return #FN; }          \
+    }
+
+#define DEFINE_FUNCTOR_1OP_TEMPLATE(FN, N, ...)                  \
+    struct FN##_##N##_fn                                         \
+    {                                                            \
+        template <class T>                                       \
+        inline T XSIMD_CALLCONV operator()(T XSIMD_CREF x) const \
+        {                                                        \
+            using xsimd::FN;                                     \
+            return FN<T, __VA_ARGS__>(x);                        \
+        }                                                        \
+        inline std::string name() const { return #FN " " #N; }   \
+    }
+
+#define DEFINE_FUNCTOR_2OP(FN)                                                       \
+    struct FN##_fn                                                                   \
     {                                                                                \
         template <class T>                                                           \
-        inline T operator()(const T& lhs, const T& rhs) const { return lhs OP rhs; } \
-        inline std::string name() const { return #NAME; }                            \
+        inline T XSIMD_CALLCONV operator()(T XSIMD_CREF lhs, T XSIMD_CREF rhs) const \
+        {                                                                            \
+            using xsimd::FN;                                                         \
+            return FN(lhs, rhs);                                                     \
+        }                                                                            \
+        inline std::string name() const { return #FN; }                              \
     }
 
-#define DEFINE_FUNCTOR_1OP(FN)                          \
-    struct FN##_fn                                      \
-    {                                                   \
-        template <class T>                              \
-        inline T operator()(const T& x) const           \
-        {                                               \
-            using xsimd::FN;                            \
-            return FN(x);                               \
-        }                                               \
-        inline std::string name() const { return #FN; } \
-    }
-
-#define DEFINE_FUNCTOR_1OP_TEMPLATE(FN, N, ...)                \
-    struct FN##_##N##_fn                                       \
-    {                                                          \
-        template <class T>                                     \
-        inline T operator()(const T& x) const                  \
-        {                                                      \
-            using xsimd::FN;                                   \
-            return FN<T, __VA_ARGS__>(x);                      \
-        }                                                      \
-        inline std::string name() const { return #FN " " #N; } \
-    }
-
-#define DEFINE_FUNCTOR_2OP(FN)                                \
-    struct FN##_fn                                            \
-    {                                                         \
-        template <class T>                                    \
-        inline T operator()(const T& lhs, const T& rhs) const \
-        {                                                     \
-            using xsimd::FN;                                  \
-            return FN(lhs, rhs);                              \
-        }                                                     \
-        inline std::string name() const { return #FN; }       \
-    }
-
-#define DEFINE_FUNCTOR_3OP(FN)                                              \
-    struct FN##_fn                                                          \
-    {                                                                       \
-        template <class T>                                                  \
-        inline T operator()(const T& op0, const T& op1, const T& op2) const \
-        {                                                                   \
-            using xsimd::FN;                                                \
-            return FN(op0, op1, op2);                                       \
-        }                                                                   \
-        inline std::string name() const { return #FN; }                     \
+#define DEFINE_FUNCTOR_3OP(FN)                                                                         \
+    struct FN##_fn                                                                                     \
+    {                                                                                                  \
+        template <class T>                                                                             \
+        inline T XSIMD_CALLCONV operator()(T XSIMD_CREF op0, T XSIMD_CREF op1, T XSIMD_CREF op2) const \
+        {                                                                                              \
+            using xsimd::FN;                                                                           \
+            return FN(op0, op1, op2);                                                                  \
+        }                                                                                              \
+        inline std::string name() const { return #FN; }                                                \
     }
 
     DEFINE_OP_FUNCTOR_2OP(+, add);

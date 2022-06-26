@@ -22,38 +22,38 @@ namespace xsimd
     namespace constants
     {
 
-#define XSIMD_DEFINE_CONSTANT(NAME, SINGLE, DOUBLE) \
-    template <class T>                              \
-    inline T NAME() noexcept                        \
-    {                                               \
-        return T(NAME<typename T::value_type>());   \
-    }                                               \
-    template <>                                     \
-    inline float NAME<float>() noexcept             \
-    {                                               \
-        return SINGLE;                              \
-    }                                               \
-    template <>                                     \
-    inline double NAME<double>() noexcept           \
-    {                                               \
-        return DOUBLE;                              \
+#define XSIMD_DEFINE_CONSTANT(NAME, SINGLE, DOUBLE)                 \
+    template <class T>                                              \
+    XSIMD_FORCEINLINE T XSIMD_CALLCONV NAME() noexcept              \
+    {                                                               \
+        return T(NAME<typename T::value_type>());                   \
+    }                                                               \
+    template <>                                                     \
+    XSIMD_FORCEINLINE float XSIMD_CALLCONV NAME<float>() noexcept   \
+    {                                                               \
+        return SINGLE;                                              \
+    }                                                               \
+    template <>                                                     \
+    XSIMD_FORCEINLINE double XSIMD_CALLCONV NAME<double>() noexcept \
+    {                                                               \
+        return DOUBLE;                                              \
     }
 
-#define XSIMD_DEFINE_CONSTANT_HEX(NAME, SINGLE, DOUBLE) \
-    template <class T>                                  \
-    inline T NAME() noexcept                            \
-    {                                                   \
-        return T(NAME<typename T::value_type>());       \
-    }                                                   \
-    template <>                                         \
-    inline float NAME<float>() noexcept                 \
-    {                                                   \
-        return bit_cast<float>((uint32_t)SINGLE);       \
-    }                                                   \
-    template <>                                         \
-    inline double NAME<double>() noexcept               \
-    {                                                   \
-        return bit_cast<double>((uint64_t)DOUBLE);      \
+#define XSIMD_DEFINE_CONSTANT_HEX(NAME, SINGLE, DOUBLE)             \
+    template <class T>                                              \
+    XSIMD_FORCEINLINE T XSIMD_CALLCONV NAME() noexcept              \
+    {                                                               \
+        return T(NAME<typename T::value_type>());                   \
+    }                                                               \
+    template <>                                                     \
+    XSIMD_FORCEINLINE float XSIMD_CALLCONV NAME<float>() noexcept   \
+    {                                                               \
+        return bit_cast<float>((uint32_t)SINGLE);                   \
+    }                                                               \
+    template <>                                                     \
+    XSIMD_FORCEINLINE double XSIMD_CALLCONV NAME<double>() noexcept \
+    {                                                               \
+        return bit_cast<double>((uint64_t)DOUBLE);                  \
     }
 
         XSIMD_DEFINE_CONSTANT(infinity, (std::numeric_limits<float>::infinity()), (std::numeric_limits<double>::infinity()))
@@ -109,31 +109,31 @@ namespace xsimd
 #undef XSIMD_DEFINE_CONSTANT_HEX
 
         template <class T>
-        constexpr T allbits() noexcept;
+        constexpr T XSIMD_CALLCONV allbits() noexcept;
 
         template <class T>
-        constexpr as_integer_t<T> mask1frexp() noexcept;
+        constexpr as_integer_t<T> XSIMD_CALLCONV mask1frexp() noexcept;
 
         template <class T>
-        constexpr as_integer_t<T> mask2frexp() noexcept;
+        constexpr as_integer_t<T> XSIMD_CALLCONV mask2frexp() noexcept;
 
         template <class T>
-        constexpr as_integer_t<T> maxexponent() noexcept;
+        constexpr as_integer_t<T> XSIMD_CALLCONV maxexponent() noexcept;
 
         template <class T>
-        constexpr as_integer_t<T> maxexponentm1() noexcept;
+        constexpr as_integer_t<T> XSIMD_CALLCONV maxexponentm1() noexcept;
 
         template <class T>
-        constexpr int32_t nmb() noexcept;
+        constexpr int32_t XSIMD_CALLCONV nmb() noexcept;
 
         template <class T>
-        constexpr T zero() noexcept;
+        constexpr T XSIMD_CALLCONV zero() noexcept;
 
         template <class T>
-        constexpr T minvalue() noexcept;
+        constexpr T XSIMD_CALLCONV minvalue() noexcept;
 
         template <class T>
-        constexpr T maxvalue() noexcept;
+        constexpr T XSIMD_CALLCONV maxvalue() noexcept;
 
         /**************************
          * allbits implementation *
@@ -144,7 +144,8 @@ namespace xsimd
             template <class T, bool = std::is_integral<T>::value>
             struct allbits_impl
             {
-                static constexpr T get_value() noexcept
+                XSIMD_FORCEINLINE
+                static constexpr T XSIMD_CALLCONV get_value() noexcept
                 {
                     return T(~0);
                 }
@@ -153,7 +154,8 @@ namespace xsimd
             template <class T>
             struct allbits_impl<T, false>
             {
-                static constexpr T get_value() noexcept
+                XSIMD_FORCEINLINE
+                static constexpr T XSIMD_CALLCONV get_value() noexcept
                 {
                     return nan<T>();
                 }
@@ -161,7 +163,7 @@ namespace xsimd
         }
 
         template <class T>
-        inline constexpr T allbits() noexcept
+        XSIMD_FORCEINLINE constexpr T XSIMD_CALLCONV allbits() noexcept
         {
             return T(detail::allbits_impl<typename T::value_type>::get_value());
         }
@@ -171,19 +173,19 @@ namespace xsimd
          *****************************/
 
         template <class T>
-        inline constexpr as_integer_t<T> mask1frexp() noexcept
+        XSIMD_FORCEINLINE constexpr as_integer_t<T> XSIMD_CALLCONV mask1frexp() noexcept
         {
             return as_integer_t<T>(mask1frexp<typename T::value_type>());
         }
 
         template <>
-        inline constexpr int32_t mask1frexp<float>() noexcept
+        XSIMD_FORCEINLINE constexpr int32_t XSIMD_CALLCONV mask1frexp<float>() noexcept
         {
             return 0x7f800000;
         }
 
         template <>
-        inline constexpr int64_t mask1frexp<double>() noexcept
+        XSIMD_FORCEINLINE constexpr int64_t XSIMD_CALLCONV mask1frexp<double>() noexcept
         {
             return 0x7ff0000000000000;
         }
@@ -193,19 +195,19 @@ namespace xsimd
          *****************************/
 
         template <class T>
-        inline constexpr as_integer_t<T> mask2frexp() noexcept
+        XSIMD_FORCEINLINE constexpr as_integer_t<T> XSIMD_CALLCONV mask2frexp() noexcept
         {
             return as_integer_t<T>(mask2frexp<typename T::value_type>());
         }
 
         template <>
-        inline constexpr int32_t mask2frexp<float>() noexcept
+        XSIMD_FORCEINLINE constexpr int32_t XSIMD_CALLCONV mask2frexp<float>() noexcept
         {
             return 0x3f000000;
         }
 
         template <>
-        inline constexpr int64_t mask2frexp<double>() noexcept
+        XSIMD_FORCEINLINE constexpr int64_t XSIMD_CALLCONV mask2frexp<double>() noexcept
         {
             return 0x3fe0000000000000;
         }
@@ -215,19 +217,19 @@ namespace xsimd
          ******************************/
 
         template <class T>
-        inline constexpr as_integer_t<T> maxexponent() noexcept
+        XSIMD_FORCEINLINE constexpr as_integer_t<T> XSIMD_CALLCONV maxexponent() noexcept
         {
             return as_integer_t<T>(maxexponent<typename T::value_type>());
         }
 
         template <>
-        inline constexpr int32_t maxexponent<float>() noexcept
+        XSIMD_FORCEINLINE constexpr int32_t XSIMD_CALLCONV maxexponent<float>() noexcept
         {
             return 127;
         }
 
         template <>
-        inline constexpr int64_t maxexponent<double>() noexcept
+        XSIMD_FORCEINLINE constexpr int64_t XSIMD_CALLCONV maxexponent<double>() noexcept
         {
             return 1023;
         }
@@ -237,19 +239,19 @@ namespace xsimd
          ******************************/
 
         template <class T>
-        inline constexpr as_integer_t<T> maxexponentm1() noexcept
+        XSIMD_FORCEINLINE constexpr as_integer_t<T> XSIMD_CALLCONV maxexponentm1() noexcept
         {
             return as_integer_t<T>(maxexponentm1<typename T::value_type>());
         }
 
         template <>
-        inline constexpr int32_t maxexponentm1<float>() noexcept
+        XSIMD_FORCEINLINE constexpr int32_t XSIMD_CALLCONV maxexponentm1<float>() noexcept
         {
             return 126;
         }
 
         template <>
-        inline constexpr int64_t maxexponentm1<double>() noexcept
+        XSIMD_FORCEINLINE constexpr int64_t XSIMD_CALLCONV maxexponentm1<double>() noexcept
         {
             return 1022;
         }
@@ -259,19 +261,19 @@ namespace xsimd
          **********************/
 
         template <class T>
-        inline constexpr int32_t nmb() noexcept
+        XSIMD_FORCEINLINE constexpr int32_t XSIMD_CALLCONV nmb() noexcept
         {
             return nmb<typename T::value_type>();
         }
 
         template <>
-        inline constexpr int32_t nmb<float>() noexcept
+        XSIMD_FORCEINLINE constexpr int32_t XSIMD_CALLCONV nmb<float>() noexcept
         {
             return 23;
         }
 
         template <>
-        inline constexpr int32_t nmb<double>() noexcept
+        XSIMD_FORCEINLINE constexpr int32_t XSIMD_CALLCONV nmb<double>() noexcept
         {
             return 52;
         }
@@ -281,7 +283,7 @@ namespace xsimd
          ***********************/
 
         template <class T>
-        inline constexpr T zero() noexcept
+        XSIMD_FORCEINLINE constexpr T XSIMD_CALLCONV zero() noexcept
         {
             return T(typename T::value_type(0));
         }
@@ -295,7 +297,8 @@ namespace xsimd
             template <class T>
             struct minvalue_impl
             {
-                static constexpr T get_value() noexcept
+                XSIMD_FORCEINLINE
+                static constexpr T XSIMD_CALLCONV get_value() noexcept
                 {
                     return std::numeric_limits<typename T::value_type>::min();
                 }
@@ -304,7 +307,8 @@ namespace xsimd
             template <class T>
             struct minvalue_common
             {
-                static constexpr T get_value() noexcept
+                XSIMD_FORCEINLINE
+                static constexpr T XSIMD_CALLCONV get_value() noexcept
                 {
                     return std::numeric_limits<T>::min();
                 }
@@ -346,7 +350,8 @@ namespace xsimd
             template <>
             struct minvalue_impl<float>
             {
-                static float get_value() noexcept
+                XSIMD_FORCEINLINE
+                static float XSIMD_CALLCONV get_value() noexcept
                 {
                     return bit_cast<float>((uint32_t)0xff7fffff);
                 }
@@ -355,7 +360,8 @@ namespace xsimd
             template <>
             struct minvalue_impl<double>
             {
-                static double get_value() noexcept
+                XSIMD_FORCEINLINE
+                static double XSIMD_CALLCONV get_value() noexcept
                 {
                     return bit_cast<double>((uint64_t)0xffefffffffffffff);
                 }
@@ -363,7 +369,7 @@ namespace xsimd
         }
 
         template <class T>
-        inline constexpr T minvalue() noexcept
+        XSIMD_FORCEINLINE constexpr T XSIMD_CALLCONV minvalue() noexcept
         {
             return T(detail::minvalue_impl<typename T::value_type>::get_value());
         }
@@ -373,7 +379,7 @@ namespace xsimd
          ***************************/
 
         template <class T>
-        inline constexpr T maxvalue() noexcept
+        XSIMD_FORCEINLINE constexpr T XSIMD_CALLCONV maxvalue() noexcept
         {
             return T(std::numeric_limits<typename T::value_type>::max());
         }

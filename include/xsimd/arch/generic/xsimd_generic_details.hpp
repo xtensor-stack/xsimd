@@ -14,6 +14,7 @@
 
 #include <complex>
 
+#include "../../config/xsimd_config.hpp"
 #include "../../math/xsimd_rem_pio2.hpp"
 #include "../../types/xsimd_generic_arch.hpp"
 #include "../../types/xsimd_utils.hpp"
@@ -23,85 +24,85 @@ namespace xsimd
 {
     // Forward declaration. Should we put them in a separate file?
     template <class T, class A>
-    inline batch<T, A> abs(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV abs(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> abs(batch<std::complex<T>, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV abs(batch<std::complex<T>, A> const& self) noexcept;
     template <class T, class A>
-    inline bool any(batch_bool<T, A> const& self) noexcept;
+    inline bool XSIMD_CALLCONV any(batch_bool<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV atan2(batch<T, A> const& self, batch<T, A> const& other) noexcept;
     template <class T, class A>
-    inline batch<T, A> bitofsign(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV bitofsign(batch<T, A> const& self) noexcept;
     template <class B, class T, class A>
-    inline B bitwise_cast(batch<T, A> const& self) noexcept;
+    inline B XSIMD_CALLCONV bitwise_cast(batch<T, A> const& self) noexcept;
     template <class A>
-    inline batch_bool<float, A> bool_cast(batch_bool<int32_t, A> const& self) noexcept;
+    inline batch_bool<float, A> XSIMD_CALLCONV bool_cast(batch_bool<int32_t, A> const& self) noexcept;
     template <class A>
-    inline batch_bool<int32_t, A> bool_cast(batch_bool<float, A> const& self) noexcept;
+    inline batch_bool<int32_t, A> XSIMD_CALLCONV bool_cast(batch_bool<float, A> const& self) noexcept;
     template <class A>
-    inline batch_bool<double, A> bool_cast(batch_bool<int64_t, A> const& self) noexcept;
+    inline batch_bool<double, A> XSIMD_CALLCONV bool_cast(batch_bool<int64_t, A> const& self) noexcept;
     template <class A>
-    inline batch_bool<int64_t, A> bool_cast(batch_bool<double, A> const& self) noexcept;
+    inline batch_bool<int64_t, A> XSIMD_CALLCONV bool_cast(batch_bool<double, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> cos(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV cos(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> cosh(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV cosh(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> exp(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV exp(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
     template <class T, class A>
-    inline batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
     template <class T, class A>
-    inline batch<T, A> frexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV frexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e) noexcept;
     template <class T, class A>
-    inline T hadd(batch<T, A> const&) noexcept;
+    inline T XSIMD_CALLCONV hadd(batch<T, A> const&) noexcept;
     template <class T, class A, uint64_t... Coefs>
-    inline batch<T, A> horner(const batch<T, A>& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV horner(const batch<T, A>& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> hypot(const batch<T, A>& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV hypot(const batch<T, A>& self) noexcept;
     template <class T, class A>
-    inline batch_bool<T, A> is_even(batch<T, A> const& self) noexcept;
+    inline batch_bool<T, A> XSIMD_CALLCONV is_even(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch_bool<T, A> is_flint(batch<T, A> const& self) noexcept;
+    inline batch_bool<T, A> XSIMD_CALLCONV is_flint(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch_bool<T, A> is_odd(batch<T, A> const& self) noexcept;
+    inline batch_bool<T, A> XSIMD_CALLCONV is_odd(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch_bool<T, A> isinf(batch<T, A> const& self) noexcept;
+    inline batch_bool<T, A> XSIMD_CALLCONV isinf(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline typename batch<T, A>::batch_bool_type isnan(batch<T, A> const& self) noexcept;
+    inline typename batch<T, A>::batch_bool_type XSIMD_CALLCONV isnan(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e) noexcept;
     template <class T, class A>
-    inline batch<T, A> log(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV log(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> nearbyint(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV nearbyint(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<as_integer_t<T>, A> nearbyint_as_int(const batch<T, A>& x) noexcept;
+    inline batch<as_integer_t<T>, A> XSIMD_CALLCONV nearbyint_as_int(const batch<T, A>& x) noexcept;
     template <class T, class A>
-    inline batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&) noexcept;
     template <class T, class A>
-    inline batch<std::complex<T>, A> select(batch_bool<T, A> const&, batch<std::complex<T>, A> const&, batch<std::complex<T>, A> const&) noexcept;
+    inline batch<std::complex<T>, A> XSIMD_CALLCONV select(batch_bool<T, A> const&, batch<std::complex<T>, A> const&, batch<std::complex<T>, A> const&) noexcept;
     template <class T, class A>
-    inline batch<T, A> sign(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV sign(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> signnz(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV signnz(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> sin(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV sin(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> sinh(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV sinh(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self) noexcept;
+    inline std::pair<batch<T, A>, batch<T, A>> XSIMD_CALLCONV sincos(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> sqrt(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV sqrt(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> tan(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV tan(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<as_float_t<T>, A> to_float(batch<T, A> const& self) noexcept;
+    inline batch<as_float_t<T>, A> XSIMD_CALLCONV to_float(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<as_integer_t<T>, A> to_int(batch<T, A> const& self) noexcept;
+    inline batch<as_integer_t<T>, A> XSIMD_CALLCONV to_int(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch<T, A> trunc(batch<T, A> const& self) noexcept;
+    inline batch<T, A> XSIMD_CALLCONV trunc(batch<T, A> const& self) noexcept;
 
     namespace kernel
     {
@@ -109,7 +110,7 @@ namespace xsimd
         namespace detail
         {
             template <class F, class A, class T, class... Batches>
-            inline batch<T, A> apply(F&& func, batch<T, A> const& self, batch<T, A> const& other) noexcept
+            inline batch<T, A> XSIMD_CALLCONV apply(F&& func, batch<T, A> const& self, batch<T, A> const& other) noexcept
             {
                 constexpr std::size_t size = batch<T, A>::size;
                 alignas(A::alignment()) T self_buffer[size];
@@ -124,7 +125,7 @@ namespace xsimd
             }
 
             template <class U, class F, class A, class T>
-            inline batch<U, A> apply_transform(F&& func, batch<T, A> const& self) noexcept
+            inline batch<U, A> XSIMD_CALLCONV apply_transform(F&& func, batch<T, A> const& self) noexcept
             {
                 static_assert(batch<T, A>::size == batch<U, A>::size,
                               "Source and destination sizes must match");
@@ -187,25 +188,25 @@ namespace xsimd
              * ====================================================
              */
             template <class B, uint64_t c>
-            inline B coef() noexcept
+            inline B XSIMD_CALLCONV coef() noexcept
             {
                 using value_type = typename B::value_type;
                 return B(bit_cast<value_type>(as_unsigned_integer_t<value_type>(c)));
             }
             template <class B>
-            inline B horner(const B&) noexcept
+            inline B XSIMD_CALLCONV horner(const B&) noexcept
             {
                 return B(typename B::value_type(0.));
             }
 
             template <class B, uint64_t c0>
-            inline B horner(const B&) noexcept
+            inline B XSIMD_CALLCONV horner(const B&) noexcept
             {
                 return coef<B, c0>();
             }
 
             template <class B, uint64_t c0, uint64_t c1, uint64_t... args>
-            inline B horner(const B& self) noexcept
+            inline B XSIMD_CALLCONV horner(const B& self) noexcept
             {
                 return fma(self, horner<B, c1, args...>(self), coef<B, c0>());
             }
@@ -220,19 +221,19 @@ namespace xsimd
              * ====================================================
              */
             template <class B>
-            inline B horner1(const B&) noexcept
+            inline B XSIMD_CALLCONV horner1(const B&) noexcept
             {
                 return B(1.);
             }
 
             template <class B, uint64_t c0>
-            inline B horner1(const B& x) noexcept
+            inline B XSIMD_CALLCONV horner1(const B& x) noexcept
             {
                 return x + detail::coef<B, c0>();
             }
 
             template <class B, uint64_t c0, uint64_t c1, uint64_t... args>
-            inline B horner1(const B& x) noexcept
+            inline B XSIMD_CALLCONV horner1(const B& x) noexcept
             {
                 return fma(x, horner1<B, c1, args...>(x), detail::coef<B, c0>());
             }

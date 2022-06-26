@@ -35,20 +35,23 @@ namespace xsimd
 
         operator batch_bool<typename batch_type::value_type, arch_type>() const noexcept { return { Values... }; }
 
-        bool get(size_t i) const noexcept
+        constexpr bool XSIMD_CALLCONV get(size_t i) const noexcept
         {
-            return std::array<value_type, size> { { Values... } }[i];
+            constexpr auto vals = std::array<value_type, size> { { Values... } };
+            return vals[i];
         }
 
-        static constexpr int mask() noexcept
+        static constexpr int XSIMD_CALLCONV mask() noexcept
         {
             return mask_helper(0, static_cast<int>(Values)...);
         }
 
     private:
-        static constexpr int mask_helper(int acc) noexcept { return acc; }
+        XSIMD_FORCEINLINE
+        static constexpr int XSIMD_CALLCONV mask_helper(int acc) noexcept { return acc; }
+
         template <class... Tys>
-        static constexpr int mask_helper(int acc, int mask, Tys... masks) noexcept
+        static constexpr int XSIMD_CALLCONV mask_helper(int acc, int mask, Tys... masks) noexcept
         {
             return mask_helper(acc | mask, (masks << 1)...);
         }
@@ -73,20 +76,15 @@ namespace xsimd
         /**
          * @brief Generate a batch of @p batch_type from this @p batch_constant
          */
-        operator batch_type() const noexcept { return { Values... }; }
+        XSIMD_FORCEINLINE XSIMD_CALLCONV operator batch_type() const noexcept { return { Values... }; }
 
         /**
          * @brief Get the @p i th element of this @p batch_constant
          */
-        constexpr value_type get(size_t i) const noexcept
+        constexpr value_type XSIMD_CALLCONV get(size_t i) const noexcept
         {
-            return get(i, std::array<value_type, size> { Values... });
-        }
-
-    private:
-        constexpr value_type get(size_t i, std::array<value_type, size> const& values) const noexcept
-        {
-            return values[i];
+            constexpr auto vals = std::array<value_type, size> { Values... };
+            return vals[i];
         }
     };
 
@@ -128,13 +126,13 @@ namespace xsimd
      * @endcode
      */
     template <class batch_type, class G>
-    inline constexpr auto make_batch_constant() noexcept -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
+    inline constexpr auto XSIMD_CALLCONV make_batch_constant() noexcept -> decltype(detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>()))
     {
         return detail::make_batch_constant<batch_type, G>(detail::make_index_sequence<batch_type::size>());
     }
 
     template <class batch_type, class G>
-    inline constexpr auto make_batch_bool_constant() noexcept
+    inline constexpr auto XSIMD_CALLCONV make_batch_bool_constant() noexcept
         -> decltype(detail::make_batch_bool_constant<batch_type, G>(
             detail::make_index_sequence<batch_type::size>()))
     {

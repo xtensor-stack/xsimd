@@ -13,6 +13,7 @@
 #define XSIMD_AVX_REGISTER_HPP
 
 #include "./xsimd_generic_arch.hpp"
+#include "./xsimd_register.hpp" // XSIMD_DECLARE_SIMD_REGISTER
 
 namespace xsimd
 {

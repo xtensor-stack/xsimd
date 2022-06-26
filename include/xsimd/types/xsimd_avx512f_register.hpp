@@ -13,6 +13,7 @@
 #define XSIMD_AVX512F_REGISTER_HPP
 
 #include "./xsimd_generic_arch.hpp"
+#include "./xsimd_register.hpp" // XSIMD_DECLARE_SIMD_REGISTER
 
 namespace xsimd
 {
@@ -44,8 +45,8 @@ namespace xsimd
                 std::conditional<(sizeof(T) == 4), __mmask16, __mmask8>>::type::type;
             register_type data;
             simd_avx512_bool_register() = default;
-            simd_avx512_bool_register(register_type r) { data = r; }
-            operator register_type() const noexcept { return data; }
+            simd_avx512_bool_register(register_type r) noexcept { data = r; }
+            XSIMD_FORCEINLINE XSIMD_CALLCONV operator register_type() const noexcept { return data; }
         };
         template <class T>
         struct get_bool_simd_register<T, avx512f>
