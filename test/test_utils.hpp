@@ -54,7 +54,7 @@ public:
     static std::string GetName(int)
     {
         using value_type = typename T::value_type;
-        std::string prefix = "fallback_";
+        std::string prefix;
 #if XSIMD_WITH_SSE
         size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
         if (register_size == size_t(128))

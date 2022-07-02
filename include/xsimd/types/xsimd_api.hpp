@@ -80,8 +80,8 @@ namespace xsimd
      * @param y batch or scalar involved in the addition.
      * @return the sum of \c x and \c y
      */
-    template <class T, class Tp>
-    inline auto add(T const& x, Tp const& y) noexcept -> decltype(x + y)
+    template <class T, class A>
+    inline auto add(batch<T> const& x, batch<T, A> const& y) noexcept -> decltype(x + y)
     {
         return x + y;
     }
@@ -390,9 +390,9 @@ namespace xsimd
      * @ingroup batch_math
      *
      * Clips the values of the batch \c x between those of the batches \c lo and \c hi.
-     * @param x batch of floating point values.
-     * @param lo batch of floating point values.
-     * @param hi batch of floating point values.
+     * @param x batch of scalar values.
+     * @param lo batch of scalar values.
+     * @param hi batch of scalar values.
      * @return the result of the clipping.
      */
     template <class A, class T>
@@ -464,8 +464,8 @@ namespace xsimd
      * @param y scalar or batch of scalars
      * @return the result of the division.
      */
-    template <class T, class Tp>
-    inline auto div(T const& x, Tp const& y) noexcept -> decltype(x / y)
+    template <class T, class Tp, class A>
+    inline auto div(batch<T, A> const& x, batch<Tp, A> const& y) noexcept -> decltype(x / y)
     {
         return x / y;
     }
@@ -479,7 +479,7 @@ namespace xsimd
      * @return a boolean batch.
      */
     template <class T, class A>
-    inline batch_bool<T, A> eq(batch<T, A> const& x, batch<T, A> const& y) noexcept
+    inline auto eq(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x == y)
     {
         return x == y;
     }
@@ -563,27 +563,13 @@ namespace xsimd
     }
 
     /**
-     * @ingroup batch_math_extra
-     *
-     * Evaluate polynomial with coefficient \c Coefs on point \c x using estrin
-     * method.
-     * @param x batch of floating point values.
-     * @return the evaluation ofpolynomial with coefficient \c Coefs on point \c x.
-     */
-    template <class T, class A, uint64_t... Coefs>
-    inline batch<T, A> estrin(const batch<T, A>& x) noexcept
-    {
-        return kernel::estrin<T, A, Coefs...>(x);
-    }
-
-    /**
      * Extract vector from pair of vectors
      * extracts the lowest vector elements from the second source \c x
      * and the highest vector elements from the first source \c y
      * Concatenates the results into th Return value.
      * @param x batch of integer or floating point values.
      * @param y batch of integer or floating point values.
-     * @param i integer specifuing the lowest vector element to extract from the first source register
+     * @param i integer specifying the lowest vector element to extract from the first source register
      * @return.
      */
     template <class T, class A>
@@ -597,7 +583,7 @@ namespace xsimd
      *
      * Computes the absolute values of each scalar in the batch \c x.
      * @param x batch floating point values.
-     * @return the asbolute values of \c x.
+     * @return the absolute values of \c x.
      */
     template <class T, class A>
     inline batch<T, A> fabs(batch<T, A> const& x) noexcept
@@ -806,20 +792,6 @@ namespace xsimd
     inline batch<T, A> haddp(batch<T, A> const* row) noexcept
     {
         return kernel::haddp<A>(row, A {});
-    }
-
-    /**
-     * @ingroup batch_math_extra
-     *
-     * Evaluate polynomial with coefficient \c Coefs on point \c x using horner
-     * method.
-     * @param x batch of floating point values.
-     * @return the evaluation ofpolynomial with coefficient \c Coefs on point \c x.
-     */
-    template <class T, class A, uint64_t... Coefs>
-    inline batch<T, A> horner(const batch<T, A>& x) noexcept
-    {
-        return kernel::horner<T, A, Coefs...>(x);
     }
 
     /**
@@ -1237,8 +1209,8 @@ namespace xsimd
      * @param y batch involved in the modulo.
      * @return the result of the modulo.
      */
-    template <class T, class Tp>
-    inline auto mod(T const& x, Tp const& y) noexcept -> decltype(x % y)
+    template <class T, class A>
+    inline auto mod(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x % y)
     {
         return x % y;
     }
@@ -1252,8 +1224,8 @@ namespace xsimd
      * @param y batch involved in the product.
      * @return the result of the product.
      */
-    template <class T, class Tp>
-    inline auto mul(T const& x, Tp const& y) noexcept -> decltype(x * y)
+    template <class T, class A>
+    inline auto mul(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x * y)
     {
         return x * y;
     }
@@ -1279,6 +1251,8 @@ namespace xsimd
      * the current rounding mode.
      * @param x batch of floating point values.
      * @return the batch of nearest integer values.
+     *
+     * @warning For very large values the conversion to int silently overflows.
      */
     template <class T, class A>
     inline batch<as_integer_t<T>, A>
@@ -1296,7 +1270,7 @@ namespace xsimd
      * @return a boolean batch.
      */
     template <class T, class A>
-    inline batch_bool<T, A> neq(batch<T, A> const& x, batch<T, A> const& y) noexcept
+    inline auto neq(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x != y)
     {
         return x != y;
     }
@@ -1620,19 +1594,6 @@ namespace xsimd
     /**
      * @ingroup batch_trigo
      *
-     * Computes the hyperbolic sine of the batch \c x.
-     * @param x batch of floating point values.
-     * @return the hyperbolic sine of \c x.
-     */
-    template <class T, class A>
-    inline batch<T, A> sinh(batch<T, A> const& x) noexcept
-    {
-        return kernel::sinh<A>(x, A {});
-    }
-
-    /**
-     * @ingroup batch_trigo
-     *
      * Computes the sine and the cosine of the batch \c x. This method is faster
      * than calling sine and cosine independently.
      * @param x batch of floating point values.
@@ -1642,6 +1603,19 @@ namespace xsimd
     inline std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& x) noexcept
     {
         return kernel::sincos<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_trigo
+     *
+     * Computes the hyperbolic sine of the batch \c x.
+     * @param x batch of floating point values.
+     * @return the hyperbolic sine of \c x.
+     */
+    template <class T, class A>
+    inline batch<T, A> sinh(batch<T, A> const& x) noexcept
+    {
+        return kernel::sinh<A>(x, A {});
     }
 
     /**
@@ -1841,8 +1815,8 @@ namespace xsimd
      * @param y scalar or batch of scalars
      * @return the difference between \c x and \c y
      */
-    template <class T, class Tp>
-    inline auto sub(T const& x, Tp const& y) noexcept -> decltype(x - y)
+    template <class T, class A>
+    inline auto sub(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x - y)
     {
         return x - y;
     }

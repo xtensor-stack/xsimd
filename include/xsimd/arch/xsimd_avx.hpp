@@ -204,23 +204,23 @@ namespace xsimd
         template <class A>
         inline batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_andnot_ps(self, other);
+            return _mm256_andnot_ps(other, self);
         }
         template <class A>
         inline batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_andnot_pd(self, other);
+            return _mm256_andnot_pd(other, self);
         }
 
         template <class A>
         inline batch_bool<float, A> bitwise_andnot(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_andnot_ps(self, other);
+            return _mm256_andnot_ps(other, self);
         }
         template <class A>
         inline batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_andnot_pd(self, other);
+            return _mm256_andnot_pd(other, self);
         }
 
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
