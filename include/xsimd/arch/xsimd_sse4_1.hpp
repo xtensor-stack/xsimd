@@ -82,11 +82,12 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF(sizeof(T) == 8)
             {
-            case 8:
                 return _mm_cmpeq_epi64(self, other);
-            default:
+            }
+            else
+            {
                 return eq(self, other, ssse3 {});
             }
         }
@@ -107,17 +108,22 @@ namespace xsimd
         template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<sse4_1>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_insert_epi8(self, val, I);
-            case 4:
+            }
+            else XSIMD_IF(sizeof(T) == 4)
+            {
                 return _mm_insert_epi32(self, val, I);
 #if !defined(_MSC_VER) || _MSC_VER > 1900 && defined(_M_X64)
-            case 8:
+            }
+            else XSIMD_IF(sizeof(T) == 8)
+            {
                 return _mm_insert_epi64(self, val, I);
 #endif
-            default:
+            }
+            else
+            {
                 return insert(self, val, pos, ssse3 {});
             }
         }
@@ -128,29 +134,39 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                switch (sizeof(T))
+                XSIMD_IF(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_max_epi8(self, other);
-                case 2:
+                }
+                else XSIMD_IF(sizeof(T) == 2)
+                {
                     return _mm_max_epi16(self, other);
-                case 4:
+                }
+                else XSIMD_IF(sizeof(T) == 4)
+                {
                     return _mm_max_epi32(self, other);
-                default:
+                }
+                else
+                {
                     return max(self, other, ssse3 {});
                 }
             }
             else
             {
-                switch (sizeof(T))
+                XSIMD_IF(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_max_epu8(self, other);
-                case 2:
+                }
+                else XSIMD_IF(sizeof(T) == 2)
+                {
                     return _mm_max_epu16(self, other);
-                case 4:
+                }
+                else XSIMD_IF(sizeof(T) == 4)
+                {
                     return _mm_max_epu32(self, other);
-                default:
+                }
+                else
+                {
                     return max(self, other, ssse3 {});
                 }
             }
