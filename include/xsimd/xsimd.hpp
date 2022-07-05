@@ -35,6 +35,21 @@
 #define XSIMD_NO_DISCARD
 #endif
 
+#ifdef __cpp_if_constexpr
+// this means that the compiler supports the `if constexpr` construct
+#define XSIMD_IF if constexpr
+#endif
+
+#if !defined(XSIMD_IF) && __cplusplus >= 201703L
+// this means that the previous test failed, but we are using C++17 or higher
+#define XSIMD_IF if constexpr
+#endif
+
+#if !defined(XSIMD_IF)
+// this means that all the previous checks failed, so we fallback to a normal `if`
+#define XSIMD_IF if
+#endif
+
 #include "config/xsimd_config.hpp"
 
 #include "arch/xsimd_scalar.hpp"
