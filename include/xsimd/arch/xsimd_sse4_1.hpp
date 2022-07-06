@@ -178,29 +178,39 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                switch (sizeof(T))
+                XSIMD_IF(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_min_epi8(self, other);
-                case 2:
+                }
+                else XSIMD_IF(sizeof(T) == 2)
+                {
                     return _mm_min_epi16(self, other);
-                case 4:
+                }
+                else XSIMD_IF(sizeof(T) == 4)
+                {
                     return _mm_min_epi32(self, other);
-                default:
+                }
+                else
+                {
                     return min(self, other, ssse3 {});
                 }
             }
             else
             {
-                switch (sizeof(T))
+                XSIMD_IF(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_min_epu8(self, other);
-                case 2:
+                }
+                else XSIMD_IF(sizeof(T) == 2)
+                {
                     return _mm_min_epu16(self, other);
-                case 4:
+                }
+                else XSIMD_IF(sizeof(T) == 4)
+                {
                     return _mm_min_epu32(self, other);
-                default:
+                }
+                else
+                {
                     return min(self, other, ssse3 {});
                 }
             }
@@ -210,17 +220,22 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_or_si128(
                     _mm_and_si128(_mm_mullo_epi16(self, other), _mm_srli_epi16(_mm_cmpeq_epi8(self, self), 8)),
                     _mm_slli_epi16(_mm_mullo_epi16(_mm_srli_epi16(self, 8), _mm_srli_epi16(other, 8)), 8));
-            case 2:
+            }
+            else XSIMD_IF(sizeof(T) == 2)
+            {
                 return _mm_mullo_epi16(self, other);
-            case 4:
+            }
+            else XSIMD_IF(sizeof(T) == 4)
+            {
                 return _mm_mullo_epi32(self, other);
-            case 8:
+            }
+            else XSIMD_IF(sizeof(T) == 8)
+            {
                 return _mm_add_epi64(
                     _mm_mul_epu32(self, other),
                     _mm_slli_epi64(
@@ -228,7 +243,9 @@ namespace xsimd
                             _mm_mul_epu32(other, _mm_shuffle_epi32(self, _MM_SHUFFLE(2, 3, 0, 1))),
                             _mm_mul_epu32(self, _mm_shuffle_epi32(other, _MM_SHUFFLE(2, 3, 0, 1)))),
                         32));
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -276,22 +293,23 @@ namespace xsimd
         inline batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
-            switch (sizeof(T))
+            XSIMD_IF(sizeof(T) == 2)
             {
-            case 2:
                 return _mm_blend_epi16(false_br, true_br, mask);
-            case 4:
+            }
+            else XSIMD_IF(sizeof(T) == 4)
             {
                 constexpr int imask = detail::interleave(mask);
                 return _mm_blend_epi16(false_br, true_br, imask);
             }
-            case 8:
+            else XSIMD_IF(sizeof(T) == 8)
             {
                 constexpr int imask = detail::interleave(mask);
                 constexpr int imask2 = detail::interleave(imask);
                 return _mm_blend_epi16(false_br, true_br, imask2);
             }
-            default:
+            else
+            {
                 return select(batch_bool_constant<batch<T, A>, Values...>(), true_br, false_br, ssse3 {});
             }
         }
