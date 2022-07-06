@@ -809,12 +809,13 @@ namespace xsimd
             else XSIMD_IF(sizeof(T) == 4)
             {
                 return _mm256_insert_epi32(self, val, I);
-#endif
             }
             else
             {
                 return insert(self, val, pos, generic {});
             }
+#endif
+            return insert(self, val, pos, generic {});
         }
 
         // isnan
