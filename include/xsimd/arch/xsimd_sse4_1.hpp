@@ -82,7 +82,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
-            XSIMD_IF(sizeof(T) == 8)
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 return _mm_cmpeq_epi64(self, other);
             }
@@ -108,16 +108,16 @@ namespace xsimd
         template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<sse4_1>) noexcept
         {
-            XSIMD_IF(sizeof(T) == 1)
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
                 return _mm_insert_epi8(self, val, I);
             }
-            else XSIMD_IF(sizeof(T) == 4)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
                 return _mm_insert_epi32(self, val, I);
 #if !defined(_MSC_VER) || _MSC_VER > 1900 && defined(_M_X64)
             }
-            else XSIMD_IF(sizeof(T) == 8)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 return _mm_insert_epi64(self, val, I);
 #endif
@@ -134,15 +134,15 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                XSIMD_IF(sizeof(T) == 1)
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
                     return _mm_max_epi8(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 2)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
                     return _mm_max_epi16(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 4)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
                     return _mm_max_epi32(self, other);
                 }
@@ -153,15 +153,15 @@ namespace xsimd
             }
             else
             {
-                XSIMD_IF(sizeof(T) == 1)
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
                     return _mm_max_epu8(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 2)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
                     return _mm_max_epu16(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 4)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
                     return _mm_max_epu32(self, other);
                 }
@@ -178,15 +178,15 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                XSIMD_IF(sizeof(T) == 1)
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
                     return _mm_min_epi8(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 2)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
                     return _mm_min_epi16(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 4)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
                     return _mm_min_epi32(self, other);
                 }
@@ -197,15 +197,15 @@ namespace xsimd
             }
             else
             {
-                XSIMD_IF(sizeof(T) == 1)
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
                     return _mm_min_epu8(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 2)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
                     return _mm_min_epu16(self, other);
                 }
-                else XSIMD_IF(sizeof(T) == 4)
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
                     return _mm_min_epu32(self, other);
                 }
@@ -220,21 +220,21 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
-            XSIMD_IF(sizeof(T) == 1)
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
                 return _mm_or_si128(
                     _mm_and_si128(_mm_mullo_epi16(self, other), _mm_srli_epi16(_mm_cmpeq_epi8(self, self), 8)),
                     _mm_slli_epi16(_mm_mullo_epi16(_mm_srli_epi16(self, 8), _mm_srli_epi16(other, 8)), 8));
             }
-            else XSIMD_IF(sizeof(T) == 2)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 return _mm_mullo_epi16(self, other);
             }
-            else XSIMD_IF(sizeof(T) == 4)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
                 return _mm_mullo_epi32(self, other);
             }
-            else XSIMD_IF(sizeof(T) == 8)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 return _mm_add_epi64(
                     _mm_mul_epu32(self, other),
@@ -293,16 +293,16 @@ namespace xsimd
         inline batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             constexpr int mask = batch_bool_constant<batch<T, A>, Values...>::mask();
-            XSIMD_IF(sizeof(T) == 2)
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 return _mm_blend_epi16(false_br, true_br, mask);
             }
-            else XSIMD_IF(sizeof(T) == 4)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
                 constexpr int imask = detail::interleave(mask);
                 return _mm_blend_epi16(false_br, true_br, imask);
             }
-            else XSIMD_IF(sizeof(T) == 8)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 constexpr int imask = detail::interleave(mask);
                 constexpr int imask2 = detail::interleave(imask);

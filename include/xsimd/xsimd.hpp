@@ -37,17 +37,17 @@
 
 #ifdef __cpp_if_constexpr
 // this means that the compiler supports the `if constexpr` construct
-#define XSIMD_IF if constexpr
+#define XSIMD_IF_CONSTEXPR if constexpr
 #endif
 
-#if !defined(XSIMD_IF) && __cplusplus >= 201703L
+#if !defined(XSIMD_IF_CONSTEXPR) && __cplusplus >= 201703L
 // this means that the previous test failed, but we are using C++17 or higher
-#define XSIMD_IF if constexpr
+#define XSIMD_IF_CONSTEXPR if constexpr
 #endif
 
-#if !defined(XSIMD_IF)
+#if !defined(XSIMD_IF_CONSTEXPR)
 // this means that all the previous checks failed, so we fallback to a normal `if`
-#define XSIMD_IF if
+#define XSIMD_IF_CONSTEXPR if
 #endif
 
 #include "config/xsimd_config.hpp"
