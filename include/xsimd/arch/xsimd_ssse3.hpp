@@ -29,17 +29,24 @@ namespace xsimd
         template <class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, void>::type>
         inline batch<T, A> abs(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_abs_epi8(self);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_abs_epi16(self);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_abs_epi32(self);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_abs_epi64(self);
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -79,22 +86,21 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline T hadd(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
-            switch (sizeof(T))
-            {
-            case 2:
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 __m128i tmp1 = _mm_hadd_epi16(self, self);
                 __m128i tmp2 = _mm_hadd_epi16(tmp1, tmp1);
                 __m128i tmp3 = _mm_hadd_epi16(tmp2, tmp2);
                 return _mm_cvtsi128_si32(tmp3) & 0xFFFF;
             }
-            case 4:
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
                 __m128i tmp1 = _mm_hadd_epi32(self, self);
                 __m128i tmp2 = _mm_hadd_epi32(tmp1, tmp1);
                 return _mm_cvtsi128_si32(tmp2);
             }
-            default:
+            else
+            {
                 return hadd(self, sse3 {});
             }
         }

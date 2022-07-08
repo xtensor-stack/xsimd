@@ -55,17 +55,24 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_add_epi8(self, other);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_add_epi16(self, other);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_add_epi32(self, other);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_add_epi64(self, other);
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -197,17 +204,24 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_and_si128(_mm_set1_epi8(0xFF << other), _mm_slli_epi32(self, other));
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_slli_epi16(self, other);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_slli_epi32(self, other);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_slli_epi64(self, other);
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -285,20 +299,22 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                switch (sizeof(T))
-                {
-                case 1:
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
                     __m128i sign_mask = _mm_set1_epi16((0xFF00 >> other) & 0x00FF);
                     __m128i cmp_is_negative = _mm_cmpgt_epi8(_mm_setzero_si128(), self);
                     __m128i res = _mm_srai_epi16(self, other);
                     return _mm_or_si128(_mm_and_si128(sign_mask, cmp_is_negative), _mm_andnot_si128(sign_mask, res));
                 }
-                case 2:
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_srai_epi16(self, other);
-                case 4:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
                     return _mm_srai_epi32(self, other);
-                case 8:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     // from https://github.com/samyvilar/vect/blob/master/vect_128.h
                     return _mm_or_si128(
@@ -307,24 +323,32 @@ namespace xsimd
                             _mm_srai_epi32(_mm_shuffle_epi32(self, _MM_SHUFFLE(3, 3, 1, 1)), 32),
                             64 - other));
                 }
-                default:
+                else
+                {
                     assert(false && "unsupported arch/op combination");
                     return {};
                 }
             }
             else
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_and_si128(_mm_set1_epi8(0xFF >> other), _mm_srli_epi32(self, other));
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_srli_epi16(self, other);
-                case 4:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
                     return _mm_srli_epi32(self, other);
-                case 8:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
                     return _mm_srli_epi64(self, other);
-                default:
+                }
+                else
+                {
                     assert(false && "unsupported arch/op combination");
                     return {};
                 }
@@ -409,17 +433,24 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> broadcast(T val, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_set1_epi8(val);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_set1_epi16(val);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_set1_epi32(val);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_set1_epi64x(val);
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -488,10 +519,10 @@ namespace xsimd
 
                 __m128i v_lo = _mm_and_si128(v, msk_lo); /* extract the 16 lowest significant bits of self                             */
                 __m128i v_hi = _mm_srli_epi32(v, 16); /* 16 most significant bits of v                                                 */
-                __m128 v_lo_flt = _mm_cvtepi32_ps(v_lo); /* No rounding                                                                   */
-                __m128 v_hi_flt = _mm_cvtepi32_ps(v_hi); /* No rounding                                                                   */
-                v_hi_flt = _mm_mul_ps(cnst65536f, v_hi_flt); /* No rounding                                                                   */
-                return _mm_add_ps(v_hi_flt, v_lo_flt); /* Rounding may occur here, mul and add may fuse to fma for haswell and newer    */
+                __m128 v_lo_flt = _mm_cvtepi32_ps(v_lo); /* No rounding                                                                */
+                __m128 v_hi_flt = _mm_cvtepi32_ps(v_hi); /* No rounding                                                                */
+                v_hi_flt = _mm_mul_ps(cnst65536f, v_hi_flt); /* No rounding                                                            */
+                return _mm_add_ps(v_hi_flt, v_lo_flt); /* Rounding may occur here, mul and add may fuse to fma for haswell and newer   */
             }
 
             template <class A>
@@ -554,15 +585,19 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_cmpeq_epi8(self, other);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_cmpeq_epi16(self, other);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_cmpeq_epi32(self, other);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 __m128i tmp1 = _mm_cmpeq_epi32(self, other);
                 __m128i tmp2 = _mm_shuffle_epi32(tmp1, 0xB1);
@@ -570,7 +605,8 @@ namespace xsimd
                 __m128i tmp4 = _mm_srai_epi32(tmp3, 31);
                 return _mm_shuffle_epi32(tmp4, 0xF5);
             }
-            default:
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -667,17 +703,22 @@ namespace xsimd
                 0xFFFFFF00,
                 0xFFFFFFFF,
             };
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 assert(!(mask & ~0xFFFF) && "inbound mask");
                 return _mm_setr_epi32(lut32[mask & 0xF], lut32[(mask >> 4) & 0xF], lut32[(mask >> 8) & 0xF], lut32[mask >> 12]);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 assert(!(mask & ~0xFF) && "inbound mask");
                 return _mm_set_epi64x(lut64[mask >> 4], lut64[mask & 0xF]);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_castps_si128(from_mask(batch_bool<float, A> {}, mask, sse2 {}));
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_castpd_si128(from_mask(batch_bool<double, A> {}, mask, sse2 {}));
             }
         }
@@ -705,15 +746,20 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_cmpgt_epi8(self, other);
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_cmpgt_epi16(self, other);
-                case 4:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
                     return _mm_cmpgt_epi32(self, other);
-                default:
+                }
+                else
+                {
                     return gt(self, other, generic {});
                 }
             }
@@ -756,9 +802,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline T hadd(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
-            {
-            case 4:
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
                 __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
                 __m128i tmp2 = _mm_add_epi32(self, tmp1);
@@ -766,7 +810,7 @@ namespace xsimd
                 __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
                 return _mm_cvtsi128_si32(tmp4);
             }
-            case 8:
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
                 __m128i tmp2 = _mm_add_epi64(self, tmp1);
@@ -780,7 +824,8 @@ namespace xsimd
                 return i;
 #endif
             }
-            default:
+            else
+            {
                 return detail::hadd_default(self, A {});
             }
         }
@@ -815,11 +860,12 @@ namespace xsimd
         template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-            case 2:
                 return _mm_insert_epi16(self, val, I);
-            default:
+            }
+            else
+            {
                 return insert(self, val, pos, generic {});
             }
         }
@@ -909,15 +955,19 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_cmplt_epi8(self, other);
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_cmplt_epi16(self, other);
-                case 4:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
                     return _mm_cmplt_epi32(self, other);
-                case 8:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     __m128i tmp1 = _mm_sub_epi64(self, other);
                     __m128i tmp2 = _mm_xor_si128(self, other);
@@ -927,22 +977,27 @@ namespace xsimd
                     __m128i tmp6 = _mm_srai_epi32(tmp5, 31);
                     return _mm_shuffle_epi32(tmp6, 0xF5);
                 }
-                default:
+                else
+                {
                     assert(false && "unsupported arch/op combination");
                     return {};
                 }
             }
             else
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_cmplt_epi8(_mm_xor_si128(self, _mm_set1_epi8(std::numeric_limits<int8_t>::lowest())), _mm_xor_si128(other, _mm_set1_epi8(std::numeric_limits<int8_t>::lowest())));
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_cmplt_epi16(_mm_xor_si128(self, _mm_set1_epi16(std::numeric_limits<int16_t>::lowest())), _mm_xor_si128(other, _mm_set1_epi16(std::numeric_limits<int16_t>::lowest())));
-                case 4:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
                     return _mm_cmplt_epi32(_mm_xor_si128(self, _mm_set1_epi32(std::numeric_limits<int32_t>::lowest())), _mm_xor_si128(other, _mm_set1_epi32(std::numeric_limits<int32_t>::lowest())));
-                case 8:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     auto xself = _mm_xor_si128(self, _mm_set1_epi64x(std::numeric_limits<int64_t>::lowest()));
                     auto xother = _mm_xor_si128(other, _mm_set1_epi64x(std::numeric_limits<int64_t>::lowest()));
@@ -954,7 +1009,8 @@ namespace xsimd
                     __m128i tmp6 = _mm_srai_epi32(tmp5, 31);
                     return _mm_shuffle_epi32(tmp6, 0xF5);
                 }
-                default:
+                else
+                {
                     assert(false && "unsupported arch/op combination");
                     return {};
                 }
@@ -1002,20 +1058,25 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline uint64_t mask(batch_bool<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_movemask_epi8(self);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 uint64_t mask8 = _mm_movemask_epi8(self);
                 return detail::mask_lut(mask8) | (detail::mask_lut(mask8 >> 8) << 4);
             }
-            case 4:
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_movemask_ps(_mm_castsi128_ps(self));
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_movemask_pd(_mm_castsi128_pd(self));
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -1240,25 +1301,31 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_adds_epi8(self, other);
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_adds_epi16(self, other);
-                default:
+                }
+                else
+                {
                     return detail::sadd_default(self, other, A {});
                 }
             }
             else
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_adds_epu8(self, other);
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_adds_epu16(self, other);
-                default:
+                }
+                else
+                {
                     return detail::sadd_default(self, other, A {});
                 }
             }
@@ -1354,25 +1421,31 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_subs_epi8(self, other);
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_subs_epi16(self, other);
-                default:
+                }
+                else
+                {
                     return detail::ssub_default(self, other, A {});
                 }
             }
             else
             {
-                switch (sizeof(T))
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                case 1:
                     return _mm_subs_epu8(self, other);
-                case 2:
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     return _mm_subs_epu16(self, other);
-                default:
+                }
+                else
+                {
                     return detail::ssub_default(self, other, A {});
                 }
             }
@@ -1437,17 +1510,24 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_sub_epi8(self, other);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_sub_epi16(self, other);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_sub_epi32(self, other);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_sub_epi64(self, other);
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -1521,17 +1601,24 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_unpackhi_epi8(self, other);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_unpackhi_epi16(self, other);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_unpackhi_epi32(self, other);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_unpackhi_epi64(self, other);
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -1551,17 +1638,24 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            switch (sizeof(T))
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-            case 1:
                 return _mm_unpacklo_epi8(self, other);
-            case 2:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
                 return _mm_unpacklo_epi16(self, other);
-            case 4:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
                 return _mm_unpacklo_epi32(self, other);
-            case 8:
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
                 return _mm_unpacklo_epi64(self, other);
-            default:
+            }
+            else
+            {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
@@ -1572,7 +1666,6 @@ namespace xsimd
             return _mm_unpacklo_pd(self, other);
         }
     }
-
 }
 
 #endif
