@@ -46,9 +46,9 @@ protected:
         for (size_t i = 0; i < nb_input; i += size)
         {
             detail::load_batch(in, input, i);
-            out = xsimd::horner<typename batch_type::value_type, typename batch_type::arch_type, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16>(in);
+            out = xsimd::kernel::horner<typename batch_type::value_type, typename batch_type::arch_type, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16>(in);
             detail::store_batch(out, horner_res, i);
-            out = xsimd::estrin<typename batch_type::value_type, typename batch_type::arch_type, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16>(in);
+            out = xsimd::kernel::estrin<typename batch_type::value_type, typename batch_type::arch_type, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16>(in);
             detail::store_batch(out, estrin_res, i);
         }
         size_t diff = detail::get_nb_diff(horner_res, estrin_res);

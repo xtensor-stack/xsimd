@@ -37,12 +37,12 @@ namespace xsimd
         template <class A>
         inline batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512dq>) noexcept
         {
-            return _mm512_andnot_ps(self, other);
+            return _mm512_andnot_ps(other, self);
         }
         template <class A>
         inline batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512dq>) noexcept
         {
-            return _mm512_andnot_pd(self, other);
+            return _mm512_andnot_pd(other, self);
         }
 
         // bitwise_or

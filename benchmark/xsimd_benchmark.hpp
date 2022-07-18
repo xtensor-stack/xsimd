@@ -49,8 +49,8 @@ namespace xsimd
         for (size_t i = 0; i < size; ++i)
         {
             op0[i] = T(0.5) + std::sqrt(T(i)) * T(9.) / T(size);
-            op1[i] = T(10.2) / T(i + 2) + T(0.25);
-            op2[i] = T(20.1) / T(i + 5) + T(0.65);
+            op1[i] = T(10.2) / T(i + 3) + T(0.25);
+            op2[i] = T(20.1) / T(i + 2) + T(0.65);
         }
     }
 
@@ -425,36 +425,48 @@ namespace xsimd
         out << "============================" << std::endl;
     }
 
-#define DEFINE_OP_FUNCTOR_2OP(OP, NAME)                                              \
-    struct NAME##_fn                                                                 \
-    {                                                                                \
-        template <class T>                                                           \
-        inline T operator()(const T& lhs, const T& rhs) const { return lhs OP rhs; } \
-        inline std::string name() const { return #NAME; }                            \
+#define DEFINE_OP_FUNCTOR_2OP(OP, NAME)                       \
+    struct NAME##_fn                                          \
+    {                                                         \
+        template <class T>                                    \
+        inline T operator()(const T& lhs, const T& rhs) const \
+        {                                                     \
+            return lhs OP rhs;                                \
+        }                                                     \
+        inline std::string name() const                       \
+        {                                                     \
+            return #NAME;                                     \
+        }                                                     \
     }
 
-#define DEFINE_FUNCTOR_1OP(FN)                          \
-    struct FN##_fn                                      \
-    {                                                   \
-        template <class T>                              \
-        inline T operator()(const T& x) const           \
-        {                                               \
-            using xsimd::FN;                            \
-            return FN(x);                               \
-        }                                               \
-        inline std::string name() const { return #FN; } \
+#define DEFINE_FUNCTOR_1OP(FN)                \
+    struct FN##_fn                            \
+    {                                         \
+        template <class T>                    \
+        inline T operator()(const T& x) const \
+        {                                     \
+            using xsimd::FN;                  \
+            return FN(x);                     \
+        }                                     \
+        inline std::string name() const       \
+        {                                     \
+            return #FN;                       \
+        }                                     \
     }
 
-#define DEFINE_FUNCTOR_1OP_TEMPLATE(FN, N, ...)                \
-    struct FN##_##N##_fn                                       \
-    {                                                          \
-        template <class T>                                     \
-        inline T operator()(const T& x) const                  \
-        {                                                      \
-            using xsimd::FN;                                   \
-            return FN<T, __VA_ARGS__>(x);                      \
-        }                                                      \
-        inline std::string name() const { return #FN " " #N; } \
+#define DEFINE_FUNCTOR_1OP_TEMPLATE(NAME, FN, N, ...) \
+    struct NAME##_##N##_fn                            \
+    {                                                 \
+        template <class T>                            \
+        inline T operator()(const T& x) const         \
+        {                                             \
+            using xsimd::FN;                          \
+            return FN<T, __VA_ARGS__>(x);             \
+        }                                             \
+        inline std::string name() const               \
+        {                                             \
+            return #FN " " #N;                        \
+        }                                             \
     }
 
 #define DEFINE_FUNCTOR_2OP(FN)                                \
@@ -466,7 +478,10 @@ namespace xsimd
             using xsimd::FN;                                  \
             return FN(lhs, rhs);                              \
         }                                                     \
-        inline std::string name() const { return #FN; }       \
+        inline std::string name() const                       \
+        {                                                     \
+            return #FN;                                       \
+        }                                                     \
     }
 
 #define DEFINE_FUNCTOR_3OP(FN)                                              \
@@ -478,7 +493,10 @@ namespace xsimd
             using xsimd::FN;                                                \
             return FN(op0, op1, op2);                                       \
         }                                                                   \
-        inline std::string name() const { return #FN; }                     \
+        inline std::string name() const                                     \
+        {                                                                   \
+            return #FN;                                                     \
+        }                                                                   \
     }
 
     DEFINE_OP_FUNCTOR_2OP(+, add);
@@ -532,18 +550,16 @@ DEFINE_FUNCTOR_1OP(is_odd);
 DEFINE_FUNCTOR_1OP(is_even);
 #endif
 
-#ifdef XSIMD_POLY_BENCHMARKS
-    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 5, 1, 2, 3, 4, 5);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 5, 1, 2, 3, 4, 5);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-#endif
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, kernel::horner, 5, 1, 2, 3, 4, 5);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, kernel::estrin, 5, 1, 2, 3, 4, 5);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, kernel::horner, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, kernel::estrin, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, kernel::horner, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, kernel::estrin, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, kernel::horner, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, kernel::estrin, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(horner, kernel::horner, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+    DEFINE_FUNCTOR_1OP_TEMPLATE(estrin, kernel::estrin, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
 
 }
 #endif

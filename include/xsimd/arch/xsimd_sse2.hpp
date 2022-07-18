@@ -169,35 +169,35 @@ namespace xsimd
         template <class A>
         inline batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_andnot_ps(self, other);
+            return _mm_andnot_ps(other, self);
         }
 
         template <class A>
         inline batch_bool<float, A> bitwise_andnot(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_andnot_ps(self, other);
+            return _mm_andnot_ps(other, self);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_andnot_si128(self, other);
+            return _mm_andnot_si128(other, self);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_andnot_si128(self, other);
+            return _mm_andnot_si128(other, self);
         }
 
         template <class A>
         inline batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_andnot_pd(self, other);
+            return _mm_andnot_pd(other, self);
         }
 
         template <class A>
         inline batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_andnot_pd(self, other);
+            return _mm_andnot_pd(other, self);
         }
 
         // bitwise_lshift

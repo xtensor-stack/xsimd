@@ -196,6 +196,7 @@ set(XSIMD_TESTS
     test_sum.cpp
     test_traits.cpp
     test_trigonometric.cpp
+    test_xsimd_api.cpp
     test_utils.hpp
 )
 
