@@ -34,6 +34,7 @@ namespace xsimd
     template <class T, class A = default_arch>
     class batch : public types::simd_register<T, A>
     {
+
     public:
         static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T); ///< Number of scalar elements in this batch.
 
@@ -416,13 +417,14 @@ namespace xsimd
     struct batch<xtl::xcomplex<T, T, i3ec>, A>
     {
         static_assert(std::is_same<T, void>::value,
-                      "Please use batch<std::complex<T>, A> initialized from xtl::complex instead");
+                      "Please use batch<std::complex<T>, A> initialized from xtl::xcomplex instead");
     };
 #endif
 }
 
 #include "../arch/xsimd_isa.hpp"
-#include "../types/xsimd_batch_constant.hpp"
+#include "./xsimd_batch_constant.hpp"
+#include "./xsimd_traits.hpp"
 
 namespace xsimd
 {
@@ -434,6 +436,7 @@ namespace xsimd
     inline batch<T, A>::batch(T val) noexcept
         : types::simd_register<T, A>(kernel::broadcast<A>(val, A {}))
     {
+        detail::static_check_supported_config<T, A>();
     }
 
     /**
@@ -445,6 +448,7 @@ namespace xsimd
     inline batch<T, A>::batch(T val0, T val1, Ts... vals) noexcept
         : batch(kernel::set<A>(batch {}, A {}, val0, val1, static_cast<T>(vals)...))
     {
+        detail::static_check_supported_config<T, A>();
         static_assert(sizeof...(Ts) + 2 == size, "The constructor requires as many arguments as batch elements.");
     }
 
@@ -467,6 +471,7 @@ namespace xsimd
     inline batch<T, A>::batch(register_type reg) noexcept
         : types::simd_register<T, A>({ reg })
     {
+        detail::static_check_supported_config<T, A>();
     }
 
     /**
@@ -476,6 +481,7 @@ namespace xsimd
     template <class U>
     XSIMD_NO_DISCARD inline batch<T, A> batch<T, A>::broadcast(U val) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return batch(static_cast<T>(val));
     }
 
@@ -491,6 +497,7 @@ namespace xsimd
     template <class U>
     inline void batch<T, A>::store_aligned(U* mem) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         kernel::store_aligned<A>(mem, *this, A {});
     }
 
@@ -502,6 +509,7 @@ namespace xsimd
     template <class U>
     inline void batch<T, A>::store_unaligned(U* mem) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         kernel::store_unaligned<A>(mem, *this, A {});
     }
 
@@ -512,6 +520,7 @@ namespace xsimd
     template <class U>
     inline void batch<T, A>::store(U* mem, aligned_mode) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return store_aligned(mem);
     }
 
@@ -522,6 +531,7 @@ namespace xsimd
     template <class U>
     inline void batch<T, A>::store(U* mem, unaligned_mode) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return store_unaligned(mem);
     }
 
@@ -533,6 +543,7 @@ namespace xsimd
     template <class U>
     inline batch<T, A> batch<T, A>::load_aligned(U const* mem) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::load_aligned<A>(mem, kernel::convert<T> {}, A {});
     }
 
@@ -544,6 +555,7 @@ namespace xsimd
     template <class U>
     inline batch<T, A> batch<T, A>::load_unaligned(U const* mem) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::load_unaligned<A>(mem, kernel::convert<T> {}, A {});
     }
 
@@ -554,6 +566,7 @@ namespace xsimd
     template <class U>
     inline batch<T, A> batch<T, A>::load(U const* mem, aligned_mode) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return load_aligned(mem);
     }
 
@@ -564,6 +577,7 @@ namespace xsimd
     template <class U>
     inline batch<T, A> batch<T, A>::load(U const* mem, unaligned_mode) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return load_unaligned(mem);
     }
 
@@ -577,6 +591,7 @@ namespace xsimd
     template <typename U, typename V>
     inline batch<T, A> batch<T, A>::gather(U const* src, batch<V, A> const& index) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         static_assert(std::is_convertible<T, U>::value, "Can't convert from src to this batch's type!");
         return kernel::gather(batch {}, src, index, A {});
     }
@@ -591,6 +606,7 @@ namespace xsimd
     template <class U, class V>
     inline void batch<T, A>::scatter(U* dst, batch<V, A> const& index) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         static_assert(std::is_convertible<T, U>::value, "Can't convert from this batch's type to dst!");
         kernel::scatter<A>(*this, dst, index, A {});
     }
@@ -616,6 +632,7 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator==(batch<T, A> const& other) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::eq<A>(*this, other, A {});
     }
 
@@ -625,6 +642,7 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator!=(batch<T, A> const& other) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::neq<A>(*this, other, A {});
     }
 
@@ -634,6 +652,7 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator>=(batch<T, A> const& other) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::ge<A>(*this, other, A {});
     }
 
@@ -643,6 +662,7 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator<=(batch<T, A> const& other) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::le<A>(*this, other, A {});
     }
 
@@ -652,6 +672,7 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator>(batch<T, A> const& other) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::gt<A>(*this, other, A {});
     }
 
@@ -661,6 +682,7 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator<(batch<T, A> const& other) const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::lt<A>(*this, other, A {});
     }
 
@@ -671,72 +693,84 @@ namespace xsimd
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator+=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::add<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator-=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::sub<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator*=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::mul<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator/=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::div<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator%=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::mod<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator&=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::bitwise_and<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator|=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::bitwise_or<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator^=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::bitwise_xor<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator>>=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::bitwise_rshift<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator<<=(batch<T, A> const& other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::bitwise_lshift<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator>>=(int32_t other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::bitwise_rshift<A>(*this, other, A {});
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator<<=(int32_t other) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this = kernel::bitwise_lshift<A>(*this, other, A {});
     }
 
@@ -747,18 +781,21 @@ namespace xsimd
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator++() noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return operator+=(1);
     }
 
     template <class T, class A>
     inline batch<T, A>& batch<T, A>::operator--() noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return operator-=(1);
     }
 
     template <class T, class A>
     inline batch<T, A> batch<T, A>::operator++(int) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         batch<T, A> copy(*this);
         operator+=(1);
         return copy;
@@ -767,6 +804,7 @@ namespace xsimd
     template <class T, class A>
     inline batch<T, A> batch<T, A>::operator--(int) noexcept
     {
+        detail::static_check_supported_config<T, A>();
         batch copy(*this);
         operator-=(1);
         return copy;
@@ -779,24 +817,28 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> batch<T, A>::operator!() const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::eq<A>(*this, batch(0), A {});
     }
 
     template <class T, class A>
     inline batch<T, A> batch<T, A>::operator~() const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::bitwise_not<A>(*this, A {});
     }
 
     template <class T, class A>
     inline batch<T, A> batch<T, A>::operator-() const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return kernel::neg<A>(*this, A {});
     }
 
     template <class T, class A>
     inline batch<T, A> batch<T, A>::operator+() const noexcept
     {
+        detail::static_check_supported_config<T, A>();
         return *this;
     }
 
@@ -1316,11 +1358,30 @@ namespace xsimd
             using type = void;
         };
 
+        template <typename T, class Arch, bool BatchExists = xsimd::types::has_simd_register<T, Arch>::value>
+        struct batch_trait;
+
+        template <typename T, class Arch>
+        struct batch_trait<T, Arch, true>
+        {
+            using type = xsimd::batch<T, Arch>;
+            static constexpr std::size_t size = xsimd::batch<T, Arch>::size;
+        };
+
+        template <typename T, class Arch>
+        struct batch_trait<T, Arch, false>
+        {
+            using type = void;
+            static constexpr std::size_t size = 0;
+        };
+
         template <typename T, std::size_t N, class Arch, class... Archs>
         struct sized_batch<T, N, xsimd::arch_list<Arch, Archs...>>
         {
-            using type = typename std::conditional<xsimd::batch<T, Arch>::size == N, xsimd::batch<T, Arch>,
-                                                   typename sized_batch<T, N, xsimd::arch_list<Archs...>>::type>::type;
+            using type = typename std::conditional<
+                batch_trait<T, Arch>::size == N,
+                typename batch_trait<T, Arch>::type,
+                typename sized_batch<T, N, xsimd::arch_list<Archs...>>::type>::type;
         };
     }
 
