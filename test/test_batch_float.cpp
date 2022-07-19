@@ -59,12 +59,14 @@ protected:
     {
         // rsqrt
         {
-            array_type expected;
+            array_type res, expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
                            [](const value_type& l)
                            { return std::ceil((value_type(1) / std::sqrt(l)) * value_type(100)); });
-            batch_type res = ceil(rsqrt(batch_lhs()) * value_type(100));
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("rsqrt");
+            batch_type res1 = ceil(rsqrt(batch_lhs()) * value_type(100));
+            res1.store_unaligned(res.data());
+            size_t diff = detail::get_nb_diff_near(res, expected, 1.5f * std::pow(2, 12));
+            EXPECT_EQ(diff, 0) << print_function_name("rsqrt");
         }
     }
 
