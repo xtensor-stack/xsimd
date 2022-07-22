@@ -593,6 +593,18 @@ protected:
             value_type res = reduce_add(batch_lhs());
             EXPECT_SCALAR_EQ(res, expected) << print_function_name("reduce_add");
         }
+        // reduce_max
+        {
+            value_type expected = *std::max_element(lhs.cbegin(), lhs.cend());
+            value_type res = reduce_max(batch_lhs());
+            EXPECT_SCALAR_EQ(res, expected) << print_function_name("reduce_max");
+        }
+        // reduce_min
+        {
+            value_type expected = *std::min_element(lhs.cbegin(), lhs.cend());
+            value_type res = reduce_min(batch_lhs());
+            EXPECT_SCALAR_EQ(res, expected) << print_function_name("reduce_min");
+        }
     }
 
     void test_boolean_conversions() const

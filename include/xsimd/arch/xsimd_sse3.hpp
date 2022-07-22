@@ -42,7 +42,6 @@ namespace xsimd
             return _mm_lddqu_si128((__m128i const*)mem);
         }
 
-
         // reduce_add
         template <class A>
         inline float reduce_add(batch<float, A> const& self, requires_arch<sse3>) noexcept
@@ -57,7 +56,6 @@ namespace xsimd
             __m128d tmp0 = _mm_hadd_pd(self, self);
             return _mm_cvtsd_f64(tmp0);
         }
-
 
     }
 

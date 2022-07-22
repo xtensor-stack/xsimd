@@ -1299,6 +1299,27 @@ namespace xsimd
             return reduce_add(blow, avx2 {}) + reduce_add(bhigh, avx2 {});
         }
 
+        // reduce_max
+        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) == 1), void>::type>
+        inline T reduce_max(batch<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            constexpr batch_constant<batch<uint64_t, A>, 5, 6, 7, 8, 0, 0, 0, 0> mask;
+            batch<T, A> step = _mm512_permutexvar_epi64((batch<uint64_t, A>)mask, self);
+            batch<T, A> acc = max(self, step);
+            __m256i low = _mm512_castsi512_si256(acc);
+            return reduce_max(batch<T, avx2>(low));
+        }
+
+        // reduce_min
+        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) == 1), void>::type>
+        inline T reduce_min(batch<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            constexpr batch_constant<batch<uint64_t, A>, 5, 6, 7, 8, 0, 0, 0, 0> mask;
+            batch<T, A> step = _mm512_permutexvar_epi64((batch<uint64_t, A>)mask, self);
+            batch<T, A> acc = min(self, step);
+            __m256i low = _mm512_castsi512_si256(acc);
+            return reduce_min(batch<T, avx2>(low));
+        }
 
         // rsqrt
         template <class A>

@@ -894,6 +894,34 @@ namespace xsimd
     /**
      * @ingroup batch_reducers
      *
+     * Max of all the scalars of the batch \c x.
+     * @param x batch involved in the reduction
+     * @return the result of the reduction.
+     */
+    template <class T, class A>
+    inline T reduce_max(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::reduce_max<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_reducers
+     *
+     * Min of all the scalars of the batch \c x.
+     * @param x batch involved in the reduction
+     * @return the result of the reduction.
+     */
+    template <class T, class A>
+    inline T reduce_min(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::reduce_min<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_reducers
+     *
      * Parallel horizontal addition: adds the scalars of each batch
      * in the array pointed by \c row and store them in a returned
      * batch.

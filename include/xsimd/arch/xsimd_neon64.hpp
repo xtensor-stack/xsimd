@@ -753,7 +753,6 @@ namespace xsimd
             return vaddvq_f64(arg);
         }
 
-
         /**********
          * select *
          **********/

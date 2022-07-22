@@ -1577,7 +1577,6 @@ namespace xsimd
             return vget_lane_f32(tmp, 0);
         }
 
-
         /**********
          * select *
          **********/

@@ -1098,6 +1098,28 @@ namespace xsimd
             return reduce_add(blow) + reduce_add(bhigh);
         }
 
+        // reduce_max
+        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
+        inline T reduce_max(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            constexpr auto mask = detail::shuffle(1, 0);
+            batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
+            batch<T, A> acc = max(self, step);
+            __m128i low = _mm256_castsi256_si128(acc);
+            return reduce_max(batch<T, sse4_2>(low));
+        }
+
+        // reduce_min
+        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
+        inline T reduce_min(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            constexpr auto mask = detail::shuffle(1, 0);
+            batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
+            batch<T, A> acc = min(self, step);
+            __m128i low = _mm256_castsi256_si128(acc);
+            return reduce_min(batch<T, sse4_2>(low));
+        }
+
         // rsqrt
         template <class A>
         inline batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<avx>) noexcept
@@ -1499,12 +1521,13 @@ namespace xsimd
             return bitwise_cast<batch<T, A>>(
                 swizzle(bitwise_cast<batch<float, A>>(self), mask));
         }
+
         template <class A,
                   typename T,
-                  uint32_t V0,
-                  uint32_t V1,
-                  uint32_t V2,
-                  uint32_t V3,
+                  uint64_t V0,
+                  uint64_t V1,
+                  uint64_t V2,
+                  uint64_t V3,
                   detail::enable_sized_integral_t<T, 8> = 0>
         inline batch<T, A>
         swizzle(batch<T, A> const& self,
