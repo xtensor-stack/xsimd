@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 #include <type_traits>
