@@ -885,10 +885,10 @@ namespace xsimd
      * @return the result of the reduction.
      */
     template <class T, class A>
-    inline T hadd(batch<T, A> const& x) noexcept
+    inline T reduce_add(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::hadd<A>(x, A {});
+        return kernel::reduce_add<A>(x, A {});
     }
 
     /**

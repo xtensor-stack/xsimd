@@ -78,7 +78,7 @@ architecture-agnostic description:
       const unsigned n = size / batch::size * batch::size;
       for(unsigned i = 0; i != n; i += batch::size)
           acc += batch::load_unaligned(data + i);
-      T star_acc = xsimd::hadd(acc);
+      T star_acc = xsimd::reduce_add(acc);
       for(unsigned i = n; i < size; ++i)
         star_acc += data[i];
       return star_acc;

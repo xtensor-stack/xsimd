@@ -82,9 +82,9 @@ namespace xsimd
             return detail::extract_pair(self, other, i, ::xsimd::detail::make_index_sequence<size>());
         }
 
-        // hadd
+        // reduce_add
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline T hadd(batch<T, A> const& self, requires_arch<ssse3>) noexcept
+        inline T reduce_add(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
@@ -101,7 +101,7 @@ namespace xsimd
             }
             else
             {
-                return hadd(self, sse3 {});
+                return reduce_add(self, sse3 {});
             }
         }
 

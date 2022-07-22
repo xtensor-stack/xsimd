@@ -868,32 +868,6 @@ namespace xsimd
             return detail::compare_int_avx512f<A, T, _MM_CMPINT_GT>(self, other);
         }
 
-        // hadd
-        template <class A>
-        inline float hadd(batch<float, A> const& rhs, requires_arch<avx512f>) noexcept
-        {
-            __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
-            __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
-            __m256 res1 = _mm256_add_ps(tmp1, tmp2);
-            return hadd(batch<float, avx2>(res1), avx2 {});
-        }
-        template <class A>
-        inline double hadd(batch<double, A> const& rhs, requires_arch<avx512f>) noexcept
-        {
-            __m256d tmp1 = _mm512_extractf64x4_pd(rhs, 1);
-            __m256d tmp2 = _mm512_extractf64x4_pd(rhs, 0);
-            __m256d res1 = _mm256_add_pd(tmp1, tmp2);
-            return hadd(batch<double, avx2>(res1), avx2 {});
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline T hadd(batch<T, A> const& self, requires_arch<avx512f>) noexcept
-        {
-            __m256i low, high;
-            detail::split_avx512(self, low, high);
-            batch<T, avx2> blow(low), bhigh(high);
-            return hadd(blow, avx2 {}) + hadd(bhigh, avx2 {});
-        }
-
         // haddp
         template <class A>
         inline batch<float, A> haddp(batch<float, A> const* row, requires_arch<avx512f>) noexcept
@@ -1298,6 +1272,33 @@ namespace xsimd
         {
             return _mm512_rcp14_pd(self);
         }
+
+        // reduce_add
+        template <class A>
+        inline float reduce_add(batch<float, A> const& rhs, requires_arch<avx512f>) noexcept
+        {
+            __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
+            __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
+            __m256 res1 = _mm256_add_ps(tmp1, tmp2);
+            return reduce_add(batch<float, avx2>(res1), avx2 {});
+        }
+        template <class A>
+        inline double reduce_add(batch<double, A> const& rhs, requires_arch<avx512f>) noexcept
+        {
+            __m256d tmp1 = _mm512_extractf64x4_pd(rhs, 1);
+            __m256d tmp2 = _mm512_extractf64x4_pd(rhs, 0);
+            __m256d res1 = _mm256_add_pd(tmp1, tmp2);
+            return reduce_add(batch<double, avx2>(res1), avx2 {});
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline T reduce_add(batch<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            __m256i low, high;
+            detail::split_avx512(self, low, high);
+            batch<T, avx2> blow(low), bhigh(high);
+            return reduce_add(blow, avx2 {}) + reduce_add(bhigh, avx2 {});
+        }
+
 
         // rsqrt
         template <class A>

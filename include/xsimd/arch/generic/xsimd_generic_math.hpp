@@ -1020,13 +1020,6 @@ namespace xsimd
             return batch<T, A>(self.data) & batch<T, A>(1);
         }
 
-        // hadd
-        template <class A, class T>
-        inline std::complex<T> hadd(batch<std::complex<T>, A> const& self, requires_arch<generic>) noexcept
-        {
-            return { hadd(self.real()), hadd(self.imag()) };
-        }
-
         // horner
         template <class T, class A, uint64_t... Coefs>
         inline batch<T, A> horner(const batch<T, A>& self) noexcept
@@ -1975,6 +1968,14 @@ namespace xsimd
             using batch_type = batch<T, A>;
             return div(batch_type(1), self);
         }
+
+        // reduce_add
+        template <class A, class T>
+        inline std::complex<T> reduce_add(batch<std::complex<T>, A> const& self, requires_arch<generic>) noexcept
+        {
+            return { reduce_add(self.real()), reduce_add(self.imag()) };
+        }
+
 
         // remainder
         template <class A>

@@ -440,39 +440,6 @@ namespace xsimd
             }
         }
 
-        // hadd
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline T hadd(batch<T, A> const& self, requires_arch<avx2>) noexcept
-        {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                __m256i tmp1 = _mm256_hadd_epi32(self, self);
-                __m256i tmp2 = _mm256_hadd_epi32(tmp1, tmp1);
-                __m128i tmp3 = _mm256_extracti128_si256(tmp2, 1);
-                __m128i tmp4 = _mm_add_epi32(_mm256_castsi256_si128(tmp2), tmp3);
-                return _mm_cvtsi128_si32(tmp4);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-                __m256i tmp1 = _mm256_shuffle_epi32(self, 0x0E);
-                __m256i tmp2 = _mm256_add_epi64(self, tmp1);
-                __m128i tmp3 = _mm256_extracti128_si256(tmp2, 1);
-                __m128i res = _mm_add_epi64(_mm256_castsi256_si128(tmp2), tmp3);
-#if defined(__x86_64__)
-                return _mm_cvtsi128_si64(res);
-#else
-                __m128i m;
-                _mm_storel_epi64(&m, res);
-                int64_t i;
-                std::memcpy(&i, &m, sizeof(i));
-                return i;
-#endif
-            }
-            else
-            {
-                return hadd(self, avx {});
-            }
-        }
         // load_complex
         template <class A>
         inline batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<avx2>) noexcept
@@ -618,6 +585,40 @@ namespace xsimd
             else
             {
                 return mul(self, other, avx {});
+            }
+        }
+
+        // reduce_add
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline T reduce_add(batch<T, A> const& self, requires_arch<avx2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                __m256i tmp1 = _mm256_hadd_epi32(self, self);
+                __m256i tmp2 = _mm256_hadd_epi32(tmp1, tmp1);
+                __m128i tmp3 = _mm256_extracti128_si256(tmp2, 1);
+                __m128i tmp4 = _mm_add_epi32(_mm256_castsi256_si128(tmp2), tmp3);
+                return _mm_cvtsi128_si32(tmp4);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                __m256i tmp1 = _mm256_shuffle_epi32(self, 0x0E);
+                __m256i tmp2 = _mm256_add_epi64(self, tmp1);
+                __m128i tmp3 = _mm256_extracti128_si256(tmp2, 1);
+                __m128i res = _mm_add_epi64(_mm256_castsi256_si128(tmp2), tmp3);
+#if defined(__x86_64__)
+                return _mm_cvtsi128_si64(res);
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, res);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
+            }
+            else
+            {
+                return reduce_add(self, avx {});
             }
         }
 
