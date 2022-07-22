@@ -655,7 +655,7 @@ namespace xsimd
      * Computes the smaller values of the batches \c x and \c y.
      * @param x a batch of integer or floating point values.
      * @param y a batch of integer or floating point values.
-     * @return a batch of the larger values.
+     * @return a batch of the smaller values.
      */
     template <class T, class A>
     inline batch<T, A> fmin(batch<T, A> const& x, batch<T, A> const& y) noexcept
