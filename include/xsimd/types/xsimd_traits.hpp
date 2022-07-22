@@ -54,6 +54,35 @@ namespace xsimd
 
         template <class T>
         constexpr size_t simd_traits_impl<T, true>::size;
+
+        template <class T, class A>
+        struct static_check_supported_config_emitter
+        {
+
+            static_assert(A::supported(),
+                          "usage of batch type with unsupported architecture");
+            static_assert(!A::supported() || has_simd_register<T, A>::value,
+                          "usage of batch type with unsupported type");
+        };
+
+        template <class T, class A>
+        struct static_check_supported_config_emitter<std::complex<T>, A> : static_check_supported_config_emitter<T, A>
+        {
+        };
+
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+        template <class T, class A, bool i3ec>
+        struct static_check_supported_config_emitter<xtl::xcomplex<T, T, i3ec>, A> : static_check_supported_config_emitter<T, A>
+        {
+        };
+#endif
+
+        // consistency checker
+        template <class T, class A>
+        void static_check_supported_config()
+        {
+            (void)static_check_supported_config_emitter<T, A>();
+        }
     }
 
     template <class T>
@@ -153,7 +182,7 @@ namespace xsimd
         {
         };
 
-#if XSIMD_ENABLE_XTL_COMPLEX
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
         template <class T1, class T2, bool I3EC, class A>
         struct simd_return_type_impl<xtl::xcomplex<T1, T1, I3EC>, T2, A>
             : std::enable_if<simd_condition<T1, T2>::value, batch<std::complex<T2>, A>>

@@ -59,7 +59,9 @@ protected:
         init_test_vector(i64_vec);
         init_test_vector(ui64_vec);
         init_test_vector(f_vec);
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
         init_test_vector(d_vec);
+#endif
     }
 
     void test_load()
@@ -73,7 +75,9 @@ protected:
         test_load_impl(i64_vec, "load int64_t");
         test_load_impl(ui64_vec, "load uint64_t");
         test_load_impl(f_vec, "load float");
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
         test_load_impl(d_vec, "load double");
+#endif
     }
 
     void test_store()
@@ -87,7 +91,9 @@ protected:
         test_store_impl(i64_vec, "load int64_t");
         test_store_impl(ui64_vec, "load uint64_t");
         test_store_impl(f_vec, "load float");
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
         test_store_impl(d_vec, "load double");
+#endif
     }
 
     void test_set()
@@ -101,7 +107,9 @@ protected:
         test_set_impl<int64_t>("set int64_t");
         test_set_impl<uint64_t>("set uint64_t");
         test_set_impl<float>("set float");
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
         test_set_impl<double>("set double");
+#endif
     }
 
 private:

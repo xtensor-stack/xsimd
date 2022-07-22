@@ -100,11 +100,7 @@ namespace xsimd
         XSIMD_DECLARE_SIMD_REGISTER(long long int, neon, detail::neon_vector_type<long long int>);
         XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, neon, detail::neon_vector_type<unsigned long long int>);
         XSIMD_DECLARE_SIMD_REGISTER(float, neon, float32x4_t);
-
-        struct invalid_register
-        {
-        };
-        XSIMD_DECLARE_SIMD_REGISTER(double, neon, invalid_register);
+        XSIMD_DECLARE_INVALID_SIMD_REGISTER(double, neon);
 
         namespace detail
         {

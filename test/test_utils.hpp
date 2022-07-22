@@ -678,22 +678,22 @@ namespace xsimd
         batch<uint64_t>,
         batch<int64_t>>;
 
-#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
-    using batch_float_type_list = mpl::type_list<batch<float>>;
-#else
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
     using batch_float_type_list = mpl::type_list<batch<float>, batch<double>>;
+#else
+    using batch_float_type_list = mpl::type_list<batch<float>>;
 #endif
 
     using batch_int32_type_list = mpl::type_list<
         batch<int32_t>>;
 
-#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
-    using batch_complex_type_list = mpl::type_list<
-        batch<std::complex<float>>>;
-#else
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
     using batch_complex_type_list = mpl::type_list<
         batch<std::complex<float>>,
         batch<std::complex<double>>>;
+#else
+    using batch_complex_type_list = mpl::type_list<
+        batch<std::complex<float>>>;
 #endif
     using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
 

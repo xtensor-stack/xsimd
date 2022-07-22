@@ -56,10 +56,10 @@ The previous behavior can be emulated through the
 Batch of Complex Types
 **********************
 
-Loading a batch of complex from an ``xtl::complex<T>`` now yields an
-``xsimd::batch<std::complex<T>>`` instead of an ``xtl::complex<T>``. It is still
+Loading a batch of complex from an ``xtl::xcomplex<T>`` now yields an
+``xsimd::batch<std::complex<T>>`` instead of an ``xtl::xcomplex<T>``. It is still
 possible to store an ``xsimd::batch<std::complex<T>>`` to an
-``xtl::complex<T>``.
+``xtl::xcomplex<T>``.
 
 
 Loading Batches

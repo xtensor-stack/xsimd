@@ -174,7 +174,12 @@ TEST(arch, default_load)
 {
     // make sure load_aligned / load_unaligned work for the default arch and
     // return the appropriate type.
-    using type_list = xsimd::mpl::type_list<short, int, long, float, double, std::complex<float>, std::complex<double>>;
+    using type_list = xsimd::mpl::type_list<short, int, long, float, std::complex<float>
+#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
+                                            ,
+                                            double, std::complex<double>
+#endif
+                                            >;
     try_loads<type_list>();
 }
 

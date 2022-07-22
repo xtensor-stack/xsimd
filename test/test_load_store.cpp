@@ -92,7 +92,9 @@ protected:
         test_load_impl(ul_vec, "load unsigned long");
 #endif
         test_load_impl(f_vec, "load float");
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
         test_load_impl(d_vec, "load double");
+#endif
     }
 
     void test_store()
@@ -110,7 +112,9 @@ protected:
         test_store_impl(ul_vec, "load unsigned long");
 #endif
         test_store_impl(f_vec, "load float");
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
         test_store_impl(d_vec, "load double");
+#endif
     }
     void test_gather()
     {
@@ -126,10 +130,9 @@ protected:
         test_gather_impl(l_vec, "gather long");
         test_gather_impl(ul_vec, "gather unsigned long");
 #endif
-#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
         test_gather_impl(f_vec, "gather float");
-#else
         test_gather_impl(f_vec, "gather float");
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
         test_gather_impl(d_vec, "gather double");
 #endif
     }
@@ -148,10 +151,8 @@ protected:
         test_scatter_impl(l_vec, "scatter long");
         test_scatter_impl(ul_vec, "scatter unsigned long");
 #endif
-#if XSIMD_WITH_NEON && !XSIMD_WITH_NEON64
         test_scatter_impl(f_vec, "scatter float");
-#else
-        test_scatter_impl(f_vec, "scatter float");
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
         test_scatter_impl(d_vec, "scatter double");
 #endif
     }
