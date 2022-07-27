@@ -711,46 +711,6 @@ namespace xsimd
             }
         }
 
-        // hadd
-        template <class A>
-        inline float hadd(batch<float, A> const& rhs, requires_arch<avx>) noexcept
-        {
-            // Warning about _mm256_hadd_ps:
-            // _mm256_hadd_ps(a,b) gives
-            // (a0+a1,a2+a3,b0+b1,b2+b3,a4+a5,a6+a7,b4+b5,b6+b7). Hence we can't
-            // rely on a naive use of this method
-            // rhs = (x0, x1, x2, x3, x4, x5, x6, x7)
-            // tmp = (x4, x5, x6, x7, x0, x1, x2, x3)
-            __m256 tmp = _mm256_permute2f128_ps(rhs, rhs, 1);
-            // tmp = (x4+x0, x5+x1, x6+x2, x7+x3, x0+x4, x1+x5, x2+x6, x3+x7)
-            tmp = _mm256_add_ps(rhs, tmp);
-            // tmp = (x4+x0+x5+x1, x6+x2+x7+x3, -, -, -, -, -, -)
-            tmp = _mm256_hadd_ps(tmp, tmp);
-            // tmp = (x4+x0+x5+x1+x6+x2+x7+x3, -, -, -, -, -, -, -)
-            tmp = _mm256_hadd_ps(tmp, tmp);
-            return _mm_cvtss_f32(_mm256_extractf128_ps(tmp, 0));
-        }
-        template <class A>
-        inline double hadd(batch<double, A> const& rhs, requires_arch<avx>) noexcept
-        {
-            // rhs = (x0, x1, x2, x3)
-            // tmp = (x2, x3, x0, x1)
-            __m256d tmp = _mm256_permute2f128_pd(rhs, rhs, 1);
-            // tmp = (x2+x0, x3+x1, -, -)
-            tmp = _mm256_add_pd(rhs, tmp);
-            // tmp = (x2+x0+x3+x1, -, -, -)
-            tmp = _mm256_hadd_pd(tmp, tmp);
-            return _mm_cvtsd_f64(_mm256_extractf128_pd(tmp, 0));
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline T hadd(batch<T, A> const& self, requires_arch<avx>) noexcept
-        {
-            __m128i low, high;
-            detail::split_avx(self, low, high);
-            batch<T, sse4_2> blow(low), bhigh(high);
-            return hadd(blow) + hadd(bhigh);
-        }
-
         // haddp
         template <class A>
         inline batch<float, A> haddp(batch<float, A> const* row, requires_arch<avx>) noexcept
@@ -1096,6 +1056,68 @@ namespace xsimd
                                           kernel::requires_arch<avx>) noexcept
         {
             return _mm256_rcp_ps(self);
+        }
+
+        // reduce_add
+        template <class A>
+        inline float reduce_add(batch<float, A> const& rhs, requires_arch<avx>) noexcept
+        {
+            // Warning about _mm256_hadd_ps:
+            // _mm256_hadd_ps(a,b) gives
+            // (a0+a1,a2+a3,b0+b1,b2+b3,a4+a5,a6+a7,b4+b5,b6+b7). Hence we can't
+            // rely on a naive use of this method
+            // rhs = (x0, x1, x2, x3, x4, x5, x6, x7)
+            // tmp = (x4, x5, x6, x7, x0, x1, x2, x3)
+            __m256 tmp = _mm256_permute2f128_ps(rhs, rhs, 1);
+            // tmp = (x4+x0, x5+x1, x6+x2, x7+x3, x0+x4, x1+x5, x2+x6, x3+x7)
+            tmp = _mm256_add_ps(rhs, tmp);
+            // tmp = (x4+x0+x5+x1, x6+x2+x7+x3, -, -, -, -, -, -)
+            tmp = _mm256_hadd_ps(tmp, tmp);
+            // tmp = (x4+x0+x5+x1+x6+x2+x7+x3, -, -, -, -, -, -, -)
+            tmp = _mm256_hadd_ps(tmp, tmp);
+            return _mm_cvtss_f32(_mm256_extractf128_ps(tmp, 0));
+        }
+        template <class A>
+        inline double reduce_add(batch<double, A> const& rhs, requires_arch<avx>) noexcept
+        {
+            // rhs = (x0, x1, x2, x3)
+            // tmp = (x2, x3, x0, x1)
+            __m256d tmp = _mm256_permute2f128_pd(rhs, rhs, 1);
+            // tmp = (x2+x0, x3+x1, -, -)
+            tmp = _mm256_add_pd(rhs, tmp);
+            // tmp = (x2+x0+x3+x1, -, -, -)
+            tmp = _mm256_hadd_pd(tmp, tmp);
+            return _mm_cvtsd_f64(_mm256_extractf128_pd(tmp, 0));
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline T reduce_add(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            __m128i low, high;
+            detail::split_avx(self, low, high);
+            batch<T, sse4_2> blow(low), bhigh(high);
+            return reduce_add(blow) + reduce_add(bhigh);
+        }
+
+        // reduce_max
+        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
+        inline T reduce_max(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            constexpr auto mask = detail::shuffle(1, 0);
+            batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
+            batch<T, A> acc = max(self, step);
+            __m128i low = _mm256_castsi256_si128(acc);
+            return reduce_max(batch<T, sse4_2>(low));
+        }
+
+        // reduce_min
+        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
+        inline T reduce_min(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            constexpr auto mask = detail::shuffle(1, 0);
+            batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
+            batch<T, A> acc = min(self, step);
+            __m128i low = _mm256_castsi256_si128(acc);
+            return reduce_min(batch<T, sse4_2>(low));
         }
 
         // rsqrt
@@ -1499,12 +1521,13 @@ namespace xsimd
             return bitwise_cast<batch<T, A>>(
                 swizzle(bitwise_cast<batch<float, A>>(self), mask));
         }
+
         template <class A,
                   typename T,
-                  uint32_t V0,
-                  uint32_t V1,
-                  uint32_t V2,
-                  uint32_t V3,
+                  uint64_t V0,
+                  uint64_t V1,
+                  uint64_t V2,
+                  uint64_t V3,
                   detail::enable_sized_integral_t<T, 8> = 0>
         inline batch<T, A>
         swizzle(batch<T, A> const& self,

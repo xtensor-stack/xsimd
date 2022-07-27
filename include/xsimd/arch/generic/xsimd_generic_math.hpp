@@ -1020,13 +1020,6 @@ namespace xsimd
             return batch<T, A>(self.data) & batch<T, A>(1);
         }
 
-        // hadd
-        template <class A, class T>
-        inline std::complex<T> hadd(batch<std::complex<T>, A> const& self, requires_arch<generic>) noexcept
-        {
-            return { hadd(self.real()), hadd(self.imag()) };
-        }
-
         // horner
         template <class T, class A, uint64_t... Coefs>
         inline batch<T, A> horner(const batch<T, A>& self) noexcept
@@ -1974,6 +1967,57 @@ namespace xsimd
         {
             using batch_type = batch<T, A>;
             return div(batch_type(1), self);
+        }
+
+        // reduce_add
+        template <class A, class T>
+        inline std::complex<T> reduce_add(batch<std::complex<T>, A> const& self, requires_arch<generic>) noexcept
+        {
+            return { reduce_add(self.real()), reduce_add(self.imag()) };
+        }
+
+        namespace detail
+        {
+            template <class T, T N>
+            struct SplitHigh
+            {
+                static constexpr T get(T i, T)
+                {
+                    return i >= N ? 0 : i + N;
+                }
+            };
+
+            template <class Op, class A, class T>
+            inline T reduce(Op, batch<T, A> const& self, std::integral_constant<unsigned, 1>) noexcept
+            {
+                return self.get(0);
+            }
+
+            template <class Op, class A, class T, unsigned Lvl>
+            inline T reduce(Op op, batch<T, A> const& self, std::integral_constant<unsigned, Lvl>) noexcept
+            {
+                using index_type = as_unsigned_integer_t<T>;
+                batch<T, A> split = swizzle(self, make_batch_constant<batch<index_type, A>, SplitHigh<index_type, Lvl / 2>>());
+                return reduce(op, op(split, self), std::integral_constant<unsigned, Lvl / 2>());
+            }
+        }
+
+        // reduce_max
+        template <class A, class T>
+        inline T reduce_max(batch<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            return detail::reduce([](batch<T, A> const& x, batch<T, A> const& y)
+                                  { return max(x, y); },
+                                  self, std::integral_constant<unsigned, batch<T, A>::size>());
+        }
+
+        // reduce_min
+        template <class A, class T>
+        inline T reduce_min(batch<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            return detail::reduce([](batch<T, A> const& x, batch<T, A> const& y)
+                                  { return min(x, y); },
+                                  self, std::integral_constant<unsigned, batch<T, A>::size>());
         }
 
         // remainder

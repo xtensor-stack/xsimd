@@ -557,7 +557,7 @@ namespace xsimd
         template <class A, uint8_t... Vs>
         inline batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch_constant<batch<uint8_t, A>, Vs...> mask, requires_arch<avx512bw>) noexcept
         {
-            return _mm512_permutexvar_epi8((batch<uint8_t, A>)mask, self);
+            return _mm512_shuffle_epi8(self, (batch<uint8_t, A>)mask);
         }
 
         template <class A, uint8_t... Vs>

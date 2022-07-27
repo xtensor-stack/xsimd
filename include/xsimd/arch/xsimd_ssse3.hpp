@@ -82,9 +82,9 @@ namespace xsimd
             return detail::extract_pair(self, other, i, ::xsimd::detail::make_index_sequence<size>());
         }
 
-        // hadd
+        // reduce_add
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline T hadd(batch<T, A> const& self, requires_arch<ssse3>) noexcept
+        inline T reduce_add(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
@@ -101,7 +101,7 @@ namespace xsimd
             }
             else
             {
-                return hadd(self, sse3 {});
+                return reduce_add(self, sse3 {});
             }
         }
 
@@ -118,7 +118,7 @@ namespace xsimd
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
         inline batch<int16_t, A> swizzle(batch<int16_t, A> const& self, batch_constant<batch<uint16_t, A>, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<ssse3>) noexcept
         {
-            return bitwise_cast<int16_t>(swizzle(bitwise_cast<uint16_t>(self), mask, ssse3 {}));
+            return bitwise_cast<batch<int16_t, A>>(swizzle(bitwise_cast<batch<uint16_t, A>>(self), mask, ssse3 {}));
         }
 
         template <class A, uint8_t V0, uint8_t V1, uint8_t V2, uint8_t V3, uint8_t V4, uint8_t V5, uint8_t V6, uint8_t V7,
@@ -132,7 +132,7 @@ namespace xsimd
                   uint8_t V8, uint8_t V9, uint8_t V10, uint8_t V11, uint8_t V12, uint8_t V13, uint8_t V14, uint8_t V15>
         inline batch<int8_t, A> swizzle(batch<int8_t, A> const& self, batch_constant<batch<uint8_t, A>, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> mask, requires_arch<ssse3>) noexcept
         {
-            return bitwise_cast<int8_t>(swizzle(bitwise_cast<uint8_t>(self), mask, ssse3 {}));
+            return bitwise_cast<batch<int8_t, A>>(swizzle(bitwise_cast<batch<uint8_t, A>>(self), mask, ssse3 {}));
         }
 
     }
