@@ -1577,6 +1577,20 @@ namespace xsimd
             return vget_lane_f32(tmp, 0);
         }
 
+        /**************
+         * reduce_max *
+         **************/
+
+        // Using generic implementation because ARM doe snot provide intrinsics
+        // for this operation
+
+        /**************
+         * reduce_min *
+         **************/
+
+        // Using generic implementation because ARM doe snot provide intrinsics
+        // for this operation
+
         /**********
          * select *
          **********/
