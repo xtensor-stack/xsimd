@@ -840,7 +840,7 @@ namespace xsimd
         inline batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n, requires_arch<neon64>) noexcept
         {
             constexpr std::size_t size = batch<double, A>::size;
-            assert(0 <= n && n < size && "index in bounds");
+            assert(n < size && "index in bounds");
             return detail::extract_pair(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
         }
 

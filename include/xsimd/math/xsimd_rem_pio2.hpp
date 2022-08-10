@@ -645,7 +645,7 @@ namespace xsimd
                     j = ix >> 20;
                     y[0] = r - w;
                     GET_HIGH_WORD(high, y[0]);
-                    i = j - ((high >> 20) & 0x7ff);
+                    i = j - static_cast<int32_t>((high >> 20) & 0x7ff);
                     if (i > 16)
                     { /* 2nd iteration needed, good to 118 */
                         t = r;
@@ -654,7 +654,7 @@ namespace xsimd
                         w = fn * pio2_2t - ((t - r) - w);
                         y[0] = r - w;
                         GET_HIGH_WORD(high, y[0]);
-                        i = j - ((high >> 20) & 0x7ff);
+                        i = j - static_cast<int32_t>((high >> 20) & 0x7ff);
                         if (i > 49)
                         { /* 3rd iteration need, 151 bits acc */
                             t = r; /* will cover all possible cases */
@@ -687,7 +687,7 @@ namespace xsimd
             GET_LOW_WORD(low, x);
             SET_LOW_WORD(z, low);
             e0 = (ix >> 20) - 1046; /* e0 = ilogb(z)-23; */
-            SET_HIGH_WORD(z, ix - ((std::int32_t)(e0 << 20)));
+            SET_HIGH_WORD(z, static_cast<uint32_t>(ix - (e0 << 20)));
             for (i = 0; i < 2; i++)
             {
                 tx[i] = (double)((std::int32_t)(z));
