@@ -1194,3 +1194,39 @@ TYPED_TEST(xsimd_api_all_types_functions, sub)
 {
     this->test_sub();
 }
+
+/*
+ * Functions that apply only to floating point types
+ */
+template <typename T>
+class xsimd_api_all_floating_point_types_functions : public ::testing::Test
+{
+    using value_type = typename scalar_type<T>::type;
+
+public:
+    void test_neq_nan()
+    {
+        value_type valNaN(std::numeric_limits<value_type>::signaling_NaN());
+        value_type val1(1.0);
+        EXPECT_EQ(extract(xsimd::neq(T(valNaN), T(val1))), valNaN != val1);
+    }
+};
+
+using AllFloatingPointTypes = ::testing::Types<
+    float, double,
+    std::complex<float>, std::complex<double>
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+    ,
+    xsimd::batch<float>, xsimd::batch<std::complex<float>>
+#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
+    ,
+    xsimd::batch<double>, xsimd::batch<std::complex<double>>
+#endif
+#endif
+    >;
+
+TYPED_TEST_SUITE(xsimd_api_all_floating_point_types_functions, AllFloatingPointTypes);
+TYPED_TEST(xsimd_api_all_floating_point_types_functions, neq_nan)
+{
+    this->test_neq_nan();
+}
