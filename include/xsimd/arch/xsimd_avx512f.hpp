@@ -1236,12 +1236,12 @@ namespace xsimd
         template <class A>
         inline batch_bool<float, A> neq(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
         {
-            return _mm512_cmp_ps_mask(self, other, _CMP_NEQ_OQ);
+            return _mm512_cmp_ps_mask(self, other, _CMP_NEQ_UQ);
         }
         template <class A>
         inline batch_bool<double, A> neq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512f>) noexcept
         {
-            return _mm512_cmp_pd_mask(self, other, _CMP_NEQ_OQ);
+            return _mm512_cmp_pd_mask(self, other, _CMP_NEQ_UQ);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512f>) noexcept
