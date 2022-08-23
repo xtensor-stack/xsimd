@@ -27,6 +27,7 @@ namespace xsimd
     namespace kernel
     {
         using namespace types;
+
         /*******
          * all *
          *******/
@@ -853,66 +854,6 @@ namespace xsimd
             };
             return dispatcher.apply(register_type(arg));
         }
-
-        /*template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_u8(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_s8(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_u16(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_s16(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_u32(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_s32(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_u64(arg);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_s64(arg);
-        }
-
-        template <class A>
-        inline float reduce_add(batch<float, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_f32(arg);
-        }
-
-        template <class A>
-        inline double reduce_add(batch<double, A> const& arg, requires_arch<neon64>) noexcept
-        {
-            return vaddvq_f64(arg);
-        }*/
 
         /**************
          * reduce_max *
