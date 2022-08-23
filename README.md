@@ -34,7 +34,7 @@ Architecture | Instruction set extensions
 x86          | SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2, FMA3+SSE, FMA3+AVX, FMA3+AVX2
 x86          | AVX512BW, AVX512CD, AVX512DQ, AVX512F (gcc7 and higher)
 x86 AMD      | FMA4
-ARM          | NEON, NEON64
+ARM          | NEON, NEON64, SVE128/256 (fixed vector size)
 
 ## Installation
 

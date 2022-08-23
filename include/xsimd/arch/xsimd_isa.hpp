@@ -76,6 +76,10 @@
 #include "./xsimd_neon64.hpp"
 #endif
 
+#if XSIMD_WITH_SVE
+#include "./xsimd_sve.hpp"
+#endif
+
 // Must come last to have access to all conversion specializations.
 #include "./xsimd_generic.hpp"
 
