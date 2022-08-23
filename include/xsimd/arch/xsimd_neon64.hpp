@@ -689,11 +689,172 @@ namespace xsimd
             return vsetq_lane_f64(val, self, I);
         }
 
+        /******************
+         * reducer macros *
+         ******************/
+
+        // Wrap reducer intrinsics so we can pass them as function pointers
+        // - OP: intrinsics name prefix, e.g., vorrq
+
+#define WRAP_REDUCER_INT_EXCLUDING_64(OP)               \
+    namespace wrap                                      \
+    {                                                   \
+        inline uint8_t OP##_u8(uint8x16_t a) noexcept   \
+        {                                               \
+            return ::OP##_u8(a);                        \
+        }                                               \
+        inline int8_t OP##_s8(int8x16_t a) noexcept     \
+        {                                               \
+            return ::OP##_s8(a);                        \
+        }                                               \
+        inline uint16_t OP##_u16(uint16x8_t a) noexcept \
+        {                                               \
+            return ::OP##_u16(a);                       \
+        }                                               \
+        inline int16_t OP##_s16(int16x8_t a) noexcept   \
+        {                                               \
+            return ::OP##_s16(a);                       \
+        }                                               \
+        inline uint32_t OP##_u32(uint32x4_t a) noexcept \
+        {                                               \
+            return ::OP##_u32(a);                       \
+        }                                               \
+        inline int32_t OP##_s32(int32x4_t a) noexcept   \
+        {                                               \
+            return ::OP##_s32(a);                       \
+        }                                               \
+    }
+
+#define WRAP_REDUCER_INT(OP)                            \
+    WRAP_REDUCER_INT_EXCLUDING_64(OP)                   \
+    namespace wrap                                      \
+    {                                                   \
+        inline uint64_t OP##_u64(uint64x2_t a) noexcept \
+        {                                               \
+            return ::OP##_u64(a);                       \
+        }                                               \
+        inline int64_t OP##_s64(int64x2_t a) noexcept   \
+        {                                               \
+            return ::OP##_s64(a);                       \
+        }                                               \
+    }
+
+#define WRAP_REDUCER_FLOAT(OP)                         \
+    namespace wrap                                     \
+    {                                                  \
+        inline float OP##_f32(float32x4_t a) noexcept  \
+        {                                              \
+            return ::OP##_f32(a);                      \
+        }                                              \
+        inline double OP##_f64(float64x2_t a) noexcept \
+        {                                              \
+            return ::OP##_f64(a);                      \
+        }                                              \
+    }
+
+        namespace detail
+        {
+            template <class R>
+            struct reducer_return_type_impl;
+
+            template <>
+            struct reducer_return_type_impl<uint8x16_t>
+            {
+                using type = uint8_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<int8x16_t>
+            {
+                using type = int8_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<uint16x8_t>
+            {
+                using type = uint16_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<int16x8_t>
+            {
+                using type = int16_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<uint32x4_t>
+            {
+                using type = uint32_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<int32x4_t>
+            {
+                using type = int32_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<uint64x2_t>
+            {
+                using type = uint64_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<int64x2_t>
+            {
+                using type = int64_t;
+            };
+
+            template <>
+            struct reducer_return_type_impl<float32x4_t>
+            {
+                using type = float;
+            };
+
+            template <>
+            struct reducer_return_type_impl<float64x2_t>
+            {
+                using type = double;
+            };
+
+            template <class R>
+            using reducer_return_type = typename reducer_return_type_impl<R>::type;
+
+            template <class... T>
+            struct neon_reducer_dispatcher_impl : neon_dispatcher_base<reducer_return_type, T...>
+            {
+            };
+
+            using neon_reducer_dispatcher = neon_reducer_dispatcher_impl<uint8x16_t, int8x16_t,
+                                                                         uint16x8_t, int16x8_t,
+                                                                         uint32x4_t, int32x4_t,
+                                                                         uint64x2_t, int64x2_t,
+                                                                         float32x4_t, float64x2_t>;
+            template <class T>
+            using enable_neon64_type_t = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value,
+                                                                 int>::type;
+        }
+
         /**************
          * reduce_add *
          **************/
 
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
+        WRAP_REDUCER_INT(vaddvq)
+        WRAP_REDUCER_FLOAT(vaddvq)
+
+        template <class A, class T, detail::enable_neon64_type_t<T> = 0>
+        inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
+        {
+            using register_type = typename batch<T, A>::register_type;
+            const detail::neon_reducer_dispatcher::unary dispatcher = {
+                std::make_tuple(wrap::vaddvq_u8, wrap::vaddvq_s8, wrap::vaddvq_u16, wrap::vaddvq_s16,
+                                wrap::vaddvq_u32, wrap::vaddvq_s32, wrap::vaddvq_u64, wrap::vaddvq_s64,
+                                wrap::vaddvq_f32, wrap::vaddvq_f64)
+            };
+            return dispatcher.apply(register_type(arg));
+        }
+
+        /*template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
         inline typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_u8(arg);
@@ -751,7 +912,75 @@ namespace xsimd
         inline double reduce_add(batch<double, A> const& arg, requires_arch<neon64>) noexcept
         {
             return vaddvq_f64(arg);
+        }*/
+
+        /**************
+         * reduce_max *
+         **************/
+
+        WRAP_REDUCER_INT_EXCLUDING_64(vmaxvq)
+        WRAP_REDUCER_FLOAT(vmaxvq)
+
+        namespace wrap
+        {
+            inline uint64_t vmaxvq_u64(uint64x2_t a) noexcept
+            {
+                return std::max(vdupd_laneq_u64(a, 0), vdupd_laneq_u64(a, 1));
+            }
+
+            inline int64_t vmaxvq_s64(int64x2_t a) noexcept
+            {
+                return std::max(vdupd_laneq_s64(a, 0), vdupd_laneq_s64(a, 1));
+            }
         }
+
+        template <class A, class T, detail::enable_neon64_type_t<T> = 0>
+        inline typename batch<T, A>::value_type reduce_max(batch<T, A> const& arg, requires_arch<neon64>) noexcept
+        {
+            using register_type = typename batch<T, A>::register_type;
+            const detail::neon_reducer_dispatcher::unary dispatcher = {
+                std::make_tuple(wrap::vmaxvq_u8, wrap::vmaxvq_s8, wrap::vmaxvq_u16, wrap::vmaxvq_s16,
+                                wrap::vmaxvq_u32, wrap::vmaxvq_s32, wrap::vmaxvq_u64, wrap::vmaxvq_s64,
+                                wrap::vmaxvq_f32, wrap::vmaxvq_f64)
+            };
+            return dispatcher.apply(register_type(arg));
+        }
+
+        /**************
+         * reduce_min *
+         **************/
+
+        WRAP_REDUCER_INT_EXCLUDING_64(vminvq)
+        WRAP_REDUCER_FLOAT(vminvq)
+
+        namespace wrap
+        {
+            inline uint64_t vminvq_u64(uint64x2_t a) noexcept
+            {
+                return std::min(vdupd_laneq_u64(a, 0), vdupd_laneq_u64(a, 1));
+            }
+
+            inline int64_t vminvq_s64(int64x2_t a) noexcept
+            {
+                return std::min(vdupd_laneq_s64(a, 0), vdupd_laneq_s64(a, 1));
+            }
+        }
+
+        template <class A, class T, detail::enable_neon64_type_t<T> = 0>
+        inline typename batch<T, A>::value_type reduce_min(batch<T, A> const& arg, requires_arch<neon64>) noexcept
+        {
+            using register_type = typename batch<T, A>::register_type;
+            const detail::neon_reducer_dispatcher::unary dispatcher = {
+                std::make_tuple(wrap::vminvq_u8, wrap::vminvq_s8, wrap::vminvq_u16, wrap::vminvq_s16,
+                                wrap::vminvq_u32, wrap::vminvq_s32, wrap::vminvq_u64, wrap::vminvq_s64,
+                                wrap::vminvq_f32, wrap::vminvq_f64)
+            };
+            return dispatcher.apply(register_type(arg));
+        }
+
+#undef WRAP_REDUCER_INT_EXCLUDING_64
+#undef WRAP_REDUCER_INT
+#undef WRAP_REDUCER_FLOAT
 
         /**********
          * select *
