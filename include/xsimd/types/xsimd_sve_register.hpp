@@ -22,32 +22,28 @@
 
 namespace xsimd
 {
-    /**
-     * @ingroup arch
-     *
-     * SVE instructions (fixed vector size) for arm64
-     */
     namespace detail
     {
+        /**
+         * @ingroup arch
+         *
+         * SVE instructions (fixed vector size) for arm64
+         */
+        template <size_t Width>
         struct sve : xsimd::generic
         {
-            static constexpr bool supported() noexcept { return XSIMD_WITH_SVE; }
+            static constexpr bool supported() noexcept { return Width == XSIMD_SVE_BITS; }
             static constexpr bool available() noexcept { return true; }
             static constexpr bool requires_alignment() noexcept { return true; }
             static constexpr std::size_t alignment() noexcept { return 16; }
             static constexpr unsigned version() noexcept { return generic::version(9, 0, 0); }
             static constexpr char const* name() noexcept { return "arm64+sve"; }
         };
-    } // namespace detail
+    }
 
 #if XSIMD_WITH_SVE
 
-    // Create alias with explicit vector size
-#if XSIMD_SVE_BITS == 128
-    using sve128 = detail::sve;
-#elif XSIMD_SVE_BITS == 256
-    using sve256 = detail::sve;
-#endif
+    using sve = detail::sve<__ARM_FEATURE_SVE_BITS>;
 
     namespace types
     {
@@ -123,19 +119,19 @@ namespace xsimd
                                                               unsigned_int_sve_vector_type<T>>::type;
         } // namespace detail
 
-        XSIMD_DECLARE_SIMD_REGISTER(signed char, xsimd::detail::sve, detail::sve_vector_type<signed char>);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned char, xsimd::detail::sve, detail::sve_vector_type<unsigned char>);
-        XSIMD_DECLARE_SIMD_REGISTER(char, xsimd::detail::sve, detail::sve_vector_type<char>);
-        XSIMD_DECLARE_SIMD_REGISTER(short, xsimd::detail::sve, detail::sve_vector_type<short>);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned short, xsimd::detail::sve, detail::sve_vector_type<unsigned short>);
-        XSIMD_DECLARE_SIMD_REGISTER(int, xsimd::detail::sve, detail::sve_vector_type<int>);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned int, xsimd::detail::sve, detail::sve_vector_type<unsigned int>);
-        XSIMD_DECLARE_SIMD_REGISTER(long int, xsimd::detail::sve, detail::sve_vector_type<long int>);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned long int, xsimd::detail::sve, detail::sve_vector_type<unsigned long int>);
-        XSIMD_DECLARE_SIMD_REGISTER(long long int, xsimd::detail::sve, detail::sve_vector_type<long long int>);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, xsimd::detail::sve, detail::sve_vector_type<unsigned long long int>);
-        XSIMD_DECLARE_SIMD_REGISTER(float, xsimd::detail::sve, detail::sve_vector_type<float>);
-        XSIMD_DECLARE_SIMD_REGISTER(double, xsimd::detail::sve, detail::sve_vector_type<double>);
+        XSIMD_DECLARE_SIMD_REGISTER(signed char, sve, detail::sve_vector_type<signed char>);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned char, sve, detail::sve_vector_type<unsigned char>);
+        XSIMD_DECLARE_SIMD_REGISTER(char, sve, detail::sve_vector_type<char>);
+        XSIMD_DECLARE_SIMD_REGISTER(short, sve, detail::sve_vector_type<short>);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned short, sve, detail::sve_vector_type<unsigned short>);
+        XSIMD_DECLARE_SIMD_REGISTER(int, sve, detail::sve_vector_type<int>);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned int, sve, detail::sve_vector_type<unsigned int>);
+        XSIMD_DECLARE_SIMD_REGISTER(long int, sve, detail::sve_vector_type<long int>);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned long int, sve, detail::sve_vector_type<unsigned long int>);
+        XSIMD_DECLARE_SIMD_REGISTER(long long int, sve, detail::sve_vector_type<long long int>);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, sve, detail::sve_vector_type<unsigned long long int>);
+        XSIMD_DECLARE_SIMD_REGISTER(float, sve, detail::sve_vector_type<float>);
+        XSIMD_DECLARE_SIMD_REGISTER(double, sve, detail::sve_vector_type<double>);
 
         namespace detail
         {
@@ -148,7 +144,7 @@ namespace xsimd
         } // namespace detail
 
         template <class T>
-        struct get_bool_simd_register<T, xsimd::detail::sve>
+        struct get_bool_simd_register<T, sve>
         {
             using type = detail::sve_bool_simd_register;
         };
