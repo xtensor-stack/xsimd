@@ -441,7 +441,7 @@ namespace xsimd
         return !(x0 == x1);
     }
 
-#ifdef _GNU_SOURCE
+#if defined(_GNU_SOURCE) && !defined(__APPLE__)
     inline float exp10(const float& x) noexcept
     {
         return ::exp10f(x);
