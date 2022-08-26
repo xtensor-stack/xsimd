@@ -24,7 +24,8 @@ INPUT             = ../include/xsimd/types/xsimd_api.hpp \
                     ../include/xsimd/types/xsimd_sse3_register.hpp \
                     ../include/xsimd/types/xsimd_sse4_1_register.hpp \
                     ../include/xsimd/types/xsimd_sse4_2_register.hpp \
-                    ../include/xsimd/types/xsimd_ssse3_register.hpp
+                    ../include/xsimd/types/xsimd_ssse3_register.hpp  \
+                    ../include/xsimd/types/xsimd_sve_register.hpp
 
 
 GENERATE_LATEX    = NO
