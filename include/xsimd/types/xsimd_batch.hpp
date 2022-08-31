@@ -498,6 +498,8 @@ namespace xsimd
     inline void batch<T, A>::store_aligned(U* mem) const noexcept
     {
         detail::static_check_supported_config<T, A>();
+        assert(((reinterpret_cast<uintptr_t>(mem) % A::alignment()) == 0)
+               && "store location is not properly aligned");
         kernel::store_aligned<A>(mem, *this, A {});
     }
 
@@ -543,6 +545,8 @@ namespace xsimd
     template <class U>
     inline batch<T, A> batch<T, A>::load_aligned(U const* mem) noexcept
     {
+        assert(((reinterpret_cast<uintptr_t>(mem) % A::alignment()) == 0)
+               && "loaded pointer is not properly aligned");
         detail::static_check_supported_config<T, A>();
         return kernel::load_aligned<A>(mem, kernel::convert<T> {}, A {});
     }
@@ -1087,6 +1091,8 @@ namespace xsimd
     template <class T, class A>
     inline batch<std::complex<T>, A> batch<std::complex<T>, A>::load_aligned(const value_type* src) noexcept
     {
+        assert(((reinterpret_cast<uintptr_t>(src) % A::alignment()) == 0)
+               && "loaded pointer is not properly aligned");
         return kernel::load_complex_aligned<A>(src, kernel::convert<value_type> {}, A {});
     }
 
@@ -1099,6 +1105,8 @@ namespace xsimd
     template <class T, class A>
     inline void batch<std::complex<T>, A>::store_aligned(value_type* dst) const noexcept
     {
+        assert(((reinterpret_cast<uintptr_t>(dst) % A::alignment()) == 0)
+               && "store location is not properly aligned");
         return kernel::store_complex_aligned(dst, *this, A {});
     }
 
