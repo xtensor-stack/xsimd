@@ -12,6 +12,7 @@ jobs:
         vector_bits:
           - 128
           - 256
+          - 512
     steps:
     - name: Setup compiler
       run: |
