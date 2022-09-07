@@ -14,6 +14,8 @@
 
 #include "test_utils.hpp"
 
+#include <climits>
+
 namespace xsimd
 {
     template <class T, std::size_t N = T::size>
