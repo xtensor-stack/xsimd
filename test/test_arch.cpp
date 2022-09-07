@@ -13,7 +13,6 @@
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #include <numeric>
-#include <random>
 #include <type_traits>
 
 #include "test_sum.hpp"

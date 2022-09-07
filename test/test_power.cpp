@@ -14,8 +14,6 @@
 
 #include "test_utils.hpp"
 
-#include <cfenv>
-
 template <class B>
 class power_test : public testing::Test
 {

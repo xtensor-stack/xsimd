@@ -10,10 +10,10 @@
  ****************************************************************************/
 
 #include "xsimd/xsimd.hpp"
+
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #include "test_utils.hpp"
-#include "xsimd/xsimd.hpp"
 
 template <class B>
 class complex_trigonometric_test : public testing::Test
