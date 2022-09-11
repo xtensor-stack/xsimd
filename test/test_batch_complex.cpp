@@ -41,6 +41,7 @@ protected:
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     using xtl_value_type = xtl::xcomplex<real_value_type, real_value_type, true>;
+    using std_value_type = std::complex<real_value_type>;
     using xtl_array_type = std::array<xtl_value_type, size>;
 #endif
 
@@ -128,10 +129,10 @@ protected:
         batch_type b0(xtl_value_type(2, 3));
         EXPECT_EQ(b0, tmp) << print_function_name("batch(value_type)");
 
-        batch_type b1 = xsimd::load_as<xtl_value_type>(aligned_tmp.data(), xsimd::aligned_mode());
+        batch_type b1 = xsimd::load_as<std_value_type>(aligned_tmp.data(), xsimd::aligned_mode());
         EXPECT_EQ(b1, tmp) << print_function_name("load_as<value_type> aligned");
 
-        batch_type b2 = xsimd::load_as<xtl_value_type>(tmp.data(), xsimd::unaligned_mode());
+        batch_type b2 = xsimd::load_as<std_value_type>(tmp.data(), xsimd::unaligned_mode());
         EXPECT_EQ(b2, tmp) << print_function_name("load_as<value_type> unaligned");
 
         xsimd::store_as(aligned_tmp.data(), b1, xsimd::aligned_mode());

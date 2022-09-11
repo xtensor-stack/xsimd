@@ -44,17 +44,6 @@ protected:
         constexpr bool same_type = std::is_same<value_type, typename traits_type::type>::value;
         EXPECT_TRUE(same_type);
     }
-
-    void test_simd_return_type()
-    {
-        using rtype1 = xsimd::simd_return_type<value_type, float>;
-        constexpr bool res1 = std::is_same<rtype1, xsimd::batch<float>>::value;
-        EXPECT_TRUE(res1);
-
-        using rtype2 = xsimd::simd_return_type<bool, value_type>;
-        constexpr bool res2 = std::is_same<rtype2, xsimd::batch_bool<value_type>>::value;
-        EXPECT_TRUE(res2);
-    }
 };
 
 TYPED_TEST_SUITE(traits_test, batch_types, simd_test_names);
@@ -67,11 +56,6 @@ TYPED_TEST(traits_test, simd_traits)
 TYPED_TEST(traits_test, revert_simd_traits)
 {
     this->test_revert_simd_traits();
-}
-
-TYPED_TEST(traits_test, simd_return_type)
-{
-    this->test_simd_return_type();
 }
 
 template <class B>
@@ -104,17 +88,6 @@ protected:
         constexpr bool same_type = std::is_same<value_type, typename traits_type::type>::value;
         EXPECT_TRUE(same_type);
     }
-
-    void test_simd_return_type()
-    {
-        using rtype1 = xsimd::simd_return_type<value_type, float>;
-        constexpr bool res1 = std::is_same<rtype1, xsimd::batch<std::complex<float>>>::value;
-        EXPECT_TRUE(res1);
-
-        using rtype2 = xsimd::simd_return_type<bool, value_type>;
-        constexpr bool res2 = std::is_same<rtype2, xsimd::batch_bool<typename value_type::value_type>>::value;
-        EXPECT_TRUE(res2);
-    }
 };
 
 TYPED_TEST_SUITE(complex_traits_test, batch_complex_types, simd_test_names);
@@ -127,10 +100,5 @@ TYPED_TEST(complex_traits_test, simd_traits)
 TYPED_TEST(complex_traits_test, revert_simd_traits)
 {
     this->test_revert_simd_traits();
-}
-
-TYPED_TEST(complex_traits_test, simd_return_type)
-{
-    this->test_simd_return_type();
 }
 #endif
