@@ -176,6 +176,17 @@ private:
         EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned (load_as)");
     }
 
+    struct test_load_char
+    {
+        /* Make sure xsimd doesn't try to be smart with char types */
+        static_assert(std::is_same<xsimd::batch<char>, decltype(xsimd::load_as<char>(std::declval<char*>(), xsimd::aligned_mode()))>::value,
+                      "honor explicit type request");
+        static_assert(std::is_same<xsimd::batch<unsigned char>, decltype(xsimd::load_as<unsigned char>(std::declval<unsigned char*>(), xsimd::aligned_mode()))>::value,
+                      "honor explicit type request");
+        static_assert(std::is_same<xsimd::batch<signed char>, decltype(xsimd::load_as<signed char>(std::declval<signed char*>(), xsimd::aligned_mode()))>::value,
+                      "honor explicit type request");
+    };
+
     template <class V>
     void test_store_impl(const V& v, const std::string& name)
     {
