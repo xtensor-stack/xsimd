@@ -158,6 +158,16 @@ protected:
     }
 
 private:
+#ifdef XSIMD_WITH_SSE2
+    struct test_load_as_return_type
+    {
+        using lower_arch = xsimd::sse2;
+        using expected_batch_type = xsimd::batch<float, lower_arch>;
+        using load_as_return_type = decltype(xsimd::load_as<float, lower_arch>(std::declval<float*>(), xsimd::aligned_mode()));
+        static_assert(std::is_same<load_as_return_type, expected_batch_type>::value, "honoring arch parameter");
+    };
+#endif
+
     template <class V>
     void test_load_impl(const V& v, const std::string& name)
     {

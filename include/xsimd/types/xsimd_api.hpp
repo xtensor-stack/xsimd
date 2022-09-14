@@ -432,14 +432,14 @@ namespace xsimd
      * @return a new batch instance
      */
     template <class To, class A = default_arch, class From>
-    inline simd_return_type<From, To> broadcast_as(From v) noexcept
+    inline simd_return_type<From, To, A> broadcast_as(From v) noexcept
     {
         detail::static_check_supported_config<From, A>();
-        using batch_value_type = typename simd_return_type<From, To>::value_type;
+        using batch_value_type = typename simd_return_type<From, To, A>::value_type;
         using value_type = typename std::conditional<std::is_same<From, bool>::value,
                                                      bool,
                                                      batch_value_type>::type;
-        return simd_return_type<From, To>(value_type(v));
+        return simd_return_type<From, To, A>(value_type(v));
     }
 
     /**
@@ -1133,32 +1133,32 @@ namespace xsimd
      * @return a new batch instance
      */
     template <class To, class A = default_arch, class From>
-    inline simd_return_type<From, To> load_as(From const* ptr, aligned_mode) noexcept
+    inline simd_return_type<From, To, A> load_as(From const* ptr, aligned_mode) noexcept
     {
-        using batch_value_type = typename simd_return_type<From, To>::value_type;
+        using batch_value_type = typename simd_return_type<From, To, A>::value_type;
         detail::static_check_supported_config<From, A>();
         detail::static_check_supported_config<To, A>();
         return kernel::load_aligned<A>(ptr, kernel::convert<batch_value_type> {}, A {});
     }
 
     template <class To, class A = default_arch>
-    inline simd_return_type<bool, To> load_as(bool const* ptr, aligned_mode) noexcept
+    inline simd_return_type<bool, To, A> load_as(bool const* ptr, aligned_mode) noexcept
     {
         detail::static_check_supported_config<To, A>();
-        return simd_return_type<bool, To>::load_aligned(ptr);
+        return simd_return_type<bool, To, A>::load_aligned(ptr);
     }
 
     template <class To, class A = default_arch, class From>
-    inline simd_return_type<std::complex<From>, To> load_as(std::complex<From> const* ptr, aligned_mode) noexcept
+    inline simd_return_type<std::complex<From>, To, A> load_as(std::complex<From> const* ptr, aligned_mode) noexcept
     {
         detail::static_check_supported_config<To, A>();
-        using batch_value_type = typename simd_return_type<std::complex<From>, To>::value_type;
+        using batch_value_type = typename simd_return_type<std::complex<From>, To, A>::value_type;
         return kernel::load_complex_aligned<A>(ptr, kernel::convert<batch_value_type> {}, A {});
     }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     template <class To, class A = default_arch, class From, bool i3ec>
-    inline simd_return_type<xtl::xcomplex<From, From, i3ec>, To> load_as(xtl::xcomplex<From, From, i3ec> const* ptr, aligned_mode) noexcept
+    inline simd_return_type<xtl::xcomplex<From, From, i3ec>, To, A> load_as(xtl::xcomplex<From, From, i3ec> const* ptr, aligned_mode) noexcept
     {
         detail::static_check_supported_config<To, A>();
         detail::static_check_supported_config<From, A>();
@@ -1175,32 +1175,32 @@ namespace xsimd
      * @return a new batch instance
      */
     template <class To, class A = default_arch, class From>
-    inline simd_return_type<From, To> load_as(From const* ptr, unaligned_mode) noexcept
+    inline simd_return_type<From, To, A> load_as(From const* ptr, unaligned_mode) noexcept
     {
-        using batch_value_type = typename simd_return_type<From, To>::value_type;
+        using batch_value_type = typename simd_return_type<From, To, A>::value_type;
         detail::static_check_supported_config<To, A>();
         detail::static_check_supported_config<From, A>();
         return kernel::load_unaligned<A>(ptr, kernel::convert<batch_value_type> {}, A {});
     }
 
     template <class To, class A = default_arch>
-    inline simd_return_type<bool, To> load_as(bool const* ptr, unaligned_mode) noexcept
+    inline simd_return_type<bool, To, A> load_as(bool const* ptr, unaligned_mode) noexcept
     {
-        return simd_return_type<bool, To>::load_unaligned(ptr);
+        return simd_return_type<bool, To, A>::load_unaligned(ptr);
     }
 
     template <class To, class A = default_arch, class From>
-    inline simd_return_type<std::complex<From>, To> load_as(std::complex<From> const* ptr, unaligned_mode) noexcept
+    inline simd_return_type<std::complex<From>, To, A> load_as(std::complex<From> const* ptr, unaligned_mode) noexcept
     {
         detail::static_check_supported_config<To, A>();
         detail::static_check_supported_config<From, A>();
-        using batch_value_type = typename simd_return_type<std::complex<From>, To>::value_type;
+        using batch_value_type = typename simd_return_type<std::complex<From>, To, A>::value_type;
         return kernel::load_complex_unaligned<A>(ptr, kernel::convert<batch_value_type> {}, A {});
     }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     template <class To, class A = default_arch, class From, bool i3ec>
-    inline simd_return_type<xtl::xcomplex<From, From, i3ec>, To> load_as(xtl::xcomplex<From, From, i3ec> const* ptr, unaligned_mode) noexcept
+    inline simd_return_type<xtl::xcomplex<From, From, i3ec>, To, A> load_as(xtl::xcomplex<From, From, i3ec> const* ptr, unaligned_mode) noexcept
     {
         detail::static_check_supported_config<To, A>();
         detail::static_check_supported_config<From, A>();
