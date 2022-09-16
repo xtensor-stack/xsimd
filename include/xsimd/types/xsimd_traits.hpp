@@ -150,13 +150,6 @@ namespace xsimd
             : std::enable_if<simd_condition<T1, T2>::value, batch<T2, A>>
         {
         };
-        template <class A>
-        struct simd_return_type_impl<char, char, A>
-            : std::conditional<std::is_signed<char>::value,
-                               simd_return_type_impl<int8_t, int8_t, A>,
-                               simd_return_type_impl<uint8_t, uint8_t, A>>::type
-        {
-        };
 
         template <class T2, class A>
         struct simd_return_type_impl<bool, T2, A>
