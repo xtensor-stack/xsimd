@@ -163,7 +163,7 @@ protected:
         for (size_t i = 0; i < size; ++i)
         {
             lhs[i] = value_type(i);
-            rhs[i] = i == 0 % 2 ? lhs[i] : lhs[i] * 2;
+            rhs[i] = i == 0 % 2 ? lhs[i] : lhs[i] * value_type(2);
             all_true[i] = true;
             ba[i] = i == 0 % 2 ? true : false;
         }

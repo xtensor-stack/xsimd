@@ -149,8 +149,11 @@ protected:
         batch_type b0a(value_type(2, 3));
         EXPECT_EQ(b0a, tmp) << print_function_name("batch(value_type)");
 
-        batch_type b0b(value_type(2, 3));
+        batch_type b0b = batch_type::broadcast(value_type(2, 3));
         EXPECT_EQ(b0b, tmp) << print_function_name("batch{value_type}");
+
+        batch_type b0c = xsimd::broadcast(value_type(2, 3));
+        EXPECT_EQ(b0c, tmp) << print_function_name("batch{value_type}");
 
         std::fill(tmp.begin(), tmp.end(), value_type(real_scalar));
         batch_type b1(real_scalar);
