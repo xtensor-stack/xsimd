@@ -185,7 +185,6 @@ set(XSIMD_TESTS
     test_exponential.cpp
     test_extract_pair.cpp
     test_fp_manipulation.cpp
-    test_gnu_source.cpp
     test_hyperbolic.cpp
     test_load_store.cpp
     test_memory.cpp
@@ -200,6 +199,10 @@ set(XSIMD_TESTS
     test_xsimd_api.cpp
     test_utils.hpp
 )
+
+if(NOT MSVC)
+    list(APPEND XSIMD_TESTS test_gnu_source.cpp)
+endif()
 
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})
 target_link_libraries(test_xsimd xsimd GTest::GTest GTest::Main ${CMAKE_THREAD_LIBS_INIT})
