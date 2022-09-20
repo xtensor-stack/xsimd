@@ -420,7 +420,7 @@ namespace xsimd
     inline batch<T, A> broadcast(T v) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::broadcast<A>(v, A {});
+        return batch<T, A>::broadcast(v);
     }
 
     /**

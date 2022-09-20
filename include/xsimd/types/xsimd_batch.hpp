@@ -313,6 +313,9 @@ namespace xsimd
         batch(value_type val0, value_type val1, Ts... vals) noexcept;
         explicit batch(batch_bool_type const& b) noexcept;
 
+        template <class U>
+        XSIMD_NO_DISCARD static batch broadcast(U val) noexcept;
+
         // memory operators
         XSIMD_NO_DISCARD static batch load_aligned(const T* real_src, const T* imag_src = nullptr) noexcept;
         XSIMD_NO_DISCARD static batch load_unaligned(const T* real_src, const T* imag_src = nullptr) noexcept;
@@ -1071,6 +1074,13 @@ namespace xsimd
         : m_real(b)
         , m_imag(0)
     {
+    }
+
+    template <class T, class A>
+    template <class U>
+    XSIMD_NO_DISCARD inline batch<std::complex<T>, A> batch<std::complex<T>, A>::broadcast(U val) noexcept
+    {
+        return batch(static_cast<std::complex<T>>(val));
     }
 
     /***********************************
