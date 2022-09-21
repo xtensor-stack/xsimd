@@ -1,0 +1,119 @@
+name: Linux build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash -l {0}
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - ${{ matrix.sys.flags }}'
+    strategy:
+      matrix:
+        sys:
+          - { compiler: 'gcc',   version: '7',  flags: 'force_no_instr_set' }
+          - { compiler: 'gcc',   version: '8',  flags: 'enable_xtl_complex' }
+          - { compiler: 'gcc',   version: '9',  flags: 'avx' }
+          - { compiler: 'gcc',   version: '10', flags: 'avx512' }
+          - { compiler: 'gcc',   version: '11', flags: 'i386' }
+          - { compiler: 'clang', version: '8',  flags: 'force_no_instr_set' }
+          - { compiler: 'clang', version: '10', flags: 'enable_xtl_complex' }
+          - { compiler: 'clang', version: '12', flags: 'avx' }
+          - { compiler: 'clang', version: '14', flags: 'avx512' }
+    steps:
+    - name: Setup compiler
+      if: ${{ matrix.sys.compiler == 'gcc' }}
+      run: |
+        GCC_VERSION=${{ matrix.sys.version }}
+        if [[ $GCC_VERSION == '6' || $GCC_VERSION == '7' || $GCC_VERSION == '8' ]]; then
+        #sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get --no-install-suggests --no-install-recommends install g++-$GCC_VERSION
+        fi
+        if [[ '${{ matrix.sys.flags }}' -eq 'i386' ]]; then
+          sudo dpkg --add-architecture i386
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get --no-install-suggests --no-install-recommends install gcc-$GCC_VERSION-multilib g++-$GCC_VERSION-multilib linux-libc-dev:i386
+        fi
+        CC=gcc-$GCC_VERSION
+        echo "CC=$CC" >> $GITHUB_ENV 
+        CXX=g++-$GCC_VERSION
+        echo "CXX=$CXX" >> $GITHUB_ENV 
+    - name: Setup compiler
+      if: ${{ matrix.sys.compiler == 'clang' }}
+      run: |
+        LLVM_VERSION=${{ matrix.sys.version }}
+        #sudo add-apt-repository ppa:ubuntu-toolchain-r/test || exit 1
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - || exit 1
+        if [[ $LLVM_VERSION -ge 13 ]]; then
+          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-$LLVM_VERSION main" || exit 1
+        else
+          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal main" || exit 1
+        fi || exit 1
+        sudo apt-get update || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install libc++-dev || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install g++-9 g++-9-multilib || exit 1
+        sudo ln -s /usr/include/asm-generic /usr/include/asm
+        CC=clang-$LLVM_VERSION
+        echo "CC=$CC" >> $GITHUB_ENV
+        CXX=clang++-$LLVM_VERSION
+        echo "CXX=$CXX" >> $GITHUB_ENV 
+    - name: Setup Ninja
+      run: |
+        sudo apt-get install ninja-build
+    - name: Checkout xsimd
+      uses: actions/checkout@v2
+    - name: Install mamba
+      uses: mamba-org/provision-with-micromamba@main
+      with:
+        environment-file: environment.yml
+    - name: Setup SDE
+      if: ${{ matrix.sys.flags == 'avx512' }}
+      run: sh install_sde.sh
+    - name: Configure build
+      env:
+        CC: ${{ env.CC }}
+        CXX: ${{ env.CXX }}
+      run: |
+        if [[ '${{ matrix.sys.flags }}' == 'enable_xtl_complex' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_XTL_COMPLEX=ON"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'force_no_instr_set' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXSIMD_FORCE_X86_INSTR_SET=0 -DXSIMD_FORCE_X86_AMD_INSTR_SET=0"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_CXX_FLAGS='-m32'"
+        fi
+
+        mkdir _build
+        cd _build
+        cmake  .. -DDOWNLOAD_GTEST=ON \
+                  -DBUILD_TESTS=ON \
+                  -DBUILD_BENCHMARK=ON \
+                  -DBUILD_EXAMPLES=ON \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_C_COMPILER=$CC \
+                  -DCMAKE_CXX_COMPILER=$CXX \
+                  $CMAKE_EXTRA_ARGS \
+                  -G Ninja
+    - name: Build
+      run: ninja -C _build
+    - name: Test
+      run: |
+        cd _build
+        cd test
+        if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
+          ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd
+        else
+          ./test_xsimd
+        fi
