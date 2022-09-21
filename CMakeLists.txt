@@ -54,7 +54,6 @@ ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_cpuid.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_aligned_allocator.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/memory/xsimd_alignment.hpp
-${XSIMD_INCLUDE_DIR}/xsimd/stl/algorithms.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_all_registers.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_api.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_neon_register.hpp
