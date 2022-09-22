@@ -37,10 +37,19 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
 
     if(NOT MSVC)
         CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
-        if (HAS_CPP11_FLAG)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        if (ENABLE_XTL_COMPLEX)
+            CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
+            if (NOT HAS_CPP14_FLAG)
+                message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++14 support when xtl complex support is enabled")
+            endif()
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
         else()
-            message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
+            CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
+            if (NOT HAS_CPP11_FLAG)
+                message(FATAL_ERROR "Unsupported compiler -- xsimd requires C++11 support!")
+            else()
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+            endif()
         endif()
     endif()
 endif()
@@ -65,5 +74,9 @@ set(XSIMD_BENCHMARK
 
 set(XSIMD_BENCHMARK_TARGET benchmark_xsimd)
 add_executable(${XSIMD_BENCHMARK_TARGET} ${XSIMD_BENCHMARK} ${XSIMD_HEADERS})
+
+if(ENABLE_XTL_COMPLEX)
+    target_link_libraries(benchmark_xsimd PRIVATE xtl)
+endif()
 
 add_custom_target(xbenchmark COMMAND benchmark_xsimd DEPENDS ${XSIMD_BENCHMARK_TARGET})

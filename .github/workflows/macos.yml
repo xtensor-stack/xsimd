@@ -1,11 +1,17 @@
-name: macOS universal build
+name: macOS build
 on: [push, pull_request]
 concurrency: 
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os:
+          - 11
+          - 12
+    runs-on: macos-${{ matrix.os }}
+    name: 'macos-${{ matrix.os }}'
     steps:
     - uses: actions/checkout@v2
     - name: Setup

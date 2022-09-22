@@ -37,5 +37,8 @@ endif()
 
 add_executable(mandelbrot mandelbrot.cpp ${XSIMD_HEADERS})
 set_property(TARGET mandelbrot PROPERTY CXX_STANDARD 14)
+if(ENABLE_XTL_COMPLEX)
+    target_link_libraries(mandelbrot PRIVATE xtl)
+endif()
 
 add_custom_target(xmandelbrot COMMAND mandelbrot DEPENDS mandelbrot)
