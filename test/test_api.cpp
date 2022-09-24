@@ -144,7 +144,7 @@ private:
     {
         T v = T(1);
         batch_type expected(v);
-        batch_type res = xsimd::broadcast<T, value_type>(v);
+        batch_type res = xsimd::broadcast<value_type>(v);
         EXPECT_BATCH_EQ(res, expected) << print_function_name(name);
     }
 
@@ -182,10 +182,8 @@ TYPED_TEST(xsimd_api_test, store)
     this->test_store();
 }
 
-#ifdef XSIMD_BATCH_DOUBLE_SIZE
 TYPED_TEST(xsimd_api_test, set)
 {
     this->test_set();
 }
-#endif
 #endif
