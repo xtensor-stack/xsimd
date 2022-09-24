@@ -17,9 +17,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class xsimd_api_test : public testing::Test
+struct xsimd_api_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -120,10 +119,12 @@ private:
         std::copy(v.cbegin(), v.cend(), expected.begin());
 
         b = batch_type::load(v.data(), xsimd::unaligned_mode());
-        EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " unaligned");
+        INFO(name, " unaligned");
+        CHECK_BATCH_EQ(b, expected);
 
         b = batch_type::load(v.data(), xsimd::aligned_mode());
-        EXPECT_BATCH_EQ(b, expected) << print_function_name(name + " aligned");
+        INFO(name, " aligned");
+        CHECK_BATCH_EQ(b, expected);
     }
 
     template <class V>
@@ -133,10 +134,12 @@ private:
         V res(size);
 
         xsimd::store_as(res.data(), b, xsimd::unaligned_mode());
-        EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " unaligned");
+        INFO(name, " unaligned");
+        CHECK_VECTOR_EQ(res, v);
 
         xsimd::store_as(res.data(), b, xsimd::aligned_mode());
-        EXPECT_VECTOR_EQ(res, v) << print_function_name(name + " aligned");
+        INFO(name, " aligned");
+        CHECK_VECTOR_EQ(res, v);
     }
 
     template <class T>
@@ -145,7 +148,8 @@ private:
         T v = T(1);
         batch_type expected(v);
         batch_type res = xsimd::broadcast<value_type>(v);
-        EXPECT_BATCH_EQ(res, expected) << print_function_name(name);
+        INFO(name);
+        CHECK_BATCH_EQ(res, expected);
     }
 
     template <class V>
@@ -168,22 +172,22 @@ private:
     }
 };
 
-using xsimd_api_types = batch_types;
-
-TYPED_TEST_SUITE(xsimd_api_test, xsimd_api_types, simd_test_names);
-
-TYPED_TEST(xsimd_api_test, load)
+TEST_CASE_TEMPLATE("[basic api]", B, BATCH_TYPES)
 {
-    this->test_load();
-}
+    xsimd_api_test<B> Test;
+    SUBCASE("load")
+    {
+        Test.test_load();
+    }
 
-TYPED_TEST(xsimd_api_test, store)
-{
-    this->test_store();
-}
+    SUBCASE("store")
+    {
+        Test.test_store();
+    }
 
-TYPED_TEST(xsimd_api_test, set)
-{
-    this->test_set();
+    SUBCASE("set")
+    {
+        Test.test_set();
+    }
 }
 #endif

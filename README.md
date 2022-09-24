@@ -179,15 +179,15 @@ void mean(const vector_type& a, const vector_type& b, vector_type& res)
 
 ## Building and Running the Tests
 
-Building the tests requires the [GTest](https://github.com/google/googletest) testing framework and [cmake](https://cmake.org).
+Building the tests requires [cmake](https://cmake.org).
 
-gtest and cmake are available as a packages for most linux distributions. Besides, they can also be installed with the `conda` package manager (even on windows):
+`cmake` is available as a package for most linux distributions. Besides, they can also be installed with the `conda` package manager (even on windows):
 
 ```bash
-conda install -c conda-forge gtest cmake
+conda install -c conda-forge cmake
 ```
 
-Once `gtest` and `cmake` are installed, you can build and run the tests:
+Once `cmake` is installed, you can build and run the tests:
 
 ```bash
 mkdir build

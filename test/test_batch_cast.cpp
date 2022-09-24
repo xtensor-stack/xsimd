@@ -59,9 +59,8 @@ namespace detail
 }
 
 template <class CP>
-class batch_cast_test : public testing::Test
+struct batch_cast_test
 {
-protected:
     static constexpr size_t N = CP::size;
     static constexpr size_t A = CP::alignment;
 
@@ -333,7 +332,8 @@ private:
         if (detail::is_convertible<T_out>(in_test_value))
         {
             B_common_out res = xsimd::batch_cast<T_out>(B_common_in(in_test_value));
-            EXPECT_SCALAR_EQ(res.get(0), static_cast<T_out>(in_test_value)) << print_function_name(name);
+            INFO(name);
+            CHECK_SCALAR_EQ(res.get(0), static_cast<T_out>(in_test_value));
         }
     }
 
@@ -347,26 +347,30 @@ private:
 
         B_common_in all_true_in(true);
         B_common_out all_true_res = xsimd::batch_bool_cast<T_out>(all_true_in);
-        EXPECT_SCALAR_EQ(all_true_res.get(0), true) << print_function_name(name);
+        INFO(name);
+        CHECK_SCALAR_EQ(all_true_res.get(0), true);
 
         B_common_in all_false_in(false);
         B_common_out all_false_res = xsimd::batch_bool_cast<T_out>(all_false_in);
-        EXPECT_SCALAR_EQ(all_false_res.get(0), false) << print_function_name(name);
+        INFO(name);
+        CHECK_SCALAR_EQ(all_false_res.get(0), false);
     }
 };
 
-TYPED_TEST_SUITE(batch_cast_test, conversion_types, conversion_test_names);
-
-TYPED_TEST(batch_cast_test, bool_cast)
+TEST_CASE_TEMPLATE("[xsimd cast tests]", B, CONVERSION_TYPES)
 {
-    this->test_bool_cast();
-}
+    batch_cast_test<B> Test;
 
-TYPED_TEST(batch_cast_test, cast)
-{
-    this->test_cast();
-}
+    SUBCASE("bool cast")
+    {
+        Test.test_bool_cast();
+    }
 
+    SUBCASE("cast")
+    {
+        Test.test_cast();
+    }
+}
 #endif
 #if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift1)
@@ -383,13 +387,16 @@ TYPED_TEST(batch_cast_test, cast_sizeshift2)
 #endif
 
 #if XSIMD_WITH_SSE2
-TEST(batch_cast, uses_fast_cast)
+TEST_CASE_TEMPLATE("[xsimd cast tests]", B, CONVERSION_TYPES)
 {
-    using A = xsimd::default_arch;
-    static_assert(detail::uses_fast_cast<A, int32_t, float>::value,
-                  "expected int32 to float conversion to use fast_cast");
-    static_assert(detail::uses_fast_cast<A, float, int32_t>::value,
-                  "expected float to int32 conversion to use fast_cast");
+    SUBCASE("use fastcast")
+    {
+        using A = xsimd::default_arch;
+        static_assert(detail::uses_fast_cast<A, int32_t, float>::value,
+                      "expected int32 to float conversion to use fast_cast");
+        static_assert(detail::uses_fast_cast<A, float, int32_t>::value,
+                      "expected float to int32 conversion to use fast_cast");
+    }
 }
 #endif
 #endif

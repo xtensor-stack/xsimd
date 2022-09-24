@@ -89,17 +89,11 @@ struct as_index<xsimd::batch<std::complex<T>, A>> : as_index<xsimd::batch<T, A>>
 };
 
 template <class B>
-class insert_test : public testing::Test
+struct insert_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
-
-    insert_test()
-    {
-        std::cout << "insert tests" << std::endl;
-    }
 
     void insert_first()
     {
@@ -109,9 +103,9 @@ protected:
         batch_type w = insert(v, sentinel_value, ::xsimd::index<0>());
         std::array<value_type, batch_type::size> data;
         w.store_unaligned(data.data());
-        EXPECT_SCALAR_EQ(data.front(), sentinel_value);
+        CHECK_SCALAR_EQ(data.front(), sentinel_value);
         for (size_t i = 1; i < batch_type::size; ++i)
-            EXPECT_SCALAR_EQ(data[i], fill_value);
+            CHECK_SCALAR_EQ(data[i], fill_value);
     }
 
     void insert_last()
@@ -123,35 +117,31 @@ protected:
         std::array<value_type, batch_type::size> data;
         w.store_unaligned(data.data());
         for (size_t i = 0; i < batch_type::size - 1; ++i)
-            EXPECT_SCALAR_EQ(data[i], fill_value);
-        EXPECT_SCALAR_EQ(data.back(), sentinel_value);
+            CHECK_SCALAR_EQ(data[i], fill_value);
+        CHECK_SCALAR_EQ(data.back(), sentinel_value);
     }
 };
 
-TYPED_TEST_SUITE(insert_test, batch_types, simd_test_names);
-
-TYPED_TEST(insert_test, insert_first)
+TEST_CASE_TEMPLATE("[insert_test]", B, BATCH_TYPES)
 {
-    this->insert_first();
-}
+    insert_test<B> Test;
+    SUBCASE("insert_first")
+    {
+        Test.insert_first();
+    }
 
-TYPED_TEST(insert_test, insert_last)
-{
-    this->insert_last();
+    SUBCASE("insert_last")
+    {
+        Test.insert_last();
+    }
 }
 
 template <class B>
-class swizzle_test : public testing::Test
+struct swizzle_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
-
-    swizzle_test()
-    {
-        std::cout << "swizzle tests" << std::endl;
-    }
 
     void swizzle_reverse()
     {
@@ -165,7 +155,7 @@ protected:
 
         using index_type = typename as_index<batch_type>::type;
         B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Reversor<typename index_type::value_type>>());
-        EXPECT_BATCH_EQ(b_res, b_exped) << print_function_name("swizzle reverse test");
+        CHECK_BATCH_EQ(b_res, b_exped);
     }
 
     void swizzle_fill()
@@ -180,7 +170,7 @@ protected:
 
         using index_type = typename as_index<batch_type>::type;
         B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Last<typename index_type::value_type>>());
-        EXPECT_BATCH_EQ(b_res, b_exped) << print_function_name("swizzle fill test");
+        CHECK_BATCH_EQ(b_res, b_exped);
     }
 
     void swizzle_dup()
@@ -195,25 +185,27 @@ protected:
 
         using index_type = typename as_index<batch_type>::type;
         B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Dup<typename index_type::value_type>>());
-        EXPECT_BATCH_EQ(b_res, b_exped) << print_function_name("swizzle dup test");
+        CHECK_BATCH_EQ(b_res, b_exped);
     }
 };
 
-TYPED_TEST_SUITE(swizzle_test, batch_swizzle_types, simd_test_names);
-
-TYPED_TEST(swizzle_test, swizzle_reverse)
+TEST_CASE_TEMPLATE("[swizzle]", B, BATCH_SWIZZLE_TYPES)
 {
-    this->swizzle_reverse();
-}
+    swizzle_test<B> Test;
+    SUBCASE("reverse")
+    {
+        Test.swizzle_reverse();
+    }
 
-TYPED_TEST(swizzle_test, swizzle_fill)
-{
-    this->swizzle_fill();
-}
+    SUBCASE("fill")
+    {
+        Test.swizzle_fill();
+    }
 
-TYPED_TEST(swizzle_test, swizzle_dup)
-{
-    this->swizzle_dup();
+    SUBCASE("dup")
+    {
+        Test.swizzle_dup();
+    }
 }
 
 #endif

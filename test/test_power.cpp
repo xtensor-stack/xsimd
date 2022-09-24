@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class power_test : public testing::Test
+struct power_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -63,7 +62,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("pow");
+            INFO("pow");
+            CHECK_EQ(diff, 0);
         }
         // pow zero
         {
@@ -79,7 +79,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("pow");
+            INFO("pow");
+            CHECK_EQ(diff, 0);
 
 #ifdef __SSE__
             // Test with FE_INVALID...
@@ -94,7 +95,8 @@ protected:
             }
             _MM_SET_EXCEPTION_MASK(mask);
             diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("pow");
+            INFO("pow");
+            CHECK_EQ(diff, 0);
 #endif
         }
         // ipow
@@ -111,7 +113,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("ipow");
+            INFO("ipow");
+            CHECK_EQ(diff, 0);
         }
         // hypot
         {
@@ -127,7 +130,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("hypot");
+            INFO("hypot");
+            CHECK_EQ(diff, 0);
         }
         // cbrt
         {
@@ -142,15 +146,15 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("cbrt");
+            INFO("cbrt");
+            CHECK_EQ(diff, 0);
         }
     }
 };
 
-TYPED_TEST_SUITE(power_test, batch_float_types, simd_test_names);
-
-TYPED_TEST(power_test, power)
+TEST_CASE_TEMPLATE("[power]", B, BATCH_FLOAT_TYPES)
 {
-    this->test_power_functions();
+    power_test<B> Test;
+    Test.test_power_functions();
 }
 #endif

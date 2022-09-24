@@ -11,7 +11,8 @@
 
 #include "xsimd/types/xsimd_utils.hpp"
 #include "xsimd/xsimd.hpp"
-#include "gtest/gtest.h"
+
+#include "doctest/doctest.h"
 
 template <class T>
 struct scalar_type
@@ -34,19 +35,86 @@ template <class T, class A>
 bool extract(xsimd::batch_bool<T, A> const& batch) { return batch.get(0); }
 
 /*
+ * Type series
+ */
+
+#define INTEGRAL_TYPES_HEAD char, unsigned char, signed char, short, unsigned short, int, unsigned int, long, unsigned long
+#ifdef XSIMD_NO_SUPPORTED_ARCHITECTURE
+#define INTEGRAL_TYPES_TAIL
+#else
+#define INTEGRAL_TYPES_TAIL , xsimd::batch<char>, xsimd::batch<unsigned char>, xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<unsigned short>, xsimd::batch<int>, xsimd::batch<unsigned int>, xsimd::batch<long>, xsimd::batch<unsigned long>
+#endif
+
+#define INTEGRAL_TYPES INTEGRAL_TYPES_HEAD INTEGRAL_TYPES_TAIL
+
+//
+
+#define FLOAT_TYPES_HEAD float, double
+
+#ifdef XSIMD_NO_SUPPORTED_ARCHITECTURE
+#define FLOAT_TYPES_MIDDLE
+#define FLOAT_TYPES_TAIL
+#else
+#define FLOAT_TYPES_MIDDLE , xsimd::batch<float>
+#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
+#define FLOAT_TYPES_TAIL , xsimd::batch<double>
+#else
+#define FLOAT_TYPES_TAIL
+#endif
+#endif
+#define FLOAT_TYPES FLOAT_TYPES_HEAD FLOAT_TYPES_MIDDLE FLOAT_TYPES_TAIL
+
+//
+#define SCALAR_TYPES INTEGRAL_TYPES, FLOAT_TYPES
+
+//
+#define ALL_FLOATING_POINT_TYPES_HEAD float, double, std::complex<float>, std::complex<double>
+
+#ifdef XSIMD_NO_SUPPORTED_ARCHITECTURE
+#define ALL_FLOATING_POINT_TYPES_MIDDLE
+#define ALL_FLOATING_POINT_TYPES_TAIL
+#else
+#define ALL_FLOATING_POINT_TYPES_MIDDLE , xsimd::batch<float>, xsimd::batch<std::complex<float>>
+
+#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
+#define ALL_FLOATING_POINT_TYPES_TAIL , xsimd::batch<double>, xsimd::batch<std::complex<double>>
+#else
+#define ALL_FLOATING_POINT_TYPES_TAIL
+#endif
+#endif
+#define ALL_FLOATING_POINT_TYPES ALL_FLOATING_POINT_TYPES_HEAD ALL_FLOATING_POINT_TYPES_MIDDLE ALL_FLOATING_POINT_TYPES_TAIL
+
+//
+
+#define COMPLEX_TYPES ALL_FLOATING_POINT_TYPES
+
+//
+#define ALL_INTEGRAL_SIGNED_TYPES_HEAD signed char, short, int, long
+#ifdef XSIMD_NO_SUPPORTED_ARCHITECTURE
+#define ALL_INTEGRAL_SIGNED_TYPES_TAIL
+#else
+#define ALL_INTEGRAL_SIGNED_TYPES_TAIL , xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<int>, xsimd::batch<long>
+#endif
+
+#define ALL_SIGNED_TYPES ALL_INTEGRAL_SIGNED_TYPES_HEAD ALL_INTEGRAL_SIGNED_TYPES_TAIL, ALL_FLOATING_POINT_TYPES
+
+//
+
+#define ALL_TYPES INTEGRAL_TYPES, ALL_FLOATING_POINT_TYPES
+
+/*
  * Functions that apply on scalar types only
  */
 
 template <typename T>
-class xsimd_api_scalar_types_functions : public ::testing::Test
+struct xsimd_api_scalar_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-public:
     void test_bitofsign()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::bitofsign(T(val))), val < 0);
+        CHECK_EQ(extract(xsimd::bitofsign(T(val))), val < 0);
     }
 
     void test_bitwise_and()
@@ -59,7 +127,7 @@ public:
         value_type r;
         ir = ival0 & ival1;
         std::memcpy((void*)&r, (void*)&ir, sizeof(ir));
-        EXPECT_EQ(extract(xsimd::bitwise_and(T(val0), T(val1))), r);
+        CHECK_EQ(extract(xsimd::bitwise_and(T(val0), T(val1))), r);
     }
 
     void test_bitwise_andnot()
@@ -72,7 +140,7 @@ public:
         value_type r;
         ir = ival0 & ~ival1;
         std::memcpy((void*)&r, (void*)&ir, sizeof(ir));
-        EXPECT_EQ(extract(xsimd::bitwise_andnot(T(val0), T(val1))), r);
+        CHECK_EQ(extract(xsimd::bitwise_andnot(T(val0), T(val1))), r);
     }
 
     void test_bitwise_not()
@@ -83,7 +151,7 @@ public:
         value_type r;
         ir = ~ival;
         std::memcpy((void*)&r, (void*)&ir, sizeof(ir));
-        EXPECT_EQ(extract(xsimd::bitwise_not(T(val))), r);
+        CHECK_EQ(extract(xsimd::bitwise_not(T(val))), r);
     }
 
     void test_bitwise_or()
@@ -96,7 +164,7 @@ public:
         value_type r;
         ir = ival0 | ival1;
         std::memcpy((void*)&r, (void*)&ir, sizeof(ir));
-        EXPECT_EQ(extract(xsimd::bitwise_or(T(val0), T(val1))), r);
+        CHECK_EQ(extract(xsimd::bitwise_or(T(val0), T(val1))), r);
     }
 
     void test_bitwise_xor()
@@ -109,7 +177,7 @@ public:
         value_type r;
         ir = ival0 ^ ival1;
         std::memcpy((void*)&r, (void*)&ir, sizeof(ir));
-        EXPECT_EQ(extract(xsimd::bitwise_xor(T(val0), T(val1))), r);
+        CHECK_EQ(extract(xsimd::bitwise_xor(T(val0), T(val1))), r);
     }
 
     void test_clip()
@@ -117,163 +185,153 @@ public:
         value_type val0(5);
         value_type val1(2);
         value_type val2(3);
-        EXPECT_EQ(extract(xsimd::clip(T(val0), T(val1), T(val2))), val0 <= val1 ? val1 : (val0 >= val2 ? val2 : val0));
+        CHECK_EQ(extract(xsimd::clip(T(val0), T(val1), T(val2))), val0 <= val1 ? val1 : (val0 >= val2 ? val2 : val0));
     }
 
     void test_ge()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::ge(T(val0), T(val1))), val0 >= val1);
+        CHECK_EQ(extract(xsimd::ge(T(val0), T(val1))), val0 >= val1);
     }
 
     void test_gt()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::gt(T(val0), T(val1))), val0 > val1);
+        CHECK_EQ(extract(xsimd::gt(T(val0), T(val1))), val0 > val1);
     }
 
     void test_le()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::le(T(val0), T(val1))), val0 <= val1);
+        CHECK_EQ(extract(xsimd::le(T(val0), T(val1))), val0 <= val1);
     }
 
     void test_lt()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::lt(T(val0), T(val1))), val0 < val1);
+        CHECK_EQ(extract(xsimd::lt(T(val0), T(val1))), val0 < val1);
     }
 
     void test_max()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::max(T(val0), T(val1))), std::max(val0, val1));
+        CHECK_EQ(extract(xsimd::max(T(val0), T(val1))), std::max(val0, val1));
     }
 
     void test_min()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::min(T(val0), T(val1))), std::min(val0, val1));
+        CHECK_EQ(extract(xsimd::min(T(val0), T(val1))), std::min(val0, val1));
     }
 
     void test_remainder()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::remainder(T(val0), T(val1))), val0 - xsimd::as_integer_t<value_type>(val0) / xsimd::as_integer_t<value_type>(val1));
+        CHECK_EQ(extract(xsimd::remainder(T(val0), T(val1))), val0 - xsimd::as_integer_t<value_type>(val0) / xsimd::as_integer_t<value_type>(val1));
     }
     void test_sign()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::sign(T(val))), val == 0 ? 0 : val > 0 ? 1
-                                                                       : -1);
+        CHECK_EQ(extract(xsimd::sign(T(val))), val == 0 ? 0 : val > 0 ? 1
+                                                                      : -1);
     }
     void test_signnz()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::signnz(T(val))), val == 0 ? 1 : val > 0 ? 1
-                                                                         : -1);
+        CHECK_EQ(extract(xsimd::signnz(T(val))), val == 0 ? 1 : val > 0 ? 1
+                                                                        : -1);
     }
 };
 
-using ScalarTypes = ::testing::Types<
-    char, unsigned char, signed char, short, unsigned short, int, unsigned int, long, unsigned long, float, double
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-    ,
-    xsimd::batch<char>, xsimd::batch<unsigned char>, xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<unsigned short>, xsimd::batch<int>, xsimd::batch<unsigned int>, xsimd::batch<long>, xsimd::batch<unsigned long>, xsimd::batch<float>
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
-    ,
-    xsimd::batch<double>
-#endif
-#endif
-    >;
-
-TYPED_TEST_SUITE(xsimd_api_scalar_types_functions, ScalarTypes);
-
-TYPED_TEST(xsimd_api_scalar_types_functions, bitofsign)
+TEST_CASE_TEMPLATE("[xsimd api | scalar types]", B, SCALAR_TYPES)
 {
-    this->test_bitofsign();
-}
+    xsimd_api_scalar_types_functions<B> Test;
+    SUBCASE("bitofsign")
+    {
+        Test.test_bitofsign();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, bitwise_and)
-{
-    this->test_bitwise_and();
-}
+    SUBCASE("bitwise_and")
+    {
+        Test.test_bitwise_and();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, bitwise_andnot)
-{
-    this->test_bitwise_andnot();
-}
+    SUBCASE("bitwise_andnot")
+    {
+        Test.test_bitwise_andnot();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, bitwise_not)
-{
-    this->test_bitwise_not();
-}
+    SUBCASE("bitwise_not")
+    {
+        Test.test_bitwise_not();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, bitwise_or)
-{
-    this->test_bitwise_or();
-}
+    SUBCASE("bitwise_or")
+    {
+        Test.test_bitwise_or();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, bitwise_xor)
-{
-    this->test_bitwise_xor();
-}
+    SUBCASE("bitwise_xor")
+    {
+        Test.test_bitwise_xor();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, clip)
-{
-    this->test_clip();
-}
+    SUBCASE("clip")
+    {
+        Test.test_clip();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, ge)
-{
-    this->test_ge();
-}
+    SUBCASE("ge")
+    {
+        Test.test_ge();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, gt)
-{
-    this->test_gt();
-}
+    SUBCASE("gt")
+    {
+        Test.test_gt();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, le)
-{
-    this->test_le();
-}
+    SUBCASE("le")
+    {
+        Test.test_le();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, lt)
-{
-    this->test_lt();
-}
+    SUBCASE("lt")
+    {
+        Test.test_lt();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, max)
-{
-    this->test_max();
-}
+    SUBCASE("max")
+    {
+        Test.test_max();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, min)
-{
-    this->test_min();
-}
+    SUBCASE("min")
+    {
+        Test.test_min();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, remainder)
-{
-    this->test_remainder();
-}
+    SUBCASE("remainder")
+    {
+        Test.test_remainder();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, sign)
-{
-    this->test_sign();
-}
+    SUBCASE("sign")
+    {
+        Test.test_sign();
+    }
 
-TYPED_TEST(xsimd_api_scalar_types_functions, signnz)
-{
-    this->test_signnz();
+    SUBCASE("signnz")
+    {
+        Test.test_signnz();
+    }
 }
 
 /*
@@ -281,54 +339,48 @@ TYPED_TEST(xsimd_api_scalar_types_functions, signnz)
  */
 
 template <typename T>
-class xsimd_api_integral_types_functions : public ::testing::Test
+struct xsimd_api_integral_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-public:
     void test_mod()
     {
         value_type val0(5);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::mod(T(val0), T(val1))), val0 % val1);
+        CHECK_EQ(extract(xsimd::mod(T(val0), T(val1))), val0 % val1);
     }
     void test_sadd()
     {
         value_type val0(122);
         value_type val1(std::numeric_limits<value_type>::max());
-        EXPECT_EQ(extract(xsimd::sadd(T(val0), T(val1))), (val0 > std::numeric_limits<value_type>::max() - val1) ? std::numeric_limits<value_type>::max() : (val0 + val1));
+        CHECK_EQ(extract(xsimd::sadd(T(val0), T(val1))), (val0 > std::numeric_limits<value_type>::max() - val1) ? std::numeric_limits<value_type>::max() : (val0 + val1));
     }
     void test_ssub()
     {
         value_type val0(122);
         value_type val1(121);
-        EXPECT_EQ(extract(xsimd::ssub(T(val0), T(val1))), (val0 < std::numeric_limits<value_type>::min() + val1) ? std::numeric_limits<value_type>::min() : (val0 - val1));
+        CHECK_EQ(extract(xsimd::ssub(T(val0), T(val1))), (val0 < std::numeric_limits<value_type>::min() + val1) ? std::numeric_limits<value_type>::min() : (val0 - val1));
     }
 };
 
-using IntegralTypes = ::testing::Types<
-    char, unsigned char, signed char, short, unsigned short, int, unsigned int, long, unsigned long
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-    ,
-    xsimd::batch<char>, xsimd::batch<unsigned char>, xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<unsigned short>, xsimd::batch<int>, xsimd::batch<unsigned int>, xsimd::batch<long>, xsimd::batch<unsigned long>
-#endif
-    >;
-
-TYPED_TEST_SUITE(xsimd_api_integral_types_functions, IntegralTypes);
-
-TYPED_TEST(xsimd_api_integral_types_functions, mod)
+TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
 {
-    this->test_mod();
-}
+    xsimd_api_integral_types_functions<B> Test;
 
-TYPED_TEST(xsimd_api_integral_types_functions, sadd)
-{
-    this->test_sadd();
-}
+    SUBCASE("mod")
+    {
+        Test.test_mod();
+    }
 
-TYPED_TEST(xsimd_api_integral_types_functions, ssub)
-{
-    this->test_ssub();
+    SUBCASE("sadd")
+    {
+        Test.test_sadd();
+    }
+
+    SUBCASE("ssub")
+    {
+        Test.test_ssub();
+    }
 }
 
 /*
@@ -336,586 +388,578 @@ TYPED_TEST(xsimd_api_integral_types_functions, ssub)
  */
 
 template <typename T>
-class xsimd_api_float_types_functions : public ::testing::Test
+struct xsimd_api_float_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-public:
     void test_acos()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::acos(T(val))), std::acos(val));
+        CHECK_EQ(extract(xsimd::acos(T(val))), std::acos(val));
     }
     void test_acosh()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::acosh(T(val))), std::acosh(val));
+        CHECK_EQ(extract(xsimd::acosh(T(val))), std::acosh(val));
     }
     void test_asin()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::asin(T(val))), std::asin(val));
+        CHECK_EQ(extract(xsimd::asin(T(val))), std::asin(val));
     }
     void test_asinh()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::asinh(T(val))), std::asinh(val));
+        CHECK_EQ(extract(xsimd::asinh(T(val))), std::asinh(val));
     }
     void test_atan()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::atan(T(val))), std::atan(val));
+        CHECK_EQ(extract(xsimd::atan(T(val))), std::atan(val));
     }
     void test_atan2()
     {
         value_type val0(0);
         value_type val1(1);
-        EXPECT_EQ(extract(xsimd::atan2(T(val0), T(val1))), std::atan2(val0, val1));
+        CHECK_EQ(extract(xsimd::atan2(T(val0), T(val1))), std::atan2(val0, val1));
     }
     void test_atanh()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::atanh(T(val))), std::atanh(val));
+        CHECK_EQ(extract(xsimd::atanh(T(val))), std::atanh(val));
     }
     void test_cbrt()
     {
         value_type val(8);
-        EXPECT_EQ(extract(xsimd::cbrt(T(val))), std::cbrt(val));
+        CHECK_EQ(extract(xsimd::cbrt(T(val))), std::cbrt(val));
     }
     void test_ceil()
     {
         value_type val(1.5);
-        EXPECT_EQ(extract(xsimd::ceil(T(val))), std::ceil(val));
+        CHECK_EQ(extract(xsimd::ceil(T(val))), std::ceil(val));
     }
 
     void test_copysign()
     {
         value_type val0(2);
         value_type val1(-1);
-        EXPECT_EQ(extract(xsimd::copysign(T(val0), T(val1))), (value_type)std::copysign(val0, val1));
+        CHECK_EQ(extract(xsimd::copysign(T(val0), T(val1))), (value_type)std::copysign(val0, val1));
     }
     void test_cos()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::cos(T(val))), std::cos(val));
+        CHECK_EQ(extract(xsimd::cos(T(val))), std::cos(val));
     }
     void test_cosh()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::cosh(T(val))), std::cosh(val));
+        CHECK_EQ(extract(xsimd::cosh(T(val))), std::cosh(val));
     }
     void test_exp()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::exp(T(val))), std::exp(val));
+        CHECK_EQ(extract(xsimd::exp(T(val))), std::exp(val));
     }
     void test_exp10()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::exp10(T(val))), std::pow(value_type(10), val));
+        CHECK_EQ(extract(xsimd::exp10(T(val))), std::pow(value_type(10), val));
     }
     void test_exp2()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::exp2(T(val))), std::exp2(val));
+        CHECK_EQ(extract(xsimd::exp2(T(val))), std::exp2(val));
     }
     void test_expm1()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::expm1(T(val))), std::expm1(val));
+        CHECK_EQ(extract(xsimd::expm1(T(val))), std::expm1(val));
     }
     void test_erf()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::erf(T(val))), std::erf(val));
+        CHECK_EQ(extract(xsimd::erf(T(val))), std::erf(val));
     }
     void test_erfc()
     {
         // FIXME: can we do better?
         value_type val(0);
-        EXPECT_NEAR(extract(xsimd::erfc(T(val))), std::erfc(val), 10e-7);
+        CHECK_EQ(extract(xsimd::erfc(T(val))), doctest::Approx(std::erfc(val)).epsilon(10e-7));
     }
     void test_fabs()
     {
         value_type val(-3);
-        EXPECT_EQ(extract(xsimd::fabs(T(val))), std::abs(val));
+        CHECK_EQ(extract(xsimd::fabs(T(val))), std::abs(val));
     }
     void test_fdim()
     {
         value_type val0(-3);
         value_type val1(1);
-        EXPECT_EQ(extract(xsimd::fdim(T(val0), T(val1))), std::fdim(val0, val1));
+        CHECK_EQ(extract(xsimd::fdim(T(val0), T(val1))), std::fdim(val0, val1));
     }
     void test_floor()
     {
         value_type val(3.1);
-        EXPECT_EQ(extract(xsimd::floor(T(val))), std::floor(val));
+        CHECK_EQ(extract(xsimd::floor(T(val))), std::floor(val));
     }
     void test_fmax()
     {
         value_type val0(3);
         value_type val1(1);
-        EXPECT_EQ(extract(xsimd::fmax(T(val0), T(val1))), std::fmax(val0, val1));
+        CHECK_EQ(extract(xsimd::fmax(T(val0), T(val1))), std::fmax(val0, val1));
     }
     void test_fmin()
     {
         value_type val0(3);
         value_type val1(1);
-        EXPECT_EQ(extract(xsimd::fmin(T(val0), T(val1))), std::fmin(val0, val1));
+        CHECK_EQ(extract(xsimd::fmin(T(val0), T(val1))), std::fmin(val0, val1));
     }
     void test_fmod()
     {
         value_type val0(3);
         value_type val1(1);
-        EXPECT_EQ(extract(xsimd::fmin(T(val0), T(val1))), std::fmin(val0, val1));
+        CHECK_EQ(extract(xsimd::fmin(T(val0), T(val1))), std::fmin(val0, val1));
     }
     void test_frexp()
     {
         value_type val(3.3);
         int res;
         typename std::conditional<std::is_floating_point<T>::value, int, xsimd::as_integer_t<T>>::type vres;
-        EXPECT_EQ(extract(xsimd::frexp(T(val), vres)), std::frexp(val, &res));
-        EXPECT_EQ(extract(vres), res);
+        CHECK_EQ(extract(xsimd::frexp(T(val), vres)), std::frexp(val, &res));
+        CHECK_EQ(extract(vres), res);
     }
     void test_hypot()
     {
         value_type val0(3);
         value_type val1(1);
-        EXPECT_EQ(extract(xsimd::hypot(T(val0), T(val1))), std::hypot(val0, val1));
+        CHECK_EQ(extract(xsimd::hypot(T(val0), T(val1))), std::hypot(val0, val1));
     }
     void test_is_even()
     {
         value_type val(4);
-        EXPECT_EQ(extract(xsimd::is_even(T(val))), (val == long(val)) && (long(val) % 2 == 0));
+        CHECK_EQ(extract(xsimd::is_even(T(val))), (val == long(val)) && (long(val) % 2 == 0));
     }
     void test_is_flint()
     {
         value_type val(4.1);
-        EXPECT_EQ(extract(xsimd::is_flint(T(val))), (val == long(val)));
+        CHECK_EQ(extract(xsimd::is_flint(T(val))), (val == long(val)));
     }
     void test_is_odd()
     {
         value_type val(4);
-        EXPECT_EQ(extract(xsimd::is_odd(T(val))), (val == long(val)) && (long(val) % 2 == 1));
+        CHECK_EQ(extract(xsimd::is_odd(T(val))), (val == long(val)) && (long(val) % 2 == 1));
     }
     void test_isinf()
     {
         value_type val(4);
-        EXPECT_EQ(extract(xsimd::isinf(T(val))), std::isinf(val));
+        CHECK_EQ(extract(xsimd::isinf(T(val))), std::isinf(val));
     }
     void test_isfinite()
     {
         value_type val(4);
-        EXPECT_EQ(extract(xsimd::isfinite(T(val))), std::isfinite(val));
+        CHECK_EQ(extract(xsimd::isfinite(T(val))), std::isfinite(val));
     }
     void test_isnan()
     {
         value_type val(4);
-        EXPECT_EQ(extract(xsimd::isnan(T(val))), std::isnan(val));
+        CHECK_EQ(extract(xsimd::isnan(T(val))), std::isnan(val));
     }
     void test_ldexp()
     {
         value_type val0(4);
         xsimd::as_integer_t<value_type> val1(2);
-        EXPECT_EQ(extract(xsimd::ldexp(T(val0), xsimd::as_integer_t<T>(val1))), std::ldexp(val0, val1));
+        CHECK_EQ(extract(xsimd::ldexp(T(val0), xsimd::as_integer_t<T>(val1))), std::ldexp(val0, val1));
     }
     void test_lgamma()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::lgamma(T(val))), std::lgamma(val));
+        CHECK_EQ(extract(xsimd::lgamma(T(val))), std::lgamma(val));
     }
     void test_log()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::log(T(val))), std::log(val));
+        CHECK_EQ(extract(xsimd::log(T(val))), std::log(val));
     }
 
     void test_log2()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::log2(T(val))), std::log2(val));
+        CHECK_EQ(extract(xsimd::log2(T(val))), std::log2(val));
     }
 
     void test_log10()
     {
         value_type val(10);
-        EXPECT_EQ(extract(xsimd::log10(T(val))), std::log10(val));
+        CHECK_EQ(extract(xsimd::log10(T(val))), std::log10(val));
     }
 
     void test_log1p()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::log1p(T(val))), std::log1p(val));
+        CHECK_EQ(extract(xsimd::log1p(T(val))), std::log1p(val));
     }
     void test_nearbyint()
     {
         value_type val(3.1);
-        EXPECT_EQ(extract(xsimd::nearbyint(T(val))), std::nearbyint(val));
+        CHECK_EQ(extract(xsimd::nearbyint(T(val))), std::nearbyint(val));
     }
     void test_nearbyint_as_int()
     {
         value_type val(3.1);
-        EXPECT_EQ(extract(xsimd::nearbyint_as_int(T(val))), long(std::nearbyint(val)));
+        CHECK_EQ(extract(xsimd::nearbyint_as_int(T(val))), long(std::nearbyint(val)));
     }
     void test_nextafter()
     {
         value_type val0(3);
         value_type val1(4);
-        EXPECT_EQ(extract(xsimd::nextafter(T(val0), T(val1))), std::nextafter(val0, val1));
+        CHECK_EQ(extract(xsimd::nextafter(T(val0), T(val1))), std::nextafter(val0, val1));
     }
     void test_polar()
     {
         value_type val0(3);
         value_type val1(4);
-        EXPECT_EQ(extract(xsimd::polar(T(val0), T(val1))), std::polar(val0, val1));
+        CHECK_EQ(extract(xsimd::polar(T(val0), T(val1))), std::polar(val0, val1));
     }
     void test_pow()
     {
         value_type val0(2);
         value_type val1(3);
         int ival1 = 4;
-        EXPECT_EQ(extract(xsimd::pow(T(val0), T(val1))), std::pow(val0, val1));
-        EXPECT_EQ(extract(xsimd::pow(T(val0), ival1)), std::pow(val0, ival1));
+        CHECK_EQ(extract(xsimd::pow(T(val0), T(val1))), std::pow(val0, val1));
+        CHECK_EQ(extract(xsimd::pow(T(val0), ival1)), std::pow(val0, ival1));
     }
     void test_reciprocal()
     {
         value_type val(1);
-        EXPECT_NEAR(extract(xsimd::reciprocal(T(val))), value_type(1) / val, 10e-2);
+        CHECK_EQ(extract(xsimd::reciprocal(T(val))), doctest::Approx(value_type(1) / val).epsilon(10e-2));
     }
     void test_rint()
     {
         value_type val(3.1);
-        EXPECT_EQ(extract(xsimd::rint(T(val))), std::rint(val));
+        CHECK_EQ(extract(xsimd::rint(T(val))), std::rint(val));
     }
     void test_round()
     {
         value_type val(3.1);
-        EXPECT_EQ(extract(xsimd::round(T(val))), std::round(val));
+        CHECK_EQ(extract(xsimd::round(T(val))), std::round(val));
     }
     void test_rsqrt()
     {
         value_type val(4);
-        EXPECT_NEAR(extract(xsimd::rsqrt(T(val))), value_type(1) / std::sqrt(val), 10e-4);
+        CHECK_EQ(extract(xsimd::rsqrt(T(val))), doctest::Approx(value_type(1) / std::sqrt(val)).epsilon(10e-4));
     }
     void test_sin()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::sin(T(val))), std::sin(val));
+        CHECK_EQ(extract(xsimd::sin(T(val))), std::sin(val));
     }
     void test_sincos()
     {
         value_type val(0);
         auto vres = xsimd::sincos(T(val));
-        EXPECT_EQ(extract(vres.first), std::sin(val));
-        EXPECT_EQ(extract(vres.second), std::cos(val));
+        CHECK_EQ(extract(vres.first), std::sin(val));
+        CHECK_EQ(extract(vres.second), std::cos(val));
     }
     void test_sinh()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::sinh(T(val))), std::sinh(val));
+        CHECK_EQ(extract(xsimd::sinh(T(val))), std::sinh(val));
     }
     void test_sqrt()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::sqrt(T(val))), std::sqrt(val));
+        CHECK_EQ(extract(xsimd::sqrt(T(val))), std::sqrt(val));
     }
     void test_tan()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::tan(T(val))), std::tan(val));
+        CHECK_EQ(extract(xsimd::tan(T(val))), std::tan(val));
     }
     void test_tanh()
     {
         value_type val(0);
-        EXPECT_EQ(extract(xsimd::tanh(T(val))), std::tanh(val));
+        CHECK_EQ(extract(xsimd::tanh(T(val))), std::tanh(val));
     }
     void test_tgamma()
     {
         value_type val(2);
-        EXPECT_EQ(extract(xsimd::tgamma(T(val))), std::tgamma(val));
+        CHECK_EQ(extract(xsimd::tgamma(T(val))), std::tgamma(val));
     }
     void test_trunc()
     {
         value_type val(2.1);
-        EXPECT_EQ(extract(xsimd::trunc(T(val))), std::trunc(val));
+        CHECK_EQ(extract(xsimd::trunc(T(val))), std::trunc(val));
     }
 };
 
-using FloatTypes = ::testing::Types<float, double
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-                                    ,
-                                    xsimd::batch<float>
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
-                                    ,
-                                    xsimd::batch<double>
-#endif
-#endif
-                                    >;
-TYPED_TEST_SUITE(xsimd_api_float_types_functions, FloatTypes);
+TEST_CASE_TEMPLATE("[xsimd api | float types functions]", B, FLOAT_TYPES)
+{
+    xsimd_api_float_types_functions<B> Test;
 
-TYPED_TEST(xsimd_api_float_types_functions, acos)
-{
-    this->test_acos();
-}
+    SUBCASE("acos")
+    {
+        Test.test_acos();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, acosh)
-{
-    this->test_acosh();
-}
+    SUBCASE("acosh")
+    {
+        Test.test_acosh();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, asin)
-{
-    this->test_asin();
-}
+    SUBCASE("asin")
+    {
+        Test.test_asin();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, asinh)
-{
-    this->test_asinh();
-}
+    SUBCASE("asinh")
+    {
+        Test.test_asinh();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, atan)
-{
-    this->test_atan();
-}
+    SUBCASE("atan")
+    {
+        Test.test_atan();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, atan2)
-{
-    this->test_atan2();
-}
+    SUBCASE("atan2")
+    {
+        Test.test_atan2();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, atanh)
-{
-    this->test_atanh();
-}
+    SUBCASE("atanh")
+    {
+        Test.test_atanh();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, cbrt)
-{
-    this->test_cbrt();
-}
+    SUBCASE("cbrt")
+    {
+        Test.test_cbrt();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, ceil)
-{
-    this->test_ceil();
-}
+    SUBCASE("ceil")
+    {
+        Test.test_ceil();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, copysign)
-{
-    this->test_copysign();
-}
+    SUBCASE("copysign")
+    {
+        Test.test_copysign();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, cos)
-{
-    this->test_cos();
-}
+    SUBCASE("cos")
+    {
+        Test.test_cos();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, cosh)
-{
-    this->test_cosh();
-}
+    SUBCASE("cosh")
+    {
+        Test.test_cosh();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, exp)
-{
-    this->test_exp();
-}
+    SUBCASE("exp")
+    {
+        Test.test_exp();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, exp10)
-{
-    this->test_exp10();
-}
+    SUBCASE("exp10")
+    {
+        Test.test_exp10();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, exp2)
-{
-    this->test_exp2();
-}
+    SUBCASE("exp2")
+    {
+        Test.test_exp2();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, expm1)
-{
-    this->test_expm1();
-}
+    SUBCASE("expm1")
+    {
+        Test.test_expm1();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, erf)
-{
-    this->test_erf();
-}
+    SUBCASE("erf")
+    {
+        Test.test_erf();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, erfc)
-{
-    this->test_erfc();
-}
+    SUBCASE("erfc")
+    {
+        Test.test_erfc();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, fabs)
-{
-    this->test_fabs();
-}
+    SUBCASE("fabs")
+    {
+        Test.test_fabs();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, fdim)
-{
-    this->test_fdim();
-}
+    SUBCASE("fdim")
+    {
+        Test.test_fdim();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, floor)
-{
-    this->test_floor();
-}
+    SUBCASE("floor")
+    {
+        Test.test_floor();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, fmax)
-{
-    this->test_fmax();
-}
+    SUBCASE("fmax")
+    {
+        Test.test_fmax();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, fmin)
-{
-    this->test_fmin();
-}
+    SUBCASE("fmin")
+    {
+        Test.test_fmin();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, fmod)
-{
-    this->test_fmod();
-}
-TYPED_TEST(xsimd_api_float_types_functions, frexp)
-{
-    this->test_frexp();
-}
-TYPED_TEST(xsimd_api_float_types_functions, hypot)
-{
-    this->test_hypot();
-}
-TYPED_TEST(xsimd_api_float_types_functions, is_even)
-{
-    this->test_is_even();
-}
-TYPED_TEST(xsimd_api_float_types_functions, is_flint)
-{
-    this->test_is_flint();
-}
-TYPED_TEST(xsimd_api_float_types_functions, is_odd)
-{
-    this->test_is_odd();
-}
-TYPED_TEST(xsimd_api_float_types_functions, isinf)
-{
-    this->test_isinf();
-}
-TYPED_TEST(xsimd_api_float_types_functions, isfinite)
-{
-    this->test_isfinite();
-}
-TYPED_TEST(xsimd_api_float_types_functions, isnan)
-{
-    this->test_isnan();
-}
-TYPED_TEST(xsimd_api_float_types_functions, ldexp)
-{
-    this->test_ldexp();
-}
-TYPED_TEST(xsimd_api_float_types_functions, lgamma)
-{
-    this->test_lgamma();
-}
+    SUBCASE("fmod")
+    {
+        Test.test_fmod();
+    }
+    SUBCASE("frexp")
+    {
+        Test.test_frexp();
+    }
+    SUBCASE("hypot")
+    {
+        Test.test_hypot();
+    }
+    SUBCASE("is_even")
+    {
+        Test.test_is_even();
+    }
+    SUBCASE("is_flint")
+    {
+        Test.test_is_flint();
+    }
+    SUBCASE("is_odd")
+    {
+        Test.test_is_odd();
+    }
+    SUBCASE("isinf")
+    {
+        Test.test_isinf();
+    }
+    SUBCASE("isfinite")
+    {
+        Test.test_isfinite();
+    }
+    SUBCASE("isnan")
+    {
+        Test.test_isnan();
+    }
+    SUBCASE("ldexp")
+    {
+        Test.test_ldexp();
+    }
+    SUBCASE("lgamma")
+    {
+        Test.test_lgamma();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, log)
-{
-    this->test_log();
-}
+    SUBCASE("log")
+    {
+        Test.test_log();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, log2)
-{
-    this->test_log2();
-}
+    SUBCASE("log2")
+    {
+        Test.test_log2();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, log10)
-{
-    this->test_log10();
-}
+    SUBCASE("log10")
+    {
+        Test.test_log10();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, log1p)
-{
-    this->test_log1p();
-}
+    SUBCASE("log1p")
+    {
+        Test.test_log1p();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, nearbyint)
-{
-    this->test_nearbyint();
-}
+    SUBCASE("nearbyint")
+    {
+        Test.test_nearbyint();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, nearbyint_as_int)
-{
-    this->test_nearbyint_as_int();
-}
+    SUBCASE("nearbyint_as_int")
+    {
+        Test.test_nearbyint_as_int();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, nextafter)
-{
-    this->test_nextafter();
-}
+    SUBCASE("nextafter")
+    {
+        Test.test_nextafter();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, polar)
-{
-    this->test_polar();
-}
+    SUBCASE("polar")
+    {
+        Test.test_polar();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, pow)
-{
-    this->test_pow();
-}
+    SUBCASE("pow")
+    {
+        Test.test_pow();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, reciprocal)
-{
-    this->test_reciprocal();
-}
+    SUBCASE("reciprocal")
+    {
+        Test.test_reciprocal();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, rint)
-{
-    this->test_rint();
-}
+    SUBCASE("rint")
+    {
+        Test.test_rint();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, round)
-{
-    this->test_round();
-}
+    SUBCASE("round")
+    {
+        Test.test_round();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, rsqrt)
-{
-    this->test_rsqrt();
-}
+    SUBCASE("rsqrt")
+    {
+        Test.test_rsqrt();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, sin)
-{
-    this->test_sin();
-}
+    SUBCASE("sin")
+    {
+        Test.test_sin();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, sincos)
-{
-    this->test_sincos();
-}
+    SUBCASE("sincos")
+    {
+        Test.test_sincos();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, sinh)
-{
-    this->test_sinh();
-}
+    SUBCASE("sinh")
+    {
+        Test.test_sinh();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, sqrt)
-{
-    this->test_sqrt();
-}
+    SUBCASE("sqrt")
+    {
+        Test.test_sqrt();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, tan)
-{
-    this->test_tan();
-}
+    SUBCASE("tan")
+    {
+        Test.test_tan();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, tanh)
-{
-    this->test_tanh();
-}
+    SUBCASE("tanh")
+    {
+        Test.test_tanh();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, tgamma)
-{
-    this->test_tgamma();
-}
+    SUBCASE("tgamma")
+    {
+        Test.test_tgamma();
+    }
 
-TYPED_TEST(xsimd_api_float_types_functions, trunc)
-{
-    this->test_trunc();
+    SUBCASE("trunc")
+    {
+        Test.test_trunc();
+    }
 }
 
 /*
@@ -923,81 +967,71 @@ TYPED_TEST(xsimd_api_float_types_functions, trunc)
  */
 
 template <typename T>
-class xsimd_api_complex_types_functions : public ::testing::Test
+struct xsimd_api_complex_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-public:
     void test_arg()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::arg(T(val))), std::arg(val));
+        CHECK_EQ(extract(xsimd::arg(T(val))), std::arg(val));
     }
 
     void test_conj()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::conj(T(val))), std::conj(val));
+        CHECK_EQ(extract(xsimd::conj(T(val))), std::conj(val));
     }
 
     void test_norm()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::norm(T(val))), std::norm(val));
+        CHECK_EQ(extract(xsimd::norm(T(val))), std::norm(val));
     }
 
     void test_proj()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::proj(T(val))), std::proj(val));
+        CHECK_EQ(extract(xsimd::proj(T(val))), std::proj(val));
     }
 };
 
-using ComplexTypes = ::testing::Types<float, double, std::complex<float>, std::complex<double>
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-                                      ,
-                                      xsimd::batch<float>, xsimd::batch<std::complex<float>>
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
-                                      ,
-                                      xsimd::batch<double>, xsimd::batch<std::complex<double>>
-#endif
-#endif
-                                      >;
-TYPED_TEST_SUITE(xsimd_api_complex_types_functions, ComplexTypes);
-
-TYPED_TEST(xsimd_api_complex_types_functions, arg)
+TEST_CASE_TEMPLATE("[xsimd api | complex types functions]", B, COMPLEX_TYPES)
 {
-    this->test_arg();
-}
+    xsimd_api_complex_types_functions<B> Test;
+    SUBCASE("arg")
+    {
+        Test.test_arg();
+    }
 
-TYPED_TEST(xsimd_api_complex_types_functions, conj)
-{
-    this->test_conj();
-}
+    SUBCASE("conj")
+    {
+        Test.test_conj();
+    }
 
-TYPED_TEST(xsimd_api_complex_types_functions, norm)
-{
-    this->test_norm();
-}
+    SUBCASE("norm")
+    {
+        Test.test_norm();
+    }
 
-TYPED_TEST(xsimd_api_complex_types_functions, proj)
-{
-    this->test_proj();
+    SUBCASE("proj")
+    {
+        Test.test_proj();
+    }
 }
 
 /*
  * Functions that apply on all signed types
  */
 template <typename T>
-class xsimd_api_all_signed_types_functions : public ::testing::Test
+struct xsimd_api_all_signed_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-public:
     void test_abs()
     {
         value_type val(-1);
-        EXPECT_EQ(extract(xsimd::abs(T(val))), std::abs(val));
+        CHECK_EQ(extract(xsimd::abs(T(val))), std::abs(val));
     }
 
     void test_fnms()
@@ -1005,41 +1039,32 @@ public:
         value_type val0(1);
         value_type val1(3);
         value_type val2(5);
-        EXPECT_EQ(extract(xsimd::fnms(T(val0), T(val1), T(val2))), -(val0 * val1) - val2);
+        CHECK_EQ(extract(xsimd::fnms(T(val0), T(val1), T(val2))), -(val0 * val1) - val2);
     }
 
     void test_neg()
     {
         value_type val(-1);
-        EXPECT_EQ(extract(xsimd::neg(T(val))), -val);
+        CHECK_EQ(extract(xsimd::neg(T(val))), -val);
     }
 };
 
-using AllSignedTypes = ::testing::Types<
-    signed char, short, int, long, float, double,
-    std::complex<float>, std::complex<double>
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-    ,
-    xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<int>, xsimd::batch<long>, xsimd::batch<float>, xsimd::batch<std::complex<float>>
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
-    ,
-    xsimd::batch<double>, xsimd::batch<std::complex<double>>
-#endif
-#endif
-    >;
-TYPED_TEST_SUITE(xsimd_api_all_signed_types_functions, AllSignedTypes);
+TEST_CASE_TEMPLATE("[xsimd api | all signed types functions]", B, ALL_SIGNED_TYPES)
+{
+    xsimd_api_all_signed_types_functions<B> Test;
 
-TYPED_TEST(xsimd_api_all_signed_types_functions, abs)
-{
-    this->test_abs();
-}
-TYPED_TEST(xsimd_api_all_signed_types_functions, fnms)
-{
-    this->test_fnms();
-}
-TYPED_TEST(xsimd_api_all_signed_types_functions, neg)
-{
-    this->test_neg();
+    SUBCASE("abs")
+    {
+        Test.test_abs();
+    }
+    SUBCASE("fnms")
+    {
+        Test.test_fnms();
+    }
+    SUBCASE("neg")
+    {
+        Test.test_neg();
+    }
 }
 
 /*
@@ -1047,30 +1072,29 @@ TYPED_TEST(xsimd_api_all_signed_types_functions, neg)
  */
 
 template <typename T>
-class xsimd_api_all_types_functions : public ::testing::Test
+struct xsimd_api_all_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-public:
     void test_add()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::add(T(val0), T(val1))), val0 + val1);
+        CHECK_EQ(extract(xsimd::add(T(val0), T(val1))), val0 + val1);
     }
 
     void test_div()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::div(T(val0), T(val1))), val0 / val1);
+        CHECK_EQ(extract(xsimd::div(T(val0), T(val1))), val0 / val1);
     }
 
     void test_eq()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::eq(T(val0), T(val1))), val0 == val1);
+        CHECK_EQ(extract(xsimd::eq(T(val0), T(val1))), val0 == val1);
     }
 
     void test_fma()
@@ -1078,7 +1102,7 @@ public:
         value_type val0(1);
         value_type val1(3);
         value_type val2(5);
-        EXPECT_EQ(extract(xsimd::fma(T(val0), T(val1), T(val2))), val0 * val1 + val2);
+        CHECK_EQ(extract(xsimd::fma(T(val0), T(val1), T(val2))), val0 * val1 + val2);
     }
 
     void test_fms()
@@ -1086,7 +1110,7 @@ public:
         value_type val0(1);
         value_type val1(5);
         value_type val2(3);
-        EXPECT_EQ(extract(xsimd::fms(T(val0), T(val1), T(val2))), val0 * val1 - val2);
+        CHECK_EQ(extract(xsimd::fms(T(val0), T(val1), T(val2))), val0 * val1 - val2);
     }
 
     void test_fnma()
@@ -1094,139 +1118,116 @@ public:
         value_type val0(1);
         value_type val1(3);
         value_type val2(5);
-        EXPECT_EQ(extract(xsimd::fnma(T(val0), T(val1), T(val2))), -(val0 * val1) + val2);
+        CHECK_EQ(extract(xsimd::fnma(T(val0), T(val1), T(val2))), -(val0 * val1) + val2);
     }
 
     void test_mul()
     {
         value_type val0(2);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::mul(T(val0), T(val1))), val0 * val1);
+        CHECK_EQ(extract(xsimd::mul(T(val0), T(val1))), val0 * val1);
     }
     void test_neq()
     {
         value_type val0(1);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::neq(T(val0), T(val1))), val0 != val1);
+        CHECK_EQ(extract(xsimd::neq(T(val0), T(val1))), val0 != val1);
     }
     void test_pos()
     {
         value_type val(1);
-        EXPECT_EQ(extract(xsimd::pos(T(val))), +val);
+        CHECK_EQ(extract(xsimd::pos(T(val))), +val);
     }
     void test_select()
     {
         value_type val0(2);
         value_type val1(3);
-        EXPECT_EQ(extract(xsimd::select(T(val0) != T(val1), T(val0), T(val1))), val0 != val1 ? val0 : val1);
+        CHECK_EQ(extract(xsimd::select(T(val0) != T(val1), T(val0), T(val1))), val0 != val1 ? val0 : val1);
     }
     void test_sub()
     {
         value_type val0(3);
         value_type val1(2);
-        EXPECT_EQ(extract(xsimd::sub(T(val0), T(val1))), val0 - val1);
+        CHECK_EQ(extract(xsimd::sub(T(val0), T(val1))), val0 - val1);
     }
 };
 
-using AllTypes = ::testing::Types<
-    char, unsigned char, signed char, short, unsigned short, int, unsigned int, long, unsigned long, float, double,
-    std::complex<float>, std::complex<double>
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-    ,
-    xsimd::batch<char>, xsimd::batch<unsigned char>, xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<unsigned short>, xsimd::batch<int>, xsimd::batch<unsigned int>, xsimd::batch<long>, xsimd::batch<unsigned long>, xsimd::batch<float>, xsimd::batch<std::complex<float>>
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
-    ,
-    xsimd::batch<double>, xsimd::batch<std::complex<double>>
-#endif
-#endif
-    >;
-TYPED_TEST_SUITE(xsimd_api_all_types_functions, AllTypes);
+TEST_CASE_TEMPLATE("[xsimd api | all types functions]", B, ALL_TYPES)
+{
+    xsimd_api_all_types_functions<B> Test;
 
-TYPED_TEST(xsimd_api_all_types_functions, add)
-{
-    this->test_add();
-}
+    SUBCASE("add")
+    {
+        Test.test_add();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, div)
-{
-    this->test_div();
-}
+    SUBCASE("div")
+    {
+        Test.test_div();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, eq)
-{
-    this->test_eq();
-}
+    SUBCASE("eq")
+    {
+        Test.test_eq();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, fma)
-{
-    this->test_fma();
-}
+    SUBCASE("fma")
+    {
+        Test.test_fma();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, fms)
-{
-    this->test_fms();
-}
+    SUBCASE("fms")
+    {
+        Test.test_fms();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, fnma)
-{
-    this->test_fnma();
-}
+    SUBCASE("fnma")
+    {
+        Test.test_fnma();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, mul)
-{
-    this->test_mul();
-}
+    SUBCASE("mul")
+    {
+        Test.test_mul();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, neq)
-{
-    this->test_neq();
-}
+    SUBCASE("neq")
+    {
+        Test.test_neq();
+    }
 
-TYPED_TEST(xsimd_api_all_types_functions, pos)
-{
-    this->test_pos();
-}
-TYPED_TEST(xsimd_api_all_types_functions, select)
-{
-    this->test_select();
-}
-TYPED_TEST(xsimd_api_all_types_functions, sub)
-{
-    this->test_sub();
+    SUBCASE("pos")
+    {
+        Test.test_pos();
+    }
+    SUBCASE("select")
+    {
+        Test.test_select();
+    }
+    SUBCASE("sub")
+    {
+        Test.test_sub();
+    }
 }
 
 /*
  * Functions that apply only to floating point types
  */
 template <typename T>
-class xsimd_api_all_floating_point_types_functions : public ::testing::Test
+struct xsimd_api_all_floating_point_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-public:
     void test_neq_nan()
     {
         value_type valNaN(std::numeric_limits<value_type>::signaling_NaN());
         value_type val1(1.0);
-        EXPECT_EQ(extract(xsimd::neq(T(valNaN), T(val1))), valNaN != val1);
+        CHECK_EQ(extract(xsimd::neq(T(valNaN), T(val1))), valNaN != val1);
     }
 };
 
-using AllFloatingPointTypes = ::testing::Types<
-    float, double,
-    std::complex<float>, std::complex<double>
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-    ,
-    xsimd::batch<float>, xsimd::batch<std::complex<float>>
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
-    ,
-    xsimd::batch<double>, xsimd::batch<std::complex<double>>
-#endif
-#endif
-    >;
-
-TYPED_TEST_SUITE(xsimd_api_all_floating_point_types_functions, AllFloatingPointTypes);
-TYPED_TEST(xsimd_api_all_floating_point_types_functions, neq_nan)
+TEST_CASE_TEMPLATE("[xsimd api | all floating point types functions]", B, ALL_FLOATING_POINT_TYPES)
 {
-    this->test_neq_nan();
+    xsimd_api_all_floating_point_types_functions<B> Test;
+    Test.test_neq_nan();
 }

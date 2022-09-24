@@ -9,6 +9,8 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+
 #include <array>
 #include <climits>
 #include <cmath>
@@ -17,9 +19,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "gtest/gtest.h"
-
-#include "xsimd/xsimd.hpp"
+#include "doctest/doctest.h"
 
 #ifndef XSIMD_TEST_UTILS_HPP
 #define XSIMD_TEST_UTILS_HPP
@@ -372,142 +372,77 @@ namespace detail
     };
 
     template <class T>
-    testing::AssertionResult expect_scalar_near(const char* lhs_expression,
-                                                const char* rhs_expression,
-                                                const T& lhs,
-                                                const T& rhs)
+    bool expect_scalar_near(const T& lhs, const T& rhs)
     {
-        if (scalar_comparison<T>::run(lhs, rhs))
-        {
-            return testing::AssertionSuccess();
-        }
-
-        std::stringstream lhs_ss;
-        lhs_ss << std::setprecision(std::numeric_limits<T>::digits10 + 2)
-               << lhs;
-
-        std::stringstream rhs_ss;
-        rhs_ss << std::setprecision(std::numeric_limits<T>::digits10 + 2)
-               << rhs;
-
-        return testing::internal::EqFailure(lhs_expression,
-                                            rhs_expression,
-                                            lhs_ss.str(),
-                                            rhs_ss.str(),
-                                            false);
+        return scalar_comparison<T>::run(lhs, rhs);
     }
 
     template <class V>
-    testing::AssertionResult expect_container_near(const char* lhs_expression,
-                                                   const char* rhs_expression,
-                                                   const V& lhs,
-                                                   const V& rhs)
+    bool expect_container_near(const V& lhs, const V& rhs)
     {
-        if (vector_comparison<V>::run(lhs, rhs))
-        {
-            return testing::AssertionSuccess();
-        }
-
-        using value_type = typename V::value_type;
-        std::stringstream lhs_ss;
-        lhs_ss << std::setprecision(std::numeric_limits<value_type>::digits10 + 2);
-        testing::internal::PrintTo(lhs, &lhs_ss);
-
-        std::stringstream rhs_ss;
-        rhs_ss << std::setprecision(std::numeric_limits<value_type>::digits10 + 2);
-        testing::internal::PrintTo(rhs, &rhs_ss);
-
-        return testing::internal::EqFailure(lhs_expression,
-                                            rhs_expression,
-                                            lhs_ss.str(),
-                                            rhs_ss.str(),
-                                            false);
+        return vector_comparison<V>::run(lhs, rhs);
     }
 
     template <class T, size_t N>
-    testing::AssertionResult expect_array_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const std::array<T, N>& lhs,
-                                               const std::array<T, N>& rhs)
+    bool expect_array_near(const std::array<T, N>& lhs, const std::array<T, N>& rhs)
     {
-        return expect_container_near(lhs_expression, rhs_expression, lhs, rhs);
+        return expect_container_near(lhs, rhs);
     }
 
     template <class T, class A>
-    testing::AssertionResult expect_vector_near(const char* lhs_expression,
-                                                const char* rhs_expression,
-                                                const std::vector<T, A>& lhs,
-                                                const std::vector<T, A>& rhs)
+    bool expect_vector_near(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
     {
-        return expect_container_near(lhs_expression, rhs_expression, lhs, rhs);
+        return expect_container_near(lhs, rhs);
     }
 
     template <class T, size_t N, class A>
-    testing::AssertionResult expect_batch_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const ::xsimd::batch<T, A>& lhs,
-                                               const std::array<T, N>& rhs)
+    bool expect_batch_near(const ::xsimd::batch<T, A>& lhs, const std::array<T, N>& rhs)
     {
         std::array<T, N> tmp;
         lhs.store_unaligned(tmp.data());
-        return expect_array_near(lhs_expression, rhs_expression, tmp, rhs);
+        return expect_array_near(tmp, rhs);
     }
 
     template <class T, size_t N, class A>
-    testing::AssertionResult expect_batch_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const std::array<T, N>& lhs,
-                                               const ::xsimd::batch<T, A>& rhs)
+    bool expect_batch_near(const std::array<T, N>& lhs, const ::xsimd::batch<T, A>& rhs)
     {
         std::array<T, N> tmp;
         rhs.store_unaligned(tmp.data());
-        return expect_array_near(lhs_expression, rhs_expression, lhs, tmp);
+        return expect_array_near(lhs, tmp);
     }
 
     template <class T, class A>
-    testing::AssertionResult expect_batch_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const ::xsimd::batch<T, A>& lhs,
-                                               const ::xsimd::batch<T, A>& rhs)
+    bool expect_batch_near(const ::xsimd::batch<T, A>& lhs, const ::xsimd::batch<T, A>& rhs)
     {
         constexpr auto N = xsimd::batch<T, A>::size;
         std::array<T, N> tmp;
         lhs.store_unaligned(tmp.data());
-        return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
+        return expect_batch_near(tmp, rhs);
     }
 
     template <class T, size_t N, class A>
-    testing::AssertionResult expect_batch_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const ::xsimd::batch_bool<T, A>& lhs,
-                                               const std::array<bool, N>& rhs)
+    bool expect_batch_near(const ::xsimd::batch_bool<T, A>& lhs, const std::array<bool, N>& rhs)
     {
         std::array<bool, N> tmp;
         lhs.store_unaligned(tmp.data());
-        return expect_array_near(lhs_expression, rhs_expression, tmp, rhs);
+        return expect_array_near(tmp, rhs);
     }
 
     template <class T, size_t N, class A>
-    testing::AssertionResult expect_batch_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const std::array<bool, N>& lhs,
-                                               const ::xsimd::batch_bool<T, A>& rhs)
+    bool expect_batch_near(const std::array<bool, N>& lhs, const ::xsimd::batch_bool<T, A>& rhs)
     {
         std::array<bool, N> tmp;
         rhs.store_unaligned(tmp.data());
-        return expect_array_near(lhs_expression, rhs_expression, lhs, tmp);
+        return expect_array_near(lhs, tmp);
     }
 
     template <class T, class A>
-    testing::AssertionResult expect_batch_near(const char* lhs_expression,
-                                               const char* rhs_expression,
-                                               const ::xsimd::batch_bool<T, A>& lhs,
-                                               const ::xsimd::batch_bool<T, A>& rhs)
+    bool expect_batch_near(const ::xsimd::batch_bool<T, A>& lhs, const ::xsimd::batch_bool<T, A>& rhs)
     {
         constexpr auto N = xsimd::batch<T, A>::size;
         std::array<bool, N> tmp;
         lhs.store_unaligned(tmp.data());
-        return expect_batch_near(lhs_expression, rhs_expression, tmp, rhs);
+        return expect_batch_near(tmp, rhs);
     }
 
     template <class It>
@@ -577,20 +512,29 @@ namespace detail
         b.store_unaligned(dst.data() + i);
     }
 
-    inline xsimd::as_integer_t<float> nearbyint_as_int(float a)
-    {
-        return std::lroundf(a);
-    }
-
-    inline xsimd::as_integer_t<double> nearbyint_as_int(double a)
-    {
-        return std::llround(a);
-    }
 }
 
-#define EXPECT_BATCH_EQ(b1, b2) EXPECT_PRED_FORMAT2(::detail::expect_batch_near, b1, b2)
-#define EXPECT_SCALAR_EQ(s1, s2) EXPECT_PRED_FORMAT2(::detail::expect_scalar_near, s1, s2)
-#define EXPECT_VECTOR_EQ(v1, v2) EXPECT_PRED_FORMAT2(::detail::expect_vector_near, v1, v2)
+#define CHECK_BATCH_EQ(b1, b2)                            \
+    do                                                    \
+    {                                                     \
+        INFO(#b1 ":", b1);                                \
+        INFO(#b2 ":", b2);                                \
+        CHECK_UNARY(::detail::expect_batch_near(b1, b2)); \
+    } while (0)
+#define CHECK_SCALAR_EQ(s1, s2)                            \
+    do                                                     \
+    {                                                      \
+        INFO(#s1 ":", s1);                                 \
+        INFO(#s2 ":", s2);                                 \
+        CHECK_UNARY(::detail::expect_scalar_near(s1, s2)); \
+    } while (0)
+#define CHECK_VECTOR_EQ(v1, v2)                            \
+    do                                                     \
+    {                                                      \
+        INFO(#v1 ":", v1);                                 \
+        INFO(#v2 ":", v2);                                 \
+        CHECK_UNARY(::detail::expect_vector_near(v1, v2)); \
+    } while (0)
 
 namespace xsimd
 {
@@ -617,38 +561,6 @@ namespace xsimd
         struct type_list
         {
         };
-
-        /***************
-         * concatenate *
-         ***************/
-
-        template <class... TL>
-        struct concatenate;
-
-        template <template <class...> class TL, class... T, class... U>
-        struct concatenate<TL<T...>, TL<U...>>
-        {
-            using type = TL<T..., U...>;
-        };
-
-        template <class... TL>
-        using concatenate_t = typename concatenate<TL...>::type;
-
-        /********
-         * cast *
-         ********/
-
-        template <class S, template <class...> class D>
-        struct cast;
-
-        template <template <class...> class S, class... T, template <class...> class D>
-        struct cast<S<T...>, D>
-        {
-            using type = D<T...>;
-        };
-
-        template <class S, template <class...> class D>
-        using cast_t = typename cast<S, D>::type;
     }
 }
 
@@ -656,72 +568,36 @@ namespace xsimd
  * Testing types lists *
  ***********************/
 
-#if XSIMD_X86_INSTR_SET == XSIMD_VERSION_NUMBER_NOT_AVAILABLE && XSIMD_ARM_INSTR_SET == XSIMD_VERSION_NUMBER_NOT_AVAILABLE
-#define XSIMD_FALLBACK_DELIMITER
-#else
-#define XSIMD_FALLBACK_DELIMITER ,
-#endif
-
-template <class T>
-using to_testing_types = xsimd::mpl::cast_t<T, testing::Types>;
-
-namespace xsimd
-{
-    using batch_int_type_list = mpl::type_list<
-        batch<uint8_t>,
-        batch<int8_t>,
-        batch<uint16_t>,
-        batch<int16_t>,
-        batch<uint32_t>,
-        batch<int32_t>,
-        batch<uint64_t>,
-        batch<int64_t>>;
+#define BATCH_INT_TYPES xsimd::batch<uint8_t>,  \
+                        xsimd::batch<int8_t>,   \
+                        xsimd::batch<uint16_t>, \
+                        xsimd::batch<int16_t>,  \
+                        xsimd::batch<uint32_t>, \
+                        xsimd::batch<int32_t>,  \
+                        xsimd::batch<uint64_t>, \
+                        xsimd::batch<int64_t>
 
 #if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
-    using batch_float_type_list = mpl::type_list<batch<float>, batch<double>>;
+#define BATCH_FLOAT_TYPES xsimd::batch<float>, xsimd::batch<double>
 #else
-    using batch_float_type_list = mpl::type_list<batch<float>>;
+#define BATCH_FLOAT_TYPES xsimd::batch<float>
 #endif
-
-    using batch_int32_type_list = mpl::type_list<
-        batch<int32_t>>;
-
 #if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
-    using batch_complex_type_list = mpl::type_list<
-        batch<std::complex<float>>,
-        batch<std::complex<double>>>;
+#define BATCH_COMPLEX_TYPES xsimd::batch<std::complex<float>>, xsimd::batch<std::complex<double>>
 #else
-    using batch_complex_type_list = mpl::type_list<
-        batch<std::complex<float>>>;
+#define BATCH_COMPLEX_TYPES xsimd::batch<std::complex<float>>
 #endif
-    using batch_math_type_list = mpl::concatenate_t<batch_int32_type_list, batch_float_type_list>;
 
-    using batch_swizzle_type_list = mpl::type_list<
-#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
-        batch<float>, batch<double>,
-#else
-        batch<float>,
-#endif
+#define BATCH_TYPES BATCH_INT_TYPES, BATCH_FLOAT_TYPES
+#define BATCH_MATH_TYPES xsimd::batch<int32_t>, BATCH_FLOAT_TYPES
+
 #if !XSIMD_WITH_AVX || XSIMD_WITH_AVX2
-        batch<uint32_t>, batch<int32_t>,
-        batch<uint64_t>, batch<int64_t>,
+#define BATCH_SWIZZLE_TAIL , xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>
+#else
+#define BATCH_SWIZZLE_TAIL
 #endif
-        batch<std::complex<float>>
-#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
-        ,
-        batch<std::complex<double>>
-#endif
-        >;
 
-    using batch_type_list = mpl::concatenate_t<batch_int_type_list, batch_float_type_list>;
-}
-
-using batch_int_types = to_testing_types<xsimd::batch_int_type_list>;
-using batch_float_types = to_testing_types<xsimd::batch_float_type_list>;
-using batch_complex_types = to_testing_types<xsimd::batch_complex_type_list>;
-using batch_math_types = to_testing_types<xsimd::batch_math_type_list>;
-using batch_types = to_testing_types<xsimd::batch_type_list>;
-using batch_swizzle_types = to_testing_types<xsimd::batch_swizzle_type_list>;
+#define BATCH_SWIZZLE_TYPES BATCH_FLOAT_TYPES, BATCH_COMPLEX_TYPES BATCH_SWIZZLE_TAIL
 
 /********************
  * conversion utils *
@@ -733,22 +609,6 @@ struct conversion_param
     static constexpr size_t alignment = A;
 };
 
-class conversion_test_names
-{
-public:
-    template <class T>
-    static std::string GetName(int)
-    {
-#ifndef _MSC_VER
-        return __PRETTY_FUNCTION__;
-#else
-        return "Unknown name";
-#endif
-    }
-};
-
-using conversion_type_list = xsimd::mpl::type_list<
-    conversion_param<sizeof(xsimd::types::simd_register<int, xsimd::default_arch>) / sizeof(double), xsimd::default_arch::alignment()>>;
-using conversion_types = to_testing_types<conversion_type_list>;
+#define CONVERSION_TYPES conversion_param<sizeof(xsimd::types::simd_register<int, xsimd::default_arch>) / sizeof(double), xsimd::default_arch::alignment()>
 
 #endif // XXSIMD_TEST_UTILS_HPP

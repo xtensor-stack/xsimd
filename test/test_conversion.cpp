@@ -16,9 +16,8 @@
 
 #if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 template <class CP>
-class conversion_test : public testing::Test
+struct conversion_test
 {
-protected:
     static constexpr size_t N = CP::size;
     static constexpr size_t A = CP::alignment;
 
@@ -79,12 +78,14 @@ protected:
         {
             int32_batch fbres = to_int(fpos);
             fbres.store_aligned(fvres.data());
-            EXPECT_VECTOR_EQ(fvres, fposres) << print_function_name("to_int(positive float)");
+            INFO("to_int(positive float)");
+            CHECK_VECTOR_EQ(fvres, fposres);
         }
         {
             int32_batch fbres = to_int(fneg);
             fbres.store_aligned(fvres.data());
-            EXPECT_VECTOR_EQ(fvres, fnegres) << print_function_name("to_int(negative float)");
+            INFO("to_int(negative float)");
+            CHECK_VECTOR_EQ(fvres, fnegres);
         }
     }
 
@@ -95,12 +96,14 @@ protected:
         {
             int64_batch dbres = to_int(dpos);
             dbres.store_aligned(dvres.data());
-            EXPECT_VECTOR_EQ(dvres, dposres) << print_function_name("to_int(positive double)");
+            INFO("to_int(positive double)");
+            CHECK_VECTOR_EQ(dvres, dposres);
         }
         {
             int64_batch dbres = to_int(dneg);
             dbres.store_aligned(dvres.data());
-            EXPECT_VECTOR_EQ(dvres, dnegres) << print_function_name("to_int(negative double)");
+            INFO("to_int(negative double)");
+            CHECK_VECTOR_EQ(dvres, dnegres);
         }
     }
 
@@ -111,12 +114,14 @@ protected:
         {
             float_batch i32bres = to_float(i32pos);
             i32bres.store_aligned(i32vres.data());
-            EXPECT_VECTOR_EQ(i32vres, i32posres) << print_function_name("to_float(positive int32)");
+            INFO("to_float(positive int32)");
+            CHECK_VECTOR_EQ(i32vres, i32posres);
         }
         {
             float_batch i32bres = to_float(i32neg);
             i32bres.store_aligned(i32vres.data());
-            EXPECT_VECTOR_EQ(i32vres, i32negres) << print_function_name("to_float(negative int32)");
+            INFO("to_float(negative int32)");
+            CHECK_VECTOR_EQ(i32vres, i32negres);
         }
     }
 
@@ -127,12 +132,14 @@ protected:
         {
             double_batch i64bres = to_float(i64pos);
             i64bres.store_aligned(i64vres.data());
-            EXPECT_VECTOR_EQ(i64vres, i64posres) << print_function_name("to_float(positive int64)");
+            INFO("to_float(positive int64)");
+            CHECK_VECTOR_EQ(i64vres, i64posres);
         }
         {
             double_batch i64bres = to_float(i64neg);
             i64bres.store_aligned(i64vres.data());
-            EXPECT_VECTOR_EQ(i64vres, i64negres) << print_function_name("to_float(negative int64)");
+            INFO("to_float(negative int64)");
+            CHECK_VECTOR_EQ(i64vres, i64negres);
         }
     }
 
@@ -144,49 +151,54 @@ protected:
             uint16_batch ui16casting = xsimd::bitwise_cast<uint16_batch>(ui8tmp);
             uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui16casting);
             ui8casting.store_aligned(ui8vres.data());
-            EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_16");
+            INFO("u8_to_16");
+            CHECK_VECTOR_EQ(ui8vres, ui8res);
         }
         {
             uint32_batch ui32casting = xsimd::bitwise_cast<uint32_batch>(ui8tmp);
             uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui32casting);
             ui8casting.store_aligned(ui8vres.data());
-            EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_32");
+            INFO("u8_to_32");
+            CHECK_VECTOR_EQ(ui8vres, ui8res);
         }
         {
             uint64_batch ui64casting = xsimd::bitwise_cast<uint64_batch>(ui8tmp);
             uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui64casting);
             ui8casting.store_aligned(ui8vres.data());
-            EXPECT_VECTOR_EQ(ui8vres, ui8res) << print_function_name("u8_to_64");
+            INFO("u8_to_64");
+            CHECK_VECTOR_EQ(ui8vres, ui8res);
         }
     }
 };
 
-TYPED_TEST_SUITE(conversion_test, conversion_types, conversion_test_names);
-
-TYPED_TEST(conversion_test, to_int32)
+TEST_CASE_TEMPLATE("[conversion]", B, CONVERSION_TYPES)
 {
-    this->test_to_int32();
-}
+    conversion_test<B> Test;
 
-TYPED_TEST(conversion_test, to_int64)
-{
-    this->test_to_int64();
-}
+    SUBCASE("to_int32")
+    {
+        Test.test_to_int32();
+    }
 
-TYPED_TEST(conversion_test, to_float)
-{
-    this->test_to_float();
-}
+    SUBCASE("to_int64")
+    {
+        Test.test_to_int64();
+    }
 
-TYPED_TEST(conversion_test, to_double)
-{
-    this->test_to_double();
-}
+    SUBCASE("to_float")
+    {
+        Test.test_to_float();
+    }
 
-TYPED_TEST(conversion_test, u8_casting)
-{
-    this->test_u8_casting();
-}
+    SUBCASE("to_double")
+    {
+        Test.test_to_double();
+    }
 
+    SUBCASE("u8_casting")
+    {
+        Test.test_u8_casting();
+    }
+}
 #endif
 #endif

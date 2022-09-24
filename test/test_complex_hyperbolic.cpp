@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class complex_hyperbolic_test : public testing::Test
+struct complex_hyperbolic_test
 {
-protected:
     using batch_type = B;
     using real_batch_type = typename B::real_batch;
     using value_type = typename B::value_type;
@@ -64,7 +63,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("sinh");
+        CHECK_EQ(diff, 0);
     }
 
     void test_cosh()
@@ -80,7 +79,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("cosh");
+        CHECK_EQ(diff, 0);
     }
 
     void test_tanh()
@@ -96,7 +95,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("tanh");
+        CHECK_EQ(diff, 0);
     }
 
     void test_asinh()
@@ -112,7 +111,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("asinh");
+        CHECK_EQ(diff, 0);
     }
 
     void test_acosh()
@@ -128,7 +127,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("acosh");
+        CHECK_EQ(diff, 0);
     }
 
     void test_atanh()
@@ -144,39 +143,41 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("atanh");
+        CHECK_EQ(diff, 0);
     }
 };
 
-TYPED_TEST_SUITE(complex_hyperbolic_test, batch_complex_types, simd_test_names);
-
-TYPED_TEST(complex_hyperbolic_test, sinh)
+TEST_CASE_TEMPLATE("[complex hyperbolic]", B, BATCH_COMPLEX_TYPES)
 {
-    this->test_sinh();
-}
+    complex_hyperbolic_test<B> Test;
+    SUBCASE("sinh")
+    {
+        Test.test_sinh();
+    }
 
-TYPED_TEST(complex_hyperbolic_test, cosh)
-{
-    this->test_cosh();
-}
+    SUBCASE("cosh")
+    {
+        Test.test_cosh();
+    }
 
-TYPED_TEST(complex_hyperbolic_test, tanh)
-{
-    this->test_tanh();
-}
+    SUBCASE("tanh")
+    {
+        Test.test_tanh();
+    }
 
-TYPED_TEST(complex_hyperbolic_test, asinh)
-{
-    this->test_asinh();
-}
+    SUBCASE("asinh")
+    {
+        Test.test_asinh();
+    }
 
-TYPED_TEST(complex_hyperbolic_test, acosh)
-{
-    this->test_acosh();
-}
+    SUBCASE("acosh")
+    {
+        Test.test_acosh();
+    }
 
-TYPED_TEST(complex_hyperbolic_test, atanh)
-{
-    this->test_atanh();
+    SUBCASE("atanh")
+    {
+        Test.test_atanh();
+    }
 }
 #endif

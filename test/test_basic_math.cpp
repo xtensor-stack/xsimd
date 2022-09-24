@@ -22,13 +22,15 @@ namespace detail
         static void test_isfinite()
         {
             T input(1);
-            EXPECT_TRUE(xsimd::all(xsimd::isfinite(input))) << print_function_name("isfinite");
+            INFO("input: ", input);
+            CHECK_UNARY(xsimd::all(xsimd::isfinite(input)));
         }
 
         static void test_isinf()
         {
             T input(1);
-            EXPECT_FALSE(xsimd::any(xsimd::isinf(input))) << print_function_name("isfinite");
+            INFO("input: ", input);
+            CHECK_FALSE(xsimd::any(xsimd::isinf(input)));
         }
     };
 
@@ -38,20 +40,19 @@ namespace detail
         static void test_isfinite()
         {
             T input = xsimd::infinity<T>();
-            EXPECT_FALSE(xsimd::any(xsimd::isfinite(input))) << print_function_name("isfinite");
+            CHECK_FALSE(xsimd::any(xsimd::isfinite(input)));
         }
         static void test_isinf()
         {
             T input = xsimd::infinity<T>();
-            EXPECT_TRUE(xsimd::all(xsimd::isinf(input))) << print_function_name("isfinite");
+            CHECK_UNARY(xsimd::all(xsimd::isinf(input)));
         }
     };
 }
 
 template <class B>
-class basic_math_test : public testing::Test
+struct basic_math_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -73,66 +74,70 @@ protected:
         }
     }
 
-    void test_basic_functions() const
+    void test_fmod() const
     {
-        // fmod
-        {
-            array_type expected;
-            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                           [](const value_type& l, const value_type& r)
-                           { return std::fmod(l, r); });
-            batch_type res = xsimd::fmod(batch_lhs(), batch_rhs());
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("fmod");
-        }
-        // remainder
-        {
-            array_type expected;
-            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                           [](const value_type& l, const value_type& r)
-                           { return std::remainder(l, r); });
-            batch_type res = xsimd::remainder(batch_lhs(), batch_rhs());
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("remainder");
-        }
-        // fdim
-        {
-            array_type expected;
-            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                           [](const value_type& l, const value_type& r)
-                           { return std::fdim(l, r); });
-            batch_type res = xsimd::fdim(batch_lhs(), batch_rhs());
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("fdim");
-        }
-        // clip
-        {
-            value_type clip_lo = static_cast<value_type>(0.5);
-            value_type clip_hi = static_cast<value_type>(1.);
-            array_type expected;
-            std::transform(clip_input.cbegin(), clip_input.cend(), expected.begin(),
-                           [clip_lo, clip_hi](const value_type& l)
-                           {
-                               return l < clip_lo ? clip_lo : clip_hi < l ? clip_hi
-                                                                          : l;
-                           });
-            batch_type res = xsimd::clip(batch_clip_input(), batch_type(clip_lo), batch_type(clip_hi));
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("clip");
-        }
-        // isfinite
-        {
-            detail::infinity_tester<batch_type>::test_isfinite();
-        }
-        // isinf
-        {
-            detail::infinity_tester<batch_type>::test_isinf();
-        }
-        // nextafter
-        {
-            array_type expected;
-            std::transform(from_input.cbegin(), from_input.cend(), rhs.cbegin(), expected.begin(),
-                           [](const value_type& l, const value_type& r)
-                           { return std::nextafter(l, r); });
-            batch_type res = xsimd::nextafter(batch_from_input(), batch_rhs());
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("nextafter");
-        }
+        array_type expected;
+        std::transform(
+            lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+            [](const value_type& l, const value_type& r)
+            { return std::fmod(l, r); });
+        batch_type res = xsimd::fmod(batch_lhs(), batch_rhs());
+        CHECK_BATCH_EQ(res, expected);
+    }
+
+    void test_remainder() const
+    {
+        array_type expected;
+        std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                       [](const value_type& l, const value_type& r)
+                       { return std::remainder(l, r); });
+        batch_type res = xsimd::remainder(batch_lhs(), batch_rhs());
+        CHECK_BATCH_EQ(res, expected);
+    }
+
+    void test_fdim() const
+    {
+        array_type expected;
+        std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                       [](const value_type& l, const value_type& r)
+                       { return std::fdim(l, r); });
+        batch_type res = xsimd::fdim(batch_lhs(), batch_rhs());
+        CHECK_BATCH_EQ(res, expected);
+    }
+
+    void test_clip()
+    {
+        value_type clip_lo = static_cast<value_type>(0.5);
+        value_type clip_hi = static_cast<value_type>(1.);
+        array_type expected;
+        std::transform(clip_input.cbegin(), clip_input.cend(), expected.begin(),
+                       [clip_lo, clip_hi](const value_type& l)
+                       {
+                           return l < clip_lo ? clip_lo : clip_hi < l ? clip_hi
+                                                                      : l;
+                       });
+        batch_type res = xsimd::clip(batch_clip_input(), batch_type(clip_lo), batch_type(clip_hi));
+        CHECK_BATCH_EQ(res, expected);
+    }
+
+    void test_isfinite()
+    {
+        detail::infinity_tester<batch_type>::test_isfinite();
+    }
+
+    void test_isinf()
+    {
+        detail::infinity_tester<batch_type>::test_isinf();
+    }
+
+    void test_nextafter()
+    {
+        array_type expected;
+        std::transform(from_input.cbegin(), from_input.cend(), rhs.cbegin(), expected.begin(),
+                       [](const value_type& l, const value_type& r)
+                       { return std::nextafter(l, r); });
+        batch_type res = xsimd::nextafter(batch_from_input(), batch_rhs());
+        CHECK_BATCH_EQ(res, expected);
     }
 
 private:
@@ -157,10 +162,16 @@ private:
     }
 };
 
-TYPED_TEST_SUITE(basic_math_test, batch_math_types, simd_test_names);
-
-TYPED_TEST(basic_math_test, basic_functions)
+TEST_CASE_TEMPLATE("[basic math tests]", B, BATCH_MATH_TYPES)
 {
-    this->test_basic_functions();
+    basic_math_test<B> Test;
+
+    SUBCASE("fmod") { Test.test_fmod(); }
+    SUBCASE("remainder") { Test.test_remainder(); }
+    SUBCASE("fdim") { Test.test_fdim(); }
+    SUBCASE("clip") { Test.test_clip(); }
+    SUBCASE("isfinite") { Test.test_isfinite(); }
+    SUBCASE("isinf") { Test.test_isinf(); }
+    SUBCASE("nextafter") { Test.test_nextafter(); }
 }
 #endif

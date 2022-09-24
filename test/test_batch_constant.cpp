@@ -14,12 +14,9 @@
 
 #include "test_utils.hpp"
 
-using namespace std::placeholders;
-
 template <class B>
-class constant_batch_test : public testing::Test
+struct constant_batch_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -43,8 +40,8 @@ protected:
                       [&i]()
                       { return generator::get(i++, size); });
         constexpr auto b = xsimd::make_batch_constant<batch_type, generator>();
-        EXPECT_BATCH_EQ((batch_type)b, expected)
-            << print_function_name("batch(value_type)");
+        INFO("batch(value_type)");
+        CHECK_BATCH_EQ((batch_type)b, expected);
     }
 
     struct arange
@@ -63,8 +60,8 @@ protected:
                       [&i]()
                       { return arange::get(i++, size); });
         constexpr auto b = xsimd::make_batch_constant<batch_type, arange>();
-        EXPECT_BATCH_EQ((batch_type)b, expected)
-            << print_function_name("batch(value_type)");
+        INFO("batch(value_type)");
+        CHECK_BATCH_EQ((batch_type)b, expected);
     }
 
     struct constant
@@ -80,32 +77,27 @@ protected:
         array_type expected;
         std::fill(expected.begin(), expected.end(), constant::get(0, 0));
         constexpr auto b = xsimd::make_batch_constant<batch_type, constant>();
-        EXPECT_BATCH_EQ((batch_type)b, expected)
-            << print_function_name("batch(value_type)");
+        INFO("batch(value_type)");
+        CHECK_BATCH_EQ((batch_type)b, expected);
     }
 };
 
-TYPED_TEST_SUITE(constant_batch_test, batch_int_types, simd_test_names);
-
-TYPED_TEST(constant_batch_test, init_from_generator)
+TEST_CASE_TEMPLATE("[constant batch]", B, BATCH_INT_TYPES)
 {
-    this->test_init_from_generator();
-}
+    constant_batch_test<B> Test;
+    SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
 
-TYPED_TEST(constant_batch_test, init_from_generator_arange)
-{
-    this->test_init_from_generator_arange();
-}
+    SUBCASE("init_from_generator_arange")
+    {
+        Test.test_init_from_generator_arange();
+    }
 
-TYPED_TEST(constant_batch_test, init_from_constant)
-{
-    this->test_init_from_constant();
+    SUBCASE("init_from_constant") { Test.test_init_from_constant(); }
 }
 
 template <class B>
-class constant_bool_batch_test : public testing::Test
+struct constant_bool_batch_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -129,8 +121,8 @@ protected:
                       [&i]()
                       { return generator::get(i++, size); });
         constexpr auto b = xsimd::make_batch_bool_constant<batch_type, generator>();
-        EXPECT_BATCH_EQ((batch_bool_type)b, expected)
-            << print_function_name("batch_bool_constant(value_type)");
+        INFO("batch_bool_constant(value_type)");
+        CHECK_BATCH_EQ((batch_bool_type)b, expected);
     }
 
     struct split
@@ -149,20 +141,19 @@ protected:
                       [&i]()
                       { return split::get(i++, size); });
         constexpr auto b = xsimd::make_batch_bool_constant<batch_type, split>();
-        EXPECT_BATCH_EQ((batch_bool_type)b, expected)
-            << print_function_name("batch_bool_constant(value_type)");
+        INFO("batch_bool_constant(value_type)");
+        CHECK_BATCH_EQ((batch_bool_type)b, expected);
     }
 };
 
-TYPED_TEST_SUITE(constant_bool_batch_test, batch_int_types, simd_test_names);
-
-TYPED_TEST(constant_bool_batch_test, init_from_generator)
+TEST_CASE_TEMPLATE("[constant bool batch]", B, BATCH_INT_TYPES)
 {
-    this->test_init_from_generator();
-}
+    constant_bool_batch_test<B> Test;
+    SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
 
-TYPED_TEST(constant_bool_batch_test, init_from_generator_split)
-{
-    this->test_init_from_generator_split();
+    SUBCASE("init_from_generator_split")
+    {
+        Test.test_init_from_generator_split();
+    }
 }
 #endif

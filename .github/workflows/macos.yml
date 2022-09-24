@@ -1,6 +1,6 @@
 name: macOS build
 on: [push, pull_request]
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
@@ -17,7 +17,7 @@ jobs:
     - name: Setup
       run: |
         mkdir _build
-        cd _build && cmake .. -DDOWNLOAD_GTEST=ON -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
     - name: Build
       run: cmake --build _build
     - name: Testing sequential

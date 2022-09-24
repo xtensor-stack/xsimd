@@ -39,9 +39,9 @@ jobs:
           sudo apt-get --no-install-suggests --no-install-recommends install gcc-$GCC_VERSION-multilib g++-$GCC_VERSION-multilib linux-libc-dev:i386
         fi
         CC=gcc-$GCC_VERSION
-        echo "CC=$CC" >> $GITHUB_ENV 
+        echo "CC=$CC" >> $GITHUB_ENV
         CXX=g++-$GCC_VERSION
-        echo "CXX=$CXX" >> $GITHUB_ENV 
+        echo "CXX=$CXX" >> $GITHUB_ENV
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'clang' }}
       run: |
@@ -61,10 +61,7 @@ jobs:
         CC=clang-$LLVM_VERSION
         echo "CC=$CC" >> $GITHUB_ENV
         CXX=clang++-$LLVM_VERSION
-        echo "CXX=$CXX" >> $GITHUB_ENV 
-    - name: Setup Ninja
-      run: |
-        sudo apt-get install ninja-build
+        echo "CXX=$CXX" >> $GITHUB_ENV
     - name: Checkout xsimd
       uses: actions/checkout@v2
     - name: Install mamba
@@ -97,8 +94,7 @@ jobs:
 
         mkdir _build
         cd _build
-        cmake  .. -DDOWNLOAD_GTEST=ON \
-                  -DBUILD_TESTS=ON \
+        cmake  .. -DBUILD_TESTS=ON \
                   -DBUILD_BENCHMARK=ON \
                   -DBUILD_EXAMPLES=ON \
                   -DCMAKE_BUILD_TYPE=Release \

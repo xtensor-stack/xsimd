@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class trigonometric_test : public testing::Test
+struct trigonometric_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -61,7 +60,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("sin");
+            INFO("sin");
+            CHECK_EQ(diff, 0);
         }
         // cos
         {
@@ -76,7 +76,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("cos");
+            INFO("cos");
+            CHECK_EQ(diff, 0);
         }
         // sincos
         {
@@ -96,9 +97,11 @@ protected:
                 detail::store_batch(out2, res2, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("sincos(sin)");
+            INFO("sincos(sin)");
+            CHECK_EQ(diff, 0);
             diff = detail::get_nb_diff(res2, expected2);
-            EXPECT_EQ(diff, 0) << print_function_name("sincos(cos)");
+            INFO("sincos(cos)");
+            CHECK_EQ(diff, 0);
         }
         // tan
         {
@@ -113,7 +116,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("tan");
+            INFO("tan");
+            CHECK_EQ(diff, 0);
         }
     }
 
@@ -133,7 +137,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("asin");
+            INFO("asin");
+            CHECK_EQ(diff, 0);
         }
         // acos
         {
@@ -148,7 +153,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("acos");
+            INFO("acos");
+            CHECK_EQ(diff, 0);
         }
         // atan
         {
@@ -163,7 +169,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("atan");
+            INFO("atan");
+            CHECK_EQ(diff, 0);
         }
         // atan2
         {
@@ -179,20 +186,23 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("atan2");
+            INFO("atan2");
+            CHECK_EQ(diff, 0);
         }
     }
 };
 
-TYPED_TEST_SUITE(trigonometric_test, batch_float_types, simd_test_names);
-
-TYPED_TEST(trigonometric_test, trigonometric)
+TEST_CASE_TEMPLATE("[trigonometric]", B, BATCH_FLOAT_TYPES)
 {
-    this->test_trigonometric_functions();
-}
+    trigonometric_test<B> Test;
+    SUBCASE("trigonometric")
+    {
+        Test.test_trigonometric_functions();
+    }
 
-TYPED_TEST(trigonometric_test, reciprocal)
-{
-    this->test_reciprocal_functions();
+    SUBCASE("reciprocal")
+    {
+        Test.test_reciprocal_functions();
+    }
 }
 #endif
