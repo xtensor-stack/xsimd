@@ -31,7 +31,9 @@ protected:
     vector_type lhs_pn;
     vector_type lhs_np;
     vector_type lhs_pp;
+    real_vector_type lhs_real;
     vector_type rhs;
+    real_vector_type rhs_real;
     vector_type expected;
     vector_type res;
 
@@ -42,7 +44,9 @@ protected:
         lhs_pn.resize(nb_input);
         lhs_np.resize(nb_input);
         lhs_pp.resize(nb_input);
+        lhs_real.resize(nb_input);
         rhs.resize(nb_input);
+        rhs_real.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
             real_value_type real = (real_value_type(i) / 4 + real_value_type(1.2) * std::sqrt(real_value_type(i + 0.25))) / 100;
@@ -53,6 +57,9 @@ protected:
             lhs_pp[i] = value_type(real, imag);
             rhs[i] = value_type(real_value_type(10.2) / (i + 2) + real_value_type(0.25),
                                 real_value_type(9.1) / (i + 3) + real_value_type(0.45));
+
+            lhs_real[i] = (i % 2 == 0 ? 1 : -1) * real;
+            rhs_real[i] = (i % 3 == 0 ? 1 : -1) * rhs[i].real();
         }
         expected.resize(nb_input);
         res.resize(nb_input);
@@ -163,6 +170,42 @@ protected:
         EXPECT_EQ(diff, 0) << print_function_name("sqrt_pp");
     }
 
+    void test_pow_real_complex()
+    {
+        std::transform(lhs_real.cbegin(), lhs_real.cend(), rhs.cbegin(), expected.begin(),
+                       [](const real_value_type& l, const value_type& r)
+                       { using std::pow; return pow(l, r); });
+        batch_type rhs_in, out;
+        real_batch_type lhs_in;
+        for (size_t i = 0; i < nb_input; i += size)
+        {
+            detail::load_batch(lhs_in, lhs_real, i);
+            detail::load_batch(rhs_in, rhs, i);
+            out = pow(lhs_in, rhs_in);
+            detail::store_batch(out, res, i);
+        }
+        size_t diff = detail::get_nb_diff(res, expected);
+        EXPECT_EQ(diff, 0) << print_function_name("pow (real/complex)");
+    }
+
+    void test_pow_complex_real()
+    {
+        std::transform(lhs_np.cbegin(), lhs_np.cend(), rhs_real.cbegin(), expected.begin(),
+                       [](const value_type& l, const real_value_type& r)
+                       { using std::pow; return pow(l, r); });
+        batch_type lhs_in, out;
+        real_batch_type rhs_in;
+        for (size_t i = 0; i < nb_input; i += size)
+        {
+            detail::load_batch(lhs_in, lhs_np, i);
+            detail::load_batch(rhs_in, rhs_real, i);
+            out = pow(lhs_in, rhs_in);
+            detail::store_batch(out, res, i);
+        }
+        size_t diff = detail::get_nb_diff(res, expected);
+        EXPECT_EQ(diff, 0) << print_function_name("pow (complex/real)");
+    }
+
 private:
     void test_pow_impl()
     {
@@ -216,6 +259,16 @@ TYPED_TEST(complex_power_test, arg)
 TYPED_TEST(complex_power_test, pow)
 {
     this->test_pow();
+}
+
+TYPED_TEST(complex_power_test, pow_real_complex)
+{
+    this->test_pow_real_complex();
+}
+
+TYPED_TEST(complex_power_test, pow_complex_real)
+{
+    this->test_pow_complex_real();
 }
 
 TYPED_TEST(complex_power_test, sqrt_nn)
