@@ -69,6 +69,13 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         if (NOT CROSS_COMPILE_ARM)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC")
         endif()
+
+
+    endif()
+
+    CHECK_CXX_COMPILER_FLAG("-Wno-stringop-overflow" XSIMD_DISABLE_STRINGOP_OVERFLOW_WARNING)
+    if (XSIMD_DISABLE_STRINGOP_OVERFLOW_WARNING)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-stringop-overflow")
     endif()
 
     if (ANDROID)
