@@ -12,6 +12,7 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include <functional>
 #include <vector>
 
 #include "test_utils.hpp"
@@ -143,9 +144,8 @@ namespace xsimd
 }
 
 template <class B>
-class batch_bool_test : public testing::Test
+struct batch_bool_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -174,11 +174,11 @@ protected:
         bool_array_type res;
         batch_bool_type b(true);
         b.store_unaligned(res.data());
-        EXPECT_EQ(res, all_true) << print_function_name("batch_bool(bool)");
+        CHECK_EQ(res, all_true);
 
         batch_bool_type c { true };
         c.store_unaligned(res.data());
-        EXPECT_EQ(res, all_true) << print_function_name("batch_bool{bool}");
+        CHECK_EQ(res, all_true);
     }
 
     void test_load_store() const
@@ -186,13 +186,13 @@ protected:
         bool_array_type res;
         batch_bool_type b(batch_bool_type::load_unaligned(ba.data()));
         b.store_unaligned(res.data());
-        EXPECT_EQ(res, ba) << print_function_name("load_unaligned / store_unaligned");
+        CHECK_EQ(res, ba);
 
         alignas(xsimd::default_arch::alignment()) bool_array_type arhs(this->ba);
         alignas(xsimd::default_arch::alignment()) bool_array_type ares;
         b = batch_bool_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
-        EXPECT_EQ(ares, arhs) << print_function_name("load_aligned / store_aligned");
+        CHECK_EQ(ares, arhs);
     }
 
     void test_any_all() const
@@ -202,33 +202,33 @@ protected:
         {
             auto any_check_false = (batch_lhs() != batch_lhs());
             bool any_res_false = xsimd::any(any_check_false);
-            EXPECT_FALSE(any_res_false) << print_function_name("any (false)");
+            CHECK_FALSE(any_res_false);
             auto any_check_true = (batch_lhs() == batch_rhs());
             bool any_res_true = xsimd::any(any_check_true);
-            EXPECT_TRUE(any_res_true) << print_function_name("any (true)");
+            CHECK_UNARY(any_res_true);
 
             for (const auto& vec : bool_g.almost_all_false())
             {
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool any_res = xsimd::any(b);
-                EXPECT_TRUE(any_res) << print_function_name("any (almost_all_false)");
+                CHECK_UNARY(any_res);
             }
 
             for (const auto& vec : bool_g.almost_all_true())
             {
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool any_res = xsimd::any(b);
-                EXPECT_TRUE(any_res) << print_function_name("any (almost_all_true)");
+                CHECK_UNARY(any_res);
             }
         }
         // all
         {
             auto all_check_false = (batch_lhs() == batch_rhs());
             bool all_res_false = xsimd::all(all_check_false);
-            EXPECT_FALSE(all_res_false) << print_function_name("all (false)");
+            CHECK_FALSE(all_res_false);
             auto all_check_true = (batch_lhs() == batch_lhs());
             bool all_res_true = xsimd::all(all_check_true);
-            EXPECT_TRUE(all_res_true) << print_function_name("all (true)");
+            CHECK_UNARY(all_res_true);
 
             for (const auto& vec : bool_g.almost_all_false())
             {
@@ -237,37 +237,37 @@ protected:
                 // give expected result
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool all_res = xsimd::all(b);
-                EXPECT_FALSE(all_res) << print_function_name("all (almost_all_false)");
+                CHECK_FALSE(all_res);
             }
 
             for (const auto& vec : bool_g.almost_all_true())
             {
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool all_res = xsimd::all(b);
-                EXPECT_FALSE(all_res) << print_function_name("all (almost_all_true)");
+                CHECK_FALSE(all_res);
             }
         }
         // none
         {
             auto none_check_false = (batch_lhs() == batch_rhs());
             bool none_res_false = xsimd::none(none_check_false);
-            EXPECT_FALSE(none_res_false) << print_function_name("none (false)");
+            CHECK_FALSE(none_res_false);
             auto none_check_true = (batch_lhs() != batch_lhs());
             bool none_res_true = xsimd::none(none_check_true);
-            EXPECT_TRUE(none_res_true) << print_function_name("none (true)");
+            CHECK_UNARY(none_res_true);
 
             for (const auto& vec : bool_g.almost_all_false())
             {
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool none_res = xsimd::none(b);
-                EXPECT_FALSE(none_res) << print_function_name("none (almost_all_false)");
+                CHECK_FALSE(none_res);
             }
 
             for (const auto& vec : bool_g.almost_all_true())
             {
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
                 bool none_res = xsimd::none(b);
-                EXPECT_FALSE(none_res) << print_function_name("none (almost_all_true)");
+                CHECK_FALSE(none_res);
             }
         }
     }
@@ -279,12 +279,12 @@ protected:
         // operator!=
         {
             bool res = xsimd::all(bool_g.half != bool_g.ihalf);
-            EXPECT_TRUE(res) << print_function_name("operator!=");
+            CHECK_UNARY(res);
         }
         // operator==
         {
             bool res = xsimd::all(bool_g.half == !bool_g.ihalf);
-            EXPECT_TRUE(res) << print_function_name("operator==");
+            CHECK_UNARY(res);
         }
         // operator &&
         {
@@ -292,7 +292,7 @@ protected:
             bool_array_type ares;
             res.store_unaligned(ares.data());
             size_t nb_false = std::count(ares.cbegin(), ares.cend(), false);
-            EXPECT_EQ(nb_false, s) << print_function_name("operator&&");
+            CHECK_EQ(nb_false, s);
         }
         // operator ||
         {
@@ -300,7 +300,7 @@ protected:
             bool_array_type ares;
             res.store_unaligned(ares.data());
             size_t nb_true = std::count(ares.cbegin(), ares.cend(), true);
-            EXPECT_EQ(nb_true, s) << print_function_name("operator||");
+            CHECK_EQ(nb_true, s);
         }
         // operator ^
         {
@@ -308,7 +308,7 @@ protected:
             bool_array_type ares;
             res.store_unaligned(ares.data());
             size_t nb_true = std::count(ares.cbegin(), ares.cend(), true);
-            EXPECT_EQ(nb_true, s) << print_function_name("operator^");
+            CHECK_EQ(nb_true, s);
         }
         // bitwise_andnot
         {
@@ -316,7 +316,7 @@ protected:
             bool_array_type ares;
             res.store_unaligned(ares.data());
             size_t nb_false = std::count(ares.cbegin(), ares.cend(), false);
-            EXPECT_EQ(nb_false, s) << print_function_name("bitwise_andnot");
+            CHECK_EQ(nb_false, s);
         }
     }
 
@@ -326,17 +326,17 @@ protected:
         // operator~
         {
             bool res = xsimd::all(bool_g.half == ~bool_g.ihalf);
-            EXPECT_TRUE(res) << print_function_name("operator~");
+            CHECK_UNARY(res);
         }
         // operator|
         {
             bool res = xsimd::all((bool_g.half | bool_g.ihalf) == bool_g.all_true);
-            EXPECT_TRUE(res) << print_function_name("operator|");
+            CHECK_UNARY(res);
         }
         // operator&
         {
             bool res = xsimd::all((bool_g.half & bool_g.ihalf) == bool_g.all_false);
-            EXPECT_TRUE(res) << print_function_name("operator&");
+            CHECK_UNARY(res);
         }
     }
 
@@ -344,20 +344,20 @@ protected:
     {
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
         const uint64_t full_mask = ((uint64_t)-1) >> (64 - batch_bool_type::size);
-        EXPECT_EQ(bool_g.all_false.mask(), 0);
-        EXPECT_EQ(batch_bool_type::from_mask(bool_g.all_false.mask()).mask(), bool_g.all_false.mask());
+        CHECK_EQ(bool_g.all_false.mask(), 0);
+        CHECK_EQ(batch_bool_type::from_mask(bool_g.all_false.mask()).mask(), bool_g.all_false.mask());
 
-        EXPECT_EQ(bool_g.all_true.mask(), full_mask);
-        EXPECT_EQ(batch_bool_type::from_mask(bool_g.all_true.mask()).mask(), bool_g.all_true.mask());
+        CHECK_EQ(bool_g.all_true.mask(), full_mask);
+        CHECK_EQ(batch_bool_type::from_mask(bool_g.all_true.mask()).mask(), bool_g.all_true.mask());
 
-        EXPECT_EQ(bool_g.half.mask(), full_mask & ((uint64_t)-1) << (batch_bool_type::size / 2));
-        EXPECT_EQ(batch_bool_type::from_mask(bool_g.half.mask()).mask(), bool_g.half.mask());
+        CHECK_EQ(bool_g.half.mask(), full_mask & ((uint64_t)-1) << (batch_bool_type::size / 2));
+        CHECK_EQ(batch_bool_type::from_mask(bool_g.half.mask()).mask(), bool_g.half.mask());
 
-        EXPECT_EQ(bool_g.ihalf.mask(), full_mask & ~(((uint64_t)-1) << (batch_bool_type::size / 2)));
-        EXPECT_EQ(batch_bool_type::from_mask(bool_g.ihalf.mask()).mask(), bool_g.ihalf.mask());
+        CHECK_EQ(bool_g.ihalf.mask(), full_mask & ~(((uint64_t)-1) << (batch_bool_type::size / 2)));
+        CHECK_EQ(batch_bool_type::from_mask(bool_g.ihalf.mask()).mask(), bool_g.ihalf.mask());
 
-        EXPECT_EQ(bool_g.interspersed.mask(), full_mask & 0xAAAAAAAAAAAAAAAAul);
-        EXPECT_EQ(batch_bool_type::from_mask(bool_g.interspersed.mask()).mask(), bool_g.interspersed.mask());
+        CHECK_EQ(bool_g.interspersed.mask(), full_mask & 0xAAAAAAAAAAAAAAAAul);
+        CHECK_EQ(batch_bool_type::from_mask(bool_g.interspersed.mask()).mask(), bool_g.interspersed.mask());
     }
 
 private:
@@ -372,35 +372,20 @@ private:
     }
 };
 
-TYPED_TEST_SUITE(batch_bool_test, batch_types, simd_test_names);
-
-TYPED_TEST(batch_bool_test, constructors)
+TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
 {
-    this->test_constructors();
-}
+    batch_bool_test<B> Test;
 
-TYPED_TEST(batch_bool_test, load_store)
-{
-    this->test_load_store();
-}
+    SUBCASE("constructors") { Test.test_constructors(); }
 
-TYPED_TEST(batch_bool_test, any_all)
-{
-    this->test_any_all();
-}
+    SUBCASE("load store") { Test.test_load_store(); }
 
-TYPED_TEST(batch_bool_test, logical_operations)
-{
-    this->test_logical_operations();
-}
+    SUBCASE("any all") { Test.test_any_all(); }
 
-TYPED_TEST(batch_bool_test, bitwise_operations)
-{
-    this->test_bitwise_operations();
-}
+    SUBCASE("logical operations") { Test.test_logical_operations(); }
 
-TYPED_TEST(batch_bool_test, mask)
-{
-    this->test_mask();
+    SUBCASE("bitwise operations") { Test.test_bitwise_operations(); }
+
+    SUBCASE("mask") { Test.test_mask(); }
 }
 #endif

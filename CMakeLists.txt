@@ -94,11 +94,6 @@ endif()
 
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" OFF)
-OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
-
-if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
-    set(BUILD_TESTS ON)
-endif()
 
 if(ENABLE_XTL_COMPLEX)
     add_definitions(-DXSIMD_ENABLE_XTL_COMPLEX=1)

@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class fp_manipulation_test : public testing::Test
+struct fp_manipulation_test
 {
-protected:
     using batch_type = B;
     using arch_type = typename B::arch_type;
     using value_type = typename B::value_type;
@@ -48,7 +47,8 @@ protected:
                            [this](const value_type& v)
                            { return std::ldexp(v, exponent); });
             batch_type res = xsimd::ldexp(batch_input(), bexp);
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("ldexp");
+            INFO("ldexp");
+            CHECK_BATCH_EQ(res, expected);
         }
         // frexp
         {
@@ -57,7 +57,8 @@ protected:
                            [](const value_type& v)
                            { int tmp; return std::frexp(v, &tmp); });
             batch_type res = xsimd::frexp(batch_input(), bexp);
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("frexp");
+            INFO("frexp");
+            CHECK_BATCH_EQ(res, expected);
         }
     }
 
@@ -68,10 +69,9 @@ private:
     }
 };
 
-TYPED_TEST_SUITE(fp_manipulation_test, batch_float_types, simd_test_names);
-
-TYPED_TEST(fp_manipulation_test, fp_manipulations)
+TEST_CASE_TEMPLATE("[fp manipulation]", B, BATCH_FLOAT_TYPES)
 {
-    this->test_fp_manipulations();
+    fp_manipulation_test<B> Test;
+    Test.test_fp_manipulations();
 }
 #endif

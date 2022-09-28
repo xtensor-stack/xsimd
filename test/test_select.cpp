@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class select_test : public testing::Test
+struct select_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -59,7 +58,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("select_dynamic");
+        CHECK_EQ(diff, 0);
     }
     struct pattern
     {
@@ -84,12 +83,14 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("select_static");
+        CHECK_EQ(diff, 0);
     }
 };
 
-TYPED_TEST_SUITE(select_test, batch_types, simd_test_names);
-
-TYPED_TEST(select_test, select_dynamic) { this->test_select_dynamic(); }
-TYPED_TEST(select_test, select_static) { this->test_select_static(); }
+TEST_CASE_TEMPLATE("[select]", B, BATCH_TYPES)
+{
+    select_test<B> Test;
+    SUBCASE("select_dynamic") { Test.test_select_dynamic(); }
+    SUBCASE("select_static") { Test.test_select_static(); }
+}
 #endif

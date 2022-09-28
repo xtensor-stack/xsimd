@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class complex_exponential_test : public testing::Test
+struct complex_exponential_test
 {
-protected:
     using batch_type = B;
     using real_batch_type = typename B::real_batch;
     using value_type = typename B::value_type;
@@ -63,7 +62,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("exp");
+        CHECK_EQ(diff, 0);
     }
 
     void test_expm1()
@@ -80,7 +79,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("expm1");
+        CHECK_EQ(diff, 0);
     }
 
     void test_huge_exp()
@@ -96,7 +95,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("huge exp");
+        CHECK_EQ(diff, 0);
     }
 
     void test_log()
@@ -112,7 +111,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("log");
+        CHECK_EQ(diff, 0);
     }
 
     void test_log2()
@@ -128,7 +127,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("log2");
+        CHECK_EQ(diff, 0);
     }
 
     void test_log10()
@@ -144,7 +143,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("log10");
+        CHECK_EQ(diff, 0);
     }
 
     void test_log1p()
@@ -160,7 +159,7 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("log1p");
+        CHECK_EQ(diff, 0);
     }
 
     void test_sign()
@@ -176,49 +175,52 @@ protected:
             detail::store_batch(out, res, i);
         }
         size_t diff = detail::get_nb_diff(res, expected);
-        EXPECT_EQ(diff, 0) << print_function_name("sign");
+        CHECK_EQ(diff, 0);
     }
 };
 
-TYPED_TEST_SUITE(complex_exponential_test, batch_complex_types, simd_test_names);
-
-TYPED_TEST(complex_exponential_test, exp)
+TEST_CASE_TEMPLATE("[complex exponential]", B, BATCH_COMPLEX_TYPES)
 {
-    this->test_exp();
-}
+    complex_exponential_test<B> Test;
 
-TYPED_TEST(complex_exponential_test, expm1)
-{
-    this->test_expm1();
-}
+    SUBCASE("exp")
+    {
+        Test.test_exp();
+    }
 
-TYPED_TEST(complex_exponential_test, huge_exp)
-{
-    this->test_huge_exp();
-}
+    SUBCASE("expm1")
+    {
+        Test.test_expm1();
+    }
 
-TYPED_TEST(complex_exponential_test, log)
-{
-    this->test_log();
-}
+    SUBCASE("huge_exp")
+    {
+        Test.test_huge_exp();
+    }
 
-TYPED_TEST(complex_exponential_test, log2)
-{
-    this->test_log2();
-}
+    SUBCASE("log")
+    {
+        Test.test_log();
+    }
 
-TYPED_TEST(complex_exponential_test, log10)
-{
-    this->test_log10();
-}
+    SUBCASE("log2")
+    {
+        Test.test_log2();
+    }
 
-TYPED_TEST(complex_exponential_test, log1p)
-{
-    this->test_log1p();
-}
+    SUBCASE("log10")
+    {
+        Test.test_log10();
+    }
 
-TYPED_TEST(complex_exponential_test, sign)
-{
-    this->test_sign();
+    SUBCASE("log1p")
+    {
+        Test.test_log1p();
+    }
+
+    SUBCASE("sign")
+    {
+        Test.test_sign();
+    }
 }
 #endif

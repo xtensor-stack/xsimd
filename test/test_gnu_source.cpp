@@ -17,10 +17,14 @@
 #endif
 #include "xsimd/xsimd.hpp"
 
-#include "gtest/gtest.h"
+#include "doctest/doctest.h"
 
-TEST(gnu_source, exp10)
+TEST_CASE("[GNU_SOURCE support]")
 {
-    EXPECT_EQ(xsimd::exp10(0.), 1.);
-    EXPECT_EQ(xsimd::exp10(0.f), 1.f);
+
+    SUBCASE("exp10")
+    {
+        CHECK_EQ(xsimd::exp10(0.), 1.);
+        CHECK_EQ(xsimd::exp10(0.f), 1.f);
+    }
 }

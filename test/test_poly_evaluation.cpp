@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class poly_evaluation_test : public testing::Test
+struct poly_evaluation_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -52,14 +51,14 @@ protected:
             detail::store_batch(out, estrin_res, i);
         }
         size_t diff = detail::get_nb_diff(horner_res, estrin_res);
-        EXPECT_EQ(diff, 0) << print_function_name("estrin");
+        CHECK_EQ(diff, 0);
     }
 };
 
-TYPED_TEST_SUITE(poly_evaluation_test, batch_float_types, simd_test_names);
-
-TYPED_TEST(poly_evaluation_test, poly_evaluation)
+TEST_CASE_TEMPLATE("[poly evaluation]", B, BATCH_FLOAT_TYPES)
 {
-    this->test_poly_evaluation();
+
+    poly_evaluation_test<B> Test;
+    Test.test_poly_evaluation();
 }
 #endif

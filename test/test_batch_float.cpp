@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class batch_float_test : public testing::Test
+struct batch_float_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -51,7 +50,8 @@ protected:
             batch_type res1 = reciprocal(batch_lhs());
             res1.store_unaligned(res.data());
             size_t diff = detail::get_nb_diff_near(res, expected, 1e-12f);
-            EXPECT_EQ(diff, 0) << print_function_name("reciprocal");
+            INFO("reciprocal");
+            CHECK_EQ(diff, 0);
         }
     }
 
@@ -66,7 +66,8 @@ protected:
             batch_type res1 = ceil(rsqrt(batch_lhs()) * value_type(100));
             res1.store_unaligned(res.data());
             size_t diff = detail::get_nb_diff_near(res, expected, 1.5f * std::pow(2, 12));
-            EXPECT_EQ(diff, 0) << print_function_name("rsqrt");
+            INFO("rsqrt");
+            CHECK_EQ(diff, 0);
         }
     }
 
@@ -79,7 +80,8 @@ protected:
                            [](const value_type& l)
                            { return std::sqrt(l); });
             batch_type res = sqrt(batch_lhs());
-            EXPECT_BATCH_EQ(res, expected) << print_function_name("sqrt");
+            INFO("sqrt");
+            CHECK_BATCH_EQ(res, expected);
         }
     }
 
@@ -108,7 +110,8 @@ protected:
             }
         }
         auto res = haddp(haddp_input);
-        EXPECT_BATCH_EQ(res, expected) << print_function_name("haddp");
+        INFO("haddp");
+        CHECK_BATCH_EQ(res, expected);
     }
 
 private:
@@ -123,25 +126,16 @@ private:
     }
 };
 
-TYPED_TEST_SUITE(batch_float_test, batch_float_types, simd_test_names);
-
-TYPED_TEST(batch_float_test, reciprocal)
+TEST_CASE_TEMPLATE("[xsimd batch float]", B, BATCH_FLOAT_TYPES)
 {
-    this->test_reciprocal();
-}
+    batch_float_test<B> Test;
 
-TYPED_TEST(batch_float_test, sqrt)
-{
-    this->test_sqrt();
-}
+    SUBCASE("reciprocal") { Test.test_reciprocal(); }
 
-TYPED_TEST(batch_float_test, rsqrt)
-{
-    this->test_rsqrt();
-}
+    SUBCASE("sqrt") { Test.test_sqrt(); }
 
-TYPED_TEST(batch_float_test, haddp)
-{
-    this->test_haddp();
+    SUBCASE("rsqrt") { Test.test_rsqrt(); }
+
+    SUBCASE("haddp") { Test.test_haddp(); }
 }
 #endif

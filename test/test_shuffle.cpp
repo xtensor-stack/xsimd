@@ -65,17 +65,11 @@ namespace
 }
 
 template <class B>
-class shuffle_test : public testing::Test
+struct shuffle_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
-
-    shuffle_test()
-    {
-        std::cout << "shuffle-128 test" << std::endl;
-    }
 
     void shuffle_low_high()
     {
@@ -92,18 +86,20 @@ protected:
         B b_exp_hi = B::load_unaligned(v_exp_hi.data());
 
         B b_res_lo = xsimd::zip_lo(b_lhs, b_rhs);
-        EXPECT_BATCH_EQ(b_res_lo, b_exp_lo) << print_function_name("zip low test");
+        INFO("zip low test");
+        CHECK_BATCH_EQ(b_res_lo, b_exp_lo);
 
         B b_res_hi = xsimd::zip_hi(b_lhs, b_rhs);
-        EXPECT_BATCH_EQ(b_res_hi, b_exp_hi) << print_function_name("zip high test");
+        INFO("zip high test");
+        CHECK_BATCH_EQ(b_res_hi, b_exp_hi);
     }
 };
 
-TYPED_TEST_SUITE(shuffle_test, batch_types, simd_test_names);
+TEST_CASE_TEMPLATE("[suhuffle]", B, BATCH_TYPES)
 
-TYPED_TEST(shuffle_test, shuffle_low_high)
 {
-    this->shuffle_low_high();
+    shuffle_test<B> Test;
+    Test.shuffle_low_high();
 }
 
 namespace
@@ -167,9 +163,8 @@ namespace
 }
 
 template <class B>
-class slide_test : public testing::Test, init_slide_base<typename B::value_type, B::size>
+struct slide_test : public init_slide_base<typename B::value_type, B::size>
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -179,11 +174,6 @@ protected:
     using base::below_half_slide;
     using base::full_slide;
     using base::half_slide;
-
-    slide_test()
-    {
-        std::cout << "slide test" << std::endl;
-    }
 
     void slide_left()
     {
@@ -196,24 +186,30 @@ protected:
         B b_left_below_half = B::load_unaligned(this->v_left_below_half.data());
 
         B b_res_left0 = xsimd::slide_left<0>(b_in);
-        EXPECT_BATCH_EQ(b_res_left0, b_left0) << print_function_name("slide_left 0");
+        INFO("slide_left 0");
+        CHECK_BATCH_EQ(b_res_left0, b_left0);
 
         B b_res_left_full = xsimd::slide_left<full_slide>(b_in);
-        EXPECT_BATCH_EQ(b_res_left_full, b_left_full) << print_function_name("slide_left full");
+        INFO("slide_left full");
+        CHECK_BATCH_EQ(b_res_left_full, b_left_full);
 
         B b_res_left_half = xsimd::slide_left<half_slide>(b_in);
-        EXPECT_BATCH_EQ(b_res_left_half, b_left_half) << print_function_name("slide_left half_slide");
+        INFO("slide_left half_slide");
+        CHECK_BATCH_EQ(b_res_left_half, b_left_half);
 
         B b_res_left_one = xsimd::slide_left<sizeof(value_type)>(b_in);
-        EXPECT_BATCH_EQ(b_res_left_one, b_left_one) << print_function_name("slide_left one_slide");
+        INFO("slide_left one_slide");
+        CHECK_BATCH_EQ(b_res_left_one, b_left_one);
 
         if (activate_above_below_checks)
         {
             B b_res_left_above_half = xsimd::slide_left<above_half_slide>(b_in);
-            EXPECT_BATCH_EQ(b_res_left_above_half, b_left_above_half) << print_function_name("slide_left above_half_slide");
+            INFO("slide_left above_half_slide");
+            CHECK_BATCH_EQ(b_res_left_above_half, b_left_above_half);
 
             B b_res_left_below_half = xsimd::slide_left<below_half_slide>(b_in);
-            EXPECT_BATCH_EQ(b_res_left_below_half, b_left_below_half) << print_function_name("slide_left below_half_slide");
+            INFO("slide_left below_half_slide");
+            CHECK_BATCH_EQ(b_res_left_below_half, b_left_below_half);
         }
     }
 
@@ -228,35 +224,44 @@ protected:
         B b_right_below_half = B::load_unaligned(this->v_right_below_half.data());
 
         B b_res_right0 = xsimd::slide_right<0>(b_in);
-        EXPECT_BATCH_EQ(b_res_right0, b_right0) << print_function_name("slide_right 0");
+        INFO("slide_right 0");
+        CHECK_BATCH_EQ(b_res_right0, b_right0);
 
         B b_res_right_full = xsimd::slide_right<full_slide>(b_in);
-        EXPECT_BATCH_EQ(b_res_right_full, b_right_full) << print_function_name("slide_right full");
+        INFO("slide_right full");
+        CHECK_BATCH_EQ(b_res_right_full, b_right_full);
 
         B b_res_right_half = xsimd::slide_right<half_slide>(b_in);
-        EXPECT_BATCH_EQ(b_res_right_half, b_right_half) << print_function_name("slide_right half_slide");
+        INFO("slide_right half_slide");
+        CHECK_BATCH_EQ(b_res_right_half, b_right_half);
 
         B b_res_right_one = xsimd::slide_right<sizeof(value_type)>(b_in);
-        EXPECT_BATCH_EQ(b_res_right_one, b_right_one) << print_function_name("slide_right one_slide");
+        INFO("slide_right one_slide");
+        CHECK_BATCH_EQ(b_res_right_one, b_right_one);
 
         if (activate_above_below_checks)
         {
             B b_res_right_above_half = xsimd::slide_right<above_half_slide>(b_in);
-            EXPECT_BATCH_EQ(b_res_right_above_half, b_right_above_half) << print_function_name("slide_right above_half_slide");
+            INFO("slide_right above_half_slide");
+            CHECK_BATCH_EQ(b_res_right_above_half, b_right_above_half);
 
             B b_res_right_below_half = xsimd::slide_right<below_half_slide>(b_in);
-            EXPECT_BATCH_EQ(b_res_right_below_half, b_right_below_half) << print_function_name("slide_right below_half_slide");
+            INFO("slide_right below_half_slide");
+            CHECK_BATCH_EQ(b_res_right_below_half, b_right_below_half);
         }
     }
 };
 
-TYPED_TEST_SUITE(slide_test, batch_int_types, simd_test_names);
-TYPED_TEST(slide_test, slide_left)
+TEST_CASE_TEMPLATE("[slide]", B, BATCH_INT_TYPES)
 {
-    this->slide_left();
-}
-TYPED_TEST(slide_test, slide_right)
-{
-    this->slide_right();
+    slide_test<B> Test;
+    SUBCASE("slide_left")
+    {
+        Test.slide_left();
+    }
+    SUBCASE("slide_right")
+    {
+        Test.slide_right();
+    }
 }
 #endif

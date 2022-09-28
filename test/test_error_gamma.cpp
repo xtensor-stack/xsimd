@@ -15,9 +15,8 @@
 #include "test_utils.hpp"
 
 template <class B>
-class error_gamma_test : public testing::Test
+struct error_gamma_test
 {
-protected:
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
@@ -61,7 +60,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("erf");
+            INFO("erf");
+            CHECK_EQ(diff, 0);
         }
         // erfc
         {
@@ -76,7 +76,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("erfc");
+            INFO("erfc");
+            CHECK_EQ(diff, 0);
         }
     }
 
@@ -95,7 +96,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("tgamma");
+            INFO("tgamma");
+            CHECK_EQ(diff, 0);
         }
         // tgamma (negative input)
         {
@@ -110,7 +112,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("tgamma (negative input)");
+            INFO("tgamma (negative input)");
+            CHECK_EQ(diff, 0);
         }
         // lgamma
         {
@@ -125,7 +128,8 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("lgamma");
+            INFO("lgamma");
+            CHECK_EQ(diff, 0);
         }
 #if !(XSIMD_WITH_AVX && !XSIMD_WITH_AVX2)
 
@@ -142,21 +146,25 @@ protected:
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            EXPECT_EQ(diff, 0) << print_function_name("lgamma (negative input)");
+            INFO("lgamma (negative input)");
+            CHECK_EQ(diff, 0);
         }
 #endif
     }
 };
 
-TYPED_TEST_SUITE(error_gamma_test, batch_float_types, simd_test_names);
-
-TYPED_TEST(error_gamma_test, error)
+TEST_CASE_TEMPLATE("[error gamma]", B, BATCH_FLOAT_TYPES)
 {
-    this->test_error_functions();
-}
+    error_gamma_test<B> Test;
 
-TYPED_TEST(error_gamma_test, gamma)
-{
-    this->test_gamma_functions();
+    SUBCASE("error")
+    {
+        Test.test_error_functions();
+    }
+
+    SUBCASE("gamma")
+    {
+        Test.test_gamma_functions();
+    }
 }
 #endif

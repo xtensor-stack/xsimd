@@ -4,3 +4,4 @@ channels:
 dependencies:
   - ninja
   - xtl
+  - doctest

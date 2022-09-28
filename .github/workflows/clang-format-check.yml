@@ -1,6 +1,6 @@
 name: clang-format
 on: [push, pull_request]
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
@@ -13,3 +13,4 @@ jobs:
       uses: jidicula/clang-format-action@v4.2.0
       with:
         clang-format-version: '13'
+        exclude-regex: 'doctest.h'
