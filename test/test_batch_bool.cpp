@@ -323,19 +323,36 @@ struct batch_bool_test
     void test_bitwise_operations() const
     {
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
-        // operator~
+        // operator version
         {
             bool res = xsimd::all(bool_g.half == ~bool_g.ihalf);
+            INFO("operator~");
             CHECK_UNARY(res);
         }
-        // operator|
         {
             bool res = xsimd::all((bool_g.half | bool_g.ihalf) == bool_g.all_true);
+            INFO("operator|");
             CHECK_UNARY(res);
         }
-        // operator&
         {
             bool res = xsimd::all((bool_g.half & bool_g.ihalf) == bool_g.all_false);
+            INFO("operator&");
+            CHECK_UNARY(res);
+        }
+        // free function version
+        {
+            bool res = xsimd::all(bool_g.half == xsimd::bitwise_not(bool_g.ihalf));
+            INFO("bitwise_not");
+            CHECK_UNARY(res);
+        }
+        {
+            bool res = xsimd::all(xsimd::bitwise_or(bool_g.half, bool_g.ihalf) == bool_g.all_true);
+            INFO("bitwise_or");
+            CHECK_UNARY(res);
+        }
+        {
+            bool res = xsimd::all(xsimd::bitwise_and(bool_g.half, bool_g.ihalf) == bool_g.all_false);
+            INFO("bitwise_and");
             CHECK_UNARY(res);
         }
     }
