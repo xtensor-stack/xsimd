@@ -56,7 +56,7 @@ bool extract(xsimd::batch_bool<T, A> const& batch) { return batch.get(0); }
 #define FLOAT_TYPES_TAIL
 #else
 #define FLOAT_TYPES_MIDDLE , xsimd::batch<float>
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 #define FLOAT_TYPES_TAIL , xsimd::batch<double>
 #else
 #define FLOAT_TYPES_TAIL
@@ -76,7 +76,7 @@ bool extract(xsimd::batch_bool<T, A> const& batch) { return batch.get(0); }
 #else
 #define ALL_FLOATING_POINT_TYPES_MIDDLE , xsimd::batch<float>, xsimd::batch<std::complex<float>>
 
-#if defined(XSIMD_WITH_NEON) && !defined(XSIMD_WITH_NEON64)
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 #define ALL_FLOATING_POINT_TYPES_TAIL , xsimd::batch<double>, xsimd::batch<std::complex<double>>
 #else
 #define ALL_FLOATING_POINT_TYPES_TAIL
@@ -623,7 +623,7 @@ struct xsimd_api_float_types_functions
     void test_pow()
     {
         value_type val0(2);
-        value_type val1(3);
+        value_type val1(2);
         int ival1 = 4;
         CHECK_EQ(extract(xsimd::pow(T(val0), T(val1))), std::pow(val0, val1));
         CHECK_EQ(extract(xsimd::pow(T(val0), ival1)), std::pow(val0, ival1));
