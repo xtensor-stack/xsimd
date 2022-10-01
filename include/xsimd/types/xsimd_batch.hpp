@@ -21,6 +21,59 @@
 
 namespace xsimd
 {
+    template <class T, class A = default_arch>
+    class batch;
+    namespace types
+    {
+        template <class T, class A>
+        struct integral_only_operators
+        {
+            inline batch<T, A>& operator%=(batch<T, A> const& other) noexcept;
+            inline batch<T, A>& operator>>=(int32_t other) noexcept;
+            inline batch<T, A>& operator>>=(batch<T, A> const& other) noexcept;
+            inline batch<T, A>& operator<<=(int32_t other) noexcept;
+            inline batch<T, A>& operator<<=(batch<T, A> const& other) noexcept;
+
+            /** Shorthand for xsimd::mod() */
+            friend batch<T, A> operator%(batch<T, A> const& self, batch<T, A> const& other) noexcept
+            {
+                return batch<T, A>(self) %= other;
+            }
+
+            /** Shorthand for xsimd::bitwise_rshift() */
+            friend batch<T, A> operator>>(batch<T, A> const& self, batch<T, A> const& other) noexcept
+            {
+                return batch<T, A>(self) >>= other;
+            }
+
+            /** Shorthand for xsimd::bitwise_lshift() */
+            friend batch<T, A> operator<<(batch<T, A> const& self, batch<T, A> const& other) noexcept
+            {
+                return batch<T, A>(self) <<= other;
+            }
+
+            /** Shorthand for xsimd::bitwise_rshift() */
+            friend batch<T, A> operator>>(batch<T, A> const& self, int32_t other) noexcept
+            {
+                return batch<T, A>(self) >>= other;
+            }
+
+            /** Shorthand for xsimd::bitwise_lshift() */
+            friend batch<T, A> operator<<(batch<T, A> const& self, int32_t other) noexcept
+            {
+                return batch<T, A>(self) <<= other;
+            }
+        };
+        template <class A>
+        struct integral_only_operators<float, A>
+        {
+        };
+        template <class A>
+        struct integral_only_operators<double, A>
+        {
+        };
+
+    }
 
     /**
      * @brief batch of integer or floating point values.
@@ -31,8 +84,8 @@ namespace xsimd
      * @tparam T the type of the underlying values.
      * @tparam A the architecture this batch is tied too.
      **/
-    template <class T, class A = default_arch>
-    class batch : public types::simd_register<T, A>
+    template <class T, class A>
+    class batch : public types::simd_register<T, A>, public types::integral_only_operators<T, A>
     {
 
     public:
@@ -93,14 +146,9 @@ namespace xsimd
         inline batch& operator-=(batch const& other) noexcept;
         inline batch& operator*=(batch const& other) noexcept;
         inline batch& operator/=(batch const& other) noexcept;
-        inline batch& operator%=(batch const& other) noexcept;
         inline batch& operator&=(batch const& other) noexcept;
         inline batch& operator|=(batch const& other) noexcept;
         inline batch& operator^=(batch const& other) noexcept;
-        inline batch& operator>>=(int32_t other) noexcept;
-        inline batch& operator>>=(batch const& other) noexcept;
-        inline batch& operator<<=(int32_t other) noexcept;
-        inline batch& operator<<=(batch const& other) noexcept;
 
         // incr/decr operators
         inline batch& operator++() noexcept;
@@ -142,12 +190,6 @@ namespace xsimd
             return batch(self) /= other;
         }
 
-        /** Shorthand for xsimd::mod() */
-        friend batch operator%(batch const& self, batch const& other) noexcept
-        {
-            return batch(self) %= other;
-        }
-
         /** Shorthand for xsimd::bitwise_and() */
         friend batch operator&(batch const& self, batch const& other) noexcept
         {
@@ -164,30 +206,6 @@ namespace xsimd
         friend batch operator^(batch const& self, batch const& other) noexcept
         {
             return batch(self) ^= other;
-        }
-
-        /** Shorthand for xsimd::bitwise_rshift() */
-        friend batch operator>>(batch const& self, batch const& other) noexcept
-        {
-            return batch(self) >>= other;
-        }
-
-        /** Shorthand for xsimd::bitwise_lshift() */
-        friend batch operator<<(batch const& self, batch const& other) noexcept
-        {
-            return batch(self) <<= other;
-        }
-
-        /** Shorthand for xsimd::bitwise_rshift() */
-        friend batch operator>>(batch const& self, int32_t other) noexcept
-        {
-            return batch(self) >>= other;
-        }
-
-        /** Shorthand for xsimd::bitwise_lshift() */
-        friend batch operator<<(batch const& self, int32_t other) noexcept
-        {
-            return batch(self) <<= other;
         }
 
         /** Shorthand for xsimd::logical_and() */
@@ -726,10 +744,10 @@ namespace xsimd
     }
 
     template <class T, class A>
-    inline batch<T, A>& batch<T, A>::operator%=(batch<T, A> const& other) noexcept
+    inline batch<T, A>& types::integral_only_operators<T, A>::operator%=(batch<T, A> const& other) noexcept
     {
-        detail::static_check_supported_config<T, A>();
-        return *this = kernel::mod<A>(*this, other, A {});
+        ::xsimd::detail::static_check_supported_config<T, A>();
+        return *static_cast<batch<T, A>*>(this) = kernel::mod<A>(*static_cast<batch<T, A>*>(this), other, A {});
     }
 
     template <class T, class A>
@@ -754,31 +772,31 @@ namespace xsimd
     }
 
     template <class T, class A>
-    inline batch<T, A>& batch<T, A>::operator>>=(batch<T, A> const& other) noexcept
+    inline batch<T, A>& kernel::integral_only_operators<T, A>::operator>>=(batch<T, A> const& other) noexcept
     {
-        detail::static_check_supported_config<T, A>();
-        return *this = kernel::bitwise_rshift<A>(*this, other, A {});
+        ::xsimd::detail::static_check_supported_config<T, A>();
+        return *static_cast<batch<T, A>*>(this) = kernel::bitwise_rshift<A>(*static_cast<batch<T, A>*>(this), other, A {});
     }
 
     template <class T, class A>
-    inline batch<T, A>& batch<T, A>::operator<<=(batch<T, A> const& other) noexcept
+    inline batch<T, A>& kernel::integral_only_operators<T, A>::operator<<=(batch<T, A> const& other) noexcept
     {
-        detail::static_check_supported_config<T, A>();
-        return *this = kernel::bitwise_lshift<A>(*this, other, A {});
+        ::xsimd::detail::static_check_supported_config<T, A>();
+        return *static_cast<batch<T, A>*>(this) = kernel::bitwise_lshift<A>(*static_cast<batch<T, A>*>(this), other, A {});
     }
 
     template <class T, class A>
-    inline batch<T, A>& batch<T, A>::operator>>=(int32_t other) noexcept
+    inline batch<T, A>& kernel::integral_only_operators<T, A>::operator>>=(int32_t other) noexcept
     {
-        detail::static_check_supported_config<T, A>();
-        return *this = kernel::bitwise_rshift<A>(*this, other, A {});
+        ::xsimd::detail::static_check_supported_config<T, A>();
+        return *static_cast<batch<T, A>*>(this) = kernel::bitwise_rshift<A>(*static_cast<batch<T, A>*>(this), other, A {});
     }
 
     template <class T, class A>
-    inline batch<T, A>& batch<T, A>::operator<<=(int32_t other) noexcept
+    inline batch<T, A>& kernel::integral_only_operators<T, A>::operator<<=(int32_t other) noexcept
     {
-        detail::static_check_supported_config<T, A>();
-        return *this = kernel::bitwise_lshift<A>(*this, other, A {});
+        ::xsimd::detail::static_check_supported_config<T, A>();
+        return *static_cast<batch<T, A>*>(this) = kernel::bitwise_lshift<A>(*static_cast<batch<T, A>*>(this), other, A {});
     }
 
     /*****************************

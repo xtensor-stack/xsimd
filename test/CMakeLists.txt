@@ -142,6 +142,7 @@ set(XSIMD_TESTS
     test_complex_trigonometric.cpp
     test_conversion.cpp
     test_error_gamma.cpp
+    test_explicit_batch_instantiation.cpp
     test_exponential.cpp
     test_extract_pair.cpp
     test_fp_manipulation.cpp
