@@ -19,7 +19,7 @@
 namespace
 {
     template <typename T, std::size_t N>
-    struct init_shuffle_base
+    struct zip_base
     {
         using shuffle_vector_type = std::array<T, N>;
         shuffle_vector_type lhs_in, rhs_in, exp_lo, exp_hi;
@@ -29,32 +29,22 @@ namespace
             std::vector<shuffle_vector_type> vects;
             vects.reserve(4);
 
-            constexpr size_t K = 128 / (sizeof(T) * 8);
-            constexpr size_t P = N / K;
-
             /* Generate input data: lhs, rhs */
-            for (size_t p = 0; p < P; ++p)
+            for (size_t i = 0; i < N; ++i)
             {
-                for (size_t i = 0; i < K; ++i)
-                {
-                    lhs_in[i + p * K] = 2 * i + 1;
-                    rhs_in[i + p * K] = 2 * i + 2;
-                }
+                lhs_in[i] = 'A' + 2 * i + 1;
+                rhs_in[i] = 'A' + 2 * i;
             }
             vects.push_back(std::move(lhs_in));
             vects.push_back(std::move(rhs_in));
 
-            /* Expected shuffle data */
-            for (size_t p = 0; p < P; ++p)
+            /* Expected zipped data */
+            for (size_t i = 0; i < N / 2; ++i)
             {
-                for (size_t i = 0, j = 0; i < K / 2; ++i, j = j + 2)
-                {
-                    exp_lo[j + p * K] = lhs_in[i];
-                    exp_hi[j + p * K] = lhs_in[i + K / 2];
-
-                    exp_lo[j + 1 + p * K] = rhs_in[i];
-                    exp_hi[j + 1 + p * K] = rhs_in[i + K / 2];
-                }
+                exp_lo[2 * i] = lhs_in[i];
+                exp_lo[2 * i + 1] = rhs_in[i];
+                exp_hi[2 * i] = lhs_in[i + N / 2];
+                exp_hi[2 * i + 1] = rhs_in[i + N / 2];
             }
             vects.push_back(std::move(exp_lo));
             vects.push_back(std::move(exp_hi));
@@ -65,41 +55,49 @@ namespace
 }
 
 template <class B>
-struct shuffle_test
+struct zip_test : zip_base<typename B::value_type, B::size>
 {
     using batch_type = B;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
+    using zip_base<value_type, size>::create_vectors;
 
-    void shuffle_low_high()
+    void zip_low()
     {
-        init_shuffle_base<value_type, size> shuffle_base;
-        auto shuffle_base_vecs = shuffle_base.create_vectors();
-        auto v_lhs = shuffle_base_vecs[0];
-        auto v_rhs = shuffle_base_vecs[1];
-        auto v_exp_lo = shuffle_base_vecs[2];
-        auto v_exp_hi = shuffle_base_vecs[3];
+        auto zipped_vecs = create_vectors();
+        auto v_lhs = zipped_vecs[0];
+        auto v_rhs = zipped_vecs[1];
+        auto v_exp_lo = zipped_vecs[2];
 
         B b_lhs = B::load_unaligned(v_lhs.data());
         B b_rhs = B::load_unaligned(v_rhs.data());
         B b_exp_lo = B::load_unaligned(v_exp_lo.data());
-        B b_exp_hi = B::load_unaligned(v_exp_hi.data());
 
         B b_res_lo = xsimd::zip_lo(b_lhs, b_rhs);
-        INFO("zip low test");
         CHECK_BATCH_EQ(b_res_lo, b_exp_lo);
+    }
+    void zip_hi()
+    {
+        auto zipped_vecs = create_vectors();
+        auto v_lhs = zipped_vecs[0];
+        auto v_rhs = zipped_vecs[1];
+        auto v_exp_hi = zipped_vecs[3];
+
+        B b_lhs = B::load_unaligned(v_lhs.data());
+        B b_rhs = B::load_unaligned(v_rhs.data());
+        B b_exp_hi = B::load_unaligned(v_exp_hi.data());
 
         B b_res_hi = xsimd::zip_hi(b_lhs, b_rhs);
-        INFO("zip high test");
         CHECK_BATCH_EQ(b_res_hi, b_exp_hi);
     }
 };
 
-TEST_CASE_TEMPLATE("[suhuffle]", B, BATCH_TYPES)
+TEST_CASE_TEMPLATE("[zip]", B, BATCH_TYPES)
 
 {
-    shuffle_test<B> Test;
-    Test.shuffle_low_high();
+    zip_test<B> Test;
+    SUBCASE("zip low") { Test.zip_low(); }
+    SUBCASE("zip high") { Test.zip_hi(); }
 }
 
 namespace
