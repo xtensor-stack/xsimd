@@ -1784,74 +1784,130 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512f>) noexcept
         {
+            __m512i lo, hi;
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                return _mm512_unpackhi_epi8(self, other);
+                lo = _mm512_unpacklo_epi8(self, other);
+                hi = _mm512_unpackhi_epi8(self, other);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-                return _mm512_unpackhi_epi16(self, other);
+                lo = _mm512_unpacklo_epi16(self, other);
+                hi = _mm512_unpackhi_epi16(self, other);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                return _mm512_unpackhi_epi32(self, other);
+                lo = _mm512_unpacklo_epi32(self, other);
+                hi = _mm512_unpackhi_epi32(self, other);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
-                return _mm512_unpackhi_epi64(self, other);
+                lo = _mm512_unpacklo_epi64(self, other);
+                hi = _mm512_unpackhi_epi64(self, other);
             }
             else
             {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
+            return _mm512_inserti32x4(
+                _mm512_inserti32x4(
+                    _mm512_inserti32x4(hi, _mm512_extracti32x4_epi32(lo, 2), 0),
+                    _mm512_extracti32x4_epi32(lo, 3),
+                    2),
+                _mm512_extracti32x4_epi32(hi, 2),
+                1);
         }
         template <class A>
         inline batch<float, A> zip_hi(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
         {
-            return _mm512_unpackhi_ps(self, other);
+            auto lo = _mm512_unpacklo_ps(self, other);
+            auto hi = _mm512_unpackhi_ps(self, other);
+            return _mm512_insertf32x4(
+                _mm512_insertf32x4(
+                    _mm512_insertf32x4(hi, _mm512_extractf32x4_ps(lo, 2), 0),
+                    _mm512_extractf32x4_ps(lo, 3),
+                    2),
+                _mm512_extractf32x4_ps(hi, 2),
+                1);
         }
         template <class A>
         inline batch<double, A> zip_hi(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512f>) noexcept
         {
-            return _mm512_unpackhi_pd(self, other);
+            auto lo = _mm512_castpd_ps(_mm512_unpacklo_pd(self, other));
+            auto hi = _mm512_castpd_ps(_mm512_unpackhi_pd(self, other));
+            return _mm512_castps_pd(_mm512_insertf32x4(
+                _mm512_insertf32x4(
+                    _mm512_insertf32x4(hi, _mm512_extractf32x4_ps(lo, 2), 0),
+                    _mm512_extractf32x4_ps(lo, 3),
+                    2),
+                _mm512_extractf32x4_ps(hi, 2),
+                1));
         }
 
         // zip_lo
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512f>) noexcept
         {
+            __m512i lo, hi;
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                return _mm512_unpacklo_epi8(self, other);
+                lo = _mm512_unpacklo_epi8(self, other);
+                hi = _mm512_unpackhi_epi8(self, other);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-                return _mm512_unpacklo_epi16(self, other);
+                lo = _mm512_unpacklo_epi16(self, other);
+                hi = _mm512_unpackhi_epi16(self, other);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                return _mm512_unpacklo_epi32(self, other);
+                lo = _mm512_unpacklo_epi32(self, other);
+                hi = _mm512_unpackhi_epi32(self, other);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
-                return _mm512_unpacklo_epi64(self, other);
+                lo = _mm512_unpacklo_epi64(self, other);
+                hi = _mm512_unpackhi_epi64(self, other);
             }
             else
             {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
+            return _mm512_inserti32x4(
+                _mm512_inserti32x4(
+                    _mm512_inserti32x4(lo, _mm512_extracti32x4_epi32(hi, 0), 1),
+                    _mm512_extracti32x4_epi32(hi, 1),
+                    3),
+                _mm512_extracti32x4_epi32(lo, 1),
+                2);
         }
         template <class A>
         inline batch<float, A> zip_lo(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
         {
-            return _mm512_unpacklo_ps(self, other);
+            auto lo = _mm512_unpacklo_ps(self, other);
+            auto hi = _mm512_unpackhi_ps(self, other);
+            return _mm512_insertf32x4(
+                _mm512_insertf32x4(
+                    _mm512_insertf32x4(lo, _mm512_extractf32x4_ps(hi, 0), 1),
+                    _mm512_extractf32x4_ps(hi, 1),
+                    3),
+                _mm512_extractf32x4_ps(lo, 1),
+                2);
         }
         template <class A>
         inline batch<double, A> zip_lo(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512f>) noexcept
         {
-            return _mm512_unpacklo_pd(self, other);
+            auto lo = _mm512_castpd_ps(_mm512_unpacklo_pd(self, other));
+            auto hi = _mm512_castpd_ps(_mm512_unpackhi_pd(self, other));
+            return _mm512_castps_pd(_mm512_insertf32x4(
+                _mm512_insertf32x4(
+                    _mm512_insertf32x4(lo, _mm512_extractf32x4_ps(hi, 0), 1),
+                    _mm512_extractf32x4_ps(hi, 1),
+                    3),
+                _mm512_extractf32x4_ps(lo, 1),
+                2));
         }
 
     }

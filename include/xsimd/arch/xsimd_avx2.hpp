@@ -871,19 +871,27 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                return _mm256_unpackhi_epi8(self, other);
+                auto lo = _mm256_unpacklo_epi8(self, other);
+                auto hi = _mm256_unpackhi_epi8(self, other);
+                return _mm256_permute2f128_si256(lo, hi, 0x31);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-                return _mm256_unpackhi_epi16(self, other);
+                auto lo = _mm256_unpacklo_epi16(self, other);
+                auto hi = _mm256_unpackhi_epi16(self, other);
+                return _mm256_permute2f128_si256(lo, hi, 0x31);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                return _mm256_unpackhi_epi32(self, other);
+                auto lo = _mm256_unpacklo_epi32(self, other);
+                auto hi = _mm256_unpackhi_epi32(self, other);
+                return _mm256_permute2f128_si256(lo, hi, 0x31);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
-                return _mm256_unpackhi_epi64(self, other);
+                auto lo = _mm256_unpacklo_epi64(self, other);
+                auto hi = _mm256_unpackhi_epi64(self, other);
+                return _mm256_permute2f128_si256(lo, hi, 0x31);
             }
             else
             {
@@ -898,19 +906,27 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                return _mm256_unpacklo_epi8(self, other);
+                auto lo = _mm256_unpacklo_epi8(self, other);
+                auto hi = _mm256_unpackhi_epi8(self, other);
+                return _mm256_inserti128_si256(lo, _mm256_castsi256_si128(hi), 1);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-                return _mm256_unpacklo_epi16(self, other);
+                auto lo = _mm256_unpacklo_epi16(self, other);
+                auto hi = _mm256_unpackhi_epi16(self, other);
+                return _mm256_inserti128_si256(lo, _mm256_castsi256_si128(hi), 1);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                return _mm256_unpacklo_epi32(self, other);
+                auto lo = _mm256_unpacklo_epi32(self, other);
+                auto hi = _mm256_unpackhi_epi32(self, other);
+                return _mm256_inserti128_si256(lo, _mm256_castsi256_si128(hi), 1);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
-                return _mm256_unpacklo_epi64(self, other);
+                auto lo = _mm256_unpacklo_epi64(self, other);
+                auto hi = _mm256_unpackhi_epi64(self, other);
+                return _mm256_inserti128_si256(lo, _mm256_castsi256_si128(hi), 1);
             }
             else
             {

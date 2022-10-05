@@ -749,95 +749,18 @@ namespace xsimd
             return select(batch_bool<T, A> { b... }, true_br, false_br, sve {});
         }
 
-        // zip in 128-bit lane as AVX does, unfortunatly we cannot use svzip which truly and neatly zips two vectors
-        namespace detail
-        {
-            template <int N>
-            struct sve_128b_lane_zipper
-            {
-                template <class A, class T>
-                inline batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs) noexcept
-                {
-                    const auto indexes = get_shuffle_indexes<A, T>();
-                    const auto lhs_shuffled = svtbl(lhs, indexes);
-                    const auto rhs_shuffled = svtbl(rhs, indexes);
-                    return svzip1(lhs_shuffled, rhs_shuffled);
-                }
-
-                template <class A, class T>
-                inline batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs) noexcept
-                {
-                    const auto indexes = get_shuffle_indexes<A, T>();
-                    const auto lhs_shuffled = svtbl(lhs, indexes);
-                    const auto rhs_shuffled = svtbl(rhs, indexes);
-                    return svzip2(lhs_shuffled, rhs_shuffled);
-                }
-
-                // Pre shuffle per 128-bit lane so we can still use svzip
-                // E.g., sve256/int32: abcd efgh -> abef cdgh
-                // The shuffle indexes are calculated at compile time
-                template <class A, class T, class U = as_unsigned_integer_t<T>>
-                inline batch<U, A> get_shuffle_indexes() noexcept
-                {
-                    constexpr int b128_lanes = N / 128;
-                    constexpr int elements_per_b128 = 128 / (sizeof(T) * 8);
-
-                    U indexes[batch<U, A>::size];
-
-                    int index = 0, step = 0;
-                    for (int i = 0; i < b128_lanes; ++i)
-                    {
-                        for (int j = 0; j < elements_per_b128 / 2; ++j)
-                        {
-                            indexes[index] = index + step;
-                            ++index;
-                        }
-                        step += elements_per_b128 / 2;
-                    }
-                    step -= elements_per_b128 / 2;
-                    for (int i = 0; i < b128_lanes; ++i)
-                    {
-                        for (int j = 0; j < elements_per_b128 / 2; ++j)
-                        {
-                            indexes[index] = index - step;
-                            ++index;
-                        }
-                        step -= elements_per_b128 / 2;
-                    }
-
-                    return svld1(detail::sve_ptrue<U>(), indexes);
-                }
-            };
-
-            template <>
-            struct sve_128b_lane_zipper<128>
-            {
-                template <class A, class T>
-                inline batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs) noexcept
-                {
-                    return svzip1(lhs, rhs);
-                }
-
-                template <class A, class T>
-                inline batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs) noexcept
-                {
-                    return svzip2(lhs, rhs);
-                }
-            };
-        } // namespace detail
-
         // zip_lo
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
         inline batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return detail::sve_128b_lane_zipper<XSIMD_SVE_BITS>().zip_lo(lhs, rhs);
+            return svzip1(lhs, rhs);
         }
 
         // zip_hi
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
         inline batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return detail::sve_128b_lane_zipper<XSIMD_SVE_BITS>().zip_hi(lhs, rhs);
+            return svzip2(lhs, rhs);
         }
 
         /*****************************
