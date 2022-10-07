@@ -25,6 +25,7 @@ namespace xsimd
         static constexpr bool available() noexcept { return true; }
         static constexpr std::size_t alignment() noexcept { return 0; }
         static constexpr bool requires_alignment() noexcept { return false; }
+        static constexpr unsigned version() noexcept { return generic::version(0, 0, 0); }
 
     protected:
         static constexpr unsigned version(unsigned major, unsigned minor, unsigned patch) noexcept { return major * 10000u + minor * 100u + patch; }

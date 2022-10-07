@@ -116,7 +116,7 @@ TEST_CASE("[multi arch support]")
 
         // check that we pick the most appropriate version
         {
-            auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::sse3, xsimd::sse2>>(get_arch_version {});
+            auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::sse3, xsimd::sse2, xsimd::generic>>(get_arch_version {});
             unsigned expected = xsimd::available_architectures().best >= xsimd::sse3::version()
                 ? xsimd::sse3::version()
                 : xsimd::sse2::version();
