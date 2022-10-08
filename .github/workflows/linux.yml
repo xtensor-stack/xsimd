@@ -18,6 +18,7 @@ jobs:
           - { compiler: 'gcc',   version: '9',  flags: 'avx' }
           - { compiler: 'gcc',   version: '10', flags: 'avx512' }
           - { compiler: 'gcc',   version: '11', flags: 'i386' }
+          - { compiler: 'gcc',   version: '11', flags: 'avx512cd' }
           - { compiler: 'clang', version: '8',  flags: 'force_no_instr_set' }
           - { compiler: 'clang', version: '10', flags: 'enable_xtl_complex' }
           - { compiler: 'clang', version: '12', flags: 'avx' }
@@ -69,7 +70,7 @@ jobs:
       with:
         environment-file: environment.yml
     - name: Setup SDE
-      if: ${{ matrix.sys.flags == 'avx512' }}
+      if: startswith(matrix.sys.flags, 'avx512')
       run: sh install_sde.sh
     - name: Configure build
       env:
@@ -87,6 +88,9 @@ jobs:
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512cd' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_CXX_FLAGS='-m32'"
@@ -108,7 +112,7 @@ jobs:
       run: |
         cd _build
         cd test
-        if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
+        if [[ '${{ matrix.sys.flags }}' == 'avx512' || '${{ matrix.sys.flags }}' == 'avx512cd' ]]; then
           ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd
         else
           ./test_xsimd
