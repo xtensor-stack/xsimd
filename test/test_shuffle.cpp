@@ -92,7 +92,13 @@ struct zip_test : zip_base<typename B::value_type, B::size>
     }
 };
 
-TEST_CASE_TEMPLATE("[zip]", B, BATCH_TYPES)
+#if !XSIMD_WITH_AVX512F || XSIMD_WITH_AVX512BW
+#define ZIP_BATCH_TYPES BATCH_TYPES
+#else
+#define ZIP_BATCH_TYPES xsimd::batch<float>, xsimd::batch<double>, xsimd::batch<int32_t>, xsimd::batch<int64_t>
+#endif
+
+TEST_CASE_TEMPLATE("[zip]", B, ZIP_BATCH_TYPES)
 
 {
     zip_test<B> Test;
@@ -160,6 +166,7 @@ namespace
     };
 }
 
+#if !XSIMD_WITH_AVX512F || XSIMD_WITH_AVX512BW
 template <class B>
 struct slide_test : public init_slide_base<typename B::value_type, B::size>
 {
@@ -262,4 +269,7 @@ TEST_CASE_TEMPLATE("[slide]", B, BATCH_INT_TYPES)
         Test.slide_right();
     }
 }
+
+#endif
+
 #endif
