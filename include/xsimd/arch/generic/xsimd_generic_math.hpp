@@ -1983,7 +1983,7 @@ namespace xsimd
             {
                 static constexpr T get(T i, T)
                 {
-                    return i >= N ? 0 : i + N;
+                    return i >= N ? (i % 2) : i + N;
                 }
             };
 
