@@ -73,8 +73,35 @@ struct batch_test
         CHECK_EQ(ares, rhs);
     }
 
+    template <size_t... Is>
+    struct pack
+    {
+    };
+
+    template <size_t... Values>
+    void check_constructor_from_sequence(std::integral_constant<size_t, 0>, pack<Values...>) const
+    {
+        array_type tmp = { static_cast<value_type>(Values)... };
+        batch_type b0(static_cast<value_type>(Values)...);
+        INFO("batch(values...)");
+        CHECK_EQ(b0, tmp);
+
+        batch_type b1 { static_cast<value_type>(Values)... };
+        INFO("batch{values...}");
+        CHECK_EQ(b0, tmp);
+    }
+
+    template <size_t I, size_t... Values>
+    void check_constructor_from_sequence(std::integral_constant<size_t, I>, pack<Values...>) const
+    {
+        return check_constructor_from_sequence(std::integral_constant<size_t, I - 1>(), pack<Values..., I>());
+    }
+
     void test_constructors() const
     {
+        batch_type b;
+        // value initialized to random data, can't be checked
+
         array_type tmp;
         std::fill(tmp.begin(), tmp.end(), value_type(2));
         batch_type b0a(2);
@@ -85,9 +112,7 @@ struct batch_test
         INFO("batch{value_type}");
         CHECK_EQ(b0b, tmp);
 
-        batch_type b1 = batch_type::load_unaligned(lhs.data());
-        INFO("batch(value_type*)");
-        CHECK_EQ(b1, lhs);
+        check_constructor_from_sequence(std::integral_constant<size_t, size>(), pack<>());
     }
 
     void test_static_builders() const

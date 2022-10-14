@@ -169,16 +169,50 @@ struct batch_bool_test
         }
     }
 
+    template <size_t... Is>
+    struct pack
+    {
+    };
+
+    template <size_t... Values>
+    void check_constructor_from_sequence(std::integral_constant<size_t, 0>, pack<Values...>) const
+    {
+        bool_array_type res = { bool(Values % 3)... };
+        bool_array_type tmp;
+        batch_bool_type b0(bool(Values % 3)...);
+        b0.store_unaligned(tmp.data());
+        INFO("batch_bool(values...)");
+        CHECK_EQ(tmp, res);
+
+        batch_bool_type b1 { bool(Values % 3)... };
+        b1.store_unaligned(tmp.data());
+        INFO("batch_bool{values...}");
+        CHECK_EQ(tmp, res);
+    }
+
+    template <size_t I, size_t... Values>
+    void check_constructor_from_sequence(std::integral_constant<size_t, I>, pack<Values...>) const
+    {
+        return check_constructor_from_sequence(std::integral_constant<size_t, I - 1>(), pack<Values..., I>());
+    }
+
     void test_constructors() const
     {
+        batch_bool_type a;
+        // value uninitialized, cannot test it.
+
         bool_array_type res;
         batch_bool_type b(true);
         b.store_unaligned(res.data());
+        INFO("batch_bool{value}");
         CHECK_EQ(res, all_true);
 
         batch_bool_type c { true };
         c.store_unaligned(res.data());
+        INFO("batch_bool{value}");
         CHECK_EQ(res, all_true);
+
+        check_constructor_from_sequence(std::integral_constant<size_t, size>(), pack<>());
     }
 
     void test_load_store() const
