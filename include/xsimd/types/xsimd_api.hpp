@@ -1699,7 +1699,7 @@ namespace xsimd
      * for(std::size_t i = 0; i < N; ++i)
      *     res[i] = cond[i] ? true_br[i] : false_br[i];
      * \endcode
-     * @param cond constant batch condition.
+     * @param cond batch condition.
      * @param true_br batch values for truthy condition.
      * @param false_br batch value for falsy condition.
      * @return the result of the selection.
@@ -1720,7 +1720,7 @@ namespace xsimd
      * for(std::size_t i = 0; i < N; ++i)
      *     res[i] = cond[i] ? true_br[i] : false_br[i];
      * \endcode
-     * @param cond constant batch condition.
+     * @param cond batch condition.
      * @param true_br batch values for truthy condition.
      * @param false_br batch value for falsy condition.
      * @return the result of the selection.
