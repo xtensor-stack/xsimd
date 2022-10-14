@@ -10,11 +10,15 @@ Conditional expression
 .. toctree::
 
 +---------------------------------------------+---------------------------------------------------+
-| :ref:`select <select-function-reference>`   | conditonal selection                              |
+| :ref:`select <select-function-reference>`   | conditional selection                              |
 +---------------------------------------------+---------------------------------------------------+
 
 
 .. _select-function-reference:
 .. doxygenfunction:: xsimd::select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&)
+   :project: xsimd
+
+.. _select-function-reference:
+.. doxygenfunction:: xsimd::select(batch_bool_constant<T, A> const&, batch<T, A> const&, batch<T, A> const&)
    :project: xsimd
 
