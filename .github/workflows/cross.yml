@@ -28,9 +28,9 @@ jobs:
         fi
         sudo apt-get update || exit 1
         if [[ $LLVM_VERSION -eq 'latest' ]]; then
-          sudo apt-get --no-install-suggests --no-install-recommends install clang libc++-dev || exit 1
+          sudo apt-get --no-install-suggests --no-install-recommends install clang || exit 1
         else
-          sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION libc++-dev || exit 1
+          sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
         fi
         sudo apt-get --no-install-suggests --no-install-recommends install g++-9-${{ matrix.target.dir }} g++-9-multilib || exit 1
     - name: Setup compiler

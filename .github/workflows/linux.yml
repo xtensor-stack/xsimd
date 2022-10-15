@@ -56,7 +56,6 @@ jobs:
         fi || exit 1
         sudo apt-get update || exit 1
         sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install libc++-dev || exit 1
         sudo apt-get --no-install-suggests --no-install-recommends install g++-9 g++-9-multilib || exit 1
         sudo ln -s /usr/include/asm-generic /usr/include/asm
         CC=clang-$LLVM_VERSION
