@@ -39,9 +39,6 @@ namespace xsimd
             template <class T>
             svbool_t sve_ptrue() noexcept { return sve_ptrue_impl(index<sizeof(T)> {}); }
 
-            template <class T>
-            svbool_t sve_pfalse() noexcept { return svpfalse(); }
-
             // count active lanes in a predicate
             inline uint64_t sve_pcount_impl(svbool_t p, index<1>) noexcept { return svcntp_b8(p, p); }
             inline uint64_t sve_pcount_impl(svbool_t p, index<2>) noexcept { return svcntp_b16(p, p); }
@@ -1079,7 +1076,34 @@ namespace xsimd
             return !(arg == arg);
         }
 
-        // TODO: nearbyint_as_int
+        // nearbyint
+        template <class A, class T, detail::sve_enable_floating_point_t<T> = 0>
+        inline batch<T, A> nearbyint(batch<T, A> const& arg, requires_arch<sve>) noexcept
+        {
+            return svrintx_x(detail::sve_ptrue<T>(), arg);
+        }
+
+        // nearbyint_as_int
+        template <class A>
+        inline batch<int32_t, A> nearbyint_as_int(batch<float, A> const& arg, requires_arch<sve>) noexcept
+        {
+            const auto nearest = svrinta_x(detail::sve_ptrue<float>(), arg);
+            return svcvt_s32_x(detail::sve_ptrue<float>(), nearest);
+        }
+
+        template <class A>
+        inline batch<int64_t, A> nearbyint_as_int(batch<double, A> const& arg, requires_arch<sve>) noexcept
+        {
+            const auto nearest = svrinta_x(detail::sve_ptrue<double>(), arg);
+            return svcvt_s64_x(detail::sve_ptrue<double>(), nearest);
+        }
+
+        // ldexp
+        template <class A, class T, detail::sve_enable_floating_point_t<T> = 0>
+        inline batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& exp, requires_arch<sve>) noexcept
+        {
+            return svscale_x(detail::sve_ptrue<T>(), x, exp);
+        }
 
     } // namespace kernel
 } // namespace xsimd

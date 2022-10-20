@@ -1083,10 +1083,10 @@ namespace xsimd
     /**
      * @ingroup batch_math_extra
      *
-     * Computes the multiplication of the floating- point number x by 2 raised to the power exp.
+     * Computes the multiplication of the floating point number \c x by 2 raised to the power \c y.
      * @param x batch of floating point values.
-     * @param y batch of floating point values.
-     * @return the natural logarithm of the gamma function of \c x.
+     * @param y batch of integer values.
+     * @return a batch of floating point values.
      */
     template <class T, class A>
     inline batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& y) noexcept
