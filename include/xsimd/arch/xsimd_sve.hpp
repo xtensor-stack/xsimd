@@ -86,8 +86,6 @@ namespace xsimd
                                                              sve_fix_char_t_impl, T>::type;
         }
 
-        // TODO: gather
-
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<sve>) noexcept
         {
@@ -121,8 +119,6 @@ namespace xsimd
          * Store *
          *********/
 
-        // TODO: scatter
-
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
         inline void store_aligned(T* dst, batch<T, A> const& src, requires_arch<sve>) noexcept
         {
@@ -151,6 +147,30 @@ namespace xsimd
         inline void store_complex_unaligned(std::complex<T>* dst, batch<std::complex<T>, A> const& src, requires_arch<sve>) noexcept
         {
             store_complex_aligned(dst, src, sve {});
+        }
+
+        /******************
+         * scatter/gather *
+         ******************/
+
+        namespace detail
+        {
+            template <class T, class U>
+            using sve_enable_sg_t = typename std::enable_if<(sizeof(T) == sizeof(U) && (sizeof(T) == 4 || sizeof(T) == 8)), int>::type;
+        }
+
+        // scatter
+        template <class A, class T, class U, detail::sve_enable_sg_t<T, U> = 0>
+        inline void scatter(batch<T, A> const& src, T* dst, batch<U, A> const& index, kernel::requires_arch<sve>) noexcept
+        {
+            svst1_scatter_index(detail::sve_ptrue<T>(), dst, index.data, src.data);
+        }
+
+        // gather
+        template <class A, class T, class U, detail::sve_enable_sg_t<T, U> = 0>
+        inline batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index, kernel::requires_arch<sve>) noexcept
+        {
+            return svld1_gather_index(detail::sve_ptrue<T>(), src, index.data);
         }
 
         /********************
