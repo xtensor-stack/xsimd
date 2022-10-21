@@ -150,6 +150,13 @@ namespace xsimd
             return concat;
         }
 
+        // ldexp
+        template <class A>
+        inline batch<double, A> ldexp(const batch<double, A>& self, const batch<as_integer_t<double>, A>& other, requires_arch<avx512dq>) noexcept
+        {
+            return _mm512_scalef_pd(self, _mm512_cvtepi64_pd(other));
+        }
+
         // mul
         template <class A>
         inline batch<uint64_t, A> mul(batch<uint64_t, A> const& self, batch<uint64_t, A> const& other, requires_arch<avx512dq>) noexcept

@@ -976,6 +976,22 @@ namespace xsimd
             return _mm512_cmp_pd_mask(self, self, _CMP_UNORD_Q);
         }
 
+        // ldexp
+        template <class A>
+        inline batch<float, A> ldexp(const batch<float, A>& self, const batch<as_integer_t<float>, A>& other, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_scalef_ps(self, _mm512_cvtepi32_ps(other));
+        }
+
+        template <class A>
+        inline batch<double, A> ldexp(const batch<double, A>& self, const batch<as_integer_t<double>, A>& other, requires_arch<avx512f>) noexcept
+        {
+            // FIXME: potential data loss here when converting other elements to
+            // int32 before converting them back to double.
+            __m512d adjusted_index = _mm512_cvtepi32_pd(_mm512_cvtepi64_epi32(other));
+            return _mm512_scalef_pd(self, adjusted_index);
+        }
+
         // le
         template <class A>
         inline batch_bool<float, A> le(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
