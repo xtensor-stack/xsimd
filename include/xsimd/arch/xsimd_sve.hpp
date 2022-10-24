@@ -345,6 +345,34 @@ namespace xsimd
             return svabs_x(detail::sve_ptrue<T>(), arg);
         }
 
+        // fma: x * y + z
+        template <class A, class T, detail::sve_enable_all_t<T> = 0>
+        inline batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
+        {
+            return svmad_x(detail::sve_ptrue<T>(), x, y, z);
+        }
+
+        // fnma: z - x * y
+        template <class A, class T, detail::sve_enable_all_t<T> = 0>
+        inline batch<T, A> fnma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
+        {
+            return svmsb_x(detail::sve_ptrue<T>(), x, y, z);
+        }
+
+        // fms: x * y - z
+        template <class A, class T, detail::sve_enable_all_t<T> = 0>
+        inline batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
+        {
+            return -fnma(x, y, z, sve {});
+        }
+
+        // fnms: - x * y - z
+        template <class A, class T, detail::sve_enable_all_t<T> = 0>
+        inline batch<T, A> fnms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
+        {
+            return -fma(x, y, z, sve {});
+        }
+
         /**********************
          * Logical operations *
          **********************/
@@ -796,19 +824,6 @@ namespace xsimd
         inline batch<T, A> sqrt(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
             return svsqrt_x(detail::sve_ptrue<T>(), arg);
-        }
-
-        // fused operations
-        template <class A, class T, detail::sve_enable_floating_point_t<T> = 0>
-        inline batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
-        {
-            return svmad_x(detail::sve_ptrue<T>(), x, y, z);
-        }
-
-        template <class A, class T, detail::sve_enable_floating_point_t<T> = 0>
-        inline batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
-        {
-            return svmad_x(detail::sve_ptrue<T>(), x, y, -z);
         }
 
         // reciprocal
