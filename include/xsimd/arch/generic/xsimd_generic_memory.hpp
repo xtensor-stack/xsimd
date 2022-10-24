@@ -34,7 +34,7 @@ namespace xsimd
         inline batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<generic>) noexcept
         {
             constexpr std::size_t size = batch<T, A>::size;
-            assert(0 <= i && i < size && "index in bounds");
+            assert(i < size && "index in bounds");
 
             alignas(A::alignment()) T self_buffer[size];
             self.store_aligned(self_buffer);

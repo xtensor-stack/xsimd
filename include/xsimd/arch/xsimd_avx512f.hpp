@@ -1380,8 +1380,7 @@ namespace xsimd
 
         // scatter
         template <class A, class T,
-                  typename std::enable_if<std::is_same<uint32_t, T>::value || std::is_same<int32_t, T>::value,
-                                          void>::type>
+                  class = typename std::enable_if<std::is_same<uint32_t, T>::value || std::is_same<int32_t, T>::value, void>::type>
         inline void scatter(batch<T, A> const& src, T* dst,
                             batch<int32_t, A> const& index,
                             kernel::requires_arch<avx512f>) noexcept
@@ -1389,9 +1388,8 @@ namespace xsimd
             _mm512_i32scatter_epi32(dst, index, src, sizeof(T));
         }
 
-        template <class T, class A,
-                  typename std::enable_if<std::is_same<uint64_t, T>::value || std::is_same<int64_t, T>::value,
-                                          void>::type>
+        template <class A, class T,
+                  class = typename std::enable_if<std::is_same<uint64_t, T>::value || std::is_same<int64_t, T>::value, void>::type>
         inline void scatter(batch<T, A> const& src, T* dst,
                             batch<int64_t, A> const& index,
                             kernel::requires_arch<avx512f>) noexcept
