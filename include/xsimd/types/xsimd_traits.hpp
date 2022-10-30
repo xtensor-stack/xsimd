@@ -61,7 +61,7 @@ namespace xsimd
 
             static_assert(A::supported(),
                           "usage of batch type with unsupported architecture");
-            static_assert(!A::supported() || has_simd_register<T, A>::value,
+            static_assert(!A::supported() || xsimd::has_simd_register<T, A>::value,
                           "usage of batch type with unsupported type");
         };
 
@@ -86,20 +86,20 @@ namespace xsimd
     }
 
     template <class T>
-    struct simd_traits : detail::simd_traits_impl<T, has_simd_register<T>::value>
+    struct simd_traits : detail::simd_traits_impl<T, xsimd::has_simd_register<T>::value>
     {
     };
 
     template <class T>
     struct simd_traits<std::complex<T>>
-        : detail::simd_traits_impl<std::complex<T>, has_simd_register<T>::value>
+        : detail::simd_traits_impl<std::complex<T>, xsimd::has_simd_register<T>::value>
     {
     };
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     template <class T, bool i3ec>
     struct simd_traits<xtl::xcomplex<T, T, i3ec>>
-        : detail::simd_traits_impl<std::complex<T>, has_simd_register<T>::value>
+        : detail::simd_traits_impl<std::complex<T>, xsimd::has_simd_register<T>::value>
     {
     };
 #endif
