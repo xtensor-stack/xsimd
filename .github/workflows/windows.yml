@@ -60,7 +60,11 @@ jobs:
         shell: msys2 {0}
     strategy:
       matrix:
-        msystem: [ MINGW32, MINGW64, UCRT64, CLANG32, CLANG64 ]
+        # Temporarily remove MINGW64 and UCRT64 builds because
+        # GCC 12 gives an unexpected overflow warning for __builtin_memmove
+        # see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=106199
+        msystem: [ MINGW32, CLANG32, CLANG64 ]
+        #msystem: [ MINGW32, MINGW64, UCRT64, CLANG32, CLANG64 ]
       fail-fast: false
     steps:
       - name: Use MinGW from MSYS2
