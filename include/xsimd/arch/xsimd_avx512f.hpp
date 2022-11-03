@@ -1350,16 +1350,6 @@ namespace xsimd
         }
 
         // sadd
-        template <class A>
-        inline batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
-        {
-            return add(self, other); // no saturated arithmetic on floating point numbers
-        }
-        template <class A>
-        inline batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512f>) noexcept
-        {
-            return add(self, other); // no saturated arithmetic on floating point numbers
-        }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512f>) noexcept
         {
@@ -1642,16 +1632,6 @@ namespace xsimd
         }
 
         // ssub
-        template <class A>
-        inline batch<float, A> ssub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
-        {
-            return _mm512_sub_ps(self, other); // no saturated arithmetic on floating point numbers
-        }
-        template <class A>
-        inline batch<double, A> ssub(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512f>) noexcept
-        {
-            return _mm512_sub_pd(self, other); // no saturated arithmetic on floating point numbers
-        }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512f>) noexcept
         {

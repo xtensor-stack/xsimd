@@ -1684,7 +1684,7 @@ namespace xsimd
      * @return the result of the saturated addition.
      */
     template <class T, class A>
-    inline auto sadd(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x + y)
+    inline batch<T, A> sadd(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::sadd<A>(x, y, A {});
@@ -1884,7 +1884,7 @@ namespace xsimd
      * @return the result of the saturated difference.
      */
     template <class T, class A>
-    inline auto ssub(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x - y)
+    inline batch<T, A> ssub(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::ssub<A>(x, y, A {});
