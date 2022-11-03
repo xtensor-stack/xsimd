@@ -250,7 +250,6 @@ struct batch_test
 
     void test_saturated_arithmetic() const
     {
-#ifdef T
         // batch + batch
         {
             array_type expected;
@@ -259,6 +258,7 @@ struct batch_test
             INFO("sadd(batch, batch)");
             CHECK_BATCH_EQ(res, expected);
         }
+#if 0
         // batch + scalar
         {
             array_type expected;
@@ -271,6 +271,7 @@ struct batch_test
             INFO("sadd(scalar, batch)");
             CHECK_BATCH_EQ(rres, expected);
         }
+#endif
         // batch - batch
         {
             array_type expected;
@@ -280,6 +281,7 @@ struct batch_test
             INFO("ssub(batch, batch)");
             CHECK_BATCH_EQ(res, expected);
         }
+#if 0
         // batch - scalar
         {
             array_type expected;

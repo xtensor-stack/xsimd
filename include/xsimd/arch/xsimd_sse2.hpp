@@ -1325,11 +1325,7 @@ namespace xsimd
         }
 
         // sadd
-        template <class A>
-        inline batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept
-        {
-            return _mm_add_ps(self, other); // no saturated arithmetic on floating point numbers
-        }
+
         // TODO: move this in xsimd_generic
         namespace detail
         {
@@ -1385,11 +1381,6 @@ namespace xsimd
                     return detail::sadd_default(self, other, A {});
                 }
             }
-        }
-        template <class A>
-        inline batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires_arch<sse2>) noexcept
-        {
-            return _mm_add_pd(self, other); // no saturated arithmetic on floating point numbers
         }
 
         // set
@@ -1449,11 +1440,6 @@ namespace xsimd
         }
 
         // ssub
-        template <class A>
-        inline batch<float, A> ssub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept
-        {
-            return _mm_sub_ps(self, other); // no saturated arithmetic on floating point numbers
-        }
         // TODO: move this in xsimd_generic
         namespace detail
         {
@@ -1505,12 +1491,6 @@ namespace xsimd
                     return detail::ssub_default(self, other, A {});
                 }
             }
-        }
-
-        template <class A>
-        inline batch<double, A> ssub(batch<double, A> const& self, batch<double, A> const& other, requires_arch<sse2>) noexcept
-        {
-            return _mm_sub_pd(self, other); // no saturated arithmetic on floating point numbers
         }
 
         // store_aligned

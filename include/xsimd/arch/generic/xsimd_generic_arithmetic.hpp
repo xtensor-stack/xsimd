@@ -121,6 +121,30 @@ namespace xsimd
                                  self, other);
         }
 
+        // sadd
+        template <class A>
+        inline batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires_arch<generic>) noexcept
+        {
+            return add(self, other); // no saturated arithmetic on floating point numbers
+        }
+        template <class A>
+        inline batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires_arch<generic>) noexcept
+        {
+            return add(self, other); // no saturated arithmetic on floating point numbers
+        }
+
+        // ssub
+        template <class A>
+        inline batch<float, A> ssub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<generic>) noexcept
+        {
+            return sub(self, other); // no saturated arithmetic on floating point numbers
+        }
+        template <class A>
+        inline batch<double, A> ssub(batch<double, A> const& self, batch<double, A> const& other, requires_arch<generic>) noexcept
+        {
+            return sub(self, other); // no saturated arithmetic on floating point numbers
+        }
+
     }
 
 }
