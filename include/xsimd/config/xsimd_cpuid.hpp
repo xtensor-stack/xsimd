@@ -111,7 +111,7 @@ namespace xsimd
 
                 get_cpuid(regs, 0x1);
 
-                sse2 = regs[2] >> 26 & 1;
+                sse2 = regs[3] >> 26 & 1;
                 best = std::max(best, sse2::version() * sse2);
 
                 sse3 = regs[2] >> 0 & 1;
