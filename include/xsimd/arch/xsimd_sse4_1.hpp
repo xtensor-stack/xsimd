@@ -115,11 +115,16 @@ namespace xsimd
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
                 return _mm_insert_epi32(self, val, I);
-#if !defined(_MSC_VER) || _MSC_VER > 1900 && defined(_M_X64)
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
+#if (!defined(_MSC_VER) && __x86_64__) || (_MSC_VER > 1900 && defined(_M_X64))
                 return _mm_insert_epi64(self, val, I);
+#else
+                uint32_t lo, hi;
+                memcpy(&lo, (reinterpret_cast<uint32_t*>(&val)), sizeof(lo));
+                memcpy(&hi, (reinterpret_cast<uint32_t*>(&val)) + 1, sizeof(hi));
+                return _mm_insert_epi32(_mm_insert_epi32(self, lo, 2 * I), hi, 2 * I + 1);
 #endif
             }
             else
