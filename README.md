@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 }
 ```
 
-Do not forget to enable AVX extension when building the example. With gcc or clang, this is done with the `-march=native` flag,
+Do not forget to enable AVX extension when building the example. With gcc or clang, this is done with the `-mavx` flag,
 on MSVC you have to pass the `/arch:AVX` option.
 
 This example outputs:
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 }
 ```
 
-Do not forget to enable AVX extension when building the example. With gcc or clang, this is done with the `-march=native` flag,
+Do not forget to enable AVX extension when building the example. With gcc or clang, this is done with the `-mavx` flag,
 on MSVC you have to pass the `/arch:AVX` option.
 
 This example outputs:
