@@ -171,8 +171,10 @@ namespace xsimd
     aligned_allocator<T, A>::allocate(size_type n, const void*) -> pointer
     {
         pointer res = reinterpret_cast<pointer>(aligned_malloc(sizeof(T) * n, A));
+#if defined(_CPPUNWIND) || defined(__cpp_exceptions)
         if (res == nullptr)
             throw std::bad_alloc();
+#endif
         return res;
     }
 

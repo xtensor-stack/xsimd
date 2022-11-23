@@ -1,0 +1,17 @@
+name: C++ -fno-except compatibility
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+          sudo apt install g++ cmake
+    - name: Setup
+      run: |
+        mkdir _build
+        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-fno-exceptions
+    - name: Build
+      run: cmake --build _build
+
