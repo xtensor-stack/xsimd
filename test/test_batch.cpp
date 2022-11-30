@@ -437,6 +437,10 @@ struct batch_test
             auto res = batch_lhs() < scalar;
             INFO("batch < scalar");
             CHECK_BATCH_EQ(res, expected);
+
+            auto res_neg = batch_lhs() >= scalar;
+            INFO("batch >= scalar");
+            CHECK_BATCH_EQ(!res_neg, expected);
         }
 
         // batch <= batch
@@ -458,6 +462,10 @@ struct batch_test
             auto res = batch_lhs() <= scalar;
             INFO("batch <= scalar");
             CHECK_BATCH_EQ(res, expected);
+
+            auto res_neg = batch_lhs() > scalar;
+            INFO("batch > scalar");
+            CHECK_BATCH_EQ(!res_neg, expected);
         }
 
         // batch > batch
@@ -479,6 +487,10 @@ struct batch_test
             auto res = batch_lhs() > scalar;
             INFO("batch > scalar");
             CHECK_BATCH_EQ(res, expected);
+
+            auto res_neg = batch_lhs() <= scalar;
+            INFO("batch <= scalar");
+            CHECK_BATCH_EQ(!res_neg, expected);
         }
         // batch >= batch
         {
@@ -499,6 +511,10 @@ struct batch_test
             auto res = batch_lhs() >= scalar;
             INFO("batch >= scalar");
             CHECK_BATCH_EQ(res, expected);
+
+            auto res_neg = batch_lhs() < scalar;
+            INFO("batch < scalar");
+            CHECK_BATCH_EQ(!res_neg, expected);
         }
     }
 
