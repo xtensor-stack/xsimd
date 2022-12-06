@@ -106,7 +106,7 @@
  */
 #ifdef __FMA__
 
-#if defined(__SSE__) && !defined(__AVX__)
+#if defined(__SSE__)
 #ifndef XSIMD_WITH_FMA3_SSE // Leave the opportunity to manually disable it, see #643
 #define XSIMD_WITH_FMA3_SSE 1
 #endif
