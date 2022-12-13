@@ -207,7 +207,7 @@ namespace xsimd
      *
      * Perform a static_cast from \c T_in to \c T_out on \c \c x.
      * @param x batch_bool of \c T_in
-     * @return \c x casted to \c T_out
+     * @return \c x cast to \c T_out
      */
     template <class T_out, class T_in, class A>
     inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& x) noexcept
@@ -223,7 +223,7 @@ namespace xsimd
      *
      * Perform a static_cast from \c T_in to \c T_out on \c \c x.
      * @param x batch of \c T_in
-     * @return \c x casted to \c T_out
+     * @return \c x cast to \c T_out
      */
     template <class T_out, class T_in, class A>
     inline batch<T_out, A> batch_cast(batch<T_in, A> const& x) noexcept
@@ -2174,7 +2174,16 @@ namespace xsimd
         return kernel::zip_lo<A>(x, y, A {});
     }
 
-    // bitwise_cast
+    /**
+     * @ingroup batch_conversion
+     *
+     * Cast a \c batch_bool of \c T into a \c batch of the same type using the
+     * following rule: if an element of \c self is true, it maps to -1 in the
+     * returned integral batch, otherwise it maps to 0.
+     *
+     * @param self batch_bool of \c T
+     * @return \c self cast to a \c batch of \c T
+     */
     template <class T, class A, typename std::enable_if<std::is_integral<T>::value, int>::type = 3>
     inline batch<T, A> bitwise_cast(batch_bool<T, A> const& self) noexcept
     {
