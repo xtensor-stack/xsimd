@@ -9,16 +9,18 @@ Conditional expression
 
 .. toctree::
 
-+---------------------------------------------+---------------------------------------------------+
-| :ref:`select <select-function-reference>`   | conditional selection                              |
-+---------------------------------------------+---------------------------------------------------+
++-------------------------------------------------+---------------------------------------------------+
+| :ref:`select <select-function-reference-dyn>`   | conditional selection with dynamic mask           |
++-------------------------------------------------+---------------------------------------------------+
+| :ref:`select <select-function-reference>`       | conditional selection with constant mask          |
++-------------------------------------------------+---------------------------------------------------+
 
 
-.. _select-function-reference:
-.. doxygenfunction:: xsimd::select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&)
+.. _select-function-reference-dyn:
+.. doxygenfunction:: select(batch_bool<T, A> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
    :project: xsimd
 
 .. _select-function-reference:
-.. doxygenfunction:: xsimd::select(batch_bool_constant<T, A> const&, batch<T, A> const&, batch<T, A> const&)
+.. doxygenfunction:: select(batch_bool_constant<batch<T, A>, Values...> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
    :project: xsimd
 
