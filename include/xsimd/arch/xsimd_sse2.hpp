@@ -626,7 +626,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            return eq(batch<T, A>(self.data), batch<T, A>(other.data));
+            return ~(self != other);
         }
         template <class A>
         inline batch_bool<double, A> eq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<sse2>) noexcept
@@ -1137,7 +1137,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<sse2>) noexcept
         {
-            return ~(self == other);
+            return _mm_castps_si128(_mm_xor_ps(_mm_castsi128_ps(self.data), _mm_castsi128_ps(other.data)));
         }
 
         template <class A>

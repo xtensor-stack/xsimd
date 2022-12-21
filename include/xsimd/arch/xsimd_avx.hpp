@@ -575,16 +575,12 @@ namespace xsimd
         template <class A>
         inline batch_bool<float, A> eq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_castsi256_ps(detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                                          { return eq(batch_bool<int32_t, sse4_2>(s), batch_bool<int32_t, sse4_2>(o), sse4_2 {}); },
-                                                          _mm256_castps_si256(self), _mm256_castps_si256(other)));
+            return ~(self != other);
         }
         template <class A>
         inline batch_bool<double, A> eq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_castsi256_pd(detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                                          { return eq(batch_bool<int32_t, sse4_2>(s), batch_bool<int32_t, sse4_2>(o), sse4_2 {}); },
-                                                          _mm256_castpd_si256(self), _mm256_castpd_si256(other)));
+            return ~(self != other);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
@@ -597,7 +593,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return eq(batch<T, A>(self.data), batch<T, A>(other.data));
+            return ~(self != other);
         }
 
         // floor
@@ -1046,7 +1042,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return ~(self == other);
+            return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(self.data), _mm256_castsi256_ps(other.data)));
         }
 
         // reciprocal
