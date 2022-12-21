@@ -189,14 +189,7 @@ private:
     template <class T, typename std::enable_if<std::is_same<T, float>::value, int>::type = 0>
     void test_conditional_pow()
     {
-
-#if (XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION) || (XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION)
-#if DEBUG_ACCURACY
         test_pow_impl();
-#endif
-#else
-        test_pow_impl();
-#endif
     }
 };
 
