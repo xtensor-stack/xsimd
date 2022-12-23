@@ -718,6 +718,19 @@ struct batch_test
         }
     }
 
+    template <size_t N>
+    typename std::enable_if<4 <= N, void>::type test_generic_horizontal_operations(std::integral_constant<size_t, N>) const
+    {
+        // reduce generic
+        {
+            value_type expected = std::accumulate(lhs.cbegin(), lhs.cend(), value_type(1), std::multiplies<value_type>());
+            value_type res = reduce(xsimd::mul<typename B::value_type, typename B::arch_type>, batch_lhs());
+            INFO("generic reduce");
+            CHECK_SCALAR_EQ(res, expected);
+        }
+    }
+    void test_generic_horizontal_operations(...) const { }
+
     void test_boolean_conversions() const
     {
         using batch_bool_type = typename batch_type::batch_bool_type;
@@ -879,6 +892,7 @@ TEST_CASE_TEMPLATE("[batch]", B, BATCH_TYPES)
     SUBCASE("horizontal_operations")
     {
         Test.test_horizontal_operations();
+        Test.test_generic_horizontal_operations(std::integral_constant<size_t, sizeof(typename B::value_type)>());
     }
 
     SUBCASE("boolean_conversions")
