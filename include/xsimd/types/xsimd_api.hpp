@@ -880,6 +880,21 @@ namespace xsimd
     /**
      * @ingroup batch_reducers
      *
+     * Generic reducer using only batch operations
+     * @param f reducing function, accepting `batch ()(batch, batch)`
+     * @param x batch involved in the reduction
+     * @return the result of the reduction, as a scalar.
+     */
+    template <class T, class A, class F>
+    inline T reduce(F&& r, batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::detail::reduce(std::forward<F>(r), x, std::integral_constant<unsigned, batch<T, A>::size>());
+    }
+
+    /**
+     * @ingroup batch_reducers
+     *
      * Adds all the scalars of the batch \c x.
      * @param x batch involved in the reduction
      * @return the result of the reduction.
