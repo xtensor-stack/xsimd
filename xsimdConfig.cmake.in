@@ -21,7 +21,7 @@ if(NOT TARGET @PROJECT_NAME@)
     set(@PROJECT_NAME@_ENABLE_XTL_COMPLEX @ENABLE_XTL_COMPLEX@)
     if(@PROJECT_NAME@_ENABLE_XTL_COMPLEX)
         include(CMakeFindDependencyMacro)
-        find_dependency(xtl)
+        find_dependency(xtl REQUIRED)
     endif()
 
     include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
