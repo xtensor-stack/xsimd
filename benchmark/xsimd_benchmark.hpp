@@ -382,7 +382,7 @@ namespace xsimd
 #endif
 
         out << "============================" << std::endl;
-        out << default_arch::name() << std::endl;
+        out << f.name() << std::endl;
         out << "scalar float      : " << t_float_scalar.count() << "ms" << std::endl;
         out << "vector float      : " << t_float_vector.count() << "ms" << std::endl;
         out << "vector float unr  : " << t_float_vector_u.count() << "ms" << std::endl;
@@ -413,7 +413,7 @@ namespace xsimd
 #endif
 
         out << "============================" << std::endl;
-        out << default_arch::name() << std::endl;
+        out << f.name() << std::endl;
         out << "scalar float      : " << t_float_scalar.count() << "ms" << std::endl;
         out << "vector float      : " << t_float_vector.count() << "ms" << std::endl;
         out << "vector float unr  : " << t_float_vector_u.count() << "ms" << std::endl;
