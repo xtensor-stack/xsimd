@@ -1,0 +1,36 @@
+name: Android build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - armeabi-v7a
+          - arm64-v8a
+          - x86
+          - x86_64
+        api:
+          - 16
+          - 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build script
+        env:
+          TARGET: ${{ matrix.target }}
+          API: ${{ matrix.api }}
+        run: |
+          mkdir _build
+          NDK="$($ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed | sed -E 's/( +[|] +)/|/g;s/ +$//' | grep '^  ndk' | cut -d '|' -f 4 | sort | head -n1)"
+          cd _build && \
+            cmake .. -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/$NDK/build/cmake/android.toolchain.cmake \
+                     -DANDROID_ABI=$ABI \
+                     -DANDROID_PLATFORM=android-$API \
+                     -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release
+
+          cmake --build . --verbose
