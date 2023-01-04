@@ -65,7 +65,8 @@ namespace xsimd
                 neon64 = 1;
                 best = neon64::version();
 #elif defined(__ARM_NEON) || defined(_M_ARM)
-#if defined(__linux__)
+
+#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
                 neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
 #else
                 // that's very conservative :-/
