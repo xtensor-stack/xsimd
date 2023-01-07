@@ -77,9 +77,10 @@ http://xsimd.readthedocs.io/
 | `xsimd` | `xtl` (optional) |
 |---------|------------------|
 |  master |     ^0.7.0       |
-|  9.x    |     ^0.7.0       |
-|  8.x    |     ^0.7.0       |
-|  7.x    |     ^0.7.0       |
+|  10.x   |     ^0.7.0       |
+|   9.x   |     ^0.7.0       |
+|   8.x   |     ^0.7.0       |
+|   7.x   |     ^0.7.0       |
 
 The dependency on `xtl` is required if you want to support vectorization for `xtl::xcomplex`. In this case, you must build your project with C++14 support enabled.
 
