@@ -18,7 +18,7 @@ jobs:
           - x86
           - x64
         sys:
-         - { set: SSE, flags: "" }
+          - { set: SSE, flags: "/arch:SSE2" }
          - { set: AVX, flags: "/arch:AVX" }
          - { set: AVX2, flags: "/arch:AVX2" }
          - { set: AVX512, flags: "/arch:AVX512" }
