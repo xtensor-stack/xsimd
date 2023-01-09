@@ -31,7 +31,17 @@ namespace xsimd
     template <class T, class A>
     class batch_bool;
 
-    using std::abs;
+    inline unsigned int abs(unsigned int n) { return n; }
+    inline unsigned long abs(unsigned long n) { return n; }
+    inline unsigned long long abs(unsigned long long n) { return n; }
+    inline int abs(int n) { return n < 0 ? -n : n; }
+    inline long abs(long n) { return n < 0L ? -n : n; }
+    inline long long abs(long long n) { return n < 0LL ? -n : n; }
+    inline float abs(float f) { return fabsf(f); }
+    inline double abs(double f) { return fabs(f); }
+    inline long double abs(long double f) { return fabsl(f); }
+    template <typename T>
+    inline std::complex<T> abs(std::complex<T> const& f) { return std::abs(f); }
 
     using std::acos;
     using std::acosh;
