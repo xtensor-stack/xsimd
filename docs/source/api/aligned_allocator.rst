@@ -10,3 +10,9 @@ Aligned memory allocator
 .. doxygenclass:: xsimd::aligned_allocator
    :project: xsimd
    :members:
+
+Alignement checker
+==================
+
+.. doxygenfunction:: xsimd::is_aligned
+   :project: xsimd
