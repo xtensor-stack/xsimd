@@ -37,4 +37,18 @@ TEST_CASE("[alignment]")
     CHECK_UNARY((std::is_same<a_vector_align, xsimd::aligned_mode>::value));
     CHECK_UNARY((std::is_same<mock_align, xsimd::unaligned_mode>::value));
 }
+
+TEST_CASE("[is_aligned]")
+{
+    float f[100];
+    void* unaligned_f = static_cast<void*>(&f[0]);
+    constexpr std::size_t alignment = xsimd::default_arch::alignment();
+    std::size_t aligned_f_size;
+    void* aligned_f = std::align(alignment, sizeof(f), unaligned_f, aligned_f_size);
+    CHECK_UNARY(xsimd::is_aligned(aligned_f));
+
+    __attribute__((aligned(alignment))) char aligned[8];
+    CHECK_UNARY(xsimd::is_aligned(&aligned[0]));
+    CHECK_UNARY(!xsimd::is_aligned(&aligned[3]));
+}
 #endif
