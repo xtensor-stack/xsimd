@@ -886,10 +886,10 @@ namespace xsimd
      * @return the result of the reduction, as a scalar.
      */
     template <class T, class A, class F>
-    inline T reduce(F&& r, batch<T, A> const& x) noexcept
+    inline T reduce(F&& f, batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::detail::reduce(std::forward<F>(r), x, std::integral_constant<unsigned, batch<T, A>::size>());
+        return kernel::detail::reduce(std::forward<F>(f), x, std::integral_constant<unsigned, batch<T, A>::size>());
     }
 
     /**
