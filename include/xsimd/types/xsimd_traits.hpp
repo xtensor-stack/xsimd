@@ -246,6 +246,20 @@ namespace xsimd
     struct is_batch_complex<batch<std::complex<T>, A>> : std::true_type
     {
     };
+
+    template <class T>
+    struct scalar_type
+    {
+        using type = T;
+    };
+    template <class T, class A>
+    struct scalar_type<batch<T, A>>
+    {
+        using type = T;
+    };
+
+    template <class T>
+    using scalar_type_t = typename scalar_type<T>::type;
 }
 
 #endif
