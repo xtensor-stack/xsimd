@@ -16,6 +16,13 @@
 
 #include "xsimd_batch.hpp"
 
+/**
+ * high level type traits
+ *
+ * @defgroup batch_traits Type traits
+ *
+ **/
+
 namespace xsimd
 {
 
@@ -205,11 +212,18 @@ namespace xsimd
     template <class T1, class T2, class A = default_arch>
     using simd_return_type = typename detail::simd_return_type_impl<T1, T2, A>::type;
 
-    /************
-     * is_batch *
-     ************/
+    /**
+     * @ingroup batch_traits
+     *
+     * type traits that inherits from @c std::true_type for @c batch<...> types and from
+     * @c std::false_type otherwise.
+     *
+     * @tparam T type to analyze.
+     */
+    template <class T>
+    struct is_batch;
 
-    template <class V>
+    template <class T>
     struct is_batch : std::false_type
     {
     };
@@ -219,11 +233,16 @@ namespace xsimd
     {
     };
 
-    /*****************
-     * is_batch_bool *
-     *****************/
+    /**
+     * @ingroup batch_traits
+     *
+     * type traits that inherits from @c std::true_type for @c batch_bool<...> types and from
+     * @c std::false_type otherwise.
+     *
+     * @tparam T type to analyze.
+     */
 
-    template <class V>
+    template <class T>
     struct is_batch_bool : std::false_type
     {
     };
@@ -233,11 +252,16 @@ namespace xsimd
     {
     };
 
-    /********************
-     * is_batch_complex *
-     ********************/
+    /**
+     * @ingroup batch_traits
+     *
+     * type traits that inherits from @c std::true_type for @c batch<std::complex<...>>
+     * types and from @c std::false_type otherwise.
+     *
+     * @tparam T type to analyze.
+     */
 
-    template <class V>
+    template <class T>
     struct is_batch_complex : std::false_type
     {
     };
@@ -247,6 +271,14 @@ namespace xsimd
     {
     };
 
+    /**
+     * @ingroup batch_traits
+     *
+     * type traits whose @c type field is set to @c T::value_type if @c
+     * is_batch<T>::value and to @c T otherwise.
+     *
+     * @tparam T type to analyze.
+     */
     template <class T>
     struct scalar_type
     {
