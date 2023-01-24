@@ -93,6 +93,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    api/math_index
    api/reducer_index
    api/cast_index
+   api/type_traits
    api/misc_index
    api/batch_manip
    api/aligned_allocator
