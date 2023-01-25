@@ -292,6 +292,28 @@ namespace xsimd
 
     template <class T>
     using scalar_type_t = typename scalar_type<T>::type;
+
+    /**
+     * @ingroup batch_traits
+     *
+     * type traits whose @c type field is set to @c T::value_type if @c
+     * is_batch_bool<T>::value and to @c bool otherwise.
+     *
+     * @tparam T type to analyze.
+     */
+    template <class T>
+    struct mask_type
+    {
+        using type = bool;
+    };
+    template <class T, class A>
+    struct mask_type<batch<T, A>>
+    {
+        using type = typename batch<T, A>::batch_bool_type;
+    };
+
+    template <class T>
+    using mask_type_t = typename mask_type<T>::type;
 }
 
 #endif
