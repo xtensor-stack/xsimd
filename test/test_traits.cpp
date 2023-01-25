@@ -54,6 +54,17 @@ struct traits_test
         constexpr bool res2 = std::is_same<rtype2, xsimd::batch_bool<value_type>>::value;
         CHECK_UNARY(res2);
     }
+
+    void test_mask_type()
+    {
+        using mtype0 = xsimd::mask_type_t<batch_type>;
+        constexpr bool res0 = std::is_same<mtype0, xsimd::batch_bool<xsimd::scalar_type_t<batch_type>>>::value;
+        CHECK_UNARY(res0);
+
+        using mtype1 = xsimd::mask_type_t<value_type>;
+        constexpr bool res1 = std::is_same<mtype1, bool>::value;
+        CHECK_UNARY(res1);
+    }
 };
 
 TEST_CASE_TEMPLATE("[traits]", B, BATCH_TYPES)
@@ -73,6 +84,11 @@ TEST_CASE_TEMPLATE("[traits]", B, BATCH_TYPES)
     SUBCASE("simd_return_type")
     {
         Test.test_simd_return_type();
+    }
+
+    SUBCASE("mask_type")
+    {
+        Test.test_mask_type();
     }
 }
 
@@ -116,6 +132,17 @@ struct complex_traits_test
         constexpr bool res2 = std::is_same<rtype2, xsimd::batch_bool<typename value_type::value_type>>::value;
         CHECK_UNARY(res2);
     }
+
+    void test_mask_type()
+    {
+        using mtype0 = xsimd::mask_type_t<batch_type>;
+        constexpr bool res0 = std::is_same<mtype0, xsimd::batch_bool<xsimd::scalar_type_t<typename batch_type::real_batch::value_type>>>::value;
+        CHECK_UNARY(res0);
+
+        using mtype1 = xsimd::mask_type_t<value_type>;
+        constexpr bool res1 = std::is_same<mtype1, bool>::value;
+        CHECK_UNARY(res1);
+    }
 };
 
 TEST_CASE_TEMPLATE("[complex traits]", B, BATCH_COMPLEX_TYPES)
@@ -135,6 +162,11 @@ TEST_CASE_TEMPLATE("[complex traits]", B, BATCH_COMPLEX_TYPES)
     SUBCASE("simd_return_type")
     {
         Test.test_simd_return_type();
+    }
+
+    SUBCASE("mask_type")
+    {
+        Test.test_mask_type();
     }
 }
 #endif
