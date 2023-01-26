@@ -452,59 +452,114 @@ namespace xsimd
          * load *
          ********/
 
+        // It is not possible to use a call to A::alignment() here, so use an
+        // immediate instead.
+#if defined(__clang__) || defined(__GNUC__)
+#define xsimd_aligned_load(inst, type, expr) inst((type)__builtin_assume_aligned(expr, 16))
+#elif defined(_MSC_VER)
+#define xsimd_aligned_load(inst, type, expr) inst##_ex((type)expr, 128)
+#else
+#define xsimd_aligned_load(inst, type, expr) inst((type)expr)
+#endif
+
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_u8((uint8_t*)src);
+            return xsimd_aligned_load(vld1q_u8, uint8_t*, src);
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_s8((int8_t*)src);
+            return xsimd_aligned_load(vld1q_s8, int8_t*, src);
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_u16((uint16_t*)src);
+            return xsimd_aligned_load(vld1q_u16, uint16_t*, src);
         }
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_s16((int16_t*)src);
+            return xsimd_aligned_load(vld1q_s16, int16_t*, src);
         }
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_u32((uint32_t*)src);
+            return xsimd_aligned_load(vld1q_u32, uint32_t*, src);
         }
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_s32((int32_t*)src);
+            return xsimd_aligned_load(vld1q_s32, int32_t*, src);
         }
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_u64((uint64_t*)src);
+            return xsimd_aligned_load(vld1q_u64, uint64_t*, src);
         }
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         inline batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return vld1q_s64((int64_t*)src);
+            return xsimd_aligned_load(vld1q_s64, int64_t*, src);
         }
 
         template <class A>
         inline batch<float, A> load_aligned(float const* src, convert<float>, requires_arch<neon>) noexcept
         {
-            return vld1q_f32(src);
+            return xsimd_aligned_load(vld1q_f32, float*, src);
         }
 
-        template <class A, class T>
+#undef xsimd_aligned_load
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
         inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
         {
-            return load_aligned<A>(src, convert<T>(), A {});
+            return vld1q_u8((uint8_t*)src);
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
+        inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
+        {
+            return vld1q_s8((int8_t*)src);
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
+        inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
+        {
+            return vld1q_u16((uint16_t*)src);
+        }
+        template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
+        inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
+        {
+            return vld1q_s16((int16_t*)src);
+        }
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
+        inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
+        {
+            return vld1q_u32((uint32_t*)src);
+        }
+        template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
+        inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
+        {
+            return vld1q_s32((int32_t*)src);
+        }
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
+        {
+            return vld1q_u64((uint64_t*)src);
+        }
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        inline batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<neon>) noexcept
+        {
+            return vld1q_s64((int64_t*)src);
+        }
+
+        template <class A>
+        inline batch<float, A> load_unaligned(float const* src, convert<float>, requires_arch<neon>) noexcept
+        {
+            return vld1q_f32(src);
         }
 
         /*********
