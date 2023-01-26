@@ -768,6 +768,45 @@ namespace xsimd
             return _mm512_roundscale_pd(self, _MM_FROUND_TO_NEG_INF);
         }
 
+        // fnma
+        template <class A>
+        inline batch<float, A> fnma(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_fnmadd_ps(x, y, z);
+        }
+
+        template <class A>
+        inline batch<double, A> fnma(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_fnmadd_pd(x, y, z);
+        }
+
+        // fma
+        template <class A>
+        inline batch<float, A> fma(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_fmadd_ps(x, y, z);
+        }
+
+        template <class A>
+        inline batch<double, A> fma(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_fmadd_pd(x, y, z);
+        }
+
+        // fms
+        template <class A>
+        inline batch<float, A> fms(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_fmsub_ps(x, y, z);
+        }
+
+        template <class A>
+        inline batch<double, A> fms(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_fmsub_pd(x, y, z);
+        }
+
         // from bool
         template <class A, class T>
         inline batch<T, A> from_bool(batch_bool<T, A> const& self, requires_arch<avx512f>) noexcept
