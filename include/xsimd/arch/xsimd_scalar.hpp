@@ -462,11 +462,11 @@ namespace xsimd
 #else
     inline float exp10(const float& x) noexcept
     {
-        return std::exp((float)(M_LN10 * (x)));
+        return std::exp(0x1.26bb1cp+1f * x);
     }
     inline double exp10(const double& x) noexcept
     {
-        return std::exp((double)(M_LN10 * (x)));
+        return std::exp(0x1.26bb1bbb55516p+1 * x);
     }
 #endif
 
