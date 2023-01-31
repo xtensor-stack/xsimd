@@ -12,22 +12,24 @@ jobs:
     strategy:
       matrix:
         os:
-         - 2019
-         - 2022
+          - 2019
+          - 2022
         target:
           - x86
           - x64
         sys:
           - { set: SSE, flags: "/arch:SSE2" }
-         - { set: AVX, flags: "/arch:AVX" }
-         - { set: AVX2, flags: "/arch:AVX2" }
-         - { set: AVX512, flags: "/arch:AVX512" }
+          - { set: AVX, flags: "/arch:AVX" }
+          - { set: AVX2, flags: "/arch:AVX2" }
+          - { set: AVX512, flags: "/arch:AVX512" }
         exclude:
           # AVX on both platforms has a codegen error
           # On 2019 in _mm256_rsqrt_ps, on 2022 in _mm256_blend_p*
           - { sys: { set: AVX } }
           # On both platforms x86 + AVX512 triggers a compiler crash
           - { target: x86, sys: { set: AVX512 } }
+          # /arch:SSE2 is not available on x64 platforms (SSE2 is enabled by default)
+          - { target: x64, sys: { set: SSE} }
     runs-on: windows-${{ matrix.os }}
     steps:
     - name: Setup compiler

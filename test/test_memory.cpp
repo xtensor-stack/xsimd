@@ -47,7 +47,7 @@ TEST_CASE("[is_aligned]")
     void* aligned_f = std::align(alignment, sizeof(f), unaligned_f, aligned_f_size);
     CHECK_UNARY(xsimd::is_aligned(aligned_f));
 
-    __attribute__((aligned(alignment))) char aligned[8];
+    alignas(alignment) char aligned[8];
     CHECK_UNARY(xsimd::is_aligned(&aligned[0]));
     CHECK_UNARY(!xsimd::is_aligned(&aligned[3]));
 }
