@@ -1,9 +1,22 @@
-9.0.1 - Johan Mabille <johan.mabille@gmail.com>
+.. Copyright (c) Serge Guelton and Johan Mabille
+   Copyright (c) QuantStack
+
+   Distributed under the terms of the BSD 3-Clause License.
+
+   The full license is in the file LICENSE, distributed with this software.
+
+
+Changelog
+=========
+
+9.0.1
+-----
 
     * Fix potential ABI issue in SVE support, making ``xsimd::sve`` a type alias to
       size-dependent type.
 
-9.0.0 - Johan Mabille <johan.mabille@gmail.com>
+9.0.0
+-----
 
     * Support fixed size SVE
 
@@ -39,7 +52,8 @@
 
     * Support integral ``xsimd::swizzles`` on AVX
 
-8.1.0 - Johan Mabille <johan.mabille@gmail.com>
+8.1.0
+-----
 
     * Add ``xsimd::gather`` and ``xsimd::scatter``
 
@@ -92,14 +106,16 @@
 
     * Add missing scalar version of ``xsimd::norm`` and ``xsimd::conj``
 
-8.0.5 - Johan Mabille <johan.mabille@gmail.com>
+8.0.5
+-----
 
     * Fix neon ``xsimd::hadd`` implementation
 
     * Detect unsupported architectures and set ``XSIMD_NO_SUPPORTED_ARCHITECTURE``
       if needs be
 
-8.0.4 - Johan Mabille <johan.mabille@gmail.com>
+8.0.4
+-----
 
     * Provide some conversion operators for ``float`` -> ``uint32``
 
@@ -117,16 +133,19 @@
 
     * Mark all functions inline and noexcept
 
-	* Assert when using incomplete ``std::initializer_list``
+    * Assert when using incomplete ``std::initializer_list``
 
-8.0.3 - Johan Mabille <johan.mabille@gmail.com>
+8.0.3
+-----
 
-	* Improve CI & testing, no functional change
+    * Improve CI & testing, no functional change
 
-8.0.2 - Johan Mabille <johan.mabille@gmail.com>
+8.0.2
+-----
 
-	* Do not use ``_mm256_srai_epi32`` under AVX, it's an AVX2 instruction
+    * Do not use ``_mm256_srai_epi32`` under AVX, it's an AVX2 instruction
 
-8.0.1 - Johan Mabille <johan.mabille@gmail.com>
+8.0.1
+-----
 
-	* Fix invalid constexpr ``std::make_tuple`` usage in neon64
+    * Fix invalid constexpr ``std::make_tuple`` usage in neon64
