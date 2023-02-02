@@ -459,14 +459,13 @@ namespace xsimd
     {
         return ::exp10(x);
     }
-#elif defined(__MINGW32__)
-    inline float exp10(const float& x) noexcept
+#elif defined(_WIN32)
+    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    inline T exp10(const T& x) noexcept
     {
-        return std::exp((float)(2.30258509F * (x)));
-    }
-    inline double exp10(const double& x) noexcept
-    {
-        return std::exp((double)(2.30258509299404568402 * (x)));
+        // Very inefficient but other implementations give incorrect results
+        // on Windows
+        return std::pow(T(10), x);
     }
 #else
     inline float exp10(const float& x) noexcept
