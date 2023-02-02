@@ -459,6 +459,15 @@ namespace xsimd
     {
         return ::exp10(x);
     }
+#elif defined(__MINGW32__)
+    inline float exp10(const float& x) noexcept
+    {
+        return std::exp((float)(2.30258509F * (x)));
+    }
+    inline double exp10(const double& x) noexcept
+    {
+        return std::exp((double)(2.30258509299404568402 * (x)));
+    }
 #else
     inline float exp10(const float& x) noexcept
     {
