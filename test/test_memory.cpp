@@ -47,8 +47,12 @@ TEST_CASE("[is_aligned]")
     void* aligned_f = std::align(alignment, sizeof(f), unaligned_f, aligned_f_size);
     CHECK_UNARY(xsimd::is_aligned(aligned_f));
 
+    // GCC does not generate correct alignment on ARM
+    // (see https://godbolt.org/z/obv1n8bWq)
+#if !(XSIMD_WITH_NEON && defined(__GNUC__) && !defined(__clang__))
     alignas(alignment) char aligned[8];
     CHECK_UNARY(xsimd::is_aligned(&aligned[0]));
     CHECK_UNARY(!xsimd::is_aligned(&aligned[3]));
+#endif
 }
 #endif
