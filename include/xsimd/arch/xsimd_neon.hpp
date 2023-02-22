@@ -2526,9 +2526,9 @@ namespace xsimd
                 inline batch<T, A> operator()(batch<T, A> const& x, requires_arch<neon>) noexcept
                 {
                     const auto left = vdupq_n_u8(0);
-                    const auto right = bitwise_cast<batch<uint8_t, A>>(x).data;
+                    const auto right = bitwise_cast<uint8_t>(x).data;
                     const batch<uint8_t, A> res(vextq_u8(left, right, 16 - N));
-                    return bitwise_cast<batch<T, A>>(res);
+                    return bitwise_cast<T>(res);
                 }
             };
 
@@ -2558,10 +2558,10 @@ namespace xsimd
                 template <class A, class T>
                 inline batch<T, A> operator()(batch<T, A> const& x, requires_arch<neon>) noexcept
                 {
-                    const auto left = bitwise_cast<batch<uint8_t, A>>(x).data;
+                    const auto left = bitwise_cast<uint8_t>(x).data;
                     const auto right = vdupq_n_u8(0);
                     const batch<uint8_t, A> res(vextq_u8(left, right, N));
-                    return bitwise_cast<batch<T, A>>(res);
+                    return bitwise_cast<T>(res);
                 }
             };
 

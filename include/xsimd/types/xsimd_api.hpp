@@ -314,11 +314,12 @@ namespace xsimd
      * @param x batch of \c T_in
      * @return \c x reinterpreted as \c T_out
      */
-    template <class B, class T, class A>
-    inline B bitwise_cast(batch<T, A> const& x) noexcept
+    template <class T_out, class T_in, class A>
+    inline batch<T_out, A> bitwise_cast(batch<T_in, A> const& x) noexcept
     {
-        detail::static_check_supported_config<T, A>();
-        return kernel::bitwise_cast<A>(x, B {}, A {});
+        detail::static_check_supported_config<T_in, A>();
+        detail::static_check_supported_config<T_out, A>();
+        return kernel::bitwise_cast<A>(x, batch<T_out, A> {}, A {});
     }
 
     /**

@@ -101,13 +101,13 @@ struct bitwise_cast_test
     {
         int32_vector i32vres(int32_batch::size);
         {
-            int32_batch i32bres = xsimd::bitwise_cast<int32_batch>(f_input());
+            int32_batch i32bres = xsimd::bitwise_cast<int32_t>(f_input());
             i32bres.store_aligned(i32vres.data());
             INFO("to_int32(float)");
             CHECK_VECTOR_EQ(i32vres, ftoi32_res);
         }
         {
-            int32_batch i32bres = xsimd::bitwise_cast<int32_batch>(d_input());
+            int32_batch i32bres = xsimd::bitwise_cast<int32_t>(d_input());
             i32bres.store_aligned(i32vres.data());
             INFO("to_int32(double)");
             CHECK_VECTOR_EQ(i32vres, dtoi32_res);
@@ -118,13 +118,13 @@ struct bitwise_cast_test
     {
         int64_vector i64vres(int64_batch::size);
         {
-            int64_batch i64bres = xsimd::bitwise_cast<int64_batch>(f_input());
+            int64_batch i64bres = xsimd::bitwise_cast<int64_t>(f_input());
             i64bres.store_aligned(i64vres.data());
             INFO("to_int64(float)");
             CHECK_VECTOR_EQ(i64vres, ftoi64_res);
         }
         {
-            int64_batch i64bres = xsimd::bitwise_cast<int64_batch>(d_input());
+            int64_batch i64bres = xsimd::bitwise_cast<int64_t>(d_input());
             i64bres.store_aligned(i64vres.data());
             INFO("to_int64(double)");
             CHECK_VECTOR_EQ(i64vres, dtoi64_res);
@@ -135,19 +135,19 @@ struct bitwise_cast_test
     {
         float_vector fvres(float_batch::size);
         {
-            float_batch fbres = xsimd::bitwise_cast<float_batch>(i32_input());
+            float_batch fbres = xsimd::bitwise_cast<float>(i32_input());
             fbres.store_aligned(fvres.data());
             INFO("to_float(int32_t)");
             CHECK_VECTOR_EQ(fvres, i32tof_res);
         }
         {
-            float_batch fbres = xsimd::bitwise_cast<float_batch>(i64_input());
+            float_batch fbres = xsimd::bitwise_cast<float>(i64_input());
             fbres.store_aligned(fvres.data());
             INFO("to_float(int64_t)");
             CHECK_VECTOR_EQ(fvres, i64tof_res);
         }
         {
-            float_batch fbres = xsimd::bitwise_cast<float_batch>(d_input());
+            float_batch fbres = xsimd::bitwise_cast<float>(d_input());
             fbres.store_aligned(fvres.data());
             INFO("to_float(double)");
             CHECK_VECTOR_EQ(fvres, dtof_res);
@@ -158,19 +158,19 @@ struct bitwise_cast_test
     {
         double_vector dvres(double_batch::size);
         {
-            double_batch dbres = xsimd::bitwise_cast<double_batch>(i32_input());
+            double_batch dbres = xsimd::bitwise_cast<double>(i32_input());
             dbres.store_aligned(dvres.data());
             INFO("to_double(int32_t)");
             CHECK_VECTOR_EQ(dvres, i32tod_res);
         }
         {
-            double_batch dbres = xsimd::bitwise_cast<double_batch>(i64_input());
+            double_batch dbres = xsimd::bitwise_cast<double>(i64_input());
             dbres.store_aligned(dvres.data());
             INFO("to_double(int64_t)");
             CHECK_VECTOR_EQ(dvres, i64tod_res);
         }
         {
-            double_batch dbres = xsimd::bitwise_cast<double_batch>(f_input());
+            double_batch dbres = xsimd::bitwise_cast<double>(f_input());
             dbres.store_aligned(dvres.data());
             INFO("to_double(float)");
             CHECK_VECTOR_EQ(dvres, ftod_res);

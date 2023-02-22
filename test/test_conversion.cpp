@@ -148,22 +148,22 @@ struct conversion_test
         uint8_batch ui8tmp(4);
         uint8_vector ui8vres(uint8_batch::size);
         {
-            uint16_batch ui16casting = xsimd::bitwise_cast<uint16_batch>(ui8tmp);
-            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui16casting);
+            uint16_batch ui16casting = xsimd::bitwise_cast<uint16_t>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_t>(ui16casting);
             ui8casting.store_aligned(ui8vres.data());
             INFO("u8_to_16");
             CHECK_VECTOR_EQ(ui8vres, ui8res);
         }
         {
-            uint32_batch ui32casting = xsimd::bitwise_cast<uint32_batch>(ui8tmp);
-            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui32casting);
+            uint32_batch ui32casting = xsimd::bitwise_cast<uint32_t>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_t>(ui32casting);
             ui8casting.store_aligned(ui8vres.data());
             INFO("u8_to_32");
             CHECK_VECTOR_EQ(ui8vres, ui8res);
         }
         {
-            uint64_batch ui64casting = xsimd::bitwise_cast<uint64_batch>(ui8tmp);
-            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_batch>(ui64casting);
+            uint64_batch ui64casting = xsimd::bitwise_cast<uint64_t>(ui8tmp);
+            uint8_batch ui8casting = xsimd::bitwise_cast<uint8_t>(ui64casting);
             ui8casting.store_aligned(ui8vres.data());
             INFO("u8_to_64");
             CHECK_VECTOR_EQ(ui8vres, ui8res);
