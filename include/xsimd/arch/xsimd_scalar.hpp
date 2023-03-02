@@ -138,6 +138,21 @@ namespace xsimd
         return x + y;
     }
 
+    inline bool all(bool mask)
+    {
+        return mask;
+    }
+
+    inline bool any(bool mask)
+    {
+        return mask;
+    }
+
+    inline bool none(bool mask)
+    {
+        return !mask;
+    }
+
     template <class T>
     inline typename std::enable_if<std::is_integral<T>::value, T>::type
     bitwise_and(T x, T y) noexcept
