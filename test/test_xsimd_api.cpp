@@ -1231,3 +1231,38 @@ TEST_CASE_TEMPLATE("[xsimd api | all floating point types functions]", B, ALL_FL
     xsimd_api_all_floating_point_types_functions<B> Test;
     Test.test_neq_nan();
 }
+
+/*
+ * Functions that apply only to mask type
+ */
+template <typename T>
+struct xsimd_api_all_mask_functions
+{
+    using value_type = typename scalar_type<T>::type;
+
+    void test_all()
+    {
+        value_type val(1);
+        CHECK_EQ(xsimd::all(T(val) == T(val)), xsimd::all(val == val));
+    }
+
+    void test_any()
+    {
+        value_type val(1);
+        CHECK_EQ(xsimd::any(T(val) == T(val)), xsimd::any(val == val));
+    }
+
+    void test_none()
+    {
+        value_type val(1);
+        CHECK_EQ(xsimd::none(T(val) != T(val)), xsimd::none(val != val));
+    }
+};
+
+TEST_CASE_TEMPLATE("[xsimd api | all mask functions]", B, ALL_TYPES)
+{
+    xsimd_api_all_mask_functions<B> Test;
+    Test.test_all();
+    Test.test_any();
+    Test.test_none();
+}
