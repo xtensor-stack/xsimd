@@ -11,6 +11,9 @@ xsimd provides an high level description of the instruction sets it manipulates.
 The mentionned types are primarily used as template parameters for :ref:`batch
 <xsimd-batch-ref>`, and when interacting with :cpp:func:`xsimd::dispatch()`.
 
-.. doxygengroup:: arch
+The best available architecture is available at compile time through
+``xsimd::best_arch`` which also happens to be ``xsimd::default_arch``.
+
+.. doxygengroup:: architectures
    :project: xsimd
-   :content-only:
+   :members:

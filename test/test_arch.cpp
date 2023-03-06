@@ -19,9 +19,13 @@
 #include "test_utils.hpp"
 
 static_assert(xsimd::default_arch::supported(), "default arch must be supported");
+static_assert(std::is_same<xsimd::default_arch, xsimd::best_arch>::value, "default arch is the best available");
 static_assert(xsimd::supported_architectures::contains<xsimd::default_arch>(), "default arch is supported");
 static_assert(xsimd::all_architectures::contains<xsimd::default_arch>(), "default arch is a valid arch");
-// static_assert(!(xsimd::x86_arch::supported() && xsimd::arm::supported()), "either x86 or arm, but not both");
+
+#if !XSIMD_WITH_SVE
+static_assert((std::is_same<xsimd::default_arch, xsimd::neon64>::value || !xsimd::neon64::supported()), "on arm, without sve, the best we can do is neon64");
+#endif
 
 struct check_supported
 {
