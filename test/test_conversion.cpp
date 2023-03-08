@@ -200,5 +200,49 @@ TEST_CASE_TEMPLATE("[conversion]", B, CONVERSION_TYPES)
         Test.test_u8_casting();
     }
 }
+
+template <class T>
+struct sign_conversion_test
+{
+
+    using unsigned_type = T;
+    using signed_type = typename std::make_signed<T>::type;
+
+    void test_to_signed()
+    {
+        unsigned_type unsigned_value = 3;
+        signed_type signed_value = (signed_type)unsigned_value;
+        xsimd::batch<unsigned_type> unsigned_batch(unsigned_value);
+        auto signed_batch = xsimd::batch_cast<signed_type>(unsigned_batch);
+        CHECK_EQ(unsigned_batch.get(0), unsigned_value);
+        CHECK_EQ(signed_batch.get(0), signed_value);
+    }
+
+    void test_to_unsigned()
+    {
+        signed_type signed_value = 3;
+        unsigned_type unsigned_value = (unsigned_type)signed_value;
+        xsimd::batch<signed_type> signed_batch(signed_value);
+        auto unsigned_batch = xsimd::batch_cast<unsigned_type>(signed_batch);
+        CHECK_EQ(signed_batch.get(0), signed_value);
+        CHECK_EQ(unsigned_batch.get(0), unsigned_value);
+    }
+};
+
+TEST_CASE_TEMPLATE("[conversion]", T, uint8_t, uint16_t, uint32_t, uint64_t)
+{
+    sign_conversion_test<T> Test;
+
+    SUBCASE("to_signed")
+    {
+        Test.test_to_signed();
+    }
+
+    SUBCASE("to_unsigned")
+    {
+        Test.test_to_unsigned();
+    }
+}
+
 #endif
 #endif
