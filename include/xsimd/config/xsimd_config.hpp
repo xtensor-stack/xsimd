@@ -244,18 +244,14 @@
 #define XSIMD_WITH_AVX512BW 0
 #endif
 
-#ifdef __ARM_NEON
+#if defined(__ARM_NEON__) || defined(__ARM_NEON) || (defined(_M_ARM) && __ARM_ARCH >= 7)
 
 /**
  * @ingroup xsimd_config_macro
  *
  * Set to 1 if NEON is available at compile-time, to 0 otherwise.
  */
-#if __ARM_ARCH >= 7
 #define XSIMD_WITH_NEON 1
-#else
-#define XSIMD_WITH_NEON 0
-#endif
 
 /**
  * @ingroup xsimd_config_macro
