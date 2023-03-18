@@ -82,7 +82,7 @@ namespace xsimd
      * @return the sum of \c x and \c y
      */
     template <class T, class A>
-    inline auto add(batch<T> const& x, batch<T, A> const& y) noexcept -> decltype(x + y)
+    inline auto add(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x + y)
     {
         detail::static_check_supported_config<T, A>();
         return x + y;
