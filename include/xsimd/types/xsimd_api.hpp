@@ -881,63 +881,6 @@ namespace xsimd
     /**
      * @ingroup batch_reducers
      *
-     * Generic reducer using only batch operations
-     * @param f reducing function, accepting `batch ()(batch, batch)`
-     * @param x batch involved in the reduction
-     * @return the result of the reduction, as a scalar.
-     */
-    template <class T, class A, class F>
-    inline T reduce(F&& f, batch<T, A> const& x) noexcept
-    {
-        detail::static_check_supported_config<T, A>();
-        return kernel::detail::reduce(std::forward<F>(f), x, std::integral_constant<unsigned, batch<T, A>::size>());
-    }
-
-    /**
-     * @ingroup batch_reducers
-     *
-     * Adds all the scalars of the batch \c x.
-     * @param x batch involved in the reduction
-     * @return the result of the reduction.
-     */
-    template <class T, class A>
-    inline T reduce_add(batch<T, A> const& x) noexcept
-    {
-        detail::static_check_supported_config<T, A>();
-        return kernel::reduce_add<A>(x, A {});
-    }
-
-    /**
-     * @ingroup batch_reducers
-     *
-     * Max of all the scalars of the batch \c x.
-     * @param x batch involved in the reduction
-     * @return the result of the reduction.
-     */
-    template <class T, class A>
-    inline T reduce_max(batch<T, A> const& x) noexcept
-    {
-        detail::static_check_supported_config<T, A>();
-        return kernel::reduce_max<A>(x, A {});
-    }
-
-    /**
-     * @ingroup batch_reducers
-     *
-     * Min of all the scalars of the batch \c x.
-     * @param x batch involved in the reduction
-     * @return the result of the reduction.
-     */
-    template <class T, class A>
-    inline T reduce_min(batch<T, A> const& x) noexcept
-    {
-        detail::static_check_supported_config<T, A>();
-        return kernel::reduce_min<A>(x, A {});
-    }
-
-    /**
-     * @ingroup batch_reducers
-     *
      * Parallel horizontal addition: adds the scalars of each batch
      * in the array pointed by \c row and store them in a returned
      * batch.
@@ -1596,6 +1539,20 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_complex
+     *
+     * Computes the real part of the batch \c z.
+     * @param z batch of complex or real values.
+     * @return the argument of \c z.
+     */
+    template <class T, class A>
+    inline real_batch_type_t<batch<T, A>> real(batch<T, A> const& z) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::real<A>(z, A {});
+    }
+
+    /**
      * @ingroup batch_arithmetic
      *
      * Computes the approximate reciprocal of the batch \c x.
@@ -1612,17 +1569,60 @@ namespace xsimd
     }
 
     /**
-     * @ingroup batch_complex
+     * @ingroup batch_reducers
      *
-     * Computes the real part of the batch \c z.
-     * @param z batch of complex or real values.
-     * @return the argument of \c z.
+     * Generic reducer using only batch operations
+     * @param f reducing function, accepting `batch ()(batch, batch)`
+     * @param x batch involved in the reduction
+     * @return the result of the reduction, as a scalar.
      */
-    template <class T, class A>
-    inline real_batch_type_t<batch<T, A>> real(batch<T, A> const& z) noexcept
+    template <class T, class A, class F>
+    inline T reduce(F&& f, batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::real<A>(z, A {});
+        return kernel::detail::reduce(std::forward<F>(f), x, std::integral_constant<unsigned, batch<T, A>::size>());
+    }
+
+    /**
+     * @ingroup batch_reducers
+     *
+     * Adds all the scalars of the batch \c x.
+     * @param x batch involved in the reduction
+     * @return the result of the reduction.
+     */
+    template <class T, class A>
+    inline T reduce_add(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::reduce_add<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_reducers
+     *
+     * Max of all the scalars of the batch \c x.
+     * @param x batch involved in the reduction
+     * @return the result of the reduction.
+     */
+    template <class T, class A>
+    inline T reduce_max(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::reduce_max<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_reducers
+     *
+     * Min of all the scalars of the batch \c x.
+     * @param x batch involved in the reduction
+     * @return the result of the reduction.
+     */
+    template <class T, class A>
+    inline T reduce_min(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::reduce_min<A>(x, A {});
     }
 
     /**
