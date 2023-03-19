@@ -43,6 +43,13 @@ namespace xsimd
                                  self, other);
         }
 
+        // decr
+        template <class A, class T>
+        inline batch<T, A> decr(batch<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            return self - T(1);
+        }
+
         // div
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> div(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
@@ -102,6 +109,13 @@ namespace xsimd
         inline batch<T, A> fnms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<generic>) noexcept
         {
             return -x * y - z;
+        }
+
+        // incr
+        template <class A, class T>
+        inline batch<T, A> incr(batch<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            return self + T(1);
         }
 
         template <class A, class T>

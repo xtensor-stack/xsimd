@@ -138,6 +138,12 @@ namespace xsimd
         return x + y;
     }
 
+    template <class T>
+    inline T incr(T const& x) noexcept
+    {
+        return x + T(1);
+    }
+
     inline bool all(bool mask)
     {
         return mask;
@@ -751,6 +757,12 @@ namespace xsimd
     inline auto sub(T const& x, Tp const& y) noexcept -> decltype(x - y)
     {
         return x - y;
+    }
+
+    template <class T>
+    inline T decr(T const& x) noexcept
+    {
+        return x - T(1);
     }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX

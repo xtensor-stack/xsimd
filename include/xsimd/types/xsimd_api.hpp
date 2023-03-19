@@ -549,6 +549,20 @@ namespace xsimd
     /**
      * @ingroup batch_arithmetic
      *
+     * Subtract 1 to batch \c x
+     * @param x batch involved in the decrement.
+     * @return the substraction of \c x and 1
+     */
+    template <class T, class A>
+    inline batch<T, A> decr(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::decr<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
      * Computes the division of the batch \c x by the batch \c y.
      * @param x scalar or batch of scalars
      * @param y scalar or batch of scalars
@@ -922,6 +936,20 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return kernel::imag<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
+     * Add 1 to batch \c x
+     * @param x batch involved in the increment.
+     * @return the sum of \c x and 1
+     */
+    template <class T, class A>
+    inline batch<T, A> incr(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::incr<A>(x, A {});
     }
 
     /**

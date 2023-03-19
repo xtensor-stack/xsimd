@@ -248,6 +248,26 @@ struct batch_test
         }
     }
 
+    void test_incr_decr() const
+    {
+        // incr
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), xsimd::incr<value_type>);
+            batch_type res = xsimd::incr(batch_lhs());
+            INFO("incr(batch)");
+            CHECK_BATCH_EQ(res, expected);
+        }
+        // decr
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), xsimd::decr<value_type>);
+            batch_type res = xsimd::decr(batch_lhs());
+            INFO("decr(batch)");
+            CHECK_BATCH_EQ(res, expected);
+        }
+    }
+
     void test_saturated_arithmetic() const
     {
         // batch + batch
@@ -853,6 +873,11 @@ TEST_CASE_TEMPLATE("[batch]", B, BATCH_TYPES)
     SUBCASE("arithmetic")
     {
         Test.test_arithmetic();
+    }
+
+    SUBCASE("incr decr")
+    {
+        Test.test_incr_decr();
     }
 
     SUBCASE("saturated_arithmetic")
