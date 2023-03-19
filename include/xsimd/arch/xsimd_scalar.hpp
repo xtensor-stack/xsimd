@@ -144,6 +144,12 @@ namespace xsimd
         return x + T(1);
     }
 
+    template <class T>
+    inline T incr_if(T const& x, bool mask) noexcept
+    {
+        return x + T(mask ? 1 : 0);
+    }
+
     inline bool all(bool mask)
     {
         return mask;
@@ -763,6 +769,12 @@ namespace xsimd
     inline T decr(T const& x) noexcept
     {
         return x - T(1);
+    }
+
+    template <class T>
+    inline T decr_if(T const& x, bool mask) noexcept
+    {
+        return x - T(mask ? 1 : 0);
     }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX

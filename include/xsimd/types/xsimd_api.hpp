@@ -549,15 +549,31 @@ namespace xsimd
     /**
      * @ingroup batch_arithmetic
      *
-     * Subtract 1 to batch \c x
+     * Subtract 1 to batch \c x.
      * @param x batch involved in the decrement.
-     * @return the substraction of \c x and 1
+     * @return the subtraction of \c x and 1.
      */
     template <class T, class A>
     inline batch<T, A> decr(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::decr<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
+     * Subtract 1 to batch \c x for each element where \c mask is true.
+     * @param x batch involved in the increment.
+     * @param mask whether to perform the increment or not. Can be a \c
+     *             batch_bool or a \c batch_bool_constant.
+     * @return the subtraction of \c x and 1 when \c mask is true.
+     */
+    template <class T, class A, class Mask>
+    inline batch<T, A> decr_if(batch<T, A> const& x, Mask const& mask) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::decr_if<A>(x, mask, A {});
     }
 
     /**
@@ -941,15 +957,31 @@ namespace xsimd
     /**
      * @ingroup batch_arithmetic
      *
-     * Add 1 to batch \c x
+     * Add 1 to batch \c x.
      * @param x batch involved in the increment.
-     * @return the sum of \c x and 1
+     * @return the sum of \c x and 1.
      */
     template <class T, class A>
     inline batch<T, A> incr(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::incr<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
+     * Add 1 to batch \c x for each element where \c mask is true.
+     * @param x batch involved in the increment.
+     * @param mask whether to perform the increment or not. Can be a \c
+     *             batch_bool or a \c batch_bool_constant.
+     * @return the sum of \c x and 1 when \c mask is true.
+     */
+    template <class T, class A, class Mask>
+    inline batch<T, A> incr_if(batch<T, A> const& x, Mask const& mask) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::incr_if<A>(x, mask, A {});
     }
 
     /**

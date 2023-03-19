@@ -258,12 +258,35 @@ struct batch_test
             INFO("incr(batch)");
             CHECK_BATCH_EQ(res, expected);
         }
+
+        // incr_if
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                           [](value_type v)
+                           { return v > 1 ? v + 1 : v; });
+            batch_type res = xsimd::incr_if(batch_lhs(), batch_lhs() > value_type(1));
+            INFO("incr_if(batch)");
+            CHECK_BATCH_EQ(res, expected);
+        }
+
         // decr
         {
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(), xsimd::decr<value_type>);
             batch_type res = xsimd::decr(batch_lhs());
             INFO("decr(batch)");
+            CHECK_BATCH_EQ(res, expected);
+        }
+
+        // decr_if
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
+                           [](value_type v)
+                           { return v > 1 ? v - 1 : v; });
+            batch_type res = xsimd::decr_if(batch_lhs(), batch_lhs() > value_type(1));
+            INFO("decr_if(batch)");
             CHECK_BATCH_EQ(res, expected);
         }
     }
