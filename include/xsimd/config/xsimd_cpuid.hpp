@@ -52,6 +52,7 @@ namespace xsimd
             unsigned avx512bw : 1;
             unsigned neon : 1;
             unsigned neon64 : 1;
+            unsigned sve : 1;
 
             // version number of the best arch available
             unsigned best;
@@ -74,6 +75,15 @@ namespace xsimd
 #endif
                 neon64 = 0;
                 best = neon::version() * neon;
+
+#elif defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE_BITS) && __ARM_FEATURE_SVE_BITS > 0
+
+#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
+                sve = bool(getauxval(AT_HWCAP) & HWCAP_SVE);
+#else
+                sve = 0;
+#endif
+                best = sve::version() * sve;
 
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
                 auto get_cpuid = [](int reg[4], int func_id) noexcept
