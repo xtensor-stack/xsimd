@@ -1083,6 +1083,18 @@ struct xsimd_api_all_types_functions
         CHECK_EQ(extract(xsimd::add(T(val0), T(val1))), val0 + val1);
     }
 
+    void test_decr()
+    {
+        value_type val0(1);
+        CHECK_EQ(extract(xsimd::decr(T(val0))), val0 - value_type(1));
+    }
+
+    void test_decr_if()
+    {
+        value_type val0(1);
+        CHECK_EQ(extract(xsimd::decr_if(T(val0), T(val0) != T(0))), val0 - value_type(1));
+    }
+
     void test_div()
     {
         value_type val0(1);
@@ -1119,6 +1131,18 @@ struct xsimd_api_all_types_functions
         value_type val1(3);
         value_type val2(5);
         CHECK_EQ(extract(xsimd::fnma(T(val0), T(val1), T(val2))), -(val0 * val1) + val2);
+    }
+
+    void test_incr()
+    {
+        value_type val0(1);
+        CHECK_EQ(extract(xsimd::incr(T(val0))), val0 + value_type(1));
+    }
+
+    void test_incr_if()
+    {
+        value_type val0(1);
+        CHECK_EQ(extract(xsimd::incr_if(T(val0), T(val0) != T(0))), val0 + value_type(1));
     }
 
     void test_mul()
@@ -1161,6 +1185,12 @@ TEST_CASE_TEMPLATE("[xsimd api | all types functions]", B, ALL_TYPES)
         Test.test_add();
     }
 
+    SUBCASE("decr")
+    {
+        Test.test_decr();
+        Test.test_decr_if();
+    }
+
     SUBCASE("div")
     {
         Test.test_div();
@@ -1184,6 +1214,12 @@ TEST_CASE_TEMPLATE("[xsimd api | all types functions]", B, ALL_TYPES)
     SUBCASE("fnma")
     {
         Test.test_fnma();
+    }
+
+    SUBCASE("incr")
+    {
+        Test.test_incr();
+        Test.test_incr_if();
     }
 
     SUBCASE("mul")
