@@ -110,6 +110,13 @@ TEST_CASE("[multi arch support]")
             CHECK_EQ(ref, res);
         }
 
+        // only highest available
+        {
+            auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::best_arch>>(sum {});
+            float res = dispatched(data, 17);
+            CHECK_EQ(ref, res);
+        }
+
 #if XSIMD_WITH_AVX && XSIMD_WITH_SSE2
         static_assert(xsimd::supported_architectures::contains<xsimd::avx>() && xsimd::supported_architectures::contains<xsimd::sse2>(), "consistent supported architectures");
         {
