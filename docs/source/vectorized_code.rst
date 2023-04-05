@@ -23,7 +23,7 @@ Assume that we have a simple function that computes the mean of two vectors, som
         }
     }
 
-How can we used `xsimd` to take advantage of vectorization ?
+How can we used `xsimd` to take advantage of vectorization?
 
 Explicit use of an instruction set
 ----------------------------------
@@ -185,4 +185,4 @@ as a template parameter:
     };
 
 This can be useful to implement runtime dispatching, based on the instruction set detected at runtime. `xsimd` provides a generic machinery :cpp:func:`xsimd::dispatch()` to implement
-this pattern. Based on the above example, instead of calling ``mean{}(arch, a, b, res, tag)``, one can use ``xsimd::dispatch(mean{})(a, b, res, tag)``.
+this pattern. Based on the above example, instead of calling ``mean{}(arch, a, b, res, tag)``, one can use ``xsimd::dispatch(mean{})(a, b, res, tag)``. More about this can be found in the :ref:`Arch Dispatching` section.

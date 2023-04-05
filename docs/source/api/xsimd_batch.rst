@@ -4,8 +4,8 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-batch
-=====
+Batch of scalars
+================
 
 .. _xsimd-batch-ref:
 

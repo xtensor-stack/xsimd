@@ -29,6 +29,9 @@
 Instruction set macros
 ======================
 
+Each of these macros corresponds to an instruction set supported by XSIMD. They
+can be used to filter arch-specific code.
+
 .. doxygengroup:: xsimd_config_macro
    :project: xsimd
    :content-only:

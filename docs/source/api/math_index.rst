@@ -35,37 +35,25 @@ Mathematical functions
    basic_functions
 
 +---------------------------------------+----------------------------------------------------+
-| :ref:`abs <abs-function-reference>`   | absolute value                                     |
+| :cpp:func:`abs`                       | absolute value                                     |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`fabs <fabs-function-reference>` | absolute value                                     |
+| :cpp:func:`fabs`                      | absolute value of floating point values            |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`fmod <fmod-function-reference>` | remainder of the floating point division operation |
+| :cpp:func:`fmod`                      | remainder of the floating point division operation |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`remainder <remainder-func-ref>` | signed remainder of the division operation         |
+| :cpp:func:`remainder`                 | signed remainder of the division operation         |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`fma <fma-function-reference>`   | fused multiply-add operation                       |
+| :cpp:func:`min`                       | smaller of two batches                             |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`fms <fms-function-reference>`   | fused multiply-sub operation                       |
+| :cpp:func:`max`                       | larger of two batches                              |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`fnma <fnma-function-reference>` | fused negated multiply-add operation               |
+| :cpp:func:`fmin`                      | smaller of two batches of floating point values    |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`fnms <fnms-function-reference>` | fused negated multiply-sub operation               |
+| :cpp:func:`fmax`                      | larger of two batches of floating point values     |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`min <min-function-reference>`   | smaller of two batches                             |
+| :cpp:func:`fdim`                      | positive difference                                |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`max <max-function-reference>`   | larger of two batches                              |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`fmin <fmin-function-reference>` | smaller of two batches of floating point values    |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`fmax <fmax-function-reference>` | larger of two batches of floating point values     |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`fdim <fdim-function-reference>` | positive difference                                |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`sadd <sadd-function-reference>` | saturated addition                                 |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`ssub <ssub-function-reference>` | saturated subtraction                              |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`clip <clip-function-reference>` | clipping operation                                 |
+| :cpp:func:`clip`                      | clipping operation                                 |
 +---------------------------------------+----------------------------------------------------+
 
 .. toctree::
@@ -73,21 +61,21 @@ Mathematical functions
    exponential_functions
 
 +---------------------------------------+----------------------------------------------------+
-| :ref:`exp <exp-function-reference>`   | natural exponential function                       |
+| :cpp:func:`exp`                       | natural exponential function                       |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`exp2 <exp2-function-reference>` | base 2 exponential function                        |
+| :cpp:func:`exp2`                      | base 2 exponential function                        |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`exp10 <exp10-func-ref>`         | base 10 exponential function                       |
+| :cpp:func:`exp10`                     | base 10 exponential function                       |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`expm1 <expm1-func-ref>`         | natural exponential function, minus one            |
+| :cpp:func:`expm1`                     | natural exponential function, minus one            |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`log <log-function-reference>`   | natural logarithm function                         |
+| :cpp:func:`log`                       | natural logarithm function                         |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`log2 <log2-function-reference>` | base 2 logarithm function                          |
+| :cpp:func:`log2`                      | base 2 logarithm function                          |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`log10 <log10-func-ref>`         | base 10 logarithm function                         |
+| :cpp:func:`log10`                     | base 10 logarithm function                         |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`log1p <log1p-func-ref>`         | natural logarithm of one plus function             |
+| :cpp:func:`log1p`                     | natural logarithm of one plus function             |
 +---------------------------------------+----------------------------------------------------+
 
 .. toctree::
@@ -95,15 +83,15 @@ Mathematical functions
    power_functions
 
 +-----------------------------------------+----------------------------------------------------+
-| :ref:`pow <pow-function-reference>`     | power function                                     |
+| :cpp:func:`pow`                         | power function                                     |
 +-----------------------------------------+----------------------------------------------------+
-| :ref:`rsqrt <rsqrt-function-reference>` | reciprocal square root function                    |
+| :cpp:func:`rsqrt`                       | reciprocal square root function                    |
 +-----------------------------------------+----------------------------------------------------+
-| :ref:`sqrt <sqrt-function-reference>`   | square root function                               |
+| :cpp:func:`sqrt`                        | square root function                               |
 +-----------------------------------------+----------------------------------------------------+
-| :ref:`cbrt <cbrt-function-reference>`   | cubic root function                                |
+| :cpp:func:`cbrt`                        | cubic root function                                |
 +-----------------------------------------+----------------------------------------------------+
-| :ref:`hypot <hypot-func-ref>`           | hypotenuse function                                |
+| :cpp:func:`hypot`                       | hypotenuse function                                |
 +-----------------------------------------+----------------------------------------------------+
 
 .. toctree::
@@ -111,21 +99,21 @@ Mathematical functions
    trigonometric_functions
 
 +---------------------------------------+----------------------------------------------------+
-| :ref:`sin <sin-function-reference>`   | sine function                                      |
+| :cpp:func:`sin`                       | sine function                                      |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`cos <cos-function-reference>`   | cosine function                                    |
+| :cpp:func:`cos`                       | cosine function                                    |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`sincos <sincos-func-ref>`       | sine and cosine function                           |
+| :cpp:func:`sincos`                    | sine and cosine function                           |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`tan <tan-function-reference>`   | tangent function                                   |
+| :cpp:func:`tan`                       | tangent function                                   |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`asin <asin-function-reference>` | arc sine function                                  |
+| :cpp:func:`asin`                      | arc sine function                                  |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`acos <acos-function-reference>` | arc cosine function                                |
+| :cpp:func:`acos`                      | arc cosine function                                |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`atan <atan-function-reference>` | arc tangent function                               |
+| :cpp:func:`atan`                      | arc tangent function                               |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`atan2 <atan2-func-ref>`         | arc tangent function, determining quadrants        |
+| :cpp:func:`atan2`                     | arc tangent function, determining quadrants        |
 +---------------------------------------+----------------------------------------------------+
 
 .. toctree::
@@ -133,17 +121,17 @@ Mathematical functions
    hyperbolic_functions
 
 +---------------------------------------+----------------------------------------------------+
-| :ref:`sinh <sinh-function-reference>` | hyperbolic sine function                           |
+| :cpp:func:`sinh`                      | hyperbolic sine function                           |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`cosh <cosh-function-reference>` | hyperbolic cosine function                         |
+| :cpp:func:`cosh`                      | hyperbolic cosine function                         |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`tanh <tanh-function-reference>` | hyperbolic tangent function                        |
+| :cpp:func:`tanh`                      | hyperbolic tangent function                        |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`asinh <asinh-func-ref>`         | inverse hyperbolic sine function                   |
+| :cpp:func:`asinh`                     | inverse hyperbolic sine function                   |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`acosh <acosh-func-ref>`         | inverse hyperbolic cosine function                 |
+| :cpp:func:`acosh`                     | inverse hyperbolic cosine function                 |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`atanh <atanh-func-ref>`         | inverse hyperbolic tangent function                |
+| :cpp:func:`atanh`                     | inverse hyperbolic tangent function                |
 +---------------------------------------+----------------------------------------------------+
 
 .. toctree::
@@ -151,13 +139,13 @@ Mathematical functions
    error_functions
 
 +---------------------------------------+----------------------------------------------------+
-| :ref:`erf <erf-function-reference>`   | error function                                     |
+| :cpp:func:`erf`                       | error function                                     |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`erfc <erfc-function-reference>` | complementary error function                       |
+| :cpp:func:`erfc`                      | complementary error function                       |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`tgamma <tgamma-func-ref>`       | gamma function                                     |
+| :cpp:func:`tgamma`                    | gamma function                                     |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`lgamma <lgamma-func-ref>`       | natural logarithm of the gamma function            |
+| :cpp:func:`lgamma`                    | natural logarithm of the gamma function            |
 +---------------------------------------+----------------------------------------------------+
 
 .. toctree::
@@ -165,27 +153,17 @@ Mathematical functions
    nearint_operations
 
 +---------------------------------------+----------------------------------------------------+
-| :ref:`ceil <ceil-function-reference>` | nearest integers not less                          |
+| :cpp:func:`ceil`                      | nearest integers not less                          |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`floor <floor-func-ref>`         | nearest integers not greater                       |
+| :cpp:func:`floor`                     | nearest integers not greater                       |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`trunc <trunc-func-ref>`         | nearest integers not greater in magnitude          |
+| :cpp:func:`trunc`                     | nearest integers not greater in magnitude          |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`round <round-func-ref>`         | nearest integers, rounding away from zero          |
+| :cpp:func:`round`                     | nearest integers, rounding away from zero          |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`nearbyint <nearbyint-func-ref>` | nearest integers using current rounding mode       |
+| :cpp:func:`nearbyint`                 | nearest integers using current rounding mode       |
 +---------------------------------------+----------------------------------------------------+
-| :ref:`rint <rint-function-reference>` | nearest integers using current rounding mode       |
+| :cpp:func:`rint`                      | nearest integers using current rounding mode       |
 +---------------------------------------+----------------------------------------------------+
 
-.. toctree::
 
-   classification_functions
-
-+---------------------------------------+----------------------------------------------------+
-| :ref:`isfinite <isfinite-func-ref>`   | Checks for finite values                           |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`isinf <isinf-func-ref>`         | Checks for infinite values                         |
-+---------------------------------------+----------------------------------------------------+
-| :ref:`isnan <isnan-func-ref>`         | Checks for NaN values                              |
-+---------------------------------------+----------------------------------------------------+

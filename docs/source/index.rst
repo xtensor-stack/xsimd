@@ -16,8 +16,8 @@ SIMD (Single Instruction, Multiple Data) is a feature of microprocessors that ha
 on a batch of values at once, and thus provide a way to significantly accelerate code execution. However, these instructions differ between microprocessor
 vendors and compilers.
 
-`xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of numbers with the same arithmetic
-operators as for single values. It also provides accelerated implementation of common mathematical functions operating on batches.
+`xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of scalar and complex numbers with the same arithmetic
+operators and common mathematical functions as for single values.
 
 `xsimd` makes it easy to write a single algorithm, generate one version of the algorithm per micro-architecture and pick the best one at runtime, based on the
 running processor capability.
@@ -74,15 +74,8 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    vectorized_code
 
 .. toctree::
-   :caption: MIGRATION GUIDE
-   :maxdepth: 1
-
-   migration_guide
-
-
-.. toctree::
    :caption: API REFERENCE
-   :maxdepth: 2
+   :maxdepth: 1
 
    api/instr_macros
    api/batch_index
@@ -94,11 +87,20 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    api/reducer_index
    api/cast_index
    api/type_traits
-   api/misc_index
    api/batch_manip
+   api/misc_index
    api/aligned_allocator
    api/arch
    api/dispatching
+
+
+.. toctree::
+   :caption: MIGRATION GUIDE
+   :maxdepth: 1
+
+   migration_guide
+
+
 
 .. _The C++ Scientist: http://johanmabille.github.io/blog/archives/
 .. _boost.SIMD: https://github.com/NumScale/boost.simd

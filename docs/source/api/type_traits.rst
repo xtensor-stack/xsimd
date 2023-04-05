@@ -34,6 +34,27 @@ Type Traits
 `xsimd` provides a few type traits to interact with scalar and batch types in an
 uniformeous manner.
 
+
+Type check:
+
++---------------------------------------+----------------------------------------------------+
+| :cpp:class:`is_batch`                 | batch type detection                               |
++---------------------------------------+----------------------------------------------------+
+| :cpp:class:`is_batch_bool`            | mask batch type detection                          |
++---------------------------------------+----------------------------------------------------+
+| :cpp:class:`is_batch_complex`         | complex batch type detection                       |
++---------------------------------------+----------------------------------------------------+
+
+Type access:
+
++---------------------------------------+----------------------------------------------------+
+| :cpp:class:`scalar_type`              | batch element type                                 |
++---------------------------------------+----------------------------------------------------+
+| :cpp:class:`mask_type`                | batch mask type                                    |
++---------------------------------------+----------------------------------------------------+
+
+----
+
 .. doxygengroup:: batch_traits
    :project: xsimd
    :content-only:
