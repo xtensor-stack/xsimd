@@ -9,6 +9,52 @@
 Changelog
 =========
 
+11.0.0
+------
+
+    * Provide a generic reducer
+
+    * Fix ``find_package(xsimd)`` for xtl enabled xsimd, reloaded
+
+    * Cleanup benchmark code
+
+    * Provide avx512f implementation of FMA and variant
+
+    * Hexadecimal floating points are not a C++11 feature
+
+    * back to slow implementation of exp10 on Windows
+
+    * Changed bitwise_cast API
+
+    * Provide generic signed /unsigned type conversion
+
+    * Fixed sde location
+
+    * Feature/incr decr
+
+    * Cleanup documentation
+
+10.0.0
+------
+
+    * Fix potential ABI issue in SVE support
+
+    * Disable fast exp10 on OSX
+
+    * Assert on unaligned memory when calling aligned load/store
+
+    * Fix warning about uninitialized storage
+
+    * Always forward arch parameter
+
+    * Do not specialize the behavior of ``simd_return_type`` for char
+
+    * Support broadcasting of complex batches
+
+    * Make xsimd compatible with -fno-exceptions
+
+    * Provide and test comparison operators overloads that accept scalars
+
 9.0.1
 -----
 
