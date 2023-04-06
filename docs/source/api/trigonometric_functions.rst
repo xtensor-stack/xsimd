@@ -7,35 +7,27 @@
 Trigonometric functions
 =======================
 
-.. _sin-function-reference:
 .. doxygenfunction:: sin
    :project: xsimd
 
-.. _cos-function-reference:
 .. doxygenfunction:: cos
    :project: xsimd
 
-.. _sincos-func-ref:
 .. doxygenfunction:: sincos
    :project: xsimd
 
-.. _tan-function-reference:
 .. doxygenfunction:: tan
    :project: xsimd
 
-.. _asin-function-reference:
 .. doxygenfunction:: asin
    :project: xsimd
 
-.. _acos-function-reference:
 .. doxygenfunction:: acos
    :project: xsimd
 
-.. _atan-function-reference:
 .. doxygenfunction:: atan
    :project: xsimd
 
-.. _atan2-func-ref:
 .. doxygenfunction:: atan2
    :project: xsimd
 

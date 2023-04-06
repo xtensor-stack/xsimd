@@ -21,8 +21,9 @@
 Installation
 ============
 
-Although `xsimd` is a header-only library, we provide standardized means to install it, with package managers or with cmake.
+`xsimd` is a header-only library, so installing it is just a matter of copying the ``include/xsimd`` directory.
 
+However we provide standardized means to install it, with package managers or with cmake.
 Besides the `xsimd` headers, all these methods place the ``cmake`` project configuration file in the right location so that third-party projects can use cmake's ``find_package`` to locate `xsimd` headers.
 
 .. image:: conda.svg
@@ -53,7 +54,7 @@ A package for `xsimd` is available on the `Spack <https://spack.io>`_ package ma
 From source with cmake
 ----------------------
 
-You can also install `xsimd` from source with `cmake <https://cmake.org/>`_. On Unix platforms, from the source directory:
+You can install `xsimd` from source with `cmake <https://cmake.org/>`_. On Unix platforms, from the source directory:
 
 .. code::
 

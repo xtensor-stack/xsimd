@@ -7,23 +7,18 @@
 Power functions
 ===============
 
-.. _pow-function-reference:
 .. doxygenfunction:: xsimd::pow(batch<T, A> const&, batch<T, A> const&)
    :project: xsimd
 
-.. _rsqrt-function-reference:
 .. doxygenfunction:: rsqrt
    :project: xsimd
 
-.. _sqrt-function-reference:
 .. doxygenfunction:: sqrt
    :project: xsimd
 
-.. _cbrt-function-reference:
 .. doxygenfunction:: cbrt
    :project: xsimd
 
-.. _hypot-func-ref:
 .. doxygenfunction:: hypot
    :project: xsimd
 

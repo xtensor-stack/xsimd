@@ -4,8 +4,8 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-batch_constant
-==============
+Batch of constants
+==================
 
 .. _xsimd-batch-constant-ref:
 
