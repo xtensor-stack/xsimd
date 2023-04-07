@@ -30,9 +30,7 @@
 Mathematical functions
 ======================
 
-.. toctree::
-
-   basic_functions
+Basic functions:
 
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`abs`                       | absolute value                                     |
@@ -56,9 +54,7 @@ Mathematical functions
 | :cpp:func:`clip`                      | clipping operation                                 |
 +---------------------------------------+----------------------------------------------------+
 
-.. toctree::
-
-   exponential_functions
+Exponential functions:
 
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`exp`                       | natural exponential function                       |
@@ -78,9 +74,7 @@ Mathematical functions
 | :cpp:func:`log1p`                     | natural logarithm of one plus function             |
 +---------------------------------------+----------------------------------------------------+
 
-.. toctree::
-
-   power_functions
+Power functions:
 
 +-----------------------------------------+----------------------------------------------------+
 | :cpp:func:`pow`                         | power function                                     |
@@ -94,9 +88,7 @@ Mathematical functions
 | :cpp:func:`hypot`                       | hypotenuse function                                |
 +-----------------------------------------+----------------------------------------------------+
 
-.. toctree::
-
-   trigonometric_functions
+Trigonometric functions:
 
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`sin`                       | sine function                                      |
@@ -116,9 +108,7 @@ Mathematical functions
 | :cpp:func:`atan2`                     | arc tangent function, determining quadrants        |
 +---------------------------------------+----------------------------------------------------+
 
-.. toctree::
-
-   hyperbolic_functions
+Hyperbolic functions:
 
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`sinh`                      | hyperbolic sine function                           |
@@ -134,9 +124,7 @@ Mathematical functions
 | :cpp:func:`atanh`                     | inverse hyperbolic tangent function                |
 +---------------------------------------+----------------------------------------------------+
 
-.. toctree::
-
-   error_functions
+Error functions:
 
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`erf`                       | error function                                     |
@@ -148,9 +136,7 @@ Mathematical functions
 | :cpp:func:`lgamma`                    | natural logarithm of the gamma function            |
 +---------------------------------------+----------------------------------------------------+
 
-.. toctree::
-
-   nearint_operations
+Nearint operations:
 
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`ceil`                      | nearest integers not less                          |
@@ -167,3 +153,20 @@ Mathematical functions
 +---------------------------------------+----------------------------------------------------+
 
 
+----
+
+.. doxygengroup:: batch_math
+   :project: xsimd
+   :content-only:
+
+.. doxygengroup:: batch_trigo
+   :project: xsimd
+   :content-only:
+
+.. doxygengroup:: batch_rounding
+   :project: xsimd
+   :content-only:
+
+.. doxygengroup:: batch_math_extra
+   :project: xsimd
+   :content-only:
