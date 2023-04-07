@@ -497,11 +497,19 @@ namespace xsimd
 #else
     inline float exp10(const float& x) noexcept
     {
+#if defined(M_LN10)
+        return std::exp((float)(M_LN10 * (x)));
+#else
         return std::exp(0x1.26bb1cp+1f * x);
+#endif
     }
     inline double exp10(const double& x) noexcept
     {
+#if defined(M_LN10)
+        return std::exp((double)(M_LN10 * (x)));
+#else
         return std::exp(0x1.26bb1bbb55516p+1 * x);
+#endif
     }
 #endif
 
