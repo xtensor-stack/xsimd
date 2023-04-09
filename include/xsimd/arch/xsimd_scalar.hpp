@@ -497,11 +497,13 @@ namespace xsimd
 #else
     inline float exp10(const float& x) noexcept
     {
-        return std::exp(0x1.26bb1cp+1f * x);
+        const float ln10 = std::log(10.f);
+        return std::exp(ln10 * x);
     }
     inline double exp10(const double& x) noexcept
     {
-        return std::exp(0x1.26bb1bbb55516p+1 * x);
+        const double ln10 = std::log(10.);
+        return std::exp(ln10 * x);
     }
 #endif
 
