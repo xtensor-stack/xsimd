@@ -224,4 +224,5 @@ if (XSIMD_ENABLE_WERROR)
     target_compile_options(test_xsimd PRIVATE -Werror -Wall -DXSIMD_SKIP_ON_WERROR)
 endif()
 
+add_subdirectory(doc)
 

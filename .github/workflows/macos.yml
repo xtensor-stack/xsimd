@@ -19,8 +19,8 @@ jobs:
         mkdir _build
         cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
     - name: Build
-      run: cmake --build _build
+      run: cmake --build _build --verbose
     - name: Testing sequential
-      run: cmake --build _build --target xbenchmark
+      run: cmake --build _build --target xbenchmark --verbose
     - name: Testing xsimd
       run: ${{github.workspace}}/_build/test/test_xsimd
