@@ -19,7 +19,7 @@ architecture available, based on compile time informations:
 
     namespace xs = xsimd;
     xs::batch<float> mean(xs::batch<float> lhs, xs::batch<float> rhs) {
-      return lhs + rhs / 2;
+      return (lhs + rhs) / 2;
     }
 
 The batch can be a batch of 4 single precision floating point numbers (e.g. on
@@ -38,8 +38,8 @@ example:
 
     namespace xs = xsimd;
     template<class T, class Arch>
-    xs::batch<T, A> mean(xs::batch<T, A> lhs, xs::batch<T, A> rhs) {
-      return lhs + rhs / 2;
+    xs::batch<T, Arch> mean(xs::batch<T, Arch> lhs, xs::batch<T, Arch> rhs) {
+      return (lhs + rhs) / 2;
     }
 
 At its core, a :cpp:class:`xsimd::batch` is bound to the scalar type it contains, and to the
