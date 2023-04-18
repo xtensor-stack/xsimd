@@ -47,7 +47,7 @@ Following code showcases a usage of the :cpp:func:`xsimd::dispatch` function:
 
     // Create the dispatching function, specifying the architecture we want to
     // target.
-    auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::avx2, xsimd::sse2>(sum{});
+    auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::avx2, xsimd::sse2>>(sum{});
 
     // Call the appropriate implementation based on runtime information.
     float res = dispatched(data, 17);
