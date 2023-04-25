@@ -194,26 +194,6 @@ if(ENABLE_XTL_COMPLEX)
 endif()
 add_test(NAME test_xsimd COMMAND test_xsimd)
 
-if(DEFINED XSIMD_FORCE_X86_INSTR_SET)
-    message("Forcing XSIMD_FORCE_X86_INSTR_SET to ${XSIMD_FORCE_X86_INSTR_SET}")
-    target_compile_definitions(test_xsimd PRIVATE XSIMD_FORCE_X86_INSTR_SET=${XSIMD_FORCE_X86_INSTR_SET})
-endif()
-
-if(DEFINED XSIMD_FORCE_X86_AMD_INSTR_SET)
-    message("Forcing XSIMD_FORCE_X86_AMD_INSTR_SET to ${XSIMD_FORCE_X86_AMD_INSTR_SET}")
-    target_compile_definitions(test_xsimd PRIVATE XSIMD_FORCE_X86_AMD_INSTR_SET=${XSIMD_FORCE_X86_AMD_INSTR_SET})
-endif()
-
-if(DEFINED XSIMD_FORCE_PPC_INSTR_SET)
-    message("Forcing XSIMD_FORCE_PPC_INSTR_SET to ${XSIMD_FORCE_PPC_INSTR_SET}")
-    target_compile_definitions(test_xsimd PRIVATE XSIMD_FORCE_PPC_INSTR_SET=${XSIMD_FORCE_PPC_INSTR_SET})
-endif()
-
-if(DEFINED XSIMD_FORCE_ARM_INSTR_SET)
-    message("Forcing XSIMD_FORCE_ARM_INSTR_SET to ${XSIMD_FORCE_ARM_INSTR_SET}")
-    target_compile_definitions(test_xsimd PRIVATE XSIMD_FORCE_ARM_INSTR_SET=${XSIMD_FORCE_ARM_INSTR_SET})
-endif()
-
 if (CROSS_COMPILE_ARM)
     add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS test_xsimd)
 else()
