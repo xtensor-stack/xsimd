@@ -200,7 +200,12 @@ namespace xsimd
     using x86_arch = typename detail::supported<all_x86_architectures>::type::best;
     using arm_arch = typename detail::supported<all_arm_architectures>::type::best;
     using best_arch = typename supported_architectures::best;
+
+#ifdef XSIMD_DEFAULT_ARCH
+    using default_arch = XSIMD_DEFAULT_ARCH;
+#else
     using default_arch = best_arch;
+#endif
 
     namespace detail
     {

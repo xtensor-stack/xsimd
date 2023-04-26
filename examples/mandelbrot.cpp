@@ -230,7 +230,7 @@ namespace scalar
 } // namespace scalar
 
 // run simd version of mandelbrot benchmark for a specific arch
-template <class arch, class bencher_t>
+template <class arch, class bencher_t, size_t Align>
 void run_arch(
     bencher_t& bencher,
     float x0,
@@ -240,7 +240,7 @@ void run_arch(
     int width,
     int height,
     int maxIters,
-    std::vector<int, xsimd::aligned_allocator<int>>& buffer)
+    std::vector<int, xsimd::aligned_allocator<int, Align>>& buffer)
 {
     std::fill(buffer.begin(), buffer.end(), 0);
     auto stats = bencher([&]()
@@ -262,7 +262,7 @@ struct run_archlist;
 template <class... Arch>
 struct run_archlist<xsimd::arch_list<Arch...>>
 {
-    template <class bencher_t>
+    template <class bencher_t, size_t Align>
     static void run(
         bencher_t& bencher,
         float x0,
@@ -272,7 +272,7 @@ struct run_archlist<xsimd::arch_list<Arch...>>
         int width,
         int height,
         int maxIters,
-        std::vector<int, xsimd::aligned_allocator<int>>& buffer)
+        std::vector<int, xsimd::aligned_allocator<int, Align>>& buffer)
     {
         using expand_type = int[];
         expand_type { (run_arch<Arch>(bencher, x0, y0, x1, x1, width, height, maxIters, buffer), 0)... };
@@ -291,7 +291,7 @@ int main()
     const float y1 = 1;
     const int maxIters = 256;
 
-    std::vector<int, xsimd::aligned_allocator<int>> buf(width * height);
+    std::vector<int, xsimd::aligned_allocator<int, xsimd::default_arch::alignment()>> buf(width * height);
 
     auto bencher = pico_bench::Benchmarker<milliseconds> { 64, seconds { 10 } };
 
