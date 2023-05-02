@@ -9,6 +9,15 @@
 Changelog
 =========
 
+11.1.0
+------
+
+    * Introduce XSIMD_DEFAULT_ARCH to force default architecture (if any)
+
+    * Remove C++ requirement on xsimd::exp10 scalar implementation
+
+    * Improve and test documentation
+
 11.0.0
 ------
 
