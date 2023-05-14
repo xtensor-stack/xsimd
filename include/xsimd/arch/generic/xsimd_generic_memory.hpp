@@ -24,6 +24,9 @@ namespace xsimd
     template <class batch_type, typename batch_type::value_type... Values>
     struct batch_constant;
 
+    template <class batch_type, bool... Values>
+    struct batch_bool_constant;
+
     namespace kernel
     {
 
@@ -284,6 +287,21 @@ namespace xsimd
                           "Source and index sizes must match");
             const auto tmp = batch_cast<U>(src);
             kernel::scatter<A>(tmp, dst, index, A {});
+        }
+
+        // shuffle
+        template <class A, typename T, typename ITy, ITy... Indices>
+        inline batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<ITy, A>, Indices...>, requires_arch<generic>) noexcept
+        {
+
+            // Use a generic_pattern. It is suboptimal but clang optimizes this
+            // pretty well.
+
+            constexpr size_t bsize = sizeof...(Indices);
+            batch<T, A> x_lane = swizzle(x, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? (Indices - bsize) : Indices)...>());
+            batch<T, A> y_lane = swizzle(y, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? (Indices - bsize) : Indices)...>());
+            batch_bool_constant<batch<T, A>, (Indices < bsize)...> select_x_lane;
+            return select(select_x_lane, x_lane, y_lane);
         }
 
         // store

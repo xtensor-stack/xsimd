@@ -272,4 +272,136 @@ TEST_CASE_TEMPLATE("[slide]", B, BATCH_INT_TYPES)
 
 #endif
 
+template <class B>
+struct shuffle_test
+{
+    using batch_type = B;
+    using value_type = typename B::value_type;
+    using mask_batch_type = xsimd::as_unsigned_integer_t<B>;
+    static constexpr size_t size = B::size;
+    std::array<value_type, size> lhs;
+    std::array<value_type, size> rhs;
+
+    shuffle_test()
+    {
+        for (size_t i = 0; i < size; ++i)
+        {
+            lhs[i] = i;
+            rhs[i] = i + size;
+        }
+    }
+
+    void no_op()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct no_op_lhs_generator
+        {
+            static constexpr size_t get(size_t index, size_t /*size*/)
+            {
+                return index;
+            }
+        };
+
+        INFO("no op lhs");
+        B b_res_lhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, no_op_lhs_generator>());
+        CHECK_BATCH_EQ(b_res_lhs, b_lhs);
+
+        struct no_op_rhs_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return index + size;
+            }
+        };
+
+        INFO("no op rhs");
+        B b_res_rhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, no_op_rhs_generator>());
+        CHECK_BATCH_EQ(b_res_rhs, b_rhs);
+    }
+
+    void interleave()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct interleave_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index & 1) ? index : (index + size);
+            }
+        };
+
+        std::array<value_type, size> ref_in_order;
+        for (size_t i = 0; i < size; ++i)
+            ref_in_order[i] = (i & 1) ? lhs[i] : rhs[i];
+        B b_ref_in_order = B::load_unaligned(ref_in_order.data());
+
+        INFO("interleave in order");
+        B b_res_in_order = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, interleave_generator>());
+        CHECK_BATCH_EQ(b_res_in_order, b_ref_in_order);
+
+        struct reversed_interleave_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index & 1) ? (size - index - 1) : (size + (size - index - 1));
+            }
+        };
+
+        std::array<value_type, size> ref_reversed;
+        for (size_t i = 0; i < size; ++i)
+        {
+            size_t ri = size - i - 1;
+            ref_reversed[i] = (i & 1) ? lhs[ri] : rhs[ri];
+        }
+        B b_ref_reversed = B::load_unaligned(ref_reversed.data());
+
+        INFO("interleave reversed");
+        B b_res_reversed = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, reversed_interleave_generator>());
+        CHECK_BATCH_EQ(b_res_reversed, b_ref_reversed);
+    }
+
+    void pick()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct pick_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return index > 2 ? 0 : size;
+            }
+        };
+
+        std::array<value_type, size> ref;
+        for (size_t i = 0; i < size; ++i)
+            ref[i] = (i > 2) ? lhs[0] : rhs[0];
+        B b_ref = B::load_unaligned(ref.data());
+
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, pick_generator>());
+        CHECK_BATCH_EQ(b_res, b_ref);
+    }
+};
+
+TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES)
+{
+    shuffle_test<B> Test;
+    SUBCASE("no-op")
+    {
+        Test.no_op();
+    }
+    SUBCASE("interleave")
+    {
+        Test.interleave();
+    }
+    SUBCASE("pick")
+    {
+        Test.pick();
+    }
+}
+
 #endif

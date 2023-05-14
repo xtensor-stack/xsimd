@@ -1830,6 +1830,32 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_data_transfer
+     *
+     * Combine elements from \c x and \c y according to selector \c mask
+     * @param x batch
+     * @param y batch
+     * @param mask constant batch mask of integer elements of the same size as
+     * element of \c x and \c y. Each element of the mask index the vector that
+     * would be formed by the concatenation of \c x and \c y. For instance
+     * \code{.cpp}
+     * batch_constant<batch<uint32_t, sse2>, 0, 4, 3, 7>
+     * \endcode
+     * Picks \c x[0], \c y[0], \c x[3], \c y[3]
+     *
+     * @return combined batch
+     */
+    template <class T, class A, class Vt, Vt... Values>
+    inline typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+    shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    {
+        static_assert(std::is_floating_point<T>::value, "only support shuffling floating point values");
+        static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
+        detail::static_check_supported_config<T, A>();
+        return kernel::shuffle<A>(x, y, mask, A {});
+    }
+
+    /**
      * @ingroup batch_miscellaneous
      *
      * Computes the sign of \c x
