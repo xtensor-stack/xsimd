@@ -1849,7 +1849,6 @@ namespace xsimd
     inline typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
     shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<Vt, A>, Values...> mask) noexcept
     {
-        static_assert(std::is_floating_point<T>::value, "only support shuffling floating point values");
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
         detail::static_check_supported_config<T, A>();
         return kernel::shuffle<A>(x, y, mask, A {});

@@ -387,7 +387,7 @@ struct shuffle_test
     }
 };
 
-TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES)
+TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
 {
     shuffle_test<B> Test;
     SUBCASE("no-op")
