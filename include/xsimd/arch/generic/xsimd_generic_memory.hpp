@@ -290,14 +290,95 @@ namespace xsimd
         }
 
         // shuffle
+        namespace detail
+        {
+            constexpr bool is_swizzle_fst(size_t)
+            {
+                return true;
+            }
+            template <typename ITy, typename... ITys>
+            constexpr bool is_swizzle_fst(size_t bsize, ITy index, ITys... indices)
+            {
+                return index < bsize && is_swizzle_fst(bsize, indices...);
+            }
+            constexpr bool is_swizzle_snd(size_t)
+            {
+                return true;
+            }
+            template <typename ITy, typename... ITys>
+            constexpr bool is_swizzle_snd(size_t bsize, ITy index, ITys... indices)
+            {
+                return index >= bsize && is_swizzle_snd(bsize, indices...);
+            }
+
+            constexpr bool is_zip_lo(size_t)
+            {
+                return true;
+            }
+
+            template <typename ITy0, typename ITy1, typename... ITys>
+            constexpr bool is_zip_lo(size_t bsize, ITy0 index0, ITy1 index1, ITys... indices)
+            {
+                return index0 == (bsize - (sizeof...(indices) + 2)) && index1 == (2 * bsize - (sizeof...(indices) + 2)) && is_zip_lo(bsize, indices...);
+            }
+
+            constexpr bool is_zip_hi(size_t)
+            {
+                return true;
+            }
+
+            template <typename ITy0, typename ITy1, typename... ITys>
+            constexpr bool is_zip_hi(size_t bsize, ITy0 index0, ITy1 index1, ITys... indices)
+            {
+                return index0 == (bsize / 2 + bsize - (sizeof...(indices) + 2)) && index1 == (bsize / 2 + 2 * bsize - (sizeof...(indices) + 2)) && is_zip_hi(bsize, indices...);
+            }
+
+            constexpr bool is_select(size_t)
+            {
+                return true;
+            }
+
+            template <typename ITy, typename... ITys>
+            constexpr bool is_select(size_t bsize, ITy index, ITys... indices)
+            {
+                return (index < bsize ? index : index - bsize) == (bsize - sizeof...(ITys)) && is_select(bsize, indices...);
+            }
+
+        }
+
         template <class A, typename T, typename ITy, ITy... Indices>
         inline batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<ITy, A>, Indices...>, requires_arch<generic>) noexcept
         {
+            constexpr size_t bsize = sizeof...(Indices);
+
+            // Detect common patterns
+            XSIMD_IF_CONSTEXPR(detail::is_swizzle_fst(bsize, Indices...))
+            {
+                return swizzle(x, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? 0 /* never happens */ : Indices)...>());
+            }
+
+            XSIMD_IF_CONSTEXPR(detail::is_swizzle_snd(bsize, Indices...))
+            {
+                return swizzle(y, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? (Indices - bsize) : 0 /* never happens */)...>());
+            }
+
+            XSIMD_IF_CONSTEXPR(detail::is_zip_lo(bsize, Indices...))
+            {
+                return zip_lo(x, y);
+            }
+
+            XSIMD_IF_CONSTEXPR(detail::is_zip_hi(bsize, Indices...))
+            {
+                return zip_hi(x, y);
+            }
+
+            XSIMD_IF_CONSTEXPR(detail::is_select(bsize, Indices...))
+            {
+                return select(batch_bool_constant<batch<T, A>, (Indices < bsize)...>(), x, y);
+            }
 
             // Use a generic_pattern. It is suboptimal but clang optimizes this
             // pretty well.
-
-            constexpr size_t bsize = sizeof...(Indices);
             batch<T, A> x_lane = swizzle(x, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? (Indices - bsize) : Indices)...>());
             batch<T, A> y_lane = swizzle(y, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? (Indices - bsize) : Indices)...>());
             batch_bool_constant<batch<T, A>, (Indices < bsize)...> select_x_lane;

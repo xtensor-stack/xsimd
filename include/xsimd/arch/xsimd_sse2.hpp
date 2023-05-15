@@ -43,11 +43,23 @@ namespace xsimd
             {
                 return (y << 1) | x;
             }
+
+            constexpr uint32_t clip4(uint32_t x)
+            {
+                return x >= 4 ? x - 4 : x;
+            }
+
+            constexpr uint32_t clip_shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
+            {
+                return shuffle(clip4(w), clip4(x), clip4(y), clip4(z));
+            }
         }
 
         // fwd
         template <class A, class T, size_t I>
         inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
+        template <class A, typename T, typename ITy, ITy... Indices>
+        inline batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<ITy, A>, Indices...>, requires_arch<generic>) noexcept;
 
         // abs
         template <class A>
@@ -1314,32 +1326,17 @@ namespace xsimd
 
         // shuffle
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
-        inline batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<batch<ITy, A>, I0, I1, I2, I3>, requires_arch<sse2>) noexcept
+        inline batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<batch<ITy, A>, I0, I1, I2, I3> mask, requires_arch<sse2>) noexcept
         {
-            // actually a swizzle of the first or second argument
-            if (I0 < 4 && I1 < 4 && I2 < 4 && I3 < 4)
-                return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(x), _MM_SHUFFLE(I3, I2, I1, I0)));
-            if (I0 >= 4 && I1 >= 4 && I2 >= 4 && I3 >= 4)
-                return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(y), _MM_SHUFFLE(I3 - 4, I2 - 4, I1 - 4, I0 - 4)));
-
+            constexpr uint32_t smask = detail::clip_shuffle(I0, I1, I2, I3);
             // shuffle within lane
             if (I0 < 4 && I1 < 4 && I2 >= 4 && I3 >= 4)
-                return _mm_shuffle_ps(x, y, _MM_SHUFFLE(I3 - 4, I2 - 4, I1, I0));
+                return _mm_shuffle_ps(x, y, smask);
 
             // shuffle within opposite lane
             if (I0 >= 4 && I1 >= 4 && I2 < 4 && I3 < 4)
-                return _mm_shuffle_ps(y, x, _MM_SHUFFLE(I3, I2, I1 - 4, I0 - 4));
-
-            // otherwise use a generic_pattern. It is suboptimal but clang
-            // optimizes this to two shuffles, so favor readability as of now.
-            constexpr ITy nI0 = I0 >= 4 ? I0 - 4 : I0;
-            constexpr ITy nI1 = I1 >= 4 ? I1 - 4 : I1;
-            constexpr ITy nI2 = I2 >= 4 ? I2 - 4 : I2;
-            constexpr ITy nI3 = I3 >= 4 ? I3 - 4 : I3;
-            batch<float, A> x_lane = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(x), _MM_SHUFFLE(nI3, nI2, nI1, nI0)));
-            batch<float, A> y_lane = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(y), _MM_SHUFFLE(nI3, nI2, nI1, nI0)));
-            batch_bool<float, A> select_x_lane = { I0 < 4, I1 < 4, I2 < 4, I3 < 4 };
-            return select(select_x_lane, x_lane, y_lane);
+                return _mm_shuffle_ps(y, x, smask);
+            return shuffle(x, y, mask, generic {});
         }
 
         // sqrt

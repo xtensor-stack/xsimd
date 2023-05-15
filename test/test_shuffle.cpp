@@ -321,29 +321,12 @@ struct shuffle_test
         CHECK_BATCH_EQ(b_res_rhs, b_rhs);
     }
 
-    void interleave()
+    void generic()
     {
         B b_lhs = B::load_unaligned(lhs.data());
         B b_rhs = B::load_unaligned(rhs.data());
 
-        struct interleave_generator
-        {
-            static constexpr size_t get(size_t index, size_t size)
-            {
-                return (index & 1) ? index : (index + size);
-            }
-        };
-
-        std::array<value_type, size> ref_in_order;
-        for (size_t i = 0; i < size; ++i)
-            ref_in_order[i] = (i & 1) ? lhs[i] : rhs[i];
-        B b_ref_in_order = B::load_unaligned(ref_in_order.data());
-
-        INFO("interleave in order");
-        B b_res_in_order = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, interleave_generator>());
-        CHECK_BATCH_EQ(b_res_in_order, b_ref_in_order);
-
-        struct reversed_interleave_generator
+        struct generic_generator
         {
             static constexpr size_t get(size_t index, size_t size)
             {
@@ -351,17 +334,16 @@ struct shuffle_test
             }
         };
 
-        std::array<value_type, size> ref_reversed;
+        std::array<value_type, size> ref;
         for (size_t i = 0; i < size; ++i)
         {
             size_t ri = size - i - 1;
-            ref_reversed[i] = (i & 1) ? lhs[ri] : rhs[ri];
+            ref[i] = (i & 1) ? lhs[ri] : rhs[ri];
         }
-        B b_ref_reversed = B::load_unaligned(ref_reversed.data());
+        B b_ref = B::load_unaligned(ref.data());
 
-        INFO("interleave reversed");
-        B b_res_reversed = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, reversed_interleave_generator>());
-        CHECK_BATCH_EQ(b_res_reversed, b_ref_reversed);
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, generic_generator>());
+        CHECK_BATCH_EQ(b_res, b_ref);
     }
 
     void pick()
@@ -385,6 +367,115 @@ struct shuffle_test
         B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, pick_generator>());
         CHECK_BATCH_EQ(b_res, b_ref);
     }
+
+    void swizzle()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        {
+            struct swizzle_lo_generator
+            {
+                static constexpr size_t get(size_t index, size_t size)
+                {
+                    return size - index - 1;
+                }
+            };
+
+            std::array<value_type, size> ref;
+            for (size_t i = 0; i < size; ++i)
+                ref[i] = lhs[size - i - 1];
+            B b_ref = B::load_unaligned(ref.data());
+
+            INFO("swizzle first batch");
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, swizzle_lo_generator>());
+            CHECK_BATCH_EQ(b_res, b_ref);
+        }
+
+        {
+            struct swizzle_hi_generator
+            {
+                static constexpr size_t get(size_t index, size_t size)
+                {
+                    return size + size - index - 1;
+                }
+            };
+
+            std::array<value_type, size> ref;
+            for (size_t i = 0; i < size; ++i)
+                ref[i] = rhs[size - i - 1];
+            B b_ref = B::load_unaligned(ref.data());
+
+            INFO("swizzle second batch");
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, swizzle_hi_generator>());
+            CHECK_BATCH_EQ(b_res, b_ref);
+        }
+    }
+
+    void select()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct select_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index % 3) ? (index + size) : index;
+            }
+        };
+
+        std::array<value_type, size> ref;
+        for (size_t i = 0; i < size; ++i)
+            ref[i] = (i % 3) ? rhs[i] : lhs[i];
+        B b_ref = B::load_unaligned(ref.data());
+
+        INFO("select");
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, select_generator>());
+        CHECK_BATCH_EQ(b_res, b_ref);
+    }
+
+    void zip()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct zip_lo_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index & 1) ? (index / 2 + size) : index / 2;
+            }
+        };
+
+        std::array<value_type, size> ref_lo;
+        for (size_t i = 0; i < size; ++i)
+            ref_lo[i] = (i & 1) ? rhs[i / 2] : lhs[i / 2];
+        B b_ref_lo = B::load_unaligned(ref_lo.data());
+
+        INFO("zip_lo");
+        B b_res_lo = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, zip_lo_generator>());
+        CHECK_BATCH_EQ(b_res_lo, b_ref_lo);
+
+        struct zip_hi_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index & 1) ? (size / 2 + index / 2 + size) : (size / 2 + index / 2);
+            }
+        };
+
+        std::array<value_type, size> ref_hi;
+        for (size_t i = 0; i < size; ++i)
+        {
+            ref_hi[i] = (i & 1) ? rhs[size / 2 + i / 2] : lhs[size / 2 + i / 2];
+        }
+        B b_ref_hi = B::load_unaligned(ref_hi.data());
+
+        INFO("zip_hi");
+        B b_res_hi = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, zip_hi_generator>());
+        CHECK_BATCH_EQ(b_res_hi, b_ref_hi);
+    }
 };
 
 TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
@@ -394,13 +485,25 @@ TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xs
     {
         Test.no_op();
     }
-    SUBCASE("interleave")
+    SUBCASE("generic")
     {
-        Test.interleave();
+        Test.generic();
     }
     SUBCASE("pick")
     {
         Test.pick();
+    }
+    SUBCASE("select")
+    {
+        Test.select();
+    }
+    SUBCASE("swizzle")
+    {
+        Test.swizzle();
+    }
+    SUBCASE("zip")
+    {
+        Test.zip();
     }
 }
 
