@@ -44,14 +44,14 @@ namespace xsimd
                 return (y << 1) | x;
             }
 
-            constexpr uint32_t clip4(uint32_t x)
+            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
             {
-                return x >= 4 ? x - 4 : x;
+                return shuffle(w % 4, x % 4, y % 4, z % 4);
             }
 
-            constexpr uint32_t clip_shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
+            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x)
             {
-                return shuffle(clip4(w), clip4(x), clip4(y), clip4(z));
+                return shuffle(w % 2, x % 2);
             }
         }
 
@@ -1328,7 +1328,7 @@ namespace xsimd
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
         inline batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<batch<ITy, A>, I0, I1, I2, I3> mask, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t smask = detail::clip_shuffle(I0, I1, I2, I3);
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
             // shuffle within lane
             if (I0 < 4 && I1 < 4 && I2 >= 4 && I3 >= 4)
                 return _mm_shuffle_ps(x, y, smask);
@@ -1336,6 +1336,20 @@ namespace xsimd
             // shuffle within opposite lane
             if (I0 >= 4 && I1 >= 4 && I2 < 4 && I3 < 4)
                 return _mm_shuffle_ps(y, x, smask);
+            return shuffle(x, y, mask, generic {});
+        }
+
+        template <class A, class ITy, ITy I0, ITy I1>
+        inline batch<double, A> shuffle(batch<double, A> const& x, batch<double, A> const& y, batch_constant<batch<ITy, A>, I0, I1> mask, requires_arch<sse2>) noexcept
+        {
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1);
+            // shuffle within lane
+            if (I0 < 2 && I1 >= 2)
+                return _mm_shuffle_pd(x, y, smask);
+
+            // shuffle within opposite lane
+            if (I0 >= 2 && I1 < 2)
+                return _mm_shuffle_pd(y, x, smask);
             return shuffle(x, y, mask, generic {});
         }
 
