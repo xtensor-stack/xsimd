@@ -16,7 +16,8 @@ jobs:
           - { compiler: 'gcc',   version: '7',  flags: 'force_no_instr_set' }
           - { compiler: 'gcc',   version: '8',  flags: 'enable_xtl_complex' }
           - { compiler: 'gcc',   version: '9',  flags: 'avx' }
-          - { compiler: 'gcc',   version: '10', flags: 'avx512' }
+          #- { compiler: 'gcc',   version: '10', flags: 'avx512' } buggy
+          - { compiler: 'gcc',   version: '11', flags: 'avx512' }
           - { compiler: 'gcc',   version: '11', flags: 'i386' }
           - { compiler: 'gcc',   version: '11', flags: 'avx512cd' }
           - { compiler: 'clang', version: '8',  flags: 'force_no_instr_set' }
