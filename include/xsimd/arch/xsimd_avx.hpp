@@ -1263,6 +1263,37 @@ namespace xsimd
             return _mm256_castsi256_pd(set(batch<int64_t, A>(), A {}, static_cast<int64_t>(values ? -1LL : 0LL)...).data);
         }
 
+        // shuffle
+        template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3, ITy I4, ITy I5, ITy I6, ITy I7>
+        inline batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<batch<ITy, A>, I0, I1, I2, I3, I4, I5, I6, I7> mask, requires_arch<avx>) noexcept
+        {
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
+            // shuffle within lane
+            if (I4 == (I0 + 4) && I5 == (I1 + 4) && I6 == (I2 + 4) && I7 == (I3 + 4) && I0 < 4 && I1 < 4 && I2 >= 8 && I2 < 12 && I3 >= 8 && I3 < 12)
+                return _mm256_shuffle_ps(x, y, smask);
+
+            // shuffle within opposite lane
+            if (I4 == (I0 + 4) && I5 == (I1 + 4) && I6 == (I2 + 4) && I7 == (I3 + 4) && I2 < 4 && I3 < 4 && I0 >= 8 && I0 < 12 && I1 >= 8 && I1 < 12)
+                return _mm256_shuffle_ps(y, x, smask);
+
+            return shuffle(x, y, mask, generic {});
+        }
+
+        template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
+        inline batch<double, A> shuffle(batch<double, A> const& x, batch<double, A> const& y, batch_constant<batch<ITy, A>, I0, I1, I2, I3> mask, requires_arch<avx>) noexcept
+        {
+            constexpr uint32_t smask = (I0 & 0x1) | ((I1 & 0x1) << 1) | ((I2 & 0x1) << 2) | ((I3 & 0x1) << 3);
+            // shuffle within lane
+            if (I0 < 2 && I1 >= 4 && I1 < 6 && I2 >= 2 && I2 < 4 && I3 >= 6)
+                return _mm256_shuffle_pd(x, y, smask);
+
+            // shuffle within opposite lane
+            if (I1 < 2 && I0 >= 4 && I0 < 6 && I3 >= 2 && I3 < 4 && I2 >= 6)
+                return _mm256_shuffle_pd(y, x, smask);
+
+            return shuffle(x, y, mask, generic {});
+        }
+
         // slide_left
         template <size_t N, class A, class T>
         inline batch<T, A> slide_left(batch<T, A> const& x, requires_arch<avx>) noexcept

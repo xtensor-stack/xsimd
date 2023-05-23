@@ -43,11 +43,23 @@ namespace xsimd
             {
                 return (y << 1) | x;
             }
+
+            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
+            {
+                return shuffle(w % 4, x % 4, y % 4, z % 4);
+            }
+
+            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x)
+            {
+                return shuffle(w % 2, x % 2);
+            }
         }
 
         // fwd
         template <class A, class T, size_t I>
         inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
+        template <class A, typename T, typename ITy, ITy... Indices>
+        inline batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<ITy, A>, Indices...>, requires_arch<generic>) noexcept;
 
         // abs
         template <class A>
@@ -1310,6 +1322,35 @@ namespace xsimd
         inline batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<sse2>) noexcept
         {
             return _mm_or_pd(_mm_and_pd(cond, true_br), _mm_andnot_pd(cond, false_br));
+        }
+
+        // shuffle
+        template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
+        inline batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<batch<ITy, A>, I0, I1, I2, I3> mask, requires_arch<sse2>) noexcept
+        {
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
+            // shuffle within lane
+            if (I0 < 4 && I1 < 4 && I2 >= 4 && I3 >= 4)
+                return _mm_shuffle_ps(x, y, smask);
+
+            // shuffle within opposite lane
+            if (I0 >= 4 && I1 >= 4 && I2 < 4 && I3 < 4)
+                return _mm_shuffle_ps(y, x, smask);
+            return shuffle(x, y, mask, generic {});
+        }
+
+        template <class A, class ITy, ITy I0, ITy I1>
+        inline batch<double, A> shuffle(batch<double, A> const& x, batch<double, A> const& y, batch_constant<batch<ITy, A>, I0, I1> mask, requires_arch<sse2>) noexcept
+        {
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1);
+            // shuffle within lane
+            if (I0 < 2 && I1 >= 2)
+                return _mm_shuffle_pd(x, y, smask);
+
+            // shuffle within opposite lane
+            if (I0 >= 2 && I1 < 2)
+                return _mm_shuffle_pd(y, x, smask);
+            return shuffle(x, y, mask, generic {});
         }
 
         // sqrt

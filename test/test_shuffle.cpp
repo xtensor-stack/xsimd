@@ -272,4 +272,239 @@ TEST_CASE_TEMPLATE("[slide]", B, BATCH_INT_TYPES)
 
 #endif
 
+template <class B>
+struct shuffle_test
+{
+    using batch_type = B;
+    using value_type = typename B::value_type;
+    using mask_batch_type = xsimd::as_unsigned_integer_t<B>;
+    static constexpr size_t size = B::size;
+    std::array<value_type, size> lhs;
+    std::array<value_type, size> rhs;
+
+    shuffle_test()
+    {
+        for (size_t i = 0; i < size; ++i)
+        {
+            lhs[i] = i;
+            rhs[i] = i + size;
+        }
+    }
+
+    void no_op()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct no_op_lhs_generator
+        {
+            static constexpr size_t get(size_t index, size_t /*size*/)
+            {
+                return index;
+            }
+        };
+
+        INFO("no op lhs");
+        B b_res_lhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, no_op_lhs_generator>());
+        CHECK_BATCH_EQ(b_res_lhs, b_lhs);
+
+        struct no_op_rhs_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return index + size;
+            }
+        };
+
+        INFO("no op rhs");
+        B b_res_rhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, no_op_rhs_generator>());
+        CHECK_BATCH_EQ(b_res_rhs, b_rhs);
+    }
+
+    void generic()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct generic_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index & 1) ? (size - index - 1) : (size + (size - index - 1));
+            }
+        };
+
+        std::array<value_type, size> ref;
+        for (size_t i = 0; i < size; ++i)
+        {
+            size_t ri = size - i - 1;
+            ref[i] = (i & 1) ? lhs[ri] : rhs[ri];
+        }
+        B b_ref = B::load_unaligned(ref.data());
+
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, generic_generator>());
+        CHECK_BATCH_EQ(b_res, b_ref);
+    }
+
+    void pick()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct pick_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return index > 2 ? 0 : size;
+            }
+        };
+
+        std::array<value_type, size> ref;
+        for (size_t i = 0; i < size; ++i)
+            ref[i] = (i > 2) ? lhs[0] : rhs[0];
+        B b_ref = B::load_unaligned(ref.data());
+
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, pick_generator>());
+        CHECK_BATCH_EQ(b_res, b_ref);
+    }
+
+    void swizzle()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        {
+            struct swizzle_lo_generator
+            {
+                static constexpr size_t get(size_t index, size_t size)
+                {
+                    return size - index - 1;
+                }
+            };
+
+            std::array<value_type, size> ref;
+            for (size_t i = 0; i < size; ++i)
+                ref[i] = lhs[size - i - 1];
+            B b_ref = B::load_unaligned(ref.data());
+
+            INFO("swizzle first batch");
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, swizzle_lo_generator>());
+            CHECK_BATCH_EQ(b_res, b_ref);
+        }
+
+        {
+            struct swizzle_hi_generator
+            {
+                static constexpr size_t get(size_t index, size_t size)
+                {
+                    return size + size - index - 1;
+                }
+            };
+
+            std::array<value_type, size> ref;
+            for (size_t i = 0; i < size; ++i)
+                ref[i] = rhs[size - i - 1];
+            B b_ref = B::load_unaligned(ref.data());
+
+            INFO("swizzle second batch");
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, swizzle_hi_generator>());
+            CHECK_BATCH_EQ(b_res, b_ref);
+        }
+    }
+
+    void select()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct select_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index % 3) ? (index + size) : index;
+            }
+        };
+
+        std::array<value_type, size> ref;
+        for (size_t i = 0; i < size; ++i)
+            ref[i] = (i % 3) ? rhs[i] : lhs[i];
+        B b_ref = B::load_unaligned(ref.data());
+
+        INFO("select");
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, select_generator>());
+        CHECK_BATCH_EQ(b_res, b_ref);
+    }
+
+    void zip()
+    {
+        B b_lhs = B::load_unaligned(lhs.data());
+        B b_rhs = B::load_unaligned(rhs.data());
+
+        struct zip_lo_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index & 1) ? (index / 2 + size) : index / 2;
+            }
+        };
+
+        std::array<value_type, size> ref_lo;
+        for (size_t i = 0; i < size; ++i)
+            ref_lo[i] = (i & 1) ? rhs[i / 2] : lhs[i / 2];
+        B b_ref_lo = B::load_unaligned(ref_lo.data());
+
+        INFO("zip_lo");
+        B b_res_lo = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, zip_lo_generator>());
+        CHECK_BATCH_EQ(b_res_lo, b_ref_lo);
+
+        struct zip_hi_generator
+        {
+            static constexpr size_t get(size_t index, size_t size)
+            {
+                return (index & 1) ? (size / 2 + index / 2 + size) : (size / 2 + index / 2);
+            }
+        };
+
+        std::array<value_type, size> ref_hi;
+        for (size_t i = 0; i < size; ++i)
+        {
+            ref_hi[i] = (i & 1) ? rhs[size / 2 + i / 2] : lhs[size / 2 + i / 2];
+        }
+        B b_ref_hi = B::load_unaligned(ref_hi.data());
+
+        INFO("zip_hi");
+        B b_res_hi = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_batch_type, zip_hi_generator>());
+        CHECK_BATCH_EQ(b_res_hi, b_ref_hi);
+    }
+};
+
+TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
+{
+    shuffle_test<B> Test;
+    SUBCASE("no-op")
+    {
+        Test.no_op();
+    }
+    SUBCASE("generic")
+    {
+        Test.generic();
+    }
+    SUBCASE("pick")
+    {
+        Test.pick();
+    }
+    SUBCASE("select")
+    {
+        Test.select();
+    }
+    SUBCASE("swizzle")
+    {
+        Test.swizzle();
+    }
+    SUBCASE("zip")
+    {
+        Test.zip();
+    }
+}
+
 #endif
