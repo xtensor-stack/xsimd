@@ -416,12 +416,36 @@ namespace xsimd
         }
 
         // swizzle
+
         template <class A, class T, class ITy, ITy... Vs>
         inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& self, batch_constant<batch<ITy, A>, Vs...> mask, requires_arch<generic>) noexcept
         {
             return { swizzle(self.real(), mask), swizzle(self.imag(), mask) };
         }
 
+        template <class A, class T, class ITy>
+        inline batch<T, A> swizzle(batch<T, A> const& self, batch<ITy, A> mask, requires_arch<generic>) noexcept
+        {
+            constexpr size_t size = batch<T, A>::size;
+            alignas(A::alignment()) T self_buffer[size];
+            store_aligned(&self_buffer[0], self);
+
+            alignas(A::alignment()) ITy mask_buffer[size];
+            store_aligned(&mask_buffer[0], mask);
+
+            alignas(A::alignment()) T out_buffer[size];
+            for (size_t i = 0; i < size; ++i)
+                out_buffer[i] = self_buffer[mask_buffer[i]];
+            return batch<T, A>::load_aligned(out_buffer);
+        }
+
+        template <class A, class T, class ITy>
+        inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& self, batch<ITy, A> mask, requires_arch<generic>) noexcept
+        {
+            return { swizzle(self.real(), mask), swizzle(self.imag(), mask) };
+        }
+
+        // load_complex_aligned
         namespace detail
         {
             template <class A, class T>
@@ -443,7 +467,6 @@ namespace xsimd
             }
         }
 
-        // load_complex_aligned
         template <class A, class T_out, class T_in>
         inline batch<std::complex<T_out>, A> load_complex_aligned(std::complex<T_in> const* mem, convert<std::complex<T_out>>, requires_arch<generic>) noexcept
         {

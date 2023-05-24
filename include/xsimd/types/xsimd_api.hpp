@@ -2134,7 +2134,7 @@ namespace xsimd
     /**
      * @ingroup batch_data_transfer
      *
-     * Rearrange elements from \c x according to mask \c mask
+     * Rearrange elements from \c x according to constant mask \c mask
      * @param x batch
      * @param mask constant batch mask of integer elements of the same size as
      * element of \c x
@@ -2150,6 +2150,32 @@ namespace xsimd
     }
     template <class T, class A, class Vt, Vt... Values>
     inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& x, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    {
+        static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
+        detail::static_check_supported_config<T, A>();
+        return kernel::swizzle<A>(x, mask, A {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Rearrange elements from \c x according to mask \c mask
+     * @param x batch
+     * @param mask batch mask of integer elements of the same size as
+     * element of \c x
+     * @return swizzled batch
+     */
+    template <class T, class A, class Vt>
+    inline typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+    swizzle(batch<T, A> const& x, batch<Vt, A> mask) noexcept
+    {
+        static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
+        detail::static_check_supported_config<T, A>();
+        return kernel::swizzle<A>(x, mask, A {});
+    }
+
+    template <class T, class A, class Vt>
+    inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& x, batch<Vt, A> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
         detail::static_check_supported_config<T, A>();
