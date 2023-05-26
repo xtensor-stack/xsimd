@@ -59,7 +59,9 @@ namespace xsimd
     template <class T, class A>
     inline batch_bool<T, A> is_odd(batch<T, A> const& self) noexcept;
     template <class T, class A>
-    inline batch_bool<T, A> isinf(batch<T, A> const& self) noexcept;
+    inline typename batch<T, A>::batch_bool_type isinf(batch<T, A> const& self) noexcept;
+    template <class T, class A>
+    inline typename batch<T, A>::batch_bool_type isfinite(batch<T, A> const& self) noexcept;
     template <class T, class A>
     inline typename batch<T, A>::batch_bool_type isnan(batch<T, A> const& self) noexcept;
     template <class T, class A>

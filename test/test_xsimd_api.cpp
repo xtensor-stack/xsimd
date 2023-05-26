@@ -549,21 +549,6 @@ struct xsimd_api_float_types_functions
         value_type val(4);
         CHECK_EQ(extract(xsimd::is_odd(T(val))), (val == long(val)) && (long(val) % 2 == 1));
     }
-    void test_isinf()
-    {
-        value_type val(4);
-        CHECK_EQ(extract(xsimd::isinf(T(val))), std::isinf(val));
-    }
-    void test_isfinite()
-    {
-        value_type val(4);
-        CHECK_EQ(extract(xsimd::isfinite(T(val))), std::isfinite(val));
-    }
-    void test_isnan()
-    {
-        value_type val(4);
-        CHECK_EQ(extract(xsimd::isnan(T(val))), std::isnan(val));
-    }
     void test_ldexp()
     {
         value_type val0(4);
@@ -835,18 +820,6 @@ TEST_CASE_TEMPLATE("[xsimd api | float types functions]", B, FLOAT_TYPES)
     {
         Test.test_is_odd();
     }
-    SUBCASE("isinf")
-    {
-        Test.test_isinf();
-    }
-    SUBCASE("isfinite")
-    {
-        Test.test_isfinite();
-    }
-    SUBCASE("isnan")
-    {
-        Test.test_isnan();
-    }
     SUBCASE("ldexp")
     {
         Test.test_ldexp();
@@ -994,6 +967,24 @@ struct xsimd_api_complex_types_functions
         value_type val(1);
         CHECK_EQ(extract(xsimd::proj(T(val))), std::proj(val));
     }
+
+    void test_isinf()
+    {
+        value_type val(4);
+        CHECK_EQ(extract(xsimd::isinf(T(val))), std::isinf(std::real(val)));
+    }
+
+    void test_isfinite()
+    {
+        value_type val(4);
+        CHECK_EQ(extract(xsimd::isfinite(T(val))), std::isfinite(std::real(val)));
+    }
+
+    void test_isnan()
+    {
+        value_type val(4);
+        CHECK_EQ(extract(xsimd::isnan(T(val))), std::isnan(std::real(val)));
+    }
 };
 
 TEST_CASE_TEMPLATE("[xsimd api | complex types functions]", B, COMPLEX_TYPES)
@@ -1017,6 +1008,21 @@ TEST_CASE_TEMPLATE("[xsimd api | complex types functions]", B, COMPLEX_TYPES)
     SUBCASE("proj")
     {
         Test.test_proj();
+    }
+
+    SUBCASE("isinf")
+    {
+        Test.test_isinf();
+    }
+
+    SUBCASE("isfinite")
+    {
+        Test.test_isfinite();
+    }
+
+    SUBCASE("isnan")
+    {
+        Test.test_isnan();
     }
 }
 
