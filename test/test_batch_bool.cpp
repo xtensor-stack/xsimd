@@ -394,6 +394,32 @@ struct batch_bool_test
         }
     }
 
+    void test_update_operations() const
+    {
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
+        {
+            auto tmp = bool_g.half;
+            tmp |= bool_g.ihalf;
+            bool res = xsimd::all(tmp);
+            INFO("operator|=");
+            CHECK_UNARY(res);
+        }
+        {
+            auto tmp = bool_g.half;
+            tmp &= bool_g.half;
+            bool res = xsimd::all(tmp == bool_g.half);
+            INFO("operator&=");
+            CHECK_UNARY(res);
+        }
+        {
+            auto tmp = bool_g.half;
+            tmp ^= bool_g.ihalf;
+            bool res = xsimd::all(tmp);
+            INFO("operator^=");
+            CHECK_UNARY(res);
+        }
+    }
+
     void test_mask() const
     {
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
@@ -439,6 +465,8 @@ TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
     SUBCASE("logical operations") { Test.test_logical_operations(); }
 
     SUBCASE("bitwise operations") { Test.test_bitwise_operations(); }
+
+    SUBCASE("update operations") { Test.test_update_operations(); }
 
     SUBCASE("mask") { Test.test_mask(); }
 }
