@@ -331,9 +331,9 @@ namespace xsimd
         batch_bool operator||(batch_bool const& other) const noexcept;
 
         // update operators
-        batch_bool& operator&=(batch_bool const& other) const noexcept { return (*this) = (*this) & other; }
-        batch_bool& operator|=(batch_bool const& other) const noexcept { return (*this) = (*this) | other; }
-        batch_bool& operator^=(batch_bool const& other) const noexcept { return (*this) = (*this) ^ other; }
+        batch_bool& operator&=(batch_bool const& other) noexcept { return (*this) = (*this) & other; }
+        batch_bool& operator|=(batch_bool const& other) noexcept { return (*this) = (*this) | other; }
+        batch_bool& operator^=(batch_bool const& other) noexcept { return (*this) = (*this) ^ other; }
 
     private:
         template <class U, class... V, size_t I, size_t... Is>
