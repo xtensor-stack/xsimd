@@ -1065,7 +1065,7 @@ namespace xsimd
      * @return a batch of booleans.
      */
     template <class T, class A>
-    inline batch_bool<T, A> isinf(batch<T, A> const& x) noexcept
+    inline typename batch<T, A>::batch_bool_type isinf(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::isinf<A>(x, A {});
@@ -1079,7 +1079,7 @@ namespace xsimd
      * @return a batch of booleans.
      */
     template <class T, class A>
-    inline batch_bool<T, A> isfinite(batch<T, A> const& x) noexcept
+    inline typename batch<T, A>::batch_bool_type isfinite(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::isfinite<A>(x, A {});

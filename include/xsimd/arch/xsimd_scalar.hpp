@@ -348,7 +348,6 @@ namespace xsimd
         return 1. / x;
     }
 
-#ifdef XSIMD_ENABLE_NUMPY_COMPLEX
     template <class T>
     inline bool isnan(std::complex<T> var) noexcept
     {
@@ -360,7 +359,12 @@ namespace xsimd
     {
         return std::isinf(std::real(var)) || std::isinf(std::imag(var));
     }
-#endif
+
+    template <class T>
+    inline bool isfinite(std::complex<T> var) noexcept
+    {
+        return std::isfinite(std::real(var)) && std::isfinite(std::imag(var));
+    }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     using xtl::abs;
