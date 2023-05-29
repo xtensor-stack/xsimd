@@ -154,8 +154,13 @@ struct swizzle_test
         B b_exped = B::load_unaligned(v_exped.data());
 
         using index_type = typename as_index<batch_type>::type;
-        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Reversor<typename index_type::value_type>>());
+        auto index_batch = xsimd::make_batch_constant<index_type, Reversor<typename index_type::value_type>>();
+
+        B b_res = xsimd::swizzle(b_lhs, index_batch);
         CHECK_BATCH_EQ(b_res, b_exped);
+
+        B b_dyres = xsimd::swizzle(b_lhs, (index_type)index_batch);
+        CHECK_BATCH_EQ(b_dyres, b_exped);
     }
 
     void swizzle_fill()
@@ -169,8 +174,13 @@ struct swizzle_test
         B b_exped = B::load_unaligned(v_exped.data());
 
         using index_type = typename as_index<batch_type>::type;
-        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Last<typename index_type::value_type>>());
+        auto index_batch = xsimd::make_batch_constant<index_type, Last<typename index_type::value_type>>();
+
+        B b_res = xsimd::swizzle(b_lhs, index_batch);
         CHECK_BATCH_EQ(b_res, b_exped);
+
+        B b_dyres = xsimd::swizzle(b_lhs, (index_type)index_batch);
+        CHECK_BATCH_EQ(b_dyres, b_exped);
     }
 
     void swizzle_dup()
@@ -184,8 +194,13 @@ struct swizzle_test
         B b_exped = B::load_unaligned(v_exped.data());
 
         using index_type = typename as_index<batch_type>::type;
-        B b_res = xsimd::swizzle(b_lhs, xsimd::make_batch_constant<index_type, Dup<typename index_type::value_type>>());
+        auto index_batch = xsimd::make_batch_constant<index_type, Dup<typename index_type::value_type>>();
+
+        B b_res = xsimd::swizzle(b_lhs, index_batch);
         CHECK_BATCH_EQ(b_res, b_exped);
+
+        B b_dyres = xsimd::swizzle(b_lhs, (index_type)index_batch);
+        CHECK_BATCH_EQ(b_dyres, b_exped);
     }
 };
 
