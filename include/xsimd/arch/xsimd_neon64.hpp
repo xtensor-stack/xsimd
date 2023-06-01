@@ -1149,6 +1149,15 @@ namespace xsimd
         {
             return !(arg == arg);
         }
+
+        /****************
+         * rotate_right *
+         ****************/
+        template <size_t N, class A>
+        inline batch<double, A> rotate_right(batch<double, A> const& a, requires_arch<neon64>) noexcept
+        {
+            return vextq_f64(a, a, N);
+        }
     }
 
     template <class batch_type, typename batch_type::value_type... Values>

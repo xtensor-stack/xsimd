@@ -20,7 +20,7 @@ namespace xsimd
     struct init_swizzle_base
     {
         using swizzle_vector_type = std::array<T, N>;
-        swizzle_vector_type lhs_in, exped_reverse, exped_fill, exped_dup;
+        swizzle_vector_type lhs_in, exped_reverse, exped_fill, exped_dup, exped_ror, exped_rol;
 
         template <int... Indices>
         std::vector<swizzle_vector_type> create_swizzle_vectors()
@@ -40,10 +40,14 @@ namespace xsimd
                 exped_reverse[i] = lhs_in[N - 1 - i];
                 exped_fill[i] = lhs_in[N - 1];
                 exped_dup[i] = lhs_in[2 * (i / 2)];
+                exped_ror[i] = lhs_in[(i + 1) % N];
+                exped_rol[i] = lhs_in[(i - 1) % N];
             }
             vects.push_back(std::move(exped_reverse));
             vects.push_back(std::move(exped_fill));
             vects.push_back(std::move(exped_dup));
+            vects.push_back(std::move(exped_ror));
+            vects.push_back(std::move(exped_rol));
 
             return vects;
         }
@@ -143,6 +147,34 @@ struct swizzle_test
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
 
+    void rotate_right()
+    {
+        xsimd::init_swizzle_base<value_type, size> swizzle_base;
+        auto swizzle_vecs = swizzle_base.create_swizzle_vectors();
+        auto v_lhs = swizzle_vecs[0];
+        auto v_exped = swizzle_vecs[4];
+
+        B b_lhs = B::load_unaligned(v_lhs.data());
+        B b_exped = B::load_unaligned(v_exped.data());
+
+        B b_res = xsimd::rotate_right<1>(b_lhs);
+        CHECK_BATCH_EQ(b_res, b_exped);
+    }
+
+    void rotate_left()
+    {
+        xsimd::init_swizzle_base<value_type, size> swizzle_base;
+        auto swizzle_vecs = swizzle_base.create_swizzle_vectors();
+        auto v_lhs = swizzle_vecs[0];
+        auto v_exped = swizzle_vecs[5];
+
+        B b_lhs = B::load_unaligned(v_lhs.data());
+        B b_exped = B::load_unaligned(v_exped.data());
+
+        B b_res = xsimd::rotate_left<1>(b_lhs);
+        CHECK_BATCH_EQ(b_res, b_exped);
+    }
+
     void swizzle_reverse()
     {
         xsimd::init_swizzle_base<value_type, size> swizzle_base;
@@ -210,6 +242,12 @@ TEST_CASE_TEMPLATE("[swizzle]", B, BATCH_SWIZZLE_TYPES)
     SUBCASE("reverse")
     {
         Test.swizzle_reverse();
+    }
+
+    SUBCASE("rotate")
+    {
+        Test.rotate_left();
+        Test.rotate_right();
     }
 
     SUBCASE("fill")

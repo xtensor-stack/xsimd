@@ -229,9 +229,51 @@ namespace xsimd
             return detail::load_unaligned<A>(mem, cvt, generic {}, detail::conversion_type<A, T_in, T_out> {});
         }
 
+        // rotate_left
+        template <size_t N, class A, class T>
+        inline batch<T, A> rotate_left(batch<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            struct rotate_generator
+            {
+                static constexpr size_t get(size_t index, size_t size)
+                {
+                    return (index - N) % size;
+                }
+            };
+
+            return swizzle(self, make_batch_constant<batch<as_unsigned_integer_t<T>, A>, rotate_generator>(), A {});
+        }
+
+        template <size_t N, class A, class T>
+        inline batch<std::complex<T>, A> rotate_left(batch<std::complex<T>, A> const& self, requires_arch<generic>) noexcept
+        {
+            return { rotate_left<N>(self.real()), rotate_left<N>(self.imag()) };
+        }
+
+        // rotate_right
+        template <size_t N, class A, class T>
+        inline batch<T, A> rotate_right(batch<T, A> const& self, requires_arch<generic>) noexcept
+        {
+            struct rotate_generator
+            {
+                static constexpr size_t get(size_t index, size_t size)
+                {
+                    return (index + N) % size;
+                }
+            };
+
+            return swizzle(self, make_batch_constant<batch<as_unsigned_integer_t<T>, A>, rotate_generator>(), A {});
+        }
+
+        template <size_t N, class A, class T>
+        inline batch<std::complex<T>, A> rotate_right(batch<std::complex<T>, A> const& self, requires_arch<generic>) noexcept
+        {
+            return { rotate_right<N>(self.real()), rotate_right<N>(self.imag()) };
+        }
+
+        // Scatter with runtime indexes.
         namespace detail
         {
-            // Scatter with runtime indexes.
             template <size_t N, typename T, typename A, typename U, typename V, typename std::enable_if<N == 0, int>::type = 0>
             inline void scatter(batch<T, A> const& src, U* dst,
                                 batch<V, A> const& index,
@@ -416,7 +458,6 @@ namespace xsimd
         }
 
         // swizzle
-
         template <class A, class T, class ITy, ITy... Vs>
         inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& self, batch_constant<batch<ITy, A>, Vs...> mask, requires_arch<generic>) noexcept
         {

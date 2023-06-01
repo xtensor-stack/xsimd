@@ -1758,6 +1758,42 @@ namespace xsimd
     }
 
     /**
+     * @ingroup rotate_left
+     *
+     * Slide the whole batch to the left by \c n bytes, and reintroduce the
+     * slided out elements from the right. This is different from
+     * \c rol that rotates each batch element to the left.
+     *
+     * @tparam N Amount of bytes to rotated to the left.
+     * @param x batch of integer values.
+     * @return rotated batch.
+     */
+    template <size_t N, class T, class A>
+    inline batch<T, A> rotate_left(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotate_left<N, A>(x, A {});
+    }
+
+    /**
+     * @ingroup rotate_right
+     *
+     * Slide the whole batch to the right by \c n bytes, and reintroduce the
+     * slided out elements from the left. This is different from
+     * \c rol that rotates each batch element to the left.
+     *
+     * @tparam N Amount of bytes to rotate to the right.
+     * @param x batch of integer values.
+     * @return rotated batch.
+     */
+    template <size_t N, class T, class A>
+    inline batch<T, A> rotate_right(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotate_right<N, A>(x, A {});
+    }
+
+    /**
      * @ingroup batch_bitwise
      *
      * Perform a bitwise shift to the left, reintroducing the shifted out bits
