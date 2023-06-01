@@ -16,7 +16,7 @@ architecture available, based on compile time informations:
 .. literalinclude:: ../../test/doc/manipulating_abstract_batches.cpp
 
 The batch can be a batch of 4 single precision floating point numbers (e.g. on
-Neon) ot a batch of 8 (e.g. on AVX2).
+Neon) or a batch of 8 (e.g. on AVX2).
 
 Manipulating parametric batches
 -------------------------------
