@@ -13,6 +13,7 @@
 #define XSIMD_GENERIC_ARITHMETIC_HPP
 
 #include <complex>
+#include <limits>
 #include <type_traits>
 
 #include "./xsimd_generic_details.hpp"
@@ -147,6 +148,22 @@ namespace xsimd
             return detail::apply([](T x, T y) noexcept -> T
                                  { return x * y; },
                                  self, other);
+        }
+
+        // rotl
+        template <class A, class T, class STy>
+        inline batch<T, A> rotl(batch<T, A> const& self, STy other, requires_arch<generic>) noexcept
+        {
+            constexpr auto N = std::numeric_limits<T>::digits;
+            return (self << other) | (self >> (N - other));
+        }
+
+        // rotr
+        template <class A, class T, class STy>
+        inline batch<T, A> rotr(batch<T, A> const& self, STy other, requires_arch<generic>) noexcept
+        {
+            constexpr auto N = std::numeric_limits<T>::digits;
+            return (self >> other) | (self << (N - other));
         }
 
         // sadd

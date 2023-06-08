@@ -343,12 +343,47 @@ struct xsimd_api_integral_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
+    void test_bitwise_lshift()
+    {
+        value_type val0(12);
+        value_type val1(3);
+        value_type r = val0 << val1;
+        CHECK_EQ(extract(xsimd::bitwise_lshift(T(val0), T(val1))), r);
+    }
+
+    void test_bitwise_rshift()
+    {
+        value_type val0(12);
+        value_type val1(3);
+        value_type r = val0 >> val1;
+        CHECK_EQ(extract(xsimd::bitwise_rshift(T(val0), T(val1))), r);
+    }
+
     void test_mod()
     {
         value_type val0(5);
         value_type val1(3);
         CHECK_EQ(extract(xsimd::mod(T(val0), T(val1))), val0 % val1);
     }
+
+    void test_rotl()
+    {
+        constexpr auto N = std::numeric_limits<value_type>::digits;
+        value_type val0(12);
+        value_type val1(3);
+        value_type r = (val0 << val1) | (val0 >> (N - val1));
+        CHECK_EQ(extract(xsimd::rotl(T(val0), T(val1))), r);
+    }
+
+    void test_rotr()
+    {
+        constexpr auto N = std::numeric_limits<value_type>::digits;
+        value_type val0(12);
+        value_type val1(3);
+        value_type r = (val0 >> val1) | (val0 << (N - val1));
+        CHECK_EQ(extract(xsimd::rotr(T(val0), T(val1))), r);
+    }
+
     void test_sadd()
     {
         value_type val0(122);
@@ -367,9 +402,29 @@ TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
 {
     xsimd_api_integral_types_functions<B> Test;
 
+    SUBCASE("bitwise_lshift")
+    {
+        Test.test_bitwise_lshift();
+    }
+
+    SUBCASE("bitwise_rshift")
+    {
+        Test.test_bitwise_rshift();
+    }
+
     SUBCASE("mod")
     {
         Test.test_mod();
+    }
+
+    SUBCASE("rotl")
+    {
+        Test.test_rotl();
+    }
+
+    SUBCASE("rotr")
+    {
+        Test.test_rotr();
     }
 
     SUBCASE("sadd")

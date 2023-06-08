@@ -223,6 +223,20 @@ namespace xsimd
         return r;
     }
 
+    template <class T0, class T1>
+    inline typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    bitwise_lshift(T0 x, T1 shift) noexcept
+    {
+        return x << shift;
+    }
+
+    template <class T0, class T1>
+    inline typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    bitwise_rshift(T0 x, T1 shift) noexcept
+    {
+        return x >> shift;
+    }
+
     template <class T>
     inline typename std::enable_if<std::is_integral<T>::value, T>::type
     bitwise_not(T x) noexcept
@@ -346,6 +360,22 @@ namespace xsimd
     inline double reciprocal(double const& x) noexcept
     {
         return 1. / x;
+    }
+
+    template <class T0, class T1>
+    inline typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    rotl(T0 x, T1 shift) noexcept
+    {
+        constexpr auto N = std::numeric_limits<T0>::digits;
+        return (x << shift) | (x >> (N - shift));
+    }
+
+    template <class T0, class T1>
+    inline typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    rotr(T0 x, T1 shift) noexcept
+    {
+        constexpr auto N = std::numeric_limits<T0>::digits;
+        return (x >> shift) | (x << (N - shift));
     }
 
     template <class T>

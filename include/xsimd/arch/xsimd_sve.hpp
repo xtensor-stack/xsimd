@@ -713,6 +713,13 @@ namespace xsimd
          * Permutation *
          ***************/
 
+        //  rotate_right
+        template <size_t N, class A, class T, detail::sve_enable_all_t<T> = 0>
+        inline batch<T, A> rotate_right(batch<T, A> const& a, requires_arch<sve>) noexcept
+        {
+            return svext(a, a, N);
+        }
+
         // swizzle (dynamic)
         template <class A, class T, class I>
         inline batch<T, A> swizzle(batch<T, A> const& arg, batch<I, A> indices, requires_arch<sve>) noexcept

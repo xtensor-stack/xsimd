@@ -325,6 +325,27 @@ namespace xsimd
     /**
      * @ingroup batch_bitwise
      *
+     * Perform a bitwise shift to the left
+     * @param x batch of \c T_in
+     * @param shift scalar amount to shift
+     * @return shifted \c x.
+     */
+    template <class T, class A>
+    inline batch<T, A> bitwise_lshift(batch<T, A> const& x, int shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_lshift<A>(x, shift, A {});
+    }
+    template <class T, class A>
+    inline batch<T, A> bitwise_lshift(batch<T, A> const& x, batch<T, A> const& shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_lshift<A>(x, shift, A {});
+    }
+
+    /**
+     * @ingroup batch_bitwise
+     *
      * Computes the bitwise not of batch \c x.
      * @param x batch involved in the operation.
      * @return the result of the bitwise not.
@@ -378,6 +399,27 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return x | y;
+    }
+
+    /**
+     * @ingroup batch_bitwise
+     *
+     * Perform a bitwise shift to the right
+     * @param x batch of \c T_in
+     * @param shift scalar amount to shift
+     * @return shifted \c x.
+     */
+    template <class T, class A>
+    inline batch<T, A> bitwise_rshift(batch<T, A> const& x, int shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_rshift<A>(x, shift, A {});
+    }
+    template <class T, class A>
+    inline batch<T, A> bitwise_rshift(batch<T, A> const& x, batch<T, A> const& shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_rshift<A>(x, shift, A {});
     }
 
     /**
@@ -1713,6 +1755,86 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return nearbyint(x);
+    }
+
+    /**
+     * @ingroup rotate_left
+     *
+     * Slide the whole batch to the left by \c n bytes, and reintroduce the
+     * slided out elements from the right. This is different from
+     * \c rol that rotates each batch element to the left.
+     *
+     * @tparam N Amount of bytes to rotated to the left.
+     * @param x batch of integer values.
+     * @return rotated batch.
+     */
+    template <size_t N, class T, class A>
+    inline batch<T, A> rotate_left(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotate_left<N, A>(x, A {});
+    }
+
+    /**
+     * @ingroup rotate_right
+     *
+     * Slide the whole batch to the right by \c n bytes, and reintroduce the
+     * slided out elements from the left. This is different from
+     * \c rol that rotates each batch element to the left.
+     *
+     * @tparam N Amount of bytes to rotate to the right.
+     * @param x batch of integer values.
+     * @return rotated batch.
+     */
+    template <size_t N, class T, class A>
+    inline batch<T, A> rotate_right(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotate_right<N, A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_bitwise
+     *
+     * Perform a bitwise shift to the left, reintroducing the shifted out bits
+     * to the right
+     * @param x batch to rotate
+     * @param shift scalar amount to shift
+     * @return rotated \c x.
+     */
+    template <class T, class A>
+    inline batch<T, A> rotl(batch<T, A> const& x, int shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotl<A>(x, shift, A {});
+    }
+    template <class T, class A>
+    inline batch<T, A> rotl(batch<T, A> const& x, batch<T, A> const& shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotl<A>(x, shift, A {});
+    }
+
+    /**
+     * @ingroup batch_bitwise
+     *
+     * Perform a bitwise shift to the right, reintroducing the shifted out bits
+     * to the left.
+     * @param x batch to rotate
+     * @param shift scalar amount to shift
+     * @return rotated \c x.
+     */
+    template <class T, class A>
+    inline batch<T, A> rotr(batch<T, A> const& x, int shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotr<A>(x, shift, A {});
+    }
+    template <class T, class A>
+    inline batch<T, A> rotr(batch<T, A> const& x, batch<T, A> const& shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotr<A>(x, shift, A {});
     }
 
     /**
