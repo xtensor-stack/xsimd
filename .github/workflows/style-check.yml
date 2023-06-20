@@ -1,4 +1,4 @@
-name: clang-format
+name: style check
 on: [push, pull_request]
 concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
@@ -14,3 +14,11 @@ jobs:
       with:
         clang-format-version: '13'
         exclude-regex: 'doctest.h'
+  inlining-check:
+    runs-on: ubuntu-latest
+    name: Check inline keyword usage
+    steps:
+    - uses: actions/checkout@v2
+    - run: sudo apt install clang-tools
+    - run: sh ./test/check_inline_specifier.sh .
+

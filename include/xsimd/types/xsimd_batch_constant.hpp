@@ -33,9 +33,9 @@ namespace xsimd
         using value_type = bool;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
-        operator batch_bool<typename batch_type::value_type, arch_type>() const noexcept { return { Values... }; }
+        constexpr operator batch_bool<typename batch_type::value_type, arch_type>() const noexcept { return { Values... }; }
 
-        bool get(size_t i) const noexcept
+        constexpr bool get(size_t i) const noexcept
         {
             return std::array<value_type, size> { { Values... } }[i];
         }
@@ -73,7 +73,7 @@ namespace xsimd
         /**
          * @brief Generate a batch of @p batch_type from this @p batch_constant
          */
-        operator batch_type() const noexcept { return { Values... }; }
+        inline operator batch_type() const noexcept { return { Values... }; }
 
         /**
          * @brief Get the @p i th element of this @p batch_constant
