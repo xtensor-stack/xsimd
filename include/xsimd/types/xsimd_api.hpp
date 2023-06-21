@@ -1033,7 +1033,7 @@ namespace xsimd
      * @return a batch of positive infinity
      */
     template <class B>
-    B infinity()
+    inline B infinity()
     {
         using T = typename B::value_type;
         using A = typename B::arch_type;

@@ -130,7 +130,7 @@ namespace xsimd
         }
 
         template <class F>
-        static void for_each(F&& f) noexcept
+        static inline void for_each(F&& f) noexcept
         {
             (void)std::initializer_list<bool> { (f(Archs {}), true)... };
         }
@@ -217,14 +217,14 @@ namespace xsimd
             F functor;
 
             template <class Arch, class... Tys>
-            auto walk_archs(arch_list<Arch>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
+            inline auto walk_archs(arch_list<Arch>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
             {
                 assert(Arch::available() && "At least one arch must be supported during dispatch");
                 return functor(Arch {}, std::forward<Tys>(args)...);
             }
 
             template <class Arch, class ArchNext, class... Archs, class... Tys>
-            auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
+            inline auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
             {
                 if (Arch::version() <= best_arch_found)
                     return functor(Arch {}, std::forward<Tys>(args)...);
@@ -233,14 +233,14 @@ namespace xsimd
             }
 
         public:
-            dispatcher(F f) noexcept
+            inline dispatcher(F f) noexcept
                 : best_arch_found(available_architectures().best)
                 , functor(f)
             {
             }
 
             template <class... Tys>
-            auto operator()(Tys&&... args) noexcept -> decltype(functor(default_arch {}, std::forward<Tys>(args)...))
+            inline auto operator()(Tys&&... args) noexcept -> decltype(functor(default_arch {}, std::forward<Tys>(args)...))
             {
                 return walk_archs(ArchList {}, std::forward<Tys>(args)...);
             }

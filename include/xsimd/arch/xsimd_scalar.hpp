@@ -1001,14 +1001,14 @@ namespace xsimd
 
     namespace detail
     {
-#define XSIMD_HASSINCOS_TRAIT(func)                                                                                              \
-    template <class S>                                                                                                           \
-    struct has##func                                                                                                             \
-    {                                                                                                                            \
-        template <class T>                                                                                                       \
-        static auto get(T* ptr) -> decltype(func(std::declval<T>(), std::declval<T*>(), std::declval<T*>()), std::true_type {}); \
-        static std::false_type get(...);                                                                                         \
-        static constexpr bool value = decltype(get((S*)nullptr))::value;                                                         \
+#define XSIMD_HASSINCOS_TRAIT(func)                                                                                                     \
+    template <class S>                                                                                                                  \
+    struct has##func                                                                                                                    \
+    {                                                                                                                                   \
+        template <class T>                                                                                                              \
+        static inline auto get(T* ptr) -> decltype(func(std::declval<T>(), std::declval<T*>(), std::declval<T*>()), std::true_type {}); \
+        static inline std::false_type get(...);                                                                                         \
+        static constexpr bool value = decltype(get((S*)nullptr))::value;                                                                \
     }
 
 #define XSIMD_HASSINCOS(func, T) has##func<T>::value
@@ -1021,21 +1021,21 @@ namespace xsimd
         struct generic_sincosf
         {
             template <class T>
-            typename std::enable_if<XSIMD_HASSINCOS(sincosf, T), void>::type
+            inline typename std::enable_if<XSIMD_HASSINCOS(sincosf, T), void>::type
             operator()(float val, T& s, T& c)
             {
                 sincosf(val, &s, &c);
             }
 
             template <class T>
-            typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && XSIMD_HASSINCOS(__sincosf, T), void>::type
+            inline typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && XSIMD_HASSINCOS(__sincosf, T), void>::type
             operator()(float val, T& s, T& c)
             {
                 __sincosf(val, &s, &c);
             }
 
             template <class T>
-            typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && !XSIMD_HASSINCOS(__sincosf, T), void>::type
+            inline typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && !XSIMD_HASSINCOS(__sincosf, T), void>::type
             operator()(float val, T& s, T& c)
             {
                 s = std::sin(val);
@@ -1046,21 +1046,21 @@ namespace xsimd
         struct generic_sincos
         {
             template <class T>
-            typename std::enable_if<XSIMD_HASSINCOS(sincos, T), void>::type
+            inline typename std::enable_if<XSIMD_HASSINCOS(sincos, T), void>::type
             operator()(double val, T& s, T& c)
             {
                 sincos(val, &s, &c);
             }
 
             template <class T>
-            typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && XSIMD_HASSINCOS(__sincos, T), void>::type
+            inline typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && XSIMD_HASSINCOS(__sincos, T), void>::type
             operator()(double val, T& s, T& c)
             {
                 __sincos(val, &s, &c);
             }
 
             template <class T>
-            typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && !XSIMD_HASSINCOS(__sincos, T), void>::type
+            inline typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && !XSIMD_HASSINCOS(__sincos, T), void>::type
             operator()(double val, T& s, T& c)
             {
                 s = std::sin(val);
