@@ -538,8 +538,11 @@ struct xsimd_api_float_types_functions
     void test_erfc()
     {
         // FIXME: can we do better?
-        value_type val(0);
-        CHECK_EQ(extract(xsimd::erfc(T(val))), doctest::Approx(std::erfc(val)).epsilon(10e-7));
+        for (float f : { 0.f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f })
+        {
+            value_type val(f);
+            CHECK_EQ(extract(xsimd::erfc(T(val))), doctest::Approx(std::erfc(val)).epsilon(10e-8));
+        }
     }
     void test_fabs()
     {
