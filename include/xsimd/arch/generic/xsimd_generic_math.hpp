@@ -470,16 +470,18 @@ namespace xsimd
             batch_type x = abs(self);
             auto test0 = self < batch_type(0.);
             batch_type r1(0.);
+            auto test1 = 3.f * x < 2.f;
             batch_type z = x / (batch_type(1.) + x);
-            if (any(3.f * x < 2.f))
+            if (any(test1))
             {
                 r1 = detail::erf_kernel<batch_type>::erfc3(z);
+                if (all(test1))
+                    return select(test0, batch_type(2.) - r1, r1);
             }
-            else
-            {
-                z -= batch_type(0.4f);
-                r1 = exp(-x * x) * detail::erf_kernel<batch_type>::erfc2(z);
-            }
+
+            z -= batch_type(0.4f);
+            batch_type r2 = exp(-x * x) * detail::erf_kernel<batch_type>::erfc2(z);
+            r1 = select(test1, r1, r2);
 #ifndef XSIMD_NO_INFINITIES
             r1 = select(x == constants::infinity<batch_type>(), batch_type(0.), r1);
 #endif
