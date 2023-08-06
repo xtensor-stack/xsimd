@@ -17,13 +17,11 @@
 
 #include "../config/xsimd_arch.hpp"
 #include "../memory/xsimd_alignment.hpp"
+#include "./xsimd_element_reference.hpp"
 #include "./xsimd_utils.hpp"
 
 namespace xsimd
 {
-    template <class T, class A = default_arch>
-    class batch;
-
     namespace types
     {
         template <class T, class A>
@@ -157,6 +155,19 @@ namespace xsimd
         inline void scatter(U* dst, batch<V, arch_type> const& index) const noexcept;
 
         inline T get(std::size_t i) const noexcept;
+        inline void set(std::size_t i, T val) noexcept;
+
+        inline const batch_element_reference<batch> operator[](uint64_t index) const
+        {
+            assert(index < size && "Index out of range");
+            return { *this, index };
+        }
+
+        inline batch_element_reference<batch> operator[](uint64_t index)
+        {
+            assert(index < size && "Index out of range");
+            return { *this, index };
+        }
 
         // comparison operators. Defined as friend to enable automatic
         // conversion of parameters from scalar to batch, at the cost of using a
@@ -690,6 +701,12 @@ namespace xsimd
     inline T batch<T, A>::get(std::size_t i) const noexcept
     {
         return kernel::get(*this, i, A {});
+    }
+
+    template <class T, class A>
+    inline void batch<T, A>::set(std::size_t i, T val) noexcept
+    {
+        *(static_cast<T *>((void *)this) + i) = val;
     }
 
     /******************************
