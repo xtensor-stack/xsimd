@@ -65,7 +65,7 @@ jobs:
         CXX=clang++-$LLVM_VERSION
         echo "CXX=$CXX" >> $GITHUB_ENV
     - name: Checkout xsimd
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Install mamba
       uses: mamba-org/provision-with-micromamba@main
       with:
