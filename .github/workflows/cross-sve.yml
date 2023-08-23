@@ -27,7 +27,7 @@ jobs:
       run: |
         sudo apt-get install ninja-build
     - name: Checkout xsimd
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Setup
       run: |
         mkdir _build
