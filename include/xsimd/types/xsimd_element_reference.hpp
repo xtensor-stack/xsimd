@@ -99,7 +99,7 @@ namespace xsimd
 #undef SIMD_REF_INPLACE_OP
 
         template <typename T>
-        operator T() const
+        explicit operator T() const
         {
             return static_cast<T>(get());
         }
