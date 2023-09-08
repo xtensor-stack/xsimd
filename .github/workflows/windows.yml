@@ -41,7 +41,7 @@ jobs:
         python3 -m pip install --upgrade pip setuptools wheel
         python3 -m pip install ninja
     - name: Checkout xsimd
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Setup
       run: |
         mkdir _build
