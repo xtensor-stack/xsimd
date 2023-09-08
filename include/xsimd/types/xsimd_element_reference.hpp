@@ -52,12 +52,12 @@ namespace xsimd
 #define SIMD_REF_OP(OP_)                                              \
     auto operator OP_(const batch_element_reference& other) -> Scalar \
     {                                                                 \
-        return get() + other.get();                                   \
+        return get() OP_ other.get();                                   \
     }                                                                 \
                                                                       \
     auto operator OP_(const Scalar& other) -> Scalar                  \
     {                                                                 \
-        return get() + other;                                         \
+        return get() OP_ other;                                         \
     }
 
 #define SIMD_REF_INPLACE_OP(OP_)                                                           \
@@ -80,6 +80,12 @@ namespace xsimd
         SIMD_REF_OP(&)
         SIMD_REF_OP(|)
         SIMD_REF_OP(^)
+        SIMD_REF_OP(>)
+        SIMD_REF_OP(<)
+        SIMD_REF_OP(>=)
+        SIMD_REF_OP(<=)
+        SIMD_REF_OP(==)
+        SIMD_REF_OP(!=)
         SIMD_REF_OP(&&)
         SIMD_REF_OP(||)
         SIMD_REF_OP(<<)
@@ -99,7 +105,7 @@ namespace xsimd
 #undef SIMD_REF_INPLACE_OP
 
         template <typename T>
-        explicit operator T() const
+        operator T() const
         {
             return static_cast<T>(get());
         }
