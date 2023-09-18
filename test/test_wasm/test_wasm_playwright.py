@@ -45,7 +45,7 @@ def server_context(work_dir, port):
         server.shutdown()
         thread.join()
 
-async def playwright_run_page(page_url, headless=False, slow_mo=None):
+async def playwright_run_page(page_url, headless=True, slow_mo=None):
     async with async_playwright() as p:
         if slow_mo is None:
             browser = await p.chromium.launch(headless=headless)
