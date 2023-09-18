@@ -199,7 +199,7 @@ if(NOT EMSCRIPTEN)
     if (CROSS_COMPILE_ARM)
         add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS test_xsimd)
     else()
-        add_executable(test_xsimd_wasm xsimd_wasm.cpp)
+        add_custom_target(xtest COMMAND test_xsimd DEPENDS test_xsimd)
     endif()
 
     if (XSIMD_ENABLE_WERROR)
