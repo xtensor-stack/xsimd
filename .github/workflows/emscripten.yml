@@ -17,9 +17,12 @@ jobs:
             create-args: >-
                 microsoft::playwright
                 python
+            init-shell: bash
 
+                
 
       - name: Build script
+        shell: bash -el {0}
         run: |
             echo "Build script for wasm"
             playwright install
