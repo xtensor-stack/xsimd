@@ -5,13 +5,13 @@ set -e
 TEST_WASM_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SRC_DIR=$TEST_WASM_DIR/../..
 
-# setup emsdk
+
 git clone https://github.com/emscripten-core/emsdk
 cd emsdk
 ./emsdk install latest
 ./emsdk activate latest
 source ./emsdk_env.sh
-cd ..
+
 
 
 # build wasm
