@@ -113,7 +113,6 @@ def main(build_dir):
 
 
 if __name__ == "__main__":
-    import pytest
     import sys
 
     # get arg from args
