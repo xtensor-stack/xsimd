@@ -216,6 +216,7 @@ else()
     target_compile_options(test_xsimd_wasm
         PUBLIC --std=c++17
         PUBLIC "SHELL: -msimd128"
+        PUBLIC "SHELL: -msse2"
     )
     # add flags embind, modularize
     
