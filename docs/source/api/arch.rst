@@ -8,7 +8,7 @@ Architecture manipulation
 =========================
 
 xsimd provides an high level description of the instruction sets it manipulates.
-The mentionned types are primarily used as template parameters for :ref:`batch
+The mentioned types are primarily used as template parameters for :ref:`batch
 <xsimd-batch-ref>`, and when interacting with :cpp:func:`xsimd::dispatch()`.
 
 The best available architecture is available at compile time through
