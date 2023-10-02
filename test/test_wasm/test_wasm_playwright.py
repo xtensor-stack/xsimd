@@ -48,9 +48,9 @@ def server_context(work_dir, port):
 async def playwright_run_page(page_url, headless=True, slow_mo=None):
     async with async_playwright() as p:
         if slow_mo is None:
-            browser = await p.chromium.launch(headless=headless)
+            browser = await p.firefox.launch(headless=headless)
         else:
-            browser = await p.chromium.launch(
+            browser = await p.firefox.launch(
                 headless=headless, slow_mo=slow_mo
             )
         page = await browser.new_page()
