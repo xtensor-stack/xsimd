@@ -332,6 +332,26 @@ namespace xsimd
             return wasm_f64x2_div(self, other);
         }
 
+        // load_aligned
+        template <class A>
+        inline batch<float, A> load_aligned(float const* mem, convert<float>, requires_arch<wasm>) noexcept
+        {
+            // Assuming that mem is aligned properly, you can use wasm_v128_load to load the mem.
+            return wasm_v128_load(mem);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<wasm>) noexcept
+        {
+            // Assuming that mem is aligned properly, you can use wasm_v128_load to load the mem.
+            return wasm_v128_load((v128_t const*)mem);
+        }
+        template <class A>
+        inline batch<double, A> load_aligned(double const* mem, convert<double>, requires_arch<wasm>) noexcept
+        {
+            // Assuming that mem is aligned properly, you can use wasm_v128_load to load the mem.
+            return wasm_v128_load(mem);
+        }
+
         // set
         template <class A, class... Values>
         inline batch<float, A> set(batch<float, A> const&, requires_arch<wasm>, Values... values) noexcept
