@@ -467,7 +467,7 @@ namespace xsimd
             return set(batch<T, A>(), A {}, static_cast<T>(values ? -1LL : 0LL)...).data;
         }
 
-        //store_aligned
+        // store_aligned
         template <class A>
         inline void store_aligned(float* mem, batch<float, A> const& self, requires_arch<wasm>) noexcept
         {
@@ -491,6 +491,43 @@ namespace xsimd
         {
             // Assuming that mem is aligned properly, you can use wasm_v128_store to store the batch.
             return wasm_v128_store(mem, self);
+        }
+
+        // sub
+        template <class A>
+        inline batch<float, A> sub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_sub(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_sub(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_sub(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_sub(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_sub(self, other);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A>
+        inline batch<double, A> sub(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_sub(self, other);
         }
     }
 }
