@@ -493,6 +493,28 @@ namespace xsimd
             return wasm_v128_store(mem, self);
         }
 
+        // store_unaligned
+        template <class A>
+        inline void store_unaligned(float* mem, batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_store(mem, self);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline void store_unaligned(T* mem, batch<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_store((v128_t*)mem, self);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline void store_unaligned(T* mem, batch_bool<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_store((v128_t*)mem, self);
+        }
+        template <class A>
+        inline void store_unaligned(double* mem, batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_store(mem, self);
+        }
+
         // sub
         template <class A>
         inline batch<float, A> sub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
