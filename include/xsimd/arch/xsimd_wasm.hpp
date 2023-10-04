@@ -352,6 +352,75 @@ namespace xsimd
             return wasm_v128_load(mem);
         }
 
+        // max
+        template <class A>
+        inline batch<float, A> max(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_pmax(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return select(self > other, self, other);
+        }
+        template <class A>
+        inline batch<double, A> max(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_pmax(self, other);
+        }
+
+        // min
+        template <class A>
+        inline batch<float, A> min(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_pmin(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return select(self <= other, self, other);
+        }
+        template <class A>
+        inline batch<double, A> min(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_pmin(self, other);
+        }
+
+        // mul
+        template <class A>
+        inline batch<float, A> mul(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_mul(self, other);
+        }
+        template <class A>
+        inline batch<double, A> mul(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_mul(self, other);
+        }
+
+        // select
+        template <class A>
+        inline batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(cond, false_br));
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(cond, false_br));
+        }
+        template <class A, class T, bool... Values, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<wasm>) noexcept
+        {
+            return select(batch_bool<T, A> { Values... }, true_br, false_br, wasm {});
+        }
+        template <class A>
+        inline batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(cond, false_br));
+        }
+
         // set
         template <class A, class... Values>
         inline batch<float, A> set(batch<float, A> const&, requires_arch<wasm>, Values... values) noexcept
