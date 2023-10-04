@@ -352,6 +352,23 @@ namespace xsimd
             return wasm_v128_load(mem);
         }
 
+        // load_unaligned
+        template <class A>
+        inline batch<float, A> load_unaligned(float const* mem, convert<float>, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_load(mem);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_load((v128_t const*)mem);
+        }
+        template <class A>
+        inline batch<double, A> load_unaligned(double const* mem, convert<double>, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_load(mem);
+        }
+
         // max
         template <class A>
         inline batch<float, A> max(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
@@ -550,6 +567,18 @@ namespace xsimd
         inline batch<double, A> sub(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_f64x2_sub(self, other);
+        }
+
+        // sqrt
+        template <class A>
+        inline batch<float, A> sqrt(batch<float, A> const& val, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_sqrt(val);
+        }
+        template <class A>
+        inline batch<double, A> sqrt(batch<double, A> const& val, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_sqrt(val);
         }
     }
 }
