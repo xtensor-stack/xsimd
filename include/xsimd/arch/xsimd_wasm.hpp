@@ -332,6 +332,30 @@ namespace xsimd
             return wasm_f64x2_div(self, other);
         }
 
+        // ge
+        template <class A>
+        inline batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_ge(self, other);
+        }
+        template <class A>
+        inline batch_bool<double, A> ge(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_ge(self, other);
+        }
+
+        // le
+        template <class A>
+        inline batch_bool<float, A> le(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_le(self, other);
+        }
+        template <class A>
+        inline batch_bool<double, A> le(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_le(self, other);
+        }
+
         // load_aligned
         template <class A>
         inline batch<float, A> load_aligned(float const* mem, convert<float>, requires_arch<wasm>) noexcept
