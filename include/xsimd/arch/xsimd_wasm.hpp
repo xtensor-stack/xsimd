@@ -25,54 +25,42 @@ namespace xsimd
         using namespace types;
 
         // abs
-        template <class A, class T>
+        template <class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, void>::type>
         inline batch<T, A> abs(batch<T, A> const& self, requires_arch<wasm>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(std::is_integral_v<T> && std::is_signed_v<T>)
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-                {
-                    return wasm_i8x16_abs(self);
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-                {
-                    return  wasm_i16x8_abs(self);
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-                {
-                    return wasm_i32x4_abs(self);
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-                {
-                    return wasm_i64x2_abs(self);
-                }
-                else
-                {
-                    assert(false && "unsupported arch/op combination");
-                    return {};
-                }
+                return wasm_i8x16_abs(self);
             }
-            else XSIMD_IF_CONSTEXPR(std::is_floating_point_v<T>)
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-                {
-                    return wasm_f32x4_abs(self);
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-                {
-                    return wasm_f64x2_abs(self);
-                }
-                else
-                {
-                    assert(false && "unsupported arch/op combination");
-                    return {};
-                }
+                return wasm_i16x8_abs(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_abs(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_abs(self);
             }
             else
             {
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
+        }
+
+        template <class A>
+        inline batch<float, A> abs(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_abs(self, other);
+        }
+
+        template <class A>
+        inline batch<double, A> abs(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_abs(self, other);
         }
 
         // add
@@ -149,104 +137,40 @@ namespace xsimd
         }
 
         // bitwise_and
-        template <class A>
-        inline batch<float, A> bitwise_and(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_and(self, other);
-        }
-        template <class A>
-        inline batch_bool<float, A> bitwise_and(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_and(self, other);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T>
         inline batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_v128_and(self, other);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+
+        template <class A, class T>
         inline batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_v128_and(self, other);
         }
 
-        template <class A>
-        batch<double, A> inline bitwise_and(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_and(self, other);
-        }
-
-        template <class A>
-        inline batch_bool<double, A> bitwise_and(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_and(self, other);
-        }
-
         // bitwise_andnot
-        template <class A>
-        inline batch<float, A> bitwise_andnot(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_andnot(other, self);
-        }
-
-        template <class A>
-        inline batch_bool<float, A> bitwise_andnot(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_andnot(other, self);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T>
         inline batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
         {
-            return wasm_v128_andnot(other, self);
+            return wasm_v128_andnot(self, other);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+
+        template <class A, class T>
         inline batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
         {
-            return wasm_v128_andnot(other, self);
-        }
-
-        template <class A>
-        inline batch<double, A> bitwise_andnot(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_andnot(other, self);
-        }
-
-        template <class A>
-        inline batch_bool<double, A> bitwise_andnot(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_andnot(other, self);
+            return wasm_v128_andnot(self, other);
         }
 
         // bitwise_or
-        template <class A>
-        inline batch<float, A> bitwise_or(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_or(self, other);
-        }
-        template <class A>
-        inline batch_bool<float, A> bitwise_or(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_or(self, other);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T>
         inline batch<T, A> bitwise_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_v128_or(self, other);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+
+        template <class A, class T>
         inline batch_bool<T, A> bitwise_or(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_or(self, other);
-        }
-
-        template <class A>
-        inline batch<double, A> bitwise_or(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_or(self, other);
-        }
-
-        template <class A>
-        inline batch_bool<double, A> bitwise_or(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_v128_or(self, other);
         }
