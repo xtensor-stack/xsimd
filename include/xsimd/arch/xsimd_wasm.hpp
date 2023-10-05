@@ -176,35 +176,16 @@ namespace xsimd
         }
 
         // bitwise_xor
-        template <class A>
-        inline batch<float, A> bitwise_xor(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_xor(self, other);
-        }
-        template <class A>
-        inline batch_bool<float, A> bitwise_xor(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_xor(self, other);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T>
         inline batch<T, A> bitwise_xor(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
         {
-            return wasm_v128_or(self, other);
+            return wasm_v128_xor(self, other);
         }
-        template <class A>
-        inline batch<double, A> bitwise_xor(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+
+        template <class A, class T>
+        inline batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
         {
-            return wasm_v128_or(self, other);
-        }
-        template <class A>
-        inline batch_bool<double, A> bitwise_xor(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_or(self, other);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline batch<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
-        {
-            return wasm_v128_or(self, other);
+            return wasm_v128_xor(self, other);
         }
 
         // broadcast
