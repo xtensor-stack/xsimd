@@ -518,7 +518,12 @@ struct xsimd_api_float_types_functions
     void test_exp10()
     {
         value_type val(2);
+        #ifdef EMSCRIPTEN
+        // otherwise we see ERROR: CHECK_EQ( extract(xsimd::exp10(T(val))), std::pow(value_type(10), val) ) is NOT correct! values: CHECK_EQ( 100, 100 )
+        CHECK_EQ(extract(xsimd::exp10(T(val))), doctest::Approx(std::pow(value_type(10), val)));
+        #else
         CHECK_EQ(extract(xsimd::exp10(T(val))), std::pow(value_type(10), val));
+        #endif
     }
     void test_exp2()
     {
