@@ -520,7 +520,7 @@ namespace xsimd
     {
         return ::exp10(x);
     }
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(EMSCRIPTEN)
     template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
     inline T exp10(const T& x) noexcept
     {
