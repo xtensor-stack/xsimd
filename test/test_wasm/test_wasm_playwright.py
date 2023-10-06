@@ -65,10 +65,9 @@ async def playwright_run_page(page_url, headless=True, slow_mo=None):
 
         page.on("console", handle_console)
 
-        # await page.goto(page_url)
+
         status = await page.evaluate(
             f"""async () => {{
-
                 let test_module = await test_xsimd_wasm();
                 console.log("\\n\\n************************************************************");
                 console.log("XSIMD WASM TESTS:");
@@ -87,7 +86,7 @@ async def playwright_run_page(page_url, headless=True, slow_mo=None):
                 return r;
                 }}
 
-            }}"""
+                }}"""
         )
         return_code = int(status)
     return return_code
@@ -99,8 +98,8 @@ def main(build_dir):
         work_dir = Path(temp_dir)
 
 
-        shutil.copy(f"{build_dir}/test_xsimd_wasm.wasm", work_dir)
-        shutil.copy(f"{build_dir}/test_xsimd_wasm.js", work_dir)
+        shutil.copy(f"{build_dir}/test_xsimd.wasm", work_dir)
+        shutil.copy(f"{build_dir}/test_xsimd.js", work_dir)
         shutil.copy(f"{THIS_DIR}/browser_main.html", work_dir)
         
         port = find_free_port()
