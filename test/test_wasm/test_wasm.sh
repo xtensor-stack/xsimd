@@ -41,6 +41,3 @@ cd ..
 
 # run tests in browser
 python $TEST_WASM_DIR/test_wasm_playwright.py  build/test
-
-# run tests with node
-node build/test/test_xsimd.js
