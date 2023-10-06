@@ -82,7 +82,8 @@ struct power_test
             INFO("pow");
             CHECK_EQ(diff, 0);
 
-#ifdef __SSE__
+// use of undeclared identifier '_MM_SET_EXCEPTION_MASK for emscripten
+#if defined(__SSE__) && !defined(EMSCRIPTEN)
             // Test with FE_INVALID...
             unsigned mask = _MM_GET_EXCEPTION_MASK();
             _MM_SET_EXCEPTION_MASK(mask & ~_MM_MASK_INVALID);
