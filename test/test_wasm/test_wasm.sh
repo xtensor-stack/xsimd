@@ -39,8 +39,8 @@ emcmake cmake \
 emmake make -j4
 cd ..
 
-# run tests with node
-#node build/test/test_xsimd.js
-
-
+# run tests in browser
 python $TEST_WASM_DIR/test_wasm_playwright.py  build/test
+
+# run tests with node
+node build/test/test_xsimd.js

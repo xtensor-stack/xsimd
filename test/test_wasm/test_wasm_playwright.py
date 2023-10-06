@@ -66,31 +66,29 @@ async def playwright_run_page(page_url, headless=True, slow_mo=None):
         page.on("console", handle_console)
 
 
-        if True:
-            status = await page.evaluate(
-                f"""async () => {{
-
-                    let test_module = await test_xsimd_wasm();
-                    console.log("\\n\\n************************************************************");
-                    console.log("XSIMD WASM TESTS:");
-                    console.log("************************************************************");
-                    let r = test_module.run_tests();
-                    if (r == 0) {{
-                    console.log("\\n\\n************************************************************");
-                    console.log("XSIMD WASM TESTS PASSED");
-                    console.log("************************************************************");
-                    return r;
-                    }}
-                    else {{
-                    console.log("************************************************************");
-                    console.log("XSIMD WASM TESTS FAILED");
-                    console.log("************************************************************");
-                    return r;
-                    }}
+        status = await page.evaluate(
+            f"""async () => {{
+                let test_module = await test_xsimd_wasm();
+                console.log("\\n\\n************************************************************");
+                console.log("XSIMD WASM TESTS:");
+                console.log("************************************************************");
+                let r = test_module.run_tests();
+                if (r == 0) {{
+                console.log("\\n\\n************************************************************");
+                console.log("XSIMD WASM TESTS PASSED");
+                console.log("************************************************************");
+                return r;
+                }}
+                else {{
+                console.log("************************************************************");
+                console.log("XSIMD WASM TESTS FAILED");
+                console.log("************************************************************");
+                return r;
+                }}
 
                 }}"""
         )
-        return_code = 0#int(status)
+        return_code = int(status)
     return return_code
 def main(build_dir):
     
