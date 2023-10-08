@@ -191,8 +191,10 @@ else()
 endif()
 
 if(ENABLE_XTL_COMPLEX)
-target_include_directories(test_xsimd PRIVATE ${xtl_INCLUDE_DIRS})
+  add_compile_definitions(XSIMD_ENABLE_XTL_COMPLEX=1)
+  target_include_directories(test_xsimd PRIVATE ${xtl_INCLUDE_DIRS})
 endif()
+
 add_test(NAME test_xsimd COMMAND test_xsimd)
 
 if (CROSS_COMPILE_ARM)
