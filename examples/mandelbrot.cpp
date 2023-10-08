@@ -274,8 +274,7 @@ struct run_archlist<xsimd::arch_list<Arch...>>
         int maxIters,
         std::vector<int, xsimd::aligned_allocator<int, Align>>& buffer)
     {
-        using expand_type = int[];
-        expand_type { (run_arch<Arch>(bencher, x0, y0, x1, x1, width, height, maxIters, buffer), 0)... };
+        (void)std::initializer_list<int> { (run_arch<Arch>(bencher, x0, y0, x1, x1, width, height, maxIters, buffer), 0)... };
     }
 };
 
