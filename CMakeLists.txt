@@ -86,19 +86,16 @@ target_include_directories(xsimd INTERFACE
     $<BUILD_INTERFACE:${XSIMD_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include>)
 
-if (ENABLE_XTL_COMPLEX)
-    target_compile_features(xsimd INTERFACE cxx_std_14)
-else()
-    target_compile_features(xsimd INTERFACE cxx_std_11)
-endif()
-
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" OFF)
 
 if(ENABLE_XTL_COMPLEX)
     find_package(xtl 0.7.0 REQUIRED)
+    target_compile_features(xsimd INTERFACE cxx_std_14)
     target_compile_definitions(xsimd INTERFACE XSIMD_ENABLE_XTL_COMPLEX=1)
     target_link_libraries(xsimd INTERFACE xtl)
+else()
+    target_compile_features(xsimd INTERFACE cxx_std_11)
 endif()
 
 if(BUILD_TESTS)
