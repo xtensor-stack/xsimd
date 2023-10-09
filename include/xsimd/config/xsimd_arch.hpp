@@ -193,7 +193,8 @@ namespace xsimd
     using all_x86_architectures = arch_list<avx512bw, avx512dq, avx512cd, avx512f, fma3<avx2>, avx2, fma3<avx>, avx, fma4, fma3<sse4_2>, sse4_2, sse4_1, /*sse4a,*/ ssse3, sse3, sse2>;
     using all_sve_architectures = arch_list<detail::sve<512>, detail::sve<256>, detail::sve<128>>;
     using all_arm_architectures = typename detail::join<all_sve_architectures, arch_list<neon64, neon>>::type;
-    using all_architectures = typename detail::join<all_arm_architectures, all_x86_architectures>::type;
+    using all_wasm_architectures = arch_list<wasm>;
+    using all_architectures = typename detail::join<all_arm_architectures, all_x86_architectures, all_wasm_architectures>::type;
 
     using supported_architectures = typename detail::supported<all_architectures>::type;
 
