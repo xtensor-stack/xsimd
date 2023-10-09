@@ -52,15 +52,15 @@ namespace xsimd
         }
 
         template <class A>
-        inline batch<float, A> abs(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        inline batch<float, A> abs(batch<float, A> const& self, requires_arch<wasm>) noexcept
         {
-            return wasm_f32x4_abs(self, other);
+            return wasm_f32x4_abs(self);
         }
 
         template <class A>
-        inline batch<double, A> abs(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        inline batch<double, A> abs(batch<double, A> const& self, requires_arch<wasm>) noexcept
         {
-            return wasm_f64x2_abs(self, other);
+            return wasm_f64x2_abs(self);
         }
 
         // add
@@ -202,6 +202,73 @@ namespace xsimd
             }
         }
 
+        // bitwise_rshift
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<wasm>) noexcept
+        {
+            if (std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_i8x16_shr(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_i16x8_shr(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_i32x4_shr(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return wasm_i64x2_shr(self, other);
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return {};
+                }
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_v128_and(wasm_i8x16_splat(0xFF >> other), wasm_u32x4_shr(self, other));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_u16x8_shr(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_u32x4_shr(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return wasm_u64x2_shr(self, other);
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return {};
+                }
+            }
+        }
+
+        // bitwise_not
+        template <class A, class T>
+        inline batch<T, A> bitwise_not(batch<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_not(self);
+        }
+
+        template <class A, class T>
+        inline batch_bool<T, A> bitwise_not(batch_bool<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_not(self);
+        }
+
         // bitwise_xor
         template <class A, class T>
         inline batch<T, A> bitwise_xor(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
@@ -252,6 +319,18 @@ namespace xsimd
             return wasm_f64x2_splat(val);
         }
 
+        // ceil
+        template <class A>
+        inline batch<float, A> ceil(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_ceil(self);
+        }
+        template <class A>
+        inline batch<double, A> ceil(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_ceil(self);
+        }
+
         // div
         template <class A>
         inline batch<float, A> div(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
@@ -264,6 +343,91 @@ namespace xsimd
             return wasm_f64x2_div(self, other);
         }
 
+        // eq
+        template <class A>
+        inline batch_bool<float, A> eq(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_eq(self, other);
+        }
+        template <class A>
+        inline batch_bool<float, A> eq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_eq(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_eq(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_eq(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_eq(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_eq(self, other);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_eq(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_eq(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_eq(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_eq(self, other);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A>
+        inline batch_bool<double, A> eq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_eq(self, other);
+        }
+        template <class A>
+        inline batch_bool<double, A> eq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_eq(self, other);
+        }
+
+        // floor
+        template <class A>
+        inline batch<float, A> floor(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_floor(self);
+        }
+
+        template <class A>
+        inline batch<double, A> floor(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_floor(self);
+        }
+
         // ge
         template <class A>
         inline batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
@@ -274,6 +438,138 @@ namespace xsimd
         inline batch_bool<double, A> ge(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_f64x2_ge(self, other);
+        }
+
+        // gt
+        template <class A>
+        inline batch_bool<float, A> gt(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_gt(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            if (std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_i8x16_gt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_i16x8_gt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_i32x4_gt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return wasm_i64x2_gt(self, other);
+                }
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_u8x16_gt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_u16x8_gt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_u32x4_gt(self, other);
+                }
+                else
+                {
+                    return gt(self, other, generic {});
+                }
+            }
+        }
+
+        template <class A>
+        inline batch_bool<double, A> gt(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_gt(self, other);
+        }
+
+        // insert
+        template <class A, size_t I>
+        inline batch<float, A> insert(batch<float, A> const& self, float val, index<I> pos, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_replace_lane(self, pos, val);
+        }
+        template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<wasm>) noexcept
+        {
+            if (std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_i8x16_replace_lane(self, pos, val);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_i16x8_replace_lane(self, pos, val);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_i32x4_replace_lane(self, pos, val);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return wasm_i64x2_replace_lane(self, pos, val);
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return {};
+                }
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_u8x16_replace_lane(self, pos, val);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_u16x8_replace_lane(self, pos, val);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_u32x4_replace_lane(self, pos, val);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return wasm_u64x2_replace_lane(self, pos, val);
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return {};
+                }
+            }
+        }
+
+        template <class A, size_t I>
+        inline batch<double, A> insert(batch<double, A> const& self, double val, index<I> pos, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_replace_lane(self, pos, val);
+        }
+
+        // isnan
+        template <class A>
+        inline batch_bool<float, A> isnan(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_or(wasm_f32x4_ne(self, self), wasm_f32x4_ne(self, self));
+        }
+        template <class A>
+        inline batch_bool<double, A> isnan(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_v128_or(wasm_f64x2_ne(self, self), wasm_f64x2_ne(self, self));
         }
 
         // le
@@ -325,6 +621,109 @@ namespace xsimd
             return wasm_v128_load(mem);
         }
 
+        // lt
+        template <class A>
+        inline batch_bool<float, A> lt(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_lt(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            if (std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_i8x16_lt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_i16x8_lt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_i32x4_lt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return wasm_i64x2_lt(self, other);
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return {};
+                }
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_u8x16_lt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_u16x8_lt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return wasm_u32x4_lt(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return lt(self, other, generic {});
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return {};
+                }
+            }
+        }
+
+        template <class A>
+        inline batch_bool<double, A> lt(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_lt(self, other);
+        }
+
+        // mask
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline uint64_t mask(batch_bool<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_bitmask(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_bitmask(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_bitmask(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_bitmask(self);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A>
+        inline uint64_t mask(batch_bool<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_i32x4_bitmask(self);
+        }
+
+        template <class A>
+        inline uint64_t mask(batch_bool<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_i64x2_bitmask(self);
+        }
+
         // max
         template <class A>
         inline batch<float, A> max(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
@@ -371,17 +770,117 @@ namespace xsimd
             return wasm_f64x2_mul(self, other);
         }
 
+        // neg
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> neg(batch<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_neg(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_neg(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_neg(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_neg(self);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+
+        template <class A>
+        inline batch<float, A> neg(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_neg(self);
+        }
+
+        template <class A>
+        inline batch<double, A> neg(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_neg(self);
+        }
+
+        // neq
+        template <class A>
+        inline batch_bool<float, A> neq(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_ne(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return ~(self == other);
+        }
+        template <class A>
+        inline batch_bool<float, A> neq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_ne(self, other);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return ~(self == other);
+        }
+
+        template <class A>
+        inline batch_bool<double, A> neq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_ne(self, other);
+        }
+        template <class A>
+        inline batch_bool<double, A> neq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_ne(self, other);
+        }
+
+        // reciprocal
+        template <class A>
+        inline batch<float, A> reciprocal(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t one = wasm_f32x4_splat(1.0f);
+            return wasm_f32x4_div(one, self);
+        }
+        template <class A>
+        inline batch<double, A> reciprocal(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t one = wasm_f64x2_splat(1.0);
+            return wasm_f64x2_div(one, self);
+        }
+
+        // rsqrt
+        template <class A>
+        inline batch<float, A> rsqrt(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t one = wasm_f32x4_splat(1.0f);
+            return wasm_f32x4_div(one, wasm_f32x4_sqrt(self));
+        }
+        template <class A>
+        inline batch<double, A> rsqrt(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t one = wasm_f64x2_splat(1.0);
+            return wasm_f64x2_div(one, wasm_f64x2_sqrt(self));
+        }
+
         // select
         template <class A>
         inline batch<float, A> select(batch_bool<float, A> const& cond, batch<float, A> const& true_br, batch<float, A> const& false_br, requires_arch<wasm>) noexcept
         {
-            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(cond, false_br));
+            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(false_br, cond));
         }
 
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<wasm>) noexcept
         {
-            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(cond, false_br));
+            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(false_br, cond));
         }
         template <class A, class T, bool... Values, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<wasm>) noexcept
@@ -391,7 +890,7 @@ namespace xsimd
         template <class A>
         inline batch<double, A> select(batch_bool<double, A> const& cond, batch<double, A> const& true_br, batch<double, A> const& false_br, requires_arch<wasm>) noexcept
         {
-            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(cond, false_br));
+            return wasm_v128_or(wasm_v128_and(cond, true_br), wasm_v128_andnot(false_br, cond));
         }
 
         // set
@@ -437,6 +936,20 @@ namespace xsimd
         inline batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<wasm>, Values... values) noexcept
         {
             return set(batch<T, A>(), A {}, static_cast<T>(values ? -1LL : 0LL)...).data;
+        }
+
+        template <class A, class... Values>
+        inline batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<wasm>, Values... values) noexcept
+        {
+            static_assert(sizeof...(Values) == batch_bool<float, A>::size, "consistent init");
+            return set(batch<int32_t, A>(), A {}, static_cast<int32_t>(values ? -1LL : 0LL)...).data;
+        }
+
+        template <class A, class... Values>
+        inline batch_bool<double, A> set(batch_bool<double, A> const&, requires_arch<wasm>, Values... values) noexcept
+        {
+            static_assert(sizeof...(Values) == batch_bool<double, A>::size, "consistent init");
+            return set(batch<int64_t, A>(), A {}, static_cast<int64_t>(values ? -1LL : 0LL)...).data;
         }
 
         // store_aligned
@@ -534,6 +1047,18 @@ namespace xsimd
         inline batch<double, A> sqrt(batch<double, A> const& val, requires_arch<wasm>) noexcept
         {
             return wasm_f64x2_sqrt(val);
+        }
+
+        // trunc
+        template <class A>
+        inline batch<float, A> trunc(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_trunc(self);
+        }
+        template <class A>
+        inline batch<double, A> trunc(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_trunc(self);
         }
     }
 }
