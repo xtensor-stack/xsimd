@@ -1158,7 +1158,7 @@ namespace xsimd
         template <class A>
         inline batch_bool<float, A> neq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_cmpneq_ps(self, other);
+            return _mm_xor_ps(self, other);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<sse2>) noexcept
@@ -1174,7 +1174,7 @@ namespace xsimd
         template <class A>
         inline batch_bool<double, A> neq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<sse2>) noexcept
         {
-            return _mm_cmpneq_pd(self, other);
+            return _mm_xor_pd(self, other);
         }
 
         // reciprocal
