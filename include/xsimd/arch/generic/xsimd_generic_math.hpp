@@ -1855,7 +1855,7 @@ namespace xsimd
         {
             using U = as_integer_t<float>;
             return kernel::detail::apply_transform<U>([](float x) noexcept -> U
-                                                      { return std::lroundf(x); },
+                                                      { return std::nearbyintf(x); },
                                                       self);
         }
 
@@ -1865,7 +1865,7 @@ namespace xsimd
         {
             using U = as_integer_t<double>;
             return kernel::detail::apply_transform<U>([](double x) noexcept -> U
-                                                      { return std::llround(x); },
+                                                      { return std::nearbyint(x); },
                                                       self);
         }
 

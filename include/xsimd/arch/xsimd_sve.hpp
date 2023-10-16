@@ -1124,14 +1124,14 @@ namespace xsimd
         template <class A>
         inline batch<int32_t, A> nearbyint_as_int(batch<float, A> const& arg, requires_arch<sve>) noexcept
         {
-            const auto nearest = svrinta_x(detail::sve_ptrue<float>(), arg);
+            const auto nearest = svrintx_x(detail::sve_ptrue<float>(), arg);
             return svcvt_s32_x(detail::sve_ptrue<float>(), nearest);
         }
 
         template <class A>
         inline batch<int64_t, A> nearbyint_as_int(batch<double, A> const& arg, requires_arch<sve>) noexcept
         {
-            const auto nearest = svrinta_x(detail::sve_ptrue<double>(), arg);
+            const auto nearest = svrintx_x(detail::sve_ptrue<double>(), arg);
             return svcvt_s64_x(detail::sve_ptrue<double>(), nearest);
         }
 

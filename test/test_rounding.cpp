@@ -14,19 +14,6 @@
 
 #include "test_utils.hpp"
 
-namespace detail
-{
-    inline xsimd::as_integer_t<float> nearbyint_as_int(float a)
-    {
-        return std::lroundf(a);
-    }
-
-    inline xsimd::as_integer_t<double> nearbyint_as_int(double a)
-    {
-        return std::llround(a);
-    }
-}
-
 template <class B>
 struct rounding_test
 {
@@ -163,7 +150,7 @@ struct rounding_test
             std::array<int_value_type, nb_input> res;
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
-                           { return detail::nearbyint_as_int(v); });
+                           { return xsimd::nearbyint_as_int(v); });
             batch_type in;
             int_batch_type out;
             for (size_t i = 0; i < nb_batches; i += size)
@@ -174,7 +161,7 @@ struct rounding_test
             }
             for (size_t i = nb_batches; i < nb_input; ++i)
             {
-                res[i] = detail::nearbyint_as_int(input[i]);
+                res[i] = xsimd::nearbyint_as_int(input[i]);
             }
             size_t diff = detail::get_nb_diff(res, expected);
             INFO("nearbyint_as_int");
