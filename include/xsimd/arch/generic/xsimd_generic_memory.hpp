@@ -419,12 +419,29 @@ namespace xsimd
                 return select(batch_bool_constant<batch<T, A>, (Indices < bsize)...>(), x, y);
             }
 
+#if defined(__has_builtin)
+#if __has_builtin(__builtin_shuffle_vector)
+#define builtin_shuffle __builtin_shuffle_vector
+#endif
+#endif
+
+#if defined(builtin_shuffle)
+            return builtin_shuffle(x.data, y.data, Indices...);
+
+// FIXME: my experiments show that GCC only correctly optimizes this builtin
+// starting at GCC 13, where it already has __builtin_shuffle_vector
+//
+// #elif __has_builtin(__builtin_shuffle) || GCC >= 6
+//            typedef ITy integer_vector_type __attribute__((vector_size(sizeof(batch<ITy, A>))));
+//            return __builtin_shuffle(x.data, y.data, integer_vector_type{Indices...});
+#else
             // Use a generic_pattern. It is suboptimal but clang optimizes this
             // pretty well.
             batch<T, A> x_lane = swizzle(x, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? (Indices - bsize) : Indices)...>());
             batch<T, A> y_lane = swizzle(y, batch_constant<batch<ITy, A>, ((Indices >= bsize) ? (Indices - bsize) : Indices)...>());
             batch_bool_constant<batch<T, A>, (Indices < bsize)...> select_x_lane;
             return select(select_x_lane, x_lane, y_lane);
+#endif
         }
 
         // store
