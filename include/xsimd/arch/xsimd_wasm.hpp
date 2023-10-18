@@ -181,7 +181,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                return wasm_v128_and(wasm_i8x16_splat(0xFF << other), wasm_i32x4_shl(self, other));
+                return wasm_i8x16_shl(self, other);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
@@ -234,7 +234,7 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                    return wasm_v128_and(wasm_i8x16_splat(0xFF >> other), wasm_u32x4_shr(self, other));
+                    return wasm_u8x16_shr(self, other);
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
@@ -428,6 +428,102 @@ namespace xsimd
             return wasm_f64x2_floor(self);
         }
 
+        // from_mask
+        template <class A>
+        inline batch_bool<float, A> from_mask(batch_bool<float, A> const&, uint64_t mask, requires_arch<wasm>) noexcept
+        {
+            alignas(A::alignment()) static const uint32_t lut[][4] = {
+                { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+                { 0xFFFFFFFF, 0x00000000, 0x00000000, 0x00000000 },
+                { 0x00000000, 0xFFFFFFFF, 0x00000000, 0x00000000 },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0x00000000 },
+                { 0x00000000, 0x00000000, 0xFFFFFFFF, 0x00000000 },
+                { 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000 },
+                { 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 },
+                { 0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0x00000000, 0x00000000, 0xFFFFFFFF },
+                { 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF },
+                { 0x00000000, 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF },
+                { 0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF },
+                { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF },
+            };
+            assert(!(mask & ~0xFul) && "inbound mask");
+            return wasm_v128_load((const v128_t*)lut[mask]);
+        }
+        template <class A>
+        inline batch_bool<double, A> from_mask(batch_bool<double, A> const&, uint64_t mask, requires_arch<wasm>) noexcept
+        {
+            alignas(A::alignment()) static const uint64_t lut[][4] = {
+                { 0x0000000000000000ul, 0x0000000000000000ul },
+                { 0xFFFFFFFFFFFFFFFFul, 0x0000000000000000ul },
+                { 0x0000000000000000ul, 0xFFFFFFFFFFFFFFFFul },
+                { 0xFFFFFFFFFFFFFFFFul, 0xFFFFFFFFFFFFFFFFul },
+            };
+            assert(!(mask & ~0x3ul) && "inbound mask");
+            return wasm_v128_load((const v128_t*)lut[mask]);
+        }
+        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<wasm>) noexcept
+        {
+            alignas(A::alignment()) static const uint64_t lut64[] = {
+                0x0000000000000000,
+                0x000000000000FFFF,
+                0x00000000FFFF0000,
+                0x00000000FFFFFFFF,
+                0x0000FFFF00000000,
+                0x0000FFFF0000FFFF,
+                0x0000FFFFFFFF0000,
+                0x0000FFFFFFFFFFFF,
+                0xFFFF000000000000,
+                0xFFFF00000000FFFF,
+                0xFFFF0000FFFF0000,
+                0xFFFF0000FFFFFFFF,
+                0xFFFFFFFF00000000,
+                0xFFFFFFFF0000FFFF,
+                0xFFFFFFFFFFFF0000,
+                0xFFFFFFFFFFFFFFFF,
+            };
+            alignas(A::alignment()) static const uint32_t lut32[] = {
+                0x00000000,
+                0x000000FF,
+                0x0000FF00,
+                0x0000FFFF,
+                0x00FF0000,
+                0x00FF00FF,
+                0x00FFFF00,
+                0x00FFFFFF,
+                0xFF000000,
+                0xFF0000FF,
+                0xFF00FF00,
+                0xFF00FFFF,
+                0xFFFF0000,
+                0xFFFF00FF,
+                0xFFFFFF00,
+                0xFFFFFFFF,
+            };
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                assert(!(mask & ~0xFFFF) && "inbound mask");
+                return wasm_i32x4_make(lut32[mask & 0xF], lut32[(mask >> 4) & 0xF], lut32[(mask >> 8) & 0xF], lut32[mask >> 12]);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                assert(!(mask & ~0xFF) && "inbound mask");
+                return wasm_i64x2_make(lut64[mask >> 4], lut64[mask & 0xF]);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return from_mask(batch_bool<float, A> {}, mask, wasm {});
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return from_mask(batch_bool<double, A> {}, mask, wasm {});
+            }
+        }
+
         // ge
         template <class A>
         inline batch_bool<float, A> ge(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
@@ -467,6 +563,11 @@ namespace xsimd
                 {
                     return wasm_i64x2_gt(self, other);
                 }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return {};
+                }
             }
             else
             {
@@ -493,6 +594,27 @@ namespace xsimd
         inline batch_bool<double, A> gt(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_f64x2_gt(self, other);
+        }
+
+        // haddp
+        template <class A>
+        inline batch<float, A> haddp(batch<float, A> const* row, requires_arch<wasm>) noexcept
+        {
+            v128_t tmp0 = wasm_i32x4_shuffle(row[0], row[1], 0, 4, 1, 5);
+            v128_t tmp1 = wasm_i32x4_shuffle(row[0], row[1], 2, 6, 3, 7);
+            v128_t tmp2 = wasm_i32x4_shuffle(row[2], row[3], 2, 6, 3, 7);
+            tmp0 = wasm_f32x4_add(tmp0, tmp1);
+            tmp1 = wasm_i32x4_shuffle(row[2], row[3], 0, 4, 1, 5);
+            tmp1 = wasm_f32x4_add(tmp1, tmp2);
+            tmp2 = wasm_i32x4_shuffle(tmp1, tmp0, 6, 7, 2, 3);
+            tmp0 = wasm_i32x4_shuffle(tmp0, tmp1, 0, 1, 4, 5);
+            return wasm_f32x4_add(tmp0, tmp2);
+        }
+        template <class A>
+        inline batch<double, A> haddp(batch<double, A> const* row, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_add(wasm_i64x2_shuffle(row[0], row[1], 0, 2),
+                                  wasm_i64x2_shuffle(row[0], row[1], 1, 3));
         }
 
         // insert
@@ -588,20 +710,32 @@ namespace xsimd
         template <class A>
         inline batch<float, A> load_aligned(float const* mem, convert<float>, requires_arch<wasm>) noexcept
         {
-            // Assuming that mem is aligned properly, you can use wasm_v128_load to load the mem.
             return wasm_v128_load(mem);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<wasm>) noexcept
         {
-            // Assuming that mem is aligned properly, you can use wasm_v128_load to load the mem.
             return wasm_v128_load((v128_t const*)mem);
         }
         template <class A>
         inline batch<double, A> load_aligned(double const* mem, convert<double>, requires_arch<wasm>) noexcept
         {
-            // Assuming that mem is aligned properly, you can use wasm_v128_load to load the mem.
             return wasm_v128_load(mem);
+        }
+
+        // load_complex
+        namespace detail
+        {
+            template <class A>
+            inline batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<wasm>) noexcept
+            {
+                return { wasm_i32x4_shuffle(hi, lo, 0, 2, 4, 6), wasm_i32x4_shuffle(hi, lo, 1, 3, 5, 7) };
+            }
+            template <class A>
+            inline batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<wasm>) noexcept
+            {
+                return { wasm_i64x2_shuffle(hi, lo, 0, 2), wasm_i64x2_shuffle(hi, lo, 1, 3) };
+            }
         }
 
         // load_unaligned
@@ -670,7 +804,15 @@ namespace xsimd
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
-                    return lt(self, other, generic {});
+                    auto xself = wasm_v128_xor(self, wasm_i64x2_splat(std::numeric_limits<int64_t>::lowest()));
+                    auto xother = wasm_v128_xor(other, wasm_i64x2_splat(std::numeric_limits<int64_t>::lowest()));
+                    v128_t tmp1 = wasm_i64x2_sub(xself, xother);
+                    v128_t tmp2 = wasm_v128_xor(xself, xother);
+                    v128_t tmp3 = wasm_v128_andnot(xself, xother);
+                    v128_t tmp4 = wasm_v128_andnot(tmp1, tmp2);
+                    v128_t tmp5 = wasm_v128_or(tmp3, tmp4);
+                    v128_t tmp6 = wasm_i32x4_shr(tmp5, 31);
+                    return wasm_i32x4_shuffle(tmp6, wasm_i32x4_splat(0), 1, 1, 3, 3);
                 }
                 else
                 {
@@ -856,6 +998,47 @@ namespace xsimd
             return wasm_f64x2_div(one, self);
         }
 
+        // reduce_add
+        template <class A>
+        inline float reduce_add(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t tmp0 = wasm_f32x4_add(self, wasm_i32x4_shuffle(self, self, 6, 7, 2, 3));
+            v128_t tmp1 = wasm_i32x4_shuffle(tmp0, tmp0, 1, 0, 4, 4);
+            v128_t tmp2 = wasm_f32x4_add(tmp0, tmp1);
+            v128_t tmp3 = wasm_i32x4_shuffle(tmp0, tmp2, 4, 1, 2, 3);
+            return wasm_f32x4_extract_lane(tmp3, 0);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline T reduce_add(batch<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                v128_t tmp0 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 2, 3, 0, 0);
+                v128_t tmp1 = wasm_i32x4_add(self, tmp0);
+                v128_t tmp2 = wasm_i32x4_shuffle(tmp1, wasm_i32x4_splat(0), 1, 0, 0, 0);
+                v128_t tmp3 = wasm_i32x4_add(tmp1, tmp2);
+                return wasm_i32x4_extract_lane(tmp3, 0);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                v128_t tmp0 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 2, 3, 0, 0);
+                v128_t tmp1 = wasm_i64x2_add(self, tmp0);
+                return wasm_i64x2_extract_lane(tmp1, 0);
+            }
+            else
+            {
+                return hadd(self, generic {});
+            }
+        }
+        template <class A>
+        inline double reduce_add(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t tmp0 = wasm_i64x2_shuffle(self, self, 1, 3);
+            v128_t tmp1 = wasm_f64x2_add(self, tmp0);
+            v128_t tmp2 = wasm_i64x2_shuffle(tmp0, tmp1, 2, 1);
+            return wasm_f64x2_extract_lane(tmp2, 0);
+        }
+
         // rsqrt
         template <class A>
         inline batch<float, A> rsqrt(batch<float, A> const& self, requires_arch<wasm>) noexcept
@@ -868,6 +1051,74 @@ namespace xsimd
         {
             v128_t one = wasm_f64x2_splat(1.0);
             return wasm_f64x2_div(one, wasm_f64x2_sqrt(self));
+        }
+
+        // slide_left
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_left(batch<T, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return wasm_i8x16_shuffle(
+                wasm_i64x2_const(0, 0), x, ((N)&0xF0) ? 0 : 16 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 17 - ((N)&0xF), ((N)&0xF0) ? 0 : 18 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 19 - ((N)&0xF), ((N)&0xF0) ? 0 : 20 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 21 - ((N)&0xF), ((N)&0xF0) ? 0 : 22 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 23 - ((N)&0xF), ((N)&0xF0) ? 0 : 24 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 25 - ((N)&0xF), ((N)&0xF0) ? 0 : 26 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 27 - ((N)&0xF), ((N)&0xF0) ? 0 : 28 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 29 - ((N)&0xF), ((N)&0xF0) ? 0 : 30 - ((N)&0xF),
+                ((N)&0xF0) ? 0 : 31 - ((N)&0xF));
+        }
+
+        // slide_right
+        template <size_t N, class A, class T>
+        inline batch<T, A> slide_right(batch<T, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return wasm_i8x16_shuffle(
+                x, wasm_i64x2_const(0, 0), ((N)&0xF0) ? 16 : ((N)&0xF) + 0,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 1, ((N)&0xF0) ? 16 : ((N)&0xF) + 2,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 3, ((N)&0xF0) ? 16 : ((N)&0xF) + 4,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 5, ((N)&0xF0) ? 16 : ((N)&0xF) + 6,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 7, ((N)&0xF0) ? 16 : ((N)&0xF) + 8,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 9, ((N)&0xF0) ? 16 : ((N)&0xF) + 10,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 11, ((N)&0xF0) ? 16 : ((N)&0xF) + 12,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 13, ((N)&0xF0) ? 16 : ((N)&0xF) + 14,
+                ((N)&0xF0) ? 16 : ((N)&0xF) + 15);
+        }
+
+        // sadd
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            if (std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_i8x16_add_sat(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_i16x8_add_sat(self, other);
+                }
+                else
+                {
+                    return sadd(self, other, generic {});
+                }
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_u8x16_add_sat(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_u16x8_add_sat(self, other);
+                }
+                else
+                {
+                    return sadd(self, other, generic {});
+                }
+            }
         }
 
         // select
@@ -952,6 +1203,42 @@ namespace xsimd
             return set(batch<int64_t, A>(), A {}, static_cast<int64_t>(values ? -1LL : 0LL)...).data;
         }
 
+        // ssub
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            if (std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_i8x16_sub_sat(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_i16x8_sub_sat(self, other);
+                }
+                else
+                {
+                    return ssub(self, other, generic {});
+                }
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    return wasm_u8x16_sub_sat(self, other);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return wasm_u16x8_sub_sat(self, other);
+                }
+                else
+                {
+                    return ssub(self, other, generic {});
+                }
+            }
+        }
+
         // store_aligned
         template <class A>
         inline void store_aligned(float* mem, batch<float, A> const& self, requires_arch<wasm>) noexcept
@@ -976,6 +1263,33 @@ namespace xsimd
         {
             // Assuming that mem is aligned properly, you can use wasm_v128_store to store the batch.
             return wasm_v128_store(mem, self);
+        }
+
+        // store_complex
+        namespace detail
+        {
+            // complex_low
+            template <class A>
+            inline batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires_arch<wasm>) noexcept
+            {
+                return wasm_i32x4_shuffle(self.real(), self.imag(), 0, 4, 1, 5);
+            }
+            // complex_high
+            template <class A>
+            inline batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires_arch<wasm>) noexcept
+            {
+                return wasm_i32x4_shuffle(self.real(), self.imag(), 2, 6, 3, 7);
+            }
+            template <class A>
+            inline batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<wasm>) noexcept
+            {
+                return wasm_i64x2_shuffle(self.real(), self.imag(), 0, 2);
+            }
+            template <class A>
+            inline batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<wasm>) noexcept
+            {
+                return wasm_i64x2_shuffle(self.real(), self.imag(), 1, 3);
+            }
         }
 
         // store_unaligned
@@ -1059,6 +1373,80 @@ namespace xsimd
         inline batch<double, A> trunc(batch<double, A> const& self, requires_arch<wasm>) noexcept
         {
             return wasm_f64x2_trunc(self);
+        }
+
+        // zip_hi
+        template <class A>
+        inline batch<float, A> zip_hi(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_i32x4_shuffle(self, other, 2, 6, 3, 7);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_shuffle(self, other, 8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_shuffle(self, other, 4, 12, 5, 13, 6, 14, 7, 15);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_shuffle(self, other, 2, 6, 3, 7);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_shuffle(self, other, 1, 3);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A>
+        inline batch<double, A> zip_hi(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_i64x2_shuffle(self, other, 1, 3);
+        }
+
+        // zip_lo
+        template <class A>
+        inline batch<float, A> zip_lo(batch<float, A> const& self, batch<float, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_i32x4_shuffle(self, other, 0, 4, 1, 5);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_shuffle(self, other, 0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_shuffle(self, other, 0, 8, 1, 9, 2, 10, 3, 11);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_shuffle(self, other, 0, 4, 1, 5);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_shuffle(self, other, 0, 2);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A>
+        inline batch<double, A> zip_lo(batch<double, A> const& self, batch<double, A> const& other, requires_arch<wasm>) noexcept
+        {
+            return wasm_i64x2_shuffle(self, other, 0, 2);
         }
     }
 }
