@@ -649,6 +649,21 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_logical
+     *
+     * Element-wise equality comparison of batches of boolean values \c x and \c y.
+     * @param x batch of booleans involved in the comparison.
+     * @param y batch of booleans involved in the comparison.
+     * @return a boolean batch.
+     */
+    template <class T, class A>
+    inline auto eq(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept -> decltype(x == y)
+    {
+        detail::static_check_supported_config<T, A>();
+        return x == y;
+    }
+
+    /**
      * @ingroup batch_math
      *
      * Computes the natural exponential of the batch \c x.
@@ -1516,6 +1531,21 @@ namespace xsimd
      */
     template <class T, class A>
     inline auto neq(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x != y)
+    {
+        detail::static_check_supported_config<T, A>();
+        return x != y;
+    }
+
+    /**
+     * @ingroup batch_logical
+     *
+     * Element-wise inequality comparison of batches of boolean values \c x and \c y.
+     * @param x batch of booleans involved in the comparison.
+     * @param y batch of booleans involved in the comparison.
+     * @return a boolean batch.
+     */
+    template <class T, class A>
+    inline auto neq(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept -> decltype(x != y)
     {
         detail::static_check_supported_config<T, A>();
         return x != y;

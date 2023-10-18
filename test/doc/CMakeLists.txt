@@ -3,6 +3,11 @@
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND NOT CMAKE_OSX_ARCHITECTURES)
 
+if(ENABLE_XTL_COMPLEX)
+  add_compile_definitions(XSIMD_ENABLE_XTL_COMPLEX=1)
+  include_directories(${xtl_INCLUDE_DIRS})
+endif()
+
 add_library(test_doc_any_arch OBJECT
             explicit_use_of_an_instruction_set_mean_aligned.cpp
             explicit_use_of_an_instruction_set_mean_arch_independent.cpp

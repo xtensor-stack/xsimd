@@ -974,8 +974,12 @@ namespace xsimd
         template <class A, class T>
         inline batch<std::complex<T>, A> polar(const batch<T, A>& r, const batch<T, A>& theta, requires_arch<generic>) noexcept
         {
+#ifndef EMSCRIPTEN
             auto sincosTheta = sincos(theta);
             return { r * sincosTheta.second, r * sincosTheta.first };
+#else
+            return { r * cos(theta), r * sin(theta) };
+#endif
         }
 
         // fdim
@@ -1851,7 +1855,7 @@ namespace xsimd
         {
             using U = as_integer_t<float>;
             return kernel::detail::apply_transform<U>([](float x) noexcept -> U
-                                                      { return std::lroundf(x); },
+                                                      { return std::nearbyintf(x); },
                                                       self);
         }
 
@@ -1861,7 +1865,7 @@ namespace xsimd
         {
             using U = as_integer_t<double>;
             return kernel::detail::apply_transform<U>([](double x) noexcept -> U
-                                                      { return std::llround(x); },
+                                                      { return std::nearbyint(x); },
                                                       self);
         }
 

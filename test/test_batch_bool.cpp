@@ -440,6 +440,21 @@ struct batch_bool_test
         CHECK_EQ(batch_bool_type::from_mask(bool_g.interspersed.mask()).mask(), bool_g.interspersed.mask());
     }
 
+    void test_comparison() const
+    {
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
+        // eq
+        {
+            bool res = xsimd::all(xsimd::eq(bool_g.half, !bool_g.ihalf));
+            CHECK_UNARY(res);
+        }
+        // neq
+        {
+            bool res = xsimd::all(xsimd::neq(bool_g.half, bool_g.ihalf));
+            CHECK_UNARY(res);
+        }
+    }
+
 private:
     batch_type batch_lhs() const
     {
@@ -469,5 +484,7 @@ TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
     SUBCASE("update operations") { Test.test_update_operations(); }
 
     SUBCASE("mask") { Test.test_mask(); }
+
+    SUBCASE("eq neq") { Test.test_comparison(); }
 }
 #endif

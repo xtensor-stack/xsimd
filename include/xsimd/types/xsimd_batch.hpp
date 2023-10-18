@@ -531,7 +531,7 @@ namespace xsimd
 
     /**
      * Converts a \c bool_batch to a \c batch where each element is
-     * set to 0xFF..FF (resp. 0x00..00) if the corresponding element is `true`
+     * set to 1 (resp. 0) if the corresponding element is `true`
      * (resp. `false`).
      */
     template <class T, class A>

@@ -11,7 +11,7 @@ Assume that we have a simple function that computes the mean of two vectors, som
 
 .. literalinclude:: ../../test/doc/writing_vectorized_code.cpp
 
-How can we used `xsimd` to take advantage of vectorization?
+How can we use `xsimd` to take advantage of vectorization?
 
 Explicit use of an instruction set
 ----------------------------------

@@ -104,7 +104,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcpu=${TARGET_ARCH} -mtune=${TARGET_ARCH}")
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "riscv64")
         # Nothing specific
-    elseif(NOT WIN32)
+    elseif(NOT WIN32 AND NOT EMSCRIPTEN)
         if(NOT CMAKE_CXX_FLAGS MATCHES "-march" AND NOT CMAKE_CXX_FLAGS MATCHES "-arch" AND NOT CMAKE_OSX_ARCHITECTURES)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH}")
         endif()
@@ -191,8 +191,10 @@ else()
 endif()
 
 if(ENABLE_XTL_COMPLEX)
+  add_compile_definitions(XSIMD_ENABLE_XTL_COMPLEX=1)
   target_include_directories(test_xsimd PRIVATE ${xtl_INCLUDE_DIRS})
 endif()
+
 add_test(NAME test_xsimd COMMAND test_xsimd)
 
 if (CROSS_COMPILE_ARM)
@@ -207,3 +209,11 @@ endif()
 
 add_subdirectory(doc)
 
+if(EMSCRIPTEN)
+    set_target_properties(test_xsimd PROPERTIES LINK_FLAGS "-s MODULARIZE=1 -s EXPORT_NAME=test_xsimd_wasm -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -lembind")
+    target_compile_options(test_xsimd
+        PUBLIC --std=c++14
+        PUBLIC "SHELL: -msimd128"
+        PUBLIC "SHELL: -msse2"
+    )
+endif()

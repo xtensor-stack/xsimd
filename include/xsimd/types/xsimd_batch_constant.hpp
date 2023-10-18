@@ -28,6 +28,8 @@ namespace xsimd
     template <class batch_type, bool... Values>
     struct batch_bool_constant
     {
+
+    public:
         static constexpr std::size_t size = sizeof...(Values);
         using arch_type = typename batch_type::arch_type;
         using value_type = bool;
@@ -47,10 +49,66 @@ namespace xsimd
 
     private:
         static constexpr int mask_helper(int acc) noexcept { return acc; }
+
         template <class... Tys>
         static constexpr int mask_helper(int acc, int mask, Tys... masks) noexcept
         {
             return mask_helper(acc | mask, (masks << 1)...);
+        }
+
+        struct logical_or
+        {
+            constexpr bool operator()(bool x, bool y) const { return x || y; }
+        };
+        struct logical_and
+        {
+            constexpr bool operator()(bool x, bool y) const { return x && y; }
+        };
+        struct logical_xor
+        {
+            constexpr bool operator()(bool x, bool y) const { return x ^ y; }
+        };
+
+        template <class F, class SelfPack, class OtherPack, size_t... Indices>
+        static constexpr batch_bool_constant<batch_type, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
+        apply(detail::index_sequence<Indices...>)
+        {
+            return {};
+        }
+
+        template <class F, bool... OtherValues>
+        static constexpr auto apply(batch_bool_constant<batch_type, Values...>, batch_bool_constant<batch_type, OtherValues...>)
+            -> decltype(apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
+        {
+            static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
+            return apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>());
+        }
+
+    public:
+#define MAKE_BINARY_OP(OP, NAME)                                                            \
+    template <bool... OtherValues>                                                          \
+    constexpr auto operator OP(batch_bool_constant<batch_type, OtherValues...> other) const \
+        ->decltype(apply<NAME>(*this, other))                                               \
+    {                                                                                       \
+        return apply<NAME>(*this, other);                                                   \
+    }
+
+        MAKE_BINARY_OP(|, logical_or)
+        MAKE_BINARY_OP(||, logical_or)
+        MAKE_BINARY_OP(&, logical_and)
+        MAKE_BINARY_OP(&&, logical_and)
+        MAKE_BINARY_OP(^, logical_xor)
+
+#undef MAKE_BINARY_OP
+
+        constexpr batch_bool_constant<batch_type, !Values...> operator!() const
+        {
+            return {};
+        }
+
+        constexpr batch_bool_constant<batch_type, !Values...> operator~() const
+        {
+            return {};
         }
     };
 
@@ -87,6 +145,89 @@ namespace xsimd
         constexpr value_type get(size_t i, std::array<value_type, size> const& values) const noexcept
         {
             return values[i];
+        }
+
+        struct arithmetic_add
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x + y; }
+        };
+        struct arithmetic_sub
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x - y; }
+        };
+        struct arithmetic_mul
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x * y; }
+        };
+        struct arithmetic_div
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x / y; }
+        };
+        struct arithmetic_mod
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x % y; }
+        };
+        struct binary_and
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x & y; }
+        };
+        struct binary_or
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x | y; }
+        };
+        struct binary_xor
+        {
+            constexpr value_type operator()(value_type x, value_type y) const { return x ^ y; }
+        };
+
+        template <class F, class SelfPack, class OtherPack, size_t... Indices>
+        static constexpr batch_constant<batch_type, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
+        apply(detail::index_sequence<Indices...>)
+        {
+            return {};
+        }
+
+        template <class F, value_type... OtherValues>
+        static constexpr auto apply(batch_constant<batch_type, Values...>, batch_constant<batch_type, OtherValues...>)
+            -> decltype(apply<F, std::tuple<std::integral_constant<value_type, Values>...>, std::tuple<std::integral_constant<value_type, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
+        {
+            static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
+            return apply<F, std::tuple<std::integral_constant<value_type, Values>...>, std::tuple<std::integral_constant<value_type, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>());
+        }
+
+    public:
+#define MAKE_BINARY_OP(OP, NAME)                                                       \
+    template <value_type... OtherValues>                                               \
+    constexpr auto operator OP(batch_constant<batch_type, OtherValues...> other) const \
+        ->decltype(apply<NAME>(*this, other))                                          \
+    {                                                                                  \
+        return apply<NAME>(*this, other);                                              \
+    }
+
+        MAKE_BINARY_OP(+, arithmetic_add)
+        MAKE_BINARY_OP(-, arithmetic_sub)
+        MAKE_BINARY_OP(*, arithmetic_mul)
+        MAKE_BINARY_OP(/, arithmetic_div)
+        MAKE_BINARY_OP(%, arithmetic_mod)
+        MAKE_BINARY_OP(&, binary_and)
+        MAKE_BINARY_OP(|, binary_or)
+        MAKE_BINARY_OP(^, binary_xor)
+
+#undef MAKE_BINARY_OP
+
+        constexpr batch_constant<batch_type, (value_type)-Values...> operator-() const
+        {
+            return {};
+        }
+
+        constexpr batch_constant<batch_type, (value_type) + Values...> operator+() const
+        {
+            return {};
+        }
+
+        constexpr batch_constant<batch_type, (value_type)~Values...> operator~() const
+        {
+            return {};
         }
     };
 
