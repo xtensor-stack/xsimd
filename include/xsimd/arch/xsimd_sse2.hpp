@@ -1237,22 +1237,7 @@ namespace xsimd
             batch<T, A> acc3 = min(acc2, step3);
             return acc3.get(0);
         }
-        // TODO: move this in xsimd_generic
-        namespace detail
-        {
-            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-            inline T hadd_default(batch<T, A> const& self, requires_arch<sse2>) noexcept
-            {
-                alignas(A::alignment()) T buffer[batch<T, A>::size];
-                self.store_aligned(buffer);
-                T res = 0;
-                for (T val : buffer)
-                {
-                    res += val;
-                }
-                return res;
-            }
-        }
+
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline T reduce_add(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
@@ -1280,7 +1265,7 @@ namespace xsimd
             }
             else
             {
-                return detail::hadd_default(self, A {});
+                return hadd(self, generic {});
             }
         }
         template <class A>
@@ -1381,28 +1366,6 @@ namespace xsimd
 
         // sadd
 
-        // TODO: move this in xsimd_generic
-        namespace detail
-        {
-            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-            inline batch<T, A> sadd_default(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
-            {
-                if (std::is_signed<T>::value)
-                {
-                    auto mask = (other >> (8 * sizeof(T) - 1));
-                    auto self_pos_branch = min(std::numeric_limits<T>::max() - other, self);
-                    auto self_neg_branch = max(std::numeric_limits<T>::min() - other, self);
-                    return other + select(batch_bool<T, A>(mask.data), self_neg_branch, self_pos_branch);
-                }
-                else
-                {
-                    const auto diffmax = std::numeric_limits<T>::max() - self;
-                    const auto mindiff = min(diffmax, other);
-                    return self + mindiff;
-                }
-            }
-        }
-
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
@@ -1418,7 +1381,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::sadd_default(self, other, A {});
+                    return sadd(self, other, generic {});
                 }
             }
             else
@@ -1433,7 +1396,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::sadd_default(self, other, A {});
+                    return sadd(self, other, generic {});
                 }
             }
         }
@@ -1495,23 +1458,6 @@ namespace xsimd
         }
 
         // ssub
-        // TODO: move this in xsimd_generic
-        namespace detail
-        {
-            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-            inline batch<T, A> ssub_default(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
-            {
-                if (std::is_signed<T>::value)
-                {
-                    return sadd(self, -other);
-                }
-                else
-                {
-                    const auto diff = min(self, other);
-                    return self - diff;
-                }
-            }
-        }
 
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
@@ -1528,7 +1474,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::ssub_default(self, other, A {});
+                    return ssub(self, other, generic {});
                 }
             }
             else
@@ -1543,7 +1489,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::ssub_default(self, other, A {});
+                    return ssub(self, other, generic {});
                 }
             }
         }
