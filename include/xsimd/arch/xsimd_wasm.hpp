@@ -20,9 +20,6 @@
 namespace xsimd
 {
 
-    template <class T_out, class T_in, class A>
-    inline batch<T_out, A> bitwise_cast(batch<T_in, A> const& x) noexcept;
-
     namespace kernel
     {
         using namespace types;
@@ -163,13 +160,6 @@ namespace xsimd
         inline batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
         {
             return wasm_v128_andnot(self, other);
-        }
-
-        // bitwise_cast
-        template <class A, class T, class Tp>
-        inline batch<Tp, A> bitwise_cast(batch<T, A> const& self, batch<Tp, A> const&, requires_arch<wasm>) noexcept
-        {
-            return batch<Tp, A>(self.data);
         }
 
         // bitwise_or
@@ -526,11 +516,11 @@ namespace xsimd
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                return batch_bool<T, A>(from_mask(batch_bool<float, A> {}, mask, wasm {}).data);
+                return from_mask(batch_bool<float, A> {}, mask, wasm {});
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
-                return batch_bool<T, A>(from_mask(batch_bool<double, A> {}, mask, wasm {}).data);
+                return from_mask(batch_bool<double, A> {}, mask, wasm {});
             }
         }
 
@@ -1049,44 +1039,6 @@ namespace xsimd
             return wasm_f64x2_extract_lane(tmp2, 0);
         }
 
-        // reduce_max
-        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
-        inline T reduce_max(batch<T, A> const& self, requires_arch<wasm>) noexcept
-        {
-            batch<T, A> step0 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 2, 3, 0, 0);
-            batch<T, A> acc0 = max(self, step0);
-
-            batch<T, A> step1 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 1, 0, 0, 0);
-            batch<T, A> acc1 = max(acc0, step1);
-
-            batch<T, A> step2 = wasm_i16x8_shuffle(acc1, wasm_i16x8_splat(0), 1, 0, 0, 0, 4, 5, 6, 7);
-            batch<T, A> acc2 = max(acc1, step2);
-            if (sizeof(T) == 2)
-                return acc2.get(0);
-            batch<T, A> step3 = bitwise_cast<T>(bitwise_cast<uint16_t>(acc2) >> 8);
-            batch<T, A> acc3 = max(acc2, step3);
-            return acc3.get(0);
-        }
-
-        // reduce_min
-        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
-        inline T reduce_min(batch<T, A> const& self, requires_arch<wasm>) noexcept
-        {
-            batch<T, A> step0 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 2, 3, 0, 0);
-            batch<T, A> acc0 = min(self, step0);
-
-            batch<T, A> step1 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 1, 0, 0, 0);
-            batch<T, A> acc1 = min(acc0, step1);
-
-            batch<T, A> step2 = wasm_i16x8_shuffle(acc1, wasm_i16x8_splat(0), 1, 0, 0, 0, 4, 5, 6, 7);
-            batch<T, A> acc2 = min(acc1, step2);
-            if (sizeof(T) == 2)
-                return acc2.get(0);
-            batch<T, A> step3 = bitwise_cast<T>(bitwise_cast<uint16_t>(acc2) >> 8);
-            batch<T, A> acc3 = min(acc2, step3);
-            return acc3.get(0);
-        }
-
         // rsqrt
         template <class A>
         inline batch<float, A> rsqrt(batch<float, A> const& self, requires_arch<wasm>) noexcept
@@ -1291,21 +1243,25 @@ namespace xsimd
         template <class A>
         inline void store_aligned(float* mem, batch<float, A> const& self, requires_arch<wasm>) noexcept
         {
+            // Assuming that mem is aligned properly, you can use wasm_v128_store to store the batch.
             return wasm_v128_store(mem, self);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline void store_aligned(T* mem, batch<T, A> const& self, requires_arch<wasm>) noexcept
         {
+            // Assuming that mem is aligned properly, you can use wasm_v128_store to store the batch.
             return wasm_v128_store((v128_t*)mem, self);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline void store_aligned(T* mem, batch_bool<T, A> const& self, requires_arch<wasm>) noexcept
         {
+            // Assuming that mem is aligned properly, you can use wasm_v128_store to store the batch.
             return wasm_v128_store((v128_t*)mem, self);
         }
         template <class A>
         inline void store_aligned(double* mem, batch<double, A> const& self, requires_arch<wasm>) noexcept
         {
+            // Assuming that mem is aligned properly, you can use wasm_v128_store to store the batch.
             return wasm_v128_store(mem, self);
         }
 
@@ -1405,44 +1361,6 @@ namespace xsimd
         inline batch<double, A> sqrt(batch<double, A> const& val, requires_arch<wasm>) noexcept
         {
             return wasm_f64x2_sqrt(val);
-        }
-
-        // swizzle
-
-        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
-        inline batch<float, A> swizzle(batch<float, A> const& self, batch_constant<batch<uint32_t, A>, V0, V1, V2, V3>, requires_arch<wasm>) noexcept
-        {
-            return wasm_i32x4_shuffle(self, self, V0, V1, V2, V3);
-        }
-
-        template <class A, uint64_t V0, uint64_t V1>
-        inline batch<double, A> swizzle(batch<double, A> const& self, batch_constant<batch<uint64_t, A>, V0, V1>, requires_arch<wasm>) noexcept
-        {
-            return wasm_i64x2_shuffle(self, self, V0, V1);
-        }
-
-        template <class A, uint64_t V0, uint64_t V1>
-        inline batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch_constant<batch<uint64_t, A>, V0, V1>, requires_arch<wasm>) noexcept
-        {
-            return wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 2 * V0, 2 * V0 + 1, 2 * V1, 2 * V1 + 1);
-        }
-
-        template <class A, uint64_t V0, uint64_t V1>
-        inline batch<int64_t, A> swizzle(batch<int64_t, A> const& self, batch_constant<batch<uint64_t, A>, V0, V1> mask, requires_arch<wasm>) noexcept
-        {
-            return bitwise_cast<int64_t>(swizzle(bitwise_cast<uint64_t>(self), mask, wasm {}));
-        }
-
-        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
-        inline batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch_constant<batch<uint32_t, A>, V0, V1, V2, V3>, requires_arch<wasm>) noexcept
-        {
-            return wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), V0, V1, V2, V3);
-        }
-
-        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
-        inline batch<int32_t, A> swizzle(batch<int32_t, A> const& self, batch_constant<batch<uint32_t, A>, V0, V1, V2, V3> mask, requires_arch<wasm>) noexcept
-        {
-            return bitwise_cast<int32_t>(swizzle(bitwise_cast<uint32_t>(self), mask, wasm {}));
         }
 
         // trunc
