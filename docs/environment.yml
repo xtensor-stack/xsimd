@@ -5,4 +5,4 @@ channels:
 
 dependencies:
   - breathe
-    #- docutils<0.17
+  - sphinx_rtd_theme
