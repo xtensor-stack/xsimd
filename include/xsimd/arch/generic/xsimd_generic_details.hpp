@@ -197,6 +197,19 @@ namespace xsimd
                 v_hi_flt = cnst65536f * v_hi_flt; /* No rounding                                                            */
                 return v_hi_flt + v_lo_flt; /* Rounding may occur here, mul and add may fuse to fma for haswell and newer   */
             }
+
+            // Provide a generic float -> uint32_t cast only if we have a
+            // non-generic float -> int32_t fast_cast
+            template <class A, class _ = decltype(fast_cast(std::declval<batch<float, A> const&>(), std::declval<batch<int32_t, A> const&>(), A {}))>
+            inline batch<uint32_t, A> fast_cast(batch<float, A> const& v, batch<uint32_t, A> const&, requires_arch<generic>) noexcept
+            {
+                auto is_large = v >= batch<float, A>(1u << 31);
+                auto small = bitwise_cast<float>(batch_cast<int32_t>(v));
+                auto large = bitwise_cast<float>(
+                    batch_cast<int32_t>(v - batch<float, A>(1u << 31))
+                    ^ batch<int32_t, A>(1u << 31));
+                return bitwise_cast<uint32_t>(select(is_large, large, small));
+            }
         }
 
         namespace detail
