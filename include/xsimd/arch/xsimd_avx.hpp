@@ -520,17 +520,6 @@ namespace xsimd
             {
                 return _mm256_cvttps_epi32(self);
             }
-
-            template <class A>
-            inline batch<uint32_t, A> fast_cast(batch<float, A> const& self, batch<uint32_t, A> const&, requires_arch<avx>) noexcept
-            {
-                return _mm256_castps_si256(
-                    _mm256_blendv_ps(_mm256_castsi256_ps(_mm256_cvttps_epi32(self)),
-                                     _mm256_xor_ps(
-                                         _mm256_castsi256_ps(_mm256_cvttps_epi32(_mm256_sub_ps(self, _mm256_set1_ps(1u << 31)))),
-                                         _mm256_castsi256_ps(_mm256_set1_epi32(1u << 31))),
-                                     _mm256_cmp_ps(self, _mm256_set1_ps(1u << 31), _CMP_GE_OQ)));
-            }
         }
 
         // decr_if
