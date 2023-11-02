@@ -117,7 +117,7 @@ jobs:
         cd _build
         cd test
         if [[ '${{ matrix.sys.flags }}' == 'avx512' || '${{ matrix.sys.flags }}' == 'avx512cd' ]]; then
-          ../../sde-external-8.56.0-2020-07-05-lin/sde64 -skx -- ./test_xsimd
+          ../../sde-external-8.69.1-2021-07-18-lin/sde64 -skx -- ./test_xsimd
         else
           ./test_xsimd
         fi
