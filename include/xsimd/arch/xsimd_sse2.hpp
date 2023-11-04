@@ -542,21 +542,6 @@ namespace xsimd
             }
 
             template <class A>
-            inline batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<sse2>) noexcept
-            {
-                // see https://stackoverflow.com/questions/34066228/how-to-perform-uint32-float-conversion-with-sse
-                __m128i msk_lo = _mm_set1_epi32(0xFFFF);
-                __m128 cnst65536f = _mm_set1_ps(65536.0f);
-
-                __m128i v_lo = _mm_and_si128(v, msk_lo); /* extract the 16 lowest significant bits of self                             */
-                __m128i v_hi = _mm_srli_epi32(v, 16); /* 16 most significant bits of v                                                 */
-                __m128 v_lo_flt = _mm_cvtepi32_ps(v_lo); /* No rounding                                                                */
-                __m128 v_hi_flt = _mm_cvtepi32_ps(v_hi); /* No rounding                                                                */
-                v_hi_flt = _mm_mul_ps(cnst65536f, v_hi_flt); /* No rounding                                                            */
-                return _mm_add_ps(v_hi_flt, v_lo_flt); /* Rounding may occur here, mul and add may fuse to fma for haswell and newer   */
-            }
-
-            template <class A>
             inline batch<double, A> fast_cast(batch<uint64_t, A> const& x, batch<double, A> const&, requires_arch<sse2>) noexcept
             {
                 // from https://stackoverflow.com/questions/41144668/how-to-efficiently-perform-double-int64-conversions-with-sse-avx
@@ -588,18 +573,6 @@ namespace xsimd
             {
                 return _mm_cvttps_epi32(self);
             }
-
-            template <class A>
-            inline batch<uint32_t, A> fast_cast(batch<float, A> const& self, batch<uint32_t, A> const&, requires_arch<sse2>) noexcept
-            {
-                __m128 mask = _mm_cmpge_ps(self, _mm_set1_ps(1u << 31));
-                __m128 lhs = _mm_castsi128_ps(_mm_cvttps_epi32(self));
-                __m128 rhs = _mm_castsi128_ps(_mm_xor_si128(
-                    _mm_cvttps_epi32(_mm_sub_ps(self, _mm_set1_ps(1u << 31))),
-                    _mm_set1_epi32(1u << 31)));
-                return _mm_castps_si128(_mm_or_ps(_mm_and_ps(mask, rhs), _mm_andnot_ps(mask, lhs)));
-            }
-
         }
 
         // eq
@@ -1237,22 +1210,7 @@ namespace xsimd
             batch<T, A> acc3 = min(acc2, step3);
             return acc3.get(0);
         }
-        // TODO: move this in xsimd_generic
-        namespace detail
-        {
-            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-            inline T hadd_default(batch<T, A> const& self, requires_arch<sse2>) noexcept
-            {
-                alignas(A::alignment()) T buffer[batch<T, A>::size];
-                self.store_aligned(buffer);
-                T res = 0;
-                for (T val : buffer)
-                {
-                    res += val;
-                }
-                return res;
-            }
-        }
+
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline T reduce_add(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
@@ -1280,7 +1238,7 @@ namespace xsimd
             }
             else
             {
-                return detail::hadd_default(self, A {});
+                return hadd(self, generic {});
             }
         }
         template <class A>
@@ -1381,28 +1339,6 @@ namespace xsimd
 
         // sadd
 
-        // TODO: move this in xsimd_generic
-        namespace detail
-        {
-            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-            inline batch<T, A> sadd_default(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
-            {
-                if (std::is_signed<T>::value)
-                {
-                    auto mask = (other >> (8 * sizeof(T) - 1));
-                    auto self_pos_branch = min(std::numeric_limits<T>::max() - other, self);
-                    auto self_neg_branch = max(std::numeric_limits<T>::min() - other, self);
-                    return other + select(batch_bool<T, A>(mask.data), self_neg_branch, self_pos_branch);
-                }
-                else
-                {
-                    const auto diffmax = std::numeric_limits<T>::max() - self;
-                    const auto mindiff = min(diffmax, other);
-                    return self + mindiff;
-                }
-            }
-        }
-
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
         {
@@ -1418,7 +1354,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::sadd_default(self, other, A {});
+                    return sadd(self, other, generic {});
                 }
             }
             else
@@ -1433,7 +1369,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::sadd_default(self, other, A {});
+                    return sadd(self, other, generic {});
                 }
             }
         }
@@ -1495,23 +1431,6 @@ namespace xsimd
         }
 
         // ssub
-        // TODO: move this in xsimd_generic
-        namespace detail
-        {
-            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-            inline batch<T, A> ssub_default(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
-            {
-                if (std::is_signed<T>::value)
-                {
-                    return sadd(self, -other);
-                }
-                else
-                {
-                    const auto diff = min(self, other);
-                    return self - diff;
-                }
-            }
-        }
 
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         inline batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
@@ -1528,7 +1447,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::ssub_default(self, other, A {});
+                    return ssub(self, other, generic {});
                 }
             }
             else
@@ -1543,7 +1462,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::ssub_default(self, other, A {});
+                    return ssub(self, other, generic {});
                 }
             }
         }

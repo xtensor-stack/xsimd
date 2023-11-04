@@ -180,6 +180,36 @@ namespace xsimd
             {
                 return bitwise_cast<int64_t>(self);
             }
+
+            // Provide a generic uint32_t -> float cast only if we have a
+            // non-generic int32_t -> float fast_cast
+            template <class A, class _ = decltype(fast_cast(std::declval<batch<int32_t, A> const&>(), std::declval<batch<float, A> const&>(), A {}))>
+            inline batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<generic>) noexcept
+            {
+                // see https://stackoverflow.com/questions/34066228/how-to-perform-uint32-float-conversion-with-sse
+                batch<uint32_t, A> msk_lo(0xFFFF);
+                batch<float, A> cnst65536f(65536.0f);
+
+                auto v_lo = batch_cast<int32_t>(v & msk_lo); /* extract the 16 lowest significant bits of self                             */
+                auto v_hi = batch_cast<int32_t>(v >> 16); /* 16 most significant bits of v                                                 */
+                auto v_lo_flt = batch_cast<float>(v_lo); /* No rounding                                                                */
+                auto v_hi_flt = batch_cast<float>(v_hi); /* No rounding                                                                */
+                v_hi_flt = cnst65536f * v_hi_flt; /* No rounding                                                            */
+                return v_hi_flt + v_lo_flt; /* Rounding may occur here, mul and add may fuse to fma for haswell and newer   */
+            }
+
+            // Provide a generic float -> uint32_t cast only if we have a
+            // non-generic float -> int32_t fast_cast
+            template <class A, class _ = decltype(fast_cast(std::declval<batch<float, A> const&>(), std::declval<batch<int32_t, A> const&>(), A {}))>
+            inline batch<uint32_t, A> fast_cast(batch<float, A> const& v, batch<uint32_t, A> const&, requires_arch<generic>) noexcept
+            {
+                auto is_large = v >= batch<float, A>(1u << 31);
+                auto small = bitwise_cast<float>(batch_cast<int32_t>(v));
+                auto large = bitwise_cast<float>(
+                    batch_cast<int32_t>(v - batch<float, A>(1u << 31))
+                    ^ batch<int32_t, A>(1u << 31));
+                return bitwise_cast<uint32_t>(select(is_large, large, small));
+            }
         }
 
         namespace detail
