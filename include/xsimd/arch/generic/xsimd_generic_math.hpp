@@ -974,12 +974,8 @@ namespace xsimd
         template <class A, class T>
         inline batch<std::complex<T>, A> polar(const batch<T, A>& r, const batch<T, A>& theta, requires_arch<generic>) noexcept
         {
-#ifndef EMSCRIPTEN
             auto sincosTheta = sincos(theta);
             return { r * sincosTheta.second, r * sincosTheta.first };
-#else
-            return { r * cos(theta), r * sin(theta) };
-#endif
         }
 
         // fdim
