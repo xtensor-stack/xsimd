@@ -1,0 +1,62 @@
+name: RISC-V RVV cross-compilation build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  LLVM_VERSION: "17"
+  GCC_VERSION: "12"
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    name: 'RISC-V RVV${{ matrix.vector_bits }}'
+    strategy:
+      matrix:
+        vector_bits:
+          - 128
+          - 256
+          - 512
+    steps:
+    - name: Setup GCC
+      run: |
+        sudo apt-get -y -qq update
+        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install gcc-${GCC_VERSION}-riscv64-linux-gnu g++-${GCC_VERSION}-riscv64-linux-gnu
+        sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc /usr/bin/riscv64-linux-gnu-gcc-${GCC_VERSION} 20
+        sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-g++ riscv64-linux-gnu-g++ /usr/bin/riscv64-linux-gnu-g++-${GCC_VERSION} 20
+    - name: Setup LLVM
+      run: |
+        # Install latest LLVM stable
+        curl -o llvm.sh https://apt.llvm.org/llvm.sh
+        chmod u+x llvm.sh
+        sudo ./llvm.sh ${LLVM_VERSION}
+        sudo ln -srf $(which clang-${LLVM_VERSION}) /usr/bin/clang
+        sudo ln -srf $(which clang++-${LLVM_VERSION}) /usr/bin/clang++
+        rm llvm.sh
+    - name: Setup QEMU
+      uses: docker/setup-qemu-action@v3.0.0
+      with:
+        platforms: riscv64
+    - name: Setup Ninja
+      run: |
+        sudo apt-get -y -qq install ninja-build
+    - name: Checkout xsimd
+      uses: actions/checkout@v3
+    - name: Setup
+      run: >
+        cmake -S . -B _build
+        -GNinja
+        -DBUILD_TESTS=ON
+        -DDOWNLOAD_DOCTEST=ON
+        -DCMAKE_BUILD_TYPE=Release
+        -DTARGET_ARCH=generic
+        -DCMAKE_C_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+        -DCMAKE_CXX_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/clang-riscv64-linux-gnu.cmake
+    - name: Build
+      run: cmake --build _build
+    - name: Testing xsimd
+      run: >
+        QEMU_CPU="rv64,zba=true,zbb=true,zbs=true,v=true,vlen=${{ matrix.vector_bits }},elen=64,vext_spec=v1.0"
+        QEMU_LD_PREFIX="/usr/riscv64-linux-gnu"
+        ./test/test_xsimd
+      working-directory: ${{ github.workspace }}/_build
