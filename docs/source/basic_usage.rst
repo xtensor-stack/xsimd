@@ -49,5 +49,5 @@ This example outputs:
 .. warning::
 
    If you allow your compiler to generate AVX2 instructions (e.g. through
-   ``-mavx2``) there is nothing preventing it to optimize the above code to
-   optimize the above code using AVX2 instructions.
+   ``-mavx2``) there is nothing preventing it from optimizing the above code
+   using AVX2 instructions.
