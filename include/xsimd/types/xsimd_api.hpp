@@ -706,6 +706,19 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_data_transfer
+     *
+     * Load contiguous elements from \c x and place them in slots selected by \c
+     * mask, zeroing the other slots
+     */
+    template <class T, class A>
+    inline batch<T, A> expand(batch<T, A> const& x, batch_bool<T, A> const& mask) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::expand<A>(x, mask, A {});
+    }
+
+    /**
      * @ingroup batch_math
      *
      * Computes the natural exponential of the batch \c x, minus one.

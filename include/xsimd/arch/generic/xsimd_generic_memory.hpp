@@ -32,6 +32,23 @@ namespace xsimd
 
         using namespace types;
 
+        // expand
+        template <typename A, typename T>
+        inline batch<T, A>
+        expand(batch<T, A> const& x, batch_bool<T, A> const& mask,
+               kernel::requires_arch<generic>) noexcept
+        {
+            constexpr std::size_t size = batch_bool<T, A>::size;
+            auto bitmask = mask.mask();
+            alignas(A::alignment()) as_unsigned_integer_t<T> swizzle_buffer[size];
+            for (size_t i = 0, j = 0; i < size; ++i)
+            {
+                swizzle_buffer[i] = (bitmask & (1u << i)) ? j++ : 0;
+            }
+            auto swizzle_mask = batch<as_unsigned_integer_t<T>, A>::load_aligned(&swizzle_buffer[0]);
+            return select(mask, swizzle(x, swizzle_mask), batch<T, A>(T(0)));
+        }
+
         // extract_pair
         template <class A, class T>
         inline batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<generic>) noexcept
