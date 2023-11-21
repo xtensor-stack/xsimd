@@ -788,6 +788,38 @@ namespace xsimd
             return register_type(~self.data ^ other.data);
         }
 
+        // expand
+        template <class A>
+        inline batch<float, A> expand(batch<float, A> const& self, batch_bool<float, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_expand_ps(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<double, A> expand(batch<double, A> const& self, batch_bool<double, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_expand_pd(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<int32_t, A> expand(batch<int32_t, A> const& self, batch_bool<int32_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_expand_epi32(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<uint32_t, A> expand(batch<uint32_t, A> const& self, batch_bool<uint32_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_expand_epi32(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<int64_t, A> expand(batch<int64_t, A> const& self, batch_bool<int64_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_expand_epi64(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<uint64_t, A> expand(batch<uint64_t, A> const& self, batch_bool<uint64_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_expand_epi64(mask.mask(), self);
+        }
+
         // floor
         template <class A>
         inline batch<float, A> floor(batch<float, A> const& self, requires_arch<avx512f>) noexcept
