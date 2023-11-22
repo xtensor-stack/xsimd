@@ -40,13 +40,16 @@ namespace xsimd
         {
             constexpr std::size_t size = batch_bool<T, A>::size;
             auto bitmask = mask.mask();
-            alignas(A::alignment()) as_unsigned_integer_t<T> swizzle_buffer[size];
+
+            alignas(A::alignment()) as_unsigned_integer_t<T> x_buffer[size];
+            x.store_aligned(&x_buffer[0]);
+
+            alignas(A::alignment()) as_unsigned_integer_t<T> expand_buffer[size];
             for (size_t i = 0, j = 0; i < size; ++i)
             {
-                swizzle_buffer[i] = (bitmask & (1u << i)) ? j++ : 0;
+                expand_buffer[i] = (bitmask & (1u << i)) ? x_buffer[j++] : 0;
             }
-            auto swizzle_mask = batch<as_unsigned_integer_t<T>, A>::load_aligned(&swizzle_buffer[0]);
-            return select(mask, swizzle(x, swizzle_mask), batch<T, A>(T(0)));
+            return batch<T, A>::load_aligned(expand_buffer);
         }
 
         // extract_pair
