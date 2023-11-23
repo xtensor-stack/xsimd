@@ -95,12 +95,22 @@ namespace xsimd
         template <class A>
         inline batch<float, A> bitofsign(batch<float, A> const& self, requires_arch<generic>) noexcept
         {
+            // Under fast-math, the compiler might replace minus zero by zero
+#ifdef __FAST_MATH__
+            return self & bitwise_cast<float>(batch<uint32_t, A>::broadcast(0x80000000u));
+#else
             return self & constants::minuszero<batch<float, A>>();
+#endif
         }
         template <class A>
         inline batch<double, A> bitofsign(batch<double, A> const& self, requires_arch<generic>) noexcept
         {
+            // Under fast-math, the compiler might replace minus zero by zero
+#ifdef __FAST_MATH__
+            return self & bitwise_cast<double>(batch<uint64_t, A>::broadcast(0x8000000000000000lu));
+#else
             return self & constants::minuszero<batch<double, A>>();
+#endif
         }
 
         // bitwise_cast
