@@ -56,8 +56,7 @@ namespace xsimd
         return bit_cast<double>((uint64_t)DOUBLE);      \
     }
 
-// Under fast-math, GCC might replace minus zero by zero
-// minuszero wouldn't be patched, but this works for signmask
+// Under fast-math, GCC might signmask (minus zero) by zero
 #if defined(__FAST_MATH__) && defined(__GNUC__) && !defined(__clang__)
 #pragma GCC push_options
 #pragma GCC optimize("signed-zeros")
@@ -85,7 +84,6 @@ namespace xsimd
         XSIMD_DEFINE_CONSTANT(minlog2, -127.0f, -1023.)
         XSIMD_DEFINE_CONSTANT(minlog10, -37.89999771118164f, -308.2547155599167)
         XSIMD_DEFINE_CONSTANT(minusinfinity, (-infinity<float>()), (-infinity<double>()))
-        XSIMD_DEFINE_CONSTANT(minuszero, -0.0f, -0.0)
         XSIMD_DEFINE_CONSTANT_HEX(nan, 0xffffffff, 0xffffffffffffffff)
         XSIMD_DEFINE_CONSTANT_HEX(oneosqrteps, 0x453504f3, 0x4190000000000000)
         XSIMD_DEFINE_CONSTANT_HEX(oneotwoeps, 0x4a800000, 0x4320000000000000)
