@@ -56,7 +56,7 @@ namespace xsimd
         return bit_cast<double>((uint64_t)DOUBLE);      \
     }
 
-// Under fast-math, GCC might signmask (minus zero) by zero
+// Under fast-math, GCC might replace signmask (minus zero) by zero
 #if defined(__FAST_MATH__) && defined(__GNUC__) && !defined(__clang__)
 #pragma GCC push_options
 #pragma GCC optimize("signed-zeros")
