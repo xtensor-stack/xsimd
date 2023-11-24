@@ -15,6 +15,7 @@
 #include "../xsimd_scalar.hpp"
 #include "./xsimd_generic_details.hpp"
 #include "./xsimd_generic_trigo.hpp"
+#include "xsimd/arch/xsimd_constants.hpp"
 
 #include <type_traits>
 
@@ -95,22 +96,12 @@ namespace xsimd
         template <class A>
         inline batch<float, A> bitofsign(batch<float, A> const& self, requires_arch<generic>) noexcept
         {
-            // Under fast-math, the compiler might replace minus zero by zero
-#ifdef __FAST_MATH__
-            return self & bitwise_cast<float>(batch<uint32_t, A>::broadcast(0x80000000u));
-#else
-            return self & constants::minuszero<batch<float, A>>();
-#endif
+            return self & constants::signmask<batch<float, A>>();
         }
         template <class A>
         inline batch<double, A> bitofsign(batch<double, A> const& self, requires_arch<generic>) noexcept
         {
-            // Under fast-math, the compiler might replace minus zero by zero
-#ifdef __FAST_MATH__
-            return self & bitwise_cast<double>(batch<uint64_t, A>::broadcast(0x8000000000000000lu));
-#else
-            return self & constants::minuszero<batch<double, A>>();
-#endif
+            return self & constants::signmask<batch<double, A>>();
         }
 
         // bitwise_cast
