@@ -95,12 +95,12 @@ namespace xsimd
         template <class A>
         inline batch<float, A> bitofsign(batch<float, A> const& self, requires_arch<generic>) noexcept
         {
-            return self & constants::minuszero<batch<float, A>>();
+            return self & constants::signmask<batch<float, A>>();
         }
         template <class A>
         inline batch<double, A> bitofsign(batch<double, A> const& self, requires_arch<generic>) noexcept
         {
-            return self & constants::minuszero<batch<double, A>>();
+            return self & constants::signmask<batch<double, A>>();
         }
 
         // bitwise_cast
