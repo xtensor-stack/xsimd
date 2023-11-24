@@ -15,7 +15,6 @@
 #include "../xsimd_scalar.hpp"
 #include "./xsimd_generic_details.hpp"
 #include "./xsimd_generic_trigo.hpp"
-#include "xsimd/arch/xsimd_constants.hpp"
 
 #include <type_traits>
 
