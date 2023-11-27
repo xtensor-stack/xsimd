@@ -46,14 +46,14 @@ namespace xsimd
 
 #if XSIMD_WITH_RVV
 
-#define RVV_JOINT_(a, b, c) a##b##c
-#define RVV_JOINT(a, b, c) RVV_JOINT_(a, b, c)
-#define RVV_JOINT5(a, b, c, d, e) RVV_JOINT(RVV_JOINT(a, b, c), d, e)
+#define XSIMD_RVV_JOINT_(a, b, c) a##b##c
+#define XSIMD_RVV_JOINT(a, b, c) XSIMD_RVV_JOINT_(a, b, c)
+#define XSIMD_RVV_JOINT5(a, b, c, d, e) XSIMD_RVV_JOINT(XSIMD_RVV_JOINT(a, b, c), d, e)
 
-#define RVV_TYPE_i(S, V) RVV_JOINT5(vint, S, m, V, _t)
-#define RVV_TYPE_u(S, V) RVV_JOINT5(vuint, S, m, V, _t)
-#define RVV_TYPE_f(S, V) RVV_JOINT5(vfloat, S, m, V, _t)
-#define RVV_TYPE(T, S, V) RVV_JOINT(RVV_TYPE, _, T)(S, V)
+#define XSIMD_RVV_TYPE_i(S, V) XSIMD_RVV_JOINT5(vint, S, m, V, _t)
+#define XSIMD_RVV_TYPE_u(S, V) XSIMD_RVV_JOINT5(vuint, S, m, V, _t)
+#define XSIMD_RVV_TYPE_f(S, V) XSIMD_RVV_JOINT5(vfloat, S, m, V, _t)
+#define XSIMD_RVV_TYPE(T, S, V) XSIMD_RVV_JOINT(XSIMD_RVV_TYPE, _, T)(S, V)
 
     namespace types
     {
@@ -79,55 +79,55 @@ namespace xsimd
             //    exist -- but always enough to get us to bytes and back.
             //
             template <class T, size_t Width> struct rvv_type_info;
-#define RVV_MAKE_TYPE(scalar, t, s, vmul) \
+#define XSIMD_RVV_MAKE_TYPE(scalar, t, s, vmul) \
             template <> struct rvv_type_info<scalar, rvv_width_m1 * vmul> { \
                 static constexpr size_t width =      rvv_width_m1 * vmul; \
-                using type = RVV_TYPE(t, s, vmul); \
-                using byte_type = RVV_TYPE(u, 8, vmul); \
+                using type = XSIMD_RVV_TYPE(t, s, vmul); \
+                using byte_type = XSIMD_RVV_TYPE(u, 8, vmul); \
                 using fixed_type = type __attribute__((riscv_rvv_vector_bits(width))); \
                 template <class U> \
                 static inline type bitcast(U x) noexcept \
                 { \
-                    const auto words = RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x); \
-                    return RVV_JOINT5(__riscv_vreinterpret_, t, s, m, vmul)(words); \
+                    const auto words = XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x); \
+                    return XSIMD_RVV_JOINT5(__riscv_vreinterpret_, t, s, m, vmul)(words); \
                 } \
                 template <> inline type bitcast<type>(type x) noexcept { return x; } \
                 static inline byte_type as_bytes(type x) noexcept \
                 { \
-                    const auto words = RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x); \
-                    return RVV_JOINT5(__riscv_vreinterpret_, u, 8, m, vmul)(words); \
+                    const auto words = XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x); \
+                    return XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, 8, m, vmul)(words); \
                 } \
             };
 
 #if defined(__riscv_zvfh)
-#define RVV_MAKE_TYPE_zvfh(...) RVV_MAKE_TYPE(__VA_ARGS__)
+#define XSIMD_RVV_MAKE_TYPE_zvfh(...) XSIMD_RVV_MAKE_TYPE(__VA_ARGS__)
 #else
-#define RVV_MAKE_TYPE_zvfh(...)
+#define XSIMD_RVV_MAKE_TYPE_zvfh(...)
 #endif
-#define RVV_MAKE_TYPES(vmul) \
-            RVV_MAKE_TYPE(  int8_t,i, 8, vmul) \
-            RVV_MAKE_TYPE( uint8_t,u, 8, vmul) \
-            RVV_MAKE_TYPE( int16_t,i,16, vmul) \
-            RVV_MAKE_TYPE(uint16_t,u,16, vmul) \
-            RVV_MAKE_TYPE( int32_t,i,32, vmul) \
-            RVV_MAKE_TYPE(uint32_t,u,32, vmul) \
-            RVV_MAKE_TYPE( int64_t,i,64, vmul) \
-            RVV_MAKE_TYPE(uint64_t,u,64, vmul) \
-            RVV_MAKE_TYPE_zvfh(_Float16,f,16, vmul) \
-            RVV_MAKE_TYPE(   float,f,32, vmul) \
-            RVV_MAKE_TYPE(  double,f,64, vmul) \
+#define XSIMD_RVV_MAKE_TYPES(vmul) \
+            XSIMD_RVV_MAKE_TYPE(  int8_t,i, 8, vmul) \
+            XSIMD_RVV_MAKE_TYPE( uint8_t,u, 8, vmul) \
+            XSIMD_RVV_MAKE_TYPE( int16_t,i,16, vmul) \
+            XSIMD_RVV_MAKE_TYPE(uint16_t,u,16, vmul) \
+            XSIMD_RVV_MAKE_TYPE( int32_t,i,32, vmul) \
+            XSIMD_RVV_MAKE_TYPE(uint32_t,u,32, vmul) \
+            XSIMD_RVV_MAKE_TYPE( int64_t,i,64, vmul) \
+            XSIMD_RVV_MAKE_TYPE(uint64_t,u,64, vmul) \
+            XSIMD_RVV_MAKE_TYPE_zvfh(_Float16,f,16, vmul) \
+            XSIMD_RVV_MAKE_TYPE(   float,f,32, vmul) \
+            XSIMD_RVV_MAKE_TYPE(  double,f,64, vmul) \
 
-            RVV_MAKE_TYPES(8)
-            RVV_MAKE_TYPES(4)
-            RVV_MAKE_TYPES(2)
-            RVV_MAKE_TYPES(1)
-#undef RVV_TYPE
-#undef RVV_TYPE_f
-#undef RVV_TYPE_u
-#undef RVV_TYPE_i
-#undef RVV_MAKE_TYPES
-#undef RVV_MAKE_TYPE
-#undef RVV_MAKE_TYPE_zvfh
+            XSIMD_RVV_MAKE_TYPES(8)
+            XSIMD_RVV_MAKE_TYPES(4)
+            XSIMD_RVV_MAKE_TYPES(2)
+            XSIMD_RVV_MAKE_TYPES(1)
+#undef XSIMD_RVV_TYPE
+#undef XSIMD_RVV_TYPE_f
+#undef XSIMD_RVV_TYPE_u
+#undef XSIMD_RVV_TYPE_i
+#undef XSIMD_RVV_MAKE_TYPES
+#undef XSIMD_RVV_MAKE_TYPE
+#undef XSIMD_RVV_MAKE_TYPE_zvfh
 
             // rvv_blob is storage-type abstraction for a vector register.
             template <class T, size_t Width>
@@ -202,7 +202,7 @@ namespace xsimd
             // implicit bit-casting operations between incompatible types, so
             // we add this vacuous flag argument when we're serious:
             //
-            enum rvv_bitcast_flag { RVV_BITCAST };
+            enum rvv_bitcast_flag { XSIMD_RVV_BITCAST };
 
             // the general-purpose vector register type, usable within
             // templates, and supporting arithmetic on partial registers for
@@ -222,7 +222,7 @@ namespace xsimd
                 rvv_reg(register_type x) noexcept { value.set(x); }
                 explicit rvv_reg(byte_type v, rvv_bitcast_flag) { value.set(value.bitcast(v)); }
                 template <class U>
-                explicit rvv_reg(rvv_reg<U, Width> v, rvv_bitcast_flag) : rvv_reg(v.get_bytes(), RVV_BITCAST) {}
+                explicit rvv_reg(rvv_reg<U, Width> v, rvv_bitcast_flag) : rvv_reg(v.get_bytes(), XSIMD_RVV_BITCAST) {}
                 byte_type get_bytes() const noexcept
                 {
                     return blob_type::as_bytes(value.get());
@@ -236,25 +236,25 @@ namespace xsimd
             // similar problems and similar workarounds.
             //
             template <size_t> struct rvv_bool_info;
-#define RVV_MAKE_BOOL_TYPE(i) \
+#define XSIMD_RVV_MAKE_BOOL_TYPE(i) \
             template <> struct rvv_bool_info<i> { \
-                using type = RVV_JOINT(vbool, i, _t); \
+                using type = XSIMD_RVV_JOINT(vbool, i, _t); \
                 template <class T> \
                 static inline type bitcast(T value) noexcept \
-                { return RVV_JOINT(__riscv_vreinterpret_b, i,)(value); } \
+                { return XSIMD_RVV_JOINT(__riscv_vreinterpret_b, i,)(value); } \
                 /*template <> static inline type bitcast(type value) noexcept { return value; }*/ \
             };
-            RVV_MAKE_BOOL_TYPE( 1);
-            RVV_MAKE_BOOL_TYPE( 2);
-            RVV_MAKE_BOOL_TYPE( 4);
-            RVV_MAKE_BOOL_TYPE( 8);
-            RVV_MAKE_BOOL_TYPE(16);
-            RVV_MAKE_BOOL_TYPE(32);
-            RVV_MAKE_BOOL_TYPE(64);
-#undef RVV_MAKE_BOOL_TYPE
-#undef RVV_JOINT5
-#undef RVV_JOINT
-#undef RVV_JOINT_
+            XSIMD_RVV_MAKE_BOOL_TYPE( 1);
+            XSIMD_RVV_MAKE_BOOL_TYPE( 2);
+            XSIMD_RVV_MAKE_BOOL_TYPE( 4);
+            XSIMD_RVV_MAKE_BOOL_TYPE( 8);
+            XSIMD_RVV_MAKE_BOOL_TYPE(16);
+            XSIMD_RVV_MAKE_BOOL_TYPE(32);
+            XSIMD_RVV_MAKE_BOOL_TYPE(64);
+#undef XSIMD_RVV_MAKE_BOOL_TYPE
+#undef XSIMD_RVV_JOINT5
+#undef XSIMD_RVV_JOINT
+#undef XSIMD_RVV_JOINT_
 
             template<class T, size_t Width>
             struct rvv_bool {

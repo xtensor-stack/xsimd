@@ -25,83 +25,74 @@
 //
 // First some logic to paste text together...
 //
-#define RVV_JOIN_(x, y) x##y
-#define RVV_JOIN(x, y) RVV_JOIN_(x, y)
-#define RVV_PREFIX_T(T,S,M, then) RVV_JOIN(T, then)
-#define RVV_PREFIX_S(T,S,M, then) RVV_JOIN(S, then)
-#define RVV_PREFIX_M(T,S,M, then) RVV_JOIN(m##M, then)
-#define   RVV_PREFIX(T,S,M, then) then
+#define XSIMD_RVV_JOIN_(x, y) x##y
+#define XSIMD_RVV_JOIN(x, y) XSIMD_RVV_JOIN_(x, y)
+#define XSIMD_RVV_PREFIX_T(T,S,M, then) XSIMD_RVV_JOIN(T, then)
+#define XSIMD_RVV_PREFIX_S(T,S,M, then) XSIMD_RVV_JOIN(S, then)
+#define XSIMD_RVV_PREFIX_M(T,S,M, then) XSIMD_RVV_JOIN(m##M, then)
+#define   XSIMD_RVV_PREFIX(T,S,M, then) then
 //
-// RVV_IDENTIFIER accepts type, size, and vlmul parameters, and a template for
+// XSIMD_RVV_IDENTIFIER accepts type, size, and vlmul parameters, and a template for
 // the identifier.  The template is a comma-separated list of alternating
-// literal and parameter segments.  Each parameter is appended to RVV_PREFIX to
+// literal and parameter segments.  Each parameter is appended to XSIMD_RVV_PREFIX to
 // form a new macro name which decides which parameter should be inserted.
 // Then a literal segment is inserted after that.  Empty literals are used to
 // join two or more variables together.
 //
-#define RVV_IDENTIFIER9(T,S,M, t, ...) t
-#define RVV_IDENTIFIER8(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER9(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER7(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER8(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER6(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER7(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER5(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER6(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER4(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER5(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER3(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER4(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER2(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER3(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER1(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER2(T,S,M, __VA_ARGS__)))
-#define RVV_IDENTIFIER0(T,S,M, t, p, ...) RVV_JOIN(t, RVV_PREFIX##p(T,S,M, RVV_IDENTIFIER1(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER9(T,S,M, t, ...) t
+#define XSIMD_RVV_IDENTIFIER8(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER9(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER7(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER8(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER6(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER7(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER5(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER6(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER4(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER5(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER3(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER4(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER2(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER3(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER1(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER2(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER0(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER1(T,S,M, __VA_ARGS__)))
 //
 // UNBRACKET and REPARSE force the preprocessor to handle expansion in a
-// specific order.  RVV_UNBRACKET strips the parentheses from the template
+// specific order.  XSIMD_RVV_UNBRACKET strips the parentheses from the template
 // (which were necessary to keep the template as a single, named macro
-// parameter up to this point).  RVV_ARG_LIST then forms the new parameter list
-// to pass to RVV_IDENTIFIER0, with trailing commas to ensure the unrolled
-// RVV_IDENTIFIER loop runs to completion adding empty strings.
+// parameter up to this point).  XSIMD_RVV_ARG_LIST then forms the new parameter list
+// to pass to XSIMD_RVV_IDENTIFIER0, with trailing commas to ensure the unrolled
+// XSIMD_RVV_IDENTIFIER loop runs to completion adding empty strings.
 //
-// However RVV_IDENTIFIER0 is not expanded immediately because it does not
-// match a function-like macro in this pass.  RVV_REPARSE forces another
-// evaluation after the expansion of RVV_ARG_LIST, where RVV_IDENTIFIER0 will
+// However XSIMD_RVV_IDENTIFIER0 is not expanded immediately because it does not
+// match a function-like macro in this pass.  XSIMD_RVV_REPARSE forces another
+// evaluation after the expansion of XSIMD_RVV_ARG_LIST, where XSIMD_RVV_IDENTIFIER0 will
 // now match as a function-like macro, and the cycle of substitutions and
 // insertions can begin.
 //
-#define RVV_REPARSE(v) (v)
-#define RVV_UNBRACKET(...) __VA_ARGS__
-#define RVV_ARG_LIST(T,S,M, name) (T,S,M, RVV_UNBRACKET name,,,,,,,,,,,,,,,,,,,,,)
-#define RVV_IDENTIFIER(T,S,M, name) RVV_REPARSE(RVV_IDENTIFIER0 RVV_ARG_LIST(T,S,M, name))
+#define XSIMD_RVV_REPARSE(v) (v)
+#define XSIMD_RVV_UNBRACKET(...) __VA_ARGS__
+#define XSIMD_RVV_ARG_LIST(T,S,M, name) (T,S,M, XSIMD_RVV_UNBRACKET name,,,,,,,,,,,,,,,,,,,,,)
+#define XSIMD_RVV_IDENTIFIER(T,S,M, name) XSIMD_RVV_REPARSE(XSIMD_RVV_IDENTIFIER0 XSIMD_RVV_ARG_LIST(T,S,M, name))
 //
 // To avoid comma-counting bugs, replace the variable references with macros
 // which include enough commas to keep proper phase, and then use no commas at
 // all in the templates.
 //
-#define RVV_T ,_T,
-#define RVV_S ,_S,
-#define RVV_M ,_M,
-#define RVV_TSM RVV_T RVV_S RVV_M
+#define XSIMD_RVV_T ,_T,
+#define XSIMD_RVV_S ,_S,
+#define XSIMD_RVV_M ,_M,
+#define XSIMD_RVV_TSM XSIMD_RVV_T XSIMD_RVV_S XSIMD_RVV_M
 
-// RVV_OVERLOAD, below, expands to a head section, a number of body sections
+// XSIMD_RVV_OVERLOAD, below, expands to a head section, a number of body sections
 // (depending on which types are supported), and a tail section.  Different
 // variants of these sections are implemented with different suffixes on the
-// three macro names RVV_WRAPPER_HEAD, RVV_WRAPPER, and RVV_WRAPPER_TAIL and
-// specified as an argument to RVV_OVERLOAD (the empty string is the default,
+// three macro names XSIMD_RVV_WRAPPER_HEAD, XSIMD_RVV_WRAPPER, and XSIMD_RVV_WRAPPER_TAIL and
+// specified as an argument to XSIMD_RVV_OVERLOAD (the empty string is the default,
 // but still needs an extra comma to hold its place).
 //
-// The default RVV_WRAPPER_HEAD provides a class containing convenient names
-// for the function signature argument(s) to RVV_OVERLOAD.  That signature can
+// The default XSIMD_RVV_WRAPPER_HEAD provides a class containing convenient names
+// for the function signature argument(s) to XSIMD_RVV_OVERLOAD.  That signature can
 // also reference the template argument T, because it's a text substitution
 // into the template.
-//
-// TODO: either make ctx::type a tuple (populated from __VA_ARGS__), or add a
-// wrapper type to automatically add `_splat` overloads without the extra name.
-// IDEAL: With a bit of template metaprogramming the function signatures could
-// be filtered to produce multiple variants and to signal the implicit vl
-// argument while excluding it from the incoming argument list so that no
-// wrapper variants are needed.  And also to iterate over the m1, m2, mf2,
-// etc., variants.  But all that seems fiddly.
-//
-#define RVV_WRAPPER_HEAD(NAME, SIGNATURE, ...) \
+#define XSIMD_RVV_WRAPPER_HEAD(NAME, SIGNATURE, ...) \
         namespace NAME##_cruft { \
             template <class T, size_t M> struct ctx \
             { \
-                static constexpr size_t width = XSIMD_RVV_BITS; /* TODO: fix this */ \
+                static constexpr size_t width = XSIMD_RVV_BITS; \
                 static constexpr size_t vl = width / (sizeof(T) * 8); \
                 using  vec = rvv_reg_t<T, width>; \
                 using uvec = rvv_reg_t<as_unsigned_relaxed_t<T>, width>; \
@@ -118,10 +109,10 @@
             { void operator()() const noexcept {}; }; \
             template<class K, size_t M> using impl_t = impl<K, M, sig_t<K, M>>;
 
-#define RVV_WRAPPER_HEAD_NOVL(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
-#define RVV_WRAPPER_HEAD_DROP_1ST(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
-#define RVV_WRAPPER_HEAD_DROP_1ST_CUSTOM_ARGS(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
-#define RVV_WRAPPER_HEAD_DROP_1ST_CUSTOM_ARGS_NOVL(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_HEAD_NOVL(...)  XSIMD_RVV_WRAPPER_HEAD(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_HEAD_DROP_1ST(...)  XSIMD_RVV_WRAPPER_HEAD(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_HEAD_DROP_1ST_CUSTOM_ARGS(...)  XSIMD_RVV_WRAPPER_HEAD(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_HEAD_DROP_1ST_CUSTOM_ARGS_NOVL(...)  XSIMD_RVV_WRAPPER_HEAD(__VA_ARGS__)
 
 // The body of the wrapper defines a functor (because partial specialisation of
 // functions is not legal) which forwards its arguments to the named intrinsic
@@ -134,34 +125,34 @@
 // overcomes the problem of converting a function signature type to an argument
 // list to pass to another function.
 //
-#define RVV_WRAPPER(KEY, VMUL, CALLEE, ...) \
+#define XSIMD_RVV_WRAPPER(KEY, VMUL, CALLEE, ...) \
             template<class Ret, class... Args> \
             struct impl<KEY, VMUL, Ret(Args...)> { \
                 using ctx = ctx<KEY, VMUL>; \
                 constexpr Ret operator()(Args... args) const noexcept \
                 { return CALLEE(args..., ctx::vl); }; \
             };
-#define RVV_WRAPPER_NOVL(KEY, VMUL, CALLEE, ...) \
+#define XSIMD_RVV_WRAPPER_NOVL(KEY, VMUL, CALLEE, ...) \
             template<class Ret, class... Args> \
             struct impl<KEY, VMUL, Ret(Args...)> { \
                 constexpr Ret operator()(Args... args) const noexcept \
                 { return CALLEE(args...); }; \
             };
-#define RVV_WRAPPER_DROP_1ST(KEY, VMUL, CALLEE, ...) \
+#define XSIMD_RVV_WRAPPER_DROP_1ST(KEY, VMUL, CALLEE, ...) \
             template<class Ret, class First, class... Args> \
             struct impl<KEY, VMUL, Ret(First, Args...)> { \
                 using ctx = ctx<KEY, VMUL>; \
                 constexpr Ret operator()(First, Args... args) const noexcept \
                 { return CALLEE(args..., ctx::vl); }; \
             };
-#define RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS(KEY, VMUL, CALLEE, SIGNATURE, ...) \
+#define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS(KEY, VMUL, CALLEE, SIGNATURE, ...) \
             template<class Ret, class First, class... Args> \
             struct impl<KEY, VMUL, Ret(First, Args...)> { \
                 using ctx = ctx<KEY, VMUL>; \
                 constexpr Ret operator()(First, Args... args) const noexcept \
                 { return CALLEE(__VA_ARGS__, ctx::vl); }; \
             };
-#define RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS_NOVL(KEY, VMUL, CALLEE, SIGNATURE, ...) \
+#define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS_NOVL(KEY, VMUL, CALLEE, SIGNATURE, ...) \
             template<class Ret, class First, class... Args> \
             struct impl<KEY, VMUL, Ret(First, Args...)> { \
                 constexpr Ret operator()(First, Args... args) const noexcept \
@@ -172,72 +163,53 @@
 // with all the different function signatures available under the one name.
 // Not all of the base classes necessarily contain useful code, but there's a
 // default implementation so that filtering them out isn't really necessary.
-//
-// TODO: unroll all RVV_M_VALUE (and maybe 1/m as well), and eliminate the
-// clumsy workarounds which exist elsewhere because of the omissions.
-#if __riscv_v_fixed_vlen >= XSIMD_RVV_BITS
-#define RVV_M_VALUE 1
-#elif __riscv_v_fixed_vlen * 2 == XSIMD_RVV_BITS
-#define RVV_M_VALUE 2
-#elif __riscv_v_fixed_vlen * 4 == XSIMD_RVV_BITS
-#define RVV_M_VALUE 4
-#endif
-#if defined(__riscv_zvfh)
-#define IF_zvfh(...) __VA_ARGS__
-#else
-#define IF_zvfh(...)
-#endif
-#define RVV_WRAPPER_TAIL(NAME, ...) \
+#define XSIMD_RVV_M_VALUE 1 // lmul=m1
+#define XSIMD_RVV_WRAPPER_TAIL(NAME, ...) \
         }  /* namespace NAME##_cruft */ \
         static constexpr struct : \
-            /* TODO: mention only relevant types */ \
-            NAME##_cruft::impl_t<  int8_t,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< uint8_t,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< int16_t,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<uint16_t,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< int32_t,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<uint32_t,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< int64_t,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<uint64_t,RVV_M_VALUE>, \
-            IF_zvfh(NAME##_cruft::impl_t<_Float16,RVV_M_VALUE>,) \
-            NAME##_cruft::impl_t<   float,RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<  double,RVV_M_VALUE> { \
-                using NAME##_cruft::impl_t<  int8_t,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< uint8_t,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< int16_t,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<uint16_t,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< int32_t,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<uint32_t,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< int64_t,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<uint64_t,RVV_M_VALUE>::operator(); \
-                IF_zvfh(using NAME##_cruft::impl_t<_Float16,RVV_M_VALUE>::operator();) \
-                using NAME##_cruft::impl_t<   float,RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<  double,RVV_M_VALUE>::operator(); \
+            NAME##_cruft::impl_t<  int8_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t< uint8_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t< int16_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t<uint16_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t< int32_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t<uint32_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t< int64_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t<uint64_t,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t<   float,XSIMD_RVV_M_VALUE>, \
+            NAME##_cruft::impl_t<  double,XSIMD_RVV_M_VALUE> { \
+                using NAME##_cruft::impl_t<  int8_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t< uint8_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t< int16_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t<uint16_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t< int32_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t<uint32_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t< int64_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t<uint64_t,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t<   float,XSIMD_RVV_M_VALUE>::operator(); \
+                using NAME##_cruft::impl_t<  double,XSIMD_RVV_M_VALUE>::operator(); \
             } NAME{};
-#define RVV_WRAPPER_TAIL_NOVL(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
-#define RVV_WRAPPER_TAIL_DROP_1ST(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
-#define RVV_WRAPPER_TAIL_DROP_1ST_CUSTOM_ARGS(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
-#define RVV_WRAPPER_TAIL_DROP_1ST_CUSTOM_ARGS_NOVL(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_TAIL_NOVL(...)  XSIMD_RVV_WRAPPER_TAIL(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_TAIL_DROP_1ST(...)  XSIMD_RVV_WRAPPER_TAIL(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_TAIL_DROP_1ST_CUSTOM_ARGS(...)  XSIMD_RVV_WRAPPER_TAIL(__VA_ARGS__)
+#define XSIMD_RVV_WRAPPER_TAIL_DROP_1ST_CUSTOM_ARGS_NOVL(...)  XSIMD_RVV_WRAPPER_TAIL(__VA_ARGS__)
 
-// TODO: unroll all RVV_M_VALUE (and maybe 1/m as well)
-#define RVV_OVERLOAD_head(my_name, variant, ...) \
-      RVV_WRAPPER_HEAD##variant(my_name, __VA_ARGS__)
-#define RVV_OVERLOAD_i(name, variant, ...) \
-      RVV_WRAPPER##variant(  int8_t,RVV_M_VALUE, RVV_IDENTIFIER(i, 8,RVV_M_VALUE, name), __VA_ARGS__) \
-      RVV_WRAPPER##variant( int16_t,RVV_M_VALUE, RVV_IDENTIFIER(i,16,RVV_M_VALUE, name), __VA_ARGS__) \
-      RVV_WRAPPER##variant( int32_t,RVV_M_VALUE, RVV_IDENTIFIER(i,32,RVV_M_VALUE, name), __VA_ARGS__) \
-      RVV_WRAPPER##variant( int64_t,RVV_M_VALUE, RVV_IDENTIFIER(i,64,RVV_M_VALUE, name), __VA_ARGS__)
-#define RVV_OVERLOAD_u(name, variant, ...) \
-      RVV_WRAPPER##variant( uint8_t,RVV_M_VALUE, RVV_IDENTIFIER(u, 8,RVV_M_VALUE, name), __VA_ARGS__) \
-      RVV_WRAPPER##variant(uint16_t,RVV_M_VALUE, RVV_IDENTIFIER(u,16,RVV_M_VALUE, name), __VA_ARGS__) \
-      RVV_WRAPPER##variant(uint32_t,RVV_M_VALUE, RVV_IDENTIFIER(u,32,RVV_M_VALUE, name), __VA_ARGS__) \
-      RVV_WRAPPER##variant(uint64_t,RVV_M_VALUE, RVV_IDENTIFIER(u,64,RVV_M_VALUE, name), __VA_ARGS__)
-#define RVV_OVERLOAD_f(name, variant, ...) \
-      IF_zvfh(RVV_WRAPPER##variant(_Float16,RVV_M_VALUE, RVV_IDENTIFIER(f,16,RVV_M_VALUE, name), __VA_ARGS__)) \
-      RVV_WRAPPER##variant(   float,RVV_M_VALUE, RVV_IDENTIFIER(f,32,RVV_M_VALUE, name), __VA_ARGS__) \
-      RVV_WRAPPER##variant(  double,RVV_M_VALUE, RVV_IDENTIFIER(f,64,RVV_M_VALUE, name), __VA_ARGS__)
-#define RVV_OVERLOAD_tail(my_name, variant, ...) \
-      RVV_WRAPPER_TAIL##variant(my_name, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_head(my_name, variant, ...) \
+      XSIMD_RVV_WRAPPER_HEAD##variant(my_name, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_i(name, variant, ...) \
+      XSIMD_RVV_WRAPPER##variant(  int8_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i, 8,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant( int16_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i,16,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant( int32_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i,32,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant( int64_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i,64,XSIMD_RVV_M_VALUE, name), __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_u(name, variant, ...) \
+      XSIMD_RVV_WRAPPER##variant( uint8_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u, 8,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(uint16_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u,16,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(uint32_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u,32,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(uint64_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u,64,XSIMD_RVV_M_VALUE, name), __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_f(name, variant, ...) \
+      XSIMD_RVV_WRAPPER##variant(   float,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(f,32,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(  double,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(f,64,XSIMD_RVV_M_VALUE, name), __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_tail(my_name, variant, ...) \
+      XSIMD_RVV_WRAPPER_TAIL##variant(my_name, __VA_ARGS__)
 
 // Use these to create function (actually functor, sorry) wrappers overloaded
 // for whichever types are supported.  Being functors means they can't take a
@@ -255,36 +227,36 @@
 // together under a single overloaded identifier where they can be used within
 // templates.
 //
-#define RVV_OVERLOAD2(my_name, name_i, name_u, variant, ...) \
-    RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_i(name_i, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_u(name_u, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD2(my_name, name_i, name_u, variant, ...) \
+    XSIMD_RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_i(name_i, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_u(name_u, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
 
-#define RVV_OVERLOAD3(my_name, name_i, name_u, name_f, variant, ...) \
-    RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_i(name_i, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_u(name_u, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_f(name_f, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD3(my_name, name_i, name_u, name_f, variant, ...) \
+    XSIMD_RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_i(name_i, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_u(name_u, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_f(name_f, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
 
-#define RVV_OVERLOAD(my_name, name, ...) RVV_OVERLOAD3(my_name, name, name, name, __VA_ARGS__)
-#define RVV_OVERLOAD_INTS(my_name, name, ...) RVV_OVERLOAD2(my_name, name, name, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD(my_name, name, ...) XSIMD_RVV_OVERLOAD3(my_name, name, name, name, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_INTS(my_name, name, ...) XSIMD_RVV_OVERLOAD2(my_name, name, name, __VA_ARGS__)
 
-#define RVV_OVERLOAD_SINTS(my_name, name, variant, ...) \
-    RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_i(name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_SINTS(my_name, name, variant, ...) \
+    XSIMD_RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_i(name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
 
-#define RVV_OVERLOAD_UINTS(my_name, name, variant, ...) \
-    RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_u(name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_UINTS(my_name, name, variant, ...) \
+    XSIMD_RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_u(name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
 
-#define RVV_OVERLOAD_FLOATS(my_name, name, variant, ...) \
-    RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_f(name, variant, __VA_ARGS__) \
-    RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
+#define XSIMD_RVV_OVERLOAD_FLOATS(my_name, name, variant, ...) \
+    XSIMD_RVV_OVERLOAD_head(my_name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_f(name, variant, __VA_ARGS__) \
+    XSIMD_RVV_OVERLOAD_tail(my_name, variant, __VA_ARGS__)
 
 namespace xsimd
 {
@@ -328,7 +300,7 @@ namespace xsimd
             template <class T, class U>
             rvv_reg_t<T, U::width> rvvreinterpret(U const& arg) noexcept
             {
-                return rvv_reg_t<T, U::width>(arg, types::detail::RVV_BITCAST);
+                return rvv_reg_t<T, U::width>(arg, types::detail::XSIMD_RVV_BITCAST);
             }
             template <class T, class A, class U>
             rvv_reg_t<T, A::width> rvvreinterpret(batch<U, A> const& arg) noexcept
@@ -343,27 +315,27 @@ namespace xsimd
                 return rvvreinterpret<U>(arg.data);
             }
 
-            RVV_OVERLOAD(rvvid,
-                  (__riscv_vid_v_u RVV_S RVV_M), _DROP_1ST, uvec(T))
+            XSIMD_RVV_OVERLOAD(rvvid,
+                   (__riscv_vid_v_u XSIMD_RVV_S XSIMD_RVV_M), _DROP_1ST, uvec(T))
 
-            RVV_OVERLOAD3(rvvmv_splat,
-                   (__riscv_vmv_v_x_ RVV_TSM),
-                   (__riscv_vmv_v_x_ RVV_TSM),
-                  (__riscv_vfmv_v_f_ RVV_TSM), , vec(T))
+            XSIMD_RVV_OVERLOAD3(rvvmv_splat,
+                   (__riscv_vmv_v_x_ XSIMD_RVV_TSM),
+                   (__riscv_vmv_v_x_ XSIMD_RVV_TSM),
+                   (__riscv_vfmv_v_f_ XSIMD_RVV_TSM), , vec(T))
 
-            RVV_OVERLOAD3(rvvmv_lane0,
+            XSIMD_RVV_OVERLOAD3(rvvmv_lane0,
                    (__riscv_vmv_x),
                    (__riscv_vmv_x),
-                  (__riscv_vfmv_f), _NOVL, T(vec))
+                   (__riscv_vfmv_f), _NOVL, T(vec))
 
-            RVV_OVERLOAD(rvvmerge, (__riscv_vmerge), , vec(vec, vec, bvec))
-            RVV_OVERLOAD3(rvvmerge_splat,
+            XSIMD_RVV_OVERLOAD(rvvmerge, (__riscv_vmerge), , vec(vec, vec, bvec))
+            XSIMD_RVV_OVERLOAD3(rvvmerge_splat,
                    (__riscv_vmerge),
                    (__riscv_vmerge),
-                  (__riscv_vfmerge), , vec(vec, T, bvec))
+                   (__riscv_vfmerge), , vec(vec, T, bvec))
 
             // count active lanes in a predicate
-            RVV_OVERLOAD(rvvcpop, (__riscv_vcpop),
+            XSIMD_RVV_OVERLOAD(rvvcpop, (__riscv_vcpop),
                     , size_t(bvec));
 
             template<class T, size_t Width>
@@ -413,7 +385,6 @@ namespace xsimd
 
         namespace detail
         {
-            // TODO: expand rvvmv_splat to all register widths, then delete this
             template <class T, size_t Width>
             inline detail::rvv_reg_t<T, Width> broadcast(T arg) noexcept
             {
@@ -422,7 +393,7 @@ namespace xsimd
                 // supported.
                 detail::rvv_fix_char_t<T> arg_not_char(arg);
                 const auto splat = detail::rvvmv_splat(arg_not_char);
-                return detail::rvv_reg_t<T, Width>(splat.get_bytes(), types::detail::RVV_BITCAST);
+                return detail::rvv_reg_t<T, Width>(splat.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
             }
         }
 
@@ -439,8 +410,8 @@ namespace xsimd
 
         namespace detail
         {
-            RVV_OVERLOAD(rvvle, (__riscv_vle RVV_S _v_ RVV_TSM), , vec(T const*))
-            RVV_OVERLOAD(rvvse, (__riscv_vse RVV_S _v_ RVV_TSM), , void(T*, vec))
+            XSIMD_RVV_OVERLOAD(rvvle, (__riscv_vle XSIMD_RVV_S _v_ XSIMD_RVV_TSM), , vec(T const*))
+            XSIMD_RVV_OVERLOAD(rvvse, (__riscv_vse XSIMD_RVV_S _v_ XSIMD_RVV_TSM), , void(T*, vec))
         }
 
         template <class A, class T, detail::rvv_enable_all_t<T> = 0>
@@ -472,8 +443,8 @@ namespace xsimd
                 return __riscv_vslideup(lo, hi, lo.vl, lo.vl * 2);
             }
 
-            RVV_OVERLOAD(rvvget_lo_, (__riscv_vget_ RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 0)
-            RVV_OVERLOAD(rvvget_hi_, (__riscv_vget_ RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 1)
+            XSIMD_RVV_OVERLOAD(rvvget_lo_, (__riscv_vget_ XSIMD_RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 0)
+            XSIMD_RVV_OVERLOAD(rvvget_hi_, (__riscv_vget_ XSIMD_RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 1)
 
             template <class T, size_t W, typename std::enable_if<W >= types::detail::rvv_width_m1, int>::type = 0>
             rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
@@ -536,12 +507,12 @@ namespace xsimd
         {
             template <class T, class U>
             using rvv_enable_sg_t = typename std::enable_if<(sizeof(T) == sizeof(U) && (sizeof(T) == 4 || sizeof(T) == 8)), int>::type;
-            RVV_OVERLOAD(rvvloxei, (__riscv_vloxei RVV_S), , vec(T const*, uvec))
-            RVV_OVERLOAD(rvvsoxei, (__riscv_vsoxei RVV_S), , void(T*, uvec, vec))
-            RVV_OVERLOAD3(rvvmul_splat,
+            XSIMD_RVV_OVERLOAD(rvvloxei, (__riscv_vloxei XSIMD_RVV_S), , vec(T const*, uvec))
+            XSIMD_RVV_OVERLOAD(rvvsoxei, (__riscv_vsoxei XSIMD_RVV_S), , void(T*, uvec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvmul_splat,
                    (__riscv_vmul),
                    (__riscv_vmul),
-                  (__riscv_vfmul), , vec(vec, T))
+                   (__riscv_vfmul), , vec(vec, T))
         }
 
         // scatter
@@ -573,67 +544,68 @@ namespace xsimd
          **************/
 
         namespace detail {
-            RVV_OVERLOAD3(rvvadd,
+            XSIMD_RVV_OVERLOAD3(rvvadd,
                    (__riscv_vadd),
                    (__riscv_vadd),
-                  (__riscv_vfadd), , vec(vec, vec))
-            RVV_OVERLOAD2(rvvsadd,
+                   (__riscv_vfadd), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD2(rvvsadd,
                    (__riscv_vsadd),
                    (__riscv_vsaddu), , vec(vec, vec))
-            RVV_OVERLOAD3(rvvsub,
+            XSIMD_RVV_OVERLOAD3(rvvsub,
                    (__riscv_vsub),
                    (__riscv_vsub),
-                  (__riscv_vfsub), , vec(vec, vec))
-            RVV_OVERLOAD2(rvvssub,
+                   (__riscv_vfsub), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD2(rvvssub,
                    (__riscv_vssub),
                    (__riscv_vssubu), , vec(vec, vec))
-            RVV_OVERLOAD2(rvvaadd,
+            XSIMD_RVV_OVERLOAD2(rvvaadd,
                    (__riscv_vaadd),
                    (__riscv_vaaddu), , vec(vec, vec))
-            RVV_OVERLOAD3(rvvmul,
+            XSIMD_RVV_OVERLOAD3(rvvmul,
                    (__riscv_vmul),
                    (__riscv_vmul),
-                  (__riscv_vfmul), , vec(vec, vec))
-            RVV_OVERLOAD3(rvvdiv,
+                   (__riscv_vfmul), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvdiv,
                    (__riscv_vdiv),
                    (__riscv_vdivu),
-                  (__riscv_vfdiv), , vec(vec, vec))
-            RVV_OVERLOAD3(rvvmax,
+                   (__riscv_vfdiv), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvmax,
                    (__riscv_vmax),
                    (__riscv_vmaxu),
-                  (__riscv_vfmax), , vec(vec, vec))
-            RVV_OVERLOAD3(rvvmin,
+                   (__riscv_vfmax), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvmin,
                    (__riscv_vmin),
                    (__riscv_vminu),
-                  (__riscv_vfmin), , vec(vec, vec))
-            RVV_OVERLOAD3(rvvneg,
+                   (__riscv_vfmin), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvneg,
                    (__riscv_vneg),
                    (abort),
-                  (__riscv_vfneg), , vec(vec))
-            RVV_OVERLOAD_FLOATS(rvvabs, (__riscv_vfabs), , vec(vec))  // TODO: where's signed int abs?
-            RVV_OVERLOAD3(rvvmacc,
+                   (__riscv_vfneg), , vec(vec))
+            XSIMD_RVV_OVERLOAD_FLOATS(rvvabs,
+                    (__riscv_vfabs), , vec(vec))
+            XSIMD_RVV_OVERLOAD3(rvvmacc,
                    (__riscv_vmacc),
                    (__riscv_vmacc),
-                  (__riscv_vfmacc), , vec(vec, vec, vec))
-            RVV_OVERLOAD3(rvvnmsac,
+                   (__riscv_vfmacc), , vec(vec, vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvnmsac,
                    (__riscv_vnmsac),
                    (__riscv_vnmsac),
-                  (__riscv_vfnmsac), , vec(vec, vec, vec))
-            RVV_OVERLOAD3(rvvmadd,
+                   (__riscv_vfnmsac), , vec(vec, vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvmadd,
                    (__riscv_vmadd),
                    (__riscv_vmadd),
-                  (__riscv_vfmadd), , vec(vec, vec, vec))
-            RVV_OVERLOAD3(rvvnmsub,
+                   (__riscv_vfmadd), , vec(vec, vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvnmsub,
                    (__riscv_vnmsub),
                    (__riscv_vnmsub),
-                  (__riscv_vfnmsub), , vec(vec, vec, vec))
+                   (__riscv_vfnmsub), , vec(vec, vec, vec))
 
 #define RISCV_VMSXX(XX) \
-            RVV_OVERLOAD3(rvvms##XX, \
+            XSIMD_RVV_OVERLOAD3(rvvms##XX, \
                    (__riscv_vms##XX), \
                    (__riscv_vms##XX##u), \
                    (__riscv_vmf##XX), , bvec(vec, vec)) \
-            RVV_OVERLOAD3(rvvms##XX##_splat, \
+            XSIMD_RVV_OVERLOAD3(rvvms##XX##_splat, \
                    (__riscv_vms##XX), \
                    (__riscv_vms##XX##u), \
                    (__riscv_vmf##XX), , bvec(vec, T))
@@ -677,16 +649,6 @@ namespace xsimd
         {
             return detail::rvvssub(lhs, rhs);
         }
-
-#if 0
-        // average
-        template <class A, class T, detail::enable_integral_t<T> = 0>
-        inline batch<T, A> average(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
-        {
-            // TODO: probably need to sort out rounding mode
-            return detail::rvvaadd(lhs, rhs);
-        }
-#endif
 
         // mul
         template <class A, class T, detail::rvv_enable_all_t<T> = 0>
@@ -785,16 +747,16 @@ namespace xsimd
 
         namespace detail
         {
-            RVV_OVERLOAD_INTS(rvvand, (__riscv_vand), , vec(vec, vec))
-            RVV_OVERLOAD_INTS(rvvor, (__riscv_vor), , vec(vec, vec))
-            RVV_OVERLOAD_INTS(rvvor_splat, (__riscv_vor), , vec(vec, T))
-            RVV_OVERLOAD_INTS(rvvxor, (__riscv_vxor), , vec(vec, vec))
-            RVV_OVERLOAD_INTS(rvvnot, (__riscv_vnot), , vec(vec))
-            RVV_OVERLOAD(rvvmand, (__riscv_vmand_mm_b RVV_S), , bvec(bvec, bvec))
-            RVV_OVERLOAD(rvvmor, (__riscv_vmor_mm_b RVV_S), , bvec(bvec, bvec))
-            RVV_OVERLOAD(rvvmxor, (__riscv_vmxor_mm_b RVV_S), , bvec(bvec, bvec))
-            RVV_OVERLOAD(rvvmandn, (__riscv_vmandn_mm_b RVV_S), , bvec(bvec, bvec))
-            RVV_OVERLOAD(rvvmnot, (__riscv_vmnot), , bvec(bvec))
+            XSIMD_RVV_OVERLOAD_INTS(rvvand, (__riscv_vand), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD_INTS(rvvor, (__riscv_vor), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD_INTS(rvvor_splat, (__riscv_vor), , vec(vec, T))
+            XSIMD_RVV_OVERLOAD_INTS(rvvxor, (__riscv_vxor), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD_INTS(rvvnot, (__riscv_vnot), , vec(vec))
+            XSIMD_RVV_OVERLOAD(rvvmand, (__riscv_vmand_mm_b XSIMD_RVV_S), , bvec(bvec, bvec))
+            XSIMD_RVV_OVERLOAD(rvvmor, (__riscv_vmor_mm_b XSIMD_RVV_S), , bvec(bvec, bvec))
+            XSIMD_RVV_OVERLOAD(rvvmxor, (__riscv_vmxor_mm_b XSIMD_RVV_S), , bvec(bvec, bvec))
+            XSIMD_RVV_OVERLOAD(rvvmandn, (__riscv_vmandn_mm_b XSIMD_RVV_S), , bvec(bvec, bvec))
+            XSIMD_RVV_OVERLOAD(rvvmnot, (__riscv_vmnot), , bvec(bvec))
         }
 
         // bitwise_and
@@ -914,12 +876,12 @@ namespace xsimd
 
         namespace detail
         {
-            RVV_OVERLOAD_INTS(rvvsll_splat, (__riscv_vsll), , vec(vec, size_t))
-            RVV_OVERLOAD_INTS(rvvsll, (__riscv_vsll), , vec(vec, uvec))
-            RVV_OVERLOAD2(rvvsr_splat,
+            XSIMD_RVV_OVERLOAD_INTS(rvvsll_splat, (__riscv_vsll), , vec(vec, size_t))
+            XSIMD_RVV_OVERLOAD_INTS(rvvsll, (__riscv_vsll), , vec(vec, uvec))
+            XSIMD_RVV_OVERLOAD2(rvvsr_splat,
                    (__riscv_vsra),
                    (__riscv_vsrl), , vec(vec, size_t))
-            RVV_OVERLOAD2(rvvsr,
+            XSIMD_RVV_OVERLOAD2(rvvsr,
                    (__riscv_vsra),
                    (__riscv_vsrl), , vec(vec, uvec))
         } // namespace detail
@@ -960,33 +922,32 @@ namespace xsimd
 
         namespace detail
         {
-            RVV_OVERLOAD3(rvvredsum,
+            XSIMD_RVV_OVERLOAD3(rvvredsum,
                    (__riscv_vredsum),
                    (__riscv_vredsum),
                    (__riscv_vfredosum),  // or __riscv_vfredusum
                     , scalar_vec(vec, scalar_vec))
-            RVV_OVERLOAD3(rvvredmax,
+            XSIMD_RVV_OVERLOAD3(rvvredmax,
                    (__riscv_vredmax),
                    (__riscv_vredmaxu),
-                  (__riscv_vfredmax), , scalar_vec(vec, scalar_vec))
-            RVV_OVERLOAD3(rvvredmin,
+                   (__riscv_vfredmax), , scalar_vec(vec, scalar_vec))
+            XSIMD_RVV_OVERLOAD3(rvvredmin,
                    (__riscv_vredmin),
                    (__riscv_vredminu),
-                  (__riscv_vfredmin), , scalar_vec(vec, scalar_vec))
-            RVV_OVERLOAD3(rvvslide1up,
+                   (__riscv_vfredmin), , scalar_vec(vec, scalar_vec))
+            XSIMD_RVV_OVERLOAD3(rvvslide1up,
                    (__riscv_vslide1up),
                    (__riscv_vslide1up),
-                  (__riscv_vfslide1up), , vec(vec, vec))
-            RVV_OVERLOAD3(rvvslide1down,
+                   (__riscv_vfslide1up), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD3(rvvslide1down,
                    (__riscv_vslide1down),
                    (__riscv_vslide1down),
-                  (__riscv_vfslide1down), , vec(vec, T))
+                   (__riscv_vfslide1down), , vec(vec, T))
 
-            // TODO: fill out rvvmv_lane0 for all types, and eliminate this.
             template <class A, class T>
             inline T reduce_scalar(rvv_reg_t<T, types::detail::rvv_width_m1> const& arg)
             {
-                return detail::rvvmv_lane0(rvv_reg_t<T, A::width>(arg.get_bytes(), types::detail::RVV_BITCAST));
+                return detail::rvvmv_lane0(rvv_reg_t<T, A::width>(arg.get_bytes(), types::detail::XSIMD_RVV_BITCAST));
             }
         }
         // reduce_add
@@ -1020,17 +981,14 @@ namespace xsimd
         template <class A, class T, detail::rvv_enable_floating_point_t<T> = 0>
         inline batch<T, A> haddp(const batch<T, A>* row, requires_arch<rvv>) noexcept
         {
-            constexpr size_t size = batch<T, A>::size;
-            const auto zero = detail::broadcast<T, types::detail::rvv_width_m1>(T(0));
-            auto result = broadcast<A>(T(0), rvv{});
-            // TODO: Is this right?  This seems a poor use of register space.
-            for (size_t i = 0; i < size; ++i)
+            constexpr std::size_t size = batch<T, A>::size;
+            T sums[size];
+            #pragma unroll size
+            for (std::size_t i = 0; i < size; ++i)
             {
-                const auto r = detail::rvvredsum(row[i], zero);
-                const T s = detail::reduce_scalar<A, T>(r);
-                result = detail::rvvslide1down(result, s);
+                sums[i] = reduce_add(row[i], rvv {});
             }
-            return result;
+            return load_aligned<A>(sums, convert<T>(), rvv {});
         }
 
         /***************
@@ -1097,9 +1055,9 @@ namespace xsimd
          ***************/
         namespace detail
         {
-            RVV_OVERLOAD(rvvrgather, (__riscv_vrgather), , vec(vec, uvec))
-            RVV_OVERLOAD(rvvslideup, (__riscv_vslideup), , vec(vec, vec, size_t))
-            RVV_OVERLOAD(rvvslidedown, (__riscv_vslidedown), , vec(vec, size_t))
+            XSIMD_RVV_OVERLOAD(rvvrgather, (__riscv_vrgather), , vec(vec, uvec))
+            XSIMD_RVV_OVERLOAD(rvvslideup, (__riscv_vslideup), , vec(vec, vec, size_t))
+            XSIMD_RVV_OVERLOAD(rvvslidedown, (__riscv_vslidedown), , vec(vec, size_t))
         }
 
         // swizzle
@@ -1192,9 +1150,9 @@ namespace xsimd
 
         namespace detail
         {
-            RVV_OVERLOAD_FLOATS(rvvfsqrt, (__riscv_vfsqrt), , vec(vec))
-            RVV_OVERLOAD_FLOATS(rvvfrec7, (__riscv_vfrec7), , vec(vec))
-            RVV_OVERLOAD_FLOATS(rvvfrsqrt7, (__riscv_vfrsqrt7), , vec(vec))
+            XSIMD_RVV_OVERLOAD_FLOATS(rvvfsqrt, (__riscv_vfsqrt), , vec(vec))
+            XSIMD_RVV_OVERLOAD_FLOATS(rvvfrec7, (__riscv_vfrec7), , vec(vec))
+            XSIMD_RVV_OVERLOAD_FLOATS(rvvfrsqrt7, (__riscv_vfrsqrt7), , vec(vec))
         }
 
         // rsqrt
@@ -1202,7 +1160,6 @@ namespace xsimd
         inline batch<T, A> rsqrt(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
             auto approx = detail::rvvfrsqrt7(arg);
-            // TODO: maybe?  approx = approx * (1.5 - (0.5 * arg * __riscv_vfrec7(arg, arg.size)));
             approx = approx * (1.5 - (0.5 * arg * approx * approx));
             return approx;
         }
@@ -1228,19 +1185,19 @@ namespace xsimd
         // fast_cast
         namespace detail
         {
-            RVV_OVERLOAD2(rvvfcvt_rtz,   // truncating conversion, like C.
+            XSIMD_RVV_OVERLOAD2(rvvfcvt_rtz,   // truncating conversion, like C.
                    (__riscv_vfcvt_rtz_x),
                    (__riscv_vfcvt_rtz_xu), _DROP_1ST, vec(T, fvec))
-            RVV_OVERLOAD2(rvvfcvt_rne,   // round to nearest, ties to even
+            XSIMD_RVV_OVERLOAD2(rvvfcvt_rne,   // round to nearest, ties to even
                    (__riscv_vfcvt_x),
                    (__riscv_vfcvt_xu), _DROP_1ST_CUSTOM_ARGS, vec(T, fvec), args..., __RISCV_FRM_RNE)
-            RVV_OVERLOAD2(rvvfcvt_rmm,   // round to nearest, ties to max magnitude
+            XSIMD_RVV_OVERLOAD2(rvvfcvt_rmm,   // round to nearest, ties to max magnitude
                    (__riscv_vfcvt_x),
                    (__riscv_vfcvt_xu), _DROP_1ST_CUSTOM_ARGS, vec(T, fvec), args..., __RISCV_FRM_RMM)
-            RVV_OVERLOAD2(rvvfcvt,       // round to current rounding mode.
+            XSIMD_RVV_OVERLOAD2(rvvfcvt,       // round to current rounding mode.
                    (__riscv_vfcvt_x),
                    (__riscv_vfcvt_xu), _DROP_1ST, vec(T, fvec))
-            RVV_OVERLOAD_INTS(rvvfcvt_f, (__riscv_vfcvt_f), , fvec(vec))
+            XSIMD_RVV_OVERLOAD_INTS(rvvfcvt_f, (__riscv_vfcvt_f), , fvec(vec))
 
             template <class T, class U>
             using rvv_enable_ftoi_t = typename std::enable_if<(sizeof(T) == sizeof(U) && std::is_floating_point<T>::value && !std::is_floating_point<U>::value), int>::type;
@@ -1332,14 +1289,13 @@ namespace xsimd
         template <class A, class T, class R, detail::rvv_enable_all_t<T> = 0, detail::rvv_enable_all_t<R> = 0>
         inline batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<rvv>) noexcept
         {
-            return detail::rvv_reg_t<R, A::width>(arg.data.get_bytes(), types::detail::RVV_BITCAST);
+            return detail::rvv_reg_t<R, A::width>(arg.data.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
         }
 
         // batch_bool_cast
         template <class A, class T_out, class T_in, detail::rvv_enable_all_t<T_in> = 0>
         inline batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& arg, batch_bool<T_out, A> const&, requires_arch<rvv>) noexcept
         {
-            // TODO: Confirm that this is doing whatever the caller expects (which is what?)
             using intermediate_t = typename detail::rvv_bool_t<T_out>;
             return intermediate_t(arg.data);
         }
@@ -1397,14 +1353,13 @@ namespace xsimd
         {
             using reg_t = detail::rvv_reg_t<T, A::width>;
             const auto bytes = arg.data.get_bytes();
-            return reg_t(detail::rvvslidedownbytes<A::width>(bytes, N), types::detail::RVV_BITCAST);
+            return reg_t(detail::rvvslidedownbytes<A::width>(bytes, N), types::detail::XSIMD_RVV_BITCAST);
         }
 
         // isnan
         template <class A, class T, detail::rvv_enable_floating_point_t<T> = 0>
         inline batch_bool<T, A> isnan(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            // TODO: vfclass (maybe?)
             return !(arg == arg);
         }
 
