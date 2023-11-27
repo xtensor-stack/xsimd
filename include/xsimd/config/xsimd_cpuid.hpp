@@ -87,22 +87,16 @@ namespace xsimd
                 best = sve::version() * sve;
 
 #elif defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0
+
 #if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
-#if defined(RISCV_HWCAP_V)
-                if (getauxval(AT_HWCAP) & RISCV_HWCAP_V)
-#else
-                // TODO: remove this path when RISCV_HWCAP_V appears
-                // (the following might cause an illegal instruction...)
+#ifndef HWCAP_V
+#define HWCAP_V	(1 << ('V' - 'A'))
 #endif
-                {
-                    size_t runtime_vlen = __riscv_vsetvlmax_e8m1() * 8;
-                    rvv = runtime_vlen >= __riscv_v_fixed_vlen;
-                }
+                rvv = bool(getauxval(AT_HWCAP) & HWCAP_V);
 #else
                 rvv = 0;
 #endif
 
-                // TODO: ::xsimd:: not a thing I expected to need.
                 best = ::xsimd::rvv::version() * rvv;
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
                 auto get_cpuid = [](int reg[4], int func_id) noexcept

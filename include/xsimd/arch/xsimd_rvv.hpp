@@ -287,11 +287,7 @@ namespace xsimd
             template <class T> using as_unsigned_relaxed_t = typename as_unsigned_relaxed<sizeof(T)>::type;
             template <size_t> struct as_float_relaxed;
             template<> struct as_float_relaxed<1> { using type = int8_t; };
-#if defined(__riscv_zvfh)
-            template<> struct as_float_relaxed<2> { using type = _Float16; };
-#else
             template<> struct as_float_relaxed<2> { using type = int16_t; };
-#endif
             template<> struct as_float_relaxed<4> { using type = float; };
             template<> struct as_float_relaxed<8> { using type = double; };
             template <class T> using as_float_relaxed_t = typename as_float_relaxed<sizeof(T)>::type;

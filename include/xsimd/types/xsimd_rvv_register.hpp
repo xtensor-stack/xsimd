@@ -32,19 +32,18 @@ namespace xsimd
         template <size_t Width>
         struct rvv : xsimd::generic
         {
-            static constexpr size_t width = Width;
-            static constexpr bool supported() noexcept { return width == XSIMD_RVV_BITS; }
+            static constexpr bool supported() noexcept { return Width == XSIMD_RVV_BITS; }
             static constexpr bool available() noexcept { return true; }
             static constexpr bool requires_alignment() noexcept { return true; }
             static constexpr std::size_t alignment() noexcept { return 16; }
-            static constexpr unsigned version() noexcept { return generic::version(10, 1, 0); }
+            static constexpr unsigned version() noexcept { return generic::version(1, 0, 0, /*multiplier=*/1000); }
             static constexpr char const* name() noexcept { return "riscv+rvv"; }
         };
     }
 
-    using rvv = detail::rvv<XSIMD_RVV_BITS>;
-
 #if XSIMD_WITH_RVV
+
+    using rvv = detail::rvv<__riscv_v_fixed_vlen>;
 
 #define XSIMD_RVV_JOINT_(a, b, c) a##b##c
 #define XSIMD_RVV_JOINT(a, b, c) XSIMD_RVV_JOINT_(a, b, c)
@@ -59,13 +58,13 @@ namespace xsimd
     {
         namespace detail
         {
-            static constexpr size_t rvv_width_mf8 = __riscv_v_fixed_vlen / 8;
-            static constexpr size_t rvv_width_mf4 = __riscv_v_fixed_vlen / 4;
-            static constexpr size_t rvv_width_mf2 = __riscv_v_fixed_vlen / 2;
-            static constexpr size_t rvv_width_m1 = __riscv_v_fixed_vlen;
-            static constexpr size_t rvv_width_m2 = __riscv_v_fixed_vlen * 2;
-            static constexpr size_t rvv_width_m4 = __riscv_v_fixed_vlen * 4;
-            static constexpr size_t rvv_width_m8 = __riscv_v_fixed_vlen * 8;
+            static constexpr size_t rvv_width_mf8 = XSIMD_RVV_BITS / 8;
+            static constexpr size_t rvv_width_mf4 = XSIMD_RVV_BITS / 4;
+            static constexpr size_t rvv_width_mf2 = XSIMD_RVV_BITS / 2;
+            static constexpr size_t rvv_width_m1 = XSIMD_RVV_BITS;
+            static constexpr size_t rvv_width_m2 = XSIMD_RVV_BITS * 2;
+            static constexpr size_t rvv_width_m4 = XSIMD_RVV_BITS * 4;
+            static constexpr size_t rvv_width_m8 = XSIMD_RVV_BITS * 8;
 
             // rvv_type_info is a utility class to convert scalar type and
             // bitwidth into rvv register types.
@@ -99,11 +98,6 @@ namespace xsimd
                 } \
             };
 
-#if defined(__riscv_zvfh)
-#define XSIMD_RVV_MAKE_TYPE_zvfh(...) XSIMD_RVV_MAKE_TYPE(__VA_ARGS__)
-#else
-#define XSIMD_RVV_MAKE_TYPE_zvfh(...)
-#endif
 #define XSIMD_RVV_MAKE_TYPES(vmul) \
             XSIMD_RVV_MAKE_TYPE(  int8_t,i, 8, vmul) \
             XSIMD_RVV_MAKE_TYPE( uint8_t,u, 8, vmul) \
@@ -113,7 +107,6 @@ namespace xsimd
             XSIMD_RVV_MAKE_TYPE(uint32_t,u,32, vmul) \
             XSIMD_RVV_MAKE_TYPE( int64_t,i,64, vmul) \
             XSIMD_RVV_MAKE_TYPE(uint64_t,u,64, vmul) \
-            XSIMD_RVV_MAKE_TYPE_zvfh(_Float16,f,16, vmul) \
             XSIMD_RVV_MAKE_TYPE(   float,f,32, vmul) \
             XSIMD_RVV_MAKE_TYPE(  double,f,64, vmul) \
 
@@ -127,7 +120,6 @@ namespace xsimd
 #undef XSIMD_RVV_TYPE_i
 #undef XSIMD_RVV_MAKE_TYPES
 #undef XSIMD_RVV_MAKE_TYPE
-#undef XSIMD_RVV_MAKE_TYPE_zvfh
 
             // rvv_blob is storage-type abstraction for a vector register.
             template <class T, size_t Width>
