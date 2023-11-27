@@ -32,6 +32,7 @@ namespace xsimd
         template <size_t Width>
         struct rvv : xsimd::generic
         {
+            static constexpr size_t width = Width;
             static constexpr bool supported() noexcept { return Width == XSIMD_RVV_BITS; }
             static constexpr bool available() noexcept { return true; }
             static constexpr bool requires_alignment() noexcept { return true; }
