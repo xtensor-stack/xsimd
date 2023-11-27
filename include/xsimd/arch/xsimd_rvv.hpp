@@ -27,28 +27,28 @@
 //
 #define XSIMD_RVV_JOIN_(x, y) x##y
 #define XSIMD_RVV_JOIN(x, y) XSIMD_RVV_JOIN_(x, y)
-#define XSIMD_RVV_PREFIX_T(T,S,M, then) XSIMD_RVV_JOIN(T, then)
-#define XSIMD_RVV_PREFIX_S(T,S,M, then) XSIMD_RVV_JOIN(S, then)
-#define XSIMD_RVV_PREFIX_M(T,S,M, then) XSIMD_RVV_JOIN(m##M, then)
-#define   XSIMD_RVV_PREFIX(T,S,M, then) then
+#define XSIMD_RVV_PREFIX_T(T,S, then) XSIMD_RVV_JOIN(T, then)
+#define XSIMD_RVV_PREFIX_S(T,S, then) XSIMD_RVV_JOIN(S, then)
+#define XSIMD_RVV_PREFIX_M(T,S, then) XSIMD_RVV_JOIN(m1, then)
+#define   XSIMD_RVV_PREFIX(T,S, then) then
 //
-// XSIMD_RVV_IDENTIFIER accepts type, size, and vlmul parameters, and a template for
+// XSIMD_RVV_IDENTIFIER accepts type and size parameters, and a template for
 // the identifier.  The template is a comma-separated list of alternating
 // literal and parameter segments.  Each parameter is appended to XSIMD_RVV_PREFIX to
 // form a new macro name which decides which parameter should be inserted.
 // Then a literal segment is inserted after that.  Empty literals are used to
 // join two or more variables together.
 //
-#define XSIMD_RVV_IDENTIFIER9(T,S,M, t, ...) t
-#define XSIMD_RVV_IDENTIFIER8(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER9(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER7(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER8(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER6(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER7(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER5(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER6(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER4(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER5(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER3(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER4(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER2(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER3(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER1(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER2(T,S,M, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER0(T,S,M, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S,M, XSIMD_RVV_IDENTIFIER1(T,S,M, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER9(T,S, t, ...) t
+#define XSIMD_RVV_IDENTIFIER8(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER9(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER7(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER8(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER6(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER7(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER5(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER6(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER4(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER5(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER3(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER4(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER2(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER3(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER1(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER2(T,S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER0(T,S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T,S, XSIMD_RVV_IDENTIFIER1(T,S, __VA_ARGS__)))
 //
 // UNBRACKET and REPARSE force the preprocessor to handle expansion in a
 // specific order.  XSIMD_RVV_UNBRACKET strips the parentheses from the template
@@ -65,8 +65,8 @@
 //
 #define XSIMD_RVV_REPARSE(v) (v)
 #define XSIMD_RVV_UNBRACKET(...) __VA_ARGS__
-#define XSIMD_RVV_ARG_LIST(T,S,M, name) (T,S,M, XSIMD_RVV_UNBRACKET name,,,,,,,,,,,,,,,,,,,,,)
-#define XSIMD_RVV_IDENTIFIER(T,S,M, name) XSIMD_RVV_REPARSE(XSIMD_RVV_IDENTIFIER0 XSIMD_RVV_ARG_LIST(T,S,M, name))
+#define XSIMD_RVV_ARG_LIST(T,S, name) (T,S, XSIMD_RVV_UNBRACKET name,,,,,,,,,,,,,,,,,,,,,)
+#define XSIMD_RVV_IDENTIFIER(T,S, name) XSIMD_RVV_REPARSE(XSIMD_RVV_IDENTIFIER0 XSIMD_RVV_ARG_LIST(T,S, name))
 //
 // To avoid comma-counting bugs, replace the variable references with macros
 // which include enough commas to keep proper phase, and then use no commas at
@@ -90,7 +90,7 @@
 // into the template.
 #define XSIMD_RVV_WRAPPER_HEAD(NAME, SIGNATURE, ...) \
         namespace NAME##_cruft { \
-            template <class T, size_t M> struct ctx \
+            template <class T> struct ctx \
             { \
                 static constexpr size_t width = XSIMD_RVV_BITS; \
                 static constexpr size_t vl = width / (sizeof(T) * 8); \
@@ -104,10 +104,10 @@
                 using narrow_vec = rvv_reg_t<T, width / 2>; \
                 using type = SIGNATURE; \
             }; \
-            template <class T, size_t M> using sig_t = typename ctx<T, M>::type; \
-            template<class K, size_t M, class T> struct impl \
+            template <class T> using sig_t = typename ctx<T>::type; \
+            template<class K, class T> struct impl \
             { void operator()() const noexcept {}; }; \
-            template<class K, size_t M> using impl_t = impl<K, M, sig_t<K, M>>;
+            template<class K> using impl_t = impl<K, sig_t<K>>;
 
 #define XSIMD_RVV_WRAPPER_HEAD_NOVL(...)  XSIMD_RVV_WRAPPER_HEAD(__VA_ARGS__)
 #define XSIMD_RVV_WRAPPER_HEAD_DROP_1ST(...)  XSIMD_RVV_WRAPPER_HEAD(__VA_ARGS__)
@@ -125,36 +125,36 @@
 // overcomes the problem of converting a function signature type to an argument
 // list to pass to another function.
 //
-#define XSIMD_RVV_WRAPPER(KEY, VMUL, CALLEE, ...) \
+#define XSIMD_RVV_WRAPPER(KEY, CALLEE, ...) \
             template<class Ret, class... Args> \
-            struct impl<KEY, VMUL, Ret(Args...)> { \
-                using ctx = ctx<KEY, VMUL>; \
+            struct impl<KEY, Ret(Args...)> { \
+                using ctx = ctx<KEY>; \
                 constexpr Ret operator()(Args... args) const noexcept \
                 { return CALLEE(args..., ctx::vl); }; \
             };
-#define XSIMD_RVV_WRAPPER_NOVL(KEY, VMUL, CALLEE, ...) \
+#define XSIMD_RVV_WRAPPER_NOVL(KEY, CALLEE, ...) \
             template<class Ret, class... Args> \
-            struct impl<KEY, VMUL, Ret(Args...)> { \
+            struct impl<KEY, Ret(Args...)> { \
                 constexpr Ret operator()(Args... args) const noexcept \
                 { return CALLEE(args...); }; \
             };
-#define XSIMD_RVV_WRAPPER_DROP_1ST(KEY, VMUL, CALLEE, ...) \
+#define XSIMD_RVV_WRAPPER_DROP_1ST(KEY, CALLEE, ...) \
             template<class Ret, class First, class... Args> \
-            struct impl<KEY, VMUL, Ret(First, Args...)> { \
-                using ctx = ctx<KEY, VMUL>; \
+            struct impl<KEY, Ret(First, Args...)> { \
+                using ctx = ctx<KEY>; \
                 constexpr Ret operator()(First, Args... args) const noexcept \
                 { return CALLEE(args..., ctx::vl); }; \
             };
-#define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS(KEY, VMUL, CALLEE, SIGNATURE, ...) \
+#define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS(KEY, CALLEE, SIGNATURE, ...) \
             template<class Ret, class First, class... Args> \
-            struct impl<KEY, VMUL, Ret(First, Args...)> { \
-                using ctx = ctx<KEY, VMUL>; \
+            struct impl<KEY, Ret(First, Args...)> { \
+                using ctx = ctx<KEY>; \
                 constexpr Ret operator()(First, Args... args) const noexcept \
                 { return CALLEE(__VA_ARGS__, ctx::vl); }; \
             };
-#define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS_NOVL(KEY, VMUL, CALLEE, SIGNATURE, ...) \
+#define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS_NOVL(KEY, CALLEE, SIGNATURE, ...) \
             template<class Ret, class First, class... Args> \
-            struct impl<KEY, VMUL, Ret(First, Args...)> { \
+            struct impl<KEY, Ret(First, Args...)> { \
                 constexpr Ret operator()(First, Args... args) const noexcept \
                 { return CALLEE(__VA_ARGS__); }; \
             };
@@ -163,30 +163,29 @@
 // with all the different function signatures available under the one name.
 // Not all of the base classes necessarily contain useful code, but there's a
 // default implementation so that filtering them out isn't really necessary.
-#define XSIMD_RVV_M_VALUE 1 // lmul=m1
 #define XSIMD_RVV_WRAPPER_TAIL(NAME, ...) \
         }  /* namespace NAME##_cruft */ \
         static constexpr struct : \
-            NAME##_cruft::impl_t<  int8_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< uint8_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< int16_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<uint16_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< int32_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<uint32_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t< int64_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<uint64_t,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<   float,XSIMD_RVV_M_VALUE>, \
-            NAME##_cruft::impl_t<  double,XSIMD_RVV_M_VALUE> { \
-                using NAME##_cruft::impl_t<  int8_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< uint8_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< int16_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<uint16_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< int32_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<uint32_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t< int64_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<uint64_t,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<   float,XSIMD_RVV_M_VALUE>::operator(); \
-                using NAME##_cruft::impl_t<  double,XSIMD_RVV_M_VALUE>::operator(); \
+            NAME##_cruft::impl_t<  int8_t>, \
+            NAME##_cruft::impl_t< uint8_t>, \
+            NAME##_cruft::impl_t< int16_t>, \
+            NAME##_cruft::impl_t<uint16_t>, \
+            NAME##_cruft::impl_t< int32_t>, \
+            NAME##_cruft::impl_t<uint32_t>, \
+            NAME##_cruft::impl_t< int64_t>, \
+            NAME##_cruft::impl_t<uint64_t>, \
+            NAME##_cruft::impl_t<   float>, \
+            NAME##_cruft::impl_t<  double> { \
+                using NAME##_cruft::impl_t<  int8_t>::operator(); \
+                using NAME##_cruft::impl_t< uint8_t>::operator(); \
+                using NAME##_cruft::impl_t< int16_t>::operator(); \
+                using NAME##_cruft::impl_t<uint16_t>::operator(); \
+                using NAME##_cruft::impl_t< int32_t>::operator(); \
+                using NAME##_cruft::impl_t<uint32_t>::operator(); \
+                using NAME##_cruft::impl_t< int64_t>::operator(); \
+                using NAME##_cruft::impl_t<uint64_t>::operator(); \
+                using NAME##_cruft::impl_t<   float>::operator(); \
+                using NAME##_cruft::impl_t<  double>::operator(); \
             } NAME{};
 #define XSIMD_RVV_WRAPPER_TAIL_NOVL(...)  XSIMD_RVV_WRAPPER_TAIL(__VA_ARGS__)
 #define XSIMD_RVV_WRAPPER_TAIL_DROP_1ST(...)  XSIMD_RVV_WRAPPER_TAIL(__VA_ARGS__)
@@ -196,18 +195,18 @@
 #define XSIMD_RVV_OVERLOAD_head(my_name, variant, ...) \
       XSIMD_RVV_WRAPPER_HEAD##variant(my_name, __VA_ARGS__)
 #define XSIMD_RVV_OVERLOAD_i(name, variant, ...) \
-      XSIMD_RVV_WRAPPER##variant(  int8_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i, 8,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
-      XSIMD_RVV_WRAPPER##variant( int16_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i,16,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
-      XSIMD_RVV_WRAPPER##variant( int32_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i,32,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
-      XSIMD_RVV_WRAPPER##variant( int64_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(i,64,XSIMD_RVV_M_VALUE, name), __VA_ARGS__)
+      XSIMD_RVV_WRAPPER##variant(  int8_t, XSIMD_RVV_IDENTIFIER(i, 8, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant( int16_t, XSIMD_RVV_IDENTIFIER(i,16, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant( int32_t, XSIMD_RVV_IDENTIFIER(i,32, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant( int64_t, XSIMD_RVV_IDENTIFIER(i,64, name), __VA_ARGS__)
 #define XSIMD_RVV_OVERLOAD_u(name, variant, ...) \
-      XSIMD_RVV_WRAPPER##variant( uint8_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u, 8,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
-      XSIMD_RVV_WRAPPER##variant(uint16_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u,16,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
-      XSIMD_RVV_WRAPPER##variant(uint32_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u,32,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
-      XSIMD_RVV_WRAPPER##variant(uint64_t,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(u,64,XSIMD_RVV_M_VALUE, name), __VA_ARGS__)
+      XSIMD_RVV_WRAPPER##variant( uint8_t, XSIMD_RVV_IDENTIFIER(u, 8, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(uint16_t, XSIMD_RVV_IDENTIFIER(u,16, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(uint32_t, XSIMD_RVV_IDENTIFIER(u,32, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(uint64_t, XSIMD_RVV_IDENTIFIER(u,64, name), __VA_ARGS__)
 #define XSIMD_RVV_OVERLOAD_f(name, variant, ...) \
-      XSIMD_RVV_WRAPPER##variant(   float,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(f,32,XSIMD_RVV_M_VALUE, name), __VA_ARGS__) \
-      XSIMD_RVV_WRAPPER##variant(  double,XSIMD_RVV_M_VALUE, XSIMD_RVV_IDENTIFIER(f,64,XSIMD_RVV_M_VALUE, name), __VA_ARGS__)
+      XSIMD_RVV_WRAPPER##variant(   float, XSIMD_RVV_IDENTIFIER(f,32, name), __VA_ARGS__) \
+      XSIMD_RVV_WRAPPER##variant(  double, XSIMD_RVV_IDENTIFIER(f,64, name), __VA_ARGS__)
 #define XSIMD_RVV_OVERLOAD_tail(my_name, variant, ...) \
       XSIMD_RVV_WRAPPER_TAIL##variant(my_name, __VA_ARGS__)
 
