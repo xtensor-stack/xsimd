@@ -90,7 +90,7 @@ namespace xsimd
 
 #if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
 #ifndef HWCAP_V
-#define HWCAP_V	(1 << ('V' - 'A'))
+#define HWCAP_V (1 << ('V' - 'A'))
 #endif
                 rvv = bool(getauxval(AT_HWCAP) & HWCAP_V);
 #else

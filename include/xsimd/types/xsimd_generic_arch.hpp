@@ -41,7 +41,7 @@ namespace xsimd
         static constexpr char const* name() noexcept { return "generic"; }
 
     protected:
-        static constexpr unsigned version(unsigned major, unsigned minor, unsigned patch, unsigned multiplier = 100u) noexcept { return major * multiplier*multiplier + minor * multiplier + patch; }
+        static constexpr unsigned version(unsigned major, unsigned minor, unsigned patch, unsigned multiplier = 100u) noexcept { return major * multiplier * multiplier + minor * multiplier + patch; }
     };
 }
 

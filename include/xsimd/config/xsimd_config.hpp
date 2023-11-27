@@ -285,7 +285,6 @@
 #define XSIMD_SVE_BITS 0
 #endif
 
-
 /**
  * @ingroup xsimd_config_macro
  *
