@@ -121,6 +121,7 @@
 #define RVV_WRAPPER_HEAD_NOVL(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
 #define RVV_WRAPPER_HEAD_DROP_1ST(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
 #define RVV_WRAPPER_HEAD_DROP_1ST_CUSTOM_ARGS(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
+#define RVV_WRAPPER_HEAD_DROP_1ST_CUSTOM_ARGS_NOVL(...)  RVV_WRAPPER_HEAD(__VA_ARGS__)
 
 // The body of the wrapper defines a functor (because partial specialisation of
 // functions is not legal) which forwards its arguments to the named intrinsic
@@ -154,6 +155,13 @@
                 { return CALLEE(args..., ctx::vl); }; \
             };
 #define RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS(KEY, VMUL, CALLEE, SIGNATURE, ...) \
+            template<class Ret, class First, class... Args> \
+            struct impl<KEY, VMUL, Ret(First, Args...)> { \
+                using ctx = ctx<KEY, VMUL>; \
+                constexpr Ret operator()(First, Args... args) const noexcept \
+                { return CALLEE(__VA_ARGS__, ctx::vl); }; \
+            };
+#define RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS_NOVL(KEY, VMUL, CALLEE, SIGNATURE, ...) \
             template<class Ret, class First, class... Args> \
             struct impl<KEY, VMUL, Ret(First, Args...)> { \
                 constexpr Ret operator()(First, Args... args) const noexcept \
@@ -209,6 +217,7 @@
 #define RVV_WRAPPER_TAIL_NOVL(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
 #define RVV_WRAPPER_TAIL_DROP_1ST(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
 #define RVV_WRAPPER_TAIL_DROP_1ST_CUSTOM_ARGS(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
+#define RVV_WRAPPER_TAIL_DROP_1ST_CUSTOM_ARGS_NOVL(...)  RVV_WRAPPER_TAIL(__VA_ARGS__)
 
 // TODO: unroll all RVV_M_VALUE (and maybe 1/m as well)
 #define RVV_OVERLOAD_head(my_name, variant, ...) \
@@ -463,8 +472,8 @@ namespace xsimd
                 return __riscv_vslideup(lo, hi, lo.vl, lo.vl * 2);
             }
 
-            RVV_OVERLOAD(rvvget_lo_, (__riscv_vget_ RVV_TSM), _DROP_1ST_CUSTOM_ARGS, vec(T, wide_vec), args..., 0)
-            RVV_OVERLOAD(rvvget_hi_, (__riscv_vget_ RVV_TSM), _DROP_1ST_CUSTOM_ARGS, vec(T, wide_vec), args..., 1)
+            RVV_OVERLOAD(rvvget_lo_, (__riscv_vget_ RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 0)
+            RVV_OVERLOAD(rvvget_hi_, (__riscv_vget_ RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 1)
 
             template <class T, size_t W, typename std::enable_if<W >= types::detail::rvv_width_m1, int>::type = 0>
             rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
@@ -1222,11 +1231,16 @@ namespace xsimd
             RVV_OVERLOAD2(rvvfcvt_rtz,   // truncating conversion, like C.
                    (__riscv_vfcvt_rtz_x),
                    (__riscv_vfcvt_rtz_xu), _DROP_1ST, vec(T, fvec))
-            RVV_OVERLOAD2(rvvfcvt,      // round to nearest.
+            RVV_OVERLOAD2(rvvfcvt_rne,   // round to nearest, ties to even
+                   (__riscv_vfcvt_x),
+                   (__riscv_vfcvt_xu), _DROP_1ST_CUSTOM_ARGS, vec(T, fvec), args..., __RISCV_FRM_RNE)
+            RVV_OVERLOAD2(rvvfcvt_rmm,   // round to nearest, ties to max magnitude
+                   (__riscv_vfcvt_x),
+                   (__riscv_vfcvt_xu), _DROP_1ST_CUSTOM_ARGS, vec(T, fvec), args..., __RISCV_FRM_RMM)
+            RVV_OVERLOAD2(rvvfcvt,       // round to current rounding mode.
                    (__riscv_vfcvt_x),
                    (__riscv_vfcvt_xu), _DROP_1ST, vec(T, fvec))
             RVV_OVERLOAD_INTS(rvvfcvt_f, (__riscv_vfcvt_f), , fvec(vec))
-
 
             template <class T, class U>
             using rvv_enable_ftoi_t = typename std::enable_if<(sizeof(T) == sizeof(U) && std::is_floating_point<T>::value && !std::is_floating_point<U>::value), int>::type;
@@ -1402,21 +1416,13 @@ namespace xsimd
             template <class A, class T, class U = rvv_as_signed_integer_t<T>>
             inline batch<U, A> rvvfcvt_default(batch<T, A> const& arg) noexcept
             {
-                return detail::rvvfcvt(U{}, arg);
+                return rvvfcvt_rne(U{}, arg);
             }
 
             template <class A, class T, class U = rvv_as_signed_integer_t<T>>
             inline batch<U, A> rvvfcvt_afz(batch<T, A> const& arg) noexcept
             {
-                // Ensure round-to-nearest rounds ties away from zero
-                // TODO: what if rounding mode isn't nearest?
-                // TODO: Try save and restore frm, and check compiler output
-                // for redundant output.
-                const auto mask = rvvmslt_splat(arg, constants::maxflint<T>() * 0.25f);
-                const auto bits = rvv_to_unsigned_batch(arg);
-                const auto bump = rvvor_splat(bits, 1);
-                const auto fixed = detail::rvvreinterpret<T>(bump);
-                return rvvfcvt(U{}, rvvmerge(arg, fixed, mask));
+                return rvvfcvt_rmm(U{}, arg);
             }
         }
 
@@ -1424,8 +1430,8 @@ namespace xsimd
         template <class A, class T, class U = detail::rvv_as_signed_integer_t<T>>
         inline batch<U, A> nearbyint_as_int(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            // Reference rounds ties away from zero (despite name).
-            return detail::rvvfcvt_afz(arg);
+            // Reference rounds ties to nearest even
+            return detail::rvvfcvt_default(arg);
         }
 
         // round
