@@ -531,6 +531,19 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_data_transfer
+     *
+     * Pick elements from \c x selected by \c mask, and append them to the
+     * resulting vector, zeroing the remaining slots
+     */
+    template <class T, class A>
+    inline batch<T, A> compress(batch<T, A> const& x, batch_bool<T, A> const& mask) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::compress<A>(x, mask, A {});
+    }
+
+    /**
      * @ingroup batch_complex
      *
      * Computes the conjugate of the batch \c z.
