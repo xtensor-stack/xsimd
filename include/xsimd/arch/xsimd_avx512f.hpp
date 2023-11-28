@@ -661,6 +661,38 @@ namespace xsimd
             return _mm512_roundscale_pd(self, _MM_FROUND_TO_POS_INF);
         }
 
+        // compress
+        template <class A>
+        inline batch<float, A> compress(batch<float, A> const& self, batch_bool<float, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_compress_ps(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<double, A> compress(batch<double, A> const& self, batch_bool<double, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_compress_pd(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<int32_t, A> compress(batch<int32_t, A> const& self, batch_bool<int32_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_compress_epi32(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<uint32_t, A> compress(batch<uint32_t, A> const& self, batch_bool<uint32_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_compress_epi32(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<int64_t, A> compress(batch<int64_t, A> const& self, batch_bool<int64_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_compress_epi64(mask.mask(), self);
+        }
+        template <class A>
+        inline batch<uint64_t, A> compress(batch<uint64_t, A> const& self, batch_bool<uint64_t, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_maskz_compress_epi64(mask.mask(), self);
+        }
+
         // convert
         namespace detail
         {
