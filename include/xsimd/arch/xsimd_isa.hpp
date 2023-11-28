@@ -80,6 +80,10 @@
 #include "./xsimd_sve.hpp"
 #endif
 
+#if XSIMD_WITH_RVV
+#include "./xsimd_rvv.hpp"
+#endif
+
 #if XSIMD_WITH_WASM
 #include "./xsimd_wasm.hpp"
 #endif

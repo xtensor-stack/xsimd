@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <cstring>
 
-#if defined(__linux__) && (defined(__ARM_NEON) || defined(_M_ARM))
+#if defined(__linux__) && (defined(__ARM_NEON) || defined(_M_ARM) || defined(__riscv_vector))
 #include <asm/hwcap.h>
 #include <sys/auxv.h>
 #endif
@@ -53,6 +53,7 @@ namespace xsimd
             unsigned neon : 1;
             unsigned neon64 : 1;
             unsigned sve : 1;
+            unsigned rvv : 1;
 
             // version number of the best arch available
             unsigned best;
@@ -85,6 +86,18 @@ namespace xsimd
 #endif
                 best = sve::version() * sve;
 
+#elif defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0
+
+#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
+#ifndef HWCAP_V
+#define HWCAP_V (1 << ('V' - 'A'))
+#endif
+                rvv = bool(getauxval(AT_HWCAP) & HWCAP_V);
+#else
+                rvv = 0;
+#endif
+
+                best = ::xsimd::rvv::version() * rvv;
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
                 auto get_cpuid = [](int reg[4], int func_id) noexcept
                 {
