@@ -36,19 +36,16 @@ namespace xsimd
         namespace detail
         {
             template <class IT, class A, class I, size_t... Is>
-            inline std::pair<batch<IT, A>, batch_bool<IT, A>> create_compress_swizzle_mask(I bitmask, ::xsimd::detail::index_sequence<Is...>)
+            inline batch<IT, A> create_compress_swizzle_mask(I bitmask, ::xsimd::detail::index_sequence<Is...>)
             {
                 batch<IT, A> swizzle_mask(IT(0));
-                alignas(A::alignment()) IT mask_buffer[batch<IT, A>::size];
-                size_t inserted = 0, i = 0;
+                size_t i = 0;
+                alignas(A::alignment()) IT mask_buffer[batch<IT, A>::size] = { Is... };
+                size_t inserted = 0;
                 for (size_t i = 0; i < sizeof...(Is); ++i)
                     if ((bitmask >> i) & 1u)
-                        mask_buffer[inserted++] = i;
-                for (size_t i = inserted; i < sizeof...(Is); ++i)
-                    mask_buffer[i] = inserted;
-                batch<IT, A> mask = batch<IT, A>::load_aligned(&mask_buffer[0]);
-                batch_bool<IT, A> tail = mask < (IT)inserted;
-                return std::make_pair(mask, tail);
+                        std::swap(mask_buffer[inserted++], mask_buffer[i]);
+                return batch<IT, A>::load_aligned(&mask_buffer[0]);
             }
         }
 
@@ -60,9 +57,9 @@ namespace xsimd
             using IT = as_unsigned_integer_t<T>;
             constexpr std::size_t size = batch_bool<T, A>::size;
             auto bitmask = mask.mask();
-            auto compress_masks = detail::create_compress_swizzle_mask<IT, A>(bitmask, ::xsimd::detail::make_index_sequence<size>());
-            auto z = swizzle(x, compress_masks.first);
-            return bitwise_cast<T>(select(compress_masks.second, bitwise_cast<IT>(z), batch<IT, A>(IT(0))));
+            auto z = select(mask, x, batch<T, A>((T)0));
+            auto compress_mask = detail::create_compress_swizzle_mask<IT, A>(bitmask, ::xsimd::detail::make_index_sequence<size>());
+            return swizzle(z, compress_mask);
         }
 
         // extract_pair
