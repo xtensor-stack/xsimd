@@ -36,6 +36,7 @@ x86          | AVX512BW, AVX512CD, AVX512DQ, AVX512F (gcc7 and higher)
 x86 AMD      | FMA4
 ARM          | NEON, NEON64, SVE128/256/512 (fixed vector size)
 WebAssembly  | WASM
+RISC-V       | RISC-V128/256/512 (fixed vector size)
 
 ## Installation
 
@@ -78,6 +79,8 @@ http://xsimd.readthedocs.io/
 | `xsimd` | `xtl` (optional) |
 |---------|------------------|
 |  master |     ^0.7.0       |
+|  12.x   |     ^0.7.0       |
+|  11.x   |     ^0.7.0       |
 |  10.x   |     ^0.7.0       |
 |   9.x   |     ^0.7.0       |
 |   8.x   |     ^0.7.0       |
