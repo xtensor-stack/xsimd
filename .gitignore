@@ -44,3 +44,6 @@ docs/build/
 # VSCode / clangd IntelliSense
 .vscode/
 .cache/
+
+# CLion / IDEA
+.idea/

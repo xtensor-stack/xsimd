@@ -118,6 +118,11 @@ endif()
 # Installation
 # ============
 
+OPTION(XSIMD_SKIP_INSTALL "Skip installation or not. By default it is OFF" OFF)
+if(${XSIMD_SKIP_INSTALL})
+    return() # skip installation
+endif ()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(JoinPaths)
 include(GNUInstallDirs)
