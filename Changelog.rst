@@ -9,6 +9,23 @@
 Changelog
 =========
 
+12.0.0
+------
+
+    * Fix sincos implementation to cope with Emscripten
+    
+    * Upgraded minimal version of cmake to remove deprecation warning
+
+    * Fixed constants::signmask for GCC when using ffast-math
+
+    * Add RISC-V Vector support
+
+    * Generic, simple implementation fox xsimd::compress
+
+    * Disable batch of bools, and suggest using batch_bool instead
+
+    * Add an option to skip installation
+
 11.2.0
 ------
 
