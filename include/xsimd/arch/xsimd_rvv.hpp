@@ -1124,6 +1124,20 @@ namespace xsimd
             return detail::rvvmsge(lhs, rhs);
         }
 
+        /*************
+         * Selection *
+         *************/
+        namespace detail
+        {
+            XSIMD_RVV_OVERLOAD(rvvcompress, (__riscv_vcompress), , vec(vec, bvec))
+        }
+        // compress
+        template <class A, class T>
+        inline batch<T, A> compress(batch<T, A> const& x, batch_bool<T, A> const& mask, requires_arch<rvv>) noexcept
+        {
+            return detail::rvvcompress(x, mask);
+        }
+
         /***************
          * Permutation *
          ***************/
