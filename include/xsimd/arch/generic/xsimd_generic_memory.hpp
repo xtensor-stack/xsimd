@@ -39,7 +39,6 @@ namespace xsimd
             inline batch<IT, A> create_compress_swizzle_mask(I bitmask, ::xsimd::detail::index_sequence<Is...>)
             {
                 batch<IT, A> swizzle_mask(IT(0));
-                size_t i = 0;
                 alignas(A::alignment()) IT mask_buffer[batch<IT, A>::size] = { Is... };
                 size_t inserted = 0;
                 for (size_t i = 0; i < sizeof...(Is); ++i)
