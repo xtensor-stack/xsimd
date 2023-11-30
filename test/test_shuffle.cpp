@@ -323,7 +323,7 @@ struct compress_test
         for (size_t i = 0; i < size; ++i)
             mask[i] = i % 2 == 0;
 
-        for (size_t i = 0, j = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
             expected[i] = i < size / 2 ? input[2 * i] : 0;
 
         auto b = xsimd::compress(
@@ -337,7 +337,7 @@ struct compress_test
         for (size_t i = 0; i < size; ++i)
             mask[i] = i % 3 == 0;
 
-        for (size_t i = 0, j = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
             expected[i] = i < size / 3 ? input[3 * i] : 0;
 
         auto b = xsimd::compress(

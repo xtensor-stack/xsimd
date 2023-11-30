@@ -2033,10 +2033,12 @@ namespace xsimd
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
                 assert(false && "not implemented yet");
+                return {};
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 assert(false && "not implemented yet");
+                return {};
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
@@ -2099,10 +2101,12 @@ namespace xsimd
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
                 assert(false && "not implemented yet");
+                return {};
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 assert(false && "not implemented yet");
+                return {};
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {

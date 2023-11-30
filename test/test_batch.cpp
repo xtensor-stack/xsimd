@@ -101,6 +101,7 @@ struct batch_test
     {
         batch_type b;
         // value initialized to random data, can't be checked
+        (void)b;
 
         array_type tmp;
         std::fill(tmp.begin(), tmp.end(), value_type(2));

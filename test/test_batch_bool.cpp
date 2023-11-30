@@ -200,6 +200,7 @@ struct batch_bool_test
     {
         batch_bool_type a;
         // value uninitialized, cannot test it.
+        (void)a;
 
         bool_array_type res;
         batch_bool_type b(true);
@@ -368,6 +369,7 @@ struct batch_bool_test
             // FIXME: this volatile statement is useless on its own, but it
             // workaround a bug in MSVC 2022 on avx2 that shows up in CI.
             volatile auto _ = ((bool_g.half | bool_g.ihalf) == bool_g.all_true);
+            (void)_;
             INFO("operator|");
             CHECK_UNARY(res);
         }

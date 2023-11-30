@@ -125,7 +125,7 @@ struct constant_batch_test
 
         constexpr auto n12_usub = -n12;
         constexpr auto n12_usub_ = xsimd::make_batch_constant<batch_type, constant<(value_type)-12>>();
-        static_assert(std::is_same<decltype(n12_inv), decltype(n12_inv_)>::value, "-n12 == n12_usub");
+        static_assert(std::is_same<decltype(n12_usub), decltype(n12_usub_)>::value, "-n12 == n12_usub");
     }
 };
 
