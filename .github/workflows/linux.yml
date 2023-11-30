@@ -81,9 +81,6 @@ jobs:
         if [[ '${{ matrix.sys.flags }}' == 'enable_xtl_complex' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_XTL_COMPLEX=ON"
         fi
-        if [[ '${{ matrix.sys.flags }}' == 'force_no_instr_set' ]]; then
-          :
-        fi
         if [[ '${{ matrix.sys.flags }}' == 'avx' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
         fi
@@ -98,6 +95,11 @@ jobs:
         fi
         if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_CXX_FLAGS='-m32'"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'force_no_instr_set' ]]; then
+          :
+        else
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXSIMD_ENABLE_WERROR=ON"
         fi
 
         mkdir _build
