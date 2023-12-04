@@ -45,6 +45,7 @@ namespace xsimd
             unsigned avx : 1;
             unsigned fma3_avx : 1;
             unsigned avx2 : 1;
+            unsigned avxvnni : 1;
             unsigned fma3_avx2 : 1;
             unsigned avx512f : 1;
             unsigned avx512cd : 1;
@@ -104,14 +105,14 @@ namespace xsimd
 
                 best = ::xsimd::rvv::version() * rvv;
 #elif defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
-                auto get_cpuid = [](int reg[4], int func_id) noexcept
+                auto get_cpuid = [](int reg[4], int level, int count = 0) noexcept
                 {
 
 #if defined(_MSC_VER)
-                    __cpuidex(reg, func_id, 0);
+                    __cpuidex(reg, level, count);
 
 #elif defined(__INTEL_COMPILER)
-                    __cpuid(reg, func_id);
+                    __cpuid(reg, level);
 
 #elif defined(__GNUC__) || defined(__clang__)
 
@@ -122,13 +123,13 @@ namespace xsimd
                             "xchg{l}\t{%%}ebx, %1\n\t"
                             : "=a"(reg[0]), "=r"(reg[1]), "=c"(reg[2]),
                               "=d"(reg[3])
-                            : "a"(func_id), "c"(0));
+                            : "0"(level), "2"(count));
 
 #else
                     __asm__("cpuid\n\t"
                             : "=a"(reg[0]), "=b"(reg[1]), "=c"(reg[2]),
                               "=d"(reg[3])
-                            : "a"(func_id), "c"(0));
+                            : "0"(level), "2"(count));
 #endif
 
 #else
@@ -180,6 +181,11 @@ namespace xsimd
                 get_cpuid(regs7, 0x7);
                 avx2 = regs7[1] >> 5 & 1;
                 best = std::max(best, avx2::version() * avx2);
+
+                int regs7a[4];
+                get_cpuid(regs7a, 0x7, 0x1);
+                avxvnni = regs7a[0] >> 4 & 1;
+                best = std::max(best, avxvnni::version() * avxvnni * avx2);
 
                 fma3_avx2 = avx2 && fma3_sse;
                 best = std::max(best, fma3<xsimd::avx2>::version() * fma3_avx2);
