@@ -76,6 +76,14 @@
 #include "./xsimd_avx512pf.hpp"
 #endif
 
+#if XSIMD_WITH_AVX512IFMA
+#include "./xsimd_avx512ifma.hpp"
+#endif
+
+#if XSIMD_WITH_AVX512VBMI
+#include "./xsimd_avx512vbmi.hpp"
+#endif
+
 #if XSIMD_WITH_NEON
 #include "./xsimd_neon.hpp"
 #endif
