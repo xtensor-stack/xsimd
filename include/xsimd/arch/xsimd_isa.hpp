@@ -68,6 +68,14 @@
 #include "./xsimd_avx512bw.hpp"
 #endif
 
+#if XSIMD_WITH_AVX512ER
+#include "./xsimd_avx512er.hpp"
+#endif
+
+#if XSIMD_WITH_AVX512PF
+#include "./xsimd_avx512pf.hpp"
+#endif
+
 #if XSIMD_WITH_NEON
 #include "./xsimd_neon.hpp"
 #endif
