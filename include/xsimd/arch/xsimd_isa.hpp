@@ -52,6 +52,10 @@
 #include "./xsimd_fma3_avx.hpp"
 #endif
 
+#if XSIMD_WITH_AVXVNNI
+#include "./xsimd_avxvnni.hpp"
+#endif
+
 #if XSIMD_WITH_AVX2
 #include "./xsimd_avx2.hpp"
 #endif
