@@ -52,6 +52,8 @@ namespace xsimd
             unsigned avx512bw : 1;
             unsigned avx512er : 1;
             unsigned avx512pf : 1;
+            unsigned avx512ifma : 1;
+            unsigned avx512vbmi : 1;
             unsigned neon : 1;
             unsigned neon64 : 1;
             unsigned sve : 1;
@@ -199,6 +201,11 @@ namespace xsimd
                 avx512pf = regs7[1] >> 26 & 1;
                 best = std::max(best, avx512pf::version() * avx512pf * avx512er * avx512cd * avx512f);
 
+                avx512ifma = regs7[1] >> 21 & 1;
+                best = std::max(best, avx512ifma::version() * avx512ifma * avx512bw * avx512dq * avx512cd * avx512f);
+
+                avx512vbmi = regs7[2] >> 1 & 1;
+                best = std::max(best, avx512vbmi::version() * avx512vbmi * avx512ifma * avx512bw * avx512dq * avx512cd * avx512f);
 #endif
             }
         };
