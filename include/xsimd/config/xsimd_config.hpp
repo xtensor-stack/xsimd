@@ -288,6 +288,17 @@
 #define XSIMD_WITH_AVX512VBMI 0
 #endif
 
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if AVX512VNNI is available at compile-time, to 0 otherwise.
+ */
+#ifdef __AVX512VNNI__
+#define XSIMD_WITH_AVX512VNNI XSIMD_WITH_AVX512F
+#else
+#define XSIMD_WITH_AVX512VNNI 0
+#endif
+
 #ifdef __ARM_NEON
 
 /**
