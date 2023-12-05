@@ -215,17 +215,17 @@ namespace xsimd
 
 #undef MAKE_BINARY_OP
 
-        constexpr batch_constant<batch_type, (value_type)-Values...> operator-() const
+        constexpr batch_constant<batch_type, static_cast<value_type>(0-Values)...> operator-() const
         {
             return {};
         }
 
-        constexpr batch_constant<batch_type, (value_type) + Values...> operator+() const
+        constexpr batch_constant<batch_type, static_cast<value_type>(+Values)...> operator+() const
         {
             return {};
         }
 
-        constexpr batch_constant<batch_type, (value_type)~Values...> operator~() const
+        constexpr batch_constant<batch_type, static_cast<value_type>(~Values)...> operator~() const
         {
             return {};
         }
