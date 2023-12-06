@@ -318,8 +318,7 @@ struct batch_bool_test
         }
         // operator==
         {
-            bool res = xsimd::all(bool_g.half == !bool_g.ihalf);
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(bool_g.half, !bool_g.ihalf);
         }
         // operator &&
         {
@@ -360,39 +359,29 @@ struct batch_bool_test
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
         // operator version
         {
-            bool res = xsimd::all(bool_g.half == ~bool_g.ihalf);
             INFO("operator~");
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(bool_g.half, ~bool_g.ihalf);
         }
         {
-            bool res = xsimd::all((bool_g.half | bool_g.ihalf) == bool_g.all_true);
-            // FIXME: this volatile statement is useless on its own, but it
-            // workaround a bug in MSVC 2022 on avx2 that shows up in CI.
-            volatile auto _ = ((bool_g.half | bool_g.ihalf) == bool_g.all_true);
-            (void)_;
             INFO("operator|");
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(bool_g.half | bool_g.ihalf, bool_g.all_true);
         }
         {
-            bool res = xsimd::all((bool_g.half & bool_g.ihalf) == bool_g.all_false);
             INFO("operator&");
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(bool_g.half & bool_g.ihalf, bool_g.all_false);
         }
         // free function version
         {
-            bool res = xsimd::all(bool_g.half == xsimd::bitwise_not(bool_g.ihalf));
             INFO("bitwise_not");
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(bool_g.half, xsimd::bitwise_not(bool_g.ihalf));
         }
         {
-            bool res = xsimd::all(xsimd::bitwise_or(bool_g.half, bool_g.ihalf) == bool_g.all_true);
             INFO("bitwise_or");
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(xsimd::bitwise_or(bool_g.half, bool_g.ihalf), bool_g.all_true);
         }
         {
-            bool res = xsimd::all(xsimd::bitwise_and(bool_g.half, bool_g.ihalf) == bool_g.all_false);
             INFO("bitwise_and");
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(xsimd::bitwise_and(bool_g.half, bool_g.ihalf), bool_g.all_false);
         }
     }
 
@@ -409,9 +398,8 @@ struct batch_bool_test
         {
             auto tmp = bool_g.half;
             tmp &= bool_g.half;
-            bool res = xsimd::all(tmp == bool_g.half);
             INFO("operator&=");
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(tmp, bool_g.half);
         }
         {
             auto tmp = bool_g.half;
@@ -447,13 +435,12 @@ struct batch_bool_test
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
         // eq
         {
-            bool res = xsimd::all(xsimd::eq(bool_g.half, !bool_g.ihalf));
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(bool_g.half, !bool_g.ihalf);
+            CHECK_BATCH_EQ(xsimd::eq(bool_g.half, !bool_g.ihalf), bool_g.all_true);
         }
         // neq
         {
-            bool res = xsimd::all(xsimd::neq(bool_g.half, bool_g.ihalf));
-            CHECK_UNARY(res);
+            CHECK_BATCH_EQ(xsimd::neq(bool_g.half, bool_g.ihalf), bool_g.all_true);
         }
     }
 
