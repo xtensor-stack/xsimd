@@ -12,7 +12,7 @@
 #ifndef XSIMD_AVX512IFMA_REGISTER_HPP
 #define XSIMD_AVX512IFMA_REGISTER_HPP
 
-#include "./xsimd_avx512dq_register.hpp"
+#include "./xsimd_avx512bw_register.hpp"
 
 namespace xsimd
 {
@@ -22,7 +22,7 @@ namespace xsimd
      *
      * AVX512IFMA instructions
      */
-    struct avx512ifma : avx512dq
+    struct avx512ifma : avx512bw
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512IFMA; }
         static constexpr bool available() noexcept { return true; }
@@ -40,7 +40,7 @@ namespace xsimd
             using type = simd_avx512_bool_register<T>;
         };
 
-        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx512ifma, avx512dq);
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx512ifma, avx512bw);
 
     }
 #endif
