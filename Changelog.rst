@@ -9,6 +9,15 @@
 Changelog
 =========
 
+12.1.0
+------
+
+    * Fix various problems with architecture version handling
+
+    * Specialize xsimd::compress for riscv
+
+    * Provide stubs for various avx512xx architectures
+
 12.0.0
 ------
 
