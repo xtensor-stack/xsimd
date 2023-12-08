@@ -1159,15 +1159,15 @@ namespace xsimd
         inline batch<T, A> slide_left(batch<T, A> const& x, requires_arch<wasm>) noexcept
         {
             return wasm_i8x16_shuffle(
-                wasm_i64x2_const(0, 0), x, ((N)&0xF0) ? 0 : 16 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 17 - ((N)&0xF), ((N)&0xF0) ? 0 : 18 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 19 - ((N)&0xF), ((N)&0xF0) ? 0 : 20 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 21 - ((N)&0xF), ((N)&0xF0) ? 0 : 22 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 23 - ((N)&0xF), ((N)&0xF0) ? 0 : 24 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 25 - ((N)&0xF), ((N)&0xF0) ? 0 : 26 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 27 - ((N)&0xF), ((N)&0xF0) ? 0 : 28 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 29 - ((N)&0xF), ((N)&0xF0) ? 0 : 30 - ((N)&0xF),
-                ((N)&0xF0) ? 0 : 31 - ((N)&0xF));
+                wasm_i64x2_const(0, 0), x, ((N) & 0xF0) ? 0 : 16 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 17 - ((N) & 0xF), ((N) & 0xF0) ? 0 : 18 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 19 - ((N) & 0xF), ((N) & 0xF0) ? 0 : 20 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 21 - ((N) & 0xF), ((N) & 0xF0) ? 0 : 22 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 23 - ((N) & 0xF), ((N) & 0xF0) ? 0 : 24 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 25 - ((N) & 0xF), ((N) & 0xF0) ? 0 : 26 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 27 - ((N) & 0xF), ((N) & 0xF0) ? 0 : 28 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 29 - ((N) & 0xF), ((N) & 0xF0) ? 0 : 30 - ((N) & 0xF),
+                ((N) & 0xF0) ? 0 : 31 - ((N) & 0xF));
         }
 
         // slide_right
@@ -1175,15 +1175,15 @@ namespace xsimd
         inline batch<T, A> slide_right(batch<T, A> const& x, requires_arch<wasm>) noexcept
         {
             return wasm_i8x16_shuffle(
-                x, wasm_i64x2_const(0, 0), ((N)&0xF0) ? 16 : ((N)&0xF) + 0,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 1, ((N)&0xF0) ? 16 : ((N)&0xF) + 2,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 3, ((N)&0xF0) ? 16 : ((N)&0xF) + 4,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 5, ((N)&0xF0) ? 16 : ((N)&0xF) + 6,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 7, ((N)&0xF0) ? 16 : ((N)&0xF) + 8,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 9, ((N)&0xF0) ? 16 : ((N)&0xF) + 10,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 11, ((N)&0xF0) ? 16 : ((N)&0xF) + 12,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 13, ((N)&0xF0) ? 16 : ((N)&0xF) + 14,
-                ((N)&0xF0) ? 16 : ((N)&0xF) + 15);
+                x, wasm_i64x2_const(0, 0), ((N) & 0xF0) ? 16 : ((N) & 0xF) + 0,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 1, ((N) & 0xF0) ? 16 : ((N) & 0xF) + 2,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 3, ((N) & 0xF0) ? 16 : ((N) & 0xF) + 4,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 5, ((N) & 0xF0) ? 16 : ((N) & 0xF) + 6,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 7, ((N) & 0xF0) ? 16 : ((N) & 0xF) + 8,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 9, ((N) & 0xF0) ? 16 : ((N) & 0xF) + 10,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 11, ((N) & 0xF0) ? 16 : ((N) & 0xF) + 12,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 13, ((N) & 0xF0) ? 16 : ((N) & 0xF) + 14,
+                ((N) & 0xF0) ? 16 : ((N) & 0xF) + 15);
         }
 
         // sadd
