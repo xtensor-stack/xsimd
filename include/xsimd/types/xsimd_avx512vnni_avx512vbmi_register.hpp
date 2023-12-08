@@ -16,7 +16,7 @@
 
 namespace xsimd
 {
-    template<typename arch>
+    template <typename arch>
     struct avx512vnni;
 
     /**
@@ -24,7 +24,7 @@ namespace xsimd
      *
      * AVX512VNNI instructions
      */
-    template<>
+    template <>
     struct avx512vnni<avx512vbmi> : avx512vbmi
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512VNNI_AVX512VBMI; }
