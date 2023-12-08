@@ -190,7 +190,11 @@ namespace xsimd
     struct unsupported
     {
     };
-    using all_x86_architectures = arch_list<avx512vnni, avx512vbmi, avx512ifma, avx512pf, avx512bw, avx512er, avx512dq, avx512cd, avx512f, avxvnni, fma3<avx2>, avx2, fma3<avx>, avx, fma4, fma3<sse4_2>, sse4_2, sse4_1, /*sse4a,*/ ssse3, sse3, sse2>;
+    using all_x86_architectures = arch_list<
+            avx512vnni<avx512vbmi>, avx512vbmi, avx512ifma, avx512pf, avx512vnni<avx512bw>, avx512bw, avx512er, avx512dq, avx512cd, avx512f,
+            avxvnni, fma3<avx2>, avx2, fma3<avx>, avx, fma4, fma3<sse4_2>,
+            sse4_2, sse4_1, /*sse4a,*/ ssse3, sse3, sse2>;
+
     using all_sve_architectures = arch_list<detail::sve<512>, detail::sve<256>, detail::sve<128>>;
     using all_rvv_architectures = arch_list<detail::rvv<512>, detail::rvv<256>, detail::rvv<128>>;
     using all_arm_architectures = typename detail::join<all_sve_architectures, arch_list<neon64, neon>>::type;

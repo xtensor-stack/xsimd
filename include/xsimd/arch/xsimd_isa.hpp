@@ -88,8 +88,12 @@
 #include "./xsimd_avx512vbmi.hpp"
 #endif
 
-#if XSIMD_WITH_AVX512VNNI
-#include "./xsimd_avx512vnni.hpp"
+#if XSIMD_WITH_AVX512VNNI_AVX512BW
+#include "./xsimd_avx512vnni_avx512bw.hpp"
+#endif
+
+#if XSIMD_WITH_AVX512VNNI_AVX512VBMI
+#include "./xsimd_avx512vnni_avx512vbmi.hpp"
 #endif
 
 #if XSIMD_WITH_NEON
