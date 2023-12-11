@@ -10,8 +10,9 @@ jobs:
     strategy:
       matrix:
         target:
-          - { platform: 'arm',     arch: 'armv7-a', dir: 'arm-linux-gnueabihf', flags: '-mfpu=neon' }
-          - { platform: 'aarch64', arch: 'armv8-a', dir: 'aarch64-linux-gnu', flags: '' }
+          - { platform: 'arm',     arch: 'armv7-a', dir: 'arm-linux-gnueabihf', flags: '-mfpu=neon', full: 'ON'}
+          - { platform: 'arm',     arch: 'armv7-a', dir: 'arm-linux-gnueabihf', flags: '-mfpu=vfpv3-d16', full: 'OFF' } # no neon
+          - { platform: 'aarch64', arch: 'armv8-a', dir: 'aarch64-linux-gnu', flags: '', full: 'ON' }
         sys:
           - { compiler: 'gcc',   version: '8' }
           - { compiler: 'clang', version: 'latest' }
@@ -53,7 +54,7 @@ jobs:
     - name: Setup
       run: |
         mkdir _build
-        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DTARGET_ARCH=generic -DCMAKE_C_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" -DCMAKE_CXX_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
+        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} -DCMAKE_BUILD_TYPE=Release -DTARGET_ARCH=generic -DCMAKE_C_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" -DCMAKE_CXX_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
     - name: Build
       run: cmake --build _build
     - name: Testing xsimd
