@@ -13,11 +13,21 @@ SIMD (Single Instruction, Multiple Data) is a feature of microprocessors that ha
 on a batch of values at once, and thus provide a way to significantly accelerate code execution. However, these instructions differ between microprocessor
 vendors and compilers.
 
-`xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of numbers with the same arithmetic
-operators as for single values. It also provides accelerated implementation of common mathematical functions operating on batches.
+`xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of numbers with the same arithmetic operators as for single values. It also provides accelerated implementation of common mathematical functions operating on batches.
 
-You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the [The C++ Scientist](http://johanmabille.github.io/blog/archives/).
-The mathematical functions are a lightweight implementation of the algorithms used in [boost.SIMD](https://github.com/NumScale/boost.simd).
+## Adoption
+
+Beyond Xtensor, Xsimd has been adopted by major open-source projects, such as Mozilla Firefox, Apache Arrow, Pythran, and Krita.
+
+## History
+
+The XSimd project started with a series of blog articles by Johan Mabille on how to implement wrappers for SIMD intrinsicts.
+The archives of the blog can be found here: [The C++ Scientist](http://johanmabille.github.io/blog/archives/). The design described in
+the articles remained close to the actual architecture of XSimd up until Version 8.0.
+
+The mathematical functions are a lightweight implementation of the algorithms originally implemented in the now deprecated [boost.SIMD](https://github.com/NumScale/boost.simd) project.
+
+## Requirements
 
 `xsimd` requires a C++11 compliant compiler. The following C++ compilers are supported:
 
