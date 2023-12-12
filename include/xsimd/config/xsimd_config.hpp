@@ -14,7 +14,7 @@
 
 #define XSIMD_VERSION_MAJOR 12
 #define XSIMD_VERSION_MINOR 1
-#define XSIMD_VERSION_PATCH 0
+#define XSIMD_VERSION_PATCH 1
 
 /**
  * high level free functions

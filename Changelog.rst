@@ -9,6 +9,15 @@
 Changelog
 =========
 
+12.1.1
+------
+
+    * Update readme with a section on adoption, and a section on the history of the project 
+
+    * Fix/avx512vnni implementation
+
+    * Fix regression on XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 12.1.0
 ------
 
