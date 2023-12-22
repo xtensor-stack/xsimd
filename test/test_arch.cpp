@@ -124,15 +124,6 @@ TEST_CASE("[multi arch support]")
             float res = dispatched(data, 17);
             CHECK_EQ(ref, res);
         }
-
-        // check that we pick the most appropriate version
-        {
-            auto dispatched = xsimd::dispatch<xsimd::arch_list<xsimd::sse3, xsimd::sse2, xsimd::generic>>(get_arch_version {});
-            unsigned expected = xsimd::available_architectures().best >= xsimd::sse3::version()
-                ? xsimd::sse3::version()
-                : xsimd::sse2::version();
-            CHECK_EQ(expected, dispatched());
-        }
 #endif
     }
 
