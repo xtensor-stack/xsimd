@@ -23,6 +23,7 @@ struct power_test
     using vector_type = std::vector<value_type>;
 
     size_t nb_input;
+    vector_type zero_input;
     vector_type zlhs_input;
     vector_type lhs_input;
     vector_type rhs_input;
@@ -32,11 +33,13 @@ struct power_test
     power_test()
     {
         nb_input = size * 10000;
+        zero_input.resize(nb_input);
         zlhs_input.resize(nb_input);
         lhs_input.resize(nb_input);
         rhs_input.resize(nb_input);
         for (size_t i = 0; i < nb_input; ++i)
         {
+            zero_input[i] = 0;
             lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
             zlhs_input[i] = lhs_input[i] * (i % 2);
             rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
@@ -79,7 +82,7 @@ struct power_test
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);
-            INFO("pow");
+            INFO("0 ^ x");
             CHECK_EQ(diff, 0);
 
 // use of undeclared identifier '_MM_SET_EXCEPTION_MASK for emscripten
@@ -96,9 +99,26 @@ struct power_test
             }
             _MM_SET_EXCEPTION_MASK(mask);
             diff = detail::get_nb_diff(res, expected);
-            INFO("pow");
+            INFO("0 ^ x with exception");
             CHECK_EQ(diff, 0);
 #endif
+        }
+        // pow 0^-x
+        {
+            std::transform(zero_input.cbegin(), zero_input.cend(), rhs_input.cbegin(), expected.begin(),
+                           [](const value_type& z, const value_type& r)
+                           { return std::pow(z, -r); });
+            batch_type zero_in, rhs_in, out;
+            for (size_t i = 0; i < nb_input; i += size)
+            {
+                detail::load_batch(zero_in, zero_input, i);
+                detail::load_batch(rhs_in, rhs_input, i);
+                out = pow(zero_in, -rhs_in);
+                detail::store_batch(out, res, i);
+            }
+            size_t diff = detail::get_nb_diff(res, expected);
+            INFO("pow(0, -x)");
+            CHECK_EQ(diff, 0);
         }
         // ipow
         {
