@@ -1,7 +1,15 @@
 # ![xsimd](docs/source/xsimd.svg)
 
-[![Appveyor](https://ci.appveyor.com/api/projects/status/wori7my48os31nu0?svg=true)](https://ci.appveyor.com/project/xtensor-stack/xsimd)
-[![Azure](https://dev.azure.com/xtensor-stack/xtensor-stack/_apis/build/status/xtensor-stack.xsimd?branchName=master)](https://dev.azure.com/xtensor-stack/xtensor-stack/_build/latest?definitionId=3&branchName=master)
+[![GHA android](https://github.com/xtensor-stack/xsimd/actions/workflows/android.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/android.yml)
+[![GHA cross-rvv](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-rvv.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-rvv.yml)
+[![GHA cross-sve](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-sve.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-sve.yml)
+[![GHA cross](https://github.com/xtensor-stack/xsimd/actions/workflows/cross.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross.yml)
+[![GHA cxx-no-exceptions](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-no-exceptions.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-no-exceptions.yml)
+[![GHA cxx-versions](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-versions.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-versions.yml)
+[![GHA emscripten](https://github.com/xtensor-stack/xsimd/actions/workflows/emscripten.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/emscripten.yml)
+[![GHA linux](https://github.com/xtensor-stack/xsimd/actions/workflows/linux.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/linux.yml)
+[![GHA macos](https://github.com/xtensor-stack/xsimd/actions/workflows/macos.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/macos.yml)
+[![GHA windows](https://github.com/xtensor-stack/xsimd/actions/workflows/windows.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/windows.yml)
 [![Documentation Status](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
