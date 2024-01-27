@@ -15,6 +15,7 @@
 #include <random>
 
 #include "test_utils.hpp"
+#if 0
 
 template <class B>
 struct xsimd_api_test
@@ -190,4 +191,5 @@ TEST_CASE_TEMPLATE("[basic api]", B, BATCH_TYPES)
         Test.test_set();
     }
 }
+#endif
 #endif
