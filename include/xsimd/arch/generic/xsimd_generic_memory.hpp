@@ -412,6 +412,12 @@ namespace xsimd
                 return true;
             }
 
+            template <typename ITy>
+            constexpr bool is_zip_lo(size_t, ITy)
+            {
+                return false;
+            }
+
             template <typename ITy0, typename ITy1, typename... ITys>
             constexpr bool is_zip_lo(size_t bsize, ITy0 index0, ITy1 index1, ITys... indices)
             {
@@ -421,6 +427,12 @@ namespace xsimd
             constexpr bool is_zip_hi(size_t)
             {
                 return true;
+            }
+
+            template <typename ITy>
+            constexpr bool is_zip_hi(size_t, ITy)
+            {
+                return false;
             }
 
             template <typename ITy0, typename ITy1, typename... ITys>

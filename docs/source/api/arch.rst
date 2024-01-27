@@ -17,3 +17,12 @@ The best available architecture is available at compile time through
 .. doxygengroup:: architectures
    :project: xsimd
    :members:
+
+
+Emulated mode
+-------------
+
+When compiled with the macro ``XSIMD_WITH_EMULATED`` set to ``1``, xsimd also
+exhibits a specific architecture ``xsimd::emulated<N>``, which consists of a
+vector of ``N`` bits emulated using scalar mode.
+It is mostly available for testing and debugging.
