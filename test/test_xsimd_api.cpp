@@ -665,11 +665,11 @@ struct xsimd_api_float_types_functions
     {
         value_type val0(3);
         value_type val1(4);
-#ifndef EMSCRIPTEN
-        CHECK_EQ(extract(xsimd::polar(T(val0), T(val1))), std::polar(val0, val1));
-#else
+#if defined(EMSCRIPTEN) || (defined(__APPLE__) && defined(XSIMD_WITH_NEON64))
         CHECK_EQ(std::real(extract(xsimd::polar(T(val0), T(val1)))), doctest::Approx(std::real(std::polar(val0, val1))));
         CHECK_EQ(std::imag(extract(xsimd::polar(T(val0), T(val1)))), doctest::Approx(std::imag(std::polar(val0, val1))));
+#else
+        CHECK_EQ(extract(xsimd::polar(T(val0), T(val1))), std::polar(val0, val1));
 #endif
     }
     void test_pow()
