@@ -46,6 +46,7 @@ namespace xsimd
 
     struct unsupported
     {
+        static constexpr std::size_t alignment() noexcept { return 0; }
     };
 }
 

@@ -290,7 +290,7 @@ int main()
     const float y1 = 1;
     const int maxIters = 256;
 
-    std::vector<int, xsimd::aligned_allocator<int, xsimd::default_arch::alignment()>> buf(width * height);
+    std::vector<int, xsimd::aligned_allocator<int>> buf(width * height);
 
     auto bencher = pico_bench::Benchmarker<milliseconds> { 64, seconds { 10 } };
 
