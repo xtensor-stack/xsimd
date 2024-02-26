@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install dependencies
       run: |
-          sudo apt install g++ cmake
+          sudo apt install g++
     - name: Setup
       run: |
         mkdir _build
