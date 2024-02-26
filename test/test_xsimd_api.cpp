@@ -1156,6 +1156,13 @@ struct xsimd_api_all_types_functions
         CHECK_EQ(extract(xsimd::add(T(val0), T(val1))), val0 + val1);
     }
 
+    void test_avg()
+    {
+        value_type val0(1);
+        value_type val1(3);
+        CHECK_EQ(extract(xsimd::avg(T(val0), T(val1))), (val0 + val1) / value_type(2));
+    }
+
     void test_decr()
     {
         value_type val0(1);

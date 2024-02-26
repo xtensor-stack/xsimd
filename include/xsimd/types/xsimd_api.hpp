@@ -203,6 +203,21 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_math
+     *
+     * Computes the average of batches \c x and \c y
+     * @param x batch of T
+     * @param y batch of T
+     * @return the average of elements between \c x and \c y.
+     */
+    template <class T, class A>
+    inline batch<T, A> avg(batch<T, A> const& x, batch<T, A> const& y) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::avg<A>(x, y, A {});
+    }
+
+    /**
      * @ingroup batch_conversion
      *
      * Perform a static_cast from \c T_in to \c T_out on \c \c x.
