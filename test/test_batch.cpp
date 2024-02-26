@@ -737,6 +737,26 @@ struct batch_test
         }
     }
 
+    void test_avg() const
+    {
+        array_type expected;
+        std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                       [](const value_type& l, const value_type& r) -> value_type
+                       {
+                           if (std::is_integral<value_type>::value)
+                           {
+                               return ((long long)l + r) / 2;
+                           }
+                           else
+                           {
+                               return (l + r) / 2;
+                           }
+                       });
+        batch_type res = avg(batch_lhs(), batch_rhs());
+        INFO("avg");
+        CHECK_BATCH_EQ(res, expected);
+    }
+
     void test_horizontal_operations() const
     {
         // reduce_add
@@ -936,6 +956,11 @@ TEST_CASE_TEMPLATE("[batch]", B, BATCH_TYPES)
     SUBCASE("abs")
     {
         Test.test_abs();
+    }
+
+    SUBCASE("avg")
+    {
+        Test.test_avg();
     }
 
     SUBCASE("horizontal_operations")

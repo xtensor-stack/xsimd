@@ -60,6 +60,8 @@ namespace xsimd
         inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
         template <class A, typename T, typename ITy, ITy... Indices>
         inline batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<ITy, A>, Indices...>, requires_arch<generic>) noexcept;
+        template <class A, class T>
+        inline batch<T, A> avg(batch<T, A> const&, batch<T, A> const&, requires_arch<generic>) noexcept;
 
         // abs
         template <class A>
@@ -146,6 +148,26 @@ namespace xsimd
         inline bool any(batch_bool<T, A> const& self, requires_arch<sse2>) noexcept
         {
             return _mm_movemask_epi8(self) != 0;
+        }
+
+        // avg
+        template <class A, class T, class = typename std::enable_if<std::is_unsigned<T>::value, void>::type>
+        inline batch<T, A> avg(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                auto adj = ((self ^ other) << 7) >> 7;
+                return batch<T, A>(_mm_avg_epu8(self, other)) - adj;
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                auto adj = ((self ^ other) << 15) >> 15;
+                return batch<T, A>(_mm_avg_epu16(self, other)) - adj;
+            }
+            else
+            {
+                return avg(self, other, generic {});
+            }
         }
 
         // batch_bool_cast
