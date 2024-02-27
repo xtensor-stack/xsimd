@@ -771,6 +771,22 @@ namespace xsimd
         }
 
         /********
+         * avgr *
+         ********/
+
+        WRAP_BINARY_UINT_EXCLUDING_64(vrhaddq, detail::identity_return_type)
+
+        template <class A, class T, class = typename std::enable_if<(std::is_unsigned<T>::value && sizeof(T) != 8), void>::type>
+        inline batch<T, A> avgr(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            using register_type = typename batch<T, A>::register_type;
+            const detail::neon_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary dispatcher = {
+                std::make_tuple(wrap::vrhaddq_u8, wrap::vrhaddq_u16, wrap::vrhaddq_u32)
+            };
+            return dispatcher.apply(register_type(lhs), register_type(rhs));
+        }
+
+        /********
          * sadd *
          ********/
 

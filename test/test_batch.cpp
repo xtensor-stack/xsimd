@@ -739,22 +739,42 @@ struct batch_test
 
     void test_avg() const
     {
-        array_type expected;
-        std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
-                       [](const value_type& l, const value_type& r) -> value_type
-                       {
-                           if (std::is_integral<value_type>::value)
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                           [](const value_type& l, const value_type& r) -> value_type
                            {
-                               return ((long long)l + r) / 2;
-                           }
-                           else
+                               if (std::is_integral<value_type>::value)
+                               {
+                                   return ((long long)l + r) / 2;
+                               }
+                               else
+                               {
+                                   return (l + r) / 2;
+                               }
+                           });
+            batch_type res = avg(batch_lhs(), batch_rhs());
+            INFO("avg");
+            CHECK_BATCH_EQ(res, expected);
+        }
+        {
+            array_type expected;
+            std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
+                           [](const value_type& l, const value_type& r) -> value_type
                            {
-                               return (l + r) / 2;
-                           }
-                       });
-        batch_type res = avg(batch_lhs(), batch_rhs());
-        INFO("avg");
-        CHECK_BATCH_EQ(res, expected);
+                               if (std::is_integral<value_type>::value)
+                               {
+                                   return ((long long)l + r) / 2 + ((long long)(l + r) & 1);
+                               }
+                               else
+                               {
+                                   return (l + r) / 2;
+                               }
+                           });
+            batch_type res = avgr(batch_lhs(), batch_rhs());
+            INFO("avgr");
+            CHECK_BATCH_EQ(res, expected);
+        }
     }
 
     void test_horizontal_operations() const

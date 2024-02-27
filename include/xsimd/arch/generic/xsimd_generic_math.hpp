@@ -78,6 +78,30 @@ namespace xsimd
             return detail::avg(x, y, typename std::is_integral<T>::type {}, typename std::is_signed<T>::type {});
         }
 
+        // avgr
+        namespace detail
+        {
+            template <class A, class T>
+            inline batch<T, A> avgr(batch<T, A> const& x, batch<T, A> const& y, std::true_type) noexcept
+            {
+                constexpr unsigned shift = 8 * sizeof(T) - 1;
+                auto adj = std::is_signed<T>::value ? ((x ^ y) & 0x1) : (((x ^ y) << shift) >> shift);
+                return ::xsimd::kernel::avg(x, y, A {}) + adj;
+            }
+
+            template <class A, class T>
+            inline batch<T, A> avgr(batch<T, A> const& x, batch<T, A> const& y, std::false_type) noexcept
+            {
+                return ::xsimd::kernel::avg(x, y, A {});
+            }
+        }
+
+        template <class A, class T>
+        inline batch<T, A> avgr(batch<T, A> const& x, batch<T, A> const& y, requires_arch<generic>) noexcept
+        {
+            return detail::avgr(x, y, typename std::is_integral<T>::type {});
+        }
+
         // batch_cast
         template <class A, class T>
         inline batch<T, A> batch_cast(batch<T, A> const& self, batch<T, A> const&, requires_arch<generic>) noexcept
