@@ -163,6 +163,18 @@ namespace xsimd
         }
     }
 
+    template <class T, class Tp>
+    inline typename std::common_type<T, Tp>::type avgr(T const& x, Tp const& y) noexcept
+    {
+        using common_type = typename std::common_type<T, Tp>::type;
+        if (std::is_floating_point<common_type>::value)
+            return avg(x, y);
+        else
+        {
+            return avg(x, y) + ((x ^ y) & 1);
+        }
+    }
+
     template <class T>
     inline T incr(T const& x) noexcept
     {

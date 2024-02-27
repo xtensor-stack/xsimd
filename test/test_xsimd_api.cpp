@@ -1161,6 +1161,13 @@ struct xsimd_api_all_types_functions
         value_type val0(1);
         value_type val1(3);
         CHECK_EQ(extract(xsimd::avg(T(val0), T(val1))), (val0 + val1) / value_type(2));
+
+        value_type val2(2);
+        value_type val3(3);
+        if (std::is_integral<value_type>::value)
+            CHECK_EQ(extract(xsimd::avgr(T(val2), T(val3))), (val2 + val3 + 1) / value_type(2));
+        else
+            CHECK_EQ(extract(xsimd::avgr(T(val2), T(val3))), (val2 + val3) / value_type(2));
     }
 
     void test_decr()
