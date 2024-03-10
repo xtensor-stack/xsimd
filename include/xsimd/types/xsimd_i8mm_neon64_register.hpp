@@ -39,6 +39,11 @@ namespace xsimd
 
         XSIMD_DECLARE_SIMD_REGISTER_ALIAS(i8mm<neon64>, neon64);
 
+        template <class T>
+        struct get_bool_simd_register<T, i8mm<neon64>>
+            : detail::neon_bool_simd_register<T, i8mm<neon64>>
+        {
+        };
     }
 #endif
 
