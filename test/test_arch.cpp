@@ -45,12 +45,6 @@ struct check_available
     }
 };
 
-struct get_arch_version
-{
-    template <class Arch>
-    unsigned operator()(Arch) { return Arch::version(); }
-};
-
 template <class T>
 static bool try_load()
 {
