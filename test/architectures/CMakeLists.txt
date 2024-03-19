@@ -2,9 +2,11 @@ set(INTEL_PROCESSORS
     knl knm skylake-avx512 cannonlake icelake-client
     icelake-server cascadelake cooperlake tigerlake sapphirerapids alderlake
     rocketlake graniterapids graniterapids-d znver4)
-set(CMAKE_CXX_FLAGS "")
+set(CMAKE_CXX_FLAGS "-Werror=unused-command-line-argument")
 
 foreach(INTEL_PROCESSOR ${INTEL_PROCESSORS})
+    # Adding the werror here to choke if the -march is incompatible with the
+    # native one.
     check_cxx_compiler_flag(-march=${INTEL_PROCESSOR} FLAG_SUPPORTED_${INTEL_PROCESSOR})
     if(FLAG_SUPPORTED_${INTEL_PROCESSOR})
         message(STATUS ${INTEL_PROCESSOR})
