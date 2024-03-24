@@ -24,13 +24,13 @@
 
 namespace xsimd
 {
-    template <class batch_type, bool... Values>
+    template <typename T, class A, bool... Values>
     struct batch_bool_constant;
 
     template <class T_out, class T_in, class A>
     inline batch<T_out, A> bitwise_cast(batch<T_in, A> const& x) noexcept;
 
-    template <class batch_type, typename batch_type::value_type... Values>
+    template <typename T, class A, T... Values>
     struct batch_constant;
 
     namespace kernel
@@ -41,7 +41,7 @@ namespace xsimd
         template <class A, class T, size_t I>
         inline batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
         template <class A, typename T, typename ITy, ITy... Indices>
-        inline batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<ITy, A>, Indices...>, requires_arch<generic>) noexcept;
+        inline batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<ITy, A, Indices...>, requires_arch<generic>) noexcept;
 
         namespace detail
         {
@@ -599,7 +599,7 @@ namespace xsimd
         }
 
         template <class A, class T, bool... Values>
-        inline batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<emulated<8 * sizeof(T) * batch<T, A>::size>>) noexcept
+        inline batch<T, A> select(batch_bool_constant<T, A, Values...> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<emulated<8 * sizeof(T) * batch<T, A>::size>>) noexcept
         {
             constexpr size_t size = batch<T, A>::size;
             static_assert(sizeof...(Values) == size, "consistent init");
@@ -608,7 +608,7 @@ namespace xsimd
 
         // shuffle
         template <class A, typename T, class ITy, ITy... Is>
-        inline batch<T, A> shuffle(batch<T, A> const& x, batch<float, A> const& y, batch_constant<batch<ITy, A>, Is...> mask, requires_arch<emulated<batch<T, A>::size>>) noexcept
+        inline batch<T, A> shuffle(batch<T, A> const& x, batch<float, A> const& y, batch_constant<ITy, A, Is...> mask, requires_arch<emulated<batch<T, A>::size>>) noexcept
         {
             constexpr size_t size = batch<T, A>::size;
             batch<ITy, A> bmask = mask;
@@ -710,7 +710,7 @@ namespace xsimd
         // swizzle
 
         template <class A, typename T, class ITy, ITy... Is>
-        inline batch<T, A> swizzle(batch<T, A> const& self, batch_constant<batch<ITy, A>, Is...> mask, requires_arch<emulated<8 * sizeof(T) * batch<T, A>::size>>) noexcept
+        inline batch<T, A> swizzle(batch<T, A> const& self, batch_constant<ITy, A, Is...> mask, requires_arch<emulated<8 * sizeof(T) * batch<T, A>::size>>) noexcept
         {
             constexpr size_t size = batch<T, A>::size;
             batch<ITy, A> bmask = mask;
