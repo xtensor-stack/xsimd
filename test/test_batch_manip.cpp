@@ -87,8 +87,8 @@ struct as_index
     using type = xsimd::as_unsigned_integer_t<T>;
 };
 
-template <class T, class A>
-struct as_index<xsimd::batch<std::complex<T>, A>> : as_index<xsimd::batch<T, A>>
+template <class T>
+struct as_index<std::complex<T>> : as_index<T>
 {
 };
 
@@ -145,6 +145,7 @@ struct swizzle_test
 {
     using batch_type = B;
     using value_type = typename B::value_type;
+    using arch_type = typename B::arch_type;
     static constexpr size_t size = B::size;
 
     void rotate_right()
@@ -185,13 +186,13 @@ struct swizzle_test
         B b_lhs = B::load_unaligned(v_lhs.data());
         B b_exped = B::load_unaligned(v_exped.data());
 
-        using index_type = typename as_index<batch_type>::type;
-        auto index_batch = xsimd::make_batch_constant<index_type, Reversor<typename index_type::value_type>>();
+        using index_type = typename as_index<value_type>::type;
+        auto index_batch = xsimd::make_batch_constant<index_type, arch_type, Reversor<index_type>>();
 
         B b_res = xsimd::swizzle(b_lhs, index_batch);
         CHECK_BATCH_EQ(b_res, b_exped);
 
-        B b_dyres = xsimd::swizzle(b_lhs, (index_type)index_batch);
+        B b_dyres = xsimd::swizzle(b_lhs, (xsimd::batch<index_type, arch_type>)index_batch);
         CHECK_BATCH_EQ(b_dyres, b_exped);
     }
 
@@ -205,13 +206,13 @@ struct swizzle_test
         B b_lhs = B::load_unaligned(v_lhs.data());
         B b_exped = B::load_unaligned(v_exped.data());
 
-        using index_type = typename as_index<batch_type>::type;
-        auto index_batch = xsimd::make_batch_constant<index_type, Last<typename index_type::value_type>>();
+        using index_type = typename as_index<value_type>::type;
+        auto index_batch = xsimd::make_batch_constant<index_type, arch_type, Last<index_type>>();
 
         B b_res = xsimd::swizzle(b_lhs, index_batch);
         CHECK_BATCH_EQ(b_res, b_exped);
 
-        B b_dyres = xsimd::swizzle(b_lhs, (index_type)index_batch);
+        B b_dyres = xsimd::swizzle(b_lhs, (xsimd::batch<index_type, arch_type>)index_batch);
         CHECK_BATCH_EQ(b_dyres, b_exped);
     }
 
@@ -225,13 +226,13 @@ struct swizzle_test
         B b_lhs = B::load_unaligned(v_lhs.data());
         B b_exped = B::load_unaligned(v_exped.data());
 
-        using index_type = typename as_index<batch_type>::type;
-        auto index_batch = xsimd::make_batch_constant<index_type, Dup<typename index_type::value_type>>();
+        using index_type = typename as_index<value_type>::type;
+        auto index_batch = xsimd::make_batch_constant<index_type, arch_type, Dup<index_type>>();
 
         B b_res = xsimd::swizzle(b_lhs, index_batch);
         CHECK_BATCH_EQ(b_res, b_exped);
 
-        B b_dyres = xsimd::swizzle(b_lhs, (index_type)index_batch);
+        B b_dyres = xsimd::swizzle(b_lhs, (xsimd::batch<index_type, arch_type>)index_batch);
         CHECK_BATCH_EQ(b_dyres, b_exped);
     }
 };

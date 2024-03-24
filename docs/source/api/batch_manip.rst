@@ -16,7 +16,7 @@ Conditional expression
 .. doxygenfunction:: select(batch_bool<T, A> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
    :project: xsimd
 
-.. doxygenfunction:: select(batch_bool_constant<batch<T, A>, Values...> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
+.. doxygenfunction:: select(batch_bool_constant<T, A, Values...> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
    :project: xsimd
 
 

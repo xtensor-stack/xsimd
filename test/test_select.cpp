@@ -19,6 +19,7 @@ struct select_test
 {
     using batch_type = B;
     using value_type = typename B::value_type;
+    using arch_type = typename B::arch_type;
     static constexpr size_t size = B::size;
     using vector_type = std::vector<value_type>;
 
@@ -67,7 +68,7 @@ struct select_test
 
     void test_select_static()
     {
-        constexpr auto mask = xsimd::make_batch_bool_constant<batch_type, pattern>();
+        constexpr auto mask = xsimd::make_batch_bool_constant<value_type, arch_type, pattern>();
 
         for (size_t i = 0; i < nb_input; ++i)
         {

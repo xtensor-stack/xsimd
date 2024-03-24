@@ -2031,7 +2031,7 @@ namespace xsimd
      * @return the result of the selection.
      */
     template <class T, class A, bool... Values>
-    inline batch<T, A> select(batch_bool_constant<batch<T, A>, Values...> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br) noexcept
+    inline batch<T, A> select(batch_bool_constant<T, A, Values...> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::select<A>(cond, true_br, false_br, A {});
@@ -2047,7 +2047,7 @@ namespace xsimd
      * element of \c x and \c y. Each element of the mask index the vector that
      * would be formed by the concatenation of \c x and \c y. For instance
      * \code{.cpp}
-     * batch_constant<batch<uint32_t, sse2>, 0, 4, 3, 7>
+     * batch_constant<uint32_t, sse2, 0, 4, 3, 7>
      * \endcode
      * Picks \c x[0], \c y[0], \c x[3], \c y[3]
      *
@@ -2055,7 +2055,7 @@ namespace xsimd
      */
     template <class T, class A, class Vt, Vt... Values>
     inline typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
-    shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
         detail::static_check_supported_config<T, A>();
@@ -2357,14 +2357,14 @@ namespace xsimd
      */
     template <class T, class A, class Vt, Vt... Values>
     inline typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
-    swizzle(batch<T, A> const& x, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    swizzle(batch<T, A> const& x, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
         detail::static_check_supported_config<T, A>();
         return kernel::swizzle<A>(x, mask, A {});
     }
     template <class T, class A, class Vt, Vt... Values>
-    inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& x, batch_constant<batch<Vt, A>, Values...> mask) noexcept
+    inline batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& x, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
         detail::static_check_supported_config<T, A>();
