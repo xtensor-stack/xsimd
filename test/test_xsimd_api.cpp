@@ -130,6 +130,14 @@ struct xsimd_api_scalar_types_functions
         CHECK_EQ(extract(xsimd::bitwise_and(T(val0), T(val1))), r);
     }
 
+    void test_bitwise_cast()
+    {
+        value_type val(1);
+        xsimd::as_unsigned_integer_t<value_type> r;
+        std::memcpy((void*)&r, (void*)&val, sizeof(val));
+        CHECK_EQ(extract(xsimd::bitwise_cast<value_type>(val)), r);
+    }
+
     void test_bitwise_andnot()
     {
         value_type val0(1);

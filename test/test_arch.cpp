@@ -18,10 +18,12 @@
 #include "test_sum.hpp"
 #include "test_utils.hpp"
 
+#ifndef XSIMD_DEFAULT_ARCH
 static_assert(xsimd::default_arch::supported(), "default arch must be supported");
 static_assert(std::is_same<xsimd::default_arch, xsimd::best_arch>::value, "default arch is the best available");
 static_assert(xsimd::supported_architectures::contains<xsimd::default_arch>(), "default arch is supported");
 static_assert(xsimd::all_architectures::contains<xsimd::default_arch>(), "default arch is a valid arch");
+#endif
 
 #if !XSIMD_WITH_SVE
 static_assert((std::is_same<xsimd::default_arch, xsimd::neon64>::value || !xsimd::neon64::supported()), "on arm, without sve, the best we can do is neon64");

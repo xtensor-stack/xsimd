@@ -20,7 +20,9 @@ static_assert(std::is_same<xsimd::default_arch, xsimd::sse2>::value, "default ar
 
 #else
 
+#undef XSIMD_DEFAULT_ARCH
 #define XSIMD_DEFAULT_ARCH xsimd::unsupported
+
 #include "xsimd/xsimd.hpp"
 
 #endif

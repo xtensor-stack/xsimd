@@ -2210,19 +2210,22 @@ namespace xsimd
     template <class To, class A = default_arch, class From>
     inline void store_as(To* dst, batch<From, A> const& src, aligned_mode) noexcept
     {
-        kernel::store_aligned(dst, src, A {});
+        detail::static_check_supported_config<From, A>();
+        kernel::store_aligned<A>(dst, src, A {});
     }
 
     template <class A = default_arch, class From>
     inline void store_as(bool* dst, batch_bool<From, A> const& src, aligned_mode) noexcept
     {
-        kernel::store(src, dst, A {});
+        detail::static_check_supported_config<From, A>();
+        kernel::store<A>(src, dst, A {});
     }
 
     template <class To, class A = default_arch, class From>
     inline void store_as(std::complex<To>* dst, batch<std::complex<From>, A> const& src, aligned_mode) noexcept
     {
-        kernel::store_complex_aligned(dst, src, A {});
+        detail::static_check_supported_config<std::complex<From>, A>();
+        kernel::store_complex_aligned<A>(dst, src, A {});
     }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
@@ -2244,25 +2247,29 @@ namespace xsimd
     template <class To, class A = default_arch, class From>
     inline void store_as(To* dst, batch<From, A> const& src, unaligned_mode) noexcept
     {
-        kernel::store_unaligned(dst, src, A {});
+        detail::static_check_supported_config<From, A>();
+        kernel::store_unaligned<A>(dst, src, A {});
     }
 
     template <class A = default_arch, class From>
     inline void store_as(bool* dst, batch_bool<From, A> const& src, unaligned_mode) noexcept
     {
-        kernel::store(src, dst, A {});
+        detail::static_check_supported_config<From, A>();
+        kernel::store<A>(src, dst, A {});
     }
 
     template <class To, class A = default_arch, class From>
     inline void store_as(std::complex<To>* dst, batch<std::complex<From>, A> const& src, unaligned_mode) noexcept
     {
-        kernel::store_complex_unaligned(dst, src, A {});
+        detail::static_check_supported_config<std::complex<From>, A>();
+        kernel::store_complex_unaligned<A>(dst, src, A {});
     }
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     template <class To, class A = default_arch, class From, bool i3ec>
     inline void store_as(xtl::xcomplex<To, To, i3ec>* dst, batch<std::complex<From>, A> const& src, unaligned_mode) noexcept
     {
+        detail::static_check_supported_config<std::complex<From>, A>();
         store_as(reinterpret_cast<std::complex<To>*>(dst), src, unaligned_mode());
     }
 #endif
