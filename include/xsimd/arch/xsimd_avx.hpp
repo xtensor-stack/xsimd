@@ -1517,8 +1517,8 @@ namespace xsimd
             batch_constant<uint32_t, A, (V0 % 4), (V1 % 4), (V2 % 4), (V3 % 4), (V4 % 4), (V5 % 4), (V6 % 4), (V7 % 4)> half_mask;
 
             // permute within each lane
-            __m256 r0 = _mm256_permutevar_ps(low_low, (batch<uint32_t, A>)half_mask);
-            __m256 r1 = _mm256_permutevar_ps(hi_hi, (batch<uint32_t, A>)half_mask);
+            __m256 r0 = _mm256_permutevar_ps(low_low, half_mask.as_batch());
+            __m256 r1 = _mm256_permutevar_ps(hi_hi, half_mask.as_batch());
 
             // mask to choose the right lane
             batch_bool_constant<uint32_t, A, (V0 >= 4), (V1 >= 4), (V2 >= 4), (V3 >= 4), (V4 >= 4), (V5 >= 4), (V6 >= 4), (V7 >= 4)> blend_mask;
@@ -1542,8 +1542,8 @@ namespace xsimd
             batch_constant<uint64_t, A, (V0 % 2) * -1, (V1 % 2) * -1, (V2 % 2) * -1, (V3 % 2) * -1> half_mask;
 
             // permute within each lane
-            __m256d r0 = _mm256_permutevar_pd(low_low, (batch<uint64_t, A>)half_mask);
-            __m256d r1 = _mm256_permutevar_pd(hi_hi, (batch<uint64_t, A>)half_mask);
+            __m256d r0 = _mm256_permutevar_pd(low_low, half_mask.as_batch());
+            __m256d r1 = _mm256_permutevar_pd(hi_hi, half_mask.as_batch());
 
             // mask to choose the right lane
             batch_bool_constant<uint64_t, A, (V0 >= 2), (V1 >= 2), (V2 >= 2), (V3 >= 2)> blend_mask;
