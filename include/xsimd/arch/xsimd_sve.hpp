@@ -742,7 +742,7 @@ namespace xsimd
         inline batch<T, A> swizzle(batch<T, A> const& arg, batch_constant<I, A, idx...> indices, requires_arch<sve>) noexcept
         {
             static_assert(batch<T, A>::size == sizeof...(idx), "invalid swizzle indices");
-            return swizzle(arg, (batch<I, A>)indices, sve {});
+            return swizzle(arg, indices.as_batch(), sve {});
         }
 
         template <class A, class T, class I, I... idx>
@@ -751,7 +751,7 @@ namespace xsimd
                                                  requires_arch<sve>) noexcept
         {
             static_assert(batch<std::complex<T>, A>::size == sizeof...(idx), "invalid swizzle indices");
-            return swizzle(arg, (batch<I, A>)indices, sve {});
+            return swizzle(arg, indices.as_batch(), sve {});
         }
 
         /*************

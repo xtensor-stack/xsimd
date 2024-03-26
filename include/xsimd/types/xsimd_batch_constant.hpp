@@ -34,7 +34,15 @@ namespace xsimd
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
     public:
-        constexpr operator batch_bool<T, A>() const noexcept { return { Values... }; }
+        /**
+         * @brief Generate a batch of @p batch_type from this @p batch_bool_constant
+         */
+        constexpr batch_type as_batch_bool() const noexcept { return { Values... }; }
+
+        /**
+         * @brief Generate a batch of @p batch_type from this @p batch_bool_constant
+         */
+        constexpr operator batch_type() const noexcept { return as_batch_bool(); }
 
         constexpr bool get(size_t i) const noexcept
         {
@@ -130,7 +138,12 @@ namespace xsimd
         /**
          * @brief Generate a batch of @p batch_type from this @p batch_constant
          */
-        inline operator batch_type() const noexcept { return { Values... }; }
+        inline batch_type as_batch() const noexcept { return { Values... }; }
+
+        /**
+         * @brief Generate a batch of @p batch_type from this @p batch_constant
+         */
+        inline operator batch_type() const noexcept { return as_batch(); }
 
         /**
          * @brief Get the @p i th element of this @p batch_constant

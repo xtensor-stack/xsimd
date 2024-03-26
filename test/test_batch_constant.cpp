@@ -45,6 +45,15 @@ struct constant_batch_test
         CHECK_BATCH_EQ((batch_type)b, expected);
     }
 
+    void test_cast() const
+    {
+        constexpr auto cst_b = xsimd::make_batch_constant<value_type, arch_type, generator>();
+        auto b0 = cst_b.as_batch();
+        auto b1 = (batch_type)cst_b;
+        CHECK_BATCH_EQ(b0, b1);
+        // The actual values are already tested in test_init_from_generator
+    }
+
     struct arange
     {
         static constexpr value_type get(size_t index, size_t /*size*/)
@@ -135,6 +144,8 @@ TEST_CASE_TEMPLATE("[constant batch]", B, BATCH_INT_TYPES)
     constant_batch_test<B> Test;
     SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
 
+    SUBCASE("as_batch") { Test.test_cast(); }
+
     SUBCASE("init_from_generator_arange")
     {
         Test.test_init_from_generator_arange();
@@ -216,6 +227,15 @@ struct constant_bool_batch_test
         }
     };
 
+    void test_cast() const
+    {
+        constexpr auto all_true = xsimd::make_batch_bool_constant<value_type, arch_type, constant<true>>();
+        auto b0 = all_true.as_batch_bool();
+        auto b1 = (batch_bool_type)all_true;
+        CHECK_BATCH_EQ(b0, batch_bool_type(true));
+        CHECK_BATCH_EQ(b1, batch_bool_type(true));
+    }
+
     void test_ops() const
     {
         constexpr auto all_true = xsimd::make_batch_bool_constant<value_type, arch_type, constant<true>>();
@@ -251,6 +271,8 @@ TEST_CASE_TEMPLATE("[constant bool batch]", B, BATCH_INT_TYPES)
 {
     constant_bool_batch_test<B> Test;
     SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
+
+    SUBCASE("as_batch") { Test.test_cast(); }
 
     SUBCASE("init_from_generator_split")
     {
