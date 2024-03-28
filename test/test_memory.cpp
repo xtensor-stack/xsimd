@@ -33,9 +33,12 @@ TEST_CASE("[alignment]")
     using a_vector_align = xsimd::container_alignment_t<a_vector_type>;
     using mock_align = xsimd::container_alignment_t<mock_container>;
 
-    CHECK_UNARY((std::is_same<u_vector_align, xsimd::unaligned_mode>::value));
-    CHECK_UNARY((std::is_same<a_vector_align, xsimd::aligned_mode>::value));
-    CHECK_UNARY((std::is_same<mock_align, xsimd::unaligned_mode>::value));
+    if (xsimd::default_arch::requires_alignment())
+    {
+        CHECK_UNARY((std::is_same<u_vector_align, xsimd::unaligned_mode>::value));
+        CHECK_UNARY((std::is_same<a_vector_align, xsimd::aligned_mode>::value));
+        CHECK_UNARY((std::is_same<mock_align, xsimd::unaligned_mode>::value));
+    }
 }
 
 TEST_CASE("[is_aligned]")

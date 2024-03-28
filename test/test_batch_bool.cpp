@@ -75,6 +75,17 @@ namespace xsimd
     struct get_bool;
 
     template <class T>
+    struct get_bool<batch_bool<T>, 1> : public get_bool_base<T, 1>
+    {
+        using type = batch_bool<T>;
+        type all_true = type(true);
+        type all_false = type(false);
+        type half = { 0 };
+        type ihalf = { 1 };
+        type interspersed = { 0 };
+    };
+
+    template <class T>
     struct get_bool<batch_bool<T>, 2> : public get_bool_base<T, 2>
     {
         using type = batch_bool<T>;

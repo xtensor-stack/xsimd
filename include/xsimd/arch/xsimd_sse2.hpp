@@ -1216,6 +1216,43 @@ namespace xsimd
             return _mm_cvtss_f32(tmp1);
         }
 
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        inline T reduce_add(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
+                __m128i tmp2 = _mm_add_epi32(self, tmp1);
+                __m128i tmp3 = _mm_shuffle_epi32(tmp2, 0x01);
+                __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
+                return _mm_cvtsi128_si32(tmp4);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
+                __m128i tmp2 = _mm_add_epi64(self, tmp1);
+#if defined(__x86_64__)
+                return _mm_cvtsi128_si64(tmp2);
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, tmp2);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
+            }
+            else
+            {
+                return hadd(self, generic {});
+            }
+        }
+
+        template <class A>
+        inline double reduce_add(batch<double, A> const& self, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtsd_f64(_mm_add_sd(self, _mm_unpackhi_pd(self, self)));
+        }
+
         // reduce_max
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         inline T reduce_max(batch<T, A> const& self, requires_arch<sse2>) noexcept
@@ -1258,42 +1295,6 @@ namespace xsimd
             batch<T, A> step3 = bitwise_cast<T>(bitwise_cast<uint16_t>(acc2) >> 8);
             batch<T, A> acc3 = min(acc2, step3);
             return acc3.get(0);
-        }
-
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        inline T reduce_add(batch<T, A> const& self, requires_arch<sse2>) noexcept
-        {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
-                __m128i tmp2 = _mm_add_epi32(self, tmp1);
-                __m128i tmp3 = _mm_shuffle_epi32(tmp2, 0x01);
-                __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
-                return _mm_cvtsi128_si32(tmp4);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
-                __m128i tmp2 = _mm_add_epi64(self, tmp1);
-#if defined(__x86_64__)
-                return _mm_cvtsi128_si64(tmp2);
-#else
-                __m128i m;
-                _mm_storel_epi64(&m, tmp2);
-                int64_t i;
-                std::memcpy(&i, &m, sizeof(i));
-                return i;
-#endif
-            }
-            else
-            {
-                return hadd(self, generic {});
-            }
-        }
-        template <class A>
-        inline double reduce_add(batch<double, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return _mm_cvtsd_f64(_mm_add_sd(self, _mm_unpackhi_pd(self, self)));
         }
 
         // rsqrt
