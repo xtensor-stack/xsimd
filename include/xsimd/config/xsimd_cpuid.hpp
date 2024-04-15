@@ -41,7 +41,7 @@ namespace xsimd
 
 #define ARCH_FIELD_EX(arch, field_name) \
     unsigned field_name;                \
-    inline bool has(::xsimd::arch) const { return this->field_name; }
+    XSIMD_INLINE bool has(::xsimd::arch) const { return this->field_name; }
 #define ARCH_FIELD(name) ARCH_FIELD_EX(name, name)
 
             ARCH_FIELD(sse2)
@@ -78,7 +78,7 @@ namespace xsimd
 
 #undef ARCH_FIELD
 
-            inline supported_arch() noexcept
+            XSIMD_INLINE supported_arch() noexcept
             {
                 memset(this, 0, sizeof(supported_arch));
 
@@ -191,7 +191,7 @@ namespace xsimd
         };
     } // namespace detail
 
-    inline detail::supported_arch available_architectures() noexcept
+    XSIMD_INLINE detail::supported_arch available_architectures() noexcept
     {
         static detail::supported_arch supported;
         return supported;
