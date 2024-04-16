@@ -800,9 +800,9 @@ namespace xsimd
     }
 
     template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
-    inline bool bitofsign(T const& x) noexcept
+    inline T bitofsign(T const& x) noexcept
     {
-        return x < T(0);
+        return T(x < T(0));
     }
 
     template <class T>
