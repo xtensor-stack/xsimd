@@ -90,10 +90,24 @@ namespace xsimd
     {
         return v < 0 ? -v : v;
     }
+
+    namespace detail
+    {
+        inline char abs(char v, std::true_type)
+        {
+            return v;
+        }
+        inline char abs(char v, std::false_type)
+        {
+            return v < 0 ? -v : v;
+        }
+    }
+
     inline char abs(char v)
     {
-        return v < 0 ? -v : v;
+        return detail::abs(v, std::is_unsigned<char>::type {});
     }
+
     inline short abs(short v)
     {
         return v < 0 ? -v : v;
