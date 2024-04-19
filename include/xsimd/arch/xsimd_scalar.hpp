@@ -93,11 +93,15 @@ namespace xsimd
 
     namespace detail
     {
-        inline char abs(char v, std::true_type)
+        // Use templated type here to prevent automatic instantiation that may
+        // ends up in a warning
+        template <typename char_type>
+        inline char abs(char_type v, std::true_type)
         {
             return v;
         }
-        inline char abs(char v, std::false_type)
+        template <typename char_type>
+        inline char abs(char_type v, std::false_type)
         {
             return v < 0 ? -v : v;
         }
