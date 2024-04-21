@@ -185,13 +185,7 @@ private:
     template <class T, typename std::enable_if<std::is_same<T, float>::value, int>::type = 0>
     void test_conditional_tan()
     {
-#if (XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION)
-#if DEBUG_ACCURACY
         test_tan_impl();
-#endif
-#else
-        test_tan_impl();
-#endif
     }
 };
 
