@@ -825,6 +825,21 @@ namespace xsimd
         return T(x < T(0));
     }
 
+    XSIMD_INLINE float bitofsign(float const& x) noexcept
+    {
+        return float(std::signbit(x));
+    }
+
+    XSIMD_INLINE double bitofsign(double const& x) noexcept
+    {
+        return double(std::signbit(x));
+    }
+
+    XSIMD_INLINE long double bitofsign(long double const& x) noexcept
+    {
+        return static_cast<long double>(std::signbit(x));
+    }
+
     template <class T>
     XSIMD_INLINE auto signbit(T const& v) noexcept -> decltype(bitofsign(v))
     {
