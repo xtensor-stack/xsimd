@@ -1235,7 +1235,7 @@ namespace xsimd
                     inf_result = (x == constants::infinity<batch_type>()) || inf_result;
 #endif
                     auto ltza = a < batch_type(0.);
-                    batch_type r;
+                    batch_type r(0);
                     batch_type r1 = other(q);
                     if (any(ltza))
                     {
