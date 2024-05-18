@@ -95,7 +95,19 @@ struct complex_power_test
 
     void test_pow()
     {
-        test_conditional_pow<real_value_type>();
+        std::transform(lhs_np.cbegin(), lhs_np.cend(), rhs.cbegin(), expected.begin(),
+                       [](const value_type& l, const value_type& r)
+                       { using std::pow; return pow(l, r); });
+        batch_type lhs_in, rhs_in, out;
+        for (size_t i = 0; i < nb_input; i += size)
+        {
+            detail::load_batch(lhs_in, lhs_np, i);
+            detail::load_batch(rhs_in, rhs, i);
+            out = pow(lhs_in, rhs_in);
+            detail::store_batch(out, res, i);
+        }
+        size_t diff = detail::get_nb_diff_near(res, expected, std::numeric_limits<real_value_type>::epsilon());
+        CHECK_EQ(diff, 0);
     }
 
     void test_sqrt_nn()
@@ -160,43 +172,6 @@ struct complex_power_test
         }
         size_t diff = detail::get_nb_diff(res, expected);
         CHECK_EQ(diff, 0);
-    }
-
-private:
-    void test_pow_impl()
-    {
-        std::transform(lhs_np.cbegin(), lhs_np.cend(), rhs.cbegin(), expected.begin(),
-                       [](const value_type& l, const value_type& r)
-                       { using std::pow; return pow(l, r); });
-        batch_type lhs_in, rhs_in, out;
-        for (size_t i = 0; i < nb_input; i += size)
-        {
-            detail::load_batch(lhs_in, lhs_np, i);
-            detail::load_batch(rhs_in, rhs, i);
-            out = pow(lhs_in, rhs_in);
-            detail::store_batch(out, res, i);
-        }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
-    }
-
-    template <class T, typename std::enable_if<!std::is_same<T, float>::value, int>::type = 0>
-    void test_conditional_pow()
-    {
-        test_pow_impl();
-    }
-
-    template <class T, typename std::enable_if<std::is_same<T, float>::value, int>::type = 0>
-    void test_conditional_pow()
-    {
-
-#if (XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION) || (XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION)
-#if DEBUG_ACCURACY
-        test_pow_impl();
-#endif
-#else
-        test_pow_impl();
-#endif
     }
 };
 
