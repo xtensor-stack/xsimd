@@ -2026,7 +2026,8 @@ namespace xsimd
             auto cond = (y == ze);
             r = select(cond, r, r * exp(-y * arga));
             theta = select(cond, theta, theta + y * log(absa));
-            return select(absa == ze, cplx_batch(ze), cplx_batch(r * cos(theta), r * sin(theta)));
+            auto sincosTheta = xsimd::sincos(theta);
+            return select(absa == ze, cplx_batch(ze), cplx_batch(r * sincosTheta.second, r * sincosTheta.first));
         }
 
         // reciprocal
