@@ -38,6 +38,16 @@ struct check_supported
     }
 };
 
+struct check_cpu_has_intruction_set
+{
+    template <class Arch>
+    void operator()(Arch arch) const
+    {
+        static_assert(std::is_same<decltype(xsimd::available_architectures().has(arch)), bool>::value,
+                      "cannot test instruction set availability on CPU");
+    }
+};
+
 struct check_available
 {
     template <class Arch>
@@ -69,6 +79,11 @@ TEST_CASE("[multi arch support]")
     SUBCASE("xsimd::supported_architectures")
     {
         xsimd::supported_architectures::for_each(check_supported {});
+    }
+
+    SUBCASE("xsimd::available_architectures::has")
+    {
+        xsimd::all_architectures::for_each(check_cpu_has_intruction_set {});
     }
 
     SUBCASE("xsimd::default_arch::name")
