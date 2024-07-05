@@ -80,7 +80,7 @@ spack load xsimd
 You can directly install it from the sources with cmake:
 
 ```bash
-cmake -D CMAKE_INSTALL_PREFIX=your_install_prefix
+cmake -D CMAKE_INSTALL_PREFIX=your_install_prefix .
 make install
 ```
 
