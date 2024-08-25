@@ -70,8 +70,6 @@ namespace xsimd
             // bitwidth into rvv register types.
             //
             // * `type` is the unadorned vector type.
-            // * `fixed_type` is the same type, but with the storage attribute
-            //    applied.
             // * `byte_type` is the type which is the same size in unsigned
             //    bytes, used as an intermediate step for bit-cast operations,
             //    because only a subset of __riscv_vreinterpret() intrinsics
@@ -86,7 +84,6 @@ namespace xsimd
         static constexpr size_t width = rvv_width_m1 * vmul;                              \
         using type = XSIMD_RVV_TYPE(t, s, vmul);                                          \
         using byte_type = XSIMD_RVV_TYPE(u, 8, vmul);                                     \
-        using fixed_type = type __attribute__((riscv_rvv_vector_bits(width)));            \
         template <class U>                                                                \
         static XSIMD_INLINE type bitcast(U x) noexcept                                    \
         {                                                                                 \
@@ -130,10 +127,9 @@ namespace xsimd
             struct rvv_blob : public rvv_type_info<T, Width>
             {
                 using super = rvv_type_info<T, Width>;
-                using typename super::fixed_type;
                 using typename super::type;
 
-                fixed_type value;
+                type value;
                 type get() const { return value; }
                 void set(type v) { value = v; }
             };
@@ -168,11 +164,10 @@ namespace xsimd
                 {
                     using type = vuint8mf8_t __attribute__((riscv_rvv_vector_bits(rvv_width_mf8)));
                 };
-                using fixed_type = typename semitype<divisor>::type;
                 using super::as_bytes;
                 using super::bitcast;
 
-                fixed_type value;
+                type value;
                 template <size_t div>
                 vuint8m1_t get_bytes() const;
                 template <>
