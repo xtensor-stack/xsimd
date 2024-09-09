@@ -441,6 +441,14 @@ struct batch_bool_test
         CHECK_EQ(batch_bool_type::from_mask(bool_g.interspersed.mask()).mask(), bool_g.interspersed.mask());
     }
 
+    void test_count() const
+    {
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
+        CHECK_EQ(count(bool_g.all_false), 0);
+        CHECK_EQ(count(bool_g.all_true), batch_bool_type::size);
+        CHECK_EQ(count(bool_g.half), batch_bool_type::size / 2);
+    }
+
     void test_comparison() const
     {
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
@@ -484,6 +492,8 @@ TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
     SUBCASE("update operations") { Test.test_update_operations(); }
 
     SUBCASE("mask") { Test.test_mask(); }
+
+    SUBCASE("count") { Test.test_count(); }
 
     SUBCASE("eq neq") { Test.test_comparison(); }
 }
