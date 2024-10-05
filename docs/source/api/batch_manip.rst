@@ -13,11 +13,9 @@ Conditional expression
 
 ----
 
-.. doxygenfunction:: select(batch_bool<T, A> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
+.. doxygengroup:: batch_cond
    :project: xsimd
-
-.. doxygenfunction:: select(batch_bool_constant<T, A, Values...> const &cond, batch<T, A> const &true_br, batch<T, A> const &false_br) noexcept
-   :project: xsimd
+   :content-only:
 
 
 In the specific case when one needs to conditionnaly increment or decrement a

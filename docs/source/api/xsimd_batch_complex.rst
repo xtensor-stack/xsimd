@@ -14,7 +14,7 @@ Batch of complex numbers
 Operations specific to batches of complex numbers
 -------------------------------------------------
 
-.. doxygengroup:: batch_complex_op
+.. doxygengroup:: batch_complex
    :project: xsimd
    :content-only:
 
