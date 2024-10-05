@@ -62,6 +62,8 @@ In place:
 Between batches:
 
 +---------------------------------------+----------------------------------------------------+
+| :cpp:func:`transpose`                 | tranpose a matrix as an array of batches           |
++---------------------------------------+----------------------------------------------------+
 | :cpp:func:`zip_lo`                    | interleave low halves of two batches               |
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`zip_hi`                    | interleave high halves of two batches              |

@@ -949,6 +949,7 @@ namespace xsimd
         {
             return select(batch_bool<double, A> { b... }, true_br, false_br, neon64 {});
         }
+
         /**********
          * zip_lo *
          **********/
