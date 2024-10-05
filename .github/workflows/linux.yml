@@ -69,7 +69,7 @@ jobs:
     - name: Checkout xsimd
       uses: actions/checkout@v3
     - name: Install mamba
-      uses: mamba-org/provision-with-micromamba@main
+      uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: environment.yml
     - name: Setup SDE
