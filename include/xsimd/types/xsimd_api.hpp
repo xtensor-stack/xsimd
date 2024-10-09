@@ -2517,6 +2517,23 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_data_transfer
+     *
+     * Transposes in place the matrix whose line are each of the batch passed as
+     * argument.
+     * @param matrix_begin pointer to the first line of the matrix to transpose
+     * @param matrix_end pointer to one element after the last line of the matrix to transpose
+     *
+     */
+    template <class T, class A>
+    XSIMD_INLINE void transpose(batch<T, A>* matrix_begin, batch<T, A>* matrix_end) noexcept
+    {
+        assert((matrix_end - matrix_begin == batch<T, A>::size) && "correctly sized matrix");
+        detail::static_check_supported_config<T, A>();
+        return kernel::transpose(matrix_begin, matrix_end, A {});
+    }
+
+    /**
      * @ingroup batch_rounding
      *
      * Computes the batch of nearest integer values not greater in magnitude
