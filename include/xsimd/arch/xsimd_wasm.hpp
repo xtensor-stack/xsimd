@@ -1599,6 +1599,13 @@ namespace xsimd
                 matrix_begin[2] = wasm_i32x4_shuffle(t1, t3, 0, 1, 4, 5); // r0[2] r1[2] r2[2] r3[2]
                 matrix_begin[3] = wasm_i32x4_shuffle(t1, t3, 2, 3, 6, 7); // r0[3] r1[3] r2[3] r3[3]
             }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                auto r0 = matrix_begin[0], r1 = matrix_begin[1];
+
+                matrix_begin[0] = wasm_i64x2_shuffle(r0, r1, 0, 2);
+                matrix_begin[1] = wasm_i64x2_shuffle(r0, r1, 1, 3);
+            }
             else
             {
                 transpose(matrix_begin, matrix_end, generic {});
