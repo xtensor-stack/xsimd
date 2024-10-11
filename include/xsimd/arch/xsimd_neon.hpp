@@ -1791,6 +1791,26 @@ namespace xsimd
             matrix_begin[3] = vcombine_s32(vget_high_s32(t01.val[1]), vget_high_s32(t23.val[1]));
         }
 
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        XSIMD_INLINE void transpose(batch<T, A>* matrix_begin, batch<T, A>* matrix_end, requires_arch<neon>) noexcept
+        {
+            assert((matrix_end - matrix_begin == batch<T, A>::size) && "correctly sized matrix");
+            (void)matrix_end;
+            auto r0 = matrix_begin[0], r1 = matrix_begin[1];
+            matrix_begin[0] = vcombine_u64(vget_low_u64(r0), vget_low_u64(r1));
+            matrix_begin[1] = vcombine_u64(vget_high_u64(r0), vget_high_u64(r1));
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        XSIMD_INLINE void transpose(batch<T, A>* matrix_begin, batch<T, A>* matrix_end, requires_arch<neon>) noexcept
+        {
+            assert((matrix_end - matrix_begin == batch<T, A>::size) && "correctly sized matrix");
+            (void)matrix_end;
+            auto r0 = matrix_begin[0], r1 = matrix_begin[1];
+            matrix_begin[0] = vcombine_s64(vget_low_s64(r0), vget_low_s64(r1));
+            matrix_begin[1] = vcombine_s64(vget_high_s64(r0), vget_high_s64(r1));
+        }
+
         /**********
          * zip_lo *
          **********/
