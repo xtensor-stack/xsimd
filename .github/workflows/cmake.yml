@@ -1,0 +1,29 @@
+name: CMake integration
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash -l {0}
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout xsimd
+      uses: actions/checkout@v3
+    - name: Configure build
+      run: |
+        mkdir _build && cd _build
+        cmake  .. -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_INSTALL_PREFIX=_install
+    - name: Build
+      run: cmake --build _build --target install
+    - name: Check install
+      run: |
+        mkdir _install_build && cd _install_build
+        cp ${{ github.workspace }}/.github/cmake-test/* .
+        ls $PWD/../_build/_install/share/cmake/xsimd
+        cmake . -DCMAKE_PREFIX_PATH=$PWD/../_build/_install/share/cmake/xsimd
+        cmake --build .
+
