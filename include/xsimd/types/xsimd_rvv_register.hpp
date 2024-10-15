@@ -125,6 +125,15 @@ namespace xsimd
 #undef XSIMD_RVV_MAKE_TYPES
 #undef XSIMD_RVV_MAKE_TYPE
 
+            // Specialization needed for #1058
+            template <>
+            XSIMD_INLINE rvv_type_info<int8_t, rvv_width_m1 * 8>::type
+            rvv_type_info<int8_t, rvv_width_m1 * 8>::bitcast<__rvv_uint8m8_t>(
+                __rvv_uint8m8_t x) noexcept
+            {
+                return __riscv_vreinterpret_i8m8(x);
+            }
+
             // rvv_blob is storage-type abstraction for a vector register.
             template <class T, size_t Width>
             struct rvv_blob : public rvv_type_info<T, Width>
