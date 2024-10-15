@@ -169,7 +169,7 @@ endif()
 add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})
 target_include_directories(test_xsimd PRIVATE ${XSIMD_INCLUDE_DIR})
 
-option(XSIMD_DOWNLOAD_DOCTEST OFF)
+option(DOWNLOAD_DOCTEST OFF)
 find_package(doctest QUIET)
 if (doctest_FOUND)
     set(DOCTEST_MINIMAL_VERSION 2.4.9)
@@ -181,7 +181,15 @@ elseif(DOWNLOAD_DOCTEST)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doctest")
     file(DOWNLOAD
         "https://github.com/doctest/doctest/releases/download/v2.4.9/doctest.h"
-        "${CMAKE_CURRENT_BINARY_DIR}/doctest/doctest.h")
+        "${CMAKE_CURRENT_BINARY_DIR}/doctest/doctest.h"
+        STATUS DOWNLOAD_DOCTEST_STATUS)
+    list(GET DOWNLOAD_DOCTEST_STATUS 0 DOWNLOAD_DOCTEST_STATUS_CODE)
+    list(GET DOWNLOAD_DOCTEST_STATUS 1 DOWNLOAD_DOCTEST_ERROR_MESSAGE)
+    if(${DOWNLOAD_DOCTEST_STATUS_CODE} EQUAL 0)
+        message(STATUS "Successfully downloaded doctest.h")
+    else()
+        message(FATAL_ERROR "Error occurred during download of doctest: ${DOWNLOAD_DOCTEST_ERROR_MESSAGE}")
+    endif()
     target_include_directories(test_xsimd PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 else()
     message(FATAL_ERROR "
