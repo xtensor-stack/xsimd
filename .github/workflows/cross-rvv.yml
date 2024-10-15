@@ -4,7 +4,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  LLVM_VERSION: "17"
   GCC_VERSION: "12"
 jobs:
   build:
@@ -16,6 +15,9 @@ jobs:
           - 128
           - 256
           - 512
+        LLVM_VERSION:
+          - 17
+          - 18
     steps:
     - name: Setup GCC
       run: |
@@ -28,9 +30,9 @@ jobs:
         # Install latest LLVM stable
         curl -o llvm.sh https://apt.llvm.org/llvm.sh
         chmod u+x llvm.sh
-        sudo ./llvm.sh ${LLVM_VERSION}
-        sudo ln -srf $(which clang-${LLVM_VERSION}) /usr/bin/clang
-        sudo ln -srf $(which clang++-${LLVM_VERSION}) /usr/bin/clang++
+        sudo ./llvm.sh ${{ matrix.LLVM_VERSION }}
+        sudo ln -srf $(which clang-${{ matrix.LLVM_VERSION }}) /usr/bin/clang
+        sudo ln -srf $(which clang++-${{ matrix.LLVM_VERSION }}) /usr/bin/clang++
         rm llvm.sh
     - name: Setup QEMU
       uses: docker/setup-qemu-action@v3.0.0
