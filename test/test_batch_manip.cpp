@@ -40,8 +40,8 @@ namespace xsimd
                 exped_reverse[i] = lhs_in[N - 1 - i];
                 exped_fill[i] = lhs_in[N - 1];
                 exped_dup[i] = lhs_in[2 * (i / 2)];
-                exped_ror[i] = lhs_in[(i + 1) % N];
-                exped_rol[i] = lhs_in[(i - 1) % N];
+                exped_ror[i] = lhs_in[(i - 1) % N];
+                exped_rol[i] = lhs_in[(i + 1) % N];
             }
             vects.push_back(std::move(exped_reverse));
             vects.push_back(std::move(exped_fill));
