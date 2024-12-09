@@ -8,7 +8,6 @@ jobs:
     strategy:
       matrix:
         os:
-          - 12
           - 13
           - 14
     runs-on: macos-${{ matrix.os }}
