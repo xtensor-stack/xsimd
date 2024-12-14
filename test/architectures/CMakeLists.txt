@@ -1,8 +1,7 @@
 set(INTEL_PROCESSORS
-    knl knm skylake-avx512 cannonlake icelake-client
+    bdver1 knl knm skylake-avx512 cannonlake icelake-client
     icelake-server cascadelake cooperlake tigerlake sapphirerapids alderlake
     rocketlake graniterapids graniterapids-d znver4)
-set(CMAKE_CXX_FLAGS "-Werror=unused-command-line-argument")
 
 foreach(INTEL_PROCESSOR ${INTEL_PROCESSORS})
     # Adding the werror here to choke if the -march is incompatible with the
