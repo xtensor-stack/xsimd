@@ -723,4 +723,13 @@ TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xs
     }
 }
 
+TEST_CASE_TEMPLATE("[small integer transpose]", B, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint8_t>, xsimd::batch<int8_t>)
+{
+    shuffle_test<B> Test;
+    SUBCASE("transpose")
+    {
+        Test.transpose();
+    }
+}
+
 #endif
