@@ -732,4 +732,15 @@ TEST_CASE_TEMPLATE("[small integer transpose]", B, xsimd::batch<uint16_t>, xsimd
     }
 }
 
+#if (XSIMD_WITH_SSE2 && !XSIMD_WITH_AVX)
+TEST_CASE_TEMPLATE("[small integer swizzle]", B, xsimd::batch<uint16_t>, xsimd::batch<int16_t>)
+{
+    shuffle_test<B> Test;
+    SUBCASE("swizzle")
+    {
+        Test.swizzle();
+    }
+}
+#endif
+
 #endif
