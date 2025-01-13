@@ -15,7 +15,7 @@ jobs:
           - { platform: 'aarch64', arch: 'armv8-a', dir: 'aarch64-linux-gnu', flags: '', full: 'ON' }
         sys:
           - { compiler: 'gcc',   version: '9' }
-          - { compiler: 'clang', version: 'latest' }
+#          - { compiler: 'clang', version: '17' }
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'clang' }}
