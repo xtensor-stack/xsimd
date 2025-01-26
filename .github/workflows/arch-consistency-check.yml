@@ -1,0 +1,15 @@
+name: Arch consistency check
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout xsimd
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: sudo apt install g++
+      - name: Check architecture consistency
+        run: cd test && sh ./check_arch.sh
