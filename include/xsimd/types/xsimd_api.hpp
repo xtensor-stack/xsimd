@@ -236,7 +236,7 @@ namespace xsimd
     /**
      * @ingroup batch_conversion
      *
-     * Perform a static_cast from \c T_in to \c T_out on \c \c x.
+     * Perform a static_cast from \c T_in to \c T_out on \c x.
      * @param x batch_bool of \c T_in
      * @return \c x cast to \c T_out
      */
@@ -252,7 +252,7 @@ namespace xsimd
     /**
      * @ingroup batch_conversion
      *
-     * Perform a static_cast from \c T_in to \c T_out on \c \c x.
+     * Perform a static_cast from \c T_in to \c T_out on \c x.
      * @param x batch of \c T_in
      * @return \c x cast to \c T_out
      */
