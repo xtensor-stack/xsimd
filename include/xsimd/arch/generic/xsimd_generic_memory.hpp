@@ -514,7 +514,7 @@ namespace xsimd
         }
 
         // store
-        template <class T, class A>
+        template <class A, class T>
         XSIMD_INLINE void store(batch_bool<T, A> const& self, bool* mem, requires_arch<generic>) noexcept
         {
             using batch_type = batch<T, A>;
