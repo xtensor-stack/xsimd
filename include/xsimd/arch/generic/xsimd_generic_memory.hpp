@@ -32,6 +32,32 @@ namespace xsimd
 
         using namespace types;
 
+        // broadcast
+        namespace detail
+        {
+            template <class T, class A>
+            struct broadcaster
+            {
+                using return_type = batch<T, A>;
+
+                static XSIMD_INLINE return_type run(T v) noexcept
+                {
+                    return return_type::broadcast(v);
+                }
+            };
+
+            template <class A>
+            struct broadcaster<bool, A>
+            {
+                using return_type = batch_bool<xsimd::as_unsigned_integer_t<bool>, A>;
+
+                static XSIMD_INLINE return_type run(bool b) noexcept
+                {
+                    return return_type(b);
+                }
+            };
+        }
+
         // compress
         namespace detail
         {

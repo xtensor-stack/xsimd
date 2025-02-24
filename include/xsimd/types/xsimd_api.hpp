@@ -491,10 +491,10 @@ namespace xsimd
      * @return a new batch instance
      */
     template <class T, class A = default_arch>
-    XSIMD_INLINE batch<T, A> broadcast(T v) noexcept
+    XSIMD_INLINE typename kernel::detail::broadcaster<T, A>::return_type broadcast(T v) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return batch<T, A>::broadcast(v);
+        return kernel::detail::broadcaster<T, A>::run(v);
     }
 
     /**

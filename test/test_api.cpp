@@ -23,6 +23,7 @@ struct xsimd_api_test
 {
     using batch_type = B;
     using batch_bool_type = typename B::batch_bool_type;
+    using arch_type = typename B::arch_type;
     using value_type = typename B::value_type;
     static constexpr size_t size = B::size;
     using array_type = std::array<value_type, size>;
@@ -100,6 +101,7 @@ struct xsimd_api_test
 
     void test_set()
     {
+        test_set_bool("set bool");
         test_set_impl<int8_t>("set int8_t");
         test_set_impl<uint8_t>("set uint8_t");
         test_set_impl<int16_t>("set int16_t");
@@ -167,6 +169,15 @@ private:
         T v = T(1);
         batch_type expected(v);
         batch_type res = xsimd::broadcast<value_type>(v);
+        INFO(name);
+        CHECK_BATCH_EQ(res, expected);
+    }
+
+    void test_set_bool(const std::string& name)
+    {
+        bool v = true;
+        xsimd::batch_bool<uint8_t, arch_type> expected(v);
+        xsimd::batch_bool<uint8_t, arch_type> res = xsimd::broadcast(v);
         INFO(name);
         CHECK_BATCH_EQ(res, expected);
     }
