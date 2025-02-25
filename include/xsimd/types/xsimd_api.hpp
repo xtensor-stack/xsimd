@@ -488,7 +488,7 @@ namespace xsimd
      *
      * Creates a batch from the single value \c v. If \c v is a boolean,
      * this function returns a batch_bool<uint8_t>. If you need another type
-     * of batch_bool, please use broadcast_as instead.
+     * of batch_bool, please use \c broadcast_as instead.
      * @param v the value used to initialize the batch
      * @return a new batch instance
      */
