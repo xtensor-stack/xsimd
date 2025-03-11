@@ -347,7 +347,7 @@ struct compress_test
     }
 };
 
-TEST_CASE_TEMPLATE("[compress]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
+TEST_CASE_TEMPLATE("[compress]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsimd::batch<int8_t>, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
 {
     compress_test<B> Test;
     SUBCASE("empty")
@@ -443,7 +443,7 @@ struct expand_test
     }
 };
 
-TEST_CASE_TEMPLATE("[expand]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
+TEST_CASE_TEMPLATE("[expand]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsimd::batch<int8_t>, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
 {
     expand_test<B> Test;
     SUBCASE("empty")
