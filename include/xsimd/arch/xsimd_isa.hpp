@@ -92,6 +92,10 @@
 #include "./xsimd_avx512vbmi.hpp"
 #endif
 
+#if XSIMD_WITH_AVX512VBMI2
+#include "./xsimd_avx512vbmi2.hpp"
+#endif
+
 #if XSIMD_WITH_AVX512VNNI_AVX512BW
 #include "./xsimd_avx512vnni_avx512bw.hpp"
 #endif
