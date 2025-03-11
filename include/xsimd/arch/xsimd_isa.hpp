@@ -100,7 +100,7 @@
 #include "./xsimd_avx512vnni_avx512bw.hpp"
 #endif
 
-#if XSIMD_WITH_AVX512VNNI_AVX512VBMI
+#if XSIMD_WITH_AVX512VNNI_AVX512VBMI2
 #include "./xsimd_avx512vnni_avx512vbmi.hpp"
 #endif
 
