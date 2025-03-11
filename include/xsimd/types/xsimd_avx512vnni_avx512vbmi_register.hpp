@@ -9,10 +9,10 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_AVX512VNNI_AVX512VBMI_REGISTER_HPP
-#define XSIMD_AVX512VNNI_AVX512VBMI_REGISTER_HPP
+#ifndef XSIMD_AVX512VNNI_AVX512VBMI2_REGISTER_HPP
+#define XSIMD_AVX512VNNI_AVX512VBMI2_REGISTER_HPP
 
-#include "./xsimd_avx512vbmi_register.hpp"
+#include "./xsimd_avx512vbmi2_register.hpp"
 
 namespace xsimd
 {
@@ -25,29 +25,28 @@ namespace xsimd
      * AVX512VNNI instructions
      */
     template <>
-    struct avx512vnni<avx512vbmi> : avx512vbmi
+    struct avx512vnni<avx512vbmi2> : avx512vbmi2
     {
-        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512VNNI_AVX512VBMI; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512VNNI_AVX512VBMI2; }
         static constexpr bool available() noexcept { return true; }
-        static constexpr char const* name() noexcept { return "avx512vnni+avx512vbmi"; }
+        static constexpr char const* name() noexcept { return "avx512vnni+avx512vbmi2"; }
     };
 
-#if XSIMD_WITH_AVX512VNNI_AVX512VBMI
+#if XSIMD_WITH_AVX512VNNI_AVX512VBMI2
 
-#if !XSIMD_WITH_AVX512VBMI
-#error "architecture inconsistency: avx512vnni+avx512vbmi requires avx512vbmi"
+#if !XSIMD_WITH_AVX512VBMI2
+#error "architecture inconsistency: avx512vnni+avx512vbmi2 requires avx512vbmi2"
 #endif
 
     namespace types
     {
         template <class T>
-        struct get_bool_simd_register<T, avx512vnni<avx512vbmi>>
+        struct get_bool_simd_register<T, avx512vnni<avx512vbmi2>>
         {
             using type = simd_avx512_bool_register<T>;
         };
 
-        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx512vnni<avx512vbmi>, avx512vbmi);
-
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx512vnni<avx512vbmi2>, avx512vbmi2);
     }
 #endif
 }
