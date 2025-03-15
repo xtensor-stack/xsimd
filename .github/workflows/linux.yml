@@ -131,7 +131,7 @@ jobs:
         cd _build
         cd test
         if echo '${{ matrix.sys.flags }}' | grep -q 'avx512' ; then
-          ../../sde-external-8.69.1-2021-07-18-lin/sde64 -skx -- ./test_xsimd
+          ../../sde-external-9.48.0-2024-11-25-lin/sde64 -tgl -- ./test_xsimd
         else
           ./test_xsimd
         fi
