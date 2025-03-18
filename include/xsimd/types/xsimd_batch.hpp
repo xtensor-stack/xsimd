@@ -968,11 +968,7 @@ namespace xsimd
     template <class T, class A>
     XSIMD_INLINE batch_bool<T, A> batch_bool<T, A>::load_aligned(bool const* mem) noexcept
     {
-        batch_type ref(0);
-        alignas(A::alignment()) T buffer[size];
-        for (std::size_t i = 0; i < size; ++i)
-            buffer[i] = mem[i] ? 1 : 0;
-        return ref != batch_type::load_aligned(&buffer[0]);
+        return kernel::load<A>(mem, batch_bool<T, A>(), A {});
     }
 
     template <class T, class A>
