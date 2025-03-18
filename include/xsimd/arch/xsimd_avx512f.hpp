@@ -26,6 +26,10 @@ namespace xsimd
         using namespace types;
 
         // fwd
+        template <class A, class T, class Mask>
+        XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, Mask const& mask, requires_arch<generic>) noexcept;
+        template <class A, class T, class Mask>
+        XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, Mask const& mask, requires_arch<generic>) noexcept;
         template <class A, class T, size_t I>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
         template <class A>
@@ -759,6 +763,24 @@ namespace xsimd
                 return _mm512_permutex2var_pd(self.real(), idx, self.imag());
             }
         }
+        // incr_if
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm512_mask_sub_epi32(self, mask.data, self, _mm512_set1_epi32(1));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm512_mask_sub_epi64(self, mask.data, self, _mm512_set1_epi64(1));
+            }
+            else
+            {
+                return decr_if(self, mask, generic {});
+            }
+        }
 
         // div
         template <class A>
@@ -1075,10 +1097,30 @@ namespace xsimd
             return _mm512_add_pd(tmpx, tmpy);
         }
 
+        // incr_if
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512f>) noexcept
+        {
+
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm512_mask_add_epi32(self, mask.data, self, _mm512_set1_epi32(1));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm512_mask_add_epi64(self, mask.data, self, _mm512_set1_epi64(1));
+            }
+            else
+            {
+                return incr_if(self, mask, generic {});
+            }
+        }
+
         // insert
         template <class A, size_t I>
         XSIMD_INLINE batch<float, A> insert(batch<float, A> const& self, float val, index<I>, requires_arch<avx512f>) noexcept
         {
+
             return _mm512_castsi512_ps(_mm512_mask_set1_epi32(_mm512_castps_si512(self), __mmask16(1 << (I & 15)), *(int32_t*)&val));
         }
 
