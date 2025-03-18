@@ -1193,6 +1193,19 @@ namespace xsimd
             return detail::compare_int_avx512f<A, T, _MM_CMPINT_LE>(self, other);
         }
 
+        // load
+        template <class A, class T>
+        XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<avx512f>) noexcept
+        {
+            using register_type = typename batch_bool<T, A>::register_type;
+            constexpr auto size = batch_bool<T, A>::size;
+            register_type mask = 0;
+            for (std::size_t i = 0; i < size; ++i)
+                mask |= (register_type(mem[i] ? 1 : 0) << i);
+
+            return mask;
+        }
+
         // load_aligned
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<avx512f>) noexcept

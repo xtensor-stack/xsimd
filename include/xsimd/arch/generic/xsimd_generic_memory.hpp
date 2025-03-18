@@ -260,6 +260,19 @@ namespace xsimd
             return buffer[i];
         }
 
+        // load
+        template <class A, class T>
+        XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<generic>) noexcept
+        {
+            using batch_type = batch<T, A>;
+            batch_type ref(0);
+            constexpr auto size = batch_bool<T, A>::size;
+            alignas(A::alignment()) T buffer[size];
+            for (std::size_t i = 0; i < size; ++i)
+                buffer[i] = mem[i] ? 1 : 0;
+            return ref != batch_type::load_aligned(&buffer[0]);
+        }
+
         // load_aligned
         namespace detail
         {
