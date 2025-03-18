@@ -26,6 +26,8 @@ namespace xsimd
         using namespace types;
 
         // fwd
+        template <class A, class T, size_t I>
+        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
         template <class A>
         XSIMD_INLINE void transpose(batch<uint16_t, A>* matrix_begin, batch<uint16_t, A>* matrix_end, requires_arch<generic>) noexcept;
         template <class A>
@@ -1071,6 +1073,35 @@ namespace xsimd
             auto tmpy = _mm512_shuffle_pd(resx1, resx2, 0b11111111);
 
             return _mm512_add_pd(tmpx, tmpy);
+        }
+
+        // insert
+        template <class A, size_t I>
+        XSIMD_INLINE batch<float, A> insert(batch<float, A> const& self, float val, index<I>, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_castsi512_ps(_mm512_mask_set1_epi32(_mm512_castps_si512(self), __mmask16(1 << (I & 15)), *(int32_t*)&val));
+        }
+
+        template <class A, size_t I>
+        XSIMD_INLINE batch<double, A> insert(batch<double, A> const& self, double val, index<I>, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_castsi512_pd(_mm512_mask_set1_epi64(_mm512_castpd_si512(self), __mmask8(1 << (I & 7)), *(int64_t*)&val));
+        }
+        template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm512_mask_set1_epi32(self, __mmask16(1 << (I & 15)), val);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm512_mask_set1_epi64(self, __mmask8(1 << (I & 7)), val);
+            }
+            else
+            {
+                return insert(self, val, pos, generic {});
+            }
         }
 
         // isnan
