@@ -224,6 +224,25 @@ namespace xsimd
             }
         }
 
+        // decr_if
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512bw>) noexcept
+        {
+
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return _mm512_mask_sub_epi8(self, mask.data, self, _mm512_set1_epi8(1));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm512_mask_sub_epi16(self, mask.data, self, _mm512_set1_epi16(1));
+            }
+            else
+            {
+                return decr_if(self, mask, avx512dq {});
+            }
+        }
+
         // eq
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept
@@ -243,6 +262,25 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept
         {
             return detail::compare_int_avx512bw<A, T, _MM_CMPINT_GT>(self, other);
+        }
+
+        // incr_if
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512bw>) noexcept
+        {
+
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return _mm512_mask_add_epi8(self, mask.data, self, _mm512_set1_epi8(1));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm512_mask_add_epi16(self, mask.data, self, _mm512_set1_epi16(1));
+            }
+            else
+            {
+                return incr_if(self, mask, avx512dq {});
+            }
         }
 
         // insert
