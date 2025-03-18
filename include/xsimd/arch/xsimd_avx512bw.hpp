@@ -245,6 +245,24 @@ namespace xsimd
             return detail::compare_int_avx512bw<A, T, _MM_CMPINT_GT>(self, other);
         }
 
+        // insert
+        template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<avx512bw>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return _mm512_mask_set1_epi8(self, __mmask64(1ULL << (I & 63)), val);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm512_mask_set1_epi16(self, __mmask32(1 << (I & 31)), val);
+            }
+            else
+            {
+                return insert(self, val, pos, avx512dq {});
+            }
+        }
+
         // le
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept
