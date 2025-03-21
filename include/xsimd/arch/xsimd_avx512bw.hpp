@@ -315,6 +315,18 @@ namespace xsimd
             return detail::compare_int_avx512bw<A, T, _MM_CMPINT_LT>(self, other);
         }
 
+        // load
+        template <class A, class T>
+        XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<avx512bw>) noexcept
+        {
+            using register_type = typename batch_bool<T, A>::register_type;
+            constexpr auto size = batch_bool<T, A>::size;
+            __mmask64 mask = size >= 64 ? ~(__mmask64)0 : (1ULL << size) - 1;
+            __m512i zeros = _mm512_setzero_si512();
+            __m512i bool_val = _mm512_mask_loadu_epi8(zeros, mask, (void*)mem);
+            return (register_type)_mm512_cmpgt_epu8_mask(bool_val, zeros);
+        }
+
         // max
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept
@@ -626,6 +638,16 @@ namespace xsimd
                     return ssub(self, other, avx512dq {});
                 }
             }
+        }
+
+        // store
+        template <class T, class A>
+        XSIMD_INLINE void store(batch_bool<T, A> const& self, bool* mem, requires_arch<avx512bw>) noexcept
+        {
+            constexpr auto size = batch_bool<T, A>::size;
+            __m512i bool_val = _mm512_maskz_set1_epi8(self.data, 0x01);
+            __mmask64 mask = size >= 64 ? ~(__mmask64)0 : (1ULL << size) - 1;
+            _mm512_mask_storeu_epi8((void*)mem, mask, bool_val);
         }
 
         // sub
