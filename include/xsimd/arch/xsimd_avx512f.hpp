@@ -1121,15 +1121,15 @@ namespace xsimd
         XSIMD_INLINE batch<float, A> insert(batch<float, A> const& self, float val, index<I>, requires_arch<avx512f>) noexcept
         {
 
-            int32_t* tmp = reinterpret_cast<int32_t*>(&val);
-            return _mm512_castsi512_ps(_mm512_mask_set1_epi32(_mm512_castps_si512(self), __mmask16(1 << (I & 15)), *tmp));
+            int32_t tmp = bit_cast<int32_t>(val);
+            return _mm512_castsi512_ps(_mm512_mask_set1_epi32(_mm512_castps_si512(self), __mmask16(1 << (I & 15)), tmp));
         }
 
         template <class A, size_t I>
         XSIMD_INLINE batch<double, A> insert(batch<double, A> const& self, double val, index<I>, requires_arch<avx512f>) noexcept
         {
-            int64_t* tmp = reinterpret_cast<int64_t*>(&val);
-            return _mm512_castsi512_pd(_mm512_mask_set1_epi64(_mm512_castpd_si512(self), __mmask8(1 << (I & 7)), *tmp));
+            int64_t tmp = bit_cast<int64_t>(val);
+            return _mm512_castsi512_pd(_mm512_mask_set1_epi64(_mm512_castpd_si512(self), __mmask8(1 << (I & 7)), tmp));
         }
         template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<avx512f>) noexcept
