@@ -320,11 +320,15 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<avx512bw>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            constexpr auto size = batch_bool<T, A>::size;
-            __mmask64 mask = size >= 64 ? ~(__mmask64)0 : (1ULL << size) - 1;
-            __m512i zeros = _mm512_setzero_si512();
-            __m512i bool_val = _mm512_mask_loadu_epi8(zeros, mask, (void*)mem);
-            return (register_type)_mm512_cmpgt_epu8_mask(bool_val, zeros);
+            XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 64)
+            {
+                __m512i bool_val = _mm512_loadu_si512((__m512i const*)mem);
+                return (register_type)_mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
+            }
+            else
+            {
+                return load(mem, batch_bool<T, A>(), avx512dq {});
+            }
         }
 
         // max

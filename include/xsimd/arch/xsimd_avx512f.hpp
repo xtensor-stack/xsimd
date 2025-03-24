@@ -1193,16 +1193,36 @@ namespace xsimd
             return detail::compare_int_avx512f<A, T, _MM_CMPINT_LE>(self, other);
         }
 
+        namespace detail
+        {
+            // Adapted from https://github.com/serge-sans-paille/fast-bitset-from-bool-array
+            // Generate a bitset from an array of boolean.
+            XSIMD_INLINE unsigned char tobitset(unsigned char unpacked[8])
+            {
+                uint64_t data;
+                memcpy(&data, unpacked, sizeof(uint64_t));
+
+                const uint64_t magic = (0x80 + 0x4000 + 0x200000 + 0x10000000 + 0x0800000000 + 0x040000000000 + 0x02000000000000 + 0x0100000000000000);
+
+                unsigned char res = ((data * magic) >> 56) & 0xFF;
+                return res;
+            }
+        }
+
         // load
         template <class A, class T>
         XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<avx512f>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
             constexpr auto size = batch_bool<T, A>::size;
+            constexpr auto iter = size / 8;
+            static_assert(size % 8 == 0, "incorrect size of bool batch");
             register_type mask = 0;
-            for (std::size_t i = 0; i < size; ++i)
-                mask |= (register_type(mem[i] ? 1 : 0) << i);
-
+            for (std::size_t i = 0; i < iter; ++i)
+            {
+                unsigned char block = detail::tobitset((unsigned char*)mem + i * 8);
+                mask |= (register_type(block) << (i * 8));
+            }
             return mask;
         }
 
