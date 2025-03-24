@@ -746,7 +746,7 @@ struct batch_test
                            {
                                if (std::is_integral<value_type>::value)
                                {
-                                   return ((long long)l + r) / 2;
+                                   return static_cast<value_type>(((long long)l + r) / 2);
                                }
                                else
                                {
@@ -764,7 +764,7 @@ struct batch_test
                            {
                                if (std::is_integral<value_type>::value)
                                {
-                                   return ((long long)l + r) / 2 + ((long long)(l + r) & 1);
+                                   return static_cast<value_type>(((long long)l + r) / 2 + ((long long)(l + r) & 1));
                                }
                                else
                                {

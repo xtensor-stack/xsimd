@@ -1021,7 +1021,7 @@ namespace xsimd
          */
         namespace detail
         {
-            XSIMD_INLINE int mask_lut(int mask)
+            XSIMD_INLINE int mask_lut(uint64_t mask)
             {
                 // clang-format off
                 static const int mask_lut[256] = {

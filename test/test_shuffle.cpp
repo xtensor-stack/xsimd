@@ -32,8 +32,8 @@ namespace
             /* Generate input data: lhs, rhs */
             for (size_t i = 0; i < N; ++i)
             {
-                lhs_in[i] = 'A' + 2 * i + 1;
-                rhs_in[i] = 'A' + 2 * i;
+                lhs_in[i] = static_cast<T>('A' + 2 * i + 1);
+                rhs_in[i] = static_cast<T>('A' + 2 * i);
             }
             vects.push_back(std::move(lhs_in));
             vects.push_back(std::move(rhs_in));
@@ -288,7 +288,7 @@ struct compress_test
     {
         for (size_t i = 0; i < size; ++i)
         {
-            input[i] = i;
+            input[i] = static_cast<value_type>(i);
         }
     }
 
@@ -360,11 +360,11 @@ TEST_CASE_TEMPLATE("[compress]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, x
     }
     // SUBCASE("interleave")
     //{
-    //     Test.interleave();
+    //      Test.interleave();
     // }
     // SUBCASE("generic")
     //{
-    //     Test.generic();
+    //      Test.generic();
     // }
 }
 
@@ -384,7 +384,7 @@ struct expand_test
     {
         for (size_t i = 0; i < size; ++i)
         {
-            input[i] = i;
+            input[i] = static_cast<value_type>(i);
         }
     }
 
@@ -479,8 +479,8 @@ struct shuffle_test
     {
         for (size_t i = 0; i < size; ++i)
         {
-            lhs[i] = i;
-            rhs[i] = i + size;
+            lhs[i] = static_cast<value_type>(i);
+            rhs[i] = static_cast<value_type>(i + size);
         }
     }
 

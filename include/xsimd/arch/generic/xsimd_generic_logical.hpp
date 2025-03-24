@@ -49,7 +49,7 @@ namespace xsimd
                 // popcount instruction depending on the arch...
                 XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size <= 32)
                 {
-                    uint32_t m32 = m;
+                    uint32_t m32 = static_cast<uint32_t>(m);
                     // https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
                     m32 = m32 - ((m32 >> 1) & 0x55555555); // reuse input as temporary
                     m32 = (m32 & 0x33333333) + ((m32 >> 2) & 0x33333333); // temp

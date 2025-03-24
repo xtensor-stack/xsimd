@@ -69,7 +69,7 @@ struct basic_math_test
         {
             lhs[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25)) + value_type(1.);
             rhs[i] = value_type(10.2) / (i + 2) + value_type(0.25) + value_type(1.);
-            clip_input[i] = i * value_type(0.25);
+            clip_input[i] = static_cast<value_type>(i) * value_type(0.25);
             from_input[i] = rhs[i] - value_type(1);
         }
     }

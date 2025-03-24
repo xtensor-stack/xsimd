@@ -166,9 +166,16 @@ private:
     template <class T>
     void test_set_impl(const std::string& name)
     {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#endif
         T v = T(1);
         batch_type expected(v);
         batch_type res = xsimd::broadcast<value_type>(v);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
         INFO(name);
         CHECK_BATCH_EQ(res, expected);
     }
@@ -187,8 +194,8 @@ private:
     {
         vec.resize(size);
 
-        value_type min = value_type(0);
-        value_type max = value_type(100);
+        int min = 0;
+        int max = 100;
 
         std::default_random_engine generator;
         std::uniform_int_distribution<int> distribution(min, max);

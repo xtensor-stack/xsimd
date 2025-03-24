@@ -294,7 +294,7 @@ struct batch_int_test
         lhs = batch_type(std::numeric_limits<value_type>::max());
         for (int32_t i = 0; i < s; ++i)
         {
-            res = lhs >> value_type(i);
+            res = lhs >> i;
             value_type expected = std::numeric_limits<value_type>::max() >> i;
             for (std::size_t j = 0; j < size; ++j)
             {
