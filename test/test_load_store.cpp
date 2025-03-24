@@ -269,8 +269,8 @@ private:
     {
         vec.resize(size);
 
-        value_type min = value_type(0);
-        value_type max = value_type(100);
+        int min = 0;
+        int max = 100;
 
         std::default_random_engine generator;
         std::uniform_int_distribution<int> distribution(min, max);

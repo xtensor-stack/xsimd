@@ -623,7 +623,8 @@ struct xsimd_api_float_types_functions
     {
         value_type val0(4);
         xsimd::as_integer_t<value_type> val1(2);
-        CHECK_EQ(extract(xsimd::ldexp(T(val0), xsimd::as_integer_t<T>(val1))), std::ldexp(val0, val1));
+        using exponent_type = typename std::conditional<std::is_scalar<T>::value, int, xsimd::as_integer_t<T>>::type;
+        CHECK_EQ(extract(xsimd::ldexp(T(val0), exponent_type(val1))), std::ldexp(val0, static_cast<int>(val1)));
     }
     void test_lgamma()
     {

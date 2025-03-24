@@ -58,7 +58,7 @@ struct constant_batch_test
     {
         static constexpr value_type get(size_t index, size_t /*size*/)
         {
-            return index;
+            return static_cast<value_type>(index);
         }
     };
 

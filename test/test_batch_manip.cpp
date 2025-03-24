@@ -30,7 +30,7 @@ namespace xsimd
             /* Generate input data */
             for (std::size_t i = 0; i < N; ++i)
             {
-                lhs_in[i] = 2 * i + 1;
+                lhs_in[i] = static_cast<T>(2 * i + 1);
             }
             vects.push_back(std::move(lhs_in));
 
