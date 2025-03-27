@@ -262,7 +262,7 @@ namespace xsimd
 
         // load
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<generic>) noexcept
         {
             using batch_type = batch<T, A>;
             batch_type ref(0);
@@ -271,6 +271,12 @@ namespace xsimd
             for (std::size_t i = 0; i < size; ++i)
                 buffer[i] = mem[i] ? 1 : 0;
             return ref != batch_type::load_aligned(&buffer[0]);
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A> b, requires_arch<generic>) noexcept
+        {
+            return load_unaligned(mem, b, A {});
         }
 
         // load_aligned

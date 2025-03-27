@@ -968,13 +968,13 @@ namespace xsimd
     template <class T, class A>
     XSIMD_INLINE batch_bool<T, A> batch_bool<T, A>::load_aligned(bool const* mem) noexcept
     {
-        return kernel::load<A>(mem, batch_bool<T, A>(), A {});
+        return kernel::load_aligned<A>(mem, batch_bool<T, A>(), A {});
     }
 
     template <class T, class A>
     XSIMD_INLINE batch_bool<T, A> batch_bool<T, A>::load_unaligned(bool const* mem) noexcept
     {
-        return load_aligned(mem);
+        return kernel::load_unaligned<A>(mem, batch_bool<T, A>(), A {});
     }
 
     /**
