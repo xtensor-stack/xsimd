@@ -731,16 +731,17 @@ namespace xsimd
         template <class A, class T, bool... Values, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx2>) noexcept
         {
-            constexpr int mask = batch_bool_constant<T, A, Values...>::mask();
             // FIXME: for some reason mask here is not considered as an immediate,
             // but it's okay for _mm256_blend_epi32
             // case 2: return _mm256_blend_epi16(false_br, true_br, mask);
             XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
+                constexpr int mask = batch_bool_constant<T, A, Values...>::mask();
                 return _mm256_blend_epi32(false_br, true_br, mask);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
+                constexpr int mask = batch_bool_constant<T, A, Values...>::mask();
                 constexpr int imask = detail::interleave(mask);
                 return _mm256_blend_epi32(false_br, true_br, imask);
             }

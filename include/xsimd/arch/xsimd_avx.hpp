@@ -633,44 +633,26 @@ namespace xsimd
         template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<avx>) noexcept
         {
-            alignas(A::alignment()) static const uint32_t lut32[] = {
-                0x00000000,
-                0x000000FF,
-                0x0000FF00,
-                0x0000FFFF,
-                0x00FF0000,
-                0x00FF00FF,
-                0x00FFFF00,
-                0x00FFFFFF,
-                0xFF000000,
-                0xFF0000FF,
-                0xFF00FF00,
-                0xFF00FFFF,
-                0xFFFF0000,
-                0xFFFF00FF,
-                0xFFFFFF00,
-                0xFFFFFFFF,
-            };
-            alignas(A::alignment()) static const uint64_t lut64[] = {
-                0x0000000000000000ul,
-                0x000000000000FFFFul,
-                0x00000000FFFF0000ul,
-                0x00000000FFFFFFFFul,
-                0x0000FFFF00000000ul,
-                0x0000FFFF0000FFFFul,
-                0x0000FFFFFFFF0000ul,
-                0x0000FFFFFFFFFFFFul,
-                0xFFFF000000000000ul,
-                0xFFFF00000000FFFFul,
-                0xFFFF0000FFFF0000ul,
-                0xFFFF0000FFFFFFFFul,
-                0xFFFFFFFF00000000ul,
-                0xFFFFFFFF0000FFFFul,
-                0xFFFFFFFFFFFF0000ul,
-                0xFFFFFFFFFFFFFFFFul,
-            };
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
+                alignas(A::alignment()) static const uint32_t lut32[] = {
+                    0x00000000,
+                    0x000000FF,
+                    0x0000FF00,
+                    0x0000FFFF,
+                    0x00FF0000,
+                    0x00FF00FF,
+                    0x00FFFF00,
+                    0x00FFFFFF,
+                    0xFF000000,
+                    0xFF0000FF,
+                    0xFF00FF00,
+                    0xFF00FFFF,
+                    0xFFFF0000,
+                    0xFFFF00FF,
+                    0xFFFFFF00,
+                    0xFFFFFFFF,
+                };
                 assert(!(mask & ~0xFFFFFFFFul) && "inbound mask");
                 return _mm256_setr_epi32(lut32[mask & 0xF], lut32[(mask >> 4) & 0xF],
                                          lut32[(mask >> 8) & 0xF], lut32[(mask >> 12) & 0xF],
@@ -679,6 +661,24 @@ namespace xsimd
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
+                alignas(A::alignment()) static const uint64_t lut64[] = {
+                    0x0000000000000000ul,
+                    0x000000000000FFFFul,
+                    0x00000000FFFF0000ul,
+                    0x00000000FFFFFFFFul,
+                    0x0000FFFF00000000ul,
+                    0x0000FFFF0000FFFFul,
+                    0x0000FFFFFFFF0000ul,
+                    0x0000FFFFFFFFFFFFul,
+                    0xFFFF000000000000ul,
+                    0xFFFF00000000FFFFul,
+                    0xFFFF0000FFFF0000ul,
+                    0xFFFF0000FFFFFFFFul,
+                    0xFFFFFFFF00000000ul,
+                    0xFFFFFFFF0000FFFFul,
+                    0xFFFFFFFFFFFF0000ul,
+                    0xFFFFFFFFFFFFFFFFul,
+                };
                 assert(!(mask & ~0xFFFFul) && "inbound mask");
                 return _mm256_setr_epi64x(lut64[mask & 0xF], lut64[(mask >> 4) & 0xF], lut64[(mask >> 8) & 0xF], lut64[(mask >> 12) & 0xF]);
             }
