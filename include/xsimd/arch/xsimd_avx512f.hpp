@@ -1209,14 +1209,14 @@ namespace xsimd
             }
         }
 
-        // load
+        // load mask
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<avx512f>) noexcept
+        XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<avx512f>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
             constexpr auto size = batch_bool<T, A>::size;
             constexpr auto iter = size / 8;
-            static_assert(size % 8 == 0, "incorrect size of bool batch");
+            static_assert((size % 8) == 0, "incorrect size of bool batch");
             register_type mask = 0;
             for (std::size_t i = 0; i < iter; ++i)
             {

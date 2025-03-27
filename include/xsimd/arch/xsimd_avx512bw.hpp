@@ -316,19 +316,18 @@ namespace xsimd
         }
 
         // load
-        template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> load(bool const* mem, batch_bool<T, A>, requires_arch<avx512bw>) noexcept
+        template <class A, class T, class = typename std::enable_if<batch_bool<T, A>::size == 64, void>::type>
+        XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<avx512bw>) noexcept
         {
-            using register_type = typename batch_bool<T, A>::register_type;
-            XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 64)
-            {
-                __m512i bool_val = _mm512_loadu_si512((__m512i const*)mem);
-                return (register_type)_mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
-            }
-            else
-            {
-                return load(mem, batch_bool<T, A>(), avx512dq {});
-            }
+            __m512i bool_val = _mm512_loadu_si512((__m512i const*)mem);
+            return _mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
+        }
+
+        template <class A, class T, class = typename std::enable_if<batch_bool<T, A>::size == 64, void>::type>
+        XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A>, requires_arch<avx512bw>) noexcept
+        {
+            __m512i bool_val = _mm512_load_si512((__m512i const*)mem);
+            return _mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
         }
 
         // max
