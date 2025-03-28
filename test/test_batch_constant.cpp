@@ -40,14 +40,14 @@ struct constant_batch_test
         std::generate(expected.begin(), expected.end(),
                       [&i]()
                       { return generator::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_constant<value_type, arch_type, generator>();
+        constexpr auto b = xsimd::make_batch_constant<value_type, generator, arch_type>();
         INFO("batch(value_type)");
         CHECK_BATCH_EQ((batch_type)b, expected);
     }
 
     void test_cast() const
     {
-        constexpr auto cst_b = xsimd::make_batch_constant<value_type, arch_type, generator>();
+        constexpr auto cst_b = xsimd::make_batch_constant<value_type, generator, arch_type>();
         auto b0 = cst_b.as_batch();
         auto b1 = (batch_type)cst_b;
         CHECK_BATCH_EQ(b0, b1);
@@ -69,7 +69,7 @@ struct constant_batch_test
         std::generate(expected.begin(), expected.end(),
                       [&i]()
                       { return arange::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_constant<value_type, arch_type, arange>();
+        constexpr auto b = xsimd::make_batch_constant<value_type, arange, arch_type>();
         INFO("batch(value_type)");
         CHECK_BATCH_EQ((batch_type)b, expected);
     }
@@ -87,34 +87,34 @@ struct constant_batch_test
     {
         array_type expected;
         std::fill(expected.begin(), expected.end(), constant<3>::get(0, 0));
-        constexpr auto b = xsimd::make_batch_constant<value_type, arch_type, constant<3>>();
+        constexpr auto b = xsimd::make_batch_constant<value_type, constant<3>, arch_type>();
         INFO("batch(value_type)");
         CHECK_BATCH_EQ((batch_type)b, expected);
     }
 
     void test_ops() const
     {
-        constexpr auto n12 = xsimd::make_batch_constant<value_type, arch_type, constant<12>>();
-        constexpr auto n3 = xsimd::make_batch_constant<value_type, arch_type, constant<3>>();
+        constexpr auto n12 = xsimd::make_batch_constant<value_type, constant<12>, arch_type>();
+        constexpr auto n3 = xsimd::make_batch_constant<value_type, constant<3>, arch_type>();
 
         constexpr auto n12_add_n3 = n12 + n3;
-        constexpr auto n15 = xsimd::make_batch_constant<value_type, arch_type, constant<15>>();
+        constexpr auto n15 = xsimd::make_batch_constant<value_type, constant<15>, arch_type>();
         static_assert(std::is_same<decltype(n12_add_n3), decltype(n15)>::value, "n12 + n3 == n15");
 
         constexpr auto n12_sub_n3 = n12 - n3;
-        constexpr auto n9 = xsimd::make_batch_constant<value_type, arch_type, constant<9>>();
+        constexpr auto n9 = xsimd::make_batch_constant<value_type, constant<9>, arch_type>();
         static_assert(std::is_same<decltype(n12_sub_n3), decltype(n9)>::value, "n12 - n3 == n9");
 
         constexpr auto n12_mul_n3 = n12 * n3;
-        constexpr auto n36 = xsimd::make_batch_constant<value_type, arch_type, constant<36>>();
+        constexpr auto n36 = xsimd::make_batch_constant<value_type, constant<36>, arch_type>();
         static_assert(std::is_same<decltype(n12_mul_n3), decltype(n36)>::value, "n12 * n3 == n36");
 
         constexpr auto n12_div_n3 = n12 / n3;
-        constexpr auto n4 = xsimd::make_batch_constant<value_type, arch_type, constant<4>>();
+        constexpr auto n4 = xsimd::make_batch_constant<value_type, constant<4>, arch_type>();
         static_assert(std::is_same<decltype(n12_div_n3), decltype(n4)>::value, "n12 / n3 == n4");
 
         constexpr auto n12_mod_n3 = n12 % n3;
-        constexpr auto n0 = xsimd::make_batch_constant<value_type, arch_type, constant<0>>();
+        constexpr auto n0 = xsimd::make_batch_constant<value_type, constant<0>, arch_type>();
         static_assert(std::is_same<decltype(n12_mod_n3), decltype(n0)>::value, "n12 % n3 == n0");
 
         constexpr auto n12_land_n3 = n12 & n3;
@@ -130,11 +130,11 @@ struct constant_batch_test
         static_assert(std::is_same<decltype(n12_uadd), decltype(n12)>::value, "+n12 == n12");
 
         constexpr auto n12_inv = ~n12;
-        constexpr auto n12_inv_ = xsimd::make_batch_constant<value_type, arch_type, constant<(value_type)~12>>();
+        constexpr auto n12_inv_ = xsimd::make_batch_constant<value_type, constant<(value_type)~12>, arch_type>();
         static_assert(std::is_same<decltype(n12_inv), decltype(n12_inv_)>::value, "~n12 == n12_inv");
 
         constexpr auto n12_usub = -n12;
-        constexpr auto n12_usub_ = xsimd::make_batch_constant<value_type, arch_type, constant<(value_type)-12>>();
+        constexpr auto n12_usub_ = xsimd::make_batch_constant<value_type, constant<(value_type)-12>, arch_type>();
         static_assert(std::is_same<decltype(n12_usub), decltype(n12_usub_)>::value, "-n12 == n12_usub");
     }
 };
@@ -185,7 +185,7 @@ struct constant_bool_batch_test
         std::generate(expected.begin(), expected.end(),
                       [&i]()
                       { return generator::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_bool_constant<value_type, arch_type, generator>();
+        constexpr auto b = xsimd::make_batch_bool_constant<value_type, generator, arch_type>();
         INFO("batch_bool_constant(value_type)");
         CHECK_BATCH_EQ((batch_bool_type)b, expected);
     }
@@ -205,7 +205,7 @@ struct constant_bool_batch_test
         std::generate(expected.begin(), expected.end(),
                       [&i]()
                       { return split::get(i++, size); });
-        constexpr auto b = xsimd::make_batch_bool_constant<value_type, arch_type, split>();
+        constexpr auto b = xsimd::make_batch_bool_constant<value_type, split, arch_type>();
         INFO("batch_bool_constant(value_type)");
         CHECK_BATCH_EQ((batch_bool_type)b, expected);
     }
@@ -229,7 +229,7 @@ struct constant_bool_batch_test
 
     void test_cast() const
     {
-        constexpr auto all_true = xsimd::make_batch_bool_constant<value_type, arch_type, constant<true>>();
+        constexpr auto all_true = xsimd::make_batch_bool_constant<value_type, constant<true>, arch_type>();
         auto b0 = all_true.as_batch_bool();
         auto b1 = (batch_bool_type)all_true;
         CHECK_BATCH_EQ(b0, batch_bool_type(true));
@@ -238,11 +238,11 @@ struct constant_bool_batch_test
 
     void test_ops() const
     {
-        constexpr auto all_true = xsimd::make_batch_bool_constant<value_type, arch_type, constant<true>>();
-        constexpr auto all_false = xsimd::make_batch_bool_constant<value_type, arch_type, constant<false>>();
+        constexpr auto all_true = xsimd::make_batch_bool_constant<value_type, constant<true>, arch_type>();
+        constexpr auto all_false = xsimd::make_batch_bool_constant<value_type, constant<false>, arch_type>();
 
-        constexpr auto x = xsimd::make_batch_bool_constant<value_type, arch_type, split>();
-        constexpr auto y = xsimd::make_batch_bool_constant<value_type, arch_type, inv_split>();
+        constexpr auto x = xsimd::make_batch_bool_constant<value_type, split, arch_type>();
+        constexpr auto y = xsimd::make_batch_bool_constant<value_type, inv_split, arch_type>();
 
         constexpr auto x_or_y = x | y;
         static_assert(std::is_same<decltype(x_or_y), decltype(all_true)>::value, "x | y == true");

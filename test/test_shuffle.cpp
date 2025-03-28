@@ -498,7 +498,7 @@ struct shuffle_test
         };
 
         INFO("no op lhs");
-        B b_res_lhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, no_op_lhs_generator>());
+        B b_res_lhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, no_op_lhs_generator, arch_type>());
         CHECK_BATCH_EQ(b_res_lhs, b_lhs);
 
         struct no_op_rhs_generator
@@ -510,7 +510,7 @@ struct shuffle_test
         };
 
         INFO("no op rhs");
-        B b_res_rhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, no_op_rhs_generator>());
+        B b_res_rhs = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, no_op_rhs_generator, arch_type>());
         CHECK_BATCH_EQ(b_res_rhs, b_rhs);
     }
 
@@ -535,7 +535,7 @@ struct shuffle_test
         }
         B b_ref = B::load_unaligned(ref.data());
 
-        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, generic_generator>());
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, generic_generator, arch_type>());
         CHECK_BATCH_EQ(b_res, b_ref);
     }
 
@@ -557,7 +557,7 @@ struct shuffle_test
             ref[i] = (i > 2) ? lhs[0] : rhs[0];
         B b_ref = B::load_unaligned(ref.data());
 
-        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, pick_generator>());
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, pick_generator, arch_type>());
         CHECK_BATCH_EQ(b_res, b_ref);
     }
 
@@ -581,7 +581,7 @@ struct shuffle_test
             B b_ref = B::load_unaligned(ref.data());
 
             INFO("swizzle first batch");
-            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, swizzle_lo_generator>());
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, swizzle_lo_generator, arch_type>());
             CHECK_BATCH_EQ(b_res, b_ref);
         }
 
@@ -600,7 +600,7 @@ struct shuffle_test
             B b_ref = B::load_unaligned(ref.data());
 
             INFO("swizzle second batch");
-            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, swizzle_hi_generator>());
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, swizzle_hi_generator, arch_type>());
             CHECK_BATCH_EQ(b_res, b_ref);
         }
     }
@@ -643,7 +643,7 @@ struct shuffle_test
         B b_ref = B::load_unaligned(ref.data());
 
         INFO("select");
-        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, select_generator>());
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, select_generator, arch_type>());
         CHECK_BATCH_EQ(b_res, b_ref);
     }
 
@@ -666,7 +666,7 @@ struct shuffle_test
         B b_ref_lo = B::load_unaligned(ref_lo.data());
 
         INFO("zip_lo");
-        B b_res_lo = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, zip_lo_generator>());
+        B b_res_lo = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, zip_lo_generator, arch_type>());
         CHECK_BATCH_EQ(b_res_lo, b_ref_lo);
 
         struct zip_hi_generator
@@ -685,7 +685,7 @@ struct shuffle_test
         B b_ref_hi = B::load_unaligned(ref_hi.data());
 
         INFO("zip_hi");
-        B b_res_hi = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, arch_type, zip_hi_generator>());
+        B b_res_hi = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, zip_hi_generator, arch_type>());
         CHECK_BATCH_EQ(b_res_hi, b_ref_hi);
     }
 };

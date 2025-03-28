@@ -2087,7 +2087,7 @@ namespace xsimd
             XSIMD_INLINE T reduce(Op op, batch<T, A> const& self, std::integral_constant<unsigned, Lvl>) noexcept
             {
                 using index_type = as_unsigned_integer_t<T>;
-                batch<T, A> split = swizzle(self, make_batch_constant<index_type, A, split_high<index_type, Lvl / 2>>());
+                batch<T, A> split = swizzle(self, make_batch_constant<index_type, split_high<index_type, Lvl / 2>, A>());
                 return reduce(op, op(split, self), std::integral_constant<unsigned, Lvl / 2>());
             }
         }

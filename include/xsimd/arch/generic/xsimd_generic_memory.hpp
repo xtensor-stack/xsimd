@@ -207,7 +207,7 @@ namespace xsimd
                 }
             };
             batch<T, A> tmp(val);
-            return select(make_batch_bool_constant<T, A, index_mask>(), self, tmp);
+            return select(make_batch_bool_constant<T, index_mask, A>(), self, tmp);
         }
 
         // get
@@ -341,7 +341,7 @@ namespace xsimd
                 }
             };
 
-            return swizzle(self, make_batch_constant<as_unsigned_integer_t<T>, A, rotate_generator>(), A {});
+            return swizzle(self, make_batch_constant<as_unsigned_integer_t<T>, rotate_generator, A>(), A {});
         }
 
         template <size_t N, class A, class T>
@@ -362,7 +362,7 @@ namespace xsimd
                 }
             };
 
-            return swizzle(self, make_batch_constant<as_unsigned_integer_t<T>, A, rotate_generator>(), A {});
+            return swizzle(self, make_batch_constant<as_unsigned_integer_t<T>, rotate_generator, A>(), A {});
         }
 
         template <size_t N, class A, class T>
