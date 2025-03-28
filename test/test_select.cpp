@@ -68,7 +68,7 @@ struct select_test
 
     void test_select_static()
     {
-        constexpr auto mask = xsimd::make_batch_bool_constant<value_type, arch_type, pattern>();
+        constexpr auto mask = xsimd::make_batch_bool_constant<value_type, pattern, arch_type>();
 
         for (size_t i = 0; i < nb_input; ++i)
         {
