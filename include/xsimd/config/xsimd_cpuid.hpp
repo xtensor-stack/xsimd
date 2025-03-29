@@ -71,8 +71,9 @@ namespace xsimd
             ARCH_FIELD(avx512pf)
             ARCH_FIELD(avx512ifma)
             ARCH_FIELD(avx512vbmi)
+            ARCH_FIELD(avx512vbmi2)
             ARCH_FIELD_EX(avx512vnni<::xsimd::avx512bw>, avx512vnni_bw)
-            ARCH_FIELD_EX(avx512vnni<::xsimd::avx512vbmi>, avx512vnni_vbmi)
+            ARCH_FIELD_EX(avx512vnni<::xsimd::avx512vbmi2>, avx512vnni_vbmi2)
             ARCH_FIELD(neon)
             ARCH_FIELD(neon64)
             ARCH_FIELD_EX(i8mm<::xsimd::neon64>, i8mm_neon64)
@@ -245,8 +246,9 @@ namespace xsimd
                 avx512pf = regs7[1] >> 26 & avx512_state_os_enabled;
                 avx512ifma = regs7[1] >> 21 & avx512_state_os_enabled;
                 avx512vbmi = regs7[2] >> 1 & avx512_state_os_enabled;
+                avx512vbmi2 = regs7[2] >> 6 & avx512_state_os_enabled;
                 avx512vnni_bw = regs7[2] >> 11 & avx512_state_os_enabled;
-                avx512vnni_vbmi = avx512vbmi && avx512vnni_bw;
+                avx512vnni_vbmi2 = avx512vbmi2 && avx512vnni_bw;
 #endif
             }
         };
