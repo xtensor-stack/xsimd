@@ -99,6 +99,9 @@ jobs:
         if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=cannonlake"
         fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi2' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=icelake-server"
+        fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512vnni' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
         fi
