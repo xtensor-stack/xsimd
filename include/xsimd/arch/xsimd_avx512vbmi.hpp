@@ -74,6 +74,31 @@ namespace xsimd
             return _mm512_maskz_permutexvar_epi8(mask, _mm512_load_epi32(slide_pattern.data()), x);
         }
 
+        // swizzle (dynamic version)
+        template <class A>
+        XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch<uint8_t, A> mask, requires_arch<avx512vbmi>) noexcept
+        {
+            return _mm512_permutexvar_epi8(mask, self);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<int8_t, A> swizzle(batch<int8_t, A> const& self, batch<uint8_t, A> mask, requires_arch<avx512vbmi>) noexcept
+        {
+            return bitwise_cast<int8_t>(swizzle(bitwise_cast<uint8_t>(self), mask, avx512vbmi {}));
+        }
+
+        // swizzle (static version)
+        template <class A, uint8_t... Vs>
+        XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch_constant<uint8_t, A, Vs...> mask, requires_arch<avx512vbmi>) noexcept
+        {
+            return swizzle(self, mask.as_batch(), avx512vbmi {});
+        }
+
+        template <class A, uint8_t... Vs>
+        XSIMD_INLINE batch<int8_t, A> swizzle(batch<int8_t, A> const& self, batch_constant<uint8_t, A, Vs...> mask, requires_arch<avx512vbmi>) noexcept
+        {
+            return swizzle(self, mask.as_batch(), avx512vbmi {});
+        }
     }
 }
 
