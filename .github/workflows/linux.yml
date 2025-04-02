@@ -21,6 +21,7 @@ jobs:
           - { compiler: 'gcc',   version: '11', flags: 'i386' }
           - { compiler: 'gcc',   version: '11', flags: 'avx512pf' }
           - { compiler: 'gcc',   version: '11', flags: 'avx512vbmi' }
+          - { compiler: 'gcc',   version: '11', flags: 'avx512vbmi2' }
           - { compiler: 'gcc',   version: '11', flags: 'avx512vnni' }
           - { compiler: 'clang', version: '8',  flags: 'force_no_instr_set' }
           - { compiler: 'clang', version: '10', flags: 'enable_xtl_complex' }
