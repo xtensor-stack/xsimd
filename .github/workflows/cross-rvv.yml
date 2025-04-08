@@ -7,7 +7,7 @@ env:
   GCC_VERSION: "12"
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     name: 'RISC-V RVV${{ matrix.vector_bits }}'
     strategy:
       matrix:
