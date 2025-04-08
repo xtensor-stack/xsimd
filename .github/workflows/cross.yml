@@ -14,26 +14,8 @@ jobs:
           - { platform: 'arm',     arch: 'armv7-a', dir: 'arm-linux-gnueabihf', flags: '-mfpu=vfpv3-d16', full: 'OFF' } # no neon
           - { platform: 'aarch64', arch: 'armv8-a', dir: 'aarch64-linux-gnu', flags: '', full: 'ON' }
         sys:
-          - { compiler: 'gcc',   version: '9' }
-#          - { compiler: 'clang', version: '17' }
+          - { compiler: 'gcc',   version: '10' }
     steps:
-    - name: Setup compiler
-      if: ${{ matrix.sys.compiler == 'clang' }}
-      run: |
-        LLVM_VERSION=${{ matrix.sys.version }}
-        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - || exit 1
-        if [[ $LLVM_VERSION -eq 'latest' ]]; then
-          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal main" || exit 1
-        else
-          sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-$LLVM_VERSION main" || exit 1
-        fi
-        sudo apt-get update || exit 1
-        if [[ $LLVM_VERSION -eq 'latest' ]]; then
-          sudo apt-get --no-install-suggests --no-install-recommends install clang || exit 1
-        else
-          sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
-        fi
-        sudo apt-get --no-install-suggests --no-install-recommends install g++-9-${{ matrix.target.dir }} g++-9-multilib || exit 1
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
       run: |

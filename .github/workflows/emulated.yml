@@ -8,13 +8,13 @@ defaults:
     shell: bash -l {0}
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - emulated'
     strategy:
       matrix:
         sys:
-          - { compiler: 'gcc',   version: '7'}
-          - { compiler: 'clang', version: '8'}
+          - { compiler: 'gcc',   version: '12'}
+          - { compiler: 'clang', version: '16'}
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
@@ -32,12 +32,9 @@ jobs:
       if: ${{ matrix.sys.compiler == 'clang' }}
       run: |
         LLVM_VERSION=${{ matrix.sys.version }}
-        #sudo add-apt-repository ppa:ubuntu-toolchain-r/test || exit 1
-        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - || exit 1
-        sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal main" || exit 1
         sudo apt-get update || exit 1
         sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install g++-9 g++-9-multilib || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install g++ g++-multilib || exit 1
         sudo ln -s /usr/include/asm-generic /usr/include/asm
         CC=clang-$LLVM_VERSION
         echo "CC=$CC" >> $GITHUB_ENV
