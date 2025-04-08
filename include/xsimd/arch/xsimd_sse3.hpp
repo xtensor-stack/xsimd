@@ -50,12 +50,6 @@ namespace xsimd
             __m128 tmp1 = _mm_hadd_ps(tmp0, tmp0);
             return _mm_cvtss_f32(tmp1);
         }
-        template <class A>
-        XSIMD_INLINE double reduce_add(batch<double, A> const& self, requires_arch<sse3>) noexcept
-        {
-            __m128d tmp0 = _mm_hadd_pd(self, self);
-            return _mm_cvtsd_f64(tmp0);
-        }
 
     }
 
