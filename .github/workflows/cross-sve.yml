@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: 'Arm SVE${{ matrix.vector_bits }}'
     strategy:
       matrix:
