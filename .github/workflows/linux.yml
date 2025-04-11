@@ -8,14 +8,14 @@ defaults:
     shell: bash -l {0}
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - ${{ matrix.sys.flags }}'
     strategy:
       matrix:
         sys:
-          - { compiler: 'gcc',   version: '7',  flags: 'force_no_instr_set' }
-          - { compiler: 'gcc',   version: '8',  flags: 'enable_xtl_complex' }
-          - { compiler: 'gcc',   version: '9',  flags: 'avx' }
+          - { compiler: 'gcc',   version: '8',  flags: 'force_no_instr_set' }
+          - { compiler: 'gcc',   version: '9',  flags: 'enable_xtl_complex' }
+          - { compiler: 'gcc',   version: '10',  flags: 'avx' }
           #- { compiler: 'gcc',   version: '10', flags: 'avx512' } buggy
           - { compiler: 'gcc',   version: '11', flags: 'avx512' }
           - { compiler: 'gcc',   version: '11', flags: 'i386' }
@@ -23,8 +23,8 @@ jobs:
           - { compiler: 'gcc',   version: '11', flags: 'avx512vbmi' }
           - { compiler: 'gcc',   version: '11', flags: 'avx512vbmi2' }
           - { compiler: 'gcc',   version: '11', flags: 'avx512vnni' }
-          - { compiler: 'clang', version: '8',  flags: 'force_no_instr_set' }
-          - { compiler: 'clang', version: '10', flags: 'enable_xtl_complex' }
+          - { compiler: 'clang', version: '10',  flags: 'force_no_instr_set' }
+          - { compiler: 'clang', version: '11', flags: 'enable_xtl_complex' }
           - { compiler: 'clang', version: '12', flags: 'avx' }
           - { compiler: 'clang', version: '13', flags: 'sse3' }
           - { compiler: 'clang', version: '14', flags: 'avx512' }
@@ -52,14 +52,15 @@ jobs:
       if: ${{ matrix.sys.compiler == 'clang' }}
       run: |
         LLVM_VERSION=${{ matrix.sys.version }}
-        #sudo add-apt-repository ppa:ubuntu-toolchain-r/test || exit 1
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - || exit 1
         if [[ $LLVM_VERSION -ge 13 ]]; then
           sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-$LLVM_VERSION main" || exit 1
         else
           sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal main" || exit 1
         fi || exit 1
+
         sudo apt-get update || exit 1
+
         sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
         sudo apt-get --no-install-suggests --no-install-recommends install g++-9 g++-9-multilib || exit 1
         sudo ln -s /usr/include/asm-generic /usr/include/asm
