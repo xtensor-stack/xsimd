@@ -1064,22 +1064,10 @@ namespace xsimd
             tmp = _mm256_hadd_ps(tmp, tmp);
             return _mm_cvtss_f32(_mm256_extractf128_ps(tmp, 0));
         }
-        template <class A>
-        XSIMD_INLINE double reduce_add(batch<double, A> const& rhs, requires_arch<avx>) noexcept
-        {
-            // rhs = (x0, x1, x2, x3)
-            // tmp = (x2, x3, x0, x1)
-            __m256d tmp = _mm256_permute2f128_pd(rhs, rhs, 1);
-            // tmp = (x2+x0, x3+x1, -, -)
-            tmp = _mm256_add_pd(rhs, tmp);
-            // tmp = (x2+x0+x3+x1, -, -, -)
-            tmp = _mm256_hadd_pd(tmp, tmp);
-            return _mm_cvtsd_f64(_mm256_extractf128_pd(tmp, 0));
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, double>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            __m128i low, high;
+            typename batch<T, sse4_2>::register_type low, high;
             detail::split_avx(self, low, high);
             batch<T, sse4_2> blow(low), bhigh(high);
             return reduce_add(blow) + reduce_add(bhigh);
