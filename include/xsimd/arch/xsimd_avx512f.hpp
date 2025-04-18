@@ -1506,22 +1506,12 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE float reduce_add(batch<float, A> const& rhs, requires_arch<avx512f>) noexcept
         {
-            __m128 tmp1 = _mm512_extractf32x4_ps(rhs, 0);
-            __m128 tmp2 = _mm512_extractf32x4_ps(rhs, 1);
-            __m128 tmp3 = _mm512_extractf32x4_ps(rhs, 2);
-            __m128 tmp4 = _mm512_extractf32x4_ps(rhs, 3);
-            __m128 res1 = _mm_add_ps(tmp1, tmp2);
-            __m128 res2 = _mm_add_ps(tmp3, tmp4);
-            __m128 res3 = _mm_add_ps(res1, res2);
-            return reduce_add(batch<float, sse4_2>(res3), sse4_2 {});
+            return _mm512_reduce_add_ps(rhs);
         }
         template <class A>
         XSIMD_INLINE double reduce_add(batch<double, A> const& rhs, requires_arch<avx512f>) noexcept
         {
-            __m256d tmp1 = _mm512_extractf64x4_pd(rhs, 1);
-            __m256d tmp2 = _mm512_extractf64x4_pd(rhs, 0);
-            __m256d res1 = _mm256_add_pd(tmp1, tmp2);
-            return reduce_add(batch<double, avx2>(res1), avx2 {});
+            return _mm512_reduce_add_pd(rhs);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx512f>) noexcept
