@@ -1046,31 +1046,13 @@ namespace xsimd
         }
 
         // reduce_add
-        template <class A>
-        XSIMD_INLINE float reduce_add(batch<float, A> const& rhs, requires_arch<avx>) noexcept
-        {
-            // Warning about _mm256_hadd_ps:
-            // _mm256_hadd_ps(a,b) gives
-            // (a0+a1,a2+a3,b0+b1,b2+b3,a4+a5,a6+a7,b4+b5,b6+b7). Hence we can't
-            // rely on a naive use of this method
-            // rhs = (x0, x1, x2, x3, x4, x5, x6, x7)
-            // tmp = (x4, x5, x6, x7, x0, x1, x2, x3)
-            __m256 tmp = _mm256_permute2f128_ps(rhs, rhs, 1);
-            // tmp = (x4+x0, x5+x1, x6+x2, x7+x3, x0+x4, x1+x5, x2+x6, x3+x7)
-            tmp = _mm256_add_ps(rhs, tmp);
-            // tmp = (x4+x0+x5+x1, x6+x2+x7+x3, -, -, -, -, -, -)
-            tmp = _mm256_hadd_ps(tmp, tmp);
-            // tmp = (x4+x0+x5+x1+x6+x2+x7+x3, -, -, -, -, -, -, -)
-            tmp = _mm256_hadd_ps(tmp, tmp);
-            return _mm_cvtss_f32(_mm256_extractf128_ps(tmp, 0));
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, double>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
             typename batch<T, sse4_2>::register_type low, high;
             detail::split_avx(self, low, high);
             batch<T, sse4_2> blow(low), bhigh(high);
-            return reduce_add(blow) + reduce_add(bhigh);
+            return reduce_add(blow + bhigh);
         }
 
         // reduce_max
