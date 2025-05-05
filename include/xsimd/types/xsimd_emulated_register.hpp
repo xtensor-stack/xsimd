@@ -12,7 +12,7 @@
 #ifndef XSIMD_EMULATED_REGISTER_HPP
 #define XSIMD_EMULATED_REGISTER_HPP
 
-#include "./xsimd_generic_arch.hpp"
+#include "./xsimd_common_arch.hpp"
 #include "./xsimd_register.hpp"
 
 namespace xsimd
@@ -23,7 +23,7 @@ namespace xsimd
      * emulated instructions
      */
     template <size_t N>
-    struct emulated : generic
+    struct emulated : common
     {
         static constexpr bool supported() noexcept { return true; }
         static constexpr bool available() noexcept { return true; }

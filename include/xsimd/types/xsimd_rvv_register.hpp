@@ -13,7 +13,7 @@
 #ifndef XSIMD_RVV_REGISTER_HPP
 #define XSIMD_RVV_REGISTER_HPP
 
-#include "xsimd_generic_arch.hpp"
+#include "xsimd_common_arch.hpp"
 #include "xsimd_register.hpp"
 
 #if XSIMD_WITH_RVV
@@ -30,7 +30,7 @@ namespace xsimd
          * RVV instructions (fixed vector size) for riscv
          */
         template <size_t Width>
-        struct rvv : xsimd::generic
+        struct rvv : xsimd::common
         {
             static constexpr size_t width = Width;
             static constexpr bool supported() noexcept { return Width == XSIMD_RVV_BITS; }

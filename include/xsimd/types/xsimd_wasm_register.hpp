@@ -13,7 +13,7 @@
 #ifndef XSIMD_WASM_REGISTER_HPP
 #define XSIMD_WASM_REGISTER_HPP
 
-#include "xsimd_generic_arch.hpp"
+#include "xsimd_common_arch.hpp"
 #include "xsimd_register.hpp"
 
 #if XSIMD_WITH_WASM
@@ -27,7 +27,7 @@ namespace xsimd
      *
      * WASM instructions
      */
-    struct wasm : generic
+    struct wasm : common
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_WASM; }
         static constexpr bool available() noexcept { return true; }

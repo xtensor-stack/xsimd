@@ -1123,7 +1123,7 @@ namespace xsimd
         XSIMD_HASSINCOS_TRAIT(__sincos);
         XSIMD_HASSINCOS_TRAIT(__sincosf);
 
-        struct generic_sincosf
+        struct common_sincosf
         {
             template <class T>
             XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincosf, T), void>::type
@@ -1148,7 +1148,7 @@ namespace xsimd
             }
         };
 
-        struct generic_sincos
+        struct common_sincos
         {
             template <class T>
             XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincos, T), void>::type
@@ -1180,14 +1180,14 @@ namespace xsimd
     XSIMD_INLINE std::pair<float, float> sincos(float val) noexcept
     {
         float s, c;
-        detail::generic_sincosf {}(val, s, c);
+        detail::common_sincosf {}(val, s, c);
         return std::make_pair(s, c);
     }
 
     XSIMD_INLINE std::pair<double, double> sincos(double val) noexcept
     {
         double s, c;
-        detail::generic_sincos {}(val, s, c);
+        detail::common_sincos {}(val, s, c);
         return std::make_pair(s, c);
     }
 

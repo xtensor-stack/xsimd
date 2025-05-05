@@ -34,13 +34,13 @@ namespace xsimd
 
         // fwd
         template <class A, class T, size_t I>
-        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
+        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<common>) noexcept;
         template <class A, typename T, typename ITy, ITy... Indices>
-        XSIMD_INLINE batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<ITy, A, Indices...>, requires_arch<generic>) noexcept;
+        XSIMD_INLINE batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<ITy, A, Indices...>, requires_arch<common>) noexcept;
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> avg(batch<T, A> const&, batch<T, A> const&, requires_arch<generic>) noexcept;
+        XSIMD_INLINE batch<T, A> avg(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
         template <class A, class T>
-        XSIMD_INLINE void transpose(batch<T, A>* matrix_begin, batch<T, A>* matrix_end, requires_arch<generic>) noexcept;
+        XSIMD_INLINE void transpose(batch<T, A>* matrix_begin, batch<T, A>* matrix_end, requires_arch<common>) noexcept;
 
         // abs
         template <class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, void>::type>
@@ -134,7 +134,7 @@ namespace xsimd
             }
             else
             {
-                return avgr(self, other, generic {});
+                return avgr(self, other, common {});
             }
         }
 
@@ -154,7 +154,7 @@ namespace xsimd
             }
             else
             {
-                return avg(self, other, generic {});
+                return avg(self, other, common {});
             }
         }
 
@@ -728,7 +728,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return gt(self, other, generic {});
+                    return gt(self, other, common {});
                 }
             }
         }
@@ -1170,7 +1170,7 @@ namespace xsimd
             }
             else
             {
-                return hadd(self, generic {});
+                return hadd(self, common {});
             }
         }
         template <class A>
@@ -1244,7 +1244,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return sadd(self, other, generic {});
+                    return sadd(self, other, common {});
                 }
             }
             else
@@ -1259,7 +1259,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return sadd(self, other, generic {});
+                    return sadd(self, other, common {});
                 }
             }
         }
@@ -1375,7 +1375,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return ssub(self, other, generic {});
+                    return ssub(self, other, common {});
                 }
             }
             else
@@ -1390,7 +1390,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return ssub(self, other, generic {});
+                    return ssub(self, other, common {});
                 }
             }
         }
@@ -1608,7 +1608,7 @@ namespace xsimd
             }
             else
             {
-                transpose(matrix_begin, matrix_end, generic {});
+                transpose(matrix_begin, matrix_end, common {});
             }
         }
 

@@ -99,8 +99,8 @@ TEST_CASE("[multi arch support]")
 
     SUBCASE("xsimd::arch_list<...>::alignment()")
     {
-        static_assert(xsimd::arch_list<xsimd::generic>::alignment() == 0,
-                      "generic");
+        static_assert(xsimd::arch_list<xsimd::common>::alignment() == 0,
+                      "common");
         static_assert(xsimd::arch_list<xsimd::sse2>::alignment()
                           == xsimd::sse2::alignment(),
                       "one architecture");

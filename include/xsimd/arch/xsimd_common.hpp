@@ -9,15 +9,15 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_GENERIC_HPP
-#define XSIMD_GENERIC_HPP
+#ifndef XSIMD_COMMON_HPP
+#define XSIMD_COMMON_HPP
 
-#include "./generic/xsimd_generic_arithmetic.hpp"
-#include "./generic/xsimd_generic_complex.hpp"
-#include "./generic/xsimd_generic_logical.hpp"
-#include "./generic/xsimd_generic_math.hpp"
-#include "./generic/xsimd_generic_memory.hpp"
-#include "./generic/xsimd_generic_rounding.hpp"
-#include "./generic/xsimd_generic_trigo.hpp"
+#include "./common/xsimd_common_arithmetic.hpp"
+#include "./common/xsimd_common_complex.hpp"
+#include "./common/xsimd_common_logical.hpp"
+#include "./common/xsimd_common_math.hpp"
+#include "./common/xsimd_common_memory.hpp"
+#include "./common/xsimd_common_rounding.hpp"
+#include "./common/xsimd_common_trigo.hpp"
 
 #endif

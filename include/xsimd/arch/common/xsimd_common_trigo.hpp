@@ -9,10 +9,10 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_GENERIC_TRIGO_HPP
-#define XSIMD_GENERIC_TRIGO_HPP
+#ifndef XSIMD_COMMON_TRIGO_HPP
+#define XSIMD_COMMON_TRIGO_HPP
 
-#include "./xsimd_generic_details.hpp"
+#include "./xsimd_common_details.hpp"
 
 #include <array>
 
@@ -35,7 +35,7 @@ namespace xsimd
 
         // acos
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> acos(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> acos(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             batch_type x = abs(self);
@@ -47,7 +47,7 @@ namespace xsimd
             return select(x_larger_05, x, constants::pio2<batch_type>() - x);
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> acos(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> acos(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -66,7 +66,7 @@ namespace xsimd
          * ====================================================
          */
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> acosh(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> acosh(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             batch_type x = self - batch_type(1.);
@@ -76,7 +76,7 @@ namespace xsimd
             return select(test, l1pz + constants::log_2<batch_type>(), l1pz);
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> acosh(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> acosh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             batch_type w = acos(z);
@@ -86,7 +86,7 @@ namespace xsimd
 
         // asin
         template <class A>
-        XSIMD_INLINE batch<float, A> asin(batch<float, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<float, A> asin(batch<float, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<float, A>;
             batch_type x = abs(self);
@@ -105,7 +105,7 @@ namespace xsimd
             return z ^ sign;
         }
         template <class A>
-        XSIMD_INLINE batch<double, A> asin(batch<double, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<double, A> asin(batch<double, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<double, A>;
             batch_type x = abs(self);
@@ -127,7 +127,7 @@ namespace xsimd
                               ^ bitofsign(self));
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> asin(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> asin(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -184,7 +184,7 @@ namespace xsimd
             }
         }
         template <class A>
-        XSIMD_INLINE batch<float, A> asinh(batch<float, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<float, A> asinh(batch<float, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<float, A>;
             batch_type x = abs(self);
@@ -212,7 +212,7 @@ namespace xsimd
 #endif
         }
         template <class A>
-        XSIMD_INLINE batch<double, A> asinh(batch<double, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<double, A> asinh(batch<double, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<double, A>;
             batch_type x = abs(self);
@@ -226,7 +226,7 @@ namespace xsimd
             return bitofsign(self) ^ z;
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> asinh(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> asinh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             batch_type w = asin(batch_type(-z.imag(), z.real()));
@@ -288,7 +288,7 @@ namespace xsimd
             }
         }
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> atan(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> atan(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const batch_type absa = abs(self);
@@ -296,7 +296,7 @@ namespace xsimd
             return x ^ bitofsign(self);
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> atan(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> atan(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -327,7 +327,7 @@ namespace xsimd
          * ====================================================
          */
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> atanh(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> atanh(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             batch_type x = abs(self);
@@ -338,7 +338,7 @@ namespace xsimd
             return bitofsign(self) ^ (batch_type(0.5) * log1p(select(test, fma(t, tmp, t), tmp)));
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> atanh(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> atanh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             batch_type w = atan(batch_type(-z.imag(), z.real()));
@@ -348,7 +348,7 @@ namespace xsimd
 
         // atan2
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const batch_type q = abs(self / other);
@@ -617,7 +617,7 @@ namespace xsimd
 
         }
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> cos(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> cos(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const batch_type x = abs(self);
@@ -634,7 +634,7 @@ namespace xsimd
         }
 
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> cos(batch<std::complex<T>, A> const& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> cos(batch<std::complex<T>, A> const& z, requires_arch<common>) noexcept
         {
             return { cos(z.real()) * cosh(z.imag()), -sin(z.real()) * sinh(z.imag()) };
         }
@@ -652,7 +652,7 @@ namespace xsimd
          */
 
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> cosh(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> cosh(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             batch_type x = abs(self);
@@ -663,7 +663,7 @@ namespace xsimd
             return select(test1, tmp1 * tmp, detail::average(tmp, batch_type(1.) / tmp));
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> cosh(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> cosh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             auto x = z.real();
             auto y = z.imag();
@@ -692,20 +692,20 @@ namespace xsimd
         }
 
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> sin(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> sin(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             return detail::sin(self);
         }
 
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> sin(batch<std::complex<T>, A> const& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> sin(batch<std::complex<T>, A> const& z, requires_arch<common>) noexcept
         {
             return { sin(z.real()) * cosh(z.imag()), cos(z.real()) * sinh(z.imag()) };
         }
 
         // sincos
         template <class A, class T>
-        XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>> sincos(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const batch_type x = abs(self);
@@ -725,7 +725,7 @@ namespace xsimd
 
         template <class A, class T>
         XSIMD_INLINE std::pair<batch<std::complex<T>, A>, batch<std::complex<T>, A>>
-        sincos(batch<std::complex<T>, A> const& z, requires_arch<generic>) noexcept
+        sincos(batch<std::complex<T>, A> const& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -739,7 +739,7 @@ namespace xsimd
         // sinh
         namespace detail
         {
-            /* origin: boost/simd/arch/common/detail/generic/sinh_kernel.hpp */
+            /* origin: boost/simd/arch/common/detail/common/sinh_kernel.hpp */
             /*
              * ====================================================
              * copyright 2016 NumScale SAS
@@ -792,7 +792,7 @@ namespace xsimd
          * ====================================================
          */
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> sinh(batch<T, A> const& a, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> sinh(batch<T, A> const& a, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             batch_type half(0.5);
@@ -814,7 +814,7 @@ namespace xsimd
             return select(lt1, z, r) ^ bts;
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> sinh(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> sinh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             auto x = z.real();
             auto y = z.imag();
@@ -823,7 +823,7 @@ namespace xsimd
 
         // tan
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> tan(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> tan(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const batch_type x = abs(self);
@@ -836,7 +836,7 @@ namespace xsimd
             return y ^ bitofsign(self);
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> tan(batch<std::complex<T>, A> const& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> tan(batch<std::complex<T>, A> const& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
@@ -851,7 +851,7 @@ namespace xsimd
         // tanh
         namespace detail
         {
-            /* origin: boost/simd/arch/common/detail/generic/tanh_kernel.hpp */
+            /* origin: boost/simd/arch/common/detail/common/tanh_kernel.hpp */
             /*
              * ====================================================
              * copyright 2016 NumScale SAS
@@ -934,7 +934,7 @@ namespace xsimd
          * ====================================================
          */
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> tanh(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> tanh(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             batch_type one(1.);
@@ -952,7 +952,7 @@ namespace xsimd
             return select(test, z, r) ^ bts;
         }
         template <class A, class T>
-        XSIMD_INLINE batch<std::complex<T>, A> tanh(const batch<std::complex<T>, A>& z, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<std::complex<T>, A> tanh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using real_batch = typename batch<std::complex<T>, A>::real_batch;
             auto x = z.real();

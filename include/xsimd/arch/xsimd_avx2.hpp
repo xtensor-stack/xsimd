@@ -90,7 +90,7 @@ namespace xsimd
             }
             else
             {
-                return avgr(self, other, generic {});
+                return avgr(self, other, common {});
             }
         }
 
@@ -110,7 +110,7 @@ namespace xsimd
             }
             else
             {
-                return avg(self, other, generic {});
+                return avg(self, other, common {});
             }
         }
 

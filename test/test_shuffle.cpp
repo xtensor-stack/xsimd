@@ -332,7 +332,7 @@ struct compress_test
         CHECK_BATCH_EQ(b, expected);
     }
 
-    void generic()
+    void common()
     {
         for (size_t i = 0; i < size; ++i)
             mask[i] = i % 3 == 0;
@@ -362,9 +362,9 @@ TEST_CASE_TEMPLATE("[compress]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xs
     //{
     //      Test.interleave();
     // }
-    // SUBCASE("generic")
+    // SUBCASE("common")
     //{
-    //      Test.generic();
+    //      Test.common();
     // }
 }
 
@@ -428,7 +428,7 @@ struct expand_test
         CHECK_BATCH_EQ(b, expected);
     }
 
-    void generic()
+    void common()
     {
         for (size_t i = 0; i < size; ++i)
             mask[i] = i % 3 == 0;
@@ -458,9 +458,9 @@ TEST_CASE_TEMPLATE("[expand]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsim
     {
         Test.interleave();
     }
-    SUBCASE("generic")
+    SUBCASE("common")
     {
-        Test.generic();
+        Test.common();
     }
 }
 
@@ -514,12 +514,12 @@ struct shuffle_test
         CHECK_BATCH_EQ(b_res_rhs, b_rhs);
     }
 
-    void generic()
+    void common()
     {
         B b_lhs = B::load_unaligned(lhs.data());
         B b_rhs = B::load_unaligned(rhs.data());
 
-        struct generic_generator
+        struct common_generator
         {
             static constexpr size_t get(size_t index, size_t size)
             {
@@ -535,7 +535,7 @@ struct shuffle_test
         }
         B b_ref = B::load_unaligned(ref.data());
 
-        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, generic_generator, arch_type>());
+        B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, common_generator, arch_type>());
         CHECK_BATCH_EQ(b_res, b_ref);
     }
 
@@ -697,9 +697,9 @@ TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xs
     {
         Test.no_op();
     }
-    SUBCASE("generic")
+    SUBCASE("common")
     {
-        Test.generic();
+        Test.common();
     }
     SUBCASE("pick")
     {

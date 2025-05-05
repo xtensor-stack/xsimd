@@ -9,8 +9,8 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_GENERIC_ARCH_HPP
-#define XSIMD_GENERIC_ARCH_HPP
+#ifndef XSIMD_COMMON_ARCH_HPP
+#define XSIMD_COMMON_ARCH_HPP
 
 #include "../config/xsimd_config.hpp"
 
@@ -24,7 +24,7 @@ namespace xsimd
      *
      * Base class for all architectures.
      */
-    struct generic
+    struct common
     {
         /// Whether this architecture is supported at compile-time.
         static constexpr bool supported() noexcept { return true; }
@@ -36,7 +36,7 @@ namespace xsimd
         /// Whether this architecture requires aligned memory access.
         static constexpr bool requires_alignment() noexcept { return false; }
         /// Name of the architecture.
-        static constexpr char const* name() noexcept { return "generic"; }
+        static constexpr char const* name() noexcept { return "common"; }
     };
 
     struct unsupported
