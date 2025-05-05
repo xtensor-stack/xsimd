@@ -27,12 +27,12 @@ namespace xsimd
 
         // fwd
         template <class A, class T, size_t I>
-        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<generic>) noexcept;
+        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<common>) noexcept;
 
         template <class A>
-        XSIMD_INLINE void transpose(batch<uint16_t, A>* matrix_begin, batch<uint16_t, A>* matrix_end, requires_arch<generic>) noexcept;
+        XSIMD_INLINE void transpose(batch<uint16_t, A>* matrix_begin, batch<uint16_t, A>* matrix_end, requires_arch<common>) noexcept;
         template <class A>
-        XSIMD_INLINE void transpose(batch<uint8_t, A>* matrix_begin, batch<uint8_t, A>* matrix_end, requires_arch<generic>) noexcept;
+        XSIMD_INLINE void transpose(batch<uint8_t, A>* matrix_begin, batch<uint8_t, A>* matrix_end, requires_arch<common>) noexcept;
 
         namespace detail
         {
@@ -760,10 +760,10 @@ namespace xsimd
             }
             else
             {
-                return insert(self, val, pos, generic {});
+                return insert(self, val, pos, common {});
             }
 #endif
-            return insert(self, val, pos, generic {});
+            return insert(self, val, pos, common {});
         }
 
         // isnan
@@ -1224,7 +1224,7 @@ namespace xsimd
             if (I4 == (I0 + 4) && I5 == (I1 + 4) && I6 == (I2 + 4) && I7 == (I3 + 4) && I2 < 4 && I3 < 4 && I0 >= 8 && I0 < 12 && I1 >= 8 && I1 < 12)
                 return _mm256_shuffle_ps(y, x, smask);
 
-            return shuffle(x, y, mask, generic {});
+            return shuffle(x, y, mask, common {});
         }
 
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
@@ -1239,7 +1239,7 @@ namespace xsimd
             if (I1 < 2 && I0 >= 4 && I0 < 6 && I3 >= 2 && I3 < 4 && I2 >= 6)
                 return _mm256_shuffle_pd(y, x, smask);
 
-            return shuffle(x, y, mask, generic {});
+            return shuffle(x, y, mask, common {});
         }
 
         // slide_left

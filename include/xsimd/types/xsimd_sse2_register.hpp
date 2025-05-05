@@ -12,7 +12,7 @@
 #ifndef XSIMD_SSE2_REGISTER_HPP
 #define XSIMD_SSE2_REGISTER_HPP
 
-#include "./xsimd_generic_arch.hpp"
+#include "./xsimd_common_arch.hpp"
 #include "./xsimd_register.hpp"
 
 #if XSIMD_WITH_SSE2
@@ -27,7 +27,7 @@ namespace xsimd
      *
      * SSE2 instructions
      */
-    struct sse2 : generic
+    struct sse2 : common
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_SSE2; }
         static constexpr bool available() noexcept { return true; }

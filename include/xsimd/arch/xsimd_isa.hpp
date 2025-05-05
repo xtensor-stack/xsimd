@@ -14,7 +14,7 @@
 
 #include "../config/xsimd_arch.hpp"
 
-#include "./xsimd_generic_fwd.hpp"
+#include "./xsimd_common_fwd.hpp"
 
 #if XSIMD_WITH_EMULATED
 #include "./xsimd_emulated.hpp"
@@ -129,6 +129,6 @@
 #endif
 
 // Must come last to have access to all conversion specializations.
-#include "./xsimd_generic.hpp"
+#include "./xsimd_common.hpp"
 
 #endif

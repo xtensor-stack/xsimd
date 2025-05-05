@@ -12,7 +12,7 @@
 #ifndef XSIMD_AVX512F_REGISTER_HPP
 #define XSIMD_AVX512F_REGISTER_HPP
 
-#include "./xsimd_generic_arch.hpp"
+#include "./xsimd_common_arch.hpp"
 
 namespace xsimd
 {
@@ -22,7 +22,7 @@ namespace xsimd
      *
      * AVX512F instructions
      */
-    struct avx512f : generic
+    struct avx512f : common
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512F; }
         static constexpr bool available() noexcept { return true; }

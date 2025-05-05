@@ -9,10 +9,10 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_GENERIC_LOGICAL_HPP
-#define XSIMD_GENERIC_LOGICAL_HPP
+#ifndef XSIMD_COMMON_LOGICAL_HPP
+#define XSIMD_COMMON_LOGICAL_HPP
 
-#include "./xsimd_generic_details.hpp"
+#include "./xsimd_common_details.hpp"
 
 #include <climits>
 
@@ -26,7 +26,7 @@ namespace xsimd
 
         // count
         template <class A, class T>
-        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<common>) noexcept
         {
             uint64_t m = self.mask();
             XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size < 14)
@@ -69,7 +69,7 @@ namespace xsimd
 
         // from  mask
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) bool buffer[batch_bool<T, A>::size];
             // This is inefficient but should never be called. It's just a
@@ -81,28 +81,28 @@ namespace xsimd
 
         // ge
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return other <= self;
         }
 
         // gt
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return other < self;
         }
 
         // is_even
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> is_even(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> is_even(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             return is_flint(self * T(0.5));
         }
 
         // is_flint
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> is_flint(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> is_flint(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             auto frac = select(isnan(self - self), constants::nan<batch<T, A>>(), self - trunc(self));
             return frac == T(0.);
@@ -110,69 +110,69 @@ namespace xsimd
 
         // is_odd
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> is_odd(batch<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> is_odd(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             return is_even(self - T(1.));
         }
 
         // isinf
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> isinf(batch<T, A> const&, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> isinf(batch<T, A> const&, requires_arch<common>) noexcept
         {
             return batch_bool<T, A>(false);
         }
         template <class A>
-        XSIMD_INLINE batch_bool<float, A> isinf(batch<float, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<float, A> isinf(batch<float, A> const& self, requires_arch<common>) noexcept
         {
             return abs(self) == std::numeric_limits<float>::infinity();
         }
         template <class A>
-        XSIMD_INLINE batch_bool<double, A> isinf(batch<double, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<double, A> isinf(batch<double, A> const& self, requires_arch<common>) noexcept
         {
             return abs(self) == std::numeric_limits<double>::infinity();
         }
 
         // isfinite
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> isfinite(batch<T, A> const&, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> isfinite(batch<T, A> const&, requires_arch<common>) noexcept
         {
             return batch_bool<T, A>(true);
         }
         template <class A>
-        XSIMD_INLINE batch_bool<float, A> isfinite(batch<float, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<float, A> isfinite(batch<float, A> const& self, requires_arch<common>) noexcept
         {
             return (self - self) == 0.f;
         }
         template <class A>
-        XSIMD_INLINE batch_bool<double, A> isfinite(batch<double, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<double, A> isfinite(batch<double, A> const& self, requires_arch<common>) noexcept
         {
             return (self - self) == 0.;
         }
 
         // isnan
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> isnan(batch<T, A> const&, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> isnan(batch<T, A> const&, requires_arch<common>) noexcept
         {
             return batch_bool<T, A>(false);
         }
 
         // le
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return (self < other) || (self == other);
         }
 
         // neq
         template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return !(other == self);
         }
 
         // logical_and
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> logical_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> logical_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept
                                  { return x && y; },
@@ -181,7 +181,7 @@ namespace xsimd
 
         // logical_or
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> logical_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<generic>) noexcept
+        XSIMD_INLINE batch<T, A> logical_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept
                                  { return x || y; },
@@ -190,7 +190,7 @@ namespace xsimd
 
         // mask
         template <class A, class T>
-        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<generic>) noexcept
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) bool buffer[batch_bool<T, A>::size];
             self.store_aligned(buffer);

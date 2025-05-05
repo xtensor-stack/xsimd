@@ -12,7 +12,7 @@
 #ifndef XSIMD_NEON_REGISTER_HPP
 #define XSIMD_NEON_REGISTER_HPP
 
-#include "xsimd_generic_arch.hpp"
+#include "xsimd_common_arch.hpp"
 #include "xsimd_register.hpp"
 
 #if XSIMD_WITH_NEON
@@ -26,7 +26,7 @@ namespace xsimd
      *
      * NEON instructions for arm32
      */
-    struct neon : generic
+    struct neon : common
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_NEON; }
         static constexpr bool available() noexcept { return true; }

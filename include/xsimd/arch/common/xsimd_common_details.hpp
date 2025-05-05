@@ -9,13 +9,13 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_GENERIC_DETAILS_HPP
-#define XSIMD_GENERIC_DETAILS_HPP
+#ifndef XSIMD_COMMON_DETAILS_HPP
+#define XSIMD_COMMON_DETAILS_HPP
 
 #include <complex>
 
 #include "../../math/xsimd_rem_pio2.hpp"
-#include "../../types/xsimd_generic_arch.hpp"
+#include "../../types/xsimd_common_arch.hpp"
 #include "../../types/xsimd_utils.hpp"
 #include "../xsimd_constants.hpp"
 
@@ -137,54 +137,54 @@ namespace xsimd
             }
         }
 
-        // some generic fast_cast conversion
+        // some common fast_cast conversion
         namespace detail
         {
             template <class A>
-            XSIMD_INLINE batch<uint8_t, A> fast_cast(batch<int8_t, A> const& self, batch<uint8_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<uint8_t, A> fast_cast(batch<int8_t, A> const& self, batch<uint8_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<uint8_t>(self);
             }
             template <class A>
-            XSIMD_INLINE batch<uint16_t, A> fast_cast(batch<int16_t, A> const& self, batch<uint16_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<uint16_t, A> fast_cast(batch<int16_t, A> const& self, batch<uint16_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<uint16_t>(self);
             }
             template <class A>
-            XSIMD_INLINE batch<uint32_t, A> fast_cast(batch<int32_t, A> const& self, batch<uint32_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<uint32_t, A> fast_cast(batch<int32_t, A> const& self, batch<uint32_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<uint32_t>(self);
             }
             template <class A>
-            XSIMD_INLINE batch<uint64_t, A> fast_cast(batch<int64_t, A> const& self, batch<uint64_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<uint64_t, A> fast_cast(batch<int64_t, A> const& self, batch<uint64_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<uint64_t>(self);
             }
             template <class A>
-            XSIMD_INLINE batch<int8_t, A> fast_cast(batch<uint8_t, A> const& self, batch<int8_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<int8_t, A> fast_cast(batch<uint8_t, A> const& self, batch<int8_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<int8_t>(self);
             }
             template <class A>
-            XSIMD_INLINE batch<int16_t, A> fast_cast(batch<uint16_t, A> const& self, batch<int16_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<int16_t, A> fast_cast(batch<uint16_t, A> const& self, batch<int16_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<int16_t>(self);
             }
             template <class A>
-            XSIMD_INLINE batch<int32_t, A> fast_cast(batch<uint32_t, A> const& self, batch<int32_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<int32_t, A> fast_cast(batch<uint32_t, A> const& self, batch<int32_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<int32_t>(self);
             }
             template <class A>
-            XSIMD_INLINE batch<int64_t, A> fast_cast(batch<uint64_t, A> const& self, batch<int64_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<int64_t, A> fast_cast(batch<uint64_t, A> const& self, batch<int64_t, A> const&, requires_arch<common>) noexcept
             {
                 return bitwise_cast<int64_t>(self);
             }
 
-            // Provide a generic uint32_t -> float cast only if we have a
-            // non-generic int32_t -> float fast_cast
+            // Provide a common uint32_t -> float cast only if we have a
+            // non-common int32_t -> float fast_cast
             template <class A, class _ = decltype(fast_cast(std::declval<batch<int32_t, A> const&>(), std::declval<batch<float, A> const&>(), A {}))>
-            XSIMD_INLINE batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<common>) noexcept
             {
                 // see https://stackoverflow.com/questions/34066228/how-to-perform-uint32-float-conversion-with-sse
                 batch<uint32_t, A> msk_lo(0xFFFF);
@@ -198,10 +198,10 @@ namespace xsimd
                 return v_hi_flt + v_lo_flt; /* Rounding may occur here, mul and add may fuse to fma for haswell and newer   */
             }
 
-            // Provide a generic float -> uint32_t cast only if we have a
-            // non-generic float -> int32_t fast_cast
+            // Provide a common float -> uint32_t cast only if we have a
+            // non-common float -> int32_t fast_cast
             template <class A, class _ = decltype(fast_cast(std::declval<batch<float, A> const&>(), std::declval<batch<int32_t, A> const&>(), A {}))>
-            XSIMD_INLINE batch<uint32_t, A> fast_cast(batch<float, A> const& v, batch<uint32_t, A> const&, requires_arch<generic>) noexcept
+            XSIMD_INLINE batch<uint32_t, A> fast_cast(batch<float, A> const& v, batch<uint32_t, A> const&, requires_arch<common>) noexcept
             {
                 auto is_large = v >= batch<float, A>(1u << 31);
                 auto small_v = bitwise_cast<float>(batch_cast<int32_t>(v));
