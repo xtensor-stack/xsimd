@@ -1694,9 +1694,15 @@ namespace xsimd
 #ifndef XSIMD_NO_INFINITIES
             batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
+            assert(all(isnez) && "Calling log10 on a batch with zero value while XSIMD_NO_INFINITIES is active");
+            batch_type zz = r;
 #endif
+#ifndef XSIMD_NO_NANS
             return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#else
+            assert(all(self >= batch_type(0.)) && "Calling log10 on a batch with negative value while XSIMD_NO_NANS is active");
+            return zz;
+#endif
         }
 
         template <class A>
@@ -2475,7 +2481,7 @@ namespace xsimd
         {
             using batch_type = batch<T, A>;
             auto nan_result = (self < batch_type(0.) && is_flint(self));
-#ifndef XSIMD_NO_INVALIDS
+#ifndef XSIMD_NO_NANS
             nan_result = isnan(self) || nan_result;
 #endif
             batch_type q = abs(self);
