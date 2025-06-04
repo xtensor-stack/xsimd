@@ -92,7 +92,7 @@ OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" OFF)
 
 if(ENABLE_XTL_COMPLEX)
-    find_package(xtl 0.7.0 REQUIRED)
+    find_package(xtl 0.8.0 REQUIRED)
     target_compile_features(xsimd INTERFACE cxx_std_14)
     target_compile_definitions(xsimd INTERFACE XSIMD_ENABLE_XTL_COMPLEX=1)
     target_link_libraries(xsimd INTERFACE xtl)
