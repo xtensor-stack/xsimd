@@ -5,7 +5,7 @@ contributing journey as good an experience as it can be.
 
 # Submitting patches
 
-Patches should be submitted through Github PR. We di put some effort to setup a
+Patches should be submitted through Github PR. We did put some effort to setup a
 decent Continuous Integration coverage, please try to make it green ;-)
 
 We use [clang-format](https://clang.llvm.org/docs/ClangFormat.html) to keep
