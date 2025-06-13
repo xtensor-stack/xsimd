@@ -659,7 +659,15 @@ namespace xsimd
         template <size_t N, class A>
         XSIMD_INLINE batch<uint8_t, A> rotate_left(batch<uint8_t, A> const& self, requires_arch<avx2>) noexcept
         {
-            return _mm256_alignr_epi8(self, self, N);
+            auto other = _mm256_permute2x128_si256(self, self, 0x1);
+            if (N < 16)
+            {
+                return _mm256_alignr_epi8(other, self, N);
+            }
+            else
+            {
+                return _mm256_alignr_epi8(self, other, N - 16);
+            }
         }
         template <size_t N, class A>
         XSIMD_INLINE batch<int8_t, A> rotate_left(batch<int8_t, A> const& self, requires_arch<avx2>) noexcept
@@ -669,7 +677,15 @@ namespace xsimd
         template <size_t N, class A>
         XSIMD_INLINE batch<uint16_t, A> rotate_left(batch<uint16_t, A> const& self, requires_arch<avx2>) noexcept
         {
-            return _mm256_alignr_epi8(self, self, 2 * N);
+            auto other = _mm256_permute2x128_si256(self, self, 0x1);
+            if (N < 8)
+            {
+                return _mm256_alignr_epi8(other, self, 2 * N);
+            }
+            else
+            {
+                return _mm256_alignr_epi8(self, other, 2 * (N - 8));
+            }
         }
         template <size_t N, class A>
         XSIMD_INLINE batch<int16_t, A> rotate_left(batch<int16_t, A> const& self, requires_arch<avx2>) noexcept
@@ -886,6 +902,7 @@ namespace xsimd
         }
 
         // swizzle (dynamic mask)
+
         template <class A>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
