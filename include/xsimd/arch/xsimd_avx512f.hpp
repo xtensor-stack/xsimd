@@ -32,6 +32,8 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, Mask const& mask, requires_arch<common>) noexcept;
         template <class A, class T, size_t I>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<common>) noexcept;
+        template <class A, class T, class ITy, ITy... Is>
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch_constant<ITy, A, Is...>, requires_arch<common>) noexcept;
         template <class A>
         XSIMD_INLINE void transpose(batch<uint16_t, A>* matrix_begin, batch<uint16_t, A>* matrix_end, requires_arch<common>) noexcept;
         template <class A>
