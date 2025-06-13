@@ -429,18 +429,6 @@ namespace xsimd
             return detail::compare_int_avx512bw<A, T, _MM_CMPINT_NE>(self, other);
         }
 
-        // rotate_left
-        template <size_t N, class A>
-        XSIMD_INLINE batch<uint16_t, A> rotate_left(batch<uint16_t, A> const& self, requires_arch<avx512bw>) noexcept
-        {
-            return _mm512_alignr_epi8(self, self, N);
-        }
-        template <size_t N, class A>
-        XSIMD_INLINE batch<int16_t, A> rotate_left(batch<int16_t, A> const& self, requires_arch<avx512bw>) noexcept
-        {
-            return bitwise_cast<int16_t>(rotate_left<N, A>(bitwise_cast<uint16_t>(self), avx512bw {}));
-        }
-
         // sadd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept
