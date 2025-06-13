@@ -2771,10 +2771,11 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> rotate_left(batch<T, A> const& a, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
+            // Adding modulo to avoid warning.
             const detail::neon_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::rotate_left_u8<N>, wrap::rotate_left_s8<N>, wrap::rotate_left_u16<N>, wrap::rotate_left_s16<N>,
-                                wrap::rotate_left_u32<N>, wrap::rotate_left_s32<N>, wrap::rotate_left_u64<N>, wrap::rotate_left_s64<N>,
-                                wrap::rotate_left_f32<N>)
+                std::make_tuple(wrap::rotate_left_u8<N>, wrap::rotate_left_s8<N>, wrap::rotate_left_u16<N % 8>, wrap::rotate_left_s16<N % 8>,
+                                wrap::rotate_left_u32<N % 4>, wrap::rotate_left_s32<N % 4>, wrap::rotate_left_u64<N % 2>, wrap::rotate_left_s64<N % 2>,
+                                wrap::rotate_left_f32<N % 4>)
             };
             return dispatcher.apply(register_type(a), register_type(a));
         }
