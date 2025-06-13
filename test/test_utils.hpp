@@ -591,13 +591,7 @@ namespace xsimd
 #define BATCH_TYPES BATCH_INT_TYPES, BATCH_FLOAT_TYPES
 #define BATCH_MATH_TYPES xsimd::batch<int32_t>, BATCH_FLOAT_TYPES
 
-#if !XSIMD_WITH_AVX || XSIMD_WITH_AVX2
-#define BATCH_SWIZZLE_TAIL , xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>
-#else
-#define BATCH_SWIZZLE_TAIL
-#endif
-
-#define BATCH_SWIZZLE_TYPES BATCH_FLOAT_TYPES, BATCH_COMPLEX_TYPES BATCH_SWIZZLE_TAIL
+#define BATCH_SWIZZLE_TYPES BATCH_FLOAT_TYPES, BATCH_COMPLEX_TYPES, BATCH_INT_TYPES
 
 /********************
  * conversion utils *
