@@ -561,13 +561,13 @@ struct shuffle_test
         CHECK_BATCH_EQ(b_res, b_ref);
     }
 
-    void swizzle()
+    void shuffle()
     {
         B b_lhs = B::load_unaligned(lhs.data());
         B b_rhs = B::load_unaligned(rhs.data());
 
         {
-            struct swizzle_lo_generator
+            struct shuffle_lo_generator
             {
                 static constexpr size_t get(size_t index, size_t size)
                 {
@@ -580,13 +580,13 @@ struct shuffle_test
                 ref[i] = lhs[size - i - 1];
             B b_ref = B::load_unaligned(ref.data());
 
-            INFO("swizzle first batch");
-            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, swizzle_lo_generator, arch_type>());
+            INFO("shuffle first batch");
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, shuffle_lo_generator, arch_type>());
             CHECK_BATCH_EQ(b_res, b_ref);
         }
 
         {
-            struct swizzle_hi_generator
+            struct shuffle_hi_generator
             {
                 static constexpr size_t get(size_t index, size_t size)
                 {
@@ -599,8 +599,8 @@ struct shuffle_test
                 ref[i] = rhs[size - i - 1];
             B b_ref = B::load_unaligned(ref.data());
 
-            INFO("swizzle second batch");
-            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, swizzle_hi_generator, arch_type>());
+            INFO("shuffle second batch");
+            B b_res = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, shuffle_hi_generator, arch_type>());
             CHECK_BATCH_EQ(b_res, b_ref);
         }
     }
@@ -709,9 +709,9 @@ TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xs
     {
         Test.select();
     }
-    SUBCASE("swizzle")
+    SUBCASE("shuffle")
     {
-        Test.swizzle();
+        Test.shuffle();
     }
     SUBCASE("transpose")
     {
@@ -733,12 +733,12 @@ TEST_CASE_TEMPLATE("[small integer transpose]", B, xsimd::batch<uint16_t>, xsimd
 }
 
 #if (XSIMD_WITH_SSE2 && !XSIMD_WITH_AVX)
-TEST_CASE_TEMPLATE("[small integer swizzle]", B, xsimd::batch<uint16_t>, xsimd::batch<int16_t>)
+TEST_CASE_TEMPLATE("[small integer shuffle]", B, xsimd::batch<uint16_t>, xsimd::batch<int16_t>)
 {
     shuffle_test<B> Test;
-    SUBCASE("swizzle")
+    SUBCASE("shuffle")
     {
-        Test.swizzle();
+        Test.shuffle();
     }
 }
 #endif
