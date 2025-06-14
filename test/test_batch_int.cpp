@@ -239,8 +239,8 @@ struct batch_int_test
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), expected.begin(),
                            [nb_sh](const value_type& v)
-                           { return v << nb_sh; });
-            batch_type res = batch_lhs() << nb_sh;
+                           { return xsimd::abs(v) << nb_sh; });
+            batch_type res = abs(batch_lhs()) << nb_sh;
             INFO("batch << scalar");
             CHECK_BATCH_EQ(res, expected);
         }
@@ -249,8 +249,8 @@ struct batch_int_test
             array_type expected;
             std::transform(lhs.cbegin(), lhs.cend(), shift.cbegin(), expected.begin(),
                            [](const value_type& l, const value_type& r)
-                           { return l << r; });
-            batch_type res = batch_lhs() << batch_shift();
+                           { return xsimd::abs(l) << r; });
+            batch_type res = abs(batch_lhs()) << batch_shift();
             INFO("batch << batch");
             CHECK_BATCH_EQ(res, expected);
         }

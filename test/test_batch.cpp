@@ -879,12 +879,12 @@ private:
         for (size_t i = 0; i < size; ++i)
         {
             bool negative_lhs = std::is_signed<T>::value && (i % 2 == 1);
-            lhs[i] = value_type(i) * (negative_lhs ? -10 : 10);
+            lhs[i] = value_type(i) * (negative_lhs ? -3 : 3);
             if (lhs[i] == value_type(0))
             {
                 lhs[i] += value_type(1);
             }
-            rhs[i] = value_type(i) + value_type(4);
+            rhs[i] = value_type(i) + value_type(2);
         }
         scalar = value_type(3);
     }
