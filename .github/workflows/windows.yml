@@ -65,8 +65,6 @@ jobs:
         # Temporarily remove MINGW64 and UCRT64 builds because
         # GCC 12 gives an unexpected overflow warning for __builtin_memmove
         # see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=106199
-        # Temporarily remove CLANG32 because doctest is not available anymore
-        # for this platform
         msystem: [ MINGW32, CLANG64 ]
         #msystem: [ MINGW32, MINGW64, UCRT64, CLANG32, CLANG64 ]
       fail-fast: false
@@ -81,14 +79,13 @@ jobs:
             cc:p
             cmake:p
             ninja:p
-            doctest:p
       - name: Checkout xsimd
         uses: actions/checkout@v2
       - name: Configure
         run: |
           mkdir _build
           cd _build
-          cmake .. -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
+          cmake .. -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_DOCTEST=ON -G Ninja
       - name: Build
         run: ninja -C _build
       - name: Test
