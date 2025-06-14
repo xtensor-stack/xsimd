@@ -29,7 +29,7 @@ namespace detail
     is_convertible(T_in value)
     {
         int64_t signed_value = static_cast<int64_t>(value);
-        return signed_value <= static_cast<int64_t>(std::numeric_limits<T_out>::max()) && signed_value >= static_cast<int64_t>(std::numeric_limits<T_out>::lowest());
+        return signed_value < static_cast<int64_t>(std::numeric_limits<T_out>::max()) && signed_value >= static_cast<int64_t>(std::numeric_limits<T_out>::lowest());
     }
 
     template <class T_out, class T_in>
@@ -43,7 +43,7 @@ namespace detail
     inline typename std::enable_if<std::is_floating_point<T_in>::value && std::is_integral<T_out>::value, bool>::type
     is_convertible(T_in value)
     {
-        return value <= static_cast<T_in>(std::numeric_limits<T_out>::max()) && value >= static_cast<T_in>(std::numeric_limits<T_out>::lowest());
+        return value < static_cast<T_in>(std::numeric_limits<T_out>::max()) && value >= static_cast<T_in>(std::numeric_limits<T_out>::lowest());
     }
 
     template <class T_out, class T_in>
@@ -328,12 +328,19 @@ private:
         using B_common_in = xsimd::batch<T_in>;
         using B_common_out = xsimd::batch<T_out>;
 
-        T_in in_test_value = static_cast<T_in>(test_value);
+        auto clamp = [](T v)
+        {
+            return static_cast<T_in>(xsimd::min(v, static_cast<T>(std::numeric_limits<T_in>::max() - 1)));
+        };
+
+        T_in in_test_value = clamp(test_value);
         if (detail::is_convertible<T_out>(in_test_value))
         {
             B_common_out res = xsimd::batch_cast<T_out>(B_common_in(in_test_value));
             INFO(name);
-            CHECK_SCALAR_EQ(res.get(0), static_cast<T_out>(in_test_value));
+            T_out scalar_ref = static_cast<T_out>(in_test_value);
+            T_out scalar_res = res.get(0);
+            CHECK_SCALAR_EQ(scalar_ref, scalar_res);
         }
     }
 

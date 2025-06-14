@@ -34,10 +34,14 @@ struct select_test
         nb_input = size * 10000;
         lhs_input.resize(nb_input);
         rhs_input.resize(nb_input);
+        auto clamp = [](double v)
+        {
+            return static_cast<value_type>(std::min(v, static_cast<double>(std::numeric_limits<value_type>::max())));
+        };
         for (size_t i = 0; i < nb_input; ++i)
         {
-            lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
-            rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
+            lhs_input[i] = clamp(i / 4 + 1.2 * std::sqrt(i + 0.25));
+            rhs_input[i] = clamp(10.2 / (i + 2) + 0.25);
         }
         expected.resize(nb_input);
         res.resize(nb_input);
