@@ -15,6 +15,7 @@ jobs:
         sanitizer:
           - address
           - memory
+          - undefined
     steps:
     - name: Checkout xsimd
       uses: actions/checkout@v3
