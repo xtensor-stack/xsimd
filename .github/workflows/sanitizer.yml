@@ -31,6 +31,7 @@ jobs:
                   -DBUILD_BENCHMARK=ON \
                   -DBUILD_EXAMPLES=ON \
                   -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_CXX_FLAGS='-fsanitize=${{ matrix.sanitizer }}' \
                   -G Ninja
     - name: Build
