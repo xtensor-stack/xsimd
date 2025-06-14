@@ -19,10 +19,6 @@ jobs:
     steps:
     - name: Checkout xsimd
       uses: actions/checkout@v3
-    - name: Install mamba
-      uses: mamba-org/setup-micromamba@v1
-      with:
-        environment-file: environment.yml
     - name: Configure build
       run: |
         mkdir _build
@@ -30,6 +26,7 @@ jobs:
         cmake  .. -DBUILD_TESTS=ON \
                   -DBUILD_BENCHMARK=ON \
                   -DBUILD_EXAMPLES=ON \
+                  -DDOWNLOAD_DOCTEST=ON \
                   -DCMAKE_BUILD_TYPE=Release \
                   -DCMAKE_CXX_COMPILER=clang++ \
                   -DCMAKE_CXX_FLAGS='-fsanitize=${{ matrix.sanitizer }}' \
