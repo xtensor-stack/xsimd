@@ -40,9 +40,9 @@ struct power_test
         for (size_t i = 0; i < nb_input; ++i)
         {
             zero_input[i] = 0;
-            lhs_input[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
+            lhs_input[i] = value_type(i / 4 + 1.2 * std::sqrt(i + 0.25));
             zlhs_input[i] = lhs_input[i] * (i % 2);
-            rhs_input[i] = value_type(10.2) / (i + 2) + value_type(0.25);
+            rhs_input[i] = value_type(10.2 / (i + 2) + 0.25);
         }
 
         expected.resize(nb_input);

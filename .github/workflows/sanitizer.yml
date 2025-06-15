@@ -1,0 +1,38 @@
+name: sanitizer
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash -l {0}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: 'sanitizer - ${{ matrix.sanitizer }}'
+    strategy:
+      matrix:
+        sanitizer:
+          - address
+          - undefined
+    steps:
+    - name: Checkout xsimd
+      uses: actions/checkout@v3
+    - name: Configure build
+      run: |
+        mkdir _build
+        cd _build
+        cmake  .. -DBUILD_TESTS=ON \
+                  -DBUILD_BENCHMARK=ON \
+                  -DBUILD_EXAMPLES=ON \
+                  -DDOWNLOAD_DOCTEST=ON \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_CXX_COMPILER=clang++ \
+                  -DCMAKE_CXX_FLAGS='-fsanitize=${{ matrix.sanitizer }}' \
+                  -G Ninja
+    - name: Build
+      run: ninja -C _build
+    - name: Test
+      run: |
+        cd _build/test
+        ./test_xsimd

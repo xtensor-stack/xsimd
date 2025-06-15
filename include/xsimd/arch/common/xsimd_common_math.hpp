@@ -116,6 +116,11 @@ namespace xsimd
             {
                 return fast_cast(self, out, A {});
             }
+#if defined(__clang__) || __GNUC__
+            template <class A, class T_out, class T_in>
+            XSIMD_INLINE batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires_arch<common>, with_slow_conversion) noexcept
+                __attribute__((no_sanitize("undefined")));
+#endif
             template <class A, class T_out, class T_in>
             XSIMD_INLINE batch<T_out, A> batch_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires_arch<common>, with_slow_conversion) noexcept
             {
@@ -126,7 +131,8 @@ namespace xsimd
                 alignas(A::alignment()) T_in buffer_in[batch_type_in::size];
                 alignas(A::alignment()) T_out buffer_out[batch_type_out::size];
                 self.store_aligned(&buffer_in[0]);
-                std::copy(std::begin(buffer_in), std::end(buffer_in), std::begin(buffer_out));
+                for (size_t i = 0; i < batch_type_in::size; ++i)
+                    buffer_out[i] = static_cast<T_out>(buffer_in[i]);
                 return batch_type_out::load_aligned(buffer_out);
             }
 
