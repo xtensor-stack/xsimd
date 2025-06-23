@@ -9,15 +9,25 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: 'sanitizer - ${{ matrix.sanitizer }}'
+    name: 'sanitizer - ${{ matrix.flags }}'
     strategy:
       matrix:
-        sanitizer:
-          - address
-          - undefined
+        flags:
+          - sanitize=address
+          - sanitize=undefined
+          - fast-math -fsanitize=undefined
+        llvm-version: [20]
+    env:
+      CC: clang-${{ matrix.llvm-version }}
+      CXX: clang++-${{ matrix.llvm-version }}
     steps:
     - name: Checkout xsimd
       uses: actions/checkout@v3
+    - name: Setup compiler
+      run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ matrix.llvm-version }}
     - name: Configure build
       run: |
         mkdir _build
@@ -26,9 +36,8 @@ jobs:
                   -DBUILD_BENCHMARK=ON \
                   -DBUILD_EXAMPLES=ON \
                   -DDOWNLOAD_DOCTEST=ON \
-                  -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_CXX_COMPILER=clang++ \
-                  -DCMAKE_CXX_FLAGS='-fsanitize=${{ matrix.sanitizer }}' \
+                  -DCMAKE_BUILD_TYPE=Debug \
+                  -DCMAKE_CXX_FLAGS='-f${{ matrix.flags }} -O0 -g -fno-inline' \
                   -G Ninja
     - name: Build
       run: ninja -C _build

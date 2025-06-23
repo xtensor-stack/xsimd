@@ -310,10 +310,13 @@ namespace xsimd
             num = x2 + num * num;
             real_batch den = y - one;
             den = x2 + den * den;
-            batch_type res = select((x == real_batch(0.)) && (y == real_batch(1.)),
-                                    batch_type(real_batch(0.), constants::infinity<real_batch>()),
-                                    batch_type(w, 0.25 * log(num / den)));
-            return res;
+#ifdef __FAST_MATH__
+            return batch_type(w, 0.25 * log(num / den));
+#else
+            return select((x == real_batch(0.)) && (y == real_batch(1.)),
+                          batch_type(real_batch(0.), constants::infinity<real_batch>()),
+                          batch_type(w, 0.25 * log(num / den)));
+#endif
         }
 
         // atanh
@@ -583,12 +586,14 @@ namespace xsimd
                         for (std::size_t i = 0; i < size; ++i)
                         {
                             double arg = args[i];
+#ifndef __FAST_MATH__
                             if (arg == std::numeric_limits<value_type>::infinity())
                             {
                                 tmp[i] = 0.;
                                 txr[i] = std::numeric_limits<value_type>::quiet_NaN();
                             }
                             else
+#endif
                             {
                                 double y[2];
                                 std::int32_t n = ::xsimd::detail::__ieee754_rem_pio2(arg, y);
@@ -841,11 +846,15 @@ namespace xsimd
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
             real_batch d = cos(2 * z.real()) + cosh(2 * z.imag());
-            batch_type winf(constants::infinity<real_batch>(), constants::infinity<real_batch>());
             real_batch wreal = sin(2 * z.real()) / d;
             real_batch wimag = sinh(2 * z.imag());
+#ifdef __FAST_MATH__
+            return batch_type(wreal, real_batch(1.)), batch_type(wreal, wimag / d);
+#else
+            batch_type winf(constants::infinity<real_batch>(), constants::infinity<real_batch>());
             batch_type wres = select(isinf(wimag), batch_type(wreal, real_batch(1.)), batch_type(wreal, wimag / d));
             return select(d == real_batch(0.), winf, wres);
+#endif
         }
 
         // tanh

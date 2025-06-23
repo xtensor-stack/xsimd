@@ -14,6 +14,7 @@
 
 #include "test_utils.hpp"
 
+#ifndef __FAST_MATH__
 namespace detail
 {
     template <class T, bool is_int = std::is_integral<typename T::value_type>::value>
@@ -49,6 +50,7 @@ namespace detail
         }
     };
 }
+#endif
 
 template <class B>
 struct basic_math_test
@@ -120,6 +122,7 @@ struct basic_math_test
         CHECK_BATCH_EQ(res, expected);
     }
 
+#ifndef __FAST_MATH__
     void test_isfinite()
     {
         detail::infinity_tester<batch_type>::test_isfinite();
@@ -129,6 +132,7 @@ struct basic_math_test
     {
         detail::infinity_tester<batch_type>::test_isinf();
     }
+#endif
 
     void test_nextafter()
     {
@@ -170,8 +174,10 @@ TEST_CASE_TEMPLATE("[basic math tests]", B, BATCH_MATH_TYPES)
     SUBCASE("remainder") { Test.test_remainder(); }
     SUBCASE("fdim") { Test.test_fdim(); }
     SUBCASE("clip") { Test.test_clip(); }
+#ifndef __FAST_MATH__
     SUBCASE("isfinite") { Test.test_isfinite(); }
     SUBCASE("isinf") { Test.test_isinf(); }
+#endif
     SUBCASE("nextafter") { Test.test_nextafter(); }
 }
 #endif

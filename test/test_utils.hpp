@@ -181,6 +181,7 @@ namespace xsimd
 
 namespace detail
 {
+#ifndef __FAST_MATH__
     namespace utils
     {
         // define some overloads here as integer versions do not exist for msvc
@@ -208,6 +209,7 @@ namespace detail
             return false;
         }
     }
+#endif
 
     inline unsigned char uabs(unsigned char val)
     {
@@ -289,7 +291,7 @@ namespace detail
             {
                 return lhs == rhs;
             }
-
+#ifndef __FAST_MATH__
             if (utils::isnan(lhs))
             {
                 return utils::isnan(rhs);
@@ -299,6 +301,7 @@ namespace detail
             {
                 return utils::isinf(rhs) && (lhs * rhs > 0) /* same sign */;
             }
+#endif
 
             T relative_precision = precision_t::max * std::numeric_limits<T>::epsilon();
             T absolute_zero_prox = precision_t::max * std::numeric_limits<T>::epsilon();

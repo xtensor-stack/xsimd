@@ -61,7 +61,10 @@ namespace xsimd
 #pragma GCC push_options
 #pragma GCC optimize("signed-zeros")
 #endif
+#ifndef __FAST_MATH__
         XSIMD_DEFINE_CONSTANT(infinity, (std::numeric_limits<float>::infinity()), (std::numeric_limits<double>::infinity()))
+        XSIMD_DEFINE_CONSTANT(minusinfinity, (-infinity<float>()), (-infinity<double>()))
+#endif
         XSIMD_DEFINE_CONSTANT(invlog_2, 1.442695040888963407359924681001892137426645954152986f, 1.442695040888963407359924681001892137426645954152986)
         XSIMD_DEFINE_CONSTANT_HEX(invlog_2hi, 0x3fb8b000, 0x3ff7154765200000)
         XSIMD_DEFINE_CONSTANT_HEX(invlog_2lo, 0xb9389ad4, 0x3de705fc2eefa200)
@@ -83,7 +86,6 @@ namespace xsimd
         XSIMD_DEFINE_CONSTANT(minlog, -88.3762626647949f, -708.3964185322641)
         XSIMD_DEFINE_CONSTANT(minlog2, -127.0f, -1023.)
         XSIMD_DEFINE_CONSTANT(minlog10, -37.89999771118164f, -308.2547155599167)
-        XSIMD_DEFINE_CONSTANT(minusinfinity, (-infinity<float>()), (-infinity<double>()))
         XSIMD_DEFINE_CONSTANT_HEX(nan, 0xffffffff, 0xffffffffffffffff)
         XSIMD_DEFINE_CONSTANT_HEX(oneosqrteps, 0x453504f3, 0x4190000000000000)
         XSIMD_DEFINE_CONSTANT_HEX(oneotwoeps, 0x4a800000, 0x4320000000000000)

@@ -896,7 +896,9 @@ namespace xsimd
                 batch_type k = reducer_t::reduce(self, x);
                 x = reducer_t::approx(x);
                 x = select(self <= reducer_t::minlog(), batch_type(0.), ldexp(x, to_int(k)));
+#ifndef __FAST_MATH__
                 x = select(self >= reducer_t::maxlog(), constants::infinity<batch_type>(), x);
+#endif
                 return x;
             }
 
@@ -910,7 +912,9 @@ namespace xsimd
                 batch_type c = reducer_t::approx(x);
                 c = reducer_t::finalize(x, c, hi, lo);
                 c = select(self <= reducer_t::minlog(), batch_type(0.), ldexp(c, to_int(k)));
+#ifndef __FAST_MATH__
                 c = select(self >= reducer_t::maxlog(), constants::infinity<batch_type>(), c);
+#endif
                 return c;
             }
         }
@@ -1014,11 +1018,11 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> expm1(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
-            return select(self < constants::logeps<batch_type>(),
-                          batch_type(-1.),
-                          select(self > constants::maxlog<batch_type>(),
-                                 constants::infinity<batch_type>(),
-                                 detail::expm1(self)));
+            auto x = detail::expm1(self);
+#ifndef __FAST_MATH__
+            x = select(self > constants::maxlog<batch_type>(), constants::infinity<batch_type>(), x);
+#endif
+            return select(self < constants::logeps<batch_type>(), batch_type(-1.), x);
         }
 
         template <class A, class T>
@@ -1245,12 +1249,20 @@ namespace xsimd
                     batch_type r1 = other(q);
                     if (any(ltza))
                     {
+#ifdef __FAST_MATH__
+                        r = negative(q, r1);
+#else
                         r = select(inf_result, constants::infinity<batch_type>(), negative(q, r1));
+#endif
                         if (all(ltza))
                             return r;
                     }
                     batch_type r2 = select(ltza, r, r1);
+#ifdef __FAST_MATH__
+                    return r2;
+#else
                     return select(a == constants::minusinfinity<batch_type>(), constants::nan<batch_type>(), select(inf_result, constants::infinity<batch_type>(), r2));
+#endif
                 }
 
             private:
@@ -1371,7 +1383,11 @@ namespace xsimd
                     }
                     batch_type r1 = other(a);
                     batch_type r2 = select(test, r, r1);
+#ifdef __FAST_MATH__
+                    return r2;
+#else
                     return select(a == constants::minusinfinity<batch_type>(), constants::nan<batch_type>(), select(inf_result, constants::infinity<batch_type>(), r2));
+#endif
                 }
 
             private:
@@ -1479,12 +1495,12 @@ namespace xsimd
             batch_type hfsq = batch_type(0.5) * f * f;
             batch_type dk = to_float(k);
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, (hfsq + R), dk * constants::log_2lo<batch_type>()) - hfsq + f);
-#ifndef XSIMD_NO_INFINITIES
-            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#ifdef __FAST_MATH__
+            return r;
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
-#endif
+            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
             return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#endif
         }
 
         template <class A>
@@ -1522,12 +1538,12 @@ namespace xsimd
             batch_type t2 = z * detail::horner<batch_type, 0x3fe5555555555593ll, 0x3fd2492494229359ll, 0x3fc7466496cb03dell, 0x3fc2f112df3e5244ll>(w);
             batch_type R = t2 + t1;
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, (hfsq + R), dk * constants::log_2lo<batch_type>()) - hfsq + f);
-#ifndef XSIMD_NO_INFINITIES
-            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#ifdef __FAST_MATH__
+            return r;
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
-#endif
+            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
             return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#endif
         }
 
         template <class A, class T>
@@ -1569,12 +1585,12 @@ namespace xsimd
             batch_type hfsq = batch_type(0.5) * f * f;
             batch_type dk = to_float(k);
             batch_type r = fma(fms(s, hfsq + R, hfsq) + f, constants::invlog_2<batch_type>(), dk);
-#ifndef XSIMD_NO_INFINITIES
-            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#ifdef __FAST_MATH__
+            return r;
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
-#endif
+            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
             return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#endif
         }
 
         template <class A>
@@ -1617,12 +1633,12 @@ namespace xsimd
             val_lo += (dk - w1) + val_hi;
             val_hi = w1;
             batch_type r = val_lo + val_hi;
-#ifndef XSIMD_NO_INFINITIES
-            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#ifdef __FAST_MATH__
+            return r;
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
-#endif
+            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
             return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#endif
         }
 
         namespace detail
@@ -1757,12 +1773,12 @@ namespace xsimd
             val_lo += (y - w1) + val_hi;
             val_hi = w1;
             batch_type r = val_lo + val_hi;
-#ifndef XSIMD_NO_INFINITIES
-            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#ifdef __FAST_MATH__
+            return r;
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
-#endif
+            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
             return select(!(self >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#endif
         }
 
         template <class A, class T>
@@ -1805,12 +1821,12 @@ namespace xsimd
             /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
             batch_type c = select(batch_bool_cast<float>(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, (hfsq + R), dk * constants::log_2lo<batch_type>() + c) - hfsq + f);
-#ifndef XSIMD_NO_INFINITIES
-            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#ifdef __FAST_MATH__
+            return r;
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
-#endif
+            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
             return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#endif
         }
 
         template <class A>
@@ -1838,12 +1854,12 @@ namespace xsimd
             batch_type R = t2 + t1;
             batch_type dk = to_float(k);
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, hfsq + R, dk * constants::log_2lo<batch_type>() + c) - hfsq + f);
-#ifndef XSIMD_NO_INFINITIES
-            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
+#ifdef __FAST_MATH__
+            return r;
 #else
-            batch_type zz = select(isnez, r, constants::minusinfinity<batch_type>());
-#endif
+            batch_type zz = select(isnez, select(self == constants::infinity<batch_type>(), constants::infinity<batch_type>(), r), constants::minusinfinity<batch_type>());
             return select(!(uf >= batch_type(0.)), constants::nan<batch_type>(), zz);
+#endif
         }
 
         template <class A, class T>
@@ -1980,13 +1996,21 @@ namespace xsimd
                 static XSIMD_INLINE batch_type next(const batch_type& b) noexcept
                 {
                     batch_type n = ::xsimd::bitwise_cast<T>(::xsimd::bitwise_cast<int_type>(b) + int_type(1));
+#ifdef __FAST_MATH__
+                    return n;
+#else
                     return select(b == constants::infinity<batch_type>(), b, n);
+#endif
                 }
 
                 static XSIMD_INLINE batch_type prev(const batch_type& b) noexcept
                 {
                     batch_type p = ::xsimd::bitwise_cast<T>(::xsimd::bitwise_cast<int_type>(b) - int_type(1));
+#ifdef __FAST_MATH__
+                    return p;
+#else
                     return select(b == constants::minusinfinity<batch_type>(), b, p);
+#endif
                 }
             };
         }
@@ -2355,10 +2379,12 @@ namespace xsimd
                 y *= v;
                 y = select(test, y, y * v);
                 y *= constants::sqrt_2pi<batch_type>() * w;
-#ifndef XSIMD_NO_INFINITIES
+#ifdef __FAST_MATH__
+                return y;
+#else
                 y = select(isinf(x), x, y);
-#endif
                 return select(x > stirlinglargelim, constants::infinity<batch_type>(), y);
+#endif
             }
 
             /* origin: boost/simd/arch/common/detail/common/gamma_kernel.hpp */
@@ -2501,7 +2527,11 @@ namespace xsimd
             }
             batch_type r1 = detail::tgamma_other(self, test);
             batch_type r2 = select(test, r, r1);
+#ifdef __FAST_MATH__
+            return r2;
+#else
             return select(self == batch_type(0.), copysign(constants::infinity<batch_type>(), self), select(nan_result, constants::nan<batch_type>(), r2));
+#endif
         }
 
     }
