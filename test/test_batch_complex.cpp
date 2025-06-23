@@ -628,6 +628,7 @@ struct batch_complex_test
         }
     }
 
+#ifndef __FAST_MATH__
     void test_isnan() const
     {
         {
@@ -639,6 +640,7 @@ struct batch_complex_test
             CHECK_BATCH_EQ(res, expected);
         }
     }
+#endif
 
 private:
     batch_type batch_lhs() const
@@ -689,6 +691,8 @@ TEST_CASE_TEMPLATE("[xsimd complex batches]", B, BATCH_COMPLEX_TYPES)
 
     SUBCASE("boolean_conversion") { Test.test_boolean_conversion(); }
 
+#ifndef __FAST_MATH__
     SUBCASE("isnan") { Test.test_isnan(); }
+#endif
 }
 #endif

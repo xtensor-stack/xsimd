@@ -124,12 +124,22 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch_bool<float, A> isinf(batch<float, A> const& self, requires_arch<common>) noexcept
         {
+#ifdef __FAST_MATH__
+            (void)self;
+            return { false };
+#else
             return abs(self) == std::numeric_limits<float>::infinity();
+#endif
         }
         template <class A>
         XSIMD_INLINE batch_bool<double, A> isinf(batch<double, A> const& self, requires_arch<common>) noexcept
         {
+#ifdef __FAST_MATH__
+            (void)self;
+            return { false };
+#else
             return abs(self) == std::numeric_limits<double>::infinity();
+#endif
         }
 
         // isfinite

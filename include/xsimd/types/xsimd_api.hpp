@@ -1114,6 +1114,7 @@ namespace xsimd
         return kernel::incr_if<A>(x, mask, A {});
     }
 
+#ifndef __FAST_MATH__
     /**
      * @ingroup batch_constant
      *
@@ -1128,6 +1129,7 @@ namespace xsimd
         detail::static_check_supported_config<T, A>();
         return B(std::numeric_limits<T>::infinity());
     }
+#endif
 
     /**
      * @ingroup batch_data_transfer

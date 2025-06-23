@@ -78,11 +78,15 @@ namespace xsimd
             using batch_type = complex_batch_type_t<batch<T, A>>;
             using real_batch = typename batch_type::real_batch;
             using real_value_type = typename real_batch::value_type;
+#ifdef __FAST_MATH__
+            return { self };
+#else
             auto cond = xsimd::isinf(real(self)) || xsimd::isinf(imag(self));
             return select(cond,
                           batch_type(constants::infinity<real_batch>(),
                                      copysign(real_batch(real_value_type(0)), imag(self))),
                           batch_type(self));
+#endif
         }
 
         template <class A, class T>

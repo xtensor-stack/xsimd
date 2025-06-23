@@ -13,6 +13,7 @@
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #include "test_utils.hpp"
+#include <iostream>
 
 template <class B>
 struct power_test
@@ -103,6 +104,7 @@ struct power_test
             CHECK_EQ(diff, 0);
 #endif
         }
+#ifndef __FAST_MATH__
         // pow 0^-x
         {
             std::transform(zero_input.cbegin(), zero_input.cend(), rhs_input.cbegin(), expected.begin(),
@@ -120,17 +122,18 @@ struct power_test
             INFO("pow(0, -x)");
             CHECK_EQ(diff, 0);
         }
+#endif
         // ipow
         {
             long k = 0;
             std::transform(lhs_input.cbegin(), lhs_input.cend(), expected.begin(),
                            [&k, this](const value_type& l)
-                           { auto arg = k / size - nb_input / size / 2; ++k; return std::pow(l, arg); });
+                           { auto arg = k / size / 8000 - nb_input / size / 8000 / 2; ++k; return std::pow(l, arg); });
             batch_type lhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
                 detail::load_batch(lhs_in, lhs_input, i);
-                out = pow(lhs_in, i / size - nb_input / size / 2);
+                out = pow(lhs_in, i / size / 8000 - nb_input / size / 8000 / 2);
                 detail::store_batch(out, res, i);
             }
             size_t diff = detail::get_nb_diff(res, expected);

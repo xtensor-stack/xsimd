@@ -510,7 +510,11 @@ namespace xsimd
     template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
     XSIMD_INLINE bool is_flint(const T& x) noexcept
     {
+#ifdef __FAST_MATH__
+        return (x - std::trunc(x)) == T(0);
+#else
         return std::isnan(x - x) ? false : (x - std::trunc(x)) == T(0);
+#endif
     }
 
     template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>

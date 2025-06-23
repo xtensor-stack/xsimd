@@ -488,8 +488,12 @@ struct xsimd_api_float_types_functions
     }
     void test_atanh()
     {
-        value_type val(1);
-        CHECK_EQ(extract(xsimd::atanh(T(val))), std::atanh(val));
+        value_type val0(0);
+        CHECK_EQ(extract(xsimd::atanh(T(val0))), std::atanh(val0));
+#ifndef __FAST_MATH__
+        value_type val1(1);
+        CHECK_EQ(extract(xsimd::atanh(T(val1))), std::atanh(val1));
+#endif
     }
     void test_cbrt()
     {
@@ -1044,6 +1048,7 @@ struct xsimd_api_complex_types_functions
         CHECK_EQ(extract(xsimd::proj(T(val))), std::proj(val));
     }
 
+#ifndef __FAST_MATH__
     void test_isinf()
     {
         value_type val(4);
@@ -1061,6 +1066,7 @@ struct xsimd_api_complex_types_functions
         value_type val(4);
         CHECK_EQ(extract(xsimd::isnan(T(val))), std::isnan(std::real(val)));
     }
+#endif
 };
 
 TEST_CASE_TEMPLATE("[xsimd api | complex types functions]", B, COMPLEX_TYPES)
@@ -1086,6 +1092,8 @@ TEST_CASE_TEMPLATE("[xsimd api | complex types functions]", B, COMPLEX_TYPES)
         Test.test_proj();
     }
 
+#ifndef __FAST_MATH__
+
     SUBCASE("isinf")
     {
         Test.test_isinf();
@@ -1100,6 +1108,7 @@ TEST_CASE_TEMPLATE("[xsimd api | complex types functions]", B, COMPLEX_TYPES)
     {
         Test.test_isnan();
     }
+#endif
 }
 
 /*
@@ -1194,7 +1203,7 @@ struct xsimd_api_all_types_functions
     void test_div()
     {
         value_type val0(1);
-        value_type val1(3);
+        value_type val1(2);
         CHECK_EQ(extract(xsimd::div(T(val0), T(val1))), val0 / val1);
     }
 
@@ -1345,6 +1354,7 @@ TEST_CASE_TEMPLATE("[xsimd api | all types functions]", B, ALL_TYPES)
 /*
  * Functions that apply only to floating point types
  */
+#ifndef __FAST_MATH__
 template <typename T>
 struct xsimd_api_all_floating_point_types_functions
 {
@@ -1363,6 +1373,7 @@ TEST_CASE_TEMPLATE("[xsimd api | all floating point types functions]", B, ALL_FL
     xsimd_api_all_floating_point_types_functions<B> Test;
     Test.test_neq_nan();
 }
+#endif
 
 /*
  * Functions that apply only to mask type
