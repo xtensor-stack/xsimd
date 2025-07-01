@@ -12,8 +12,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - 2019
           - 2022
+          - 2025
         target:
           - x86
           - x64
@@ -56,7 +56,7 @@ jobs:
 
   build-windows-mingw:
     name: 'MSYS2 ${{ matrix.msystem }}'
-    runs-on: windows-2019
+    runs-on: windows-2022
     defaults:
       run:
         shell: msys2 {0}
