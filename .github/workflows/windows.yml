@@ -12,8 +12,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - 2019
           - 2022
+          - 2025
         target:
           - x86
           - x64
