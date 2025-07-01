@@ -17,6 +17,11 @@
 #include <type_traits>
 
 #include "../types/xsimd_avx512f_register.hpp"
+#include "xsimd/config/xsimd_inline.hpp"
+#include "xsimd/types/xsimd_register.hpp"
+#include "xsimd/xsimd.hpp"
+
+#include <avx512fintrin.h>
 
 namespace xsimd
 {
@@ -1544,6 +1549,34 @@ namespace xsimd
             batch<T, A> acc = min(self, step);
             __m256i low = _mm512_castsi512_si256(acc);
             return reduce_min(batch<T, avx2>(low));
+        }
+        // reduce_mul
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(std::is_same<T,float>::value)
+            {
+                return _mm512_reduce_mul_ps(self);
+            }
+            else XSIMD_IF_CONSTEXPR(std::is_same<T,double>::value)
+            {
+                return _mm512_reduce_mul_pd(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm512_reduce_mul_epi32(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm512_reduce_mul_epi64(self);
+            }
+            else
+            {
+                typename batch<T, avx2>::register_type low, high;
+                detail::split_avx512(self, low, high);
+                batch<T, avx2> blow(low), bhigh(high);
+                return reduce_mul(blow * bhigh);
+            }
         }
 
         // rsqrt

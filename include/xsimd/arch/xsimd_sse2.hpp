@@ -1252,6 +1252,43 @@ namespace xsimd
         {
             return _mm_cvtsd_f64(_mm_add_sd(self, _mm_unpackhi_pd(self, self)));
         }
+        // reduce_mul
+        template <class A>
+        XSIMD_INLINE float reduce_mul(batch<float, A> const& self, requires_arch<sse2>) noexcept
+        {
+            __m128 tmp1 = _mm_mul_ps(self, _mm_movehl_ps(self, self));
+            __m128 tmp2 = _mm_mul_ps(self, _mm_shuffle_ps(tmp1, tmp1, 0x1));
+            return _mm_cvtss_f32(tmp2);
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                batch<T, A> tmp1 = _mm_shuffle_epi32(self, _MM_SHUFFLE(0,1,2,3));
+                tmp1 = tmp1 * self;
+                batch<T, A> tmp2 = _mm_unpackhi_epi32(tmp1, tmp1);
+                tmp2 = tmp2 * tmp1;
+                return _mm_cvtsi128_si32(tmp2);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                batch<T, A> tmp1 = _mm_unpackhi_epi64(self, self);
+                tmp1 = tmp1 * self;
+                return _mm_cvtsi128_si64(tmp1);
+            }
+            else
+            {
+                return hmul(self, common {});
+            }
+        }
+
+        template <class A>
+        XSIMD_INLINE double reduce_mul(batch<double,A> const& self, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtsd_f64(_mm_mul_pd(self, _mm_unpackhi_pd(self, self)));
+        }
 
         // reduce_max
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>

@@ -1076,6 +1076,15 @@ namespace xsimd
             __m128i low = _mm256_castsi256_si128(acc);
             return reduce_min(batch<T, sse4_2>(low));
         }
+        // reduce_mul
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<avx>)
+        {
+            typename batch<T, sse4_2>::register_type low, high;
+            detail::split_avx(self, low, high);
+            batch<T, sse4_2> blow(low), bhigh(high);
+            return reduce_mul(blow * bhigh);
+        }
 
         // rsqrt
         template <class A>

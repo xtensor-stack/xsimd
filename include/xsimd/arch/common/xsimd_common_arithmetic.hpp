@@ -141,6 +141,20 @@ namespace xsimd
             return res;
         }
 
+        //  hmul
+        template <class A, class T, class /*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
+        XSIMD_INLINE T hmul(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            alignas(A::alignment()) T buffer[batch<T, A>::size];
+            self.store_aligned(buffer);
+            T res = 1;
+            for (T val : buffer)
+            {
+                res *= val;
+            }
+            return res;
+        }
+
         // incr
         template <class A, class T>
         XSIMD_INLINE batch<T, A> incr(batch<T, A> const& self, requires_arch<common>) noexcept

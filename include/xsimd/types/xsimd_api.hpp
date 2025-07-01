@@ -1865,6 +1865,20 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_reducers
+     *
+     * Multiplication of all the scalars of the batch \c x.
+     * @param x batch involved in the reduction
+     * @return the result of the reduction.
+     */
+    template <class T, class A>
+    XSIMD_INLINE T reduce_mul(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::reduce_mul<A>(x, A {});
+    }
+
+    /**
      * @ingroup batch_math
      *
      * Computes the remainder of dividing \c x by \c y

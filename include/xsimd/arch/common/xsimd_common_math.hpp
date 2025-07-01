@@ -2114,6 +2114,24 @@ namespace xsimd
                 }
             };
 
+            template <class T, T N>
+            struct reverse
+            {
+                static constexpr T get(T i, T)
+                {
+                    return i >= N ? i : N - i - 1;
+                }
+            };
+
+            template <class A, class T, as_unsigned_integer_t<T> Lvl>
+            XSIMD_INLINE std::complex<T> reduce_mul(batch<std::complex<T>, A> const& self, std::integral_constant<as_unsigned_integer_t<T>, Lvl>) noexcept
+            {
+                XSIMD_IF_CONSTEXPR(Lvl == 1) { return self.get(0); }
+                using index_type = as_unsigned_integer_t<T>;
+                using batch_type = batch<std::complex<T>, A>;
+                batch_type rev = swizzle(self, make_batch_constant<index_type, reverse<index_type, Lvl>, A>());
+                return reduce_mul(self * rev, std::integral_constant<index_type, Lvl / 2>());
+            }
             template <class Op, class A, class T>
             XSIMD_INLINE T reduce(Op, batch<T, A> const& self, std::integral_constant<unsigned, 1>) noexcept
             {
@@ -2127,6 +2145,13 @@ namespace xsimd
                 batch<T, A> split = swizzle(self, make_batch_constant<index_type, split_high<index_type, Lvl / 2>, A>());
                 return reduce(op, op(split, self), std::integral_constant<unsigned, Lvl / 2>());
             }
+        }
+
+        // reduce_mul
+        template <class A, class T>
+        XSIMD_INLINE std::complex<T> reduce_mul(batch<std::complex<T>, A> const& self, requires_arch<common>) noexcept
+        {
+            return detail::reduce_mul(self, std::integral_constant<as_unsigned_integer_t<T>, batch<std::complex<T>, A>::size>());
         }
 
         // reduce_max
@@ -2144,6 +2169,15 @@ namespace xsimd
         {
             return detail::reduce([](batch<T, A> const& x, batch<T, A> const& y)
                                   { return min(x, y); },
+                                  self, std::integral_constant<unsigned, batch<T, A>::size>());
+        }
+
+        // reduce_mul
+        template <class A, class T>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            return detail::reduce([](batch<T, A> const& x, batch<T, A> const& y)
+                                  { return mul(x, y); },
                                   self, std::integral_constant<unsigned, batch<T, A>::size>());
         }
 
