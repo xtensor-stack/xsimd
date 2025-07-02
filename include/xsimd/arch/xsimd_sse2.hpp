@@ -1813,7 +1813,15 @@ namespace xsimd
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
+#if defined(__x86_64__)
                 return static_cast<T>(_mm_cvtsi128_si64(self));
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, self);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
             }
             else
             {

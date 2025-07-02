@@ -1891,8 +1891,8 @@ namespace xsimd
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
-                __m128i low = _mm256_castsi256_si128(self);
-                return static_cast<T>(_mm_cvtsi128_si64(low));
+                batch<T, sse4_2> low = _mm256_castsi256_si128(self);
+                return first(low, sse4_2 {});
             }
             else
             {
@@ -1900,7 +1900,6 @@ namespace xsimd
                 return {};
             }
         }
-
     }
 }
 

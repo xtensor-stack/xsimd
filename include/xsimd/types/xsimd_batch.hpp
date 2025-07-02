@@ -1100,7 +1100,6 @@ namespace xsimd
     {
     }
 
-
     template <class T, class A>
     template <class U, class... V, size_t I, size_t... Is>
     XSIMD_INLINE auto batch_bool<T, A>::make_register(detail::index_sequence<I, Is...>, U u, V... v) noexcept -> register_type
