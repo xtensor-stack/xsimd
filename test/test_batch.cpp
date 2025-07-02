@@ -711,6 +711,20 @@ struct batch_test
             INFO("fnms");
             CHECK_BATCH_EQ(res, expected);
         }
+        // fmas
+        {
+            array_type expected;
+            for (std::size_t i = 0; i < expected.size(); ++i)
+            {
+                // even lanes: x*y - z, odd lanes: x*y + z
+                expected[i] = (i & 1u) == 0
+                    ? lhs[i] * rhs[i] - rhs[i]
+                    : lhs[i] * rhs[i] + rhs[i];
+            }
+            batch_type res = fmas(batch_lhs(), batch_rhs(), batch_rhs());
+            INFO("fmas");
+            CHECK_BATCH_EQ(res, expected);
+        }
     }
 
     void test_abs() const

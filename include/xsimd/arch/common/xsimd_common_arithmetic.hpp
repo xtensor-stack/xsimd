@@ -127,6 +127,18 @@ namespace xsimd
             return { res_r, res_i };
         }
 
+        // fmas
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> fmas(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<common>) noexcept
+        {
+            struct even_lane
+            {
+                static constexpr bool get(unsigned const i, unsigned) noexcept { return (i & 1u) == 0; }
+            };
+            const auto mask = make_batch_bool_constant<T, even_lane, A>();
+            return fma(x, y, select(mask, neg(z), z));
+        }
+
         // hadd
         template <class A, class T, class /*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
         XSIMD_INLINE T hadd(batch<T, A> const& self, requires_arch<common>) noexcept

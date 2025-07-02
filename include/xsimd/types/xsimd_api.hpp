@@ -992,6 +992,21 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_arithmetic
+     *
+     * Computes <tt>-(x*y) - z</tt> in a single instruction when possible.
+     * @param x a batch of integer or floating point values.
+     * @param y a batch of integer or floating point values.
+     * @param z a batch of integer or floating point values.
+     * @return  a batch where each even-indexed element is computed as <tt>x * y - z</tt> and each odd-indexed element as <tt>x * y + z</tt>
+     */
+    template <class T, class A>
+    XSIMD_INLINE batch<T, A> fmas(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::fmas<A>(x, y, z, A {});
+    }
+    /**
      * @ingroup batch_fp
      *
      * Split split the number x into a normalized fraction and an exponent which is stored in exp

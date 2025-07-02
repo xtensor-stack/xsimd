@@ -47,6 +47,8 @@ namespace xsimd
     template <class T, class A>
     XSIMD_INLINE batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
     template <class T, class A>
+    XSIMD_INLINE batch<T, A> fmas(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z) noexcept;
+    template <class T, class A>
     XSIMD_INLINE batch<T, A> frexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& e) noexcept;
     template <class T, class A, uint64_t... Coefs>
     XSIMD_INLINE batch<T, A> horner(const batch<T, A>& self) noexcept;
