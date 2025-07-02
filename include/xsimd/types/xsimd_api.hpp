@@ -2124,6 +2124,7 @@ namespace xsimd
     shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
+        static_assert(std::is_unsigned<Vt>::value, "mask must hold unsigned indices");
         detail::static_check_supported_config<T, A>();
         return kernel::shuffle<A>(x, y, mask, A {});
     }
@@ -2433,6 +2434,7 @@ namespace xsimd
     XSIMD_INLINE batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& x, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
+        static_assert(std::is_unsigned<Vt>::value, "mask must hold unsigned indices");
         detail::static_check_supported_config<T, A>();
         return kernel::swizzle<A>(x, mask, A {});
     }
