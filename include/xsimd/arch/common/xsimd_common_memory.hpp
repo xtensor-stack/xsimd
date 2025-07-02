@@ -260,6 +260,25 @@ namespace xsimd
             return buffer[i];
         }
 
+        // first
+        template <class A, class T>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            return get(self, 0, common {});
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE T first(batch_bool<T, A> const& self, requires_arch<common>) noexcept
+        {
+            return get(self, 0, common {});
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE auto first(batch<std::complex<T>, A> const& self, requires_arch<common>) noexcept -> typename batch<std::complex<T>, A>::value_type
+        {
+            return get(self, 0, common {});
+        }
+
         // load
         template <class A, class T>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<common>) noexcept

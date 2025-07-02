@@ -2339,6 +2339,57 @@ namespace xsimd
                 2));
         }
 
+        // first
+        template <class A>
+        XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_cvtss_f32(self);
+        }
+
+        template <class A>
+        XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_cvtsd_f64(self);
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return static_cast<T>(_mm512_cvtsi512_si32(self) & 0xFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return static_cast<T>(_mm512_cvtsi512_si32(self) & 0xFFFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return static_cast<T>(_mm512_cvtsi512_si32(self));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return static_cast<T>(_mm_cvtsi128_si64(_mm512_castsi512_si128(self)));
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE std::complex<T> first(batch<std::complex<T>, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            return { first(self.real(), A {}), first(self.imag(), A {}) };
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE bool first(batch_bool<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            return first(batch<T, A>(self), A {});
+        }
+
     }
 
 }
