@@ -1822,17 +1822,6 @@ namespace xsimd
             }
         }
 
-        template <class A, class T>
-        XSIMD_INLINE std::complex<T> first(batch<std::complex<T>, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return { first(self.real(), A {}), first(self.imag(), A {}) };
-        }
-
-        template <class A, class T>
-        XSIMD_INLINE bool first(batch_bool<T, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return first(batch<T, A>(self), A {});
-        }
     }
 }
 
