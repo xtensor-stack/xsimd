@@ -72,6 +72,19 @@ namespace xsimd
         {
             return _mm_msub_pd(x, y, z);
         }
+
+        // fmas
+        template <class A>
+        XSIMD_INLINE batch<float, A> fmas(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires_arch<fma4>) noexcept
+        {
+            return _mm_maddsub_ps(x, y, z);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> fmas(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<fma4>) noexcept
+        {
+            return _mm_maddsub_pd(x, y, z);
+        }
     }
 
 }

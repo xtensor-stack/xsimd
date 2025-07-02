@@ -73,6 +73,19 @@ namespace xsimd
             return _mm256_fmsub_pd(x, y, z);
         }
 
+        // fmas
+        template <class A>
+        XSIMD_INLINE batch<float, A> fmas(batch<float, A> const& x, batch<float, A> const& y, batch<float, A> const& z, requires_arch<fma3<avx>>) noexcept
+        {
+            return _mm256_fmaddsub_ps(x, y, z);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> fmas(batch<double, A> const& x, batch<double, A> const& y, batch<double, A> const& z, requires_arch<fma3<avx>>) noexcept
+        {
+            return _mm256_fmaddsub_pd(x, y, z);
+        }
+
     }
 
 }
