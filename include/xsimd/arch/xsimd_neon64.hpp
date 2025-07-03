@@ -28,6 +28,13 @@ namespace xsimd
     {
         using namespace types;
 
+        // first
+        template <class A>
+        XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<neon64>) noexcept
+        {
+            return vgetq_lane_f64(self, 0);
+        }
+
         /*******
          * all *
          *******/

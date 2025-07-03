@@ -2455,6 +2455,61 @@ namespace xsimd
             return vshlq_s32(lhs, vnegq_s32(rhs));
         }
 
+        // first
+        template <class A>
+        XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_f32(self, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u8(val, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s8(val, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u16(val, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s16(val, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u32(val, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s32(val, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u64(val, 0);
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        XSIMD_INLINE T first(batch<T, A> val, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s64(val, 0);
+        }
+
         // Overloads of bitwise shifts accepting two batches of uint64/int64 are not available with ARMv7
 
         /*******
