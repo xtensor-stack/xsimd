@@ -1782,6 +1782,54 @@ namespace xsimd
         {
             return _mm_unpacklo_pd(self, other);
         }
+
+        // first
+        template <class A>
+        XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtss_f32(self);
+        }
+
+        template <class A>
+        XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtsd_f64(self);
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return static_cast<T>(_mm_cvtsi128_si32(self) & 0xFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return static_cast<T>(_mm_cvtsi128_si32(self) & 0xFFFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return static_cast<T>(_mm_cvtsi128_si32(self));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+#if defined(__x86_64__)
+                return static_cast<T>(_mm_cvtsi128_si64(self));
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, self);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+
     }
 }
 

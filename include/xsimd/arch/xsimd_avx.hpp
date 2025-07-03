@@ -20,7 +20,6 @@
 
 namespace xsimd
 {
-
     namespace kernel
     {
         using namespace types;
@@ -1860,6 +1859,46 @@ namespace xsimd
             auto lo = _mm256_unpacklo_pd(self, other);
             auto hi = _mm256_unpackhi_pd(self, other);
             return _mm256_insertf128_pd(lo, _mm256_castpd256_pd128(hi), 1);
+        }
+
+        // first
+        template <class A>
+        XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<avx>) noexcept
+        {
+            return _mm256_cvtss_f32(self);
+        }
+
+        template <class A>
+        XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<avx>) noexcept
+        {
+            return _mm256_cvtsd_f64(self);
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return static_cast<T>(_mm256_cvtsi256_si32(self) & 0xFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return static_cast<T>(_mm256_cvtsi256_si32(self) & 0xFFFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return static_cast<T>(_mm256_cvtsi256_si32(self));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                batch<T, sse4_2> low = _mm256_castsi256_si128(self);
+                return first(low, sse4_2 {});
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
         }
     }
 }

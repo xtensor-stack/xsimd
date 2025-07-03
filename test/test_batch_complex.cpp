@@ -176,6 +176,12 @@ struct batch_complex_test
         }
     }
 
+    void test_first_element() const
+    {
+        batch_type res = batch_lhs();
+        CHECK_EQ(res.first(), lhs[0]);
+    }
+
     void test_arithmetic() const
     {
         // +batch
@@ -674,6 +680,8 @@ TEST_CASE_TEMPLATE("[xsimd complex batches]", B, BATCH_COMPLEX_TYPES)
     }
 
     SUBCASE("access_operator") { Test.test_access_operator(); }
+
+    SUBCASE("first element") { Test.test_first_element(); }
 
     SUBCASE("arithmetic") { Test.test_arithmetic(); }
 

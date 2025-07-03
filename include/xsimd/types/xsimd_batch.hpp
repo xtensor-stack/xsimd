@@ -159,6 +159,8 @@ namespace xsimd
 
         XSIMD_INLINE T get(std::size_t i) const noexcept;
 
+        XSIMD_INLINE T first() const noexcept;
+
         // comparison operators. Defined as friend to enable automatic
         // conversion of parameters from scalar to batch, at the cost of using a
         // proxy implementation from details::.
@@ -314,6 +316,8 @@ namespace xsimd
 
         XSIMD_INLINE bool get(std::size_t i) const noexcept;
 
+        XSIMD_INLINE bool first() const noexcept;
+
         // mask operations
         XSIMD_INLINE uint64_t mask() const noexcept;
         XSIMD_INLINE static batch_bool from_mask(uint64_t mask) noexcept;
@@ -404,6 +408,8 @@ namespace xsimd
         XSIMD_INLINE real_batch imag() const noexcept;
 
         XSIMD_INLINE value_type get(std::size_t i) const noexcept;
+
+        XSIMD_INLINE value_type first() const noexcept;
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
         // xtl-related methods
@@ -691,6 +697,16 @@ namespace xsimd
     XSIMD_INLINE T batch<T, A>::get(std::size_t i) const noexcept
     {
         return kernel::get(*this, i, A {});
+    }
+
+    /**
+     * Retrieve the first scalar element in this batch.
+     */
+    template <class T, class A>
+    XSIMD_INLINE T batch<T, A>::first() const noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::first(*this, A {});
     }
 
     /******************************
@@ -1005,6 +1021,13 @@ namespace xsimd
         return kernel::get(*this, i, A {});
     }
 
+    template <class T, class A>
+    XSIMD_INLINE bool batch_bool<T, A>::first() const noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::first(*this, A {});
+    }
+
     /***********************************
      * batch_bool comparison operators *
      ***********************************/
@@ -1246,6 +1269,13 @@ namespace xsimd
     XSIMD_INLINE auto batch<std::complex<T>, A>::get(std::size_t i) const noexcept -> value_type
     {
         return kernel::get(*this, i, A {});
+    }
+
+    template <class T, class A>
+    XSIMD_INLINE auto batch<std::complex<T>, A>::first() const noexcept -> value_type
+    {
+        detail::static_check_supported_config<std::complex<T>, A>();
+        return kernel::first(*this, A {});
     }
 
     /**************************************
