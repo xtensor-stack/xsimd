@@ -1335,6 +1335,19 @@ namespace xsimd
             return result;
         }
 
+        // first
+        template <class A, class T, detail::rvv_enable_all_t<T> = 0>
+        XSIMD_INLINE T first(batch<T, A> const& arg, requires_arch<rvv>) noexcept
+        {
+            return detail::rvvmv_lane0(arg);
+        }
+
+        template <class A, class T, detail::rvv_enable_all_t<T> = 0>
+        XSIMD_INLINE std::complex<T> first(batch<std::complex<T>, A> const& arg, requires_arch<rvv>) noexcept
+        {
+            return std::complex<T> { detail::rvvmv_lane0(arg.real()), detail::rvvmv_lane0(arg.imag()) };
+        }
+
         // insert
         template <class A, class T, size_t I, detail::rvv_enable_all_t<T> = 0>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& arg, T val, index<I>, requires_arch<rvv>) noexcept

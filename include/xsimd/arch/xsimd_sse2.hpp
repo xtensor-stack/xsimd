@@ -673,6 +673,53 @@ namespace xsimd
             return _mm_castsi128_pd(_mm_cmpeq_epi32(_mm_castpd_si128(self), _mm_castpd_si128(other)));
         }
 
+        // first
+        template <class A>
+        XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtss_f32(self);
+        }
+
+        template <class A>
+        XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtsd_f64(self);
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return static_cast<T>(_mm_cvtsi128_si32(self) & 0xFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return static_cast<T>(_mm_cvtsi128_si32(self) & 0xFFFF);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return static_cast<T>(_mm_cvtsi128_si32(self));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+#if defined(__x86_64__)
+                return static_cast<T>(_mm_cvtsi128_si64(self));
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, self);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+
         // from_mask
         template <class A>
         XSIMD_INLINE batch_bool<float, A> from_mask(batch_bool<float, A> const&, uint64_t mask, requires_arch<sse2>) noexcept
@@ -1269,10 +1316,10 @@ namespace xsimd
             batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
             batch<T, A> acc2 = max(acc1, step2);
             if (sizeof(T) == 2)
-                return acc2.get(0);
+                return first(acc2, A {});
             batch<T, A> step3 = bitwise_cast<T>(bitwise_cast<uint16_t>(acc2) >> 8);
             batch<T, A> acc3 = max(acc2, step3);
-            return acc3.get(0);
+            return first(acc3, A {});
         }
 
         // reduce_min
@@ -1291,10 +1338,10 @@ namespace xsimd
             batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
             batch<T, A> acc2 = min(acc1, step2);
             if (sizeof(T) == 2)
-                return acc2.get(0);
+                return first(acc2, A {});
             batch<T, A> step3 = bitwise_cast<T>(bitwise_cast<uint16_t>(acc2) >> 8);
             batch<T, A> acc3 = min(acc2, step3);
-            return acc3.get(0);
+            return first(acc3, A {});
         }
 
         // rsqrt
@@ -1781,53 +1828,6 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> zip_lo(batch<double, A> const& self, batch<double, A> const& other, requires_arch<sse2>) noexcept
         {
             return _mm_unpacklo_pd(self, other);
-        }
-
-        // first
-        template <class A>
-        XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return _mm_cvtss_f32(self);
-        }
-
-        template <class A>
-        XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<sse2>) noexcept
-        {
-            return _mm_cvtsd_f64(self);
-        }
-
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<sse2>) noexcept
-        {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                return static_cast<T>(_mm_cvtsi128_si32(self) & 0xFF);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-            {
-                return static_cast<T>(_mm_cvtsi128_si32(self) & 0xFFFF);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                return static_cast<T>(_mm_cvtsi128_si32(self));
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-#if defined(__x86_64__)
-                return static_cast<T>(_mm_cvtsi128_si64(self));
-#else
-                __m128i m;
-                _mm_storel_epi64(&m, self);
-                int64_t i;
-                std::memcpy(&i, &m, sizeof(i));
-                return i;
-#endif
-            }
-            else
-            {
-                assert(false && "unsupported arch/op combination");
-                return {};
-            }
         }
 
     }

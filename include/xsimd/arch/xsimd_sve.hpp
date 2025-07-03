@@ -949,6 +949,13 @@ namespace xsimd
             return svsel(index_predicate, broadcast<A, T>(val, sve {}), arg);
         }
 
+        // first
+        template <class A, class T, detail::sve_enable_all_t<T> = 0>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<sve>) noexcept
+        {
+            return self.data[0];
+        }
+
         // all
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
         XSIMD_INLINE bool all(batch_bool<T, A> const& arg, requires_arch<sve>) noexcept
