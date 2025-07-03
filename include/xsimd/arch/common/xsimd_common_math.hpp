@@ -2117,7 +2117,7 @@ namespace xsimd
             template <class Op, class A, class T>
             XSIMD_INLINE T reduce(Op, batch<T, A> const& self, std::integral_constant<unsigned, 1>) noexcept
             {
-                return self.get(0);
+                return first(self);
             }
 
             template <class Op, class A, class T, unsigned Lvl>
