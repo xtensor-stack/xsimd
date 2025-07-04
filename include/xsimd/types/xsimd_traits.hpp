@@ -54,18 +54,12 @@ namespace xsimd
         };
 
         template <class T>
-        constexpr size_t simd_traits_impl<T, false>::size;
-
-        template <class T>
         struct simd_traits_impl<T, true>
         {
             using type = batch<T>;
             using bool_type = typename type::batch_bool_type;
             static constexpr size_t size = type::size;
         };
-
-        template <class T>
-        constexpr size_t simd_traits_impl<T, true>::size;
 
         template <class T, class A>
         struct static_check_supported_config_emitter
@@ -129,17 +123,11 @@ namespace xsimd
     };
 
     template <class T>
-    constexpr size_t revert_simd_traits<T>::size;
-
-    template <class T>
     struct revert_simd_traits<batch<T>>
     {
         using type = T;
         static constexpr size_t size = batch<T>::size;
     };
-
-    template <class T>
-    constexpr size_t revert_simd_traits<batch<T>>::size;
 
     template <class T>
     using simd_type = typename simd_traits<T>::type;
