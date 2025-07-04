@@ -18,6 +18,8 @@
 
 #include "../types/xsimd_sve_register.hpp"
 
+#include <arm_neon_sve_bridge.h>
+
 namespace xsimd
 {
     template <typename T, class A, T... Values>
@@ -947,6 +949,13 @@ namespace xsimd
             const auto iota = detail::sve_iota<T>();
             const auto index_predicate = svcmpeq(detail::sve_ptrue<T>(), iota, static_cast<as_unsigned_integer_t<T>>(I));
             return svsel(index_predicate, broadcast<A, T>(val, sve {}), arg);
+        }
+
+        // first
+        template <class A, class T, typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<sve>) noexcept
+        {
+            return first(svget_neon(self));
         }
 
         // all
