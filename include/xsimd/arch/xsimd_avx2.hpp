@@ -942,12 +942,79 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx2>) noexcept
         {
-            return _mm256_permutevar8x32_ps(self, mask.as_batch());
+            // 1) identity?
+            constexpr bool is_identity = (V0 == 0 && V1 == 1 && V2 == 2 && V3 == 3 && V4 == 4 && V5 == 5 && V6 == 6 && V7 == 7);
+            // 2) all-different mask → full 8-lane permute
+            constexpr uint32_t bitmask = (1u << (V0 & 7)) | (1u << (V1 & 7)) | (1u << (V2 & 7)) | (1u << (V3 & 7)) | (1u << (V4 & 7)) | (1u << (V5 & 7)) | (1u << (V6 & 7)) | (1u << (V7 & 7));
+            constexpr bool is_all_different = (bitmask == 0xFFu);
+            // 3) duplicate-low half?
+            constexpr bool is_dup_lo = (V0 < 4 && V1 < 4 && V2 < 4 && V3 < 4) && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3;
+            // 4) duplicate-high half?
+            constexpr bool is_dup_hi = (V0 >= 4 && V0 <= 7 && V1 >= 4 && V1 <= 7 && V2 >= 4 && V2 <= 7 && V3 >= 4 && V3 <= 7) && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3;
+
+            XSIMD_IF_CONSTEXPR(is_identity) { return self; }
+            XSIMD_IF_CONSTEXPR(is_dup_lo)
+            {
+                __m128 lo = _mm256_castps256_ps128(self);
+                // if lo is not identity, we can permute it before duplicating
+                XSIMD_IF_CONSTEXPR(V0 != 0 || V1 != 1 || V2 != 2 || V3 != 3)
+                {
+                    constexpr int imm = ((V3 & 3) << 6) | ((V2 & 3) << 4) | ((V1 & 3) << 2) | ((V0 & 3) << 0);
+                    lo = _mm_permute_ps(lo, imm);
+                }
+                return _mm256_set_m128(lo, lo);
+            }
+            XSIMD_IF_CONSTEXPR(is_dup_hi)
+            {
+                __m128 hi = _mm256_extractf128_ps(self, 1);
+                XSIMD_IF_CONSTEXPR(V0 != 4 || V1 != 5 || V2 != 6 || V3 != 7)
+                {
+                    constexpr int imm = ((V3 & 3) << 6) | ((V2 & 3) << 4) | ((V1 & 3) << 2) | ((V0 & 3) << 0);
+                    hi = _mm_permute_ps(hi, imm);
+                }
+                return _mm256_set_m128(hi, hi);
+            }
+            XSIMD_IF_CONSTEXPR(is_all_different)
+            {
+                // The intrinsic does NOT allow to copy the same element of the source vector to more than one element of the destination vector.
+                // one-shot 8-lane permute
+                return _mm256_permutevar8x32_ps(self, mask.as_batch());
+            }
+            // duplicate low and high part of input
+            __m256 hi = _mm256_castps128_ps256(_mm256_extractf128_ps(self, 1));
+            __m256 hi_hi = _mm256_insertf128_ps(self, _mm256_castps256_ps128(hi), 0);
+
+            __m256 low = _mm256_castps128_ps256(_mm256_castps256_ps128(self));
+            __m256 low_low = _mm256_insertf128_ps(self, _mm256_castps256_ps128(low), 1);
+
+            // normalize mask
+            batch_constant<uint32_t, A, (V0 % 4), (V1 % 4), (V2 % 4), (V3 % 4), (V4 % 4), (V5 % 4), (V6 % 4), (V7 % 4)> half_mask;
+
+            // permute within each lane
+            __m256 r0 = _mm256_permutevar_ps(low_low, half_mask.as_batch());
+            __m256 r1 = _mm256_permutevar_ps(hi_hi, half_mask.as_batch());
+
+            // mask to choose the right lane
+            batch_bool_constant<uint32_t, A, (V0 >= 4), (V1 >= 4), (V2 >= 4), (V3 >= 4), (V4 >= 4), (V5 >= 4), (V6 >= 4), (V7 >= 4)> blend_mask;
+
+            // blend the two permutes
+            return _mm256_blend_ps(r0, r1, blend_mask.mask());
         }
 
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3>, requires_arch<avx2>) noexcept
         {
+            constexpr bool is_identity = (V0 == 0 && V1 == 1 && V2 == 2 && V3 == 3);
+            constexpr bool can_use_pd = (V0 < 2 && V1 < 2 && V2 >= 2 && V2 < 4 && V3 >= 2 && V3 < 4);
+
+            XSIMD_IF_CONSTEXPR(is_identity) { return self; }
+            XSIMD_IF_CONSTEXPR(can_use_pd)
+            {
+                // build the 4-bit immediate: bit i = 1 if you pick the upper element of pair i
+                constexpr int mask = ((V0 & 1) << 0) | ((V1 & 1) << 1) | ((V2 & 1) << 2) | ((V3 & 1) << 3);
+                return _mm256_permute_pd(self, mask);
+            }
+            // fallback to full 4-element permute
             constexpr auto mask = detail::shuffle(V0, V1, V2, V3);
             return _mm256_permute4x64_pd(self, mask);
         }
