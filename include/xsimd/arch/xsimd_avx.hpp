@@ -1480,6 +1480,35 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<avx>) noexcept
         {
+            // 1) identity?
+            constexpr bool is_identity = (V0 == 0 && V1 == 1 && V2 == 2 && V3 == 3 && V4 == 4 && V5 == 5 && V6 == 6 && V7 == 7);
+            // 2) duplicate-low half?
+            constexpr bool is_dup_lo = ((V0 < 4 && V1 < 4 && V2 < 4 && V3 < 4) && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3);
+            // 3) duplicate-high half?
+            constexpr bool is_dup_hi = (V0 >= 4 && V0 <= 7 && V1 >= 4 && V1 <= 7 && V2 >= 4 && V2 <= 7 && V3 >= 4 && V3 <= 7 && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3);
+
+            XSIMD_IF_CONSTEXPR(is_identity) { return self; }
+            XSIMD_IF_CONSTEXPR(is_dup_lo)
+            {
+                __m128 lo = _mm256_castps256_ps128(self);
+                // if lo is not identity, we can permute it before duplicating
+                XSIMD_IF_CONSTEXPR(V0 != 0 || V1 != 1 || V2 != 2 || V3 != 3)
+                {
+                    constexpr int imm = ((V3 & 3) << 6) | ((V2 & 3) << 4) | ((V1 & 3) << 2) | ((V0 & 3) << 0);
+                    lo = _mm_permute_ps(lo, imm);
+                }
+                return _mm256_set_m128(lo, lo);
+            }
+            XSIMD_IF_CONSTEXPR(is_dup_hi)
+            {
+                __m128 hi = _mm256_extractf128_ps(self, 1);
+                XSIMD_IF_CONSTEXPR(V0 != 4 || V1 != 5 || V2 != 6 || V3 != 7)
+                {
+                    constexpr int imm = ((V3 & 3) << 6) | ((V2 & 3) << 4) | ((V1 & 3) << 2) | ((V0 & 3) << 0);
+                    hi = _mm_permute_ps(hi, imm);
+                }
+                return _mm256_set_m128(hi, hi);
+            }
             // duplicate low and high part of input
             __m256 hi = _mm256_castps128_ps256(_mm256_extractf128_ps(self, 1));
             __m256 hi_hi = _mm256_insertf128_ps(self, _mm256_castps256_ps128(hi), 0);
@@ -1505,6 +1534,16 @@ namespace xsimd
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3>, requires_arch<avx>) noexcept
         {
+            constexpr bool is_identity = V0 == 0 && V1 == 1 && V2 == 2 && V3 == 3;
+            constexpr bool can_use_pd = V0 < 2 && V1 < 2 && V2 >= 2 && V3 >= 2; // no lane crossing
+
+            XSIMD_IF_CONSTEXPR(is_identity) { return self; }
+            XSIMD_IF_CONSTEXPR(can_use_pd)
+            {
+                // build the 4-bit immediate: bit i = 1 if you pick the upper element of pair i
+                constexpr int mask = ((V0 & 1) << 0) | ((V1 & 1) << 1) | ((V2 & 1) << 2) | ((V3 & 1) << 3);
+                return _mm256_permute_pd(self, mask);
+            }
             // duplicate low and high part of input
             __m256d hi = _mm256_castpd128_pd256(_mm256_extractf128_pd(self, 1));
             __m256d hi_hi = _mm256_insertf128_pd(self, _mm256_castpd256_pd128(hi), 0);
