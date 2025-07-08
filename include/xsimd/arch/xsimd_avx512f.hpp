@@ -2124,16 +2124,53 @@ namespace xsimd
             return bitwise_cast<int32_t>(swizzle(bitwise_cast<uint32_t>(self), mask, avx512f {}));
         }
 
-        // swizzle (constant version)
-        template <class A, uint32_t... Vs>
-        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, Vs...> mask, requires_arch<avx512f>) noexcept
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7,
+                  uint32_t V8, uint32_t V9, uint32_t V10, uint32_t V11, uint32_t V12, uint32_t V13, uint32_t V14, uint32_t V15>
+        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self,
+                                             batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> mask,
+                                             requires_arch<avx512f>) noexcept
         {
+            XSIMD_IF_CONSTEXPR(detail::is_identity(mask))
+            {
+                return self;
+            }
+            XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
+            {
+                constexpr int imm0 = detail::mod_shuffle(V0, V1, V2, V3);
+                constexpr int imm1 = detail::mod_shuffle(V4, V5, V6, V7);
+                constexpr int imm2 = detail::mod_shuffle(V8, V9, V10, V11);
+                constexpr int imm3 = detail::mod_shuffle(V12, V13, V14, V15);
+                XSIMD_IF_CONSTEXPR(imm0 == imm1 && imm0 == imm2 && imm0 == imm3)
+                {
+                    return _mm512_permute_ps(self, imm0);
+                }
+            }
             return swizzle(self, mask.as_batch(), avx512f {});
         }
-
-        template <class A, uint64_t... Vs>
-        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, Vs...> mask, requires_arch<avx512f>) noexcept
+        template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3, uint64_t V4, uint64_t V5, uint64_t V6, uint64_t V7>
+        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self,
+                                              batch_constant<uint64_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask,
+                                              requires_arch<avx512f>) noexcept
         {
+            XSIMD_IF_CONSTEXPR(detail::is_identity(mask))
+            {
+                return self;
+            }
+            XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
+            {
+                constexpr auto imm = ((V0 & 1) << 0) | ((V1 & 1) << 1) | ((V2 & 1) << 2) | ((V3 & 1) << 3) | ((V4 & 1) << 4) | ((V5 & 1) << 5) | ((V6 & 1) << 6) | ((V7 & 1) << 7);
+                return _mm512_permute_pd(self, imm);
+            }
+            constexpr bool dup_lo = detail::is_dup_lo(mask);
+            constexpr bool dup_hi = detail::is_dup_hi(mask);
+            XSIMD_IF_CONSTEXPR(dup_lo || dup_hi)
+            {
+                const batch<double, avx2> half = _mm512_extractf64x4_pd(self, dup_lo ? 0 : 1);
+                constexpr typename std::conditional<dup_lo, batch_constant<uint64_t, avx2, V0 % 4, V1 % 4, V2 % 4, V3 % 4>,
+                                                    batch_constant<uint64_t, avx2, V4 % 4, V5 % 4, V6 % 4, V7 % 4>>::type half_mask {};
+                return _mm512_broadcast_f64x4(swizzle(half, half_mask, avx2 {}));
+            }
+            // General case
             return swizzle(self, mask.as_batch(), avx512f {});
         }
 

@@ -188,6 +188,28 @@ namespace xsimd
             return reduce_add(batch<float, avx2>(res1), avx2 {});
         }
 
+        // swizzle constant mask
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7,
+                  uint32_t V8, uint32_t V9, uint32_t V10, uint32_t V11, uint32_t V12, uint32_t V13, uint32_t V14, uint32_t V15>
+        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self,
+                                             batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> mask,
+                                             requires_arch<avx512dq>) noexcept
+        {
+            constexpr bool dup_lo = detail::is_dup_lo(mask);
+            constexpr bool dup_hi = detail::is_dup_hi(mask);
+
+            XSIMD_IF_CONSTEXPR(dup_lo || dup_hi)
+            {
+                const batch<float, avx2> half = _mm512_extractf32x8_ps(self, dup_lo ? 0 : 1);
+                constexpr typename std::conditional<dup_lo, batch_constant<uint32_t, avx2, V0 % 8, V1 % 8, V2 % 8, V3 % 8, V4 % 8, V5 % 8, V6 % 8, V7 % 8>,
+                                                    batch_constant<uint32_t, avx2, V8 % 8, V9 % 8, V10 % 8, V11 % 8, V12 % 8, V13 % 8, V14 % 8, V15 % 8>>::type half_mask {};
+                auto permuted = swizzle(half, half_mask, avx2 {});
+                // merge the two slices into an AVX512F register:
+                return _mm512_broadcast_f32x8(permuted); // duplicates the 256-bit perm into both halves
+            }
+            return swizzle(self, mask, avx512f {});
+        }
+
         // convert
         namespace detail
         {
