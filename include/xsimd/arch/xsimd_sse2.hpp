@@ -1759,7 +1759,7 @@ namespace xsimd
             const auto high_all = _mm_unpacklo_epi64(hi0_all, hi1_all); // { hi0, hi1 }
             // 4) Finally, pick per-lane: if Vn<4 → take from low_all, else from high_all
             constexpr batch_bool_constant<int16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> lane_mask {};
-            return select(lane_mask, batch<int16_t>(low_all), batch<int16_t>(high_all));
+            return select(lane_mask, batch<int16_t, A>(low_all), batch<int16_t, A>(high_all));
         }
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
         XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<sse2>) noexcept
