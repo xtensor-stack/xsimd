@@ -1690,20 +1690,45 @@ namespace xsimd
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
         XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<sse2>) noexcept
         {
-            // permute within each lane
-            constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
-            constexpr auto mask_hi = detail::mod_shuffle(V4, V5, V6, V7);
-            __m128i lo = _mm_shufflelo_epi16(self, mask_lo);
-            __m128i hi = _mm_shufflehi_epi16(self, mask_hi);
+            __m128i v = self;
 
-            __m128i lo_lo = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(lo), _mm_castsi128_pd(lo), _MM_SHUFFLE2(0, 0)));
-            __m128i hi_hi = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(hi), _mm_castsi128_pd(hi), _MM_SHUFFLE2(1, 1)));
+            // 1) Shuffle the low 64-bit half for lanes 0–3 and 4–7:
+            constexpr int imm_lo0 = detail::mod_shuffle(V0, V1, V2, V3);
+            constexpr int imm_lo1 = detail::mod_shuffle(V4, V5, V6, V7);
+            __m128i lo0 = _mm_shufflelo_epi16(v, imm_lo0);
+            __m128i lo1 = _mm_shufflelo_epi16(v, imm_lo1);
 
-            // mask to choose the right lane
-            batch_bool_constant<uint16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> blend_mask;
+            // Broadcast each low-half permutation across both 64-bit halves:
+            __m128i lo0_all = _mm_unpacklo_epi64(lo0, lo0);
+            __m128i lo1_all = _mm_unpacklo_epi64(lo1, lo1);
 
-            // blend the two permutes
-            return select(blend_mask, batch<uint16_t, A>(lo_lo), batch<uint16_t, A>(hi_hi));
+            // 2) Shuffle the high 64-bit half for lanes 0–3 and 4–7:
+            constexpr int imm_hi0 = detail::mod_shuffle(V0 - 4, V1 - 4, V2 - 4, V3 - 4);
+            constexpr int imm_hi1 = detail::mod_shuffle(V4 - 4, V5 - 4, V6 - 4, V7 - 4);
+            __m128i hi0 = _mm_shufflehi_epi16(v, imm_hi0);
+            __m128i hi1 = _mm_shufflehi_epi16(v, imm_hi1);
+
+            // Broadcast each high-half permutation across both 64-bit halves:
+            __m128i hi0_all = _mm_unpackhi_epi64(hi0, hi0);
+            __m128i hi1_all = _mm_unpackhi_epi64(hi1, hi1);
+
+            // 3) Merge the two “low” broadcasts into one vector (lanes 0–3 ← lo0_all, lanes 4–7 ← lo1_all)
+            __m128i low_all = _mm_unpacklo_epi64(lo0_all, lo1_all); // { lo0, lo1 }
+
+            // constexpr batch_bool_constant<uint16_t, A, false, false, false, false, true, true, true, true> group_mask {};
+            // auto low_all = select(group_mask, batch<uint16_t, A>(lo1_all), batch<uint16_t, A>(lo0_all));
+
+            // Likewise merge the two “high” broadcasts:
+            __m128i high_all = _mm_unpacklo_epi64(hi0_all, hi1_all); // { hi0, hi1 }
+
+            // auto high_all = select(group_mask, batch<uint16_t, A>(hi1_all), batch<uint16_t, A>(hi0_all));
+
+            // 4) Finally, pick per-lane: if Vn<4 → take from low_all, else from high_all
+            constexpr batch_bool_constant<uint16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> lane_mask {};
+            return select(lane_mask,              // mask[i] ? low_all[i] : high_all[i]
+                          batch<uint16_t, A>(low_all),
+                          batch<uint16_t, A>(high_all));
+            // return select(lane_mask, low_all, high_all);
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
