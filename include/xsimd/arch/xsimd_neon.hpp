@@ -1024,6 +1024,18 @@ namespace xsimd
         /******
          * gt *
          ******/
+        namespace detail
+        {
+            XSIMD_INLINE int64x2_t bitwise_not_s64(int64x2_t arg) noexcept
+            {
+                return vreinterpretq_s64_s32(vmvnq_s32(vreinterpretq_s32_s64(arg)));
+            }
+
+            XSIMD_INLINE uint64x2_t bitwise_not_u64(uint64x2_t arg) noexcept
+            {
+                return vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(arg)));
+            }
+        }
 
         WRAP_BINARY_INT_EXCLUDING_64(vcgtq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcgtq, detail::comp_return_type)
@@ -1039,10 +1051,19 @@ namespace xsimd
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch_bool<T, A>({ lhs.get(0) > rhs.get(0), lhs.get(1) > rhs.get(1) });
+            using register_type = typename batch<T, A>::register_type;
+            return batch_bool<T, A> { vshrq_n_s64(vqsubq_s64(register_type(lhs), register_type(rhs)), 63) };
+        }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            using register_type = typename batch<T, A>::register_type;
+            register_type acc = { 0x8FFFFFFFFFFFFFFFull, 0x8FFFFFFFFFFFFFFFull };
+            return batch_bool<T, A>(vreinterpretq_u64_s64(detail::bitwise_not_s64(vshrq_n_s64(vreinterpretq_s64_u64(vqaddq_u64(vqsubq_u64(register_type(rhs), register_type(lhs)), acc)), 63))));
         }
 
         /******
@@ -1218,16 +1239,6 @@ namespace xsimd
 
         namespace detail
         {
-            XSIMD_INLINE int64x2_t bitwise_not_s64(int64x2_t arg) noexcept
-            {
-                return vreinterpretq_s64_s32(vmvnq_s32(vreinterpretq_s32_s64(arg)));
-            }
-
-            XSIMD_INLINE uint64x2_t bitwise_not_u64(uint64x2_t arg) noexcept
-            {
-                return vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(arg)));
-            }
-
             XSIMD_INLINE float32x4_t bitwise_not_f32(float32x4_t arg) noexcept
             {
                 return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(arg)));
