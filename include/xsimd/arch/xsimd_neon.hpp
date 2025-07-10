@@ -938,7 +938,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch_bool<T, A>({ lhs.get(0) == rhs.get(0), lhs.get(1) == rhs.get(1) });
+            return eq(lhs.data, rhs.data);
         }
 
         /*************
