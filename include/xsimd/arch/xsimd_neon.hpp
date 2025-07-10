@@ -717,16 +717,10 @@ namespace xsimd
             return vnegq_s32(rhs);
         }
 
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch<T, A> { -rhs.get(0), -rhs.get(1) };
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        XSIMD_INLINE batch<T, A> neg(batch<T, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            return batch<T, A> { -rhs.get(0), -rhs.get(1) };
+            return 0 - rhs;
         }
 
         template <class A>
