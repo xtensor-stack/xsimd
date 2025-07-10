@@ -917,10 +917,22 @@ namespace xsimd
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch_bool<T, A>({ lhs.get(0) == rhs.get(0), lhs.get(1) == rhs.get(1) });
+            auto eq32 = vceqq_u32(vreinterpretq_u64_u32(lhs), vreinterpretq_u64_u32(rhs));
+            auto rev32 = vrev64q_u32(eq32);
+            auto eq64 = vandq_u32(eq32, rev32);
+            return batch_bool<T, A>(vreinterpretq_u32_u64(eq64));
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            auto eq32 = vceqq_u32(vreinterpretq_s64_u32(lhs), vreinterpretq_s64_u32(rhs));
+            auto rev32 = vrev64q_u32(eq32);
+            auto eq64 = vandq_u32(eq32, rev32);
+            return batch_bool<T, A>(vreinterpretq_u32_s64(eq64));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
