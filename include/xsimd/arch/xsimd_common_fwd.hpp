@@ -50,10 +50,6 @@ namespace xsimd
             XSIMD_INLINE constexpr bool is_dup_lo(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_hi(batch_constant<T, A, Vs...>) noexcept;
-            template <uint32_t... Values>
-            XSIMD_INLINE constexpr std::uint32_t shuffle() noexcept;
-            template <uint32_t... Values>
-            XSIMD_INLINE constexpr std::uint32_t mod_shuffle() noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_cross_lane(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>

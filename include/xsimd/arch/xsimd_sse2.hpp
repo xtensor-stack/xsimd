@@ -33,6 +33,28 @@ namespace xsimd
     {
         using namespace types;
 
+        namespace detail
+        {
+            constexpr uint32_t shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
+            {
+                return (z << 6) | (y << 4) | (x << 2) | w;
+            }
+            constexpr uint32_t shuffle(uint32_t x, uint32_t y)
+            {
+                return (y << 1) | x;
+            }
+
+            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
+            {
+                return shuffle(w % 4, x % 4, y % 4, z % 4);
+            }
+
+            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x)
+            {
+                return shuffle(w % 2, x % 2);
+            }
+        }
+
         // fwd
         template <class A, class T, size_t I>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<common>) noexcept;
@@ -1282,13 +1304,16 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            batch<T, A> step0 = _mm_shuffle_epi32(self, detail::shuffle<2, 3, 0, 0>());
+            constexpr auto mask0 = detail::shuffle(2, 3, 0, 0);
+            batch<T, A> step0 = _mm_shuffle_epi32(self, mask0);
             batch<T, A> acc0 = max(self, step0);
 
-            batch<T, A> step1 = _mm_shuffle_epi32(acc0, detail::shuffle<1, 0, 0, 0>());
+            constexpr auto mask1 = detail::shuffle(1, 0, 0, 0);
+            batch<T, A> step1 = _mm_shuffle_epi32(acc0, mask1);
             batch<T, A> acc1 = max(acc0, step1);
 
-            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, detail::shuffle<1, 0, 0, 0>());
+            constexpr auto mask2 = detail::shuffle(1, 0, 0, 0);
+            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
             batch<T, A> acc2 = max(acc1, step2);
             if (sizeof(T) == 2)
                 return first(acc2, A {});
@@ -1301,13 +1326,16 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            batch<T, A> step0 = _mm_shuffle_epi32(self, detail::shuffle<2, 3, 0, 0>());
+            constexpr auto mask0 = detail::shuffle(2, 3, 0, 0);
+            batch<T, A> step0 = _mm_shuffle_epi32(self, mask0);
             batch<T, A> acc0 = min(self, step0);
 
-            batch<T, A> step1 = _mm_shuffle_epi32(acc0, detail::shuffle<1, 0, 0, 0>());
+            constexpr auto mask1 = detail::shuffle(1, 0, 0, 0);
+            batch<T, A> step1 = _mm_shuffle_epi32(acc0, mask1);
             batch<T, A> acc1 = min(acc0, step1);
 
-            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, detail::shuffle<1, 0, 0, 0>());
+            constexpr auto mask2 = detail::shuffle(1, 0, 0, 0);
+            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
             batch<T, A> acc2 = min(acc1, step2);
             if (sizeof(T) == 2)
                 return first(acc2, A {});
@@ -1355,7 +1383,7 @@ namespace xsimd
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
         XSIMD_INLINE batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<ITy, A, I0, I1, I2, I3> mask, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle<I0, I1, I2, I3>();
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
             // shuffle within lane
             if (I0 < 4 && I1 < 4 && I2 >= 4 && I3 >= 4)
                 return _mm_shuffle_ps(x, y, smask);
@@ -1369,7 +1397,7 @@ namespace xsimd
         template <class A, class ITy, ITy I0, ITy I1>
         XSIMD_INLINE batch<double, A> shuffle(batch<double, A> const& x, batch<double, A> const& y, batch_constant<ITy, A, I0, I1> mask, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle<I0, I1>();
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1);
             // shuffle within lane
             if (I0 < 2 && I1 >= 2)
                 return _mm_shuffle_pd(x, y, smask);
@@ -1617,26 +1645,24 @@ namespace xsimd
             return _mm_sub_pd(self, other);
         }
 
-        // swizzle
-
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle<V0, V1, V2, V3>();
+            constexpr uint32_t index = detail::shuffle(V0, V1, V2, V3);
             return _mm_shuffle_ps(self, self, index);
         }
 
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle<V0, V1>();
+            constexpr uint32_t index = detail::shuffle(V0, V1);
             return _mm_shuffle_pd(self, self, index);
         }
 
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch_constant<uint64_t, A, V0, V1>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle<2 * V0, 2 * V0 + 1, 2 * V1, 2 * V1 + 1>();
+            constexpr uint32_t index = detail::shuffle(2 * V0, 2 * V0 + 1, 2 * V1, 2 * V1 + 1);
             return _mm_shuffle_epi32(self, index);
         }
 
@@ -1649,7 +1675,7 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle<V0, V1, V2, V3>();
+            constexpr uint32_t index = detail::shuffle(V0, V1, V2, V3);
             return _mm_shuffle_epi32(self, index);
         }
 
@@ -1663,8 +1689,8 @@ namespace xsimd
         XSIMD_INLINE batch<int16_t, A>
         swizzle(batch<int16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<sse2>) noexcept
         {
-            constexpr int imm_lo = detail::mod_shuffle<V0, V1, V2, V3>();
-            constexpr int imm_hi = detail::mod_shuffle<V4, V5, V6, V7>();
+            constexpr int imm_lo = detail::mod_shuffle(V0, V1, V2, V3);
+            constexpr int imm_hi = detail::mod_shuffle(V4, V5, V6, V7);
             // 0) identity?
             constexpr bool identity = detail::is_identity(mask);
             XSIMD_IF_CONSTEXPR(identity)
@@ -1853,6 +1879,7 @@ namespace xsimd
         {
             return _mm_unpacklo_pd(self, other);
         }
+
     }
 }
 

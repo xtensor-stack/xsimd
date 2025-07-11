@@ -964,7 +964,7 @@ namespace xsimd
                 constexpr auto imm = ((V0 & 1) << 0) | ((V1 & 1) << 1) | ((V2 & 1) << 2) | ((V3 & 1) << 3);
                 return _mm256_permute_pd(self, imm);
             }
-            constexpr auto imm = detail::mod_shuffle<V0, V1, V2, V3>();
+            constexpr auto imm = detail::mod_shuffle(V0, V1, V2, V3);
             // fallback to full 4-element permute
             return _mm256_permute4x64_pd(self, imm);
         }
@@ -972,7 +972,7 @@ namespace xsimd
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
         XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3>, requires_arch<avx2>) noexcept
         {
-            constexpr auto mask = detail::mod_shuffle<V0, V1, V2, V3>();
+            constexpr auto mask = detail::mod_shuffle(V0, V1, V2, V3);
             return _mm256_permute4x64_epi64(self, mask);
         }
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>

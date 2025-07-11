@@ -1058,7 +1058,7 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            constexpr auto mask = detail::shuffle<1, 0>();
+            constexpr auto mask = detail::shuffle(1, 0);
             batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
             batch<T, A> acc = max(self, step);
             __m128i low = _mm256_castsi256_si128(acc);
@@ -1069,7 +1069,7 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            constexpr auto mask = detail::shuffle<1, 0>();
+            constexpr auto mask = detail::shuffle(1, 0);
             batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
             batch<T, A> acc = min(self, step);
             __m128i low = _mm256_castsi256_si128(acc);
@@ -1214,7 +1214,7 @@ namespace xsimd
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3, ITy I4, ITy I5, ITy I6, ITy I7>
         XSIMD_INLINE batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<ITy, A, I0, I1, I2, I3, I4, I5, I6, I7> mask, requires_arch<avx>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle<I0, I1, I2, I3>();
+            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
             // shuffle within lane
             if (I4 == (I0 + 4) && I5 == (I1 + 4) && I6 == (I2 + 4) && I7 == (I3 + 4) && I0 < 4 && I1 < 4 && I2 >= 8 && I2 < 12 && I3 >= 8 && I3 < 12)
                 return _mm256_shuffle_ps(x, y, smask);
@@ -1488,7 +1488,7 @@ namespace xsimd
                 auto split = _mm256_permute2f128_ps(self, self, control);
                 if (!is_dup_identity)
                 {
-                    constexpr auto shuffle_mask = is_dup_low ? detail::mod_shuffle<V0, V1, V2, V3>() : detail::mod_shuffle<V4 - 4, V5 - 4, V6 - 4, V7 - 4>();
+                    constexpr auto shuffle_mask = is_dup_low ? detail::mod_shuffle(V0, V1, V2, V3) : detail::mod_shuffle(V4 - 4, V5 - 4, V6 - 4, V7 - 4);
                     split = _mm256_permute_ps(split, shuffle_mask);
                 }
                 return split;
