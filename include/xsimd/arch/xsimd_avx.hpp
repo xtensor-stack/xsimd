@@ -1058,7 +1058,7 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            constexpr auto mask = detail::shuffle(1, 0);
+            constexpr auto mask = detail::shuffle<1, 0>();
             batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
             batch<T, A> acc = max(self, step);
             __m128i low = _mm256_castsi256_si128(acc);
@@ -1069,7 +1069,7 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            constexpr auto mask = detail::shuffle(1, 0);
+            constexpr auto mask = detail::shuffle<1, 0>();
             batch<T, A> step = _mm256_permute2f128_si256(self, self, mask);
             batch<T, A> acc = min(self, step);
             __m128i low = _mm256_castsi256_si128(acc);
@@ -1214,7 +1214,7 @@ namespace xsimd
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3, ITy I4, ITy I5, ITy I6, ITy I7>
         XSIMD_INLINE batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<ITy, A, I0, I1, I2, I3, I4, I5, I6, I7> mask, requires_arch<avx>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
+            constexpr uint32_t smask = detail::mod_shuffle<I0, I1, I2, I3>();
             // shuffle within lane
             if (I4 == (I0 + 4) && I5 == (I1 + 4) && I6 == (I2 + 4) && I7 == (I3 + 4) && I0 < 4 && I1 < 4 && I2 >= 8 && I2 < 12 && I3 >= 8 && I3 < 12)
                 return _mm256_shuffle_ps(x, y, smask);
@@ -1417,23 +1417,19 @@ namespace xsimd
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx>) noexcept
         {
             // duplicate low and high part of input
-            __m256 hi = _mm256_castps128_ps256(_mm256_extractf128_ps(self, 1));
-            __m256 hi_hi = _mm256_insertf128_ps(self, _mm256_castps256_ps128(hi), 0);
-
-            __m256 low = _mm256_castps128_ps256(_mm256_castps256_ps128(self));
-            __m256 low_low = _mm256_insertf128_ps(self, _mm256_castps256_ps128(low), 1);
+            // Duplicate lanes separately
+            // 1) duplicate low and high lanes
+            __m256 lo = _mm256_permute2f128_ps(self, self, 0x00); // [low | low]
+            __m256 hi = _mm256_permute2f128_ps(self, self, 0x11); // [high| high]
 
             // normalize mask
             batch<uint32_t, A> half_mask = mask % 4;
 
             // permute within each lane
-            __m256 r0 = _mm256_permutevar_ps(low_low, half_mask);
-            __m256 r1 = _mm256_permutevar_ps(hi_hi, half_mask);
+            __m256 r0 = _mm256_permutevar_ps(lo, half_mask);
+            __m256 r1 = _mm256_permutevar_ps(hi, half_mask);
 
-            // mask to choose the right lane
             batch_bool<uint32_t, A> blend_mask = mask >= 4;
-
-            // blend the two permutes
             return _mm256_blendv_ps(r0, r1, batch_bool_cast<float>(blend_mask));
         }
 
@@ -1441,18 +1437,15 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch<uint64_t, A> mask, requires_arch<avx>) noexcept
         {
             // duplicate low and high part of input
-            __m256d hi = _mm256_castpd128_pd256(_mm256_extractf128_pd(self, 1));
-            __m256d hi_hi = _mm256_insertf128_pd(self, _mm256_castpd256_pd128(hi), 0);
-
-            __m256d low = _mm256_castpd128_pd256(_mm256_castpd256_pd128(self));
-            __m256d low_low = _mm256_insertf128_pd(self, _mm256_castpd256_pd128(low), 1);
+            __m256d lo = _mm256_permute2f128_pd(self, self, 0x00);
+            __m256d hi = _mm256_permute2f128_pd(self, self, 0x11);
 
             // normalize mask
             batch<uint64_t, A> half_mask = -(mask & 1);
 
             // permute within each lane
-            __m256d r0 = _mm256_permutevar_pd(low_low, half_mask);
-            __m256d r1 = _mm256_permutevar_pd(hi_hi, half_mask);
+            __m256d r0 = _mm256_permutevar_pd(lo, half_mask);
+            __m256d r1 = _mm256_permutevar_pd(hi, half_mask);
 
             // mask to choose the right lane
             batch_bool<uint64_t, A> blend_mask = mask >= 2;
@@ -1478,92 +1471,67 @@ namespace xsimd
 
         // swizzle (constant mask)
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
-        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<avx>) noexcept
+        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx>) noexcept
         {
-            // 1) identity?
-            constexpr bool is_identity = (V0 == 0 && V1 == 1 && V2 == 2 && V3 == 3 && V4 == 4 && V5 == 5 && V6 == 6 && V7 == 7);
-            // 2) duplicate-low half?
-            constexpr bool is_dup_lo = ((V0 < 4 && V1 < 4 && V2 < 4 && V3 < 4) && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3);
-            // 3) duplicate-high half?
-            constexpr bool is_dup_hi = (V0 >= 4 && V0 <= 7 && V1 >= 4 && V1 <= 7 && V2 >= 4 && V2 <= 7 && V3 >= 4 && V3 <= 7 && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3);
-
-            XSIMD_IF_CONSTEXPR(is_identity) { return self; }
-            XSIMD_IF_CONSTEXPR(is_dup_lo)
+            constexpr bool is_identity = detail::is_identity(mask);
+            constexpr bool is_dup_low = detail::is_dup_lo(mask);
+            constexpr bool is_dup_hi = detail::is_dup_hi(mask);
+            constexpr bool is_dup = is_dup_low || is_dup_hi;
+            XSIMD_IF_CONSTEXPR(is_identity)
             {
-                __m128 lo = _mm256_castps256_ps128(self);
-                // if lo is not identity, we can permute it before duplicating
-                XSIMD_IF_CONSTEXPR(V0 != 0 || V1 != 1 || V2 != 2 || V3 != 3)
-                {
-                    constexpr int imm = ((V3 & 3) << 6) | ((V2 & 3) << 4) | ((V1 & 3) << 2) | ((V0 & 3) << 0);
-                    lo = _mm_permute_ps(lo, imm);
-                }
-                return _mm256_set_m128(lo, lo);
+                return self;
             }
-            XSIMD_IF_CONSTEXPR(is_dup_hi)
+            XSIMD_IF_CONSTEXPR(is_dup)
             {
-                __m128 hi = _mm256_extractf128_ps(self, 1);
-                XSIMD_IF_CONSTEXPR(V0 != 4 || V1 != 5 || V2 != 6 || V3 != 7)
+                constexpr auto control = is_dup_low ? 0x00 : 0x11;
+                const auto is_dup_identity = is_dup_low ? detail::is_identity<uint32_t, V0, V1, V2, V3>() : detail::is_identity<int64_t, V4 - 4, V5 - 4, V6 - 4, V7 - 4>();
+                auto split = _mm256_permute2f128_ps(self, self, control);
+                if (!is_dup_identity)
                 {
-                    constexpr int imm = ((V3 & 3) << 6) | ((V2 & 3) << 4) | ((V1 & 3) << 2) | ((V0 & 3) << 0);
-                    hi = _mm_permute_ps(hi, imm);
+                    constexpr auto shuffle_mask = is_dup_low ? detail::mod_shuffle<V0, V1, V2, V3>() : detail::mod_shuffle<V4 - 4, V5 - 4, V6 - 4, V7 - 4>();
+                    split = _mm256_permute_ps(split, shuffle_mask);
                 }
-                return _mm256_set_m128(hi, hi);
+                return split;
             }
-            // duplicate low and high part of input
-            __m256 hi = _mm256_castps128_ps256(_mm256_extractf128_ps(self, 1));
-            __m256 hi_hi = _mm256_insertf128_ps(self, _mm256_castps256_ps128(hi), 0);
+            // Duplicate lanes separately
+            // 1) duplicate low and high lanes
+            __m256 low_dup = _mm256_permute2f128_ps(self, self, 0x00); // [low | low]
+            __m256 hi_dup = _mm256_permute2f128_ps(self, self, 0x11); // [high| high]
 
-            __m256 low = _mm256_castps128_ps256(_mm256_castps256_ps128(self));
-            __m256 low_low = _mm256_insertf128_ps(self, _mm256_castps256_ps128(low), 1);
+            // 2) build lane-local index vector (each element = source_index & 3)
+            constexpr batch_constant<uint32_t, A, (V0 % 4), (V1 % 4), (V2 % 4), (V3 % 4), (V4 % 4), (V5 % 4), (V6 % 4), (V7 % 4)> half_mask;
 
-            // normalize mask
-            batch_constant<uint32_t, A, (V0 % 4), (V1 % 4), (V2 % 4), (V3 % 4), (V4 % 4), (V5 % 4), (V6 % 4), (V7 % 4)> half_mask;
+            __m256 r0 = _mm256_permutevar_ps(low_dup, half_mask.as_batch()); // pick from low lane
+            __m256 r1 = _mm256_permutevar_ps(hi_dup, half_mask.as_batch()); // pick from high lane
 
-            // permute within each lane
-            __m256 r0 = _mm256_permutevar_ps(low_low, half_mask.as_batch());
-            __m256 r1 = _mm256_permutevar_ps(hi_hi, half_mask.as_batch());
+            constexpr batch_bool_constant<uint32_t, A, (V0 >= 4), (V1 >= 4), (V2 >= 4), (V3 >= 4), (V4 >= 4), (V5 >= 4), (V6 >= 4), (V7 >= 4)> lane_mask {};
 
-            // mask to choose the right lane
-            batch_bool_constant<uint32_t, A, (V0 >= 4), (V1 >= 4), (V2 >= 4), (V3 >= 4), (V4 >= 4), (V5 >= 4), (V6 >= 4), (V7 >= 4)> blend_mask;
-
-            // blend the two permutes
-            constexpr auto mask = blend_mask.mask();
-            return _mm256_blend_ps(r0, r1, mask);
+            return _mm256_blend_ps(r0, r1, lane_mask.mask());
         }
 
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
-        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3>, requires_arch<avx>) noexcept
+        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3> mask, requires_arch<avx>) noexcept
         {
-            constexpr bool is_identity = V0 == 0 && V1 == 1 && V2 == 2 && V3 == 3;
-            constexpr bool can_use_pd = V0 < 2 && V1 < 2 && V2 >= 2 && V3 >= 2; // no lane crossing
-
-            XSIMD_IF_CONSTEXPR(is_identity) { return self; }
-            XSIMD_IF_CONSTEXPR(can_use_pd)
+            // cannot use detail::mod_shuffle as the mod and shift are different in this case
+            constexpr auto imm = ((V0 & 1) << 0) | ((V1 & 1) << 1) | ((V2 & 1) << 2) | ((V3 & 1) << 3);
+            XSIMD_IF_CONSTEXPR(detail::is_identity(mask)) { return self; }
+            XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
             {
-                // build the 4-bit immediate: bit i = 1 if you pick the upper element of pair i
-                constexpr int mask = ((V0 & 1) << 0) | ((V1 & 1) << 1) | ((V2 & 1) << 2) | ((V3 & 1) << 3);
-                return _mm256_permute_pd(self, mask);
+                return _mm256_permute_pd(self, imm);
             }
             // duplicate low and high part of input
-            __m256d hi = _mm256_castpd128_pd256(_mm256_extractf128_pd(self, 1));
-            __m256d hi_hi = _mm256_insertf128_pd(self, _mm256_castpd256_pd128(hi), 0);
-
-            __m256d low = _mm256_castpd128_pd256(_mm256_castpd256_pd128(self));
-            __m256d low_low = _mm256_insertf128_pd(self, _mm256_castpd256_pd128(low), 1);
-
-            // normalize mask
-            batch_constant<uint64_t, A, (V0 % 2) * -1, (V1 % 2) * -1, (V2 % 2) * -1, (V3 % 2) * -1> half_mask;
+            __m256d lo = _mm256_permute2f128_pd(self, self, 0x00);
+            __m256d hi = _mm256_permute2f128_pd(self, self, 0x11);
 
             // permute within each lane
-            __m256d r0 = _mm256_permutevar_pd(low_low, half_mask.as_batch());
-            __m256d r1 = _mm256_permutevar_pd(hi_hi, half_mask.as_batch());
+            __m256d r0 = _mm256_permute_pd(lo, imm);
+            __m256d r1 = _mm256_permute_pd(hi, imm);
 
             // mask to choose the right lane
-            batch_bool_constant<uint64_t, A, (V0 >= 2), (V1 >= 2), (V2 >= 2), (V3 >= 2)> blend_mask;
+            constexpr batch_bool_constant<uint64_t, A, (V0 >= 2), (V1 >= 2), (V2 >= 2), (V3 >= 2)> blend_mask;
 
             // blend the two permutes
-            constexpr auto mask = blend_mask.mask();
-            return _mm256_blend_pd(r0, r1, mask);
+            return _mm256_blend_pd(r0, r1, blend_mask.mask());
         }
         template <class A,
                   typename T,

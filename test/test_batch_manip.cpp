@@ -3,6 +3,7 @@
  * Martin Renou                                                             *
  * Copyright (c) QuantStack                                                 *
  * Copyright (c) Serge Guelton                                              *
+ * Copyright (c) Marco Barbone                                              *
  *                                                                          *
  * Distributed under the terms of the BSD 3-Clause License.                 *
  *                                                                          *
@@ -26,61 +27,91 @@ namespace xsimd
         }
     }
 
-    /*  Existing patterns kept for backward compatibility  */
-
     template <class T>
     struct Reversor
     {
         static constexpr T get(T i, T n) { return n - 1 - i; }
     };
-
     template <class T>
     struct Last
     {
         static constexpr T get(T, T n) { return n - 1; }
     };
-
     template <class T>
-    struct DupReal /* 0,0,2,2,… */
+    struct DupReal
     {
         static constexpr T get(T i, T) { return (i & ~T { 1 }); }
     };
 
-    /*  New patterns requested  */
-
     template <class T>
-    struct DupImag /* 1,1,3,3,… */
+    struct DupImag
     {
         static constexpr T get(T i, T) { return (i & ~T { 1 }) + 1; }
     };
-
     template <class T>
-    struct SwapRI /* 1,0,3,2,… swap real <-> imag per complex number */
+    struct SwapRI
     {
         static constexpr T get(T i, T)
         {
             return i ^ T { 1 };
         }
     };
-
     template <class T>
-    struct Identity /* 0,1,2,3,… */
+    struct Identity
     {
         static constexpr T get(T i, T) { return i; }
     };
-
     template <class T>
-    struct DupLowPair /* 0,0,1,1,… */
+    struct DupLowPair
     {
         static constexpr T get(T i, T) { return i / 2; }
     };
-
     template <class T>
-    struct DupHighPair /* n/2,n/2,n/2+1,n/2+1,… */
+    struct DupHighPair
     {
         static constexpr T get(T i, T n) { return n / 2 + i / 2; }
     };
 
+    template <class T>
+    struct RotateRight1
+    {
+        static constexpr T get(T i, T n) { return (i + n - 1) % n; }
+    };
+    template <class T>
+    struct RotateLeft1
+    {
+        static constexpr T get(T i, T n) { return (i + 1) % n; }
+    };
+
+    template <class T>
+    struct ReversePairs
+    {
+        static constexpr T get(T i, T) { return (i & ~T { 1 }) | (1 - (i & T { 1 })); }
+    };
+    template <class T>
+    struct EvenThenOdd
+    {
+        static constexpr T get(T i, T n)
+        {
+            return (i < n / 2 ? 2 * i : 2 * (i - n / 2) + 1);
+        }
+    };
+    template <class T>
+    struct OddThenEven
+    {
+        static constexpr T get(T i, T n)
+        {
+            return (i < n / 2 ? 2 * i + 1 : 2 * (i - n / 2));
+        }
+    };
+    template <class T>
+    struct InterleavePairs
+    {
+        static constexpr T get(T i, T n)
+        {
+            return (i & 1) ? (i / 2 + n / 2) : (i / 2);
+        }
+    };
     template <class T>
     struct as_index
     {
@@ -91,105 +122,48 @@ namespace xsimd
     struct as_index<std::complex<T>> : as_index<T>
     {
     };
-
-    template <typename T, std::size_t N>
-    struct init_swizzle_base
-    {
-        using swizzle_vector_type = std::array<T, N>;
-
-        swizzle_vector_type lhs_in {},
-            exped_reverse {}, exped_fill {}, exped_dup {},
-            exped_ror {}, exped_rol {}, exped_rol2 {},
-            /* new patterns */
-            exped_dup_imag {}, exped_swap_ri {}, exped_identity {},
-            exped_dup_low {}, exped_dup_high {}, exped_generic {};
-
-        template <int... Indices>
-        std::vector<swizzle_vector_type> create_swizzle_vectors()
-        {
-            std::vector<swizzle_vector_type> vects;
-
-            /* 0) Generate input data */
-            for (std::size_t i = 0; i < N; ++i)
-            {
-                lhs_in[i] = static_cast<T>(2 * i + 1);
-            }
-            vects.push_back(lhs_in);
-
-            /* 1‑3) Original expectations */
-            for (std::size_t i = 0; i < N; ++i)
-            {
-                exped_reverse[i] = lhs_in[N - 1 - i];
-                exped_fill[i] = lhs_in[N - 1];
-                exped_dup[i] = lhs_in[(i & ~std::size_t { 1 })];
-                exped_ror[i] = lhs_in[(i + N - 1) % N];
-                exped_rol[i] = lhs_in[(i + 1) % N];
-                exped_rol2[i] = lhs_in[(i + N - 1) % N]; // rotate_left<N-1>
-            }
-
-            /*  New expectations built through generic helper  */
-            fill_pattern<DupImag>(exped_dup_imag, lhs_in);
-            fill_pattern<SwapRI>(exped_swap_ri, lhs_in);
-            fill_pattern<Identity>(exped_identity, lhs_in);
-            fill_pattern<DupLowPair>(exped_dup_low, lhs_in);
-            fill_pattern<DupHighPair>(exped_dup_high, lhs_in);
-
-            /* Push in the original order, then the new ones */
-            vects.push_back(exped_reverse); // 1
-            vects.push_back(exped_fill); // 2
-            vects.push_back(exped_dup); // 3
-            vects.push_back(exped_ror); // 4
-            vects.push_back(exped_rol); // 5
-            vects.push_back(exped_rol2); // 6
-
-            vects.push_back(exped_dup_imag); // 7
-            vects.push_back(exped_swap_ri); // 8
-            vects.push_back(exped_identity); // 9
-            vects.push_back(exped_dup_low); // 10
-            vects.push_back(exped_dup_high); // 11
-            vects.push_back(exped_generic); // 12
-
-            return vects;
-        }
-    };
-    template <class B>
-    struct insert_test
-    {
-        using batch_type = B;
-        using value_type = typename B::value_type;
-        static constexpr std::size_t size = B::size;
-
-        void insert_first()
-        {
-            value_type fill_value = 0;
-            value_type sentinel_value = 1;
-            batch_type v(fill_value);
-            batch_type w = insert(v, sentinel_value, ::xsimd::index<0>());
-            std::array<value_type, batch_type::size> data {};
-            w.store_unaligned(data.data());
-            CHECK_SCALAR_EQ(data.front(), sentinel_value);
-            for (std::size_t i = 1; i < batch_type::size; ++i)
-                CHECK_SCALAR_EQ(data[i], fill_value);
-        }
-
-        void insert_last()
-        {
-            value_type fill_value = 0;
-            value_type sentinel_value = 1;
-            batch_type v(fill_value);
-            batch_type w = insert(v, sentinel_value, ::xsimd::index<batch_type::size - 1>());
-            std::array<value_type, batch_type::size> data {};
-            w.store_unaligned(data.data());
-            for (std::size_t i = 0; i < batch_type::size - 1; ++i)
-                CHECK_SCALAR_EQ(data[i], fill_value);
-            CHECK_SCALAR_EQ(data.back(), sentinel_value);
-        }
-    };
 } // namespace xsimd
+
+//------------------------------------------------------------------------------
+// insert_test: unchanged from original
+//------------------------------------------------------------------------------
+template <class B>
+struct insert_test
+{
+    using batch_type = B;
+    using value_type = typename B::value_type;
+
+    void insert_first()
+    {
+        value_type fill_value = 0;
+        value_type sentinel_value = 1;
+        batch_type v(fill_value);
+        batch_type w = xsimd::insert(v, sentinel_value, xsimd::index<0>());
+        std::array<value_type, batch_type::size> data {};
+        w.store_unaligned(data.data());
+        CHECK_SCALAR_EQ(data.front(), sentinel_value);
+        for (std::size_t i = 1; i < batch_type::size; ++i)
+            CHECK_SCALAR_EQ(data[i], fill_value);
+    }
+
+    void insert_last()
+    {
+        value_type fill_value = 0;
+        value_type sentinel_value = 1;
+        batch_type v(fill_value);
+        batch_type w = xsimd::insert(v, sentinel_value,
+                                     xsimd::index<batch_type::size - 1>());
+        std::array<value_type, batch_type::size> data {};
+        w.store_unaligned(data.data());
+        for (std::size_t i = 0; i < batch_type::size - 1; ++i)
+            CHECK_SCALAR_EQ(data[i], fill_value);
+        CHECK_SCALAR_EQ(data.back(), sentinel_value);
+    }
+};
 
 TEST_CASE_TEMPLATE("[insert_test]", B, BATCH_TYPES)
 {
-    xsimd::insert_test<B> Test;
+    insert_test<B> Test;
     SUBCASE("insert_first") { Test.insert_first(); }
     SUBCASE("insert_last") { Test.insert_last(); }
 }
@@ -200,83 +174,87 @@ struct swizzle_test
     using batch_type = B;
     using value_type = typename B::value_type;
     using arch_type = typename B::arch_type;
-    static constexpr std::size_t size = B::size;
+    static constexpr std::size_t N = B::size;
+    using vec_t = std::array<value_type, N>;
 
-    template <template <class> class Pattern, std::size_t VectIndex>
-    void check_swizzle_pattern()
+    // Build the input [1,3,5,...,2N-1]
+    static vec_t make_lhs()
     {
-        xsimd::init_swizzle_base<value_type, size> swb;
-        auto vecs = swb.create_swizzle_vectors();
-        auto v_lhs = vecs[0];
-        auto v_exped = vecs[VectIndex];
+        vec_t v;
+        for (std::size_t i = 0; i < N; ++i)
+            v[i] = static_cast<value_type>(2 * i + 1);
+        return v;
+    }
 
-        batch_type b_lhs = batch_type::load_unaligned(v_lhs.data());
-        batch_type b_exped = batch_type::load_unaligned(v_exped.data());
+    template <template <class> class Pattern>
+    void run()
+    {
+        vec_t lhs = make_lhs();
+        vec_t expect = lhs;
+        xsimd::fill_pattern<Pattern>(expect, lhs);
+
+        auto b_lhs = batch_type::load_unaligned(lhs.data());
+        auto b_expect = batch_type::load_unaligned(expect.data());
 
         using idx_t = typename xsimd::as_index<value_type>::type;
         auto idx_batch = xsimd::make_batch_constant<idx_t, Pattern<idx_t>, arch_type>();
 
-        CHECK_BATCH_EQ(xsimd::swizzle(b_lhs, idx_batch), b_exped);
-        CHECK_BATCH_EQ(xsimd::swizzle(b_lhs, static_cast<xsimd::batch<idx_t, arch_type>>(idx_batch)), b_exped);
+        CHECK_BATCH_EQ(xsimd::swizzle(b_lhs, idx_batch), b_expect);
+        CHECK_BATCH_EQ(xsimd::swizzle(b_lhs,
+                                      static_cast<xsimd::batch<idx_t, arch_type>>(idx_batch)),
+                       b_expect);
     }
 
     void rotate_right()
     {
-        xsimd::init_swizzle_base<value_type, size> sb;
-        auto vv = sb.create_swizzle_vectors();
-        batch_type b_lhs = batch_type::load_unaligned(vv[0].data());
-        batch_type b_exped = batch_type::load_unaligned(vv[4].data());
-        CHECK_BATCH_EQ(xsimd::rotate_right<1>(b_lhs), b_exped);
+        vec_t lhs = make_lhs(), expect;
+        std::rotate_copy(lhs.begin(), lhs.end() - 1, lhs.end(), expect.begin());
+        CHECK_BATCH_EQ(xsimd::rotate_right<1>(batch_type::load_unaligned(lhs.data())),
+                       batch_type::load_unaligned(expect.data()));
     }
-
     void rotate_left()
     {
-        xsimd::init_swizzle_base<value_type, size> sb;
-        auto vv = sb.create_swizzle_vectors();
-        batch_type b_lhs = batch_type::load_unaligned(vv[0].data());
-        batch_type b_exped = batch_type::load_unaligned(vv[5].data());
-        CHECK_BATCH_EQ(xsimd::rotate_left<1>(b_lhs), b_exped);
+        vec_t lhs = make_lhs(), expect;
+        std::rotate_copy(lhs.begin(), lhs.begin() + 1, lhs.end(), expect.begin());
+        CHECK_BATCH_EQ(xsimd::rotate_left<1>(batch_type::load_unaligned(lhs.data())),
+                       batch_type::load_unaligned(expect.data()));
     }
-
     void rotate_left_inv()
     {
-        xsimd::init_swizzle_base<value_type, size> sb;
-        auto vv = sb.create_swizzle_vectors();
-        batch_type b_lhs = batch_type::load_unaligned(vv[0].data());
-        batch_type b_exped = batch_type::load_unaligned(vv[6].data());
-        CHECK_BATCH_EQ(xsimd::rotate_left<size - 1>(b_lhs), b_exped);
+        vec_t lhs = make_lhs(), expect;
+        std::rotate_copy(lhs.begin(), lhs.end() - 1, lhs.end(), expect.begin());
+        CHECK_BATCH_EQ(xsimd::rotate_left<N - 1>(batch_type::load_unaligned(lhs.data())),
+                       batch_type::load_unaligned(expect.data()));
     }
-
-    void swizzle_reverse() { check_swizzle_pattern<xsimd::Reversor, 1>(); }
-    void swizzle_fill() { check_swizzle_pattern<xsimd::Last, 2>(); }
-    void swizzle_dup() { check_swizzle_pattern<xsimd::DupReal, 3>(); }
-    void dup_imag() { check_swizzle_pattern<xsimd::DupImag, 7>(); }
-    void swap_ri() { check_swizzle_pattern<xsimd::SwapRI, 8>(); }
-    void identity() { check_swizzle_pattern<xsimd::Identity, 9>(); }
-    void dup_low_pair() { check_swizzle_pattern<xsimd::DupLowPair, 10>(); }
-    void dup_high_pair() { check_swizzle_pattern<xsimd::DupHighPair, 11>(); }
 };
+
+// Macro to instantiate one SUBCASE per pattern
+#define XSIMD_SWIZZLE_PATTERN_CASE(PAT) \
+    SUBCASE(#PAT) { swizzle_test<B>().template run<xsimd::PAT>(); }
 
 TEST_CASE_TEMPLATE("[swizzle]", B, BATCH_SWIZZLE_TYPES)
 {
-    swizzle_test<B> t;
-
-    SUBCASE("reverse") { t.swizzle_reverse(); }
-
-    SUBCASE("rotate")
-    {
-        t.rotate_left();
-        t.rotate_left_inv();
-        t.rotate_right();
-    }
-
-    SUBCASE("fill") { t.swizzle_fill(); }
-    SUBCASE("dup real") { t.swizzle_dup(); }
-    SUBCASE("dup imag") { t.dup_imag(); }
-    SUBCASE("swap R/I") { t.swap_ri(); }
-    SUBCASE("identity") { t.identity(); }
-    SUBCASE("dup low pair") { t.dup_low_pair(); }
-    SUBCASE("dup high pair") { t.dup_high_pair(); }
+    // All existing patterns:
+    XSIMD_SWIZZLE_PATTERN_CASE(Reversor);
+    XSIMD_SWIZZLE_PATTERN_CASE(Last);
+    XSIMD_SWIZZLE_PATTERN_CASE(DupReal);
+    XSIMD_SWIZZLE_PATTERN_CASE(DupImag);
+    XSIMD_SWIZZLE_PATTERN_CASE(SwapRI);
+    XSIMD_SWIZZLE_PATTERN_CASE(Identity);
+    XSIMD_SWIZZLE_PATTERN_CASE(DupLowPair);
+    XSIMD_SWIZZLE_PATTERN_CASE(DupHighPair);
+    XSIMD_SWIZZLE_PATTERN_CASE(RotateRight1);
+    XSIMD_SWIZZLE_PATTERN_CASE(RotateLeft1);
+    XSIMD_SWIZZLE_PATTERN_CASE(ReversePairs);
+    XSIMD_SWIZZLE_PATTERN_CASE(EvenThenOdd);
+    XSIMD_SWIZZLE_PATTERN_CASE(OddThenEven);
+    XSIMD_SWIZZLE_PATTERN_CASE(InterleavePairs);
+    // Rotation checks:
+    SUBCASE("rotate_left") { swizzle_test<B>().rotate_left(); }
+    SUBCASE("rotate_left_inv") { swizzle_test<B>().rotate_left_inv(); }
+    SUBCASE("rotate_right") { swizzle_test<B>().rotate_right(); }
 }
+
+#undef XSIMD_SWIZZLE_PATTERN_CASE
 
 #endif /* XSIMD_NO_SUPPORTED_ARCHITECTURE */
