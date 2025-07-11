@@ -232,12 +232,8 @@ namespace xsimd
             template <uint32_t... Values>
             XSIMD_INLINE constexpr std::uint32_t shuffle() noexcept
             {
-                return shuffle_impl<0,
-                                    sizeof...(Values),
-                                    log2_c<sizeof...(Values)>::value,
-                                    Values...>::value;
+                return shuffle_impl<0, sizeof...(Values), log2_c<sizeof...(Values)>::value, Values...>::value;
             }
-
             template <uint32_t... Values>
             XSIMD_INLINE constexpr std::uint32_t mod_shuffle() noexcept
             {

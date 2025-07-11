@@ -1282,16 +1282,13 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            constexpr auto mask0 = detail::shuffle<2, 3, 0, 0>();
-            batch<T, A> step0 = _mm_shuffle_epi32(self, mask0);
+            batch<T, A> step0 = _mm_shuffle_epi32(self, detail::shuffle<2, 3, 0, 0>());
             batch<T, A> acc0 = max(self, step0);
 
-            constexpr auto mask1 = detail::shuffle<1, 0, 0, 0>();
-            batch<T, A> step1 = _mm_shuffle_epi32(acc0, mask1);
+            batch<T, A> step1 = _mm_shuffle_epi32(acc0, detail::shuffle<1, 0, 0, 0>());
             batch<T, A> acc1 = max(acc0, step1);
 
-            constexpr auto mask2 = detail::shuffle<1, 0, 0, 0>();
-            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
+            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, detail::shuffle<1, 0, 0, 0>());
             batch<T, A> acc2 = max(acc1, step2);
             if (sizeof(T) == 2)
                 return first(acc2, A {});
@@ -1304,16 +1301,13 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            constexpr auto mask0 = detail::shuffle<2, 3, 0, 0>();
-            batch<T, A> step0 = _mm_shuffle_epi32(self, mask0);
+            batch<T, A> step0 = _mm_shuffle_epi32(self, detail::shuffle<2, 3, 0, 0>());
             batch<T, A> acc0 = min(self, step0);
 
-            constexpr auto mask1 = detail::shuffle<1, 0, 0, 0>();
-            batch<T, A> step1 = _mm_shuffle_epi32(acc0, mask1);
+            batch<T, A> step1 = _mm_shuffle_epi32(acc0, detail::shuffle<1, 0, 0, 0>());
             batch<T, A> acc1 = min(acc0, step1);
 
-            constexpr auto mask2 = detail::shuffle<1, 0, 0, 0>();
-            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
+            batch<T, A> step2 = _mm_shufflelo_epi16(acc1, detail::shuffle<1, 0, 0, 0>());
             batch<T, A> acc2 = min(acc1, step2);
             if (sizeof(T) == 2)
                 return first(acc2, A {});
