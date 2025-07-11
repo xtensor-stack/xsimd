@@ -1698,8 +1698,7 @@ namespace xsimd
                 return self;
             }
             // 1) duplicate‐low‐half?
-            constexpr bool dup_lo = detail::is_dup_lo(mask);
-            XSIMD_IF_CONSTEXPR(dup_lo)
+            XSIMD_IF_CONSTEXPR(detail::is_dup_lo(mask))
             {
                 // permute low half and broadcast
                 const auto lo = _mm_shufflelo_epi16(self, imm_lo);
@@ -1708,8 +1707,7 @@ namespace xsimd
             }
 
             // 2) duplicate‐high‐half?
-            constexpr bool dup_hi = detail::is_dup_hi(mask);
-            XSIMD_IF_CONSTEXPR(dup_hi)
+            XSIMD_IF_CONSTEXPR(detail::is_dup_hi(mask))
             {
                 // permute high half and broadcast
                 const auto hi = _mm_shufflehi_epi16(self, imm_lo);
@@ -1725,26 +1723,28 @@ namespace xsimd
                 _mm_shufflelo_epi16(self, imm_hi), // permute words 0-3 (hi pattern)
                 _mm_shufflelo_epi16(self, imm_hi));
 
-            const auto hi0_all = [&]
+            __m128i hi0_all;
+            XSIMD_IF_CONSTEXPR(!detail::is_identity<uint16_t, V0, V1, V2, V3>())
             {
-                XSIMD_IF_CONSTEXPR(detail::is_identity<uint32_t, V0, V1, V2, V3>())
-                {
-                    return _mm_unpackhi_epi64(self, self);
-                }
-                __m128i hi = _mm_shufflehi_epi16(self, imm_lo); // permute 4-7
-                return _mm_unpackhi_epi64(hi, hi); // broadcast
-            }();
+                __m128i hi = _mm_shufflehi_epi16(self, imm_lo);
+                hi0_all = _mm_unpackhi_epi64(hi, hi);
+            }
+            else
+            {
+                // if the “low-pattern” is identity in the high half, just keep it
+                hi0_all = _mm_unpackhi_epi64(self, self);
+            }
 
-            // ----- build hi1_all ---------------------------------------------------
-            const auto hi1_all = [&]
+            __m128i hi1_all;
+            XSIMD_IF_CONSTEXPR(!detail::is_identity<int32_t, V4 - 4, V5 - 4, V6 - 4, V7 - 4>())
             {
-                XSIMD_IF_CONSTEXPR(detail::is_identity<int32_t, V4 - 4, V5 - 4, V6 - 4, V7 - 4>())
-                {
-                    return _mm_unpackhi_epi64(self, self);
-                }
                 __m128i hi = _mm_shufflehi_epi16(self, imm_hi);
-                return _mm_unpackhi_epi64(hi, hi);
-            }();
+                hi1_all = _mm_unpackhi_epi64(hi, hi);
+            }
+            else
+            {
+                hi1_all = _mm_unpackhi_epi64(self, self);
+            }
 
             // merge halves
             const auto low_all = _mm_unpacklo_epi64(lo0_all, lo1_all);
