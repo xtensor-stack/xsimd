@@ -531,6 +531,42 @@ namespace xsimd
                     static_cast<int32_t>(wasm_f32x4_extract_lane(self, 3)));
             }
         }
+        // first
+        template <class A>
+        XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f32x4_extract_lane(self, 0);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return wasm_i8x16_extract_lane(self, 0);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return wasm_i16x8_extract_lane(self, 0);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return wasm_i32x4_extract_lane(self, 0);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return wasm_i64x2_extract_lane(self, 0);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+        template <class A>
+        XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            return wasm_f64x2_extract_lane(self, 0);
+        }
 
         // floor
         template <class A>

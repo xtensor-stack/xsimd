@@ -230,6 +230,13 @@ namespace xsimd
             return r;
         }
 
+        // first
+        template <class A, class T, size_t N = 8 * sizeof(T) * batch<T, A>::size>
+        T XSIMD_INLINE first(batch<T, A> const& self, requires_arch<emulated<N>>) noexcept
+        {
+            return self.data[0];
+        }
+
 #if 0
         // count
         template <class A, class T, size_t N = 8 * sizeof(T) * batch<T, A>::size>
