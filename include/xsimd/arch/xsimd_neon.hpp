@@ -1055,7 +1055,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return batch_bool<T, A> { vshrq_n_s64(vqsubq_s64(register_type(lhs), register_type(rhs)), 63) };
+            return batch_bool<T, A>(vreinterpretq_u64_s64(vshrq_n_s64(vqsubq_s64(register_type(lhs), register_type(rhs)), 63)));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
@@ -1331,7 +1331,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return { std::min(lhs.get(0), rhs.get(0)), std::min(lhs.get(1), rhs.get(1)) };
+            return select(lhs > rhs, rhs, lhs);
         }
 
         /*******
@@ -1355,7 +1355,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return { std::max(lhs.get(0), rhs.get(0)), std::max(lhs.get(1), rhs.get(1)) };
+            return select(lhs > rhs, lhs, rhs);
         }
 
         /*******
