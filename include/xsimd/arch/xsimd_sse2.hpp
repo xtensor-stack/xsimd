@@ -33,28 +33,6 @@ namespace xsimd
     {
         using namespace types;
 
-        namespace detail
-        {
-            constexpr uint32_t shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
-            {
-                return (z << 6) | (y << 4) | (x << 2) | w;
-            }
-            constexpr uint32_t shuffle(uint32_t x, uint32_t y)
-            {
-                return (y << 1) | x;
-            }
-
-            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x, uint32_t y, uint32_t z)
-            {
-                return shuffle(w % 4, x % 4, y % 4, z % 4);
-            }
-
-            constexpr uint32_t mod_shuffle(uint32_t w, uint32_t x)
-            {
-                return shuffle(w % 2, x % 2);
-            }
-        }
-
         // fwd
         template <class A, class T, size_t I>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<common>) noexcept;
@@ -1304,15 +1282,15 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            constexpr auto mask0 = detail::shuffle(2, 3, 0, 0);
+            constexpr auto mask0 = detail::shuffle<2, 3, 0, 0>();
             batch<T, A> step0 = _mm_shuffle_epi32(self, mask0);
             batch<T, A> acc0 = max(self, step0);
 
-            constexpr auto mask1 = detail::shuffle(1, 0, 0, 0);
+            constexpr auto mask1 = detail::shuffle<1, 0, 0, 0>();
             batch<T, A> step1 = _mm_shuffle_epi32(acc0, mask1);
             batch<T, A> acc1 = max(acc0, step1);
 
-            constexpr auto mask2 = detail::shuffle(1, 0, 0, 0);
+            constexpr auto mask2 = detail::shuffle<1, 0, 0, 0>();
             batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
             batch<T, A> acc2 = max(acc1, step2);
             if (sizeof(T) == 2)
@@ -1326,15 +1304,15 @@ namespace xsimd
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
-            constexpr auto mask0 = detail::shuffle(2, 3, 0, 0);
+            constexpr auto mask0 = detail::shuffle<2, 3, 0, 0>();
             batch<T, A> step0 = _mm_shuffle_epi32(self, mask0);
             batch<T, A> acc0 = min(self, step0);
 
-            constexpr auto mask1 = detail::shuffle(1, 0, 0, 0);
+            constexpr auto mask1 = detail::shuffle<1, 0, 0, 0>();
             batch<T, A> step1 = _mm_shuffle_epi32(acc0, mask1);
             batch<T, A> acc1 = min(acc0, step1);
 
-            constexpr auto mask2 = detail::shuffle(1, 0, 0, 0);
+            constexpr auto mask2 = detail::shuffle<1, 0, 0, 0>();
             batch<T, A> step2 = _mm_shufflelo_epi16(acc1, mask2);
             batch<T, A> acc2 = min(acc1, step2);
             if (sizeof(T) == 2)
@@ -1383,7 +1361,7 @@ namespace xsimd
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
         XSIMD_INLINE batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<ITy, A, I0, I1, I2, I3> mask, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
+            constexpr uint32_t smask = detail::mod_shuffle<I0, I1, I2, I3>();
             // shuffle within lane
             if (I0 < 4 && I1 < 4 && I2 >= 4 && I3 >= 4)
                 return _mm_shuffle_ps(x, y, smask);
@@ -1397,7 +1375,7 @@ namespace xsimd
         template <class A, class ITy, ITy I0, ITy I1>
         XSIMD_INLINE batch<double, A> shuffle(batch<double, A> const& x, batch<double, A> const& y, batch_constant<ITy, A, I0, I1> mask, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle(I0, I1);
+            constexpr uint32_t smask = detail::mod_shuffle<I0, I1>();
             // shuffle within lane
             if (I0 < 2 && I1 >= 2)
                 return _mm_shuffle_pd(x, y, smask);
@@ -1650,21 +1628,21 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(V0, V1, V2, V3);
+            constexpr uint32_t index = detail::shuffle<V0, V1, V2, V3>();
             return _mm_shuffle_ps(self, self, index);
         }
 
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(V0, V1);
+            constexpr uint32_t index = detail::shuffle<V0, V1>();
             return _mm_shuffle_pd(self, self, index);
         }
 
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch_constant<uint64_t, A, V0, V1>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(2 * V0, 2 * V0 + 1, 2 * V1, 2 * V1 + 1);
+            constexpr uint32_t index = detail::shuffle<2 * V0, 2 * V0 + 1, 2 * V1, 2 * V1 + 1>();
             return _mm_shuffle_epi32(self, index);
         }
 
@@ -1677,7 +1655,7 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<sse2>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(V0, V1, V2, V3);
+            constexpr uint32_t index = detail::shuffle<V0, V1, V2, V3>();
             return _mm_shuffle_epi32(self, index);
         }
 
@@ -1688,79 +1666,76 @@ namespace xsimd
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
-        XSIMD_INLINE batch<int16_t, A> swizzle(batch<int16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<sse2>) noexcept
+        XSIMD_INLINE batch<int16_t, A>
+        swizzle(batch<int16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<sse2>) noexcept
         {
+            constexpr int imm_lo = detail::mod_shuffle<V0, V1, V2, V3>();
+            constexpr int imm_hi = detail::mod_shuffle<V4, V5, V6, V7>();
             // 0) identity?
-            constexpr bool is_identity = (V0 == 0 && V1 == 1 && V2 == 2 && V3 == 3 && V4 == 4 && V5 == 5 && V6 == 6 && V7 == 7);
-            XSIMD_IF_CONSTEXPR(is_identity)
+            constexpr bool identity = detail::is_identity(mask);
+            XSIMD_IF_CONSTEXPR(identity)
             {
                 return self;
             }
-            // 1) duplicate‐low‐half? (lanes 0–3 from low half, and 4–7 the same)
-            constexpr bool is_dup_lo = (V0 < 4 && V1 < 4 && V2 < 4 && V3 < 4) && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3;
-            XSIMD_IF_CONSTEXPR(is_dup_lo)
+            // 1) duplicate‐low‐half?
+            constexpr bool dup_lo = detail::is_dup_lo(mask);
+            XSIMD_IF_CONSTEXPR(dup_lo)
             {
-                // permute the low half
-                constexpr int imm = detail::mod_shuffle(V0, V1, V2, V3);
-                const auto lo = _mm_shufflelo_epi16(self, imm);
-                // broadcast that 64-bit low half into both halves
+                // permute low half and broadcast
+                const auto lo = _mm_shufflelo_epi16(self, imm_lo);
                 const auto lo_all = _mm_unpacklo_epi64(lo, lo);
-                return lo_all;
+                return batch<int16_t, A>(lo_all);
             }
-            // 2) duplicate‐high‐half? (lanes 0–3 from high half, 4–7 the same)
-            constexpr bool is_dup_hi = (V0 >= 4 && V0 < 8 && V1 >= 4 && V1 < 8 && V2 >= 4 && V2 < 8 && V3 >= 4 && V3 < 8) && V4 == V0 && V5 == V1 && V6 == V2 && V7 == V3;
-            XSIMD_IF_CONSTEXPR(is_dup_hi)
-            {
-                // permute the high half (indices %4)
-                constexpr int imm = detail::mod_shuffle(V0 - 4, V1 - 4, V2 - 4, V3 - 4);
-                const auto hi = _mm_shufflehi_epi16(self, imm);
-                // broadcast that 64-bit high half into both halves
-                const auto hi_all = _mm_unpackhi_epi64(hi, hi);
-                return hi_all;
-            }
-            // 1) Shuffle the low 64-bit half for lanes 0–3 and 4–7:
-            constexpr int imm_lo0 = detail::mod_shuffle(V0, V1, V2, V3);
-            constexpr int imm_lo1 = detail::mod_shuffle(V4, V5, V6, V7);
-            const auto lo0 = _mm_shufflelo_epi16(self, imm_lo0);
-            const auto lo1 = _mm_shufflelo_epi16(self, imm_lo1);
-            // Broadcast each low-half permutation across both 64-bit halves:
-            const auto lo0_all = _mm_unpacklo_epi64(lo0, lo0);
-            const auto lo1_all = _mm_unpacklo_epi64(lo1, lo1);
-            // 2) Shuffle the high 64-bit half for lanes 0–3 and 4–7:
 
-            // Broadcast each high-half permutation across both 64-bit halves:
-            // hi0_all: only instantiated if any of V0..V3 >= 4
+            // 2) duplicate‐high‐half?
+            constexpr bool dup_hi = detail::is_dup_hi(mask);
+            XSIMD_IF_CONSTEXPR(dup_hi)
+            {
+                // permute high half and broadcast
+                const auto hi = _mm_shufflehi_epi16(self, imm_lo);
+                const auto hi_all = _mm_unpackhi_epi64(hi, hi);
+                return batch<int16_t, A>(hi_all);
+            }
+
+            __m128i lo0_all = _mm_unpacklo_epi64(
+                _mm_shufflelo_epi16(self, imm_lo), // permute words 0-3
+                _mm_shufflelo_epi16(self, imm_lo)); // broadcast
+
+            __m128i lo1_all = _mm_unpacklo_epi64(
+                _mm_shufflelo_epi16(self, imm_hi), // permute words 0-3 (hi pattern)
+                _mm_shufflelo_epi16(self, imm_hi));
+
             const auto hi0_all = [&]
             {
-                XSIMD_IF_CONSTEXPR(!(V0 < 4 && V1 < 4 && V2 < 4 && V3 < 4))
+                XSIMD_IF_CONSTEXPR(detail::is_identity<uint32_t, V0, V1, V2, V3>())
                 {
-                    constexpr int imm_hi0 = detail::mod_shuffle(V0 - 4, V1 - 4, V2 - 4, V3 - 4);
-                    __m128i hi0 = _mm_shufflehi_epi16(self, imm_hi0);
-                    return _mm_unpackhi_epi64(hi0, hi0);
+                    return _mm_unpackhi_epi64(self, self);
                 }
-                // not used whenever all V0..V3<4
-                return _mm_setzero_si128();
+                __m128i hi = _mm_shufflehi_epi16(self, imm_lo); // permute 4-7
+                return _mm_unpackhi_epi64(hi, hi); // broadcast
             }();
 
-            // hi1_all: only instantiated if any of V4..V7 >= 4
+            // ----- build hi1_all ---------------------------------------------------
             const auto hi1_all = [&]
             {
-                XSIMD_IF_CONSTEXPR(!(V4 < 4 && V5 < 4 && V6 < 4 && V7 < 4))
+                XSIMD_IF_CONSTEXPR(detail::is_identity<int32_t, V4 - 4, V5 - 4, V6 - 4, V7 - 4>())
                 {
-                    constexpr int imm_hi1 = detail::mod_shuffle(V4 - 4, V5 - 4, V6 - 4, V7 - 4);
-                    __m128i hi1 = _mm_shufflehi_epi16(self, imm_hi1);
-                    return _mm_unpackhi_epi64(hi1, hi1);
+                    return _mm_unpackhi_epi64(self, self);
                 }
-                return _mm_setzero_si128();
+                __m128i hi = _mm_shufflehi_epi16(self, imm_hi);
+                return _mm_unpackhi_epi64(hi, hi);
             }();
-            // 3) Merge the two “low” broadcasts into one vector (lanes 0–3 ← lo0_all, lanes 4–7 ← lo1_all)
-            const auto low_all = _mm_unpacklo_epi64(lo0_all, lo1_all); // { lo0, lo1 }
-            // Likewise merge the two “high” broadcasts:
-            const auto high_all = _mm_unpacklo_epi64(hi0_all, hi1_all); // { hi0, hi1 }
-            // 4) Finally, pick per-lane: if Vn<4 → take from low_all, else from high_all
+
+            // merge halves
+            const auto low_all = _mm_unpacklo_epi64(lo0_all, lo1_all);
+            const auto high_all = _mm_unpacklo_epi64(hi0_all, hi1_all);
+
+            // 3) select per lane from low_all vs high_all
             constexpr batch_bool_constant<int16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> lane_mask {};
+
             return select(lane_mask, batch<int16_t, A>(low_all), batch<int16_t, A>(high_all));
         }
+
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
         XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<sse2>) noexcept
         {
