@@ -902,13 +902,11 @@ namespace xsimd
         }
 
         // swizzle (dynamic mask)
-
         template <class A>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
-            return _mm256_permutevar8x32_ps(self, mask);
+            return swizzle(self, mask, avx {});
         }
-
         template <class A>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch<uint64_t, A> mask, requires_arch<avx2>) noexcept
         {
@@ -930,7 +928,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
-            return _mm256_permutevar8x32_epi32(self, mask);
+            return swizzle(self, mask, avx {});
         }
         template <class A>
         XSIMD_INLINE batch<int32_t, A> swizzle(batch<int32_t, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
@@ -942,20 +940,33 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx2>) noexcept
         {
-            return _mm256_permutevar8x32_ps(self, mask.as_batch());
+            XSIMD_IF_CONSTEXPR(detail::is_all_different(mask) && !detail::is_identity(mask))
+            {
+                // The intrinsic does NOT allow to copy the same element of the source vector to more than one element of the destination vector.
+                // one-shot 8-lane permute
+                return _mm256_permutevar8x32_ps(self, mask.as_batch());
+            }
+            return swizzle(self, mask, avx {});
         }
 
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
-        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3>, requires_arch<avx2>) noexcept
+        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3> mask, requires_arch<avx2>) noexcept
         {
-            constexpr auto mask = detail::shuffle(V0, V1, V2, V3);
-            return _mm256_permute4x64_pd(self, mask);
+            XSIMD_IF_CONSTEXPR(detail::is_identity(mask)) { return self; }
+            XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
+            {
+                constexpr auto imm = ((V0 & 1) << 0) | ((V1 & 1) << 1) | ((V2 & 1) << 2) | ((V3 & 1) << 3);
+                return _mm256_permute_pd(self, imm);
+            }
+            constexpr auto imm = detail::mod_shuffle(V0, V1, V2, V3);
+            // fallback to full 4-element permute
+            return _mm256_permute4x64_pd(self, imm);
         }
 
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
         XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3>, requires_arch<avx2>) noexcept
         {
-            constexpr auto mask = detail::shuffle(V0, V1, V2, V3);
+            constexpr auto mask = detail::mod_shuffle(V0, V1, V2, V3);
             return _mm256_permute4x64_epi64(self, mask);
         }
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
