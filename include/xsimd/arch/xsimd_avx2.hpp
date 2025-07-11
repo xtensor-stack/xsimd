@@ -902,15 +902,11 @@ namespace xsimd
         }
 
         // swizzle (dynamic mask)
-
         template <class A>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
             return swizzle(self, mask, avx {});
-            // this does not allow duplicates in the output
-            // return _mm256_permutevar8x32_ps(self, mask);
         }
-
         template <class A>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch<uint64_t, A> mask, requires_arch<avx2>) noexcept
         {
@@ -932,8 +928,6 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
-            // this does not allow duplicates in the output
-            // return _mm256_permutevar8x32_epi32(self, mask);
             return swizzle(self, mask, avx {});
         }
         template <class A>

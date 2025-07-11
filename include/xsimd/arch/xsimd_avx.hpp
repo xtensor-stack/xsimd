@@ -1484,9 +1484,9 @@ namespace xsimd
             XSIMD_IF_CONSTEXPR(is_dup)
             {
                 constexpr auto control = is_dup_low ? 0x00 : 0x11;
-                const auto is_dup_identity = is_dup_low ? detail::is_identity<uint32_t, V0, V1, V2, V3>() : detail::is_identity<int64_t, V4 - 4, V5 - 4, V6 - 4, V7 - 4>();
+                constexpr auto is_dup_identity = is_dup_low ? detail::is_identity<uint32_t, V0, V1, V2, V3>() : detail::is_identity<int64_t, V4 - 4, V5 - 4, V6 - 4, V7 - 4>();
                 auto split = _mm256_permute2f128_ps(self, self, control);
-                if (!is_dup_identity)
+                XSIMD_IF_CONSTEXPR(!is_dup_identity)
                 {
                     constexpr auto shuffle_mask = is_dup_low ? detail::mod_shuffle(V0, V1, V2, V3) : detail::mod_shuffle(V4 - 4, V5 - 4, V6 - 4, V7 - 4);
                     split = _mm256_permute_ps(split, shuffle_mask);
