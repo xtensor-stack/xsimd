@@ -906,21 +906,9 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
-            constexpr std::size_t N = batch<uint32_t, A>::size;
-            alignas(avx2::alignment()) std::array<uint32_t, N> tmp {};
-            mask.store_aligned(tmp.data());
-            for (std::size_t i = 0; i < N; ++i)
-            {
-                for (std::size_t j = i + 1; j < N; ++j)
-                {
-                    if (tmp[i] == tmp[j])
-                    {
-                        return swizzle(self, mask, avx {});
-                    }
-                }
-            }
+            return swizzle(self, mask, avx {});
             // this does not allow duplicates in the output
-            return _mm256_permutevar8x32_ps(self, mask);
+            // return _mm256_permutevar8x32_ps(self, mask);
         }
 
         template <class A>
@@ -944,21 +932,9 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
-            constexpr std::size_t N = batch<uint32_t, A>::size;
-            alignas(avx2::alignment()) std::array<uint32_t, N> tmp {};
-            mask.store_aligned(tmp.data());
-            for (std::size_t i = 0; i < N; ++i)
-            {
-                for (std::size_t j = i + 1; j < N; ++j)
-                {
-                    if (tmp[i] == tmp[j])
-                    {
-                        return swizzle(self, mask, avx {});
-                    }
-                }
-            }
             // this does not allow duplicates in the output
-            return _mm256_permutevar8x32_epi32(self, mask);
+            // return _mm256_permutevar8x32_epi32(self, mask);
+            return swizzle(self, mask, avx {});
         }
         template <class A>
         XSIMD_INLINE batch<int32_t, A> swizzle(batch<int32_t, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
