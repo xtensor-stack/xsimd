@@ -204,41 +204,6 @@ namespace xsimd
             static_assert(no_duplicates_v<0, 1, 2, 3, 4, 5, 6, 7>(), "N=8: [0..7] → distinct");
             static_assert(!no_duplicates_v<0, 1, 2, 3, 4, 5, 6, 0>(), "N=8: last repeats 0");
 
-            // ────────────────────────────────────────────────────────────────────────
-            // ────── log2 for powers of 2 ──────
-            template <std::size_t N>
-            struct log2_c
-            {
-                static_assert(N > 0 && (N & (N - 1)) == 0, "N must be power of 2");
-                static constexpr std::size_t value = 1 + log2_c<N / 2>::value;
-            };
-            template <>
-            struct log2_c<1>
-            {
-                static constexpr std::size_t value = 0;
-            };
-
-            // ────── Recursive encoder ──────
-            template <std::size_t I, std::size_t N, std::size_t SHIFT, uint32_t... Values>
-            struct shuffle_impl
-            {
-                static constexpr uint32_t value = (get_nth_value<I, Values...>::value << (I * SHIFT)) | shuffle_impl<I + 1, N, SHIFT, Values...>::value;
-            };
-            template <std::size_t N, std::size_t SHIFT, uint32_t... Values>
-            struct shuffle_impl<N, N, SHIFT, Values...>
-            {
-                static constexpr uint32_t value = 0;
-            };
-            template <uint32_t... Values>
-            XSIMD_INLINE constexpr std::uint32_t shuffle() noexcept
-            {
-                return shuffle_impl<0, sizeof...(Values), log2_c<sizeof...(Values)>::value, Values...>::value;
-            }
-            template <uint32_t... Values>
-            XSIMD_INLINE constexpr std::uint32_t mod_shuffle() noexcept
-            {
-                return shuffle<(Values % sizeof...(Values))...>();
-            }
         } // namespace detail
     } // namespace kernel
 } // namespace xsimd
