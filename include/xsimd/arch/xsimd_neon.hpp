@@ -1006,7 +1006,6 @@ namespace xsimd
             return batch_bool<T, A>(vreinterpretq_u64_s64(vshrq_n_s64(vreinterpretq_s64_u64(vqaddq_u64(vqsubq_u64(register_type(rhs), register_type(lhs)), acc)), 63)));
         }
 
-
         /******
          * le *
          ******/
@@ -1030,7 +1029,6 @@ namespace xsimd
         {
             return !(lhs > rhs);
         }
-
 
         /******
          * gt *
