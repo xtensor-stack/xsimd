@@ -477,6 +477,11 @@ struct batch_test
             auto res = batch_lhs() < batch_rhs();
             INFO("batch < batch");
             CHECK_BATCH_EQ(res, expected);
+
+            std::fill(expected.begin(), expected.end(), false);
+            res = batch_lhs() < batch_lhs();
+            INFO("batch < (self)");
+            CHECK_BATCH_EQ(res, expected);
         }
         // batch < scalar
         {
@@ -501,6 +506,11 @@ struct batch_test
                            { return l <= r; });
             auto res = batch_lhs() <= batch_rhs();
             INFO("batch <= batch");
+            CHECK_BATCH_EQ(res, expected);
+
+            std::fill(expected.begin(), expected.end(), true);
+            res = batch_lhs() <= batch_lhs();
+            INFO("batch < (self)");
             CHECK_BATCH_EQ(res, expected);
         }
         // batch <= scalar
@@ -527,6 +537,11 @@ struct batch_test
             auto res = batch_lhs() > batch_rhs();
             INFO("batch > batch");
             CHECK_BATCH_EQ(res, expected);
+
+            std::fill(expected.begin(), expected.end(), false);
+            res = batch_lhs() > batch_lhs();
+            INFO("batch > (self)");
+            CHECK_BATCH_EQ(res, expected);
         }
         // batch > scalar
         {
@@ -550,6 +565,11 @@ struct batch_test
                            { return l >= r; });
             auto res = batch_lhs() >= batch_rhs();
             INFO("batch >= batch");
+            CHECK_BATCH_EQ(res, expected);
+
+            std::fill(expected.begin(), expected.end(), true);
+            res = batch_lhs() >= batch_lhs();
+            INFO("batch >= (self)");
             CHECK_BATCH_EQ(res, expected);
         }
         // batch >= scalar
