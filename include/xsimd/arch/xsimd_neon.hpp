@@ -1054,9 +1054,9 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if 0
+#if 1
             using register_type = typename batch<T, A>::register_type;
-            return batch_bool<T, A>(vreinterpretq_u64_s64(vshrq_n_s64(vqsubq_s64(register_type(lhs), register_type(rhs)), 63)));
+            return batch_bool<T, A>(vreinterpretq_u64_s64(vshrq_n_s64(vqsubq_s64(register_type(rhs), register_type(lhs)), 63)));
 #else
             return batch_bool<T, A>({ lhs.get(0) > rhs.get(0), lhs.get(1) > rhs.get(1) });
 #endif
