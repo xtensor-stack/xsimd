@@ -991,11 +991,21 @@ namespace xsimd
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
 
-        template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch_bool<T, A>({ lhs.get(0) < rhs.get(0), lhs.get(1) < rhs.get(1) });
+            using register_type = typename batch<T, A>::register_type;
+            return batch_bool<T, A>(vreinterpretq_u64_s64(vshrq_n_s64(vqsubq_s64(register_type(lhs), register_type(rhs)), 63)));
         }
+
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            using register_type = typename batch<T, A>::register_type;
+            register_type acc = { 0x7FFFFFFFFFFFFFFFull, 0x7FFFFFFFFFFFFFFFull };
+            return batch_bool<T, A>(vreinterpretq_u64_s64(vshrq_n_s64(vreinterpretq_s64_u64(vqaddq_u64(vqsubq_u64(register_type(rhs), register_type(lhs)), acc)), 63)));
+        }
+
 
         /******
          * le *
@@ -1018,8 +1028,9 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch_bool<T, A>({ lhs.get(0) <= rhs.get(0), lhs.get(1) <= rhs.get(1) });
+            return !(lhs > rhs);
         }
+
 
         /******
          * gt *
@@ -1061,13 +1072,9 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if 1
             using register_type = typename batch<T, A>::register_type;
             register_type acc = { 0x7FFFFFFFFFFFFFFFull, 0x7FFFFFFFFFFFFFFFull };
             return batch_bool<T, A>(vreinterpretq_u64_s64(vshrq_n_s64(vreinterpretq_s64_u64(vqaddq_u64(vqsubq_u64(register_type(lhs), register_type(rhs)), acc)), 63)));
-#else
-            return batch_bool<T, A>({ lhs.get(0) > rhs.get(0), lhs.get(1) > rhs.get(1) });
-#endif
         }
 
         /******
@@ -1091,7 +1098,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
         XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            return batch_bool<T, A>({ lhs.get(0) >= rhs.get(0), lhs.get(1) >= rhs.get(1) });
+            return !(lhs < rhs);
         }
 
         /*******************
