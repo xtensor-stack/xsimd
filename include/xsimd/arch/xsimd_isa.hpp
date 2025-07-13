@@ -132,6 +132,10 @@
 #include "./xsimd_wasm.hpp"
 #endif
 
+#if XSIMD_WITH_ALTIVEC
+#include "./xsimd_altivec.hpp"
+#endif
+
 // Must come last to have access to all conversion specializations.
 #include "./xsimd_common.hpp"
 
