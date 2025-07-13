@@ -3,6 +3,7 @@
  * Martin Renou                                                             *
  * Copyright (c) QuantStack                                                 *
  * Copyright (c) Serge Guelton                                              *
+ * Copyright (c) Marco Barbone                                              *
  *                                                                          *
  * Distributed under the terms of the BSD 3-Clause License.                 *
  *                                                                          *
