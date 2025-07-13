@@ -414,23 +414,23 @@ namespace xsimd
             return vec_cmpgt(self, other);
         }
 
-#if 0
-
         // haddp
         template <class A>
         XSIMD_INLINE batch<float, A> haddp(batch<float, A> const* row, requires_arch<altivec>) noexcept
         {
-            __m128 tmp0 = _mm_unpacklo_ps(row[0], row[1]);
-            __m128 tmp1 = _mm_unpackhi_ps(row[0], row[1]);
-            __m128 tmp2 = _mm_unpackhi_ps(row[2], row[3]);
-            tmp0 = _mm_add_ps(tmp0, tmp1);
-            tmp1 = _mm_unpacklo_ps(row[2], row[3]);
-            tmp1 = _mm_add_ps(tmp1, tmp2);
-            tmp2 = _mm_movehl_ps(tmp1, tmp0);
-            tmp0 = _mm_movelh_ps(tmp0, tmp1);
-            return _mm_add_ps(tmp0, tmp2);
+            auto tmp0 = vec_mergee(row[0], row[1]); // v00 v10 v02 v12
+            auto tmp1 = vec_mergeo(row[0], row[1]); // v01 v11 v03 v13
+            auto tmp4 = vec_add(tmp0, tmp1); // (v00 + v01, v10 + v11, v02 + v03, v12 + v13)
+
+            auto tmp2 = vec_mergee(row[2], row[3]); // v20 v30 v22 v32
+            auto tmp3 = vec_mergeo(row[2], row[3]); // v21 v31 v23 v33
+            auto tmp5 = vec_add(tmp0, tmp1); // (v20 + v21, v30 + v31, v22 + v23, v32 + v33)
+
+            auto tmp6 = vec_permi(tmp4, tmp5, 0x0); // (v00 + v01, v10 + v11, v20 + v21, v30 + v31
+            auto tmp7 = vec_permi(tmp4, tmp5, 0x3); // (v02 + v03, v12 + v13, v12 + v13, v32 + v33)
+
+            return vec_add(tmp6, tmp7);
         }
-#endif
 
         // incr_if
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
