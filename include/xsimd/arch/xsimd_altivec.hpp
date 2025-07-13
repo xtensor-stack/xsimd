@@ -1216,64 +1216,14 @@ namespace xsimd
         {
             return vec_adds(self, other);
         }
-#if 0
 
         // set
-        template <class A, class... Values>
-        XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<altivec>, Values... values) noexcept
+        template <class A, class T, class... Values>
+        XSIMD_INLINE batch<float, A> set(batch<T, A> const&, requires_arch<altivec>, Values... values) noexcept
         {
-            static_assert(sizeof...(Values) == batch<float, A>::size, "consistent init");
-            return _mm_setr_ps(values...);
+            static_assert(sizeof...(Values) == batch<T, A>::size, "consistent init");
+            return typename batch<T, A>::register_type { values... };
         }
-
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<altivec>, T v0, T v1) noexcept
-        {
-            return _mm_set_epi64x(v1, v0);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<altivec>, T v0, T v1, T v2, T v3) noexcept
-        {
-            return _mm_setr_epi32(v0, v1, v2, v3);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<altivec>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7) noexcept
-        {
-            return _mm_setr_epi16(v0, v1, v2, v3, v4, v5, v6, v7);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<altivec>, T v0, T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10, T v11, T v12, T v13, T v14, T v15) noexcept
-        {
-            return _mm_setr_epi8(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
-        }
-
-        template <class A, class... Values>
-        XSIMD_INLINE batch<double, A> set(batch<double, A> const&, requires_arch<altivec>, Values... values) noexcept
-        {
-            static_assert(sizeof...(Values) == batch<double, A>::size, "consistent init");
-            return _mm_setr_pd(values...);
-        }
-
-        template <class A, class T, class... Values, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<altivec>, Values... values) noexcept
-        {
-            return set(batch<T, A>(), A {}, static_cast<T>(values ? -1LL : 0LL)...).data;
-        }
-
-        template <class A, class... Values>
-        XSIMD_INLINE batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<altivec>, Values... values) noexcept
-        {
-            static_assert(sizeof...(Values) == batch_bool<float, A>::size, "consistent init");
-            return _mm_castsi128_ps(set(batch<int32_t, A>(), A {}, static_cast<int32_t>(values ? -1LL : 0LL)...).data);
-        }
-
-        template <class A, class... Values>
-        XSIMD_INLINE batch_bool<double, A> set(batch_bool<double, A> const&, requires_arch<altivec>, Values... values) noexcept
-        {
-            static_assert(sizeof...(Values) == batch_bool<double, A>::size, "consistent init");
-            return _mm_castsi128_pd(set(batch<int64_t, A>(), A {}, static_cast<int64_t>(values ? -1LL : 0LL)...).data);
-        }
-#endif
 
         // ssub
 
