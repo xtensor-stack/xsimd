@@ -13,6 +13,7 @@ jobs:
           - { platform: 'arm',     arch: 'armv7-a', dir: 'arm-linux-gnueabihf', flags: '-mfpu=neon', full: 'ON'}
           - { platform: 'arm',     arch: 'armv7-a', dir: 'arm-linux-gnueabihf', flags: '-mfpu=vfpv3-d16', full: 'OFF' } # no neon
           - { platform: 'aarch64', arch: 'armv8-a', dir: 'aarch64-linux-gnu', flags: '', full: 'ON' }
+          - { platform: 'ppc', arch: 'powerpc', dir: 'powerpc-linux-gnu', flags: '-maltivec', full: 'OFF' }
         sys:
           - { compiler: 'gcc',   version: '10' }
     steps:
