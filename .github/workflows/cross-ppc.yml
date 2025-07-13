@@ -36,7 +36,7 @@ jobs:
         mkdir _build
         cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="${{ matrix.target.flags }}" -DCMAKE_CXX_FLAGS="${{ matrix.target.flags }}" -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
     - name: Build
-      run: cmake --build _build --verbose
+      run: cmake --build _build --verbose -j1
     - name: Testing xsimd
       run: |
         qemu-${{ matrix.target.platform }} -cpu 7400 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
