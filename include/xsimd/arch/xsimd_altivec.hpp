@@ -81,42 +81,21 @@ namespace xsimd
             return vec_add(self, other);
         }
 
-#if 0
-
         // all
-        template <class A>
-        XSIMD_INLINE bool all(batch_bool<float, A> const& self, requires_arch<altivec>) noexcept
-        {
-            return _mm_movemask_ps(self) == 0x0F;
-        }
-        template <class A>
-        XSIMD_INLINE bool all(batch_bool<double, A> const& self, requires_arch<altivec>) noexcept
-        {
-            return _mm_movemask_pd(self) == 0x03;
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE bool all(batch_bool<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            return _mm_movemask_epi8(self) == 0xFFFF;
+            return vec_all_ne(self, vec_xor(self, self));
         }
 
         // any
-        template <class A>
-        XSIMD_INLINE bool any(batch_bool<float, A> const& self, requires_arch<altivec>) noexcept
-        {
-            return _mm_movemask_ps(self) != 0;
-        }
-        template <class A>
-        XSIMD_INLINE bool any(batch_bool<double, A> const& self, requires_arch<altivec>) noexcept
-        {
-            return _mm_movemask_pd(self) != 0;
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE bool any(batch_bool<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            return _mm_movemask_epi8(self) != 0;
+            return vec_any_ne(self, vec_xor(self, self));
         }
 
+#if 0
         // avgr
         template <class A, class T, class = typename std::enable_if<std::is_unsigned<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
@@ -460,63 +439,19 @@ namespace xsimd
                 return _mm_cvttps_epi32(self);
             }
         }
+#endif
 
         // eq
-        template <class A>
-        XSIMD_INLINE batch_bool<float, A> eq(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_cmpeq_ps(self, other);
-        }
-        template <class A>
-        XSIMD_INLINE batch_bool<float, A> eq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_castsi128_ps(_mm_cmpeq_epi32(_mm_castps_si128(self), _mm_castps_si128(other)));
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                return _mm_cmpeq_epi8(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-            {
-                return _mm_cmpeq_epi16(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                return _mm_cmpeq_epi32(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-                __m128i tmp1 = _mm_cmpeq_epi32(self, other);
-                __m128i tmp2 = _mm_shuffle_epi32(tmp1, 0xB1);
-                __m128i tmp3 = _mm_and_si128(tmp1, tmp2);
-                __m128i tmp4 = _mm_srai_epi32(tmp3, 31);
-                return _mm_shuffle_epi32(tmp4, 0xF5);
-            }
-            else
-            {
-                assert(false && "unsupported arch/op combination");
-                return {};
-            }
+            return vec_cmpeq(self, other);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return ~(self != other);
+            return vec_cmpeq(self, other);
         }
-        template <class A>
-        XSIMD_INLINE batch_bool<double, A> eq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_cmpeq_pd(self, other);
-        }
-        template <class A>
-        XSIMD_INLINE batch_bool<double, A> eq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_castsi128_pd(_mm_cmpeq_epi32(_mm_castpd_si128(self), _mm_castpd_si128(other)));
-        }
-#endif
 
         // first
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
@@ -987,39 +922,20 @@ namespace xsimd
             return _mm_xor_pd(
                 self, _mm_castsi128_pd(_mm_setr_epi32(0, 0x80000000, 0, 0x80000000)));
         }
+#endif
 
         // neq
-        template <class A>
-        XSIMD_INLINE batch_bool<float, A> neq(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_cmpneq_ps(self, other);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return ~(self == other);
+            return vec_cmpne(self, other);
         }
-        template <class A>
-        XSIMD_INLINE batch_bool<float, A> neq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_xor_ps(self, other);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return _mm_castps_si128(_mm_xor_ps(_mm_castsi128_ps(self.data), _mm_castsi128_ps(other.data)));
+            return vec_cmpne(self, other);
         }
-
-        template <class A>
-        XSIMD_INLINE batch_bool<double, A> neq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_cmpneq_pd(self, other);
-        }
-        template <class A>
-        XSIMD_INLINE batch_bool<double, A> neq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_xor_pd(self, other);
-        }
+#if 0
 
         // reciprocal
         template <class A>
