@@ -278,12 +278,14 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_cmpeq(self.data, other.data);
+            auto res = vec_cmpeq(self.data, other.data);
+            return *reinterpret_cast<typename batch_bool<T, A>::register_type*>(&res);
         }
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_cmpeq(self.data, other.data);
+            auto res = vec_cmpeq(self.data, other.data);
+            return *reinterpret_cast<typename batch_bool<T, A>::register_type*>(&res);
         }
 
         // first
@@ -793,23 +795,21 @@ namespace xsimd
         {
             return vec_sqrt(val);
         }
-#if 0
 
         // slide_left
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<altivec>) noexcept
         {
-            return _mm_slli_si128(x, N);
+            return vec_sll(x, vec_splat_u8(N));
         }
 
         // slide_right
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<altivec>) noexcept
         {
-            return _mm_srli_si128(x, N);
+            return vec_srl(x, vec_splat_u8(N));
         }
 
-#endif
         // sadd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
@@ -819,10 +819,16 @@ namespace xsimd
 
         // set
         template <class A, class T, class... Values>
-        XSIMD_INLINE batch<float, A> set(batch<T, A> const&, requires_arch<altivec>, Values... values) noexcept
+        XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<altivec>, Values... values) noexcept
         {
             static_assert(sizeof...(Values) == batch<T, A>::size, "consistent init");
             return typename batch<T, A>::register_type { values... };
+        }
+
+        template <class A, class T, class... Values, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<altivec>, Values... values) noexcept
+        {
+            return set(batch<T, A>(), A {}, static_cast<T>(values ? -1LL : 0LL)...).data;
         }
 
         // ssub
@@ -851,24 +857,14 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE void store_unaligned(T* mem, batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            // From: https://stackoverflow.com/questions/35317341/how-to-store-a-vector-to-an-unaligned-location-in-memory-with-altivec
-            // Load the surrounding area
-            auto low = vec_ld(0, mem);
-            auto high = vec_ld(16, mem);
-            // Prepare the constants that we need
-            auto permuteVector = vec_lvsr(0, (int*)mem);
-            auto oxFF = vec_splat_s8(-1);
-            auto ox00 = vec_splat_s8(0);
-            // Make a mask for which parts of the vectors to swap out
-            auto mask = vec_perm(ox00, oxFF, permuteVector);
-            // Right rotate our input data
-            v = vec_perm(self, self, permuteVector);
-            // Insert our data into the low and high vectors
-            low = vec_sel(self, low, mask);
-            high = vec_sel(high, self, mask);
-            // Store the two aligned result vectors
-            vec_st(low, 0, mem);
-            vec_st(high, 16, mem);
+            auto tmp = vec_perm(*reinterpret_cast<const __vector unsigned char*>(&self.data), *reinterpret_cast<const __vector unsigned char*>(&self.data), vec_lvsr(0, (unsigned char*)mem));
+            vec_ste((__vector unsigned char)tmp, 0, (unsigned char*)mem);
+            vec_ste((__vector unsigned short)tmp, 1, (unsigned short*)mem);
+            vec_ste((__vector unsigned int)tmp, 3, (unsigned int*)mem);
+            vec_ste((__vector unsigned int)tmp, 4, (unsigned int*)mem);
+            vec_ste((__vector unsigned int)tmp, 8, (unsigned int*)mem);
+            vec_ste((__vector unsigned int)tmp, 12, (unsigned int*)mem);
+            vec_ste((__vector unsigned short)tmp, 14, (unsigned short*)mem);
         }
 
         // sub
