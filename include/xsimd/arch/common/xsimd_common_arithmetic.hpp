@@ -203,10 +203,9 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                auto mask = (other >> (8 * sizeof(T) - 1));
                 auto self_pos_branch = min(std::numeric_limits<T>::max() - other, self);
                 auto self_neg_branch = max(std::numeric_limits<T>::min() - other, self);
-                return other + select(batch_bool<T, A>(mask.data), self_neg_branch, self_pos_branch);
+                return other + select(other >= 0, self_pos_branch, self_neg_branch);
             }
             else
             {

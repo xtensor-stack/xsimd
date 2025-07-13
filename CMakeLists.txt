@@ -49,6 +49,7 @@ ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse3.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse4_1.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse4_2.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_ssse3.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_vsx.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sve.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_arch.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
@@ -70,6 +71,7 @@ ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_fma3_sse_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_fma4_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_common_arch.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_register.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_vsx_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_rvv_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse2_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse3_register.hpp

@@ -9,6 +9,7 @@ INPUT             = ../include/xsimd/types/xsimd_api.hpp \
                     ../include/xsimd/memory/xsimd_aligned_allocator.hpp \
                     ../include/xsimd/types/xsimd_common_arch.hpp \
                     ../include/xsimd/types/xsimd_traits.hpp \
+                    ../include/xsimd/types/xsimd_vsx_register.hpp \
                     ../include/xsimd/types/xsimd_avx2_register.hpp \
                     ../include/xsimd/types/xsimd_avx512bw_register.hpp \
                     ../include/xsimd/types/xsimd_avx512cd_register.hpp \

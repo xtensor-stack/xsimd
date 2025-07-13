@@ -1,0 +1,44 @@
+name: PowerPC cross-compilation build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: '${{ matrix.target.arch }}, ${{ matrix.sys.compiler }} ${{ matrix.sys.version }}'
+    strategy:
+      matrix:
+        target:
+          - { platform: 'ppc64le',     dir: 'powerpc64le-linux-gnu',   flags: '-maltivec -mvsx -mcpu=power10', full: 'OFF' }
+          - { platform: 'ppc64',     dir: 'powerpc64-linux-gnu',   flags: '-maltivec -mvsx -mcpu=power10', full: 'OFF' }
+        sys:
+          - { compiler: 'gcc',   version: '12' }
+    steps:
+    - name: Setup compiler
+      if: ${{ matrix.sys.compiler == 'gcc' }}
+      run: |
+        sudo apt-get update || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install g++-${{ matrix.sys.version }}-${{ matrix.target.dir }} g++-${{ matrix.sys.version }}-multilib || exit 1
+        sudo update-alternatives --remove-all ${{ matrix.target.dir }}-gcc || true
+        sudo update-alternatives --remove-all ${{ matrix.target.dir }}-g++ || true
+        sudo update-alternatives --install /usr/bin/${{ matrix.target.dir }}-gcc ${{ matrix.target.dir }}-gcc /usr/bin/${{ matrix.target.dir }}-gcc-${{ matrix.sys.version }} 20
+        sudo update-alternatives --install /usr/bin/${{ matrix.target.dir }}-g++ ${{ matrix.target.dir }}-g++ /usr/bin/${{ matrix.target.dir }}-g++-${{ matrix.sys.version }} 20
+    - name: Setup QEMU
+      run: |
+        sudo apt-get --no-install-suggests --no-install-recommends install qemu-user
+    - name: Setup Ninja
+      run: |
+        sudo apt-get install ninja-build
+    - name: Checkout xsimd
+      uses: actions/checkout@v3
+    - name: Setup
+      run: |
+        mkdir _build
+        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="${{ matrix.target.flags }}" -DCMAKE_CXX_FLAGS="${{ matrix.target.flags }}" -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
+    - name: Build
+      run: cmake --build _build --verbose -j1
+    - name: Testing xsimd
+      run: |
+        qemu-${{ matrix.target.platform }} -cpu power10 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
+      working-directory: ${{ github.workspace }}/_build
