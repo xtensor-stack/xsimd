@@ -647,40 +647,18 @@ namespace xsimd
             return vec_re(self);
         }
 
-#if 0
         // reduce_add
-        template <class A>
-        XSIMD_INLINE float reduce_add(batch<float, A> const& self, requires_arch<altivec>) noexcept
-        {
-            __m128 tmp0 = _mm_add_ps(self, _mm_movehl_ps(self, self));
-            __m128 tmp1 = _mm_add_ss(tmp0, _mm_shuffle_ps(tmp0, tmp0, 1));
-            return _mm_cvtss_f32(tmp1);
-        }
-
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
-                __m128i tmp2 = _mm_add_epi32(self, tmp1);
-                __m128i tmp3 = _mm_shuffle_epi32(tmp2, 0x01);
-                __m128i tmp4 = _mm_add_epi32(tmp2, tmp3);
-                return _mm_cvtsi128_si32(tmp4);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-                __m128i tmp1 = _mm_shuffle_epi32(self, 0x0E);
-                __m128i tmp2 = _mm_add_epi64(self, tmp1);
-#if defined(__x86_64__)
-                return _mm_cvtsi128_si64(tmp2);
-#else
-                __m128i m;
-                _mm_storel_epi64(&m, tmp2);
-                int64_t i;
-                std::memcpy(&i, &m, sizeof(i));
-                return i;
-#endif
+                // FIXME: fine an in-order approach
+                auto tmp0 = vec_reve(self); // v3, v2, v1, v0
+                auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
+                auto tmp2 = vec_permi(tmp1, tmp1, 0x3); // v2 + v1, v3 + v0, v2 + v1, v3 + v0
+                auto tmp3 = vec_add(tmp1, tmp2);
+                return vec_extract(tmp3, 0);
             }
             else
             {
@@ -688,12 +666,7 @@ namespace xsimd
             }
         }
 
-        template <class A>
-        XSIMD_INLINE double reduce_add(batch<double, A> const& self, requires_arch<altivec>) noexcept
-        {
-            return _mm_cvtsd_f64(_mm_add_sd(self, _mm_unpackhi_pd(self, self)));
-        }
-
+#if 0
         // reduce_max
         template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2), void>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<altivec>) noexcept
