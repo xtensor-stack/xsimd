@@ -889,7 +889,7 @@ namespace xsimd
 
 #endif
         // load_aligned
-        template <class A, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<altivec>) noexcept
         {
             return vec_ld(0, mem);
@@ -1115,25 +1115,15 @@ namespace xsimd
         {
             return _mm_min_pd(self, other);
         }
+#endif
 
         // mul
-        template <class A>
-        XSIMD_INLINE batch<float, A> mul(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept
+        template <class A, class T, typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return _mm_mul_ps(self, other);
+            return vec_mul(self, other);
         }
-        template <class A>
-        XSIMD_INLINE batch<double, A> mul(batch<double, A> const& self, batch<double, A> const& other, requires_arch<sse2>) noexcept
-        {
-            return _mm_mul_pd(self, other);
-        }
-
-        // mul
-        template <class A>
-        XSIMD_INLINE batch<int16_t, A> mul(batch<int16_t, A> const& self, batch<int16_t, A> const& other, requires_arch<sse2>) noexcept
-        {
-            return _mm_mullo_epi16(self, other);
-        }
+#if 0
 
         // nearbyint_as_int
         template <class A>
@@ -1388,7 +1378,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-          return vec_adds(self, other);
+            return vec_adds(self, other);
         }
 #if 0
 
@@ -1454,16 +1444,15 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-          XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-          {
-              return vec_subs(self, other);
-          }
-          else
-          {
-              return ssub(self, other, common {});
-          }
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return vec_subs(self, other);
+            }
+            else
+            {
+                return ssub(self, other, common {});
+            }
         }
-
 
         // store_aligned
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
@@ -1479,44 +1468,14 @@ namespace xsimd
             *(typename batch<T, A>::register_type)mem = self;
         }
 
-#if 0
         // sub
-        template <class A>
-        XSIMD_INLINE batch<float, A> sub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return _mm_sub_ps(self, other);
-        }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
-        {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                return _mm_sub_epi8(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-            {
-                return _mm_sub_epi16(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                return _mm_sub_epi32(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-                return _mm_sub_epi64(self, other);
-            }
-            else
-            {
-                assert(false && "unsupported arch/op combination");
-                return {};
-            }
-        }
-        template <class A>
-        XSIMD_INLINE batch<double, A> sub(batch<double, A> const& self, batch<double, A> const& other, requires_arch<sse2>) noexcept
-        {
-            return _mm_sub_pd(self, other);
+            return vec_sub(self, other);
         }
 
+#if 0
         // swizzle
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
