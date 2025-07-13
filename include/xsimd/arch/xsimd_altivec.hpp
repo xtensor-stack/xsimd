@@ -879,7 +879,24 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE void store_unaligned(T* mem, batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            *(typename batch<T, A>::register_type)mem = self.data;
+            // From: https://stackoverflow.com/questions/35317341/how-to-store-a-vector-to-an-unaligned-location-in-memory-with-altivec
+            // Load the surrounding area
+            auto low = vec_ld(0, dst);
+            auto high = vec_ld(16, dst);
+            // Prepare the constants that we need
+            auto permuteVector = vec_lvsr(0, (int*)mem);
+            auto oxFF = vec_splat_s8(-1);
+            auto ox00 = vec_splat_s8(0);
+            // Make a mask for which parts of the vectors to swap out
+            auto mask = vec_perm(ox00, oxFF, permuteVector);
+            // Right rotate our input data
+            v = vec_perm(self, self, permuteVector);
+            // Insert our data into the low and high vectors
+            low = vec_sel(self, low, mask);
+            high = vec_sel(high, self, mask);
+            // Store the two aligned result vectors
+            vec_st(low, 0, mem);
+            vec_st(high, 16, mem);
         }
 
         // sub
