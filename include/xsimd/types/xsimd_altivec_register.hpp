@@ -38,18 +38,14 @@ namespace xsimd
 #if XSIMD_WITH_ALTIVEC
     namespace types
     {
-        XSIMD_DECLARE_SIMD_REGISTER(signed char, altivec, vector signed char);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned char, altivec, vector unsigned char);
-        XSIMD_DECLARE_SIMD_REGISTER(char, altivec, vecroe char);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned short, altivec, vector unsigned short);
-        XSIMD_DECLARE_SIMD_REGISTER(short, altivec, vector short);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned int, altivec, vector unsigned int);
-        XSIMD_DECLARE_SIMD_REGISTER(int, altivec, vector int);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned long int, altivec, vector unsigned long);
-        XSIMD_DECLARE_SIMD_REGISTER(long int, altivec, vector long);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned long long int, altivec, vector unsigned long long);
-        XSIMD_DECLARE_SIMD_REGISTER(long long int, altivec, vector long long);
-        XSIMD_DECLARE_SIMD_REGISTER(float, altivec, vector float);
+        XSIMD_DECLARE_SIMD_REGISTER(signed char, altivec, __vector signed char);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned char, altivec, __vector unsigned char);
+        XSIMD_DECLARE_SIMD_REGISTER(char, altivec, __vector char);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned short, altivec, __vector unsigned short);
+        XSIMD_DECLARE_SIMD_REGISTER(short, altivec, __vector short);
+        XSIMD_DECLARE_SIMD_REGISTER(unsigned int, altivec, __vector unsigned int);
+        XSIMD_DECLARE_SIMD_REGISTER(int, altivec, __vector int);
+        XSIMD_DECLARE_SIMD_REGISTER(float, altivec, __vector float);
     }
 #endif
 }
