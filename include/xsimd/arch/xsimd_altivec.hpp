@@ -492,7 +492,9 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<altivec>) noexcept
         {
-            return batch<T, A>(*(typename batch<T, A>::register_type)mem);
+            auto lo = vec_ld(0, mem);
+            auto hi = vec_ld(16, mem);
+            return vec_perm(lo, hi, vec_lvsl(0, mem));
         }
 
 #if 0
