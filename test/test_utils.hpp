@@ -571,6 +571,14 @@ namespace xsimd
  * Testing types lists *
  ***********************/
 
+#ifdef XSIMD_WITH_ALTIVEC
+#define BATCH_INT_TYPES xsimd::batch<uint8_t>,  \
+                        xsimd::batch<int8_t>,   \
+                        xsimd::batch<uint16_t>, \
+                        xsimd::batch<int16_t>,  \
+                        xsimd::batch<uint32_t>, \
+                        xsimd::batch<int32_t>
+#else
 #define BATCH_INT_TYPES xsimd::batch<uint8_t>,  \
                         xsimd::batch<int8_t>,   \
                         xsimd::batch<uint16_t>, \
@@ -579,13 +587,14 @@ namespace xsimd
                         xsimd::batch<int32_t>,  \
                         xsimd::batch<uint64_t>, \
                         xsimd::batch<int64_t>
+#endif
 
-#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
+#if XSIMD_WITH_NEON64 || (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC)
 #define BATCH_FLOAT_TYPES xsimd::batch<float>, xsimd::batch<double>
 #else
 #define BATCH_FLOAT_TYPES xsimd::batch<float>
 #endif
-#if XSIMD_WITH_NEON64 || !XSIMD_WITH_NEON
+#if XSIMD_WITH_NEON64 || (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC)
 #define BATCH_COMPLEX_TYPES xsimd::batch<std::complex<float>>, xsimd::batch<std::complex<double>>
 #else
 #define BATCH_COMPLEX_TYPES xsimd::batch<std::complex<float>>
