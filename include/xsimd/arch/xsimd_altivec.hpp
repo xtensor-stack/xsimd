@@ -255,24 +255,32 @@ namespace xsimd
             return vec_div(self, other);
         }
 
-#if 0
-
         // fast_cast
         namespace detail
         {
             template <class A>
             XSIMD_INLINE batch<float, A> fast_cast(batch<int32_t, A> const& self, batch<float, A> const&, requires_arch<altivec>) noexcept
             {
-                return _mm_cvtepi32_ps(self);
+                return vec_ctf(self.data, 0);
+            }
+            template <class A>
+            XSIMD_INLINE batch<float, A> fast_cast(batch<uint32_t, A> const& self, batch<float, A> const&, requires_arch<altivec>) noexcept
+            {
+                return vec_ctf(self.data, 0);
             }
 
             template <class A>
             XSIMD_INLINE batch<int32_t, A> fast_cast(batch<float, A> const& self, batch<int32_t, A> const&, requires_arch<altivec>) noexcept
             {
-                return _mm_cvttps_epi32(self);
+                return vec_cts(self.data, 0);
+            }
+
+            template <class A>
+            XSIMD_INLINE batch<uint32_t, A> fast_cast(batch<float, A> const& self, batch<uint32_t, A> const&, requires_arch<altivec>) noexcept
+            {
+                return vec_ctu(self.data, 0);
             }
         }
-#endif
 
         // eq
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
