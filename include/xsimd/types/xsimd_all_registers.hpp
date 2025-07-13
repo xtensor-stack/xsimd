@@ -48,6 +48,8 @@
 
 #include "xsimd_wasm_register.hpp"
 
+#include "xsimd_vsx_register.hpp"
+
 #if XSIMD_WITH_EMULATED
 #include "xsimd_emulated_register.hpp"
 #endif

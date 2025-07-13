@@ -84,6 +84,7 @@ namespace xsimd
             ARCH_FIELD_EX_REUSE(detail::rvv<256>, rvv)
             ARCH_FIELD_EX_REUSE(detail::rvv<128>, rvv)
             ARCH_FIELD(wasm)
+            ARCH_FIELD(vsx)
 
 #undef ARCH_FIELD
 
@@ -93,6 +94,10 @@ namespace xsimd
 
 #if XSIMD_WITH_WASM
                 wasm = 1;
+#endif
+
+#if XSIMD_WITH_VSX
+                vsx = 1;
 #endif
 
 #if defined(__aarch64__) || defined(_M_ARM64)

@@ -2206,6 +2206,9 @@ namespace xsimd
      * Slide the whole batch to the left by \c n bytes. This is different from
      * \c bitwise_lshift that shifts each batch element to the left.
      *
+     * @warning The behavior of this function is platform-dependent on big
+     * endian architectures.
+     *
      * @tparam N Amount of bytes to slide to the left.
      * @param x batch of integer values.
      * @return slided batch.
@@ -2223,6 +2226,9 @@ namespace xsimd
      *
      * Slide the whole batch to the right by \c N bytes. This is different from
      * \c bitwise_rshift that shifts each batch element to the right.
+     *
+     * @warning The behavior of this function is platform-dependent on big
+     * endian architectures.
      *
      * @tparam N Amount of bytes to slide to the right.
      * @param x batch of integer values.

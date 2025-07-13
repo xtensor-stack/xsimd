@@ -169,14 +169,16 @@ namespace xsimd
     using all_sve_architectures = arch_list<detail::sve<512>, detail::sve<256>, detail::sve<128>>;
     using all_rvv_architectures = arch_list<detail::rvv<512>, detail::rvv<256>, detail::rvv<128>>;
     using all_arm_architectures = typename detail::join<all_sve_architectures, arch_list<i8mm<neon64>, neon64, neon>>::type;
+    using all_power_architectures = arch_list<vsx>;
     using all_riscv_architectures = all_rvv_architectures;
     using all_wasm_architectures = arch_list<wasm>;
-    using all_architectures = typename detail::join<all_riscv_architectures, all_wasm_architectures, all_arm_architectures, all_x86_architectures>::type;
+    using all_architectures = typename detail::join<all_power_architectures, all_riscv_architectures, all_wasm_architectures, all_arm_architectures, all_x86_architectures>::type;
 
     using supported_architectures = typename detail::supported<all_architectures>::type;
 
     using x86_arch = typename detail::supported<all_x86_architectures>::type::best;
     using arm_arch = typename detail::supported<all_arm_architectures>::type::best;
+    using power_arch = typename detail::supported<all_power_architectures>::type::best;
     using riscv_arch = typename detail::supported<all_riscv_architectures>::type::best;
     using best_arch = typename supported_architectures::best;
 

@@ -14,6 +14,13 @@
 
 #include "test_utils.hpp"
 
+#ifdef __linux__
+#include "endian.h"
+#if BYTE_ORDER == BIG_ENDIAN
+#define XSIMD_NO_SLIDE
+#endif
+#endif
+
 #include <numeric>
 
 namespace
@@ -197,6 +204,7 @@ struct slide_test : public init_slide_base<typename B::value_type, B::size>
         INFO("slide_left full");
         CHECK_BATCH_EQ(b_res_left_full, b_left_full);
 
+#ifndef XSIMD_NO_SLIDE
         B b_res_left_half = xsimd::slide_left<half_slide>(b_in);
         INFO("slide_left half_slide");
         CHECK_BATCH_EQ(b_res_left_half, b_left_half);
@@ -215,6 +223,7 @@ struct slide_test : public init_slide_base<typename B::value_type, B::size>
             INFO("slide_left below_half_slide");
             CHECK_BATCH_EQ(b_res_left_below_half, b_left_below_half);
         }
+#endif
     }
 
     void slide_right()
@@ -235,6 +244,7 @@ struct slide_test : public init_slide_base<typename B::value_type, B::size>
         INFO("slide_right full");
         CHECK_BATCH_EQ(b_res_right_full, b_right_full);
 
+#ifndef XSIMD_NO_SLIDE
         B b_res_right_half = xsimd::slide_right<half_slide>(b_in);
         INFO("slide_right half_slide");
         CHECK_BATCH_EQ(b_res_right_half, b_right_half);
@@ -253,6 +263,7 @@ struct slide_test : public init_slide_base<typename B::value_type, B::size>
             INFO("slide_right below_half_slide");
             CHECK_BATCH_EQ(b_res_right_below_half, b_right_below_half);
         }
+#endif
     }
 };
 
@@ -344,7 +355,9 @@ struct compress_test
     }
 };
 
-TEST_CASE_TEMPLATE("[compress]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsimd::batch<int8_t>, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
+#define XSIMD_COMPRESS_TYPES BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsimd::batch<int8_t>, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>
+
+TEST_CASE_TEMPLATE("[compress]", B, XSIMD_COMPRESS_TYPES)
 {
     compress_test<B> Test;
     SUBCASE("empty")
@@ -440,7 +453,9 @@ struct expand_test
     }
 };
 
-TEST_CASE_TEMPLATE("[expand]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsimd::batch<int8_t>, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
+#define XSIMD_EXPAND_TYPES XSIMD_COMPRESS_TYPES
+
+TEST_CASE_TEMPLATE("[expand]", B, XSIMD_EXPAND_TYPES)
 {
     expand_test<B> Test;
     SUBCASE("empty")
@@ -687,7 +702,9 @@ struct shuffle_test
     }
 };
 
-TEST_CASE_TEMPLATE("[shuffle]", B, BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>)
+#define XSIMD_SHUFFLE_TYPES BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>
+
+TEST_CASE_TEMPLATE("[shuffle]", B, XSIMD_SHUFFLE_TYPES)
 {
     shuffle_test<B> Test;
     SUBCASE("no-op")

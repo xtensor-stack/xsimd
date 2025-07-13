@@ -46,7 +46,7 @@ TEST_CASE("[is_aligned]")
     float f[100];
     void* unaligned_f = static_cast<void*>(&f[0]);
     constexpr std::size_t alignment = xsimd::default_arch::alignment();
-    std::size_t aligned_f_size;
+    std::size_t aligned_f_size = sizeof(f);
     void* aligned_f = std::align(alignment, sizeof(f), unaligned_f, aligned_f_size);
     CHECK_UNARY(xsimd::is_aligned(aligned_f));
 

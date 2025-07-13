@@ -39,7 +39,9 @@ struct load_store_test
     using ulong_vector_type = std::vector<unsigned long, allocator<unsigned long>>;
 #endif
     using float_vector_type = std::vector<float, allocator<float>>;
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
     using double_vector_type = std::vector<double, allocator<double>>;
+#endif
 
     int8_vector_type i8_vec;
     uint8_vector_type ui8_vec;
@@ -54,7 +56,9 @@ struct load_store_test
     ulong_vector_type ul_vec;
 #endif
     float_vector_type f_vec;
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
     double_vector_type d_vec;
+#endif
 
     array_type expected;
 
@@ -73,7 +77,9 @@ struct load_store_test
         init_test_vector(ul_vec);
 #endif
         init_test_vector(f_vec);
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
         init_test_vector(d_vec);
+#endif
     }
 
     void test_load()

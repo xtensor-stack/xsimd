@@ -54,6 +54,7 @@ x86          | AVX512BW, AVX512CD, AVX512DQ, AVX512F (gcc7 and higher)
 x86 AMD      | FMA4
 ARM          | NEON, NEON64, SVE128/256/512 (fixed vector size)
 WebAssembly  | WASM
+powerpc64    | VSX
 RISC-V       | RISC-V128/256/512 (fixed vector size)
 
 ## Installation
