@@ -122,12 +122,12 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_and(self, other);
+            return vec_and(self.data, other.data);
         }
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_and(self, other);
+            return vec_and(self.data, other.data);
         }
 
         // bitwise_andnot
@@ -239,6 +239,8 @@ namespace xsimd
             }
         }
 
+#endif
+
         // decr_if
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<altivec>) noexcept
@@ -247,16 +249,13 @@ namespace xsimd
         }
 
         // div
-        template <class A>
-        XSIMD_INLINE batch<float, A> div(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<float, A> div(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return _mm_div_ps(self, other);
+            return vec_div(self, other);
         }
-        template <class A>
-        XSIMD_INLINE batch<double, A> div(batch<double, A> const& self, batch<double, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return _mm_div_pd(self, other);
-        }
+
+#if 0
 
         // fast_cast
         namespace detail
@@ -265,33 +264,6 @@ namespace xsimd
             XSIMD_INLINE batch<float, A> fast_cast(batch<int32_t, A> const& self, batch<float, A> const&, requires_arch<altivec>) noexcept
             {
                 return _mm_cvtepi32_ps(self);
-            }
-
-            template <class A>
-            XSIMD_INLINE batch<double, A> fast_cast(batch<uint64_t, A> const& x, batch<double, A> const&, requires_arch<altivec>) noexcept
-            {
-                // from https://stackoverflow.com/questions/41144668/how-to-efficiently-perform-double-int64-conversions-with-sse-avx
-                // adapted to altivec
-                __m128i xH = _mm_srli_epi64(x, 32);
-                xH = _mm_or_si128(xH, _mm_castpd_si128(_mm_set1_pd(19342813113834066795298816.))); //  2^84
-                __m128i mask = _mm_setr_epi16(0xFFFF, 0xFFFF, 0x0000, 0x0000, 0xFFFF, 0xFFFF, 0x0000, 0x0000);
-                __m128i xL = _mm_or_si128(_mm_and_si128(mask, x), _mm_andnot_si128(mask, _mm_castpd_si128(_mm_set1_pd(0x0010000000000000)))); //  2^52
-                __m128d f = _mm_sub_pd(_mm_castsi128_pd(xH), _mm_set1_pd(19342813118337666422669312.)); //  2^84 + 2^52
-                return _mm_add_pd(f, _mm_castsi128_pd(xL));
-            }
-
-            template <class A>
-            XSIMD_INLINE batch<double, A> fast_cast(batch<int64_t, A> const& x, batch<double, A> const&, requires_arch<altivec>) noexcept
-            {
-                // from https://stackoverflow.com/questions/41144668/how-to-efficiently-perform-double-int64-conversions-with-sse-avx
-                // adapted to altivec
-                __m128i xH = _mm_srai_epi32(x, 16);
-                xH = _mm_and_si128(xH, _mm_setr_epi16(0x0000, 0x0000, 0xFFFF, 0xFFFF, 0x0000, 0x0000, 0xFFFF, 0xFFFF));
-                xH = _mm_add_epi64(xH, _mm_castpd_si128(_mm_set1_pd(442721857769029238784.))); //  3*2^67
-                __m128i mask = _mm_setr_epi16(0xFFFF, 0xFFFF, 0xFFFF, 0x0000, 0xFFFF, 0xFFFF, 0xFFFF, 0x0000);
-                __m128i xL = _mm_or_si128(_mm_and_si128(mask, x), _mm_andnot_si128(mask, _mm_castpd_si128(_mm_set1_pd(0x0010000000000000)))); //  2^52
-                __m128d f = _mm_sub_pd(_mm_castsi128_pd(xH), _mm_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
-                return _mm_add_pd(f, _mm_castsi128_pd(xL));
             }
 
             template <class A>
@@ -306,12 +278,12 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_cmpeq(self, other);
+            return vec_cmpeq(self.data, other.data);
         }
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_cmpeq(self, other);
+            return vec_cmpeq(self.data, other.data);
         }
 
         // first
@@ -881,8 +853,8 @@ namespace xsimd
         {
             // From: https://stackoverflow.com/questions/35317341/how-to-store-a-vector-to-an-unaligned-location-in-memory-with-altivec
             // Load the surrounding area
-            auto low = vec_ld(0, dst);
-            auto high = vec_ld(16, dst);
+            auto low = vec_ld(0, mem);
+            auto high = vec_ld(16, mem);
             // Prepare the constants that we need
             auto permuteVector = vec_lvsr(0, (int*)mem);
             auto oxFF = vec_splat_s8(-1);
