@@ -95,45 +95,21 @@ namespace xsimd
             return vec_any_ne(self, vec_xor(self, self));
         }
 
-#if 0
         // avgr
-        template <class A, class T, class = typename std::enable_if<std::is_unsigned<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                return _mm_avg_epu8(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-            {
-                return _mm_avg_epu16(self, other);
-            }
-            else
-            {
-                return avgr(self, other, common {});
-            }
+            return vec_avg(self, other);
         }
 
         // avg
-        template <class A, class T, class = typename std::enable_if<std::is_unsigned<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                auto adj = ((self ^ other) << 7) >> 7;
-                return avgr(self, other, A {}) - adj;
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-            {
-                auto adj = ((self ^ other) << 15) >> 15;
-                return avgr(self, other, A {}) - adj;
-            }
-            else
-            {
-                return avg(self, other, common {});
-            }
+            constexpr auto nbit = 8 * sizeof(T) - 1;
+            constexpr auto adj = ((self ^ other) << nbit) >> nbit;
+            return avgr(self, other, A {}) - adj;
         }
-#endif
 
         // batch_bool_cast
         template <class A, class T_out, class T_in>
@@ -482,12 +458,7 @@ namespace xsimd
             tmp0 = _mm_movelh_ps(tmp0, tmp1);
             return _mm_add_ps(tmp0, tmp2);
         }
-        template <class A>
-        XSIMD_INLINE batch<double, A> haddp(batch<double, A> const* row, requires_arch<altivec>) noexcept
-        {
-            return _mm_add_pd(_mm_unpacklo_pd(row[0], row[1]),
-                              _mm_unpackhi_pd(row[0], row[1]));
-        }
+#endif
 
         // incr_if
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -495,7 +466,6 @@ namespace xsimd
         {
             return self - batch<T, A>(mask.data);
         }
-#endif
 
         // insert
         template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -522,7 +492,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<altivec>) noexcept
         {
-            return *(typename batch<T, A>::register_type)mem;
+            return batch<T, A>(*(typename batch<T, A>::register_type)mem);
         }
 
 #if 0
@@ -791,18 +761,16 @@ namespace xsimd
             batch<T, A> acc3 = min(acc2, step3);
             return first(acc3, A {});
         }
+#endif
 
         // rsqrt
         template <class A>
         XSIMD_INLINE batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<altivec>) noexcept
         {
-            return _mm_rsqrt_ps(val);
+            return vec_rsqrt(val);
         }
-        template <class A>
-        XSIMD_INLINE batch<double, A> rsqrt(batch<double, A> const& val, requires_arch<altivec>) noexcept
-        {
-            return _mm_cvtps_pd(_mm_rsqrt_ps(_mm_cvtpd_ps(val)));
-        }
+
+#if 0
 
         // select
         template <class A>
@@ -917,14 +885,14 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE void store_aligned(T* mem, batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            return vec_st(self, 0, mem);
+            return vec_st(self.data, 0, mem);
         }
 
         // store_unaligned
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE void store_unaligned(T* mem, batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            *(typename batch<T, A>::register_type)mem = self;
+            *(typename batch<T, A>::register_type)mem = self.data;
         }
 
         // sub
