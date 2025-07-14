@@ -406,18 +406,8 @@ namespace xsimd
         {
             return vec_cmpge(self.data, other.data);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return vec_cmpge(self.data, other.data);
-        }
 
         // gt
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return vec_cmpgt(self.data, other.data);
-        }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
@@ -503,22 +493,12 @@ namespace xsimd
         {
             return vec_cmple(self.data, other.data);
         }
-        template <class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return vec_cmple(self.data, other.data);
-        }
 
         // lt
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
             return vec_cmplt(self.data, other.data);
-        }
-        template <class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return vec_cmplt(self, other);
         }
 
 #if 0
