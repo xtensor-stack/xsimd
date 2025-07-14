@@ -85,14 +85,14 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE bool all(batch_bool<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            return vec_all_ne(self, vec_xor(self, self));
+            return vec_all_ne(self, vec_xor(self.data, self.data));
         }
 
         // any
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE bool any(batch_bool<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            return vec_any_ne(self, vec_xor(self, self));
+            return vec_any_ne(self, vec_xor(self.data, self.data));
         }
 
         // avgr
@@ -250,7 +250,7 @@ namespace xsimd
 
         // div
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch<float, A> div(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
+        XSIMD_INLINE batch<T, A> div(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
             return vec_div(self, other);
         }
@@ -740,7 +740,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<altivec>) noexcept
         {
-            return vec_sel(true_br, false_br, cond);
+            return vec_sel(true_br.data, false_br.data, cond.data);
         }
         template <class A, class T, bool... Values, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<altivec>) noexcept
