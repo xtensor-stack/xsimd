@@ -252,7 +252,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> div(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_div(self.data, other.data);
+            return vec_mul(self.data, vec_re(other.data));
         }
 
         // fast_cast
