@@ -663,7 +663,7 @@ namespace xsimd
             {
                 auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
                 auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
-                auto tmp2 = vec_permi(tmp1, tmp1, 0x3); // v2 + v1, v3 + v0, v2 + v1, v3 + v0
+                auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
                 auto tmp3 = vec_add(tmp1, tmp2);
                 return vec_extract(tmp3, 0);
             }
@@ -678,7 +678,7 @@ namespace xsimd
             // FIXME: find an in-order approach
             auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
             auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
-            auto tmp2 = vec_permi(tmp1, tmp1, 0x3); // v2 + v1, v3 + v0, v2 + v1, v3 + v0
+            auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
             auto tmp3 = vec_add(tmp1, tmp2);
             return vec_extract(tmp3, 0);
         }
