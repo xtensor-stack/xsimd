@@ -78,7 +78,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_add(self, other);
+            return vec_add(self.data, other.data);
         }
 
         // all
@@ -661,8 +661,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                // FIXME: fine an in-order approach
-                auto tmp0 = vec_reve(self); // v3, v2, v1, v0
+                auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
                 auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
                 auto tmp2 = vec_permi(tmp1, tmp1, 0x3); // v2 + v1, v3 + v0, v2 + v1, v3 + v0
                 auto tmp3 = vec_add(tmp1, tmp2);
@@ -672,6 +671,16 @@ namespace xsimd
             {
                 return hadd(self, common {});
             }
+        }
+        template <class A>
+        XSIMD_INLINE float reduce_add(batch<float, A> const& self, requires_arch<altivec>) noexcept
+        {
+            // FIXME: find an in-order approach
+            auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
+            auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
+            auto tmp2 = vec_permi(tmp1, tmp1, 0x3); // v2 + v1, v3 + v0, v2 + v1, v3 + v0
+            auto tmp3 = vec_add(tmp1, tmp2);
+            return vec_extract(tmp3, 0);
         }
 
 #if 0
