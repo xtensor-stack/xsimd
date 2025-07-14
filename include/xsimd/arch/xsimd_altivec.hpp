@@ -798,7 +798,8 @@ namespace xsimd
         template <class A, class T, class... Values, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<altivec>, Values... values) noexcept
         {
-            return set(batch<T, A>(), A {}, static_cast<T>(values ? -1LL : 0LL)...).data;
+            static_assert(sizeof...(Values) == batch_bool<T, A>::size, "consistent init");
+            return typename batch_bool<T, A>::register_type { static_cast<decltype(std::declval<typename batch_bool<T, A>::register_type>()[0])>(values ? -1LL : 0LL)... };
         }
 
         // ssub
