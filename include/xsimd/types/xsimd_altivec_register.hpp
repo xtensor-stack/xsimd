@@ -38,14 +38,25 @@ namespace xsimd
 #if XSIMD_WITH_ALTIVEC
     namespace types
     {
-        XSIMD_DECLARE_SIMD_REGISTER(signed char, altivec, __vector signed char);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned char, altivec, __vector unsigned char);
-        XSIMD_DECLARE_SIMD_REGISTER(char, altivec, __vector char);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned short, altivec, __vector unsigned short);
-        XSIMD_DECLARE_SIMD_REGISTER(short, altivec, __vector short);
-        XSIMD_DECLARE_SIMD_REGISTER(unsigned int, altivec, __vector unsigned int);
-        XSIMD_DECLARE_SIMD_REGISTER(int, altivec, __vector int);
-        XSIMD_DECLARE_SIMD_REGISTER(float, altivec, __vector float);
+
+#define XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(T, Tb) \
+    template <>                                         \
+    struct get_bool_simd_register<T, altivec>           \
+    {                                                   \
+        using type = __vector __bool Tb;                \
+    };                                                  \
+    XSIMD_DECLARE_SIMD_REGISTER(T, altivec, __vector T)
+
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(signed char, char);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(unsigned char, char);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(char, char);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(unsigned short, short);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(short, short);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(unsigned int, int);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(int, int);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(float, float);
+
+#undef XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER
     }
 #endif
 }
