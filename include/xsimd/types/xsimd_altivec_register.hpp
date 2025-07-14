@@ -39,12 +39,22 @@ namespace xsimd
     namespace types
     {
 
-#define XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(T, Tb) \
-    template <>                                         \
-    struct get_bool_simd_register<T, altivec>           \
-    {                                                   \
-        using type = __vector __bool Tb;                \
-    };                                                  \
+#define XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(T, Tb)              \
+    template <>                                                      \
+    struct get_bool_simd_register<T, altivec>                        \
+    {                                                                \
+        struct type                                                  \
+        {                                                            \
+            using register_type = __vector __bool Tb;                \
+            register_type data;                                      \
+            type() = default;                                        \
+            type(register_type r)                                    \
+                : data(r)                                            \
+            {                                                        \
+            }                                                        \
+            operator register_type() const noexcept { return data; } \
+        };                                                           \
+    };                                                               \
     XSIMD_DECLARE_SIMD_REGISTER(T, altivec, __vector T)
 
         XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(signed char, char);
@@ -54,7 +64,7 @@ namespace xsimd
         XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(short, short);
         XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(unsigned int, int);
         XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(int, int);
-        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(float, float);
+        XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER(float, int);
 
 #undef XSIMD_DECLARE_SIMD_BOOL_ALTIVEC_REGISTER
     }
