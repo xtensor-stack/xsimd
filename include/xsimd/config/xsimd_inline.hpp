@@ -12,7 +12,9 @@
 #ifndef XSIMD_INLINE_HPP
 #define XSIMD_INLINE_HPP
 
-#if defined __has_attribute
+#if defined(__VEC__)
+#define XSIMD_INLINE inline
+#elif defined __has_attribute
 #if __has_attribute(always_inline)
 #define XSIMD_INLINE inline __attribute__((always_inline))
 #endif
@@ -20,6 +22,8 @@
 #define XSIMD_INLINE inline __forceinline
 #else
 #define XSIMD_INLINE inline
+#endif
+
 #endif
 
 #endif
