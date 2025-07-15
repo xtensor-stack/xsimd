@@ -10,9 +10,9 @@ jobs:
     strategy:
       matrix:
         target:
-          - { platform: 'ppc',     dir: 'powerpc-linux-gnu',   flags: '-maltivec', full: 'OFF' }
+          - { platform: 'ppc',     dir: 'powerpc-linux-gnu',   flags: '-maltivec -mvsx', full: 'OFF' }
         sys:
-          - { compiler: 'gcc',   version: '10' }
+          - { compiler: 'gcc',   version: '12' }
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
