@@ -39,5 +39,5 @@ jobs:
       run: cmake --build _build --verbose -j1
     - name: Testing xsimd
       run: |
-        qemu-${{ matrix.target.platform }} -cpu 7400 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
+        qemu-${{ matrix.target.platform }} -cpu 7457 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build
