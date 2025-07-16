@@ -115,7 +115,7 @@ namespace xsimd
         template <class A, class T_out, class T_in>
         XSIMD_INLINE batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& self, batch_bool<T_out, A> const&, requires_arch<altivec>) noexcept
         {
-            return { bitwise_cast<T_out>(batch<T_in, A>(self.data)).data };
+            return (typename batch_bool<T_out, A>::register_type)self.data;
         }
 
         // bitwise_and
