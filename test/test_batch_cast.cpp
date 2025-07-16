@@ -70,14 +70,17 @@ struct batch_cast_test
     using uint16_batch = xsimd::batch<uint16_t>;
     using int32_batch = xsimd::batch<int32_t>;
     using uint32_batch = xsimd::batch<uint32_t>;
+    using float_batch = xsimd::batch<float>;
+#ifndef XSIMD_WITH_ALTIVEC
     using int64_batch = xsimd::batch<int64_t>;
     using uint64_batch = xsimd::batch<uint64_t>;
-    using float_batch = xsimd::batch<float>;
     using double_batch = xsimd::batch<double>;
+#endif
 
     std::vector<uint64_t> int_test_values;
-    std::vector<float> float_test_values;
     std::vector<double> double_test_values;
+
+    std::vector<float> float_test_values;
 
     batch_cast_test()
     {
@@ -182,12 +185,14 @@ struct batch_cast_test
             test_cast_impl<uint32_batch, uint32_batch>(test_value, "batch cast uint32 -> uint32");
             test_cast_impl<uint32_batch, float_batch>(test_value, "batch cast uint32 -> float");
 
+#ifndef XSIMD_WITH_ALTIVEC
             test_cast_impl<int64_batch, int64_batch>(test_value, "batch cast int64 -> int64");
             test_cast_impl<int64_batch, uint64_batch>(test_value, "batch cast int64 -> uint64");
             test_cast_impl<int64_batch, double_batch>(test_value, "batch cast int64 -> double");
             test_cast_impl<uint64_batch, int64_batch>(test_value, "batch cast uint64 -> int64");
             test_cast_impl<uint64_batch, uint64_batch>(test_value, "batch cast uint64 -> uint64");
             test_cast_impl<uint64_batch, double_batch>(test_value, "batch cast uint64 -> double");
+#endif
         }
 
         for (const auto& test_value : float_test_values)
@@ -197,12 +202,14 @@ struct batch_cast_test
             test_cast_impl<float_batch, float_batch>(test_value, "batch cast float -> float");
         }
 
+#ifndef XSIMD_WITH_ALTIVEC
         for (const auto& test_value : double_test_values)
         {
             test_cast_impl<double_batch, int64_batch>(test_value, "batch cast double -> int64");
             test_cast_impl<double_batch, uint64_batch>(test_value, "batch cast double -> uint64");
             test_cast_impl<double_batch, double_batch>(test_value, "batch cast double -> double");
         }
+#endif
     }
 
 #if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
