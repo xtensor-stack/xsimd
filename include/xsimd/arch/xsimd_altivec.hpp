@@ -66,8 +66,6 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
 #endif
-        template <class A, class T>
-        XSIMD_INLINE batch<T, A> ssub(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
 
         // abs
         template <class A>
@@ -98,7 +96,7 @@ namespace xsimd
         }
 
         // avgr
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
             return vec_avg(self.data, other.data);
@@ -111,11 +109,6 @@ namespace xsimd
             constexpr auto nbit = 8 * sizeof(T) - 1;
             auto adj = ((self ^ other) << nbit) >> nbit;
             return avgr(self.data, other.data, A {}) - adj;
-        }
-        template <class A>
-        XSIMD_INLINE batch<float, A> avg(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
-        {
-            return vec_avg(self.data, other.data);
         }
 
         // batch_bool_cast
@@ -812,17 +805,10 @@ namespace xsimd
 
         // ssub
 
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value && sizeof(T) == 1, void>::type>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                return vec_subs(self.data, other.data);
-            }
-            else
-            {
-                return ssub(self, other, common {});
-            }
+            return vec_subs(self.data, other.data);
         }
 
         // store_aligned
