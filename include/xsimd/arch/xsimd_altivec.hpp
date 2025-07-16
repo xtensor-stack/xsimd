@@ -134,12 +134,12 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_nand(self.data, other.data);
+            return self.data & ~other.data;
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_nand(self.data, other.data);
+            return self.data & ~other.data;
         }
 
         // bitwise_lshift
@@ -191,7 +191,7 @@ namespace xsimd
             return vec_xor(self.data, other.data);
         }
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
-        XSIMD_INLINE batch<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
+        XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
         {
             return vec_xor(self.data, other.data);
         }
