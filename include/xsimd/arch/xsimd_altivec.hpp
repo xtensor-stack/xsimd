@@ -66,6 +66,8 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
 #endif
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> ssub(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
 
         // abs
         template <class A>
@@ -103,12 +105,17 @@ namespace xsimd
         }
 
         // avg
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
             constexpr auto nbit = 8 * sizeof(T) - 1;
-            constexpr auto adj = ((self ^ other) << nbit) >> nbit;
+            auto adj = ((self ^ other) << nbit) >> nbit;
             return avgr(self.data, other.data, A {}) - adj;
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> avg(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
+        {
+            return vec_avg(self.data, other.data);
         }
 
         // batch_bool_cast
@@ -613,7 +620,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            return vec_neg(self.data);
+            return -(self.data);
         }
 
         // neq
