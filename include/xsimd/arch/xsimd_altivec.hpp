@@ -209,7 +209,6 @@ namespace xsimd
         {
             return vec_splats(val);
         }
-#if 0
 
         // store_complex
         namespace detail
@@ -219,27 +218,15 @@ namespace xsimd
             template <class A>
             XSIMD_INLINE batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires_arch<altivec>) noexcept
             {
-                return _mm_unpacklo_ps(self.real(), self.imag());
+                return vec_mergel(self.real().data, self.imag().data);
             }
             // complex_high
             template <class A>
             XSIMD_INLINE batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires_arch<altivec>) noexcept
             {
-                return _mm_unpackhi_ps(self.real(), self.imag());
-            }
-            template <class A>
-            XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<altivec>) noexcept
-            {
-                return _mm_unpacklo_pd(self.real(), self.imag());
-            }
-            template <class A>
-            XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<altivec>) noexcept
-            {
-                return _mm_unpackhi_pd(self.real(), self.imag());
+                return vec_mergeh(self.real().data, self.imag().data);
             }
         }
-
-#endif
 
         // decr_if
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
@@ -956,7 +943,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_merge_hi(self.data, other.data);
+            return vec_mergeh(self.data, other.data);
         }
 
         // zip_lo
