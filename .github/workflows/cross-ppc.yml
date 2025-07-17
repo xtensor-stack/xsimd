@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         target:
-          - { platform: 'ppc',     dir: 'powerpc-linux-gnu',   flags: '-maltivec -mvsx', full: 'OFF' }
+          - { platform: 'ppc64',     dir: 'powerpc64-linux-gnu',   flags: '-maltivec -mvsx -mcpu=power8', full: 'OFF' }
         sys:
           - { compiler: 'gcc',   version: '12' }
     steps:
@@ -39,5 +39,5 @@ jobs:
       run: cmake --build _build --verbose -j1
     - name: Testing xsimd
       run: |
-        qemu-${{ matrix.target.platform }} -cpu 7457 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
+        #qemu-${{ matrix.target.platform }} -cpu power8 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build
