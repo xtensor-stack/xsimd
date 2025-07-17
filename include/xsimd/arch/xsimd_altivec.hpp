@@ -456,23 +456,15 @@ namespace xsimd
             return vec_perm(lo, hi, vec_lvsl(0, mem));
         }
 
-#if 0
         // load_complex
         namespace detail
         {
-            // Redefine these methods in the SSE-based archs if required
             template <class A>
             XSIMD_INLINE batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<altivec>) noexcept
             {
-                return { _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0)), _mm_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1)) };
-            }
-            template <class A>
-            XSIMD_INLINE batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<altivec>) noexcept
-            {
-                return { _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0)), _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1)) };
+                return { vec_mergee(hi.data, lo.data), vec_mergeo(hi.data, lo.data) };
             }
         }
-#endif
 
         // le
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
