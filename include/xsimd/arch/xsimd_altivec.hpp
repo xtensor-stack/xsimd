@@ -413,8 +413,8 @@ namespace xsimd
             auto tmp3 = vec_mergeo(row[2].data, row[3].data); // v21 v31 v23 v33
             auto tmp5 = vec_add(tmp0, tmp1); // (v20 + v21, v30 + v31, v22 + v23, v32 + v33)
 
-            auto tmp6 = vec_permi(tmp4, tmp5, 0x0); // (v00 + v01, v10 + v11, v20 + v21, v30 + v31
-            auto tmp7 = vec_permi(tmp4, tmp5, 0x3); // (v02 + v03, v12 + v13, v12 + v13, v32 + v33)
+            auto tmp6 = vec_perm(tmp4, tmp5, (__vector unsigned char) { 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23 }); // (v00 + v01, v10 + v11, v20 + v21, v30 + v31
+            auto tmp7 = vec_perm(tmp4, tmp5, (__vector unsigned char) { 8, 9, 10, 11, 12, 13, 14, 15, 24, 25, 26, 27, 28, 29, 30, 31 }); // (v02 + v03, v12 + v13, v12 + v13, v32 + v33)
 
             return vec_add(tmp6, tmp7);
         }
