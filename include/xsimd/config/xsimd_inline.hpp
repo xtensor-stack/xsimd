@@ -12,7 +12,9 @@
 #ifndef XSIMD_INLINE_HPP
 #define XSIMD_INLINE_HPP
 
-#if defined(__GNUC__)
+// When using Clang on Windows, Clangs defines _MSC_VER instead of __GNUC__
+// and selecs a version it does not support.
+#if defined(__GNUC__) || (defined(_MSC_VER) && defined(__clang__))
 #define XSIMD_INLINE inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
 #define XSIMD_INLINE inline __forceinline
