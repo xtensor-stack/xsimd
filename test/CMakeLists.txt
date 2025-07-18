@@ -141,10 +141,10 @@ set(XSIMD_TESTS
     test_bitwise_cast.cpp
     test_batch_constant.cpp
     #    test_batch_manip.cpp
-    #    test_complex_exponential.cpp
-    #    test_complex_hyperbolic.cpp
-    #    test_complex_power.cpp
-    #    test_complex_trigonometric.cpp
+    test_complex_exponential.cpp
+    test_complex_hyperbolic.cpp
+    test_complex_power.cpp
+    test_complex_trigonometric.cpp
     #    test_conversion.cpp
     #    test_custom_default_arch.cpp
     #    test_error_gamma.cpp
