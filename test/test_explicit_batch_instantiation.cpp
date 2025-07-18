@@ -22,10 +22,12 @@ namespace xsimd
     template class batch<signed short>;
     template class batch<unsigned int>;
     template class batch<signed int>;
+#if !XSIMD_WITH_ALTIVEC
     template class batch<unsigned long>;
     template class batch<signed long>;
+#endif
     template class batch<float>;
-#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
     template class batch<double>;
 #endif
 }

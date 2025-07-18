@@ -71,7 +71,7 @@ struct batch_cast_test
     using int32_batch = xsimd::batch<int32_t>;
     using uint32_batch = xsimd::batch<uint32_t>;
     using float_batch = xsimd::batch<float>;
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
     using int64_batch = xsimd::batch<int64_t>;
     using uint64_batch = xsimd::batch<uint64_t>;
     using double_batch = xsimd::batch<double>;
@@ -185,7 +185,7 @@ struct batch_cast_test
             test_cast_impl<uint32_batch, uint32_batch>(test_value, "batch cast uint32 -> uint32");
             test_cast_impl<uint32_batch, float_batch>(test_value, "batch cast uint32 -> float");
 
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
             test_cast_impl<int64_batch, int64_batch>(test_value, "batch cast int64 -> int64");
             test_cast_impl<int64_batch, uint64_batch>(test_value, "batch cast int64 -> uint64");
             test_cast_impl<int64_batch, double_batch>(test_value, "batch cast int64 -> double");
@@ -202,7 +202,7 @@ struct batch_cast_test
             test_cast_impl<float_batch, float_batch>(test_value, "batch cast float -> float");
         }
 
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         for (const auto& test_value : double_test_values)
         {
             test_cast_impl<double_batch, int64_batch>(test_value, "batch cast double -> int64");
