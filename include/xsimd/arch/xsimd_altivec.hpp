@@ -430,7 +430,7 @@ namespace xsimd
         template <class A, class T, size_t I, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<altivec>) noexcept
         {
-            return vec_insert(val, self.data, pos);
+            return vec_insert(val, self.data, I);
         }
 
         // isnan

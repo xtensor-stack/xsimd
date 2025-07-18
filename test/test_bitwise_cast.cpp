@@ -21,37 +21,44 @@ struct bitwise_cast_test
     static constexpr size_t N = CP::size;
 
     using int32_batch = xsimd::batch<int32_t>;
-    using int64_batch = xsimd::batch<int64_t>;
     using float_batch = xsimd::batch<float>;
-    using double_batch = xsimd::batch<double>;
 
     using int32_vector = std::vector<int32_t, xsimd::default_allocator<int32_t>>;
-    using int64_vector = std::vector<int64_t, xsimd::default_allocator<int64_t>>;
     using float_vector = std::vector<float, xsimd::default_allocator<float>>;
-    using double_vector = std::vector<double, xsimd::default_allocator<double>>;
 
     int32_vector ftoi32_res;
-    int32_vector dtoi32_res;
-    int64_vector ftoi64_res;
-    int64_vector dtoi64_res;
     float_vector i32tof_res;
+
+#ifndef XSIMD_WITH_ALTIVEC
+    using int64_batch = xsimd::batch<int64_t>;
+    using double_batch = xsimd::batch<double>;
+
+    using int64_vector = std::vector<int64_t, xsimd::default_allocator<int64_t>>;
+    using double_vector = std::vector<double, xsimd::default_allocator<double>>;
+
+    int32_vector dtoi32_res;
     float_vector i64tof_res;
     float_vector dtof_res;
+    int64_vector ftoi64_res;
+    int64_vector dtoi64_res;
     double_vector i32tod_res;
     double_vector i64tod_res;
     double_vector ftod_res;
+#endif
 
     bitwise_cast_test()
         : ftoi32_res(2 * N)
-        , dtoi32_res(2 * N)
-        , ftoi64_res(N)
-        , dtoi64_res(N)
         , i32tof_res(2 * N)
+#ifndef XSIMD_WITH_ALTIVEC
+        , dtoi32_res(2 * N)
         , i64tof_res(2 * N)
         , dtof_res(2 * N)
+        , ftoi64_res(N)
+        , dtoi64_res(N)
         , i32tod_res(N)
         , i64tod_res(N)
         , ftod_res(N)
+#endif
     {
         {
             int32_batch input = i32_input();
@@ -59,8 +66,22 @@ struct bitwise_cast_test
             b.i32[0] = input.get(0);
             b.i32[1] = input.get(1);
             std::fill(i32tof_res.begin(), i32tof_res.end(), b.f[0]);
+#ifndef XSIMD_WITH_ALTIVEC
             std::fill(i32tod_res.begin(), i32tod_res.end(), b.d);
+#endif
         }
+        {
+            float_batch input = f_input();
+            bitcast b;
+            b.f[0] = input.get(0);
+            b.f[1] = input.get(1);
+            std::fill(ftoi32_res.begin(), ftoi32_res.end(), b.i32[0]);
+#ifndef XSIMD_WITH_ALTIVEC
+            std::fill(ftoi64_res.begin(), ftoi64_res.end(), b.i64);
+            std::fill(ftod_res.begin(), ftod_res.end(), b.d);
+#endif
+        }
+#ifndef XSIMD_WITH_ALTIVEC
         {
             int64_batch input = i64_input();
             bitcast b;
@@ -71,15 +92,6 @@ struct bitwise_cast_test
                 i64tof_res[2 * i] = b.f[0];
                 i64tof_res[2 * i + 1] = b.f[1];
             }
-        }
-        {
-            float_batch input = f_input();
-            bitcast b;
-            b.f[0] = input.get(0);
-            b.f[1] = input.get(1);
-            std::fill(ftoi32_res.begin(), ftoi32_res.end(), b.i32[0]);
-            std::fill(ftoi64_res.begin(), ftoi64_res.end(), b.i64);
-            std::fill(ftod_res.begin(), ftod_res.end(), b.d);
         }
         {
             double_batch input = d_input();
@@ -95,6 +107,7 @@ struct bitwise_cast_test
                 dtof_res[2 * i + 1] = b.f[1];
             }
         }
+#endif
     }
 
     void test_to_int32()
@@ -106,13 +119,42 @@ struct bitwise_cast_test
             INFO("to_int32(float)");
             CHECK_VECTOR_EQ(i32vres, ftoi32_res);
         }
+#ifndef XSIMD_WITH_ALTIVEC
         {
             int32_batch i32bres = xsimd::bitwise_cast<int32_t>(d_input());
             i32bres.store_aligned(i32vres.data());
             INFO("to_int32(double)");
             CHECK_VECTOR_EQ(i32vres, dtoi32_res);
         }
+#endif
     }
+
+    void test_to_float()
+    {
+        float_vector fvres(float_batch::size);
+        {
+            float_batch fbres = xsimd::bitwise_cast<float>(i32_input());
+            fbres.store_aligned(fvres.data());
+            INFO("to_float(int32_t)");
+            CHECK_VECTOR_EQ(fvres, i32tof_res);
+        }
+#ifndef XSIMD_WITH_ALTIVEC
+        {
+            float_batch fbres = xsimd::bitwise_cast<float>(i64_input());
+            fbres.store_aligned(fvres.data());
+            INFO("to_float(int64_t)");
+            CHECK_VECTOR_EQ(fvres, i64tof_res);
+        }
+        {
+            float_batch fbres = xsimd::bitwise_cast<float>(d_input());
+            fbres.store_aligned(fvres.data());
+            INFO("to_float(double)");
+            CHECK_VECTOR_EQ(fvres, dtof_res);
+        }
+#endif
+    }
+
+#ifndef XSIMD_WITH_ALTIVEC
 
     void test_to_int64()
     {
@@ -128,29 +170,6 @@ struct bitwise_cast_test
             i64bres.store_aligned(i64vres.data());
             INFO("to_int64(double)");
             CHECK_VECTOR_EQ(i64vres, dtoi64_res);
-        }
-    }
-
-    void test_to_float()
-    {
-        float_vector fvres(float_batch::size);
-        {
-            float_batch fbres = xsimd::bitwise_cast<float>(i32_input());
-            fbres.store_aligned(fvres.data());
-            INFO("to_float(int32_t)");
-            CHECK_VECTOR_EQ(fvres, i32tof_res);
-        }
-        {
-            float_batch fbres = xsimd::bitwise_cast<float>(i64_input());
-            fbres.store_aligned(fvres.data());
-            INFO("to_float(int64_t)");
-            CHECK_VECTOR_EQ(fvres, i64tof_res);
-        }
-        {
-            float_batch fbres = xsimd::bitwise_cast<float>(d_input());
-            fbres.store_aligned(fvres.data());
-            INFO("to_float(double)");
-            CHECK_VECTOR_EQ(fvres, dtof_res);
         }
     }
 
@@ -176,6 +195,7 @@ struct bitwise_cast_test
             CHECK_VECTOR_EQ(dvres, ftod_res);
         }
     }
+#endif
 
 private:
     int32_batch i32_input() const
@@ -183,20 +203,22 @@ private:
         return int32_batch(2);
     }
 
-    int64_batch i64_input() const
-    {
-        return int64_batch(2);
-    }
-
     float_batch f_input() const
     {
         return float_batch(3.);
+    }
+
+#ifndef XSIMD_WITH_ALTIVEC
+    int64_batch i64_input() const
+    {
+        return int64_batch(2);
     }
 
     double_batch d_input() const
     {
         return double_batch(2.5e17);
     }
+#endif
 
     union bitcast
     {
@@ -212,11 +234,13 @@ TEST_CASE_TEMPLATE("[bitwise cast]", B, CONVERSION_TYPES)
     bitwise_cast_test<B> Test;
     SUBCASE("to_int32") { Test.test_to_int32(); }
 
-    SUBCASE("to_int64") { Test.test_to_int64(); }
-
     SUBCASE("to_float") { Test.test_to_float(); }
 
+#ifndef XSIMD_WITH_ALTIVEC
+    SUBCASE("to_int64") { Test.test_to_int64(); }
+
     SUBCASE("to_double") { Test.test_to_double(); }
+#endif
 }
 #endif
 #endif
