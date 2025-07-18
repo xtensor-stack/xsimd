@@ -32,7 +32,7 @@ struct load_store_test
     using uint16_vector_type = std::vector<uint16_t, allocator<uint16_t>>;
     using int32_vector_type = std::vector<int32_t, allocator<int32_t>>;
     using uint32_vector_type = std::vector<uint32_t, allocator<uint32_t>>;
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
     using int64_vector_type = std::vector<int64_t, allocator<int64_t>>;
     using uint64_vector_type = std::vector<uint64_t, allocator<uint64_t>>;
 #endif
@@ -51,7 +51,7 @@ struct load_store_test
     uint16_vector_type ui16_vec;
     int32_vector_type i32_vec;
     uint32_vector_type ui32_vec;
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
     int64_vector_type i64_vec;
     uint64_vector_type ui64_vec;
 #endif
@@ -74,7 +74,7 @@ struct load_store_test
         init_test_vector(ui16_vec);
         init_test_vector(i32_vec);
         init_test_vector(ui32_vec);
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         init_test_vector(i64_vec);
         init_test_vector(ui64_vec);
 #endif
@@ -96,7 +96,7 @@ struct load_store_test
         test_load_impl(ui16_vec, "load uint16_t");
         test_load_impl(i32_vec, "load int32_t");
         test_load_impl(ui32_vec, "load uint32_t");
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         test_load_impl(i64_vec, "load int64_t");
         test_load_impl(ui64_vec, "load uint64_t");
 #endif
@@ -118,7 +118,7 @@ struct load_store_test
         test_store_impl(ui16_vec, "load uint16_t");
         test_store_impl(i32_vec, "load int32_t");
         test_store_impl(ui32_vec, "load uint32_t");
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         test_store_impl(i64_vec, "load int64_t");
         test_store_impl(ui64_vec, "load uint64_t");
 #endif
@@ -139,7 +139,7 @@ struct load_store_test
         test_gather_impl(ui16_vec, "gather uint16_t");
         test_gather_impl(i32_vec, "gather int32_t");
         test_gather_impl(ui32_vec, "gather uint32_t");
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         test_gather_impl(i64_vec, "gather int64_t");
         test_gather_impl(ui64_vec, "gather uint64_t");
 #endif
@@ -162,7 +162,7 @@ struct load_store_test
         test_scatter_impl(ui16_vec, "scatter uint16_t");
         test_scatter_impl(i32_vec, "scatter int32_t");
         test_scatter_impl(ui32_vec, "scatter uint32_t");
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         test_scatter_impl(i64_vec, "scatter int64_t");
         test_scatter_impl(ui64_vec, "scatter uint64_t");
 #endif

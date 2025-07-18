@@ -29,7 +29,7 @@ struct bitwise_cast_test
     int32_vector ftoi32_res;
     float_vector i32tof_res;
 
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
     using int64_batch = xsimd::batch<int64_t>;
     using double_batch = xsimd::batch<double>;
 
@@ -49,7 +49,7 @@ struct bitwise_cast_test
     bitwise_cast_test()
         : ftoi32_res(2 * N)
         , i32tof_res(2 * N)
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         , dtoi32_res(2 * N)
         , i64tof_res(2 * N)
         , dtof_res(2 * N)
@@ -66,7 +66,7 @@ struct bitwise_cast_test
             b.i32[0] = input.get(0);
             b.i32[1] = input.get(1);
             std::fill(i32tof_res.begin(), i32tof_res.end(), b.f[0]);
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
             std::fill(i32tod_res.begin(), i32tod_res.end(), b.d);
 #endif
         }
@@ -76,12 +76,12 @@ struct bitwise_cast_test
             b.f[0] = input.get(0);
             b.f[1] = input.get(1);
             std::fill(ftoi32_res.begin(), ftoi32_res.end(), b.i32[0]);
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
             std::fill(ftoi64_res.begin(), ftoi64_res.end(), b.i64);
             std::fill(ftod_res.begin(), ftod_res.end(), b.d);
 #endif
         }
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         {
             int64_batch input = i64_input();
             bitcast b;
@@ -119,7 +119,7 @@ struct bitwise_cast_test
             INFO("to_int32(float)");
             CHECK_VECTOR_EQ(i32vres, ftoi32_res);
         }
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         {
             int32_batch i32bres = xsimd::bitwise_cast<int32_t>(d_input());
             i32bres.store_aligned(i32vres.data());
@@ -138,7 +138,7 @@ struct bitwise_cast_test
             INFO("to_float(int32_t)");
             CHECK_VECTOR_EQ(fvres, i32tof_res);
         }
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
         {
             float_batch fbres = xsimd::bitwise_cast<float>(i64_input());
             fbres.store_aligned(fvres.data());
@@ -154,7 +154,7 @@ struct bitwise_cast_test
 #endif
     }
 
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
 
     void test_to_int64()
     {
@@ -208,7 +208,7 @@ private:
         return float_batch(3.);
     }
 
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
     int64_batch i64_input() const
     {
         return int64_batch(2);
@@ -236,7 +236,7 @@ TEST_CASE_TEMPLATE("[bitwise cast]", B, CONVERSION_TYPES)
 
     SUBCASE("to_float") { Test.test_to_float(); }
 
-#ifndef XSIMD_WITH_ALTIVEC
+#if !XSIMD_WITH_ALTIVEC
     SUBCASE("to_int64") { Test.test_to_int64(); }
 
     SUBCASE("to_double") { Test.test_to_double(); }
