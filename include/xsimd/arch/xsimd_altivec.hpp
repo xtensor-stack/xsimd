@@ -444,15 +444,15 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<altivec>) noexcept
         {
-            return vec_ld(0, mem);
+            return vec_ld(0, reinterpret_cast<const typename batch<T, A>::register_type*>(mem));
         }
 
         // load_unaligned
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<altivec>) noexcept
         {
-            auto lo = vec_ld(0, mem);
-            auto hi = vec_ld(16, mem);
+            auto lo = vec_ld(0, reinterpret_cast<const typename batch<T, A>::register_type*>(mem));
+            auto hi = vec_ld(16, reinterpret_cast<const typename batch<T, A>::register_type*>(mem));
             return vec_perm(lo, hi, vec_lvsl(0, mem));
         }
 
@@ -794,7 +794,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE void store_aligned(T* mem, batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            return vec_st(self.data, 0, mem);
+            return vec_st(self.data, 0, reinterpret_cast<typename batch<T, A>::register_type*>(mem));
         }
 
         // store_unaligned
