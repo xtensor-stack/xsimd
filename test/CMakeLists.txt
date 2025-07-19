@@ -145,19 +145,19 @@ set(XSIMD_TESTS
     test_complex_hyperbolic.cpp
     test_complex_power.cpp
     test_complex_trigonometric.cpp
-    #    test_conversion.cpp
+    test_conversion.cpp
     test_custom_default_arch.cpp
     test_error_gamma.cpp
     test_explicit_batch_instantiation.cpp
     test_exponential.cpp
     test_extract_pair.cpp
-    #    test_fp_manipulation.cpp
+    test_fp_manipulation.cpp
     test_hyperbolic.cpp
     test_load_store.cpp
     test_memory.cpp
     test_poly_evaluation.cpp
     test_power.cpp
-    #    test_rounding.cpp
+    test_rounding.cpp
     #    test_select.cpp
     #    test_shuffle.cpp
     test_sum.cpp
