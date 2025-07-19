@@ -12,12 +12,18 @@
 #ifndef XSIMD_INLINE_HPP
 #define XSIMD_INLINE_HPP
 
+#if defined(__VEC__)
+#define XSIMD_INLINE inline
+#else
+
 #if defined(__GNUC__)
 #define XSIMD_INLINE inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
 #define XSIMD_INLINE inline __forceinline
 #else
 #define XSIMD_INLINE inline
+#endif
+
 #endif
 
 #endif

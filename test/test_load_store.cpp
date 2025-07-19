@@ -32,14 +32,18 @@ struct load_store_test
     using uint16_vector_type = std::vector<uint16_t, allocator<uint16_t>>;
     using int32_vector_type = std::vector<int32_t, allocator<int32_t>>;
     using uint32_vector_type = std::vector<uint32_t, allocator<uint32_t>>;
+#if !XSIMD_WITH_ALTIVEC
     using int64_vector_type = std::vector<int64_t, allocator<int64_t>>;
     using uint64_vector_type = std::vector<uint64_t, allocator<uint64_t>>;
+#endif
 #ifdef XSIMD_32_BIT_ABI
     using long_vector_type = std::vector<long, allocator<long>>;
     using ulong_vector_type = std::vector<unsigned long, allocator<unsigned long>>;
 #endif
     using float_vector_type = std::vector<float, allocator<float>>;
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
     using double_vector_type = std::vector<double, allocator<double>>;
+#endif
 
     int8_vector_type i8_vec;
     uint8_vector_type ui8_vec;
@@ -47,14 +51,18 @@ struct load_store_test
     uint16_vector_type ui16_vec;
     int32_vector_type i32_vec;
     uint32_vector_type ui32_vec;
+#if !XSIMD_WITH_ALTIVEC
     int64_vector_type i64_vec;
     uint64_vector_type ui64_vec;
+#endif
 #ifdef XSIMD_32_BIT_ABI
     long_vector_type l_vec;
     ulong_vector_type ul_vec;
 #endif
     float_vector_type f_vec;
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
     double_vector_type d_vec;
+#endif
 
     array_type expected;
 
@@ -66,14 +74,18 @@ struct load_store_test
         init_test_vector(ui16_vec);
         init_test_vector(i32_vec);
         init_test_vector(ui32_vec);
+#if !XSIMD_WITH_ALTIVEC
         init_test_vector(i64_vec);
         init_test_vector(ui64_vec);
+#endif
 #ifdef XSIMD_32_BIT_ABI
         init_test_vector(l_vec);
         init_test_vector(ul_vec);
 #endif
         init_test_vector(f_vec);
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
         init_test_vector(d_vec);
+#endif
     }
 
     void test_load()
@@ -84,14 +96,16 @@ struct load_store_test
         test_load_impl(ui16_vec, "load uint16_t");
         test_load_impl(i32_vec, "load int32_t");
         test_load_impl(ui32_vec, "load uint32_t");
+#if !XSIMD_WITH_ALTIVEC
         test_load_impl(i64_vec, "load int64_t");
         test_load_impl(ui64_vec, "load uint64_t");
+#endif
 #ifdef XSIMD_32_BIT_ABI
         test_load_impl(l_vec, "load long");
         test_load_impl(ul_vec, "load unsigned long");
 #endif
         test_load_impl(f_vec, "load float");
-#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
         test_load_impl(d_vec, "load double");
 #endif
     }
@@ -104,14 +118,16 @@ struct load_store_test
         test_store_impl(ui16_vec, "load uint16_t");
         test_store_impl(i32_vec, "load int32_t");
         test_store_impl(ui32_vec, "load uint32_t");
+#if !XSIMD_WITH_ALTIVEC
         test_store_impl(i64_vec, "load int64_t");
         test_store_impl(ui64_vec, "load uint64_t");
+#endif
 #ifdef XSIMD_32_BIT_ABI
         test_store_impl(l_vec, "load long");
         test_store_impl(ul_vec, "load unsigned long");
 #endif
         test_store_impl(f_vec, "load float");
-#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
         test_store_impl(d_vec, "load double");
 #endif
     }
@@ -123,15 +139,17 @@ struct load_store_test
         test_gather_impl(ui16_vec, "gather uint16_t");
         test_gather_impl(i32_vec, "gather int32_t");
         test_gather_impl(ui32_vec, "gather uint32_t");
+#if !XSIMD_WITH_ALTIVEC
         test_gather_impl(i64_vec, "gather int64_t");
         test_gather_impl(ui64_vec, "gather uint64_t");
+#endif
 #ifdef XSIMD_32_BIT_ABI
         test_gather_impl(l_vec, "gather long");
         test_gather_impl(ul_vec, "gather unsigned long");
 #endif
         test_gather_impl(f_vec, "gather float");
         test_gather_impl(f_vec, "gather float");
-#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
         test_gather_impl(d_vec, "gather double");
 #endif
     }
@@ -144,14 +162,16 @@ struct load_store_test
         test_scatter_impl(ui16_vec, "scatter uint16_t");
         test_scatter_impl(i32_vec, "scatter int32_t");
         test_scatter_impl(ui32_vec, "scatter uint32_t");
+#if !XSIMD_WITH_ALTIVEC
         test_scatter_impl(i64_vec, "scatter int64_t");
         test_scatter_impl(ui64_vec, "scatter uint64_t");
+#endif
 #ifdef XSIMD_32_BIT_ABI
         test_scatter_impl(l_vec, "scatter long");
         test_scatter_impl(ul_vec, "scatter unsigned long");
 #endif
         test_scatter_impl(f_vec, "scatter float");
-#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
+#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
         test_scatter_impl(d_vec, "scatter double");
 #endif
     }
