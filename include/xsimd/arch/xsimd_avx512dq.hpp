@@ -9,8 +9,8 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_AVX512_DQHPP
-#define XSIMD_AVX512_D_HPP
+#ifndef XSIMD_AVX512DQ_HPP
+#define XSIMD_AVX512DQ_HPP
 
 #include "../types/xsimd_avx512dq_register.hpp"
 
@@ -47,12 +47,12 @@ namespace xsimd
 
         // bitwise_not
         template <class A>
-        XSIMD_INLINE batch<float, A> bitwise_not(batch<float, A> const& self, requires_arch<avx512f>) noexcept
+        XSIMD_INLINE batch<float, A> bitwise_not(batch<float, A> const& self, requires_arch<avx512dq>) noexcept
         {
             return _mm512_xor_ps(self, _mm512_castsi512_ps(_mm512_set1_epi32(-1)));
         }
         template <class A>
-        XSIMD_INLINE batch<double, A> bitwise_not(batch<double, A> const& self, requires_arch<avx512f>) noexcept
+        XSIMD_INLINE batch<double, A> bitwise_not(batch<double, A> const& self, requires_arch<avx512dq>) noexcept
         {
             return _mm512_xor_pd(self, _mm512_castsi512_pd(_mm512_set1_epi32(-1)));
         }
@@ -96,7 +96,7 @@ namespace xsimd
             // tmp1 = [a0..8, b0..8]
             // tmp2 = [a8..f, b8..f]
 #define XSIMD_AVX512_HADDP_STEP1(I, a, b)                                \
-    batch<float, avx512f> res##I;                                        \
+    batch<float, avx512dq> res##I;                                       \
     {                                                                    \
         auto tmp1 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(1, 0, 1, 0)); \
         auto tmp2 = _mm512_shuffle_f32x4(a, b, _MM_SHUFFLE(3, 2, 3, 2)); \
@@ -180,7 +180,7 @@ namespace xsimd
 
         // reduce_add
         template <class A>
-        XSIMD_INLINE float reduce_add(batch<float, A> const& rhs, requires_arch<avx512f>) noexcept
+        XSIMD_INLINE float reduce_add(batch<float, A> const& rhs, requires_arch<avx512dq>) noexcept
         {
             __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
             __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
@@ -192,7 +192,7 @@ namespace xsimd
         namespace detail
         {
             template <class A>
-            XSIMD_INLINE batch<double, A> fast_cast(batch<int64_t, A> const& x, batch<double, A> const&, requires_arch<avx512dq>) noexcept
+            XSIMD_INLINE batch<double, A> fast_cast(batch<int64_t, A> const& self, batch<double, A> const&, requires_arch<avx512dq>) noexcept
             {
                 return _mm512_cvtepi64_pd(self);
             }
