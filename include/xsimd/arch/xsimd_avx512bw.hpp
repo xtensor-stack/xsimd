@@ -497,22 +497,16 @@ namespace xsimd
             {
                 return { (Is >= N ? Is - N : 0)... };
             }
-            template <size_t N, size_t... Is>
-            constexpr std::array<uint16_t, sizeof...(Is)> make_slide_left_mask(::xsimd::detail::index_sequence<Is...>)
-            {
-                return { (Is >= N ? 0xFFFF : 0x0000)... };
-            }
         }
 
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<avx512bw>) noexcept
         {
-            constexpr unsigned BitCount = N * 8;
-            if (BitCount == 0)
+            if (N == 0)
             {
                 return x;
             }
-            if (BitCount >= 512)
+            if (N >= 64)
             {
                 return batch<T, A>(T(0));
             }
@@ -538,9 +532,9 @@ namespace xsimd
             {
                 xx = x;
             }
+            __mmask32 mask = 0xFFFFFFFFu << ((N / 2) & 31);
             alignas(A::alignment()) auto slide_pattern = detail::make_slide_left_pattern<N / 2>(::xsimd::detail::make_index_sequence<512 / 16>());
-            alignas(A::alignment()) auto slide_mask = detail::make_slide_left_mask<N / 2>(::xsimd::detail::make_index_sequence<512 / 16>());
-            return _mm512_and_si512(_mm512_permutexvar_epi16(_mm512_load_epi32(slide_pattern.data()), xx), _mm512_load_epi32(slide_mask.data()));
+            return _mm512_maskz_permutexvar_epi16(mask, _mm512_load_epi32(slide_pattern.data()), xx);
         }
 
         // slide_right
@@ -557,21 +551,15 @@ namespace xsimd
             {
                 return { (Is < (32 - N) ? Is + N : 0)... };
             }
-            template <size_t N, size_t... Is>
-            constexpr std::array<uint16_t, sizeof...(Is)> make_slide_right_mask(::xsimd::detail::index_sequence<Is...>)
-            {
-                return { (Is < 32 - N ? 0xFFFF : 0x0000)... };
-            }
         }
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<avx512bw>) noexcept
         {
-            constexpr unsigned BitCount = N * 8;
-            if (BitCount == 0)
+            if (N == 0)
             {
                 return x;
             }
-            if (BitCount >= 512)
+            if (N >= 64)
             {
                 return batch<T, A>(T(0));
             }
@@ -590,9 +578,9 @@ namespace xsimd
             {
                 xx = x;
             }
+            __mmask32 mask = 0xFFFFFFFFu >> ((N / 2) & 31);
             alignas(A::alignment()) auto slide_pattern = detail::make_slide_right_pattern<N / 2>(::xsimd::detail::make_index_sequence<512 / 16>());
-            alignas(A::alignment()) auto slide_mask = detail::make_slide_right_mask<N / 2>(::xsimd::detail::make_index_sequence<512 / 16>());
-            return _mm512_and_si512(_mm512_permutexvar_epi16(_mm512_load_epi32(slide_pattern.data()), xx), _mm512_load_epi32(slide_mask.data()));
+            return _mm512_maskz_permutexvar_epi16(mask, _mm512_load_epi32(slide_pattern.data()), xx);
         }
 
         // ssub
