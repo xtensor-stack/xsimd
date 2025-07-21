@@ -750,14 +750,14 @@ namespace xsimd
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<altivec>) noexcept
         {
-            return vec_sll(x.data, vec_splat_u8(N));
+            return vec_sll(x.data, vec_splats((uint32_t)N));
         }
 
         // slide_right
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<altivec>) noexcept
         {
-            return vec_srl(x.data, vec_splat_u8(N));
+            return vec_srl(x.data, vec_splats((uint32_t)N));
         }
 
         // sadd
