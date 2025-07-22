@@ -140,7 +140,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return self.data & ~other.data;
+            return vec_and(self.data, vec_nor(other.data, other.data));
         }
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<altivec>) noexcept
