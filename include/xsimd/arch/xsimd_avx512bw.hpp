@@ -484,113 +484,25 @@ namespace xsimd
         }
 
         // slide_left
-        namespace detail
-        {
-            struct make_slide_perm_hi
-            {
-                static constexpr uint64_t get(size_t i, size_t)
-                {
-                    return i == 0 ? 8 : i - 1;
-                }
-            };
-
-            template <size_t N>
-            struct make_slide_left_pattern
-            {
-                static constexpr uint16_t get(size_t i, size_t)
-                {
-                    return i >= N ? i - N : 0;
-                }
-            };
-        }
-
-        template <size_t N, class A, class T>
+        template <size_t N, class A, class T, class = typename std::enable_if<(N & 3) == 2 && (N < 64)>::type>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<avx512bw>) noexcept
         {
-            if (N == 0)
-            {
-                return x;
-            }
-            if (N >= 64)
-            {
-                return batch<T, A>(T(0));
-            }
-            batch<T, A> xx;
-            if (N & 1)
-            {
-                alignas(A::alignment()) uint64_t buffer[8];
-                _mm512_store_epi64(&buffer[0], x);
-                for (int i = 7; i > 0; --i)
-                    buffer[i] = (buffer[i] << 8) | (buffer[i - 1] >> 56);
-                buffer[0] = buffer[0] << 8;
-                xx = _mm512_load_epi64(&buffer[0]);
+            static_assert((N & 3) == 2 && N < 64, "The AVX512F implementation may have a lower latency.");
 
-                auto slide_perm = xsimd::make_batch_constant<uint64_t, detail::make_slide_perm_hi, A>();
-                __m512i xl = _mm512_slli_epi64(x, 8);
-                __m512i xr = _mm512_srli_epi64(x, 56);
-                xr = _mm512_permutex2var_epi64(xr, slide_perm.as_batch(), _mm512_setzero_si512());
-                xx = _mm512_or_si512(xr, xl);
-                if (N == 1)
-                    return xx;
-            }
-            else
-            {
-                xx = x;
-            }
             __mmask32 mask = 0xFFFFFFFFu << ((N / 2) & 31);
-            auto slide_pattern = xsimd::make_batch_constant<uint16_t, detail::make_slide_left_pattern<N / 2>, A>();
-            return _mm512_maskz_permutexvar_epi16(mask, slide_pattern.as_batch(), xx);
+            auto slide_pattern = make_batch_constant<uint16_t, detail::make_slide_left_pattern<N / 2>, A>();
+            return _mm512_maskz_permutexvar_epi16(mask, slide_pattern.as_batch(), x);
         }
 
         // slide_right
-        namespace detail
-        {
-            struct make_slide_perm_low
-            {
-                static constexpr uint64_t get(size_t i, size_t)
-                {
-                    return i + 1;
-                }
-            };
-
-            template <size_t N>
-            struct make_slide_right_pattern
-            {
-                static constexpr uint16_t get(size_t i, size_t n)
-                {
-                    return i < (n - N) ? i + N : 0;
-                }
-            };
-        }
-        template <size_t N, class A, class T>
+        template <size_t N, class A, class T, class = typename std::enable_if<(N & 3) == 2 && (N < 64)>::type>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<avx512bw>) noexcept
         {
-            if (N == 0)
-            {
-                return x;
-            }
-            if (N >= 64)
-            {
-                return batch<T, A>(T(0));
-            }
-            batch<T, A> xx;
-            if (N & 1)
-            {
-                auto slide_perm = xsimd::make_batch_constant<uint64_t, detail::make_slide_perm_low, A>();
-                __m512i xr = _mm512_srli_epi64(x, 8);
-                __m512i xl = _mm512_slli_epi64(x, 56);
-                xl = _mm512_permutex2var_epi64(xl, slide_perm.as_batch(), _mm512_setzero_si512());
-                xx = _mm512_or_si512(xr, xl);
-                if (N == 1)
-                    return xx;
-            }
-            else
-            {
-                xx = x;
-            }
+            static_assert((N & 3) == 2 && N < 64, "The AVX512F implementation may have a lower latency.");
+
             __mmask32 mask = 0xFFFFFFFFu >> ((N / 2) & 31);
-            auto slide_pattern = xsimd::make_batch_constant<uint16_t, detail::make_slide_right_pattern<N / 2>, A>();
-            return _mm512_maskz_permutexvar_epi16(mask, slide_pattern.as_batch(), xx);
+            auto slide_pattern = make_batch_constant<uint16_t, detail::make_slide_right_pattern<N / 2>, A>();
+            return _mm512_maskz_permutexvar_epi16(mask, slide_pattern.as_batch(), x);
         }
 
         // ssub

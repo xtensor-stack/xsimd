@@ -166,7 +166,6 @@ namespace
     };
 }
 
-#if !XSIMD_WITH_AVX512F || XSIMD_WITH_AVX512BW
 template <class B>
 struct slide_test : public init_slide_base<typename B::value_type, B::size>
 {
@@ -269,8 +268,6 @@ TEST_CASE_TEMPLATE("[slide]", B, BATCH_INT_TYPES)
         Test.slide_right();
     }
 }
-
-#endif
 
 template <class B>
 struct compress_test
