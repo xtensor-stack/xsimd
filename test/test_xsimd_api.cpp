@@ -41,8 +41,6 @@ bool extract(xsimd::batch_bool<T, A> const& batch) { return batch.get(0); }
 #define INTEGRAL_TYPES_HEAD char, unsigned char, signed char, short, unsigned short, int, unsigned int, long, unsigned long
 #ifdef XSIMD_NO_SUPPORTED_ARCHITECTURE
 #define INTEGRAL_TYPES_TAIL
-#elif XSIMD_WITH_ALTIVEC
-#define INTEGRAL_TYPES_TAIL , xsimd::batch<char>, xsimd::batch<unsigned char>, xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<unsigned short>, xsimd::batch<int>, xsimd::batch<unsigned int>
 #else
 #define INTEGRAL_TYPES_TAIL , xsimd::batch<char>, xsimd::batch<unsigned char>, xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<unsigned short>, xsimd::batch<int>, xsimd::batch<unsigned int>, xsimd::batch<long>, xsimd::batch<unsigned long>
 #endif
