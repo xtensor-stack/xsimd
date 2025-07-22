@@ -137,7 +137,7 @@ namespace xsimd
         }
 
         // bitwise_andnot
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
             return self.data & ~other.data;
@@ -149,7 +149,7 @@ namespace xsimd
         }
 
         // bitwise_lshift
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<altivec>) noexcept
         {
             using shift_type = as_unsigned_integer_t<T>;
@@ -182,7 +182,7 @@ namespace xsimd
         }
 
         // bitwise_rshift
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<altivec>) noexcept
         {
             using shift_type = as_unsigned_integer_t<T>;
@@ -219,16 +219,25 @@ namespace xsimd
         // store_complex
         namespace detail
         {
-            // Override these methods in SSE-based archs, no need to override store_aligned / store_unaligned
             // complex_low
             template <class A>
             XSIMD_INLINE batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires_arch<altivec>) noexcept
             {
                 return vec_mergel(self.real().data, self.imag().data);
             }
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<altivec>) noexcept
+            {
+                return vec_mergel(self.real().data, self.imag().data);
+            }
             // complex_high
             template <class A>
             XSIMD_INLINE batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires_arch<altivec>) noexcept
+            {
+                return vec_mergeh(self.real().data, self.imag().data);
+            }
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<altivec>) noexcept
             {
                 return vec_mergeh(self.real().data, self.imag().data);
             }
