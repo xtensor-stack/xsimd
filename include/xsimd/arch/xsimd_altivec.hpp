@@ -757,6 +757,12 @@ namespace xsimd
             return vec_sqrt(val.data);
         }
 
+        template <class A>
+        XSIMD_INLINE batch<double, A> sqrt(batch<double, A> const& val, requires_arch<altivec>) noexcept
+        {
+            return vec_sqrt(val.data);
+        }
+
         // slide_left
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<altivec>) noexcept
