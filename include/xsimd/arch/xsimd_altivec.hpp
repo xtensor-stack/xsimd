@@ -74,6 +74,12 @@ namespace xsimd
             return vec_abs(self.data);
         }
 
+        template <class A>
+        XSIMD_INLINE batch<double, A> abs(batch<double, A> const& self, requires_arch<altivec>) noexcept
+        {
+            return vec_abs(self.data);
+        }
+
         // add
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
@@ -692,6 +698,11 @@ namespace xsimd
         // rsqrt
         template <class A>
         XSIMD_INLINE batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<altivec>) noexcept
+        {
+            return vec_rsqrt(val.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> rsqrt(batch<double, A> const& val, requires_arch<altivec>) noexcept
         {
             return vec_rsqrt(val.data);
         }
