@@ -1859,19 +1859,110 @@ namespace xsimd
         }
 
         // slide_left
-        template <size_t N, class A, class T>
-        XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const&, requires_arch<avx512f>) noexcept
+        namespace detail
         {
-            static_assert(N == 0xDEAD, "not implemented yet");
-            return {};
+            template <size_t N>
+            struct make_slide_left_pattern
+            {
+                static constexpr size_t get(size_t i, size_t)
+                {
+                    return i >= N ? i - N : 0;
+                }
+            };
+
+            template <size_t N, class A, class T>
+            XSIMD_INLINE batch<T, A> slide_left_aligned_u32(batch<T, A> const& x, requires_arch<avx512f>) noexcept
+            {
+                static_assert((N & 3) == 0 || N >= 64, "N must be aligned to 32 bits");
+
+                if (N == 0)
+                {
+                    return x;
+                }
+                if (N >= 64)
+                {
+                    return batch<T, A>(T(0));
+                }
+
+                __mmask16 mask = uint16_t(0xFFFFu << (N / 4));
+
+                if ((N & 15) == 0)
+                {
+                    const uint8_t imm8 = uint8_t(0xe4 << (2 * (N / 16)));
+                    return _mm512_maskz_shuffle_i32x4(mask, x, x, imm8);
+                }
+
+                auto slide_pattern = make_batch_constant<uint32_t, detail::make_slide_left_pattern<N / 4>, A>();
+                return _mm512_maskz_permutexvar_epi32(mask, slide_pattern.as_batch(), x);
+            }
+        }
+
+        template <size_t N, class A, class T>
+        XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<avx512f>) noexcept
+        {
+            constexpr size_t NN = N & ~3;
+            if (N == NN || NN >= 64)
+            {
+                // Call fast path
+                return detail::slide_left_aligned_u32<NN>(x, A {});
+            }
+
+            __m512i xl = detail::slide_left_aligned_u32<NN, A, T>(_mm512_slli_epi32(x, 8 * (N - NN)), A {});
+            __m512i xr = detail::slide_left_aligned_u32<NN + 4, A, T>(_mm512_srli_epi32(x, 32 - 8 * (N - NN)), A {});
+            return _mm512_or_epi32(xl, xr);
         }
 
         // slide_right
-        template <size_t N, class A, class T>
-        XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const&, requires_arch<avx512f>) noexcept
+        namespace detail
         {
-            static_assert(N == 0xDEAD, "not implemented yet");
-            return {};
+            template <size_t N>
+            struct make_slide_right_pattern
+            {
+                static constexpr size_t get(size_t i, size_t n)
+                {
+                    return i < (n - N) ? i + N : 0;
+                }
+            };
+
+            template <size_t N, class A, class T>
+            XSIMD_INLINE batch<T, A> slide_right_aligned_u32(batch<T, A> const& x, requires_arch<avx512f>) noexcept
+            {
+                static_assert((N & 3) == 0 || N >= 64, "N must be aligned to 32 bits");
+
+                if (N == 0)
+                {
+                    return x;
+                }
+                if (N >= 64)
+                {
+                    return batch<T, A>(T(0));
+                }
+
+                __mmask16 mask = 0xFFFFu >> (N / 4);
+
+                if ((N & 15) == 0)
+                {
+                    const uint8_t imm8 = 0xe4 >> (2 * (N / 16));
+                    return _mm512_maskz_shuffle_i32x4(mask, x, x, imm8);
+                }
+
+                auto slide_pattern = make_batch_constant<uint32_t, detail::make_slide_right_pattern<N / 4>, A>();
+                return _mm512_maskz_permutexvar_epi32(mask, slide_pattern.as_batch(), x);
+            }
+        }
+        template <size_t N, class A, class T>
+        XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<avx512f>) noexcept
+        {
+            constexpr size_t NN = N & ~3;
+            if (N == NN || NN >= 64)
+            {
+                // Call fast path
+                return detail::slide_right_aligned_u32<NN>(x, A {});
+            }
+
+            __m512i xl = detail::slide_right_aligned_u32<NN + 4, A, T>(_mm512_slli_epi32(x, 32 - 8 * (N - NN)), A {});
+            __m512i xr = detail::slide_right_aligned_u32<NN, A, T>(_mm512_srli_epi32(x, 8 * (N - NN)), A {});
+            return _mm512_or_epi32(xl, xr);
         }
 
         // sqrt
