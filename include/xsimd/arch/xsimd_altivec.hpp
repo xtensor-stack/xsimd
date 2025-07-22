@@ -808,7 +808,7 @@ namespace xsimd
         }
 
         // sadd
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && sizeof(T) != 8, void>::type>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
             return vec_adds(self.data, other.data);
