@@ -247,6 +247,11 @@ namespace xsimd
         {
             return vec_mul(self.data, vec_re(other.data));
         }
+        template <class A>
+        XSIMD_INLINE batch<double, A> div(batch<double, A> const& self, batch<double, A> const& other, requires_arch<altivec>) noexcept
+        {
+            return vec_mul(self.data, vec_re(other.data));
+        }
 
         // fast_cast
         namespace detail
@@ -445,6 +450,11 @@ namespace xsimd
         {
             return ~vec_cmpeq(self.data, self.data);
         }
+        template <class A>
+        XSIMD_INLINE batch_bool<double, A> isnan(batch<double, A> const& self, requires_arch<altivec>) noexcept
+        {
+            return ~vec_cmpeq(self.data, self.data);
+        }
 
         // load_aligned
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
@@ -467,6 +477,11 @@ namespace xsimd
         {
             template <class A>
             XSIMD_INLINE batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<altivec>) noexcept
+            {
+                return { vec_mergee(hi.data, lo.data), vec_mergeo(hi.data, lo.data) };
+            }
+            template <class A>
+            XSIMD_INLINE batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<altivec>) noexcept
             {
                 return { vec_mergee(hi.data, lo.data), vec_mergeo(hi.data, lo.data) };
             }
@@ -617,6 +632,12 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> reciprocal(batch<float, A> const& self,
                                                 kernel::requires_arch<altivec>)
+        {
+            return vec_re(self.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> reciprocal(batch<double, A> const& self,
+                                                 kernel::requires_arch<altivec>)
         {
             return vec_re(self.data);
         }
