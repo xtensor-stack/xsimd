@@ -61,11 +61,11 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<common>) noexcept;
         template <class A, typename T, typename ITy, ITy... Indices>
         XSIMD_INLINE batch<T, A> shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<ITy, A, Indices...>, requires_arch<common>) noexcept;
+#endif
         template <class A, class T>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
         template <class A, class T>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
-#endif
 
         // abs
         template <class A>
@@ -102,10 +102,20 @@ namespace xsimd
         }
 
         // avgr
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && sizeof(T) < 8, void>::type>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
             return vec_avg(self.data, other.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> avgr(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
+        {
+            return avgr(self, other, common {});
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> avgr(batch<double, A> const& self, batch<double, A> const& other, requires_arch<altivec>) noexcept
+        {
+            return avgr(self, other, common {});
         }
 
         // avg
@@ -115,6 +125,16 @@ namespace xsimd
             constexpr auto nbit = 8 * sizeof(T) - 1;
             auto adj = ((self ^ other) << nbit) >> nbit;
             return avgr(self, other, A {}) - adj;
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> avg(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
+        {
+            return avg(self, other, common {});
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> avg(batch<double, A> const& self, batch<double, A> const& other, requires_arch<altivec>) noexcept
+        {
+            return avg(self, other, common {});
         }
 
         // batch_bool_cast
@@ -439,6 +459,14 @@ namespace xsimd
             return vec_add(tmp6, tmp7);
         }
 
+        template <class A>
+        XSIMD_INLINE batch<double, A> haddp(batch<double, A> const* row, requires_arch<altivec>) noexcept
+        {
+            auto tmp0 = vec_mergee(row[0].data, row[1].data); // v00 v10 v02 v12
+            auto tmp1 = vec_mergeo(row[0].data, row[1].data); // v01 v11 v03 v13
+            return vec_add(tmp0, tmp1);
+        }
+
         // incr_if
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<altivec>) noexcept
@@ -652,21 +680,23 @@ namespace xsimd
         }
 
         // reduce_add
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
-        XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<altivec>) noexcept
+        template <class A>
+        XSIMD_INLINE signed reduce_add(batch<signed, A> const& self, requires_arch<altivec>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
-                auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
-                auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
-                auto tmp3 = vec_add(tmp1, tmp2);
-                return vec_extract(tmp3, 0);
-            }
-            else
-            {
-                return hadd(self, common {});
-            }
+            auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
+            auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
+            auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
+            auto tmp3 = vec_add(tmp1, tmp2);
+            return vec_extract(tmp3, 0);
+        }
+        template <class A>
+        XSIMD_INLINE unsigned reduce_add(batch<unsigned, A> const& self, requires_arch<altivec>) noexcept
+        {
+            auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
+            auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
+            auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
+            auto tmp3 = vec_add(tmp1, tmp2);
+            return vec_extract(tmp3, 0);
         }
         template <class A>
         XSIMD_INLINE float reduce_add(batch<float, A> const& self, requires_arch<altivec>) noexcept
@@ -677,6 +707,18 @@ namespace xsimd
             auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
             auto tmp3 = vec_add(tmp1, tmp2);
             return vec_extract(tmp3, 0);
+        }
+        template <class A>
+        XSIMD_INLINE double reduce_add(batch<double, A> const& self, requires_arch<altivec>) noexcept
+        {
+            auto tmp0 = vec_reve(self.data); // v1, v0
+            auto tmp1 = vec_add(self.data, tmp0); // v0 + v1, v1 + v0
+            return vec_extract(tmp1, 0);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<altivec>) noexcept
+        {
+            return hadd(self, common {});
         }
 
 #if 0

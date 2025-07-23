@@ -413,10 +413,21 @@
  *
  * Set to 1 if Altivec is available at compile-time, to 0 otherwise.
  */
-#ifdef __VEC__
+#if defined(__VEC__)
 #define XSIMD_WITH_ALTIVEC 1
 #else
 #define XSIMD_WITH_ALTIVEC 0
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if Vector Scalar eXtension is available at compile-time, to 0 otherwise.
+ */
+#if defined(__VSX__)
+#define XSIMD_WITH_VSX 1
+#else
+#define XSIMD_WITH_VSX 0
 #endif
 
 // Workaround for MSVC compiler
