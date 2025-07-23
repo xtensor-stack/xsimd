@@ -94,8 +94,6 @@ struct zip_test : zip_base<typename B::value_type, B::size>
 
 #if !XSIMD_WITH_AVX512F || XSIMD_WITH_AVX512BW
 #define ZIP_BATCH_TYPES BATCH_TYPES
-#elif XSIMD_WITH_ALTIVEC
-#define ZIP_BATCH_TYPES xsimd::batch<float>, xsimd::batch<int32_t>
 #else
 #define ZIP_BATCH_TYPES xsimd::batch<float>, xsimd::batch<double>, xsimd::batch<int32_t>, xsimd::batch<int64_t>
 #endif
@@ -346,11 +344,7 @@ struct compress_test
     }
 };
 
-#if XSIMD_WITH_ALTIVEC
-#define XSIMD_COMPRESS_TYPES BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsimd::batch<int8_t>, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint32_t>, xsimd::batch<int32_t>
-#else
 #define XSIMD_COMPRESS_TYPES BATCH_FLOAT_TYPES, xsimd::batch<uint8_t>, xsimd::batch<int8_t>, xsimd::batch<uint16_t>, xsimd::batch<int16_t>, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>
-#endif
 
 TEST_CASE_TEMPLATE("[compress]", B, XSIMD_COMPRESS_TYPES)
 {
@@ -697,11 +691,7 @@ struct shuffle_test
     }
 };
 
-#if XSIMD_WITH_ALTIVEC
-#define XSIMD_SHUFFLE_TYPES BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>
-#else
 #define XSIMD_SHUFFLE_TYPES BATCH_FLOAT_TYPES, xsimd::batch<uint32_t>, xsimd::batch<int32_t>, xsimd::batch<uint64_t>, xsimd::batch<int64_t>
-#endif
 
 TEST_CASE_TEMPLATE("[shuffle]", B, XSIMD_SHUFFLE_TYPES)
 {

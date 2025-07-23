@@ -14,7 +14,7 @@
 
 #include "test_utils.hpp"
 
-#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 template <class CP>
 struct conversion_test
 {
