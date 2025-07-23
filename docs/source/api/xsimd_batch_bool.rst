@@ -20,6 +20,8 @@ Logical operators
    :project: xsimd
    :content-only:
 
+.. _xsimd-batch-bool-reducers:
+
 Reducers
 --------
 

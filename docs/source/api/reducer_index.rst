@@ -41,6 +41,8 @@ Reduction operators
 | :cpp:func:`haddp`                     | horizontal sum across batches                      |
 +---------------------------------------+----------------------------------------------------+
 
+Also see the `batch_bool` :ref:`xsimd-batch-bool-reducers`.
+
 ----
 
 .. doxygengroup:: batch_reducers

@@ -635,7 +635,7 @@ namespace xsimd
     }
 
     /**
-     * @ingroup batch_reducers
+     * @ingroup batch_bool_reducers
      *
      * Count the number of values set to true in the batch \c x
      * @param x boolean or batch of boolean
