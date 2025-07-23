@@ -56,7 +56,7 @@ bool extract(xsimd::batch_bool<T, A> const& batch) { return batch.get(0); }
 #define FLOAT_TYPES_TAIL
 #else
 #define FLOAT_TYPES_MIDDLE , xsimd::batch<float>
-#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 #define FLOAT_TYPES_TAIL , xsimd::batch<double>
 #else
 #define FLOAT_TYPES_TAIL
@@ -76,7 +76,7 @@ bool extract(xsimd::batch_bool<T, A> const& batch) { return batch.get(0); }
 #else
 #define ALL_FLOATING_POINT_TYPES_MIDDLE , xsimd::batch<float>, xsimd::batch<std::complex<float>>
 
-#if (!XSIMD_WITH_NEON && !XSIMD_WITH_ALTIVEC) || XSIMD_WITH_NEON64
+#if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
 #define ALL_FLOATING_POINT_TYPES_TAIL , xsimd::batch<double>, xsimd::batch<std::complex<double>>
 #else
 #define ALL_FLOATING_POINT_TYPES_TAIL
