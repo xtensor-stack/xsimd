@@ -476,7 +476,7 @@ namespace xsimd
 
         // insert
         template <class A, class T, size_t I, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
-        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<altivec>) noexcept
+        XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<altivec>) noexcept
         {
             return vec_insert(val, self.data, I);
         }
@@ -790,37 +790,42 @@ namespace xsimd
         {
             return select(batch_bool<T, A> { Values... }, true_br, false_br, altivec {});
         }
-#if 0
 
         // shuffle
         template <class A, class ITy, ITy I0, ITy I1, ITy I2, ITy I3>
-        XSIMD_INLINE batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<ITy, A, I0, I1, I2, I3> mask, requires_arch<altivec>) noexcept
+        XSIMD_INLINE batch<float, A> shuffle(batch<float, A> const& x, batch<float, A> const& y, batch_constant<ITy, A, I0, I1, I2, I3>, requires_arch<altivec>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle(I0, I1, I2, I3);
-            // shuffle within lane
-            if (I0 < 4 && I1 < 4 && I2 >= 4 && I3 >= 4)
-                return _mm_shuffle_ps(x, y, smask);
-
-            // shuffle within opposite lane
-            if (I0 >= 4 && I1 >= 4 && I2 < 4 && I3 < 4)
-                return _mm_shuffle_ps(y, x, smask);
-            return shuffle(x, y, mask, common {});
+            return vec_perm(x.data, y.data,
+                            (__vector unsigned char) {
+                                4 * I0 + 0, 4 * I0 + 1, 4 * I0 + 2, 4 * I0 + 3,
+                                4 * I1 + 0, 4 * I1 + 1, 4 * I1 + 2, 4 * I1 + 3,
+                                4 * I2 + 0, 4 * I2 + 1, 4 * I2 + 2, 4 * I2 + 3,
+                                4 * I3 + 0, 4 * I3 + 1, 4 * I3 + 2, 4 * I3 + 3 });
         }
 
         template <class A, class ITy, ITy I0, ITy I1>
-        XSIMD_INLINE batch<double, A> shuffle(batch<double, A> const& x, batch<double, A> const& y, batch_constant<ITy, A, I0, I1> mask, requires_arch<altivec>) noexcept
+        XSIMD_INLINE batch<double, A> shuffle(batch<double, A> const& x, batch<double, A> const& y, batch_constant<ITy, A, I0, I1>, requires_arch<altivec>) noexcept
         {
-            constexpr uint32_t smask = detail::mod_shuffle(I0, I1);
-            // shuffle within lane
-            if (I0 < 2 && I1 >= 2)
-                return _mm_shuffle_pd(x, y, smask);
-
-            // shuffle within opposite lane
-            if (I0 >= 2 && I1 < 2)
-                return _mm_shuffle_pd(y, x, smask);
-            return shuffle(x, y, mask, common {});
+            return vec_perm(x.data, y.data,
+                            (__vector unsigned char) {
+                                8 * I0 + 0,
+                                8 * I0 + 1,
+                                8 * I0 + 2,
+                                8 * I0 + 3,
+                                8 * I0 + 4,
+                                8 * I0 + 5,
+                                8 * I0 + 6,
+                                8 * I0 + 7,
+                                8 * I1 + 0,
+                                8 * I1 + 1,
+                                8 * I1 + 2,
+                                8 * I1 + 3,
+                                8 * I1 + 4,
+                                8 * I1 + 5,
+                                8 * I1 + 6,
+                                8 * I1 + 7,
+                            });
         }
-#endif
 
         // sqrt
         template <class A>
