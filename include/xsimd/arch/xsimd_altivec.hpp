@@ -912,28 +912,65 @@ namespace xsimd
             return vec_sub(self.data, other.data);
         }
 
-#if 0
         // swizzle
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<altivec>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(V0, V1, V2, V3);
-            return _mm_shuffle_ps(self, self, index);
+            return vec_perm(self.data, self.data,
+                            (__vector unsigned char) {
+                                4 * V0 + 0, 4 * V0 + 1, 4 * V0 + 2, 4 * V0 + 3,
+                                4 * V1 + 0, 4 * V1 + 1, 4 * V1 + 2, 4 * V1 + 3,
+                                4 * V2 + 0, 4 * V2 + 1, 4 * V2 + 2, 4 * V2 + 3,
+                                4 * V3 + 0, 4 * V3 + 1, 4 * V3 + 2, 4 * V3 + 3 });
         }
 
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1>, requires_arch<altivec>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(V0, V1);
-            return _mm_shuffle_pd(self, self, index);
+            return vec_perm(self.data, self.data,
+                            (__vector unsigned char) {
+                                8 * V0 + 0,
+                                8 * V0 + 1,
+                                8 * V0 + 2,
+                                8 * V0 + 3,
+                                8 * V0 + 4,
+                                8 * V0 + 5,
+                                8 * V0 + 6,
+                                8 * V0 + 7,
+                                8 * V1 + 0,
+                                8 * V1 + 1,
+                                8 * V1 + 2,
+                                8 * V1 + 3,
+                                8 * V1 + 4,
+                                8 * V1 + 5,
+                                8 * V1 + 6,
+                                8 * V1 + 7,
+                            });
         }
 
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch_constant<uint64_t, A, V0, V1>, requires_arch<altivec>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(2 * V0, 2 * V0 + 1, 2 * V1, 2 * V1 + 1);
-            return _mm_shuffle_epi32(self, index);
+            return vec_perm(self.data, self.data,
+                            (__vector unsigned char) {
+                                8 * V0 + 0,
+                                8 * V0 + 1,
+                                8 * V0 + 2,
+                                8 * V0 + 3,
+                                8 * V0 + 4,
+                                8 * V0 + 5,
+                                8 * V0 + 6,
+                                8 * V0 + 7,
+                                8 * V1 + 0,
+                                8 * V1 + 1,
+                                8 * V1 + 2,
+                                8 * V1 + 3,
+                                8 * V1 + 4,
+                                8 * V1 + 5,
+                                8 * V1 + 6,
+                                8 * V1 + 7,
+                            });
         }
 
         template <class A, uint64_t V0, uint64_t V1>
@@ -945,8 +982,12 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<altivec>) noexcept
         {
-            constexpr uint32_t index = detail::shuffle(V0, V1, V2, V3);
-            return _mm_shuffle_epi32(self, index);
+            return vec_perm(self.data, self.data,
+                            (__vector unsigned char) {
+                                4 * V0 + 0, 4 * V0 + 1, 4 * V0 + 2, 4 * V0 + 3,
+                                4 * V1 + 0, 4 * V1 + 1, 4 * V1 + 2, 4 * V1 + 3,
+                                4 * V2 + 0, 4 * V2 + 1, 4 * V2 + 2, 4 * V2 + 3,
+                                4 * V3 + 0, 4 * V3 + 1, 4 * V3 + 2, 4 * V3 + 3 });
         }
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
@@ -958,20 +999,12 @@ namespace xsimd
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
         XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<altivec>) noexcept
         {
-            // permute within each lane
-            constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
-            constexpr auto mask_hi = detail::mod_shuffle(V4, V5, V6, V7);
-            __m128i lo = _mm_shufflelo_epi16(self, mask_lo);
-            __m128i hi = _mm_shufflehi_epi16(self, mask_hi);
-
-            __m128i lo_lo = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(lo), _mm_castsi128_pd(lo), _MM_SHUFFLE2(0, 0)));
-            __m128i hi_hi = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(hi), _mm_castsi128_pd(hi), _MM_SHUFFLE2(1, 1)));
-
-            // mask to choose the right lane
-            batch_bool_constant<uint16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> blend_mask;
-
-            // blend the two permutes
-            return select(blend_mask, batch<uint16_t, A>(lo_lo), batch<uint16_t, A>(hi_hi));
+            return vec_perm(self.data, self.data,
+                            (__vector unsigned char) {
+                                2 * V0 + 0, 2 * V0 + 1, 2 * V1 + 0, 2 * V1 + 1,
+                                2 * V2 + 0, 2 * V2 + 1, 2 * V3 + 0, 2 * V3 + 1,
+                                2 * V4 + 0, 2 * V4 + 1, 2 * V5 + 0, 2 * V5 + 1,
+                                2 * V6 + 0, 2 * V6 + 1, 2 * V7 + 0, 2 * V7 + 1 });
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
@@ -979,6 +1012,8 @@ namespace xsimd
         {
             return bitwise_cast<int16_t>(swizzle(bitwise_cast<uint16_t>(self), mask, altivec {}));
         }
+
+#if 0
 
         // transpose
         template <class A>
