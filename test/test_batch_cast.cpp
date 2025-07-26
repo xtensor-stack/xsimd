@@ -70,14 +70,15 @@ struct batch_cast_test
     using uint16_batch = xsimd::batch<uint16_t>;
     using int32_batch = xsimd::batch<int32_t>;
     using uint32_batch = xsimd::batch<uint32_t>;
+    using float_batch = xsimd::batch<float>;
     using int64_batch = xsimd::batch<int64_t>;
     using uint64_batch = xsimd::batch<uint64_t>;
-    using float_batch = xsimd::batch<float>;
     using double_batch = xsimd::batch<double>;
 
     std::vector<uint64_t> int_test_values;
-    std::vector<float> float_test_values;
     std::vector<double> double_test_values;
+
+    std::vector<float> float_test_values;
 
     batch_cast_test()
     {

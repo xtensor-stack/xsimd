@@ -1087,7 +1087,7 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& self, requires_arch<common>) noexcept
         {
-            return batch<T, A>(self.data) & batch<T, A>(1);
+            return batch<T, A>((typename batch<T, A>::register_type)self.data) & batch<T, A>(1);
         }
 
         // horner

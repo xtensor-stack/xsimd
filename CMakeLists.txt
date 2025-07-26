@@ -35,6 +35,7 @@ message(STATUS "xsimd v${${PROJECT_NAME}_VERSION}")
 set(XSIMD_HEADERS
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_constants.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_fma3_avx.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_fma3_avx.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_fma3_avx2.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_fma3_sse.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_fma4.hpp
@@ -49,6 +50,7 @@ ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse3.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse4_1.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sse4_2.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_ssse3.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_altivec.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/arch/xsimd_sve.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_arch.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/config/xsimd_config.hpp
@@ -70,6 +72,7 @@ ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_fma3_sse_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_fma4_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_common_arch.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_register.hpp
+${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_altivec_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_rvv_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse2_register.hpp
 ${XSIMD_INCLUDE_DIR}/xsimd/types/xsimd_sse3_register.hpp
