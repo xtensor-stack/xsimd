@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         target:
-          - { platform: 'ppc64',     dir: 'powerpc64-linux-gnu',   flags: '-maltivec -mvsx -mcpu=power8', full: 'OFF' }
+          - { platform: 'ppc64le',     dir: 'powerpc64le-linux-gnu',   flags: '-maltivec -mvsx -mcpu=power8', full: 'OFF' }
         sys:
           - { compiler: 'gcc',   version: '12' }
     steps:
