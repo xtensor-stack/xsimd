@@ -879,7 +879,8 @@ namespace xsimd
             }
             else
             {
-                return (typename batch<T, A>::register_type)vec_sro((__vector unsigned char)x.data, vec_splats((uint8_t)(8 * N)));
+                auto slider = vec_splats((uint8_t)(8 * N));
+                return (typename batch<T, A>::register_type)vec_sro((__vector unsigned char)x.data, slider);
             }
         }
 
