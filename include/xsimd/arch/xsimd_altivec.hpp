@@ -122,9 +122,16 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            constexpr auto nbit = 8 * sizeof(T) - 1;
-            auto adj = ((self ^ other) << nbit) >> nbit;
-            return avgr(self, other, A {}) - adj;
+            XSIMD_IF_CONSTEXPR(sizeof(T) < 8)
+            {
+                constexpr auto nbit = 8 * sizeof(T) - 1;
+                auto adj = bitwise_cast<T>(bitwise_cast<as_unsigned_integer_t<T>>((self ^ other) << nbit) >> nbit);
+                return avgr(self, other, A {}) - adj;
+            }
+            else
+            {
+                return avg(self, other, common {});
+            }
         }
         template <class A>
         XSIMD_INLINE batch<float, A> avg(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
@@ -207,7 +214,14 @@ namespace xsimd
         {
             using shift_type = as_unsigned_integer_t<T>;
             batch<shift_type, A> shift(static_cast<shift_type>(other));
-            return vec_sr(self.data, shift.data);
+            XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+            {
+                return vec_sra(self.data, shift.data);
+            }
+            else
+            {
+                return vec_sr(self.data, shift.data);
+            }
         }
 
         // bitwise_xor
@@ -226,7 +240,7 @@ namespace xsimd
         template <class A, class T_in, class T_out>
         XSIMD_INLINE batch<T_out, A> bitwise_cast(batch<T_in, A> const& self, batch<T_out, A> const&, requires_arch<altivec>) noexcept
         {
-            return *reinterpret_cast<typename batch<T_out, A>::register_type const*>(&self.data);
+            return (typename batch<T_out, A>::register_type)(self.data);
         }
 
         // broadcast
@@ -243,23 +257,23 @@ namespace xsimd
             template <class A>
             XSIMD_INLINE batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires_arch<altivec>) noexcept
             {
-                return vec_mergel(self.real().data, self.imag().data);
+                return vec_mergeh(self.real().data, self.imag().data);
             }
             template <class A>
             XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<altivec>) noexcept
             {
-                return vec_mergel(self.real().data, self.imag().data);
+                return vec_mergeh(self.real().data, self.imag().data);
             }
             // complex_high
             template <class A>
             XSIMD_INLINE batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires_arch<altivec>) noexcept
             {
-                return vec_mergeh(self.real().data, self.imag().data);
+                return vec_mergel(self.real().data, self.imag().data);
             }
             template <class A>
             XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<altivec>) noexcept
             {
-                return vec_mergeh(self.real().data, self.imag().data);
+                return vec_mergel(self.real().data, self.imag().data);
             }
         }
 
@@ -267,19 +281,19 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<altivec>) noexcept
         {
-            return self + batch<T, A>(mask.data);
+            return self + batch<T, A>((typename batch<T, A>::register_type)mask.data);
         }
 
         // div
         template <class A>
         XSIMD_INLINE batch<float, A> div(batch<float, A> const& self, batch<float, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_mul(self.data, vec_re(other.data));
+            return vec_div(self.data, other.data);
         }
         template <class A>
         XSIMD_INLINE batch<double, A> div(batch<double, A> const& self, batch<double, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_mul(self.data, vec_re(other.data));
+            return vec_div(self.data, other.data);
         }
 
         // fast_cast
@@ -471,7 +485,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<altivec>) noexcept
         {
-            return self - batch<T, A>(mask.data);
+            return self - batch<T, A>((typename batch<T, A>::register_type)mask.data);
         }
 
         // insert
@@ -504,9 +518,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<altivec>) noexcept
         {
-            auto lo = vec_ld(0, reinterpret_cast<const typename batch<T, A>::register_type*>(mem));
-            auto hi = vec_ld(16, reinterpret_cast<const typename batch<T, A>::register_type*>(mem));
-            return vec_perm(lo, hi, vec_lvsl(0, mem));
+            return *(typename batch<T, A>::register_type const*)mem;
         }
 
         // load_complex
@@ -515,7 +527,9 @@ namespace xsimd
             template <class A>
             XSIMD_INLINE batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<altivec>) noexcept
             {
-                return { vec_mergee(hi.data, lo.data), vec_mergeo(hi.data, lo.data) };
+                __vector unsigned char perme = { 0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27 };
+                __vector unsigned char permo = { 4, 5, 6, 7, 12, 13, 14, 15, 20, 21, 22, 23, 28, 29, 30, 31 };
+                return { vec_perm(hi.data, lo.data, perme), vec_perm(hi.data, lo.data, permo) };
             }
             template <class A>
             XSIMD_INLINE batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<altivec>) noexcept
@@ -685,7 +699,7 @@ namespace xsimd
         {
             auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
             auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
-            auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
+            auto tmp2 = vec_mergel(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
             auto tmp3 = vec_add(tmp1, tmp2);
             return vec_extract(tmp3, 0);
         }
@@ -694,7 +708,7 @@ namespace xsimd
         {
             auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
             auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
-            auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
+            auto tmp2 = vec_mergel(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
             auto tmp3 = vec_add(tmp1, tmp2);
             return vec_extract(tmp3, 0);
         }
@@ -704,7 +718,7 @@ namespace xsimd
             // FIXME: find an in-order approach
             auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
             auto tmp1 = vec_add(self.data, tmp0); // v0 + v3, v1 + v2, v2 + v1, v3 + v0
-            auto tmp2 = vec_mergeh(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
+            auto tmp2 = vec_mergel(tmp1, tmp1); // v2 + v1, v2 + v1, v3 + v0, v3 + v0
             auto tmp3 = vec_add(tmp1, tmp2);
             return vec_extract(tmp3, 0);
         }
@@ -783,7 +797,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<altivec>) noexcept
         {
-            return vec_sel(true_br.data, false_br.data, cond.data);
+            return vec_sel(false_br.data, true_br.data, cond.data);
         }
         template <class A, class T, bool... Values, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<altivec>) noexcept
@@ -844,14 +858,29 @@ namespace xsimd
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<altivec>) noexcept
         {
-            return (typename batch<T, A>::register_type)vec_sll((__vector unsigned char)x.data, vec_splats((uint32_t)N));
+            XSIMD_IF_CONSTEXPR(N == batch<T, A>::size * sizeof(T))
+            {
+                return batch<T, A>(0);
+            }
+            else
+            {
+                auto slider = vec_splats((uint8_t)(8 * N));
+                return (typename batch<T, A>::register_type)vec_slo(x.data, slider);
+            }
         }
 
         // slide_right
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<altivec>) noexcept
         {
-            return (typename batch<T, A>::register_type)vec_srl((__vector unsigned char)x.data, vec_splats((uint32_t)N));
+            XSIMD_IF_CONSTEXPR(N == batch<T, A>::size * sizeof(T))
+            {
+                return batch<T, A>(0);
+            }
+            else
+            {
+                return (typename batch<T, A>::register_type)vec_sro((__vector unsigned char)x.data, vec_splats((uint8_t)(8 * N)));
+            }
         }
 
         // sadd
@@ -895,14 +924,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE void store_unaligned(T* mem, batch<T, A> const& self, requires_arch<altivec>) noexcept
         {
-            auto tmp = vec_perm(*reinterpret_cast<const __vector unsigned char*>(&self.data), *reinterpret_cast<const __vector unsigned char*>(&self.data), vec_lvsr(0, (unsigned char*)mem));
-            vec_ste((__vector unsigned char)tmp, 0, (unsigned char*)mem);
-            vec_ste((__vector unsigned short)tmp, 1, (unsigned short*)mem);
-            vec_ste((__vector unsigned int)tmp, 3, (unsigned int*)mem);
-            vec_ste((__vector unsigned int)tmp, 4, (unsigned int*)mem);
-            vec_ste((__vector unsigned int)tmp, 8, (unsigned int*)mem);
-            vec_ste((__vector unsigned int)tmp, 12, (unsigned int*)mem);
-            vec_ste((__vector unsigned short)tmp, 14, (unsigned short*)mem);
+            *(typename batch<T, A>::register_type*)mem = self.data;
         }
 
         // sub
@@ -1064,14 +1086,14 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_mergeh(self.data, other.data);
+            return vec_mergel(self.data, other.data);
         }
 
         // zip_lo
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<altivec>) noexcept
         {
-            return vec_mergel(self.data, other.data);
+            return vec_mergeh(self.data, other.data);
         }
     }
 }
