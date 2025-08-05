@@ -9,7 +9,7 @@
 # The full license is in the file LICENSE, distributed with this software. #
 ############################################################################
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(xsimd)
 option(XSIMD_REFACTORING ON)
 
