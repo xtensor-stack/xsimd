@@ -470,7 +470,7 @@
 
 #endif
 
-#if XSIMD_WITH_SSE3 || defined(_M_AMD64) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+#if XSIMD_WITH_SSE3 || ((defined(_M_AMD64) || defined(_M_X64)) && !defined(_M_ARM64EC)) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
 #undef XSIMD_WITH_SSE2
 #define XSIMD_WITH_SSE2 1
 #endif
