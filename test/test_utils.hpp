@@ -152,8 +152,8 @@ namespace xsimd
     template <class T, class A, size_t N>
     inline bool operator==(const batch<T, A>& lhs, const std::array<T, N>& rhs)
     {
-        std::array<T, N> tmp;
-        lhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<T, N> tmp;
+        lhs.store_aligned(tmp.data());
         return tmp == rhs;
     }
 
@@ -166,8 +166,8 @@ namespace xsimd
     template <class T, class A, size_t N, bool i3ec>
     inline bool operator==(const batch<std::complex<T>, A>& lhs, const std::array<xtl::xcomplex<T, T, i3ec>, N>& rhs)
     {
-        std::array<xtl::xcomplex<T, T, i3ec>, N> tmp;
-        lhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<xtl::xcomplex<T, T, i3ec>, N> tmp;
+        lhs.store_aligned(tmp.data());
         return tmp == rhs;
     }
 
@@ -401,16 +401,16 @@ namespace detail
     template <class T, size_t N, class A>
     bool expect_batch_near(const ::xsimd::batch<T, A>& lhs, const std::array<T, N>& rhs)
     {
-        std::array<T, N> tmp;
-        lhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<T, N> tmp;
+        lhs.store_aligned(tmp.data());
         return expect_array_near(tmp, rhs);
     }
 
     template <class T, size_t N, class A>
     bool expect_batch_near(const std::array<T, N>& lhs, const ::xsimd::batch<T, A>& rhs)
     {
-        std::array<T, N> tmp;
-        rhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<T, N> tmp;
+        rhs.store_aligned(tmp.data());
         return expect_array_near(lhs, tmp);
     }
 
@@ -418,24 +418,24 @@ namespace detail
     bool expect_batch_near(const ::xsimd::batch<T, A>& lhs, const ::xsimd::batch<T, A>& rhs)
     {
         constexpr auto N = xsimd::batch<T, A>::size;
-        std::array<T, N> tmp;
-        lhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<T, N> tmp;
+        lhs.store_aligned(tmp.data());
         return expect_batch_near(tmp, rhs);
     }
 
     template <class T, size_t N, class A>
     bool expect_batch_near(const ::xsimd::batch_bool<T, A>& lhs, const std::array<bool, N>& rhs)
     {
-        std::array<bool, N> tmp;
-        lhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<bool, N> tmp;
+        lhs.store_aligned(tmp.data());
         return expect_array_near(tmp, rhs);
     }
 
     template <class T, size_t N, class A>
     bool expect_batch_near(const std::array<bool, N>& lhs, const ::xsimd::batch_bool<T, A>& rhs)
     {
-        std::array<bool, N> tmp;
-        rhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<bool, N> tmp;
+        rhs.store_aligned(tmp.data());
         return expect_array_near(lhs, tmp);
     }
 
@@ -443,8 +443,8 @@ namespace detail
     bool expect_batch_near(const ::xsimd::batch_bool<T, A>& lhs, const ::xsimd::batch_bool<T, A>& rhs)
     {
         constexpr auto N = xsimd::batch<T, A>::size;
-        std::array<bool, N> tmp;
-        lhs.store_unaligned(tmp.data());
+        alignas(A::alignment()) std::array<bool, N> tmp;
+        lhs.store_aligned(tmp.data());
         return expect_batch_near(tmp, rhs);
     }
 
