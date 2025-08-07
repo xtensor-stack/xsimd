@@ -1693,17 +1693,19 @@ namespace xsimd
             // permute within each lane
             constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
             constexpr auto mask_hi = detail::mod_shuffle(V4, V5, V6, V7);
-            __m128i lo = _mm_shufflelo_epi16(self, mask_lo);
-            __m128i hi = _mm_shufflehi_epi16(self, mask_hi);
+            __m128i lol = _mm_shufflelo_epi16(self, mask_lo);
+            __m128i loh = _mm_shufflelo_epi16(self, mask_hi);
+            __m128i hil = _mm_shufflehi_epi16(self, mask_lo);
+            __m128i hih = _mm_shufflehi_epi16(self, mask_hi);
 
-            __m128i lo_lo = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(lo), _mm_castsi128_pd(lo), _MM_SHUFFLE2(0, 0)));
-            __m128i hi_hi = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(hi), _mm_castsi128_pd(hi), _MM_SHUFFLE2(1, 1)));
+            __m128i lo = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(lol), _mm_castsi128_pd(loh), _MM_SHUFFLE2(0, 0)));
+            __m128i hi = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(hil), _mm_castsi128_pd(hih), _MM_SHUFFLE2(1, 1)));
 
             // mask to choose the right lane
             batch_bool_constant<uint16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> blend_mask;
 
             // blend the two permutes
-            return select(blend_mask, batch<uint16_t, A>(lo_lo), batch<uint16_t, A>(hi_hi));
+            return select(blend_mask, batch<uint16_t, A>(lo), batch<uint16_t, A>(hi));
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
