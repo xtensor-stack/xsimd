@@ -1688,8 +1688,61 @@ namespace xsimd
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
-        XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<sse2>) noexcept
+        XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<sse2>) noexcept
         {
+            constexpr bool is_identity = detail::is_identity(mask);
+            constexpr bool is_dup_lo = detail::is_dup_lo(mask);
+            constexpr bool is_dup_hi = detail::is_dup_hi(mask);
+
+            XSIMD_IF_CONSTEXPR(is_identity)
+            {
+                return self;
+            }
+            XSIMD_IF_CONSTEXPR(is_dup_lo)
+            {
+                // permute the low half
+                constexpr int imm = detail::mod_shuffle(V0, V1, V2, V3);
+                const auto lo = _mm_shufflelo_epi16(self, imm);
+                // broadcast that 64-bit low half into both halves
+                const auto lo_all = _mm_unpacklo_epi64(lo, lo);
+                return lo_all;
+            }
+            XSIMD_IF_CONSTEXPR(is_dup_hi)
+            {
+                // permute the high half
+                constexpr int imm = detail::mod_shuffle(V4, V5, V6, V7);
+                const auto hi = _mm_shufflehi_epi16(self, imm);
+                // broadcast that 64-bit high half into both halves
+                const auto hi_all = _mm_unpackhi_epi64(hi, hi);
+                return hi_all;
+            }
+            // Only pick elements from the low lane
+            XSIMD_IF_CONSTEXPR((V0 < 4) && (V1 < 4) && (V2 < 4) && (V3 < 4) && (V4 < 4) && (V5 < 4) && (V6 < 4) && (V7 < 4))
+            {
+                // permute within each sub lane
+                constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
+                constexpr auto mask_hi = detail::mod_shuffle(V4, V5, V6, V7);
+                __m128i lol = _mm_shufflelo_epi16(self, mask_lo);
+                __m128i loh = _mm_shufflelo_epi16(self, mask_hi);
+
+                // generate temporary lanes
+                return _mm_unpacklo_epi64(lol, loh);
+            }
+            // Only pick elements from the high lane
+            XSIMD_IF_CONSTEXPR((V0 >= 4) && (V1 >= 4) && (V2 >= 4) && (V3 >= 4) && (V4 >= 4) && (V5 >= 4) && (V6 >= 4) && (V7 >= 4))
+            {
+                // permute within each sub lane
+                constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
+                constexpr auto mask_hi = detail::mod_shuffle(V4, V5, V6, V7);
+                __m128i hil = _mm_shufflehi_epi16(self, mask_lo);
+                __m128i hih = _mm_shufflehi_epi16(self, mask_hi);
+
+                // generate temporary lanes
+                return _mm_unpackhi_epi64(hil, hih);
+            }
+
+            // Generic case
+
             // permute within each sub lane
             constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
             constexpr auto mask_hi = detail::mod_shuffle(V4, V5, V6, V7);
