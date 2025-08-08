@@ -2881,6 +2881,39 @@ namespace xsimd
             self.store_aligned(data.data());
             return set(batch<T, A>(), A(), data[idx]...);
         }
+
+        template <class A, uint64_t V0, uint64_t V1>
+        XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self,
+                                                batch_constant<uint64_t, A, V0, V1>,
+                                                requires_arch<neon>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(V0 == 0 && V1 == 0)
+            {
+                auto lo = vget_low_u64(self);
+                return vcombine_u64(lo, lo);
+            }
+            XSIMD_IF_CONSTEXPR(V0 == 1 && V1 == 1)
+            {
+                auto hi = vget_high_u64(self);
+                return vcombine_u64(hi, hi);
+            }
+            XSIMD_IF_CONSTEXPR(V0 == 0 && V1 == 1)
+            {
+                return self;
+            }
+            else
+            {
+                return vextq_u64(self, self, 1);
+            }
+        }
+
+        template <class A, uint64_t V0, uint64_t V1>
+        XSIMD_INLINE batch<int64_t, A> swizzle(batch<int64_t, A> const& self,
+                                               batch_constant<int64_t, A, V0, V1> mask,
+                                               requires_arch<neon>) noexcept
+        {
+            return vreinterpretq_s64_u64(swizzle(vreinterpretq_u64_s64(self), mask, A {}));
+        }
     }
 
 }
