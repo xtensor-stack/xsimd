@@ -13,6 +13,7 @@
 #define XSIMD_NEON_HPP
 
 #include <algorithm>
+#include <array>
 #include <complex>
 #include <tuple>
 #include <type_traits>
@@ -2913,6 +2914,114 @@ namespace xsimd
                                                requires_arch<neon>) noexcept
         {
             return vreinterpretq_s64_u64(swizzle(vreinterpretq_u64_s64(self), mask, A {}));
+        }
+
+        namespace detail
+        {
+            template <uint32_t Va, uint32_t Vb>
+            XSIMD_INLINE uint8x8_t make_mask()
+            {
+                uint8x8_t res = {
+                    static_cast<uint8_t>((Va % 2) * 4 + 0),
+                    static_cast<uint8_t>((Va % 2) * 4 + 1),
+                    static_cast<uint8_t>((Va % 2) * 4 + 2),
+                    static_cast<uint8_t>((Va % 2) * 4 + 3),
+                    static_cast<uint8_t>((Vb % 2) * 4 + 0),
+                    static_cast<uint8_t>((Vb % 2) * 4 + 1),
+                    static_cast<uint8_t>((Vb % 2) * 4 + 2),
+                    static_cast<uint8_t>((Vb % 2) * 4 + 3),
+                };
+                return res;
+            }
+        }
+
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
+        XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self,
+                                                batch_constant<uint32_t, A, V0, V1, V2, V3> mask,
+                                                requires_arch<neon>) noexcept
+        {
+            constexpr bool is_identity = detail::is_identity(mask);
+            constexpr bool is_dup_lo = detail::is_dup_lo(mask);
+            constexpr bool is_dup_hi = detail::is_dup_hi(mask);
+
+            XSIMD_IF_CONSTEXPR(is_identity)
+            {
+                return self;
+            }
+            XSIMD_IF_CONSTEXPR(is_dup_lo)
+            {
+                XSIMD_IF_CONSTEXPR(V0 == 0 && V1 == 1)
+                {
+                    return vreinterpretq_u32_u64(vdupq_lane_u64(vget_low_u64(vreinterpretq_u64_u32(self)), 0));
+                }
+                XSIMD_IF_CONSTEXPR(V0 == 1 && V1 == 0)
+                {
+                    return vreinterpretq_u32_u64(vdupq_lane_u64(vreinterpret_u64_u32(vrev64_u32(vget_low_u32(self))), 0));
+                }
+                return vdupq_n_u32(vgetq_lane_u32(self, V0));
+            }
+            XSIMD_IF_CONSTEXPR(is_dup_hi)
+            {
+                XSIMD_IF_CONSTEXPR(V0 == 2 && V1 == 3)
+                {
+                    return vreinterpretq_u32_u64(vdupq_lane_u64(vget_high_u64(vreinterpretq_u64_u32(self)), 0));
+                }
+                XSIMD_IF_CONSTEXPR(V0 == 3 && V1 == 2)
+                {
+                    return vreinterpretq_u32_u64(vdupq_lane_u64(vreinterpret_u64_u32(vrev64_u32(vget_high_u32(self))), 0));
+                }
+                return vdupq_n_u32(vgetq_lane_u32(self, V0));
+            }
+            XSIMD_IF_CONSTEXPR(V0 < 2 && V1 < 2 && V2 < 2 && V3 < 2)
+            {
+                uint8x8_t low = vreinterpret_u8_u64(vget_low_u64(vreinterpretq_u64_u32(self)));
+                uint8x8_t mask_lo = detail::make_mask<V0, V1>();
+                uint8x8_t mask_hi = detail::make_mask<V2, V3>();
+                uint8x8_t lo = vtbl1_u8(low, mask_lo);
+                uint8x8_t hi = vtbl1_u8(low, mask_hi);
+                return vreinterpretq_u32_u8(vcombine_u8(lo, hi));
+            }
+            XSIMD_IF_CONSTEXPR(V0 >= 2 && V1 >= 2 && V2 >= 2 && V3 >= 2)
+            {
+                uint8x8_t high = vreinterpret_u8_u64(vget_high_u64(vreinterpretq_u64_u32(self)));
+                uint8x8_t mask_lo = detail::make_mask<V0, V1>();
+                uint8x8_t mask_hi = detail::make_mask<V2, V3>();
+                uint8x8_t lo = vtbl1_u8(high, mask_lo);
+                uint8x8_t hi = vtbl1_u8(high, mask_hi);
+                return vreinterpretq_u32_u8(vcombine_u8(lo, hi));
+            }
+
+            uint8x8_t mask_lo = detail::make_mask<V0, V1>();
+            uint8x8_t mask_hi = detail::make_mask<V2, V3>();
+
+            uint8x8_t low = vreinterpret_u8_u64(vget_low_u64(vreinterpretq_u64_u32(self)));
+            uint8x8_t lol = vtbl1_u8(low, mask_lo);
+            uint8x8_t loh = vtbl1_u8(low, mask_hi);
+            uint32x4_t true_br = vreinterpretq_u32_u8(vcombine_u8(lol, loh));
+
+            uint8x8_t high = vreinterpret_u8_u64(vget_high_u64(vreinterpretq_u64_u32(self)));
+            uint8x8_t hil = vtbl1_u8(high, mask_lo);
+            uint8x8_t hih = vtbl1_u8(high, mask_hi);
+            uint32x4_t false_br = vreinterpretq_u32_u8(vcombine_u8(hil, hih));
+
+            batch_bool_constant<uint32_t, A, (V0 < 2), (V1 < 2), (V2 < 2), (V3 < 2)> blend_mask;
+            return select(blend_mask, batch<uint32_t, A>(true_br), batch<uint32_t, A>(false_br), A {});
+        }
+
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
+        XSIMD_INLINE batch<int32_t, A> swizzle(batch<int32_t, A> const& self,
+                                               batch_constant<int32_t, A, V0, V1, V2, V3> mask,
+                                               requires_arch<neon>) noexcept
+        {
+            return vreinterpretq_s32_u32(swizzle(vreinterpretq_u32_s32(self), mask, A {}));
+        }
+
+        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
+        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self,
+                                             batch_constant<uint32_t, A, V0, V1, V2, V3> mask,
+                                             requires_arch<neon>) noexcept
+        {
+            return vreinterpretq_f32_u32(swizzle(batch<uint32_t, A>(vreinterpretq_u32_f32(self)), mask, A {}));
         }
     }
 
