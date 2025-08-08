@@ -1690,7 +1690,7 @@ namespace xsimd
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
         XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7>, requires_arch<sse2>) noexcept
         {
-            // permute within each lane
+            // permute within each sub lane
             constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
             constexpr auto mask_hi = detail::mod_shuffle(V4, V5, V6, V7);
             __m128i lol = _mm_shufflelo_epi16(self, mask_lo);
@@ -1698,8 +1698,9 @@ namespace xsimd
             __m128i hil = _mm_shufflehi_epi16(self, mask_lo);
             __m128i hih = _mm_shufflehi_epi16(self, mask_hi);
 
-            __m128i lo = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(lol), _mm_castsi128_pd(loh), _MM_SHUFFLE2(0, 0)));
-            __m128i hi = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(hil), _mm_castsi128_pd(hih), _MM_SHUFFLE2(1, 1)));
+            // generate temporary lanes
+            __m128i lo = _mm_unpacklo_epi64(lol, loh);
+            __m128i hi = _mm_unpackhi_epi64(hil, hih);
 
             // mask to choose the right lane
             batch_bool_constant<uint16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> blend_mask;
