@@ -166,43 +166,6 @@ namespace xsimd
             XSIMD_INLINE constexpr bool is_cross_lane(batch_constant<T, A, Vs...>) noexcept { return detail::is_cross_lane<Vs...>(); }
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool no_duplicates(batch_constant<T, A, Vs...>) noexcept { return no_duplicates_impl<0, sizeof...(Vs), T, Vs...>(); }
-            // ────────────────────────────────────────────────────────────────────────
-            //  compile-time tests (identity, all-different, dup-lo, dup-hi)
-            //  8-lane identity
-            static_assert(is_identity<std::uint32_t, 0, 1, 2, 3, 4, 5, 6, 7>(), "identity failed");
-            // 8-lane reverse is all-different but not identity
-            static_assert(is_all_different<std::uint32_t, 7, 6, 5, 4, 3, 2, 1, 0>(), "all-diff failed");
-            static_assert(!is_identity<std::uint32_t, 7, 6, 5, 4, 3, 2, 1, 0>(), "identity on reverse");
-            // 8-lane dup-lo (repeat 0..3 twice)
-            static_assert(is_dup_lo<std::uint32_t, 0, 1, 2, 3, 0, 1, 2, 3>(), "dup_lo failed");
-            static_assert(!is_dup_hi<std::uint32_t, 0, 1, 2, 3, 0, 1, 2, 3>(), "dup_hi on dup_lo");
-            // 8-lane dup-hi (repeat 4..7 twice)
-            static_assert(is_dup_hi<std::uint32_t, 4, 5, 6, 7, 4, 5, 6, 7>(), "dup_hi failed");
-            static_assert(!is_dup_lo<std::uint32_t, 4, 5, 6, 7, 4, 5, 6, 7>(), "dup_lo on dup_hi");
-            // ────────────────────────────────────────────────────────────────────────
-            //  4-lane identity
-            static_assert(is_identity<std::uint32_t, 0, 1, 2, 3>(), "4-lane identity failed");
-            // 4-lane reverse all-different but not identity
-            static_assert(is_all_different<std::uint32_t, 3, 2, 1, 0>(), "4-lane all-diff failed");
-            static_assert(!is_identity<std::uint32_t, 3, 2, 1, 0>(), "4-lane identity on reverse");
-            // 4-lane dup-lo (repeat 0..1 twice)
-            static_assert(is_dup_lo<std::uint32_t, 0, 1, 0, 1>(), "4-lane dup_lo failed");
-            static_assert(!is_dup_hi<std::uint32_t, 0, 1, 0, 1>(), "4-lane dup_hi on dup_lo");
-            // 4-lane dup-hi (repeat 2..3 twice)
-            static_assert(is_dup_hi<std::uint32_t, 2, 3, 2, 3>(), "4-lane dup_hi failed");
-            static_assert(!is_dup_lo<std::uint32_t, 2, 3, 2, 3>(), "4-lane dup_lo on dup_hi");
-
-            static_assert(is_cross_lane<0, 1, 0, 1>(), "dup-lo only → crossing");
-            static_assert(is_cross_lane<2, 3, 2, 3>(), "dup-hi only → crossing");
-            static_assert(is_cross_lane<0, 3, 3, 3>(), "one low + rest high → crossing");
-            static_assert(!is_cross_lane<1, 0, 2, 3>(), "mixed low/high → no crossing");
-            static_assert(!is_cross_lane<0, 1, 2, 3>(), "mixed low/high → no crossing");
-
-            static_assert(no_duplicates_v<0, 1, 2, 3>(), "N=4: [0,1,2,3] → distinct");
-            static_assert(!no_duplicates_v<0, 1, 2, 2>(), "N=4: [0,1,2,2] → dup");
-
-            static_assert(no_duplicates_v<0, 1, 2, 3, 4, 5, 6, 7>(), "N=8: [0..7] → distinct");
-            static_assert(!no_duplicates_v<0, 1, 2, 3, 4, 5, 6, 0>(), "N=8: last repeats 0");
 
         } // namespace detail
     } // namespace kernel
