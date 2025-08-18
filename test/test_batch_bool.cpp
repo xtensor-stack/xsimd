@@ -381,6 +381,10 @@ struct batch_bool_test
             INFO("operator&");
             CHECK_BATCH_EQ(bool_g.half & bool_g.ihalf, bool_g.all_false);
         }
+        {
+            INFO("operator^");
+            CHECK_BATCH_EQ(bool_g.half ^ bool_g.all_true, bool_g.ihalf);
+        }
         // free function version
         {
             INFO("bitwise_not");
@@ -393,6 +397,10 @@ struct batch_bool_test
         {
             INFO("bitwise_and");
             CHECK_BATCH_EQ(xsimd::bitwise_and(bool_g.half, bool_g.ihalf), bool_g.all_false);
+        }
+        {
+            INFO("bitwise_xor");
+            CHECK_BATCH_EQ(xsimd::bitwise_xor(bool_g.half, bool_g.all_true), bool_g.ihalf);
         }
     }
 
