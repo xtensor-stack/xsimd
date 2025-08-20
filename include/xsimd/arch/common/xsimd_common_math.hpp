@@ -2110,7 +2110,7 @@ namespace xsimd
             {
                 static constexpr T get(T i, T)
                 {
-                    return i >= N ? (i % 2) : i + N;
+                    return i < N ? (i + N) : ((i % N) + N);
                 }
             };
 
