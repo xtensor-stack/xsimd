@@ -1407,6 +1407,34 @@ namespace xsimd
     /**
      * @ingroup batch_data_transfer
      *
+     * Creates a batch from the buffer \c ptr using a mask. Elements
+     * corresponding to \c false in the mask are not accessed in memory and are
+     * zero-initialized in the resulting batch.
+     * @param ptr the memory buffer to read
+     * @param mask selection mask for the elements to load
+     * @return a new batch instance
+     */
+    template <class A = default_arch, class From>
+    XSIMD_INLINE batch<From, A> load(From const* ptr,
+                                     typename batch<From, A>::batch_bool_type const& mask,
+                                     aligned_mode = {}) noexcept
+    {
+        detail::static_check_supported_config<From, A>();
+        return batch<From, A>::load(ptr, mask, aligned_mode {});
+    }
+
+    template <class A = default_arch, class From>
+    XSIMD_INLINE batch<From, A> load(From const* ptr,
+                                     typename batch<From, A>::batch_bool_type const& mask,
+                                     unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<From, A>();
+        return batch<From, A>::load(ptr, mask, unaligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
      * Creates a batch from the buffer \c ptr. The
      * memory needs to be aligned.
      * @param ptr the memory buffer to read
@@ -2295,6 +2323,16 @@ namespace xsimd
     }
 
     template <class To, class A = default_arch, class From>
+    XSIMD_INLINE void store_as(To* dst,
+                               batch<From, A> const& src,
+                               typename batch<From, A>::batch_bool_type const& mask,
+                               aligned_mode) noexcept
+    {
+        detail::static_check_supported_config<From, A>();
+        kernel::masked_store<A>(dst, src, mask, aligned_mode {}, A {});
+    }
+
+    template <class To, class A = default_arch, class From>
     XSIMD_INLINE void store_as(std::complex<To>* dst, batch<std::complex<From>, A> const& src, aligned_mode) noexcept
     {
         detail::static_check_supported_config<std::complex<From>, A>();
@@ -2329,6 +2367,16 @@ namespace xsimd
     {
         detail::static_check_supported_config<From, A>();
         kernel::store<A>(src, dst, A {});
+    }
+
+    template <class To, class A = default_arch, class From>
+    XSIMD_INLINE void store_as(To* dst,
+                               batch<From, A> const& src,
+                               typename batch<From, A>::batch_bool_type const& mask,
+                               unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<From, A>();
+        kernel::masked_store<A>(dst, src, mask, unaligned_mode {}, A {});
     }
 
     template <class To, class A = default_arch, class From>
@@ -2373,6 +2421,34 @@ namespace xsimd
     XSIMD_INLINE void store(T* mem, batch<T, A> const& val, unaligned_mode) noexcept
     {
         store_as<T, A>(mem, val, unaligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Copy selected elements of batch \c val to the buffer \c mem using
+     * a mask. Elements corresponding to \c false in the mask are not
+     * written to memory.
+     * @param mem the memory buffer to write to
+     * @param val the batch to copy from
+     * @param mask selection mask for the elements to store
+     */
+    template <class A, class T>
+    XSIMD_INLINE void store(T* mem,
+                            batch<T, A> const& val,
+                            typename batch<T, A>::batch_bool_type const& mask,
+                            aligned_mode = {}) noexcept
+    {
+        store_as<T, A>(mem, val, mask, aligned_mode {});
+    }
+
+    template <class A, class T>
+    XSIMD_INLINE void store(T* mem,
+                            batch<T, A> const& val,
+                            typename batch<T, A>::batch_bool_type const& mask,
+                            unaligned_mode) noexcept
+    {
+        store_as<T, A>(mem, val, mask, unaligned_mode {});
     }
 
     /**

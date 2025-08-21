@@ -15,6 +15,7 @@
 
 #include "../types/xsimd_batch_constant.hpp"
 
+#include <cstddef>
 #include <type_traits>
 
 namespace xsimd
@@ -55,6 +56,11 @@ namespace xsimd
             XSIMD_INLINE constexpr bool is_cross_lane(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool no_duplicates(batch_constant<T, A, Vs...>) noexcept;
+
+            template <class Mask>
+            XSIMD_INLINE constexpr std::size_t first_set_count(Mask const& mask) noexcept;
+            template <class Mask>
+            XSIMD_INLINE constexpr std::size_t last_set_count(Mask const& mask) noexcept;
 
         }
     }
