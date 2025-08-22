@@ -273,9 +273,6 @@ namespace xsimd
         XSIMD_INLINE batch logical_or(batch const& other) const noexcept;
     };
 
-    template <class T, class A>
-    constexpr std::size_t batch<T, A>::size;
-
     /**
      * @brief batch of predicate over scalar or complex values.
      *
@@ -347,9 +344,6 @@ namespace xsimd
         template <class... V>
         static XSIMD_INLINE register_type make_register(detail::index_sequence<>, V... v) noexcept;
     };
-
-    template <class T, class A>
-    constexpr std::size_t batch_bool<T, A>::size;
 
     /**
      * @brief batch of complex values.
@@ -481,9 +475,6 @@ namespace xsimd
         real_batch m_real;
         real_batch m_imag;
     };
-
-    template <class T, class A>
-    constexpr std::size_t batch<std::complex<T>, A>::size;
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     template <typename T, bool i3ec, typename A>
