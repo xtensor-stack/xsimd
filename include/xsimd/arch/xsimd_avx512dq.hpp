@@ -188,6 +188,16 @@ namespace xsimd
             return reduce_add(batch<float, avx2>(res1), avx2 {});
         }
 
+        // reduce_mul
+        template <class A>
+        XSIMD_INLINE float reduce_mul(batch<float, A> const& rhs, requires_arch<avx512dq>) noexcept
+        {
+            __m256 tmp1 = _mm512_extractf32x8_ps(rhs, 1);
+            __m256 tmp2 = _mm512_extractf32x8_ps(rhs, 0);
+            __m256 res1 = _mm256_mul_ps(tmp1, tmp2);
+            return reduce_mul(batch<float, avx2>(res1), avx2 {});
+        }
+
         // swizzle constant mask
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7,
                   uint32_t V8, uint32_t V9, uint32_t V10, uint32_t V11, uint32_t V12, uint32_t V13, uint32_t V14, uint32_t V15>

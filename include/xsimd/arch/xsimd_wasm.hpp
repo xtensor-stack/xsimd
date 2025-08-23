@@ -1218,6 +1218,47 @@ namespace xsimd
             return wasm_f64x2_extract_lane(tmp2, 0);
         }
 
+        // reduce_mul
+        template <class A>
+        XSIMD_INLINE float reduce_mul(batch<float, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t tmp0 = wasm_f32x4_mul(self, wasm_i32x4_shuffle(self, self, 6, 7, 2, 3));
+            v128_t tmp1 = wasm_i32x4_shuffle(tmp0, tmp0, 1, 0, 4, 4);
+            v128_t tmp2 = wasm_f32x4_mul(tmp0, tmp1);
+            v128_t tmp3 = wasm_i32x4_shuffle(tmp0, tmp2, 4, 1, 2, 3);
+            return wasm_f32x4_extract_lane(tmp3, 0);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                v128_t tmp0 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 2, 3, 0, 0);
+                v128_t tmp1 = wasm_i32x4_mul(self, tmp0);
+                v128_t tmp2 = wasm_i32x4_shuffle(tmp1, wasm_i32x4_splat(0), 1, 0, 0, 0);
+                v128_t tmp3 = wasm_i32x4_mul(tmp1, tmp2);
+                return wasm_i32x4_extract_lane(tmp3, 0);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                v128_t tmp0 = wasm_i32x4_shuffle(self, wasm_i32x4_splat(0), 2, 3, 0, 0);
+                v128_t tmp1 = wasm_i64x2_mul(self, tmp0);
+                return wasm_i64x2_extract_lane(tmp1, 0);
+            }
+            else
+            {
+                return reduce_mul(self, common {});
+            }
+        }
+        template <class A>
+        XSIMD_INLINE double reduce_mul(batch<double, A> const& self, requires_arch<wasm>) noexcept
+        {
+            v128_t tmp0 = wasm_i64x2_shuffle(self, self, 1, 3);
+            v128_t tmp1 = wasm_f64x2_mul(self, tmp0);
+            v128_t tmp2 = wasm_i64x2_shuffle(tmp0, tmp1, 2, 1);
+            return wasm_f64x2_extract_lane(tmp2, 0);
+        }
+
         // rsqrt
         template <class A>
         XSIMD_INLINE batch<float, A> rsqrt(batch<float, A> const& self, requires_arch<wasm>) noexcept

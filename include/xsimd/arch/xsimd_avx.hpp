@@ -1077,6 +1077,16 @@ namespace xsimd
             return reduce_min(batch<T, sse4_2>(low));
         }
 
+        // reduce_mul
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            typename batch<T, sse4_2>::register_type low, high;
+            detail::split_avx(self, low, high);
+            batch<T, sse4_2> blow(low), bhigh(high);
+            return reduce_mul(blow * bhigh);
+        }
+
         // rsqrt
         template <class A>
         XSIMD_INLINE batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<avx>) noexcept
