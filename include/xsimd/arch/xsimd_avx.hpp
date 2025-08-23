@@ -1046,7 +1046,7 @@ namespace xsimd
         }
 
         // reduce_add
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
             typename batch<T, sse4_2>::register_type low, high;

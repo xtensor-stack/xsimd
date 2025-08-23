@@ -2103,6 +2103,20 @@ namespace xsimd
             return { reduce_add(self.real()), reduce_add(self.imag()) };
         }
 
+        template <class A, class T, class /*=typename std::enable_if<std::is_scalar<T>::value, void>::type*/>
+        XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            alignas(A::alignment()) T buffer[batch<T, A>::size];
+            self.store_aligned(buffer);
+            T res = 0;
+            for (T val : buffer)
+            {
+                res += val;
+            }
+            return res;
+        }
+
+
         namespace detail
         {
             template <class T, T N>

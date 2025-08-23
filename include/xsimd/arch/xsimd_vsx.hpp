@@ -559,7 +559,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
-            return hadd(self, common {});
+            return reduce_add(self, common {});
         }
 
         // round

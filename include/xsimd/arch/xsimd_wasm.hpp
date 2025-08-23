@@ -1206,7 +1206,7 @@ namespace xsimd
             }
             else
             {
-                return hadd(self, common {});
+                return reduce_add(self, common {});
             }
         }
         template <class A>
