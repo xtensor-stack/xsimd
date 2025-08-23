@@ -77,6 +77,8 @@ namespace xsimd
     template <class T, class A>
     XSIMD_INLINE T reduce_add(batch<T, A> const&) noexcept;
     template <class T, class A>
+    XSIMD_INLINE T reduce_mul(batch<T, A> const&) noexcept;
+    template <class T, class A>
     XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const&, batch<T, A> const&, batch<T, A> const&) noexcept;
     template <class T, class A>
     XSIMD_INLINE batch<std::complex<T>, A> select(batch_bool<T, A> const&, batch<std::complex<T>, A> const&, batch<std::complex<T>, A> const&) noexcept;

@@ -1046,7 +1046,7 @@ namespace xsimd
         }
 
         // reduce_add
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
             typename batch<T, sse4_2>::register_type low, high;
@@ -1075,6 +1075,16 @@ namespace xsimd
             batch<T, A> acc = min(self, step);
             __m128i low = _mm256_castsi256_si128(acc);
             return reduce_min(batch<T, sse4_2>(low));
+        }
+
+        // reduce_mul
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            typename batch<T, sse4_2>::register_type low, high;
+            detail::split_avx(self, low, high);
+            batch<T, sse4_2> blow(low), bhigh(high);
+            return reduce_mul(blow * bhigh);
         }
 
         // rsqrt

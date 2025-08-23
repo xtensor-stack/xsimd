@@ -1558,6 +1558,37 @@ namespace xsimd
             return reduce_min(batch<T, avx2>(low));
         }
 
+        // reduce_mul
+        template <class A>
+        XSIMD_INLINE float reduce_mul(batch<float, A> const& rhs, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_reduce_mul_ps(rhs);
+        }
+        template <class A>
+        XSIMD_INLINE double reduce_mul(batch<double, A> const& rhs, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_reduce_mul_pd(rhs);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm512_reduce_mul_epi32(self);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm512_reduce_mul_epi64(self);
+            }
+            else
+            {
+                __m256i low, high;
+                detail::split_avx512(self, low, high);
+                batch<T, avx2> blow(low), bhigh(high);
+                return reduce_mul(blow, avx2 {}) * reduce_mul(bhigh, avx2 {});
+            }
+        }
+
         // rsqrt
         template <class A>
         XSIMD_INLINE batch<float, A> rsqrt(batch<float, A> const& val, requires_arch<avx512f>) noexcept

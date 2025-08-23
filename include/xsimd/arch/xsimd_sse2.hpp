@@ -1290,7 +1290,7 @@ namespace xsimd
             }
             else
             {
-                return hadd(self, common {});
+                return reduce_add(self, common {});
             }
         }
 
@@ -1342,6 +1342,52 @@ namespace xsimd
             batch<T, A> step3 = bitwise_cast<T>(bitwise_cast<uint16_t>(acc2) >> 8);
             batch<T, A> acc3 = min(acc2, step3);
             return first(acc3, A {});
+        }
+
+        // reduce_mul
+        template <class A>
+        XSIMD_INLINE float reduce_mul(batch<float, A> const& self, requires_arch<sse2>) noexcept
+        {
+            __m128 tmp0 = _mm_mul_ps(self, _mm_movehl_ps(self, self));
+            __m128 tmp1 = _mm_mul_ss(tmp0, _mm_shuffle_ps(tmp0, tmp0, 1));
+            return _mm_cvtss_f32(tmp1);
+        }
+
+        template <class A>
+        XSIMD_INLINE double reduce_mul(batch<double, A> const& self, requires_arch<sse2>) noexcept
+        {
+            return _mm_cvtsd_f64(_mm_mul_sd(self, _mm_unpackhi_pd(self, self)));
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                batch<T, A> tmp1 = _mm_shuffle_epi32(self, _MM_SHUFFLE(0, 1, 2, 3));
+                tmp1 = tmp1 * self;
+                batch<T, A> tmp2 = _mm_unpackhi_epi32(tmp1, tmp1);
+                tmp2 = tmp2 * tmp1;
+                return _mm_cvtsi128_si32(tmp2);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                batch<T, A> tmp1 = _mm_unpackhi_epi64(self, self);
+                auto tmp2 = tmp1 * self;
+#if defined(__x86_64__)
+                return _mm_cvtsi128_si64(tmp2);
+#else
+                __m128i m;
+                _mm_storel_epi64(&m, tmp2);
+                int64_t i;
+                std::memcpy(&i, &m, sizeof(i));
+                return i;
+#endif
+            }
+            else
+            {
+                return reduce_mul(self, common {});
+            }
         }
 
         // rsqrt

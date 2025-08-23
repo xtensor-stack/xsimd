@@ -2103,6 +2103,19 @@ namespace xsimd
             return { reduce_add(self.real()), reduce_add(self.imag()) };
         }
 
+        template <class A, class T, class /*=typename std::enable_if<std::is_scalar<T>::value, void>::type*/>
+        XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            alignas(A::alignment()) T buffer[batch<T, A>::size];
+            self.store_aligned(buffer);
+            T res = 0;
+            for (T val : buffer)
+            {
+                res += val;
+            }
+            return res;
+        }
+
         namespace detail
         {
             template <class T, T N>
@@ -2145,6 +2158,34 @@ namespace xsimd
             return detail::reduce([](batch<T, A> const& x, batch<T, A> const& y)
                                   { return min(x, y); },
                                   self, std::integral_constant<unsigned, batch<T, A>::size>());
+        }
+
+        // reduce_mul
+        template <class A, class T>
+        XSIMD_INLINE std::complex<T> reduce_mul(batch<std::complex<T>, A> const& self, requires_arch<common>) noexcept
+        {
+            // FIXME: could do better
+            alignas(A::alignment()) std::complex<T> buffer[batch<std::complex<T>, A>::size];
+            self.store_aligned(buffer);
+            std::complex<T> res = 1;
+            for (auto val : buffer)
+            {
+                res *= val;
+            }
+            return res;
+        }
+
+        template <class A, class T, class /*=typename std::enable_if<std::is_scalar<T>::value, void>::type*/>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            alignas(A::alignment()) T buffer[batch<T, A>::size];
+            self.store_aligned(buffer);
+            T res = 1;
+            for (T val : buffer)
+            {
+                res *= val;
+            }
+            return res;
         }
 
         // remainder

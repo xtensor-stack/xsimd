@@ -36,8 +36,10 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE T hadd(batch<T, A> const& self, requires_arch<common>) noexcept;
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<common>) noexcept;
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<common>) noexcept;
         // Forward declarations for pack-level helpers
         namespace detail
         {

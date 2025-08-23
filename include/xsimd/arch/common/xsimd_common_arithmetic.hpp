@@ -139,20 +139,6 @@ namespace xsimd
             return fma(x, y, select(mask, neg(z), z));
         }
 
-        // hadd
-        template <class A, class T, class /*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
-        XSIMD_INLINE T hadd(batch<T, A> const& self, requires_arch<common>) noexcept
-        {
-            alignas(A::alignment()) T buffer[batch<T, A>::size];
-            self.store_aligned(buffer);
-            T res = 0;
-            for (T val : buffer)
-            {
-                res += val;
-            }
-            return res;
-        }
-
         // incr
         template <class A, class T>
         XSIMD_INLINE batch<T, A> incr(batch<T, A> const& self, requires_arch<common>) noexcept

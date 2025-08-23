@@ -1705,14 +1705,21 @@ namespace xsimd
          * reduce_max *
          **************/
 
-        // Using common implementation because ARM doe snot provide intrinsics
+        // Using common implementation because ARM does not provide intrinsics
         // for this operation
 
         /**************
          * reduce_min *
          **************/
 
-        // Using common implementation because ARM doe snot provide intrinsics
+        // Using common implementation because ARM does not provide intrinsics
+        // for this operation
+
+        /**************
+         * reduce_mul *
+         **************/
+
+        // Using common implementation because ARM does not provide intrinsics
         // for this operation
 
         /**********
