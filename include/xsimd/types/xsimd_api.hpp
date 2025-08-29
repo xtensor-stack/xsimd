@@ -373,6 +373,12 @@ namespace xsimd
         detail::static_check_supported_config<T, A>();
         return kernel::bitwise_lshift<A>(x, shift, A {});
     }
+    template <int shift, class T, class A>
+    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_lshift<shift, A>(x, A {});
+    }
 
     /**
      * @ingroup batch_bitwise
@@ -451,6 +457,12 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return kernel::bitwise_rshift<A>(x, shift, A {});
+    }
+    template <int shift, class T, class A>
+    XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_rshift<shift, A>(x, A {});
     }
 
     /**
@@ -1966,6 +1978,12 @@ namespace xsimd
         detail::static_check_supported_config<T, A>();
         return kernel::rotl<A>(x, shift, A {});
     }
+    template <int count, class T, class A>
+    XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotl<count, A>(x, A {});
+    }
 
     /**
      * @ingroup batch_bitwise
@@ -1987,6 +2005,12 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return kernel::rotr<A>(x, shift, A {});
+    }
+    template <int count, class T, class A>
+    XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::rotr<count, A>(x, A {});
     }
 
     /**

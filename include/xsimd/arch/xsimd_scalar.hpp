@@ -300,9 +300,22 @@ namespace xsimd
         return x << shift;
     }
 
+    template <int shift, class T>
+    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    bitwise_lshift(T x) noexcept
+    {
+        return x << shift;
+    }
+
     template <class T0, class T1>
     XSIMD_INLINE typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
     bitwise_rshift(T0 x, T1 shift) noexcept
+    {
+        return x >> shift;
+    }
+    template <int shift, class T>
+    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    bitwise_rshift(T x) noexcept
     {
         return x >> shift;
     }
@@ -450,6 +463,13 @@ namespace xsimd
         constexpr auto N = std::numeric_limits<T0>::digits;
         return (x << shift) | (x >> (N - shift));
     }
+    template <int count, class T>
+    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    rotl(T x) noexcept
+    {
+        constexpr auto N = std::numeric_limits<T>::digits;
+        return (x << count) | (x >> (N - count));
+    }
 
     template <class T0, class T1>
     XSIMD_INLINE typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
@@ -457,6 +477,13 @@ namespace xsimd
     {
         constexpr auto N = std::numeric_limits<T0>::digits;
         return (x >> shift) | (x << (N - shift));
+    }
+    template <int count, class T>
+    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    rotr(T x) noexcept
+    {
+        constexpr auto N = std::numeric_limits<T>::digits;
+        return (x >> count) | (x << (N - count));
     }
 
     template <class T>
