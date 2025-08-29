@@ -200,10 +200,12 @@ namespace xsimd
             {
                 return _mm256_sllv_epi32(self, other);
             }
+#if XSIMD_WITH_AVX512VL
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 return _mm256_sllv_epi64(self, other);
             }
+#endif
             else
             {
                 return bitwise_lshift(self, other, avx {});
@@ -343,10 +345,12 @@ namespace xsimd
                 {
                     return _mm256_srlv_epi32(self, other);
                 }
+#if XSIMD_WITH_AVX512VL
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     return _mm256_srlv_epi64(self, other);
                 }
+#endif
                 else
                 {
                     return bitwise_rshift(self, other, avx {});

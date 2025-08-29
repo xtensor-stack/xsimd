@@ -247,6 +247,17 @@
 /**
  * @ingroup xsimd_config_macro
  *
+ * Set to 1 if AVX512VL is available at compile-time, to 0 otherwise.
+ */
+#ifdef __AVX512VL__
+#define XSIMD_WITH_AVX512VL XSIMD_WITH_AVX512F
+#else
+#define XSIMD_WITH_AVX512VL 0
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
  * Set to 1 if AVX512BW is available at compile-time, to 0 otherwise.
  */
 #ifdef __AVX512BW__
