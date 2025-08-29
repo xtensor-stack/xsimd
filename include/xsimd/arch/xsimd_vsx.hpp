@@ -559,7 +559,49 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
-            return hadd(self, common {});
+            return reduce_add(self, common {});
+        }
+
+        // reduce_mul
+        template <class A>
+        XSIMD_INLINE signed reduce_mul(batch<signed, A> const& self, requires_arch<vsx>) noexcept
+        {
+            auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
+            auto tmp1 = vec_mul(self.data, tmp0); // v0 * v3, v1 * v2, v2 * v1, v3 * v0
+            auto tmp2 = vec_mergel(tmp1, tmp1); // v2 * v1, v2 * v1, v3 * v0, v3 * v0
+            auto tmp3 = vec_mul(tmp1, tmp2);
+            return vec_extract(tmp3, 0);
+        }
+        template <class A>
+        XSIMD_INLINE unsigned reduce_mul(batch<unsigned, A> const& self, requires_arch<vsx>) noexcept
+        {
+            auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
+            auto tmp1 = vec_mul(self.data, tmp0); // v0 * v3, v1 * v2, v2 * v1, v3 * v0
+            auto tmp2 = vec_mergel(tmp1, tmp1); // v2 * v1, v2 * v1, v3 * v0, v3 * v0
+            auto tmp3 = vec_mul(tmp1, tmp2);
+            return vec_extract(tmp3, 0);
+        }
+        template <class A>
+        XSIMD_INLINE float reduce_mul(batch<float, A> const& self, requires_arch<vsx>) noexcept
+        {
+            // FIXME: find an in-order approach
+            auto tmp0 = vec_reve(self.data); // v3, v2, v1, v0
+            auto tmp1 = vec_mul(self.data, tmp0); // v0 * v3, v1 * v2, v2 * v1, v3 * v0
+            auto tmp2 = vec_mergel(tmp1, tmp1); // v2 * v1, v2 * v1, v3 * v0, v3 * v0
+            auto tmp3 = vec_mul(tmp1, tmp2);
+            return vec_extract(tmp3, 0);
+        }
+        template <class A>
+        XSIMD_INLINE double reduce_mul(batch<double, A> const& self, requires_arch<vsx>) noexcept
+        {
+            auto tmp0 = vec_reve(self.data); // v1, v0
+            auto tmp1 = vec_mul(self.data, tmp0); // v0 * v1, v1 * v0
+            return vec_extract(tmp1, 0);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<vsx>) noexcept
+        {
+            return reduce_mul(self, common {});
         }
 
         // round

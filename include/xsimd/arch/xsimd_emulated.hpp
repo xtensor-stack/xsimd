@@ -601,6 +601,16 @@ namespace xsimd
                                    { return xsimd::min(x, y); });
         }
 
+        // reduce_mul
+        template <class A, class T, size_t N = 8 * sizeof(T) * batch<T, A>::size>
+        XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<emulated<N>>) noexcept
+        {
+            constexpr size_t size = batch<T, A>::size;
+            std::array<T, size> buffer;
+            self.store_unaligned(buffer.data());
+            return std::accumulate(buffer.begin() + 1, buffer.end(), *buffer.begin(), std::multiplies<T>());
+        }
+
         // rsqrt
         template <class A, class T, size_t N = 8 * sizeof(T) * batch<T, A>::size>
         XSIMD_INLINE batch<T, A> rsqrt(batch<T, A> const& self, requires_arch<emulated<N>>) noexcept

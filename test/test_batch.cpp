@@ -840,6 +840,13 @@ struct batch_test
             INFO("reduce_min");
             CHECK_SCALAR_EQ(res, expected);
         }
+        // reduce_mul
+        {
+            value_type expected = std::accumulate(lhs.cbegin(), lhs.cend(), value_type(1), std::multiplies<value_type>());
+            value_type res = reduce_mul(batch_lhs());
+            INFO("reduce_mul");
+            CHECK_SCALAR_EQ(res, expected);
+        }
     }
 
     template <size_t N>
