@@ -865,6 +865,272 @@ namespace xsimd
             return _mm256_loadu_pd(mem);
         }
 
+        // masked_load
+        template <class A>
+        XSIMD_INLINE batch<float, A> masked_load(float const* mem,
+                                                 batch_bool<float, A> const& mask,
+                                                 convert<float>,
+                                                 aligned_mode,
+                                                 requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_ps(mem, _mm256_castps_si256(mask.data));
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<float, A> masked_load(float const* mem,
+                                                 batch_bool<float, A> const& mask,
+                                                 convert<float>,
+                                                 unaligned_mode,
+                                                 requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_ps(mem, _mm256_castps_si256(mask.data));
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<float, A> masked_load(float const* mem,
+                                                 batch_bool_constant<float, A, Values...> mask,
+                                                 convert<float>,
+                                                 aligned_mode,
+                                                 requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 4)
+            {
+                return _mm256_zextps128_ps256(_mm_load_ps(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 4)
+            {
+                return _mm256_insertf128_ps(_mm256_setzero_ps(), _mm_load_ps(mem + 4), 1);
+            }
+            else
+            {
+                return masked_load<A>(mem, mask.as_batch_bool(), convert<float> {}, aligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<float, A> masked_load(float const* mem,
+                                                 batch_bool_constant<float, A, Values...> mask,
+                                                 convert<float>,
+                                                 unaligned_mode,
+                                                 requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 4)
+            {
+                return _mm256_zextps128_ps256(_mm_loadu_ps(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 4)
+            {
+                return _mm256_insertf128_ps(_mm256_setzero_ps(), _mm_loadu_ps(mem + 4), 1);
+            }
+            else
+            {
+                return masked_load<A>(mem, mask.as_batch_bool(), convert<float> {}, unaligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> masked_load(double const* mem,
+                                                  batch_bool<double, A> const& mask,
+                                                  convert<double>,
+                                                  aligned_mode,
+                                                  requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_pd(mem, _mm256_castpd_si256(mask.data));
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> masked_load(double const* mem,
+                                                  batch_bool<double, A> const& mask,
+                                                  convert<double>,
+                                                  unaligned_mode,
+                                                  requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_pd(mem, _mm256_castpd_si256(mask.data));
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<double, A> masked_load(double const* mem,
+                                                  batch_bool_constant<double, A, Values...> mask,
+                                                  convert<double>,
+                                                  aligned_mode,
+                                                  requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 2)
+            {
+                return _mm256_zextpd128_pd256(_mm_load_pd(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 2)
+            {
+                return _mm256_insertf128_pd(_mm256_setzero_pd(), _mm_load_pd(mem + 2), 1);
+            }
+            else
+            {
+                return masked_load<A>(mem, mask.as_batch_bool(), convert<double> {}, aligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<double, A> masked_load(double const* mem,
+                                                  batch_bool_constant<double, A, Values...> mask,
+                                                  convert<double>,
+                                                  unaligned_mode,
+                                                  requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 2)
+            {
+                return _mm256_zextpd128_pd256(_mm_loadu_pd(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 2)
+            {
+                return _mm256_insertf128_pd(_mm256_setzero_pd(), _mm_loadu_pd(mem + 2), 1);
+            }
+            else
+            {
+                return masked_load<A>(mem, mask.as_batch_bool(), convert<double> {}, unaligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
+        // masked_store
+        template <class A>
+        XSIMD_INLINE void masked_store(float* mem,
+                                       batch<float, A> const& src,
+                                       batch_bool<float, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            _mm256_maskstore_ps(mem, _mm256_castps_si256(mask.data), src);
+        }
+
+        template <class A>
+        XSIMD_INLINE void masked_store(float* mem,
+                                       batch<float, A> const& src,
+                                       batch_bool<float, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            _mm256_maskstore_ps(mem, _mm256_castps_si256(mask.data), src);
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE void masked_store(float* mem,
+                                       batch<float, A> const& src,
+                                       batch_bool_constant<float, A, Values...> mask,
+                                       aligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 4)
+            {
+                _mm_store_ps(mem, _mm256_castps256_ps128(src));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 4)
+            {
+                _mm_store_ps(mem + 4, _mm256_extractf128_ps(src, 1));
+            }
+            else
+            {
+                masked_store<A>(mem, src, mask.as_batch_bool(), aligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE void masked_store(float* mem,
+                                       batch<float, A> const& src,
+                                       batch_bool_constant<float, A, Values...> mask,
+                                       unaligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 4)
+            {
+                _mm_storeu_ps(mem, _mm256_castps256_ps128(src));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 4)
+            {
+                _mm_storeu_ps(mem + 4, _mm256_extractf128_ps(src, 1));
+            }
+            else
+            {
+                masked_store<A>(mem, src, mask.as_batch_bool(), unaligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
+        template <class A>
+        XSIMD_INLINE void masked_store(double* mem,
+                                       batch<double, A> const& src,
+                                       batch_bool<double, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            _mm256_maskstore_pd(mem, _mm256_castpd_si256(mask.data), src);
+        }
+
+        template <class A>
+        XSIMD_INLINE void masked_store(double* mem,
+                                       batch<double, A> const& src,
+                                       batch_bool<double, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            _mm256_maskstore_pd(mem, _mm256_castpd_si256(mask.data), src);
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE void masked_store(double* mem,
+                                       batch<double, A> const& src,
+                                       batch_bool_constant<double, A, Values...> mask,
+                                       aligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 2)
+            {
+                _mm_store_pd(mem, _mm256_castpd256_pd128(src));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 2)
+            {
+                _mm_store_pd(mem + 2, _mm256_extractf128_pd(src, 1));
+            }
+            else
+            {
+                masked_store<A>(mem, src, mask.as_batch_bool(), aligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE void masked_store(double* mem,
+                                       batch<double, A> const& src,
+                                       batch_bool_constant<double, A, Values...> mask,
+                                       unaligned_mode,
+                                       requires_arch<avx>) noexcept
+        {
+            constexpr std::size_t n = detail::first_set_count(mask);
+            constexpr std::size_t l = detail::last_set_count(mask);
+            XSIMD_IF_CONSTEXPR(n == 2)
+            {
+                _mm_storeu_pd(mem, _mm256_castpd256_pd128(src));
+            }
+            else XSIMD_IF_CONSTEXPR(l == 2)
+            {
+                _mm_storeu_pd(mem + 2, _mm256_extractf128_pd(src, 1));
+            }
+            else
+            {
+                masked_store<A>(mem, src, mask.as_batch_bool(), unaligned_mode {}, requires_arch<avx> {});
+            }
+        }
+
         // lt
         template <class A>
         XSIMD_INLINE batch_bool<float, A> lt(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept

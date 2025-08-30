@@ -348,6 +348,119 @@ namespace xsimd
             return detail::load_unaligned<A>(mem, cvt, common {}, detail::conversion_type<A, T_in, T_out> {});
         }
 
+        // mask helpers
+        namespace detail
+        {
+            // Helper: first_set_count recursion
+            constexpr std::size_t first_set_count_impl(uint64_t bits, std::size_t n)
+            {
+                return (bits & 1u) != 0u
+                    ? first_set_count_impl(bits >> 1, n + 1)
+                    : n;
+            }
+
+            template <class Mask>
+            constexpr std::size_t first_set_count(Mask const& mask) noexcept
+            {
+                return ((static_cast<uint64_t>(mask.mask()) >> first_set_count_impl(static_cast<uint64_t>(mask.mask()), 0)) == 0u)
+                    ? first_set_count_impl(static_cast<uint64_t>(mask.mask()), 0)
+                    : (Mask::size + 1);
+            }
+
+            // Helper: last_set_count recursion
+            template <std::size_t Size>
+            constexpr std::size_t last_set_count_impl(uint64_t bits, std::size_t n)
+            {
+                return (n < Size && (bits & (uint64_t(1) << (Size - 1 - n))) != 0u)
+                    ? last_set_count_impl<Size>(bits, n + 1)
+                    : n;
+            }
+
+            // safe mask for k bits (must be single return)
+            constexpr uint64_t low_mask(std::size_t k)
+            {
+                return (k >= 64u) ? ~uint64_t(0) : ((uint64_t(1) << k) - 1u);
+            }
+
+            template <class Mask>
+            constexpr std::size_t last_set_count(Mask const& mask) noexcept
+            {
+                return ((static_cast<uint64_t>(mask.mask()) & low_mask(Mask::size - last_set_count_impl<Mask::size>(static_cast<uint64_t>(mask.mask()), 0))) == 0u)
+                    ? last_set_count_impl<Mask::size>(static_cast<uint64_t>(mask.mask()), 0)
+                    : (Mask::size + 1);
+            }
+        }
+
+        // masked_load
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE batch<T_out, A> masked_load(T_in const* mem,
+                                                 typename batch<T_out, A>::batch_bool_type const& mask,
+                                                 convert<T_out>,
+                                                 aligned_mode,
+                                                 requires_arch<common>) noexcept
+        {
+            alignas(A::alignment()) T_out buffer[batch<T_out, A>::size] = {};
+            for (std::size_t i = 0; i < batch<T_out, A>::size; ++i)
+            {
+                if (mask.get(i))
+                {
+                    buffer[i] = static_cast<T_out>(mem[i]);
+                }
+            }
+            return batch<T_out, A>::load_aligned(buffer);
+        }
+
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE batch<T_out, A> masked_load(T_in const* mem,
+                                                 typename batch<T_out, A>::batch_bool_type const& mask,
+                                                 convert<T_out>,
+                                                 unaligned_mode,
+                                                 requires_arch<common>) noexcept
+        {
+            alignas(A::alignment()) T_out buffer[batch<T_out, A>::size] = {};
+            for (std::size_t i = 0; i < batch<T_out, A>::size; ++i)
+            {
+                if (mask.get(i))
+                {
+                    buffer[i] = static_cast<T_out>(mem[i]);
+                }
+            }
+            return batch<T_out, A>::load_aligned(buffer);
+        }
+
+        // masked_store
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE void masked_store(T_out* mem,
+                                       batch<T_in, A> const& src,
+                                       typename batch<T_in, A>::batch_bool_type const& mask,
+                                       aligned_mode,
+                                       requires_arch<common>) noexcept
+        {
+            for (std::size_t i = 0; i < batch<T_in, A>::size; ++i)
+            {
+                if (mask.get(i))
+                {
+                    mem[i] = static_cast<T_out>(src.get(i));
+                }
+            }
+        }
+
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE void masked_store(T_out* mem,
+                                       batch<T_in, A> const& src,
+                                       typename batch<T_in, A>::batch_bool_type const& mask,
+                                       unaligned_mode,
+                                       requires_arch<common>) noexcept
+        {
+            for (std::size_t i = 0; i < batch<T_in, A>::size; ++i)
+            {
+                if (mask.get(i))
+                {
+                    mem[i] = static_cast<T_out>(src.get(i));
+                }
+            }
+        }
+
         // rotate_right
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> rotate_right(batch<T, A> const& self, requires_arch<common>) noexcept
