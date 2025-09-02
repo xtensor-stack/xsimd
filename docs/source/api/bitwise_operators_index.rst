@@ -40,9 +40,9 @@ Bitwise operators
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`bitwise_andnot`            | per slot bitwise and not                           |
 +---------------------------------------+----------------------------------------------------+
-| :cpp:func:`bitwise_lshift`            | per slot bitwise and                               |
+| :cpp:func:`bitwise_lshift`            | per slot bitwise left shift                        |
 +---------------------------------------+----------------------------------------------------+
-| :cpp:func:`bitwise_rshift`            | per slot bitwise and not                           |
+| :cpp:func:`bitwise_rshift`            | per slot bitwise right shift                       |
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`rotr`                      | per slot rotate right                              |
 +---------------------------------------+----------------------------------------------------+

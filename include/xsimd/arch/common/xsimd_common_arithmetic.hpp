@@ -34,6 +34,12 @@ namespace xsimd
                                  { return x << y; },
                                  self, other);
         }
+        template <size_t shift, class A, class T, class /*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            static_assert(shift < std::numeric_limits<T>::digits, "shift must be less than the number of bits in T");
+            return bitwise_lshift(self, shift, A {});
+        }
 
         // bitwise_rshift
         template <class A, class T, class /*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
@@ -42,6 +48,12 @@ namespace xsimd
             return detail::apply([](T x, T y) noexcept
                                  { return x >> y; },
                                  self, other);
+        }
+        template <size_t shift, class A, class T, class /*=typename std::enable_if<std::is_integral<T>::value, void>::type*/>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            static_assert(shift < std::numeric_limits<T>::digits, "shift must be less than the number of bits in T");
+            return bitwise_rshift(self, shift, A {});
         }
 
         // decr
@@ -169,6 +181,13 @@ namespace xsimd
             constexpr auto N = std::numeric_limits<T>::digits;
             return (self << other) | (self >> (N - other));
         }
+        template <size_t count, class A, class T>
+        XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            static_assert(count < std::numeric_limits<T>::digits, "count must be less than the number of bits in T");
+            constexpr auto N = std::numeric_limits<T>::digits;
+            return bitwise_lshift<count>(self) | bitwise_rshift<N - count>(self);
+        }
 
         // rotr
         template <class A, class T, class STy>
@@ -176,6 +195,13 @@ namespace xsimd
         {
             constexpr auto N = std::numeric_limits<T>::digits;
             return (self >> other) | (self << (N - other));
+        }
+        template <size_t count, class A, class T>
+        XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, requires_arch<common>) noexcept
+        {
+            static_assert(count < std::numeric_limits<T>::digits, "count must be less than the number of bits in T");
+            constexpr auto N = std::numeric_limits<T>::digits;
+            return bitwise_rshift<count>(self) | bitwise_lshift<N - count>(self);
         }
 
         // sadd
