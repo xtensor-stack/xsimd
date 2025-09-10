@@ -663,22 +663,18 @@ struct xsimd_api_float_types_functions
     {
         value_type val0(2.7818);
         value_type valN(NAN);
-#if XSIMD_WITH_AVX || XSIMD_WITH_SSE2
         using isnan = doctest::IsNaN<value_type>;
         CHECK_EQ(isnan(extract(xsimd::max(T(val0), T(valN)))), isnan(std::max(val0, valN)));
         CHECK_EQ(isnan(extract(xsimd::max(T(valN), T(val0)))), isnan(std::max(valN, val0)));
-#endif
     }
 
     void test_min_nan()
     {
         value_type val0(2.7818);
         value_type valN(NAN);
-#if XSIMD_WITH_AVX || XSIMD_WITH_SSE2
         using isnan = doctest::IsNaN<value_type>;
         CHECK_EQ(isnan(extract(xsimd::min(T(val0), T(valN)))), isnan(std::min(val0, valN)));
         CHECK_EQ(isnan(extract(xsimd::min(T(valN), T(val0)))), isnan(std::min(valN, val0)));
-#endif
     }
 
     void test_nearbyint()
