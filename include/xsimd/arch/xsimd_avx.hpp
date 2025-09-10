@@ -925,12 +925,12 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> max(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_max_ps(self, other);
+            return _mm256_max_ps(other, self);
         }
         template <class A>
         XSIMD_INLINE batch<double, A> max(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_max_pd(self, other);
+            return _mm256_max_pd(other, self);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
@@ -942,12 +942,12 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> min(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_min_ps(self, other);
+            return _mm256_min_ps(other, self);
         }
         template <class A>
         XSIMD_INLINE batch<double, A> min(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx>) noexcept
         {
-            return _mm256_min_pd(self, other);
+            return _mm256_min_pd(other, self);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
