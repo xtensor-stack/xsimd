@@ -658,6 +658,29 @@ struct xsimd_api_float_types_functions
         value_type val(0);
         CHECK_EQ(extract(xsimd::log1p(T(val))), std::log1p(val));
     }
+
+    void test_max_nan()
+    {
+        value_type val0(2.7818);
+        value_type valN(NAN);
+#if XSIMD_WITH_AVX || XSIMD_WITH_SSE2
+        using isnan = doctest::IsNaN<value_type>;
+        CHECK_EQ(isnan(extract(xsimd::max(T(val0), T(valN)))), isnan(std::max(val0, valN)));
+        CHECK_EQ(isnan(extract(xsimd::max(T(valN), T(val0)))), isnan(std::max(valN, val0)));
+#endif
+    }
+
+    void test_min_nan()
+    {
+        value_type val0(2.7818);
+        value_type valN(NAN);
+#if XSIMD_WITH_AVX || XSIMD_WITH_SSE2
+        using isnan = doctest::IsNaN<value_type>;
+        CHECK_EQ(isnan(extract(xsimd::min(T(val0), T(valN)))), isnan(std::min(val0, valN)));
+        CHECK_EQ(isnan(extract(xsimd::min(T(valN), T(val0)))), isnan(std::min(valN, val0)));
+#endif
+    }
+
     void test_nearbyint()
     {
         value_type val(3.1);
@@ -927,6 +950,16 @@ TEST_CASE_TEMPLATE("[xsimd api | float types functions]", B, FLOAT_TYPES)
     SUBCASE("log1p")
     {
         Test.test_log1p();
+    }
+
+    SUBCASE("max_nan")
+    {
+        Test.test_max_nan();
+    }
+
+    SUBCASE("min_nan")
+    {
+        Test.test_min_nan();
     }
 
     SUBCASE("nearbyint")
