@@ -12,6 +12,7 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include <algorithm>
 #include <functional>
 #include <numeric>
 #include <random>
@@ -121,7 +122,10 @@ private:
     void test_load_impl(const V& v, const std::string& name)
     {
         batch_type b;
-        std::copy(v.cbegin(), v.cend(), expected.begin());
+        for (size_t i = 0; i < size; ++i)
+        {
+            expected[i] = static_cast<value_type>(v[i]);
+        }
 
         b = batch_type::load(v.data(), xsimd::unaligned_mode());
         INFO(name, " unaligned");
