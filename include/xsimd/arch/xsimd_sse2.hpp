@@ -292,6 +292,36 @@ namespace xsimd
                 return {};
             }
         }
+        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(shift < bits, "Count must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(shift == 0)
+            {
+                return self;
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                // 8-bit left shift via 16-bit shift + mask
+                __m128i shifted = _mm_slli_epi16(self, static_cast<int>(shift));
+                __m128i mask = _mm_set1_epi8(static_cast<char>(0xFF << shift));
+                return _mm_and_si128(shifted, mask);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm_slli_epi16(self, static_cast<int>(shift));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm_slli_epi32(self, static_cast<int>(shift));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm_slli_epi64(self, static_cast<int>(shift));
+            }
+            return bitwise_lshift<shift>(self, common {});
+        }
 
         // bitwise_not
         template <class A>
@@ -417,6 +447,63 @@ namespace xsimd
                 {
                     assert(false && "unsupported arch/op combination");
                     return {};
+                }
+            }
+        }
+        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(shift < bits,
+                          "Shift must be less than the number of value bits in the type");
+
+            XSIMD_IF_CONSTEXPR(shift == 0)
+            {
+                return self;
+            }
+
+            XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    // 8-bit arithmetic right shift via 16-bit shift + sign-extension handling.
+                    __m128i shifted = _mm_srai_epi16(self, static_cast<int>(shift));
+                    __m128i sign_mask = _mm_set1_epi16(static_cast<short>(0xFF00 >> shift));
+                    __m128i cmp_negative = _mm_cmpgt_epi8(_mm_setzero_si128(), self);
+                    return _mm_or_si128(_mm_and_si128(sign_mask, cmp_negative),
+                                        _mm_andnot_si128(sign_mask, shifted));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return _mm_srai_epi16(self, static_cast<int>(shift));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return _mm_srai_epi32(self, static_cast<int>(shift));
+                }
+                // No 64-bit arithmetic right shift in SSE2; fall back
+                return bitwise_rshift<shift>(self, common {});
+            }
+            else // unsigned / logical right shift
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    // Emulate byte-wise logical right shift using 16-bit shifts + per-byte mask.
+                    __m128i s16 = _mm_srli_epi16(self, static_cast<int>(shift));
+                    __m128i mask = _mm_set1_epi8(static_cast<char>(0xFFu >> shift));
+                    return _mm_and_si128(s16, mask);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return _mm_srli_epi16(self, static_cast<int>(shift));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return _mm_srli_epi32(self, static_cast<int>(shift));
+                }
+                else // sizeof(T) == 8
+                {
+                    return _mm_srli_epi64(self, static_cast<int>(shift));
                 }
             }
         }
@@ -1931,7 +2018,6 @@ namespace xsimd
         {
             return _mm_unpacklo_pd(self, other);
         }
-
     }
 }
 
