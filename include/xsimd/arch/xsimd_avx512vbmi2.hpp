@@ -67,6 +67,64 @@ namespace xsimd
         {
             return _mm512_maskz_expand_epi8(mask.mask(), self);
         }
+
+        // rotl
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, int32_t other, requires_arch<avx512vbmi2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm512_shldv_epi16(self, self, _mm512_set1_epi16(static_cast<uint16_t>(other)));
+            }
+            else
+            {
+                return rotl(self, other, avx512bw {});
+            }
+        }
+
+        template <size_t count, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, requires_arch<avx512vbmi2>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(count < bits, "Count must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm512_shldi_epi16(self, self, count);
+            }
+            else
+            {
+                return rotl<count>(self, avx512bw {});
+            }
+        }
+
+        // rotr
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, int32_t other, requires_arch<avx512vbmi2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm512_shrdv_epi16(self, self, _mm512_set1_epi16(static_cast<uint16_t>(other)));
+            }
+            else
+            {
+                return rotr(self, other, avx512bw {});
+            }
+        }
+
+        template <size_t count, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, requires_arch<avx512vbmi2>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(count < bits, "count must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm512_shrdi_epi16(self, self, count);
+            }
+            else
+            {
+                return rotr<count>(self, avx512bw {});
+            }
+        }
     }
 }
 

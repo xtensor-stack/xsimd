@@ -17,6 +17,8 @@
 
 #include "../types/xsimd_avx2_register.hpp"
 
+#include <limits>
+
 namespace xsimd
 {
 
@@ -172,6 +174,29 @@ namespace xsimd
             }
         }
 
+        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<avx2>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(shift < bits, "Shift must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm256_slli_epi16(self, shift);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm256_slli_epi32(self, shift);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm256_slli_epi64(self, shift);
+            }
+            else
+            {
+                return bitwise_lshift<shift>(self, avx {});
+            }
+        }
+
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept
         {
@@ -248,6 +273,65 @@ namespace xsimd
                 else
                 {
                     return bitwise_rshift(self, other, avx {});
+                }
+            }
+        }
+
+        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, requires_arch<avx2>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(shift < bits, "Shift amount must be less than the number of bits in T");
+            if (std::is_signed<T>::value)
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    __m256i sign_mask = _mm256_set1_epi16((0xFF00 >> shift) & 0x00FF);
+                    __m256i cmp_is_negative = _mm256_cmpgt_epi8(_mm256_setzero_si256(), self);
+                    __m256i res = _mm256_srai_epi16(self, shift);
+                    return _mm256_or_si256(
+                        detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
+                                           { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2 {}); },
+                                           sign_mask, cmp_is_negative),
+                        _mm256_andnot_si256(sign_mask, res));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return _mm256_srai_epi16(self, shift);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return _mm256_srai_epi32(self, shift);
+                }
+                else
+                {
+                    return bitwise_rshift<shift>(self, avx {});
+                }
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    const __m256i byte_mask = _mm256_set1_epi16(0x00FF);
+                    __m256i u16 = _mm256_and_si256(self, byte_mask);
+                    __m256i r16 = _mm256_srli_epi16(u16, shift);
+                    return _mm256_and_si256(r16, byte_mask);
+                }
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    return _mm256_srli_epi16(self, shift);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    return _mm256_srli_epi32(self, shift);
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    return _mm256_srli_epi64(self, shift);
+                }
+                else
+                {
+                    return bitwise_rshift<shift>(self, avx {});
                 }
             }
         }
