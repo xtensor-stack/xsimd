@@ -1,38 +1,38 @@
 name: RISC-V RVV cross-compilation build
 on: [push, pull_request]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ matrix.sys.compiler }}-${{ github.ref }}
   cancel-in-progress: true
-env:
-  GCC_VERSION: "12"
 jobs:
   build:
     runs-on: ubuntu-latest
     name: 'RISC-V RVV${{ matrix.vector_bits }}'
     strategy:
       matrix:
+        sys:
+          - { compiler: 'gcc', gcc_runtime: '14'}
+          - { compiler: 'clang', version: '17', gcc_runtime: '14'}
+          - { compiler: 'clang', version: '18', gcc_runtime: '14'}
         vector_bits:
           - 128
           - 256
           - 512
-        LLVM_VERSION:
-          - 17
-          - 18
     steps:
     - name: Setup GCC
       run: |
         sudo apt-get -y -qq update
-        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install gcc-${GCC_VERSION}-riscv64-linux-gnu g++-${GCC_VERSION}-riscv64-linux-gnu
-        sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc /usr/bin/riscv64-linux-gnu-gcc-${GCC_VERSION} 20
-        sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-g++ riscv64-linux-gnu-g++ /usr/bin/riscv64-linux-gnu-g++-${GCC_VERSION} 20
+        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install gcc-${{ matrix.sys.gcc_runtime }}-riscv64-linux-gnu g++-${{ matrix.sys.gcc_runtime }}-riscv64-linux-gnu
+        sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc /usr/bin/riscv64-linux-gnu-gcc-${{ matrix.sys.gcc_runtime }} 20
+        sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-g++ riscv64-linux-gnu-g++ /usr/bin/riscv64-linux-gnu-g++-${{ matrix.sys.gcc_runtime }} 20
     - name: Setup LLVM
+      if: ${{ matrix.sys.compiler == 'clang' }}
       run: |
-        # Install latest LLVM stable
+        # Install given LLVM version
         curl -o llvm.sh https://apt.llvm.org/llvm.sh
         chmod u+x llvm.sh
-        sudo ./llvm.sh ${{ matrix.LLVM_VERSION }}
-        sudo ln -srf $(which clang-${{ matrix.LLVM_VERSION }}) /usr/bin/clang
-        sudo ln -srf $(which clang++-${{ matrix.LLVM_VERSION }}) /usr/bin/clang++
+        sudo ./llvm.sh ${{ matrix.sys.version }}
+        sudo ln -srf $(which clang-${{ matrix.sys.version }}) /usr/bin/clang
+        sudo ln -srf $(which clang++-${{ matrix.sys.version }}) /usr/bin/clang++
         rm llvm.sh
     - name: Setup QEMU
       uses: docker/setup-qemu-action@v3.0.0
@@ -53,7 +53,7 @@ jobs:
         -DTARGET_ARCH=generic
         -DCMAKE_C_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
         -DCMAKE_CXX_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
-        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/clang-riscv64-linux-gnu.cmake
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-riscv64-linux-gnu.cmake
     - name: Build
       run: cmake --build _build
     - name: Testing xsimd
