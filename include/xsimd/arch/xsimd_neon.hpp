@@ -1359,7 +1359,7 @@ namespace xsimd
                 std::make_tuple(wrap::vmaxq_u8, wrap::vmaxq_s8, wrap::vmaxq_u16, wrap::vmaxq_s16,
                                 wrap::vmaxq_u32, wrap::vmaxq_s32, wrap::vmaxq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.apply(register_type(rhs), register_type(lhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
