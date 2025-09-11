@@ -53,8 +53,10 @@ namespace xsimd
             static constexpr size_t size = 1;
         };
 
+#if __cplusplus < 201703L
         template <class T>
         constexpr size_t simd_traits_impl<T, false>::size;
+#endif
 
         template <class T>
         struct simd_traits_impl<T, true>
@@ -64,8 +66,10 @@ namespace xsimd
             static constexpr size_t size = type::size;
         };
 
+#if __cplusplus < 201703L
         template <class T>
         constexpr size_t simd_traits_impl<T, true>::size;
+#endif
 
         template <class T, class A>
         struct static_check_supported_config_emitter
@@ -128,8 +132,10 @@ namespace xsimd
         static constexpr size_t size = simd_traits<type>::size;
     };
 
+#if __cplusplus < 201703L
     template <class T>
     constexpr size_t revert_simd_traits<T>::size;
+#endif
 
     template <class T>
     struct revert_simd_traits<batch<T>>
@@ -138,8 +144,10 @@ namespace xsimd
         static constexpr size_t size = batch<T>::size;
     };
 
+#if __cplusplus < 201703L
     template <class T>
     constexpr size_t revert_simd_traits<batch<T>>::size;
+#endif
 
     template <class T>
     using simd_type = typename simd_traits<T>::type;
