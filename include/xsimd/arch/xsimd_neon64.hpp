@@ -584,7 +584,11 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<double, A> min(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
+#ifdef __FAST_MATH__
             return vminq_f64(lhs, rhs);
+#else
+            return vminnmq_f64(lhs, rhs);
+#endif
         }
 
         /*******
@@ -594,7 +598,11 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<double, A> max(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
+#ifdef __FAST_MATH__
             return vmaxq_f64(lhs, rhs);
+#else
+            return vmaxnmq_f64(lhs, rhs);
+#endif
         }
 
         /*******

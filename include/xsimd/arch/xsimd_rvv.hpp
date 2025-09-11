@@ -742,14 +742,14 @@ namespace xsimd
         template <class A, class T, detail::rvv_enable_all_t<T> = 0>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmax(lhs, rhs);
+            return detail::rvvmax(rhs, lhs);
         }
 
         // min
         template <class A, class T, detail::rvv_enable_all_t<T> = 0>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmin(lhs, rhs);
+            return detail::rvvmin(rhs, lhs);
         }
 
         // neg

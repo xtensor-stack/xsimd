@@ -470,14 +470,14 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
-            return vec_max(self.data, other.data);
+            return vec_max(other.data, self.data);
         }
 
         // min
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
-            return vec_min(self.data, other.data);
+            return vec_min(other.data, self.data);
         }
 
         // mul
