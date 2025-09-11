@@ -62,9 +62,12 @@ namespace xsimd
             static constexpr size_t rvv_width_mf4 = XSIMD_RVV_BITS / 4;
             static constexpr size_t rvv_width_mf2 = XSIMD_RVV_BITS / 2;
             static constexpr size_t rvv_width_m1 = XSIMD_RVV_BITS;
-            static constexpr size_t rvv_width_m2 = XSIMD_RVV_BITS * 2;
-            static constexpr size_t rvv_width_m4 = XSIMD_RVV_BITS * 4;
-            static constexpr size_t rvv_width_m8 = XSIMD_RVV_BITS * 8;
+
+            // Cope with gcc limitation, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=116484
+#define XSIMD_RVV_WIDTH_MF8 (XSIMD_RVV_BITS / 8)
+#define XSIMD_RVV_WIDTH_MF4 (XSIMD_RVV_BITS / 4)
+#define XSIMD_RVV_WIDTH_MF2 (XSIMD_RVV_BITS / 2)
+#define XSIMD_RVV_WIDTH_M1 XSIMD_RVV_BITS
 
             // rvv_type_info is a utility class to convert scalar type and
             // bitwidth into rvv register types.
@@ -79,30 +82,30 @@ namespace xsimd
             //
             template <class T, size_t Width>
             struct rvv_type_info;
-#define XSIMD_RVV_MAKE_TYPE(scalar, t, s, vmul)                                           \
-    template <>                                                                           \
-    struct rvv_type_info<scalar, rvv_width_m1 * vmul>                                     \
-    {                                                                                     \
-        static constexpr size_t width = rvv_width_m1 * vmul;                              \
-        using type = XSIMD_RVV_TYPE(t, s, vmul);                                          \
-        using byte_type = XSIMD_RVV_TYPE(u, 8, vmul);                                     \
-        using fixed_type = type __attribute__((riscv_rvv_vector_bits(width)));            \
-        template <class U>                                                                \
-        static XSIMD_INLINE type bitcast(U x) noexcept                                    \
-        {                                                                                 \
-            const auto words = XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x); \
-            return XSIMD_RVV_JOINT5(__riscv_vreinterpret_, t, s, m, vmul)(words);         \
-        }                                                                                 \
-        template <>                                                                       \
-        XSIMD_INLINE type bitcast<type>(type x) noexcept { return x; }                    \
-        template <class U>                                                                \
-        static XSIMD_INLINE byte_type as_bytes(U x) noexcept                              \
-        {                                                                                 \
-            static_assert(std::is_same<U, type>::value, "inconsistent conversion types"); \
-            const auto words = XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x); \
-            return XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, 8, m, vmul)(words);         \
-        }                                                                                 \
-    };
+#define XSIMD_RVV_MAKE_TYPE(scalar, t, s, vmul)                                                              \
+    template <>                                                                                              \
+    struct rvv_type_info<scalar, rvv_width_m1 * vmul>                                                        \
+    {                                                                                                        \
+        static constexpr size_t width = rvv_width_m1 * vmul;                                                 \
+        using type = XSIMD_RVV_TYPE(t, s, vmul);                                                             \
+        using byte_type = XSIMD_RVV_TYPE(u, 8, vmul);                                                        \
+        using fixed_type = type __attribute__((riscv_rvv_vector_bits(/*width=*/XSIMD_RVV_WIDTH_M1 * vmul))); \
+        template <class U>                                                                                   \
+        static XSIMD_INLINE type bitcast(U x) noexcept                                                       \
+        {                                                                                                    \
+            const auto words = XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x);                    \
+            return XSIMD_RVV_JOINT5(__riscv_vreinterpret_, t, s, m, vmul)(words);                            \
+        }                                                                                                    \
+        template <class U>                                                                                   \
+        static XSIMD_INLINE byte_type as_bytes(U x) noexcept                                                 \
+        {                                                                                                    \
+            static_assert(std::is_same<U, type>::value, "inconsistent conversion types");                    \
+            const auto words = XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x);                    \
+            return XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, 8, m, vmul)(words);                            \
+        }                                                                                                    \
+    };                                                                                                       \
+    template <>                                                                                              \
+    XSIMD_INLINE XSIMD_RVV_TYPE(t, s, vmul) rvv_type_info<scalar, rvv_width_m1 * vmul>::bitcast<XSIMD_RVV_TYPE(t, s, vmul)>(XSIMD_RVV_TYPE(t, s, vmul) x) noexcept { return x; }
 
 #define XSIMD_RVV_MAKE_TYPES(vmul)             \
     XSIMD_RVV_MAKE_TYPE(int8_t, i, 8, vmul)    \
@@ -235,17 +238,17 @@ namespace xsimd
                 template <>
                 struct semitype<2>
                 {
-                    using type = vuint8mf2_t __attribute__((riscv_rvv_vector_bits(rvv_width_mf2)));
+                    using type = vuint8mf2_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF2)));
                 };
                 template <>
                 struct semitype<4>
                 {
-                    using type = vuint8mf4_t __attribute__((riscv_rvv_vector_bits(rvv_width_mf4)));
+                    using type = vuint8mf4_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF4)));
                 };
                 template <>
                 struct semitype<8>
                 {
-                    using type = vuint8mf8_t __attribute__((riscv_rvv_vector_bits(rvv_width_mf8)));
+                    using type = vuint8mf8_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF8)));
                 };
                 using fixed_type = typename semitype<divisor>::type;
                 using super::as_bytes;
@@ -374,7 +377,7 @@ namespace xsimd
             struct rvv_bool
             {
                 using bool_info = rvv_bool_info<rvv_width_m1 * sizeof(T) * 8 / Width>;
-                using storage_type = vuint8m1_t __attribute__((riscv_rvv_vector_bits(rvv_width_m1)));
+                using storage_type = vuint8m1_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_M1)));
                 using type = typename bool_info::type;
                 storage_type value;
                 rvv_bool() = default;
@@ -489,6 +492,12 @@ namespace xsimd
             using type = detail::rvv_bool_simd_register<T>;
         };
     } // namespace types
+
+#undef XSIMD_RVV_WIDTH_MF8
+#undef XSIMD_RVV_WIDTH_MF4
+#undef XSIMD_RVV_WIDTH_MF2
+#undef XSIMD_RVV_WIDTH_M1
+
 #else
     using rvv = detail::rvv<0xFFFFFFFF>;
 #endif
