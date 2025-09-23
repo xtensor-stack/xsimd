@@ -33,6 +33,17 @@ namespace xsimd
     {
     };
 
+    /**
+     * @struct stream_mode
+     * @brief tag for load and store of aligned non-temporal memory.
+     *
+     * Streaming accesses expect aligned pointers. When no architecture-specific
+     * implementation is available, they fall back to aligned semantics.
+     */
+    struct stream_mode
+    {
+    };
+
     /***********************
      * Allocator alignment *
      ***********************/

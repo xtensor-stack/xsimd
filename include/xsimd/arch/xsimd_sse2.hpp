@@ -1741,6 +1741,23 @@ namespace xsimd
             return _mm_storeu_pd(mem, self);
         }
 
+        // store_stream
+        template <class A>
+        XSIMD_INLINE void store_stream(float* mem, batch<float, A> const& self, requires_arch<sse2>) noexcept
+        {
+            _mm_stream_ps(mem, self);
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE void store_stream(T* mem, batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            _mm_stream_si128((__m128i*)mem, self);
+        }
+        template <class A>
+        XSIMD_INLINE void store_stream(double* mem, batch<double, A> const& self, requires_arch<sse2>) noexcept
+        {
+            _mm_stream_pd(mem, self);
+        }
+
         // sub
         template <class A>
         XSIMD_INLINE batch<float, A> sub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<sse2>) noexcept
