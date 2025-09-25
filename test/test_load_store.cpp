@@ -12,7 +12,9 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include <functional>
 #include <random>
+#include <type_traits>
 
 #include "test_utils.hpp"
 
@@ -22,6 +24,7 @@ struct load_store_test
     using batch_type = B;
     using value_type = typename B::value_type;
     using index_type = typename xsimd::as_integer_t<batch_type>;
+    using batch_bool_type = typename batch_type::batch_bool_type;
     template <class T>
     using allocator = xsimd::default_allocator<T, typename B::arch_type>;
     static constexpr size_t size = B::size;
@@ -193,6 +196,59 @@ private:
         b = xsimd::load_as<value_type>(v.data(), xsimd::aligned_mode());
         INFO(name, " aligned (load_as)");
         CHECK_BATCH_EQ(b, expected);
+
+        run_mask_tests(v, name, b, expected, std::is_same<typename V::value_type, value_type> {});
+    }
+
+    template <class V>
+    void run_mask_tests(const V& v, const std::string& name, batch_type& b, const array_type& expected, std::true_type)
+    {
+        bool mask_init[size];
+        array_type expected_masked;
+
+        auto check_mask = [&](const std::function<bool(size_t)>& predicate, const std::string& label)
+        {
+            for (size_t i = 0; i < size; ++i)
+            {
+                mask_init[i] = predicate(i);
+            }
+            auto mask = batch_bool_type::load_unaligned(mask_init);
+            expected_masked.fill(value_type());
+            for (size_t i = 0; i < size; ++i)
+            {
+                if (mask_init[i])
+                {
+                    expected_masked[i] = expected[i];
+                }
+            }
+            b = xsimd::load(v.data(), mask, xsimd::aligned_mode());
+            INFO(name, label + " aligned");
+            CHECK_BATCH_EQ(b, expected_masked);
+            b = xsimd::load(v.data(), mask, xsimd::unaligned_mode());
+            INFO(name, label + " unaligned");
+            CHECK_BATCH_EQ(b, expected_masked);
+        };
+
+        check_mask([](size_t i)
+                   { return i == 0; }, " masked first element");
+        check_mask([](size_t i)
+                   { return i < size / 2; }, " masked first half");
+        size_t n = size > 2 ? size / 3 : 1;
+        check_mask([&](size_t i)
+                   { return i < n; }, " masked first N");
+        check_mask([&](size_t i)
+                   { return i >= size - n; }, " masked last N");
+        check_mask([](size_t i)
+                   { return i % 2 == 0; }, " masked even elements");
+        check_mask([](size_t i)
+                   { return i % 2 == 1; }, " masked odd elements");
+        check_mask([&](size_t i)
+                   { return ((i * 7) + 3) % size < n; }, " masked pseudo random");
+    }
+
+    template <class V>
+    void run_mask_tests(const V&, const std::string&, batch_type&, const array_type&, std::false_type)
+    {
     }
 
     struct test_load_char
@@ -227,6 +283,43 @@ private:
         xsimd::store_as(res.data(), b, xsimd::aligned_mode());
         INFO(name, " aligned (store_as)");
         CHECK_VECTOR_EQ(res, v);
+
+        bool mask_init[size];
+        V expected_masked(size);
+
+        auto check_mask = [&](const std::function<bool(size_t)>& predicate, const std::string& label)
+        {
+            for (size_t i = 0; i < size; ++i)
+            {
+                mask_init[i] = predicate(i);
+                expected_masked[i] = mask_init[i] ? v[i] : value_type();
+            }
+            auto mask = batch_bool_type::load_unaligned(mask_init);
+            std::fill(res.begin(), res.end(), value_type());
+            b.store(res.data(), mask, xsimd::aligned_mode());
+            INFO(name, label + " aligned");
+            CHECK_VECTOR_EQ(res, expected_masked);
+            std::fill(res.begin(), res.end(), value_type());
+            b.store(res.data(), mask, xsimd::unaligned_mode());
+            INFO(name, label + " unaligned");
+            CHECK_VECTOR_EQ(res, expected_masked);
+        };
+
+        check_mask([](size_t i)
+                   { return i == 0; }, " masked first element");
+        check_mask([](size_t i)
+                   { return i < size / 2; }, " masked first half");
+        size_t n = size > 2 ? size / 3 : 1;
+        check_mask([&](size_t i)
+                   { return i < n; }, " masked first N");
+        check_mask([&](size_t i)
+                   { return i >= size - n; }, " masked last N");
+        check_mask([](size_t i)
+                   { return i % 2 == 0; }, " masked even elements");
+        check_mask([](size_t i)
+                   { return i % 2 == 1; }, " masked odd elements");
+        check_mask([&](size_t i)
+                   { return ((i * 7) + 3) % size < n; }, " masked pseudo random");
     }
 
     template <class V>
