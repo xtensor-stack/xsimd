@@ -185,26 +185,22 @@ struct batch_bool_test
     {
     };
 
-    template <size_t... Values>
-    void check_constructor_from_sequence(std::integral_constant<size_t, 0>, pack<Values...>) const
+    template <typename F, size_t... Values>
+    static batch_bool_type make_batch_impl(F&& f, std::integral_constant<size_t, 0>, pack<Values...>)
     {
-        bool_array_type res = { bool(Values % 3)... };
-        bool_array_type tmp;
-        batch_bool_type b0(bool(Values % 3)...);
-        b0.store_unaligned(tmp.data());
-        INFO("batch_bool(values...)");
-        CHECK_EQ(tmp, res);
-
-        batch_bool_type b1 { bool(Values % 3)... };
-        b1.store_unaligned(tmp.data());
-        INFO("batch_bool{values...}");
-        CHECK_EQ(tmp, res);
+        return batch_bool_type(bool(f(Values))...);
     }
 
-    template <size_t I, size_t... Values>
-    void check_constructor_from_sequence(std::integral_constant<size_t, I>, pack<Values...>) const
+    template <typename F, size_t I, size_t... Values>
+    static batch_bool_type make_batch_impl(F&& f, std::integral_constant<size_t, I>, pack<Values...>)
     {
-        return check_constructor_from_sequence(std::integral_constant<size_t, I - 1>(), pack<Values..., I>());
+        return make_batch_impl(std::forward<F>(f), std::integral_constant<size_t, I - 1>(), pack<I - 1, Values...>());
+    }
+
+    template <typename F>
+    static batch_bool_type make_batch(F&& f)
+    {
+        return make_batch_impl(std::forward<F>(f), std::integral_constant<size_t, size>(), pack<>{});
     }
 
     void test_constructors() const
@@ -213,18 +209,38 @@ struct batch_bool_test
         // value uninitialized, cannot test it.
         (void)a;
 
-        bool_array_type res;
-        batch_bool_type b(true);
-        b.store_unaligned(res.data());
-        INFO("batch_bool{value}");
-        CHECK_EQ(res, all_true);
+        {
+            bool_array_type res;
+            batch_bool_type b(true);
+            b.store_unaligned(res.data());
+            INFO("batch_bool{value}");
+            CHECK_EQ(res, all_true);
 
-        batch_bool_type c { true };
-        c.store_unaligned(res.data());
-        INFO("batch_bool{value}");
-        CHECK_EQ(res, all_true);
+            batch_bool_type c { true };
+            c.store_unaligned(res.data());
+            INFO("batch_bool{value}");
+            CHECK_EQ(res, all_true);
+        }
 
-        check_constructor_from_sequence(std::integral_constant<size_t, size>(), pack<>());
+        {
+            auto f_bool = [](size_t i) { return bool(i % 3); };
+
+            bool_array_type res;
+            for (size_t i = 0; i < res.size(); i++) {
+                res[i] = f_bool(i);
+            }
+
+            bool_array_type tmp;
+            batch_bool_type b0 = make_batch(f_bool);
+            b0.store_unaligned(tmp.data());
+            INFO("batch_bool(values...)");
+            CHECK_EQ(tmp, res);
+
+            batch_bool_type b1 = make_batch(f_bool);
+            b1.store_unaligned(tmp.data());
+            INFO("batch_bool{values...}");
+            CHECK_EQ(tmp, res);
+        }
     }
 
     void test_load_store() const
@@ -239,6 +255,35 @@ struct batch_bool_test
         b = batch_bool_type::load_aligned(arhs.data());
         b.store_aligned(ares.data());
         CHECK_EQ(ares, arhs);
+
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
+        // load/store, almost all false
+        {
+            size_t i = 0;
+            for (const auto& vec : bool_g.almost_all_false()) {
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
+                batch_bool_type expected = make_batch([i](size_t x) { return x == i; });
+                i++;
+                CHECK_UNARY(xsimd::all(b == expected));
+                b.store_unaligned(res.data());
+                // Check that the representation is bitwise exact.
+                CHECK_UNARY(memcmp(res.data(), vec.data(), sizeof(res)) == 0);
+            }
+        }
+
+        // load/store, almost all true
+        {
+            size_t i = 0;
+            for (const auto& vec : bool_g.almost_all_true()) {
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
+                batch_bool_type expected = make_batch([i](size_t x) { return x != i; });
+                i++;
+                CHECK_UNARY(xsimd::all(b == expected));
+                b.store_unaligned(res.data());
+                CHECK_EQ(res, vec);
+                CHECK_UNARY(memcmp(res.data(), vec.data(), sizeof(res)) == 0);
+            }
+        }
     }
 
     void test_any_all() const
