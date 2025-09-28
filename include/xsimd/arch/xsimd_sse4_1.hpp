@@ -147,7 +147,7 @@ namespace xsimd
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8) {
                     uint16_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
-                    auto bpack = _mm_cvtsi16_si128(tmp);
+                    auto bpack = _mm_cvtsi32_si128((uint32_t)tmp);
                     return _mm_cmpgt_epi64(_mm_cvtepu8_epi64(bpack), _mm_set1_epi64x(0));
                 }
             }
