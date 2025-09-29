@@ -128,6 +128,60 @@ namespace xsimd
             return bitwise_cast<int16_t>(rotate_left<N, A>(bitwise_cast<uint16_t>(self), ssse3 {}));
         }
 
+        // store<batch_bool>
+        namespace detail {
+            template <class T>
+            XSIMD_INLINE void store_bool_ssse3(__m128i b, bool* mem, T) noexcept
+            {
+                // GCC <12 have missing or buggy unaligned store intrinsics; use memcpy to work around this.
+                // GCC/Clang/MSVC will turn it into the correct store.
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    // negate mask to convert to 0 or 1
+                    auto val = _mm_sub_epi8(_mm_set1_epi8(0), b);
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    auto packed = _mm_packs_epi16(b, b);
+                    uint64_t val = _mm_cvtsi128_si64(_mm_sub_epi8(_mm_set1_epi8(0), packed));
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    const auto bmask = _mm_set_epi8(
+                        -1, -1, -1, -1, -1, -1, -1, -1,
+                        -1, -1, -1, -1, 12,  8,  4,  0);
+                    auto packed = _mm_shuffle_epi8(b, bmask);
+                    uint32_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), packed));
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    const auto bmask = _mm_set_epi8(
+                        -1, -1, -1, -1, -1, -1, -1, -1,
+                        -1, -1, -1, -1, -1, -1,  8,  0);
+                    auto packed = _mm_shuffle_epi8(b, bmask);
+                    uint16_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), packed));
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                }
+            }
+
+            XSIMD_INLINE __m128i sse_to_i(__m128 x) { return _mm_castps_si128(x); }
+            XSIMD_INLINE __m128i sse_to_i(__m128d x) { return _mm_castpd_si128(x); }
+            XSIMD_INLINE __m128i sse_to_i(__m128i x) { return x; }
+        }
+
+        template <class T, class A>
+        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<sse3>) noexcept
+        {
+            detail::store_bool_ssse3(detail::sse_to_i(b), mem, T{});
+        }
+
         // swizzle (dynamic mask)
         template <class A>
         XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch<uint8_t, A> mask, requires_arch<ssse3>) noexcept

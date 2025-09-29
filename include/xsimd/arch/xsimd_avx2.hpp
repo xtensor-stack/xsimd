@@ -574,36 +574,58 @@ namespace xsimd
         // load_unaligned<batch_bool>
         namespace detail {
             template <class T>
-            XSIMD_INLINE __m256i load_bool_avx2(bool const* mem, T) noexcept {
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 1) {
+            XSIMD_INLINE __m256i load_bool_avx2(bool const* mem) noexcept
+            {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
                     auto maskz = _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i const*)mem), _mm256_set1_epi8(0));
                     return _mm256_xor_si256(maskz, _mm256_set1_epi8(-1));
                 }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2) {
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     auto bpack = _mm_loadu_si128((__m128i const*)mem);
                     return _mm256_cmpgt_epi16(_mm256_cvtepu8_epi16(bpack), _mm256_set1_epi16(0));
                 }
                 // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
                 // GCC/Clang/MSVC will turn it into the correct load.
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4) {
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
                     uint64_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
                     auto bpack = _mm_cvtsi64_si128(tmp);
                     return _mm256_cmpgt_epi32(_mm256_cvtepu8_epi32(bpack), _mm256_set1_epi32(0));
                 }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8) {
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
                     uint32_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
                     auto bpack = _mm_cvtsi32_si128(tmp);
                     return _mm256_cmpgt_epi64(_mm256_cvtepu8_epi64(bpack), _mm256_set1_epi64x(0));
                 }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return __m256i{};
+                }
             }
         }
 
-        template <class T, class A>
+        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<avx2>) noexcept
         {
-            return batch_bool_cast<T, A>(detail::load_bool_avx2(mem, T{}), avx2{});
+            return batch_bool<T, A>(detail::load_bool_avx2<T>(mem));
+        }
+
+        template <class A>
+        XSIMD_INLINE batch_bool<float, A> load_unaligned(bool const* mem, batch_bool<float, A>, requires_arch<avx2>) noexcept
+        {
+            return batch_bool<float, A>(_mm256_castsi256_ps(detail::load_bool_avx2<float>(mem)));
+        }
+
+        template <class A>
+        XSIMD_INLINE batch_bool<double, A> load_unaligned(bool const* mem, batch_bool<double, A>, requires_arch<avx2>) noexcept
+        {
+            return batch_bool<double, A>(_mm256_castsi256_pd(detail::load_bool_avx2<double>(mem)));
         }
 
         // mask
@@ -965,35 +987,43 @@ namespace xsimd
             XSIMD_INLINE void store_bool_avx2(__m256i b, bool* mem, T) noexcept {
                 // GCC <12 have missing or buggy unaligned store intrinsics; use memcpy to work around this.
                 // GCC/Clang/MSVC will turn it into the correct store.
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 1) {
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
                     // negate mask to convert to 0 or 1
                     auto val = _mm256_sub_epi8(_mm256_set1_epi8(0), b);
                     memcpy(mem, &val, sizeof(val));
                 }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2) {
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
                     auto packed = _mm256_castsi256_si128(_mm256_packs_epi16(b, b));
                     auto val = _mm_sub_epi8(_mm_set1_epi8(0), packed);
                     memcpy(mem, &val, sizeof(val));
                 }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4) {
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
                     auto bmask = _mm256_set_epi8(
                         -1, -1, -1, -1, -1, -1, -1, -1,
                         -1, -1, -1, -1, -1, -1, -1, -1,
                         -1, -1, -1, -1, -1, -1, -1, -1,
                         28, 24, 20, 16, 12,  8,  4,  0);
                     auto packed = _mm256_castsi256_si128(_mm256_shuffle_epi8(b, bmask));
-                    auto val = _mm_extract_epi64(_mm_sub_epi8(_mm_set1_epi8(0), packed), 0);
+                    auto val = _mm_cvtsi128_si64(_mm_sub_epi8(_mm_set1_epi8(0), packed));
                     memcpy(mem, &val, sizeof(val));
                 }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8) {
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
                     auto bmask = _mm256_set_epi8(
                         -1, -1, -1, -1, -1, -1, -1, -1,
                         -1, -1, -1, -1, -1, -1, -1, -1,
                         -1, -1, -1, -1, -1, -1, -1, -1,
                         -1, -1, -1, -1, 24, 16,  8,  0);
                     auto packed = _mm256_castsi256_si128(_mm256_shuffle_epi8(b, bmask));
-                    uint32_t val = _mm_extract_epi32(_mm_sub_epi8(_mm_set1_epi8(0), packed), 0);
+                    uint32_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), packed));
                     memcpy(mem, &val, sizeof(val));
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
                 }
             }
 
