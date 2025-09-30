@@ -579,13 +579,12 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                    auto maskz = _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i const*)mem), _mm256_set1_epi8(0));
-                    return _mm256_xor_si256(maskz, _mm256_set1_epi8(-1));
+                    return _mm256_sub_epi8(_mm256_set1_epi8(0), _mm256_loadu_si256((__m256i const*)mem));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
                     auto bpack = _mm_loadu_si128((__m128i const*)mem);
-                    return _mm256_cmpgt_epi16(_mm256_cvtepu8_epi16(bpack), _mm256_set1_epi16(0));
+                    return _mm256_sub_epi16(_mm256_set1_epi8(0), _mm256_cvtepu8_epi16(bpack));
                 }
                 // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
                 // GCC/Clang/MSVC will turn it into the correct load.
@@ -593,15 +592,13 @@ namespace xsimd
                 {
                     uint64_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
-                    auto bpack = _mm_cvtsi64_si128(tmp);
-                    return _mm256_cmpgt_epi32(_mm256_cvtepu8_epi32(bpack), _mm256_set1_epi32(0));
+                    return _mm256_sub_epi32(_mm256_set1_epi8(0), _mm256_cvtepu8_epi32(_mm_cvtsi64_si128(tmp)));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     uint32_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
-                    auto bpack = _mm_cvtsi32_si128(tmp);
-                    return _mm256_cmpgt_epi64(_mm256_cvtepu8_epi64(bpack), _mm256_set1_epi64x(0));
+                    return _mm256_sub_epi64(_mm256_set1_epi8(0), _mm256_cvtepu8_epi64(_mm_cvtsi32_si128(tmp)));
                 }
                 else
                 {

@@ -1713,8 +1713,9 @@ namespace xsimd
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
-                    uint64_t val = _mm_cvtsi128_si64(_mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(b, b)));
-                    memcpy(mem, &val, sizeof(val));
+                    auto val = _mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(b, b));
+                    // store only lower 64 bits
+                    memcpy(mem, &val, sizeof(uint64_t));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
