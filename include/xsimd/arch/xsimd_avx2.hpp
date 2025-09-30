@@ -590,9 +590,15 @@ namespace xsimd
                 // GCC/Clang/MSVC will turn it into the correct load.
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
+#if defined(__x86_64__)
                     uint64_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
-                    return _mm256_sub_epi32(_mm256_set1_epi8(0), _mm256_cvtepu8_epi32(_mm_cvtsi64_si128(tmp)));
+                    auto val = _mm_cvtsi64_si128(tmp);
+#else
+                    __m128i val;
+                    memcpy(&val, mem, sizeof(uint64_t));
+#endif
+                    return _mm256_sub_epi32(_mm256_set1_epi8(0), _mm256_cvtepu8_epi32(val));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
@@ -1005,8 +1011,13 @@ namespace xsimd
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
                     auto pack_16 = _mm_packs_epi32(b_lo, b_hi);
-                    auto val = _mm_cvtsi128_si64(_mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(pack_16, pack_16)));
-                    memcpy(mem, &val, sizeof(val));
+                    auto val = _mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(pack_16, pack_16));
+#if defined(__x86_64__)
+                    auto val_lo = _mm_cvtsi128_si64(val);
+                    memcpy(mem, &val_lo, sizeof(val_lo));
+#else
+                    memcpy(mem, &val, sizeof(uint64_t));
+#endif
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
