@@ -200,7 +200,7 @@ struct batch_bool_test
     template <typename F>
     static batch_bool_type make_batch(F&& f)
     {
-        return make_batch_impl(std::forward<F>(f), std::integral_constant<size_t, size>(), pack<>{});
+        return make_batch_impl(std::forward<F>(f), std::integral_constant<size_t, size>(), pack<> {});
     }
 
     void test_constructors() const
@@ -223,10 +223,12 @@ struct batch_bool_test
         }
 
         {
-            auto f_bool = [](size_t i) { return bool(i % 3); };
+            auto f_bool = [](size_t i)
+            { return bool(i % 3); };
 
             bool_array_type res;
-            for (size_t i = 0; i < res.size(); i++) {
+            for (size_t i = 0; i < res.size(); i++)
+            {
                 res[i] = f_bool(i);
             }
 
@@ -260,9 +262,11 @@ struct batch_bool_test
         // load/store, almost all false
         {
             size_t i = 0;
-            for (const auto& vec : bool_g.almost_all_false()) {
+            for (const auto& vec : bool_g.almost_all_false())
+            {
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
-                batch_bool_type expected = make_batch([i](size_t x) { return x == i; });
+                batch_bool_type expected = make_batch([i](size_t x)
+                                                      { return x == i; });
                 i++;
                 CHECK_UNARY(xsimd::all(b == expected));
                 b.store_unaligned(res.data());
@@ -274,13 +278,14 @@ struct batch_bool_test
         // load/store, almost all true
         {
             size_t i = 0;
-            for (const auto& vec : bool_g.almost_all_true()) {
+            for (const auto& vec : bool_g.almost_all_true())
+            {
                 batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
-                batch_bool_type expected = make_batch([i](size_t x) { return x != i; });
+                batch_bool_type expected = make_batch([i](size_t x)
+                                                      { return x != i; });
                 i++;
                 CHECK_UNARY(xsimd::all(b == expected));
                 b.store_unaligned(res.data());
-                CHECK_EQ(res, vec);
                 CHECK_UNARY(memcmp(res.data(), vec.data(), sizeof(res)) == 0);
             }
         }

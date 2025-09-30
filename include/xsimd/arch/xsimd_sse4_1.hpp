@@ -123,14 +123,14 @@ namespace xsimd
         }
 
         // load_unaligned<batch_bool>
-        namespace detail {
+        namespace detail
+        {
             template <class T>
             XSIMD_INLINE __m128i load_bool_sse4_1(bool const* mem) noexcept
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                    auto maskz = _mm_cmpeq_epi8(_mm_loadu_si128((__m128i const*)mem), _mm_set1_epi8(0));
-                    return _mm_xor_si128(maskz, _mm_set1_epi8(-1));
+                    return _mm_sub_epi8(_mm_set1_epi8(0), _mm_loadu_si128((__m128i const*)mem));
                 }
                 // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
                 // GCC/Clang/MSVC will turn it into the correct load.
@@ -138,22 +138,25 @@ namespace xsimd
                 {
                     uint64_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
-                    auto bpack = _mm_cvtsi64_si128(tmp);
-                    return _mm_cmpgt_epi16(_mm_cvtepu8_epi16(bpack), _mm_set1_epi16(0));
+                    return _mm_sub_epi16(_mm_set1_epi8(0), _mm_cvtepu8_epi16(_mm_cvtsi64_si128(tmp)));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
                     uint32_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
                     auto bpack = _mm_cvtsi32_si128(tmp);
-                    return _mm_cmpgt_epi32(_mm_cvtepu8_epi32(bpack), _mm_set1_epi32(0));
+                    return _mm_sub_epi32(_mm_set1_epi8(0), _mm_cvtepu8_epi32(_mm_cvtsi32_si128(tmp)));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     uint16_t tmp;
                     memcpy(&tmp, mem, sizeof(tmp));
-                    auto bpack = _mm_cvtsi32_si128((uint32_t)tmp);
-                    return _mm_cmpgt_epi64(_mm_cvtepu8_epi64(bpack), _mm_set1_epi64x(0));
+                    return _mm_sub_epi64(_mm_set1_epi8(0), _mm_cvtepu8_epi64(_mm_cvtsi32_si128((uint32_t)tmp)));
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                    return __m128i {};
                 }
             }
         }

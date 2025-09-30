@@ -1697,6 +1697,55 @@ namespace xsimd
             }
         }
 
+        // store<batch_bool>
+        namespace detail
+        {
+            template <class T>
+            XSIMD_INLINE void store_bool_sse2(__m128i b, bool* mem, T) noexcept
+            {
+                // GCC <12 have missing or buggy unaligned store intrinsics; use memcpy to work around this.
+                // GCC/Clang/MSVC will turn it into the correct store.
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+                {
+                    // negate mask to convert to 0 or 1
+                    auto val = _mm_sub_epi8(_mm_set1_epi8(0), b);
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+                {
+                    uint64_t val = _mm_cvtsi128_si64(_mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(b, b)));
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+                {
+                    auto pack_16 = _mm_packs_epi32(b, b);
+                    uint32_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(pack_16, pack_16)));
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+                {
+                    auto pack_32 = _mm_packs_epi32(b, b);
+                    auto pack_16 = _mm_packs_epi32(pack_32, pack_32);
+                    uint16_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(pack_16, pack_16)));
+                    memcpy(mem, &val, sizeof(val));
+                }
+                else
+                {
+                    assert(false && "unsupported arch/op combination");
+                }
+            }
+
+            XSIMD_INLINE __m128i sse_to_i(__m128 x) { return _mm_castps_si128(x); }
+            XSIMD_INLINE __m128i sse_to_i(__m128d x) { return _mm_castpd_si128(x); }
+            XSIMD_INLINE __m128i sse_to_i(__m128i x) { return x; }
+        }
+
+        template <class T, class A>
+        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<sse2>) noexcept
+        {
+            detail::store_bool_sse2(detail::sse_to_i(b), mem, T {});
+        }
+
         // store_aligned
         template <class A>
         XSIMD_INLINE void store_aligned(float* mem, batch<float, A> const& self, requires_arch<sse2>) noexcept

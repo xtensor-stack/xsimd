@@ -572,7 +572,8 @@ namespace xsimd
         }
 
         // load_unaligned<batch_bool>
-        namespace detail {
+        namespace detail
+        {
             template <class T>
             XSIMD_INLINE __m256i load_bool_avx2(bool const* mem) noexcept
             {
@@ -605,7 +606,7 @@ namespace xsimd
                 else
                 {
                     assert(false && "unsupported arch/op combination");
-                    return __m256i{};
+                    return __m256i {};
                 }
             }
         }
@@ -982,9 +983,11 @@ namespace xsimd
         }
 
         // store<batch_bool>
-        namespace detail {
+        namespace detail
+        {
             template <class T>
-            XSIMD_INLINE void store_bool_avx2(__m256i b, bool* mem, T) noexcept {
+            XSIMD_INLINE void store_bool_avx2(__m256i b, bool* mem, T) noexcept
+            {
                 // GCC <12 have missing or buggy unaligned store intrinsics; use memcpy to work around this.
                 // GCC/Clang/MSVC will turn it into the correct store.
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
@@ -992,33 +995,29 @@ namespace xsimd
                     // negate mask to convert to 0 or 1
                     auto val = _mm256_sub_epi8(_mm256_set1_epi8(0), b);
                     memcpy(mem, &val, sizeof(val));
+                    return;
                 }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+
+                auto b_hi = _mm256_extractf128_si256(b, 1);
+                auto b_lo = _mm256_castsi256_si128(b);
+                XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
-                    auto packed = _mm256_castsi256_si128(_mm256_packs_epi16(b, b));
-                    auto val = _mm_sub_epi8(_mm_set1_epi8(0), packed);
+                    auto val = _mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(b_lo, b_hi));
                     memcpy(mem, &val, sizeof(val));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
-                    auto bmask = _mm256_set_epi8(
-                        -1, -1, -1, -1, -1, -1, -1, -1,
-                        -1, -1, -1, -1, -1, -1, -1, -1,
-                        -1, -1, -1, -1, -1, -1, -1, -1,
-                        28, 24, 20, 16, 12,  8,  4,  0);
-                    auto packed = _mm256_castsi256_si128(_mm256_shuffle_epi8(b, bmask));
-                    auto val = _mm_cvtsi128_si64(_mm_sub_epi8(_mm_set1_epi8(0), packed));
+                    auto pack_16 = _mm_packs_epi32(b_lo, b_hi);
+                    auto val = _mm_cvtsi128_si64(_mm_sub_epi8(_mm_set1_epi8(0), _mm_packs_epi16(pack_16, pack_16)));
                     memcpy(mem, &val, sizeof(val));
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
-                    auto bmask = _mm256_set_epi8(
+                    const auto bmask = _mm_set_epi8(
                         -1, -1, -1, -1, -1, -1, -1, -1,
-                        -1, -1, -1, -1, -1, -1, -1, -1,
-                        -1, -1, -1, -1, -1, -1, -1, -1,
-                        -1, -1, -1, -1, 24, 16,  8,  0);
-                    auto packed = _mm256_castsi256_si128(_mm256_shuffle_epi8(b, bmask));
-                    uint32_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), packed));
+                        -1, -1, -1, -1, -1, -1, 8, 0);
+                    auto pack = _mm_unpacklo_epi16(_mm_shuffle_epi8(b_lo, bmask), _mm_shuffle_epi8(b_hi, bmask));
+                    uint32_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), pack));
                     memcpy(mem, &val, sizeof(val));
                 }
                 else
@@ -1027,7 +1026,7 @@ namespace xsimd
                 }
             }
 
-            XSIMD_INLINE __m256i avx_to_i(__m256  x) { return _mm256_castps_si256(x); }
+            XSIMD_INLINE __m256i avx_to_i(__m256 x) { return _mm256_castps_si256(x); }
             XSIMD_INLINE __m256i avx_to_i(__m256d x) { return _mm256_castpd_si256(x); }
             XSIMD_INLINE __m256i avx_to_i(__m256i x) { return x; }
         }
@@ -1035,7 +1034,7 @@ namespace xsimd
         template <class T, class A>
         XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<avx2>) noexcept
         {
-            detail::store_bool_avx2(detail::avx_to_i(b), mem, T{});
+            detail::store_bool_avx2(detail::avx_to_i(b), mem, T {});
         }
 
         // ssub
