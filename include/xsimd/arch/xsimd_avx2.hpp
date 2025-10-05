@@ -572,64 +572,56 @@ namespace xsimd
         }
 
         // load_unaligned<batch_bool>
-        namespace detail
-        {
-            template <class T>
-            XSIMD_INLINE __m256i load_bool_avx2(bool const* mem) noexcept
-            {
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-                {
-                    return _mm256_sub_epi8(_mm256_set1_epi8(0), _mm256_loadu_si256((__m256i const*)mem));
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-                {
-                    auto bpack = _mm_loadu_si128((__m128i const*)mem);
-                    return _mm256_sub_epi16(_mm256_set1_epi8(0), _mm256_cvtepu8_epi16(bpack));
-                }
-                // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
-                // GCC/Clang/MSVC will turn it into the correct load.
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-                {
-#if defined(__x86_64__)
-                    uint64_t tmp;
-                    memcpy(&tmp, mem, sizeof(tmp));
-                    auto val = _mm_cvtsi64_si128(tmp);
-#else
-                    __m128i val;
-                    memcpy(&val, mem, sizeof(uint64_t));
-#endif
-                    return _mm256_sub_epi32(_mm256_set1_epi8(0), _mm256_cvtepu8_epi32(val));
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-                {
-                    uint32_t tmp;
-                    memcpy(&tmp, mem, sizeof(tmp));
-                    return _mm256_sub_epi64(_mm256_set1_epi8(0), _mm256_cvtepu8_epi64(_mm_cvtsi32_si128(tmp)));
-                }
-                else
-                {
-                    assert(false && "unsupported arch/op combination");
-                    return __m256i {};
-                }
-            }
-        }
 
         template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<avx2>) noexcept
         {
-            return batch_bool<T, A>(detail::load_bool_avx2<T>(mem));
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return { _mm256_sub_epi8(_mm256_set1_epi8(0), _mm256_loadu_si256((__m256i const*)mem)) };
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                auto bpack = _mm_loadu_si128((__m128i const*)mem);
+                return { _mm256_sub_epi16(_mm256_set1_epi8(0), _mm256_cvtepu8_epi16(bpack)) };
+            }
+            // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
+            // GCC/Clang/MSVC will turn it into the correct load.
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+#if defined(__x86_64__)
+                uint64_t tmp;
+                memcpy(&tmp, mem, sizeof(tmp));
+                auto val = _mm_cvtsi64_si128(tmp);
+#else
+                __m128i val;
+                memcpy(&val, mem, sizeof(uint64_t));
+#endif
+                return { _mm256_sub_epi32(_mm256_set1_epi8(0), _mm256_cvtepu8_epi32(val)) };
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                uint32_t tmp;
+                memcpy(&tmp, mem, sizeof(tmp));
+                return { _mm256_sub_epi64(_mm256_set1_epi8(0), _mm256_cvtepu8_epi64(_mm_cvtsi32_si128(tmp))) };
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
         }
 
         template <class A>
-        XSIMD_INLINE batch_bool<float, A> load_unaligned(bool const* mem, batch_bool<float, A>, requires_arch<avx2>) noexcept
+        XSIMD_INLINE batch_bool<float, A> load_unaligned(bool const* mem, batch_bool<float, A>, requires_arch<avx2> r) noexcept
         {
-            return batch_bool<float, A>(_mm256_castsi256_ps(detail::load_bool_avx2<float>(mem)));
+            return { _mm256_castsi256_ps(load_unaligned(mem, batch_bool<uint32_t, A> {}, r).data) };
         }
 
         template <class A>
-        XSIMD_INLINE batch_bool<double, A> load_unaligned(bool const* mem, batch_bool<double, A>, requires_arch<avx2>) noexcept
+        XSIMD_INLINE batch_bool<double, A> load_unaligned(bool const* mem, batch_bool<double, A>, requires_arch<avx2> r) noexcept
         {
-            return batch_bool<double, A>(_mm256_castsi256_pd(detail::load_bool_avx2<double>(mem)));
+            return { _mm256_castsi256_pd(load_unaligned(mem, batch_bool<uint64_t, A> {}, r).data) };
         }
 
         // mask

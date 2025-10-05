@@ -1043,6 +1043,26 @@ namespace xsimd
             return _mm_loadu_pd(mem);
         }
 
+        // load batch_bool
+
+        template <class A>
+        XSIMD_INLINE batch_bool<char, A> load_unaligned(bool const* mem, batch_bool<char, A>, requires_arch<sse2>) noexcept
+        {
+            return _mm_sub_epi8(_mm_set1_epi8(0), _mm_loadu_si128((__m128i const*)mem));
+        }
+
+        template <class A>
+        XSIMD_INLINE batch_bool<unsigned char, A> load_unaligned(bool const* mem, batch_bool<unsigned char, A>, requires_arch<sse2> r) noexcept
+        {
+            return { load_unaligned(mem, batch_bool<char, A> {}, r).data };
+        }
+
+        template <class A>
+        XSIMD_INLINE batch_bool<signed char, A> load_unaligned(bool const* mem, batch_bool<signed char, A>, requires_arch<sse2> r) noexcept
+        {
+            return { load_unaligned(mem, batch_bool<char, A> {}, r).data };
+        }
+
         // load_complex
         namespace detail
         {
