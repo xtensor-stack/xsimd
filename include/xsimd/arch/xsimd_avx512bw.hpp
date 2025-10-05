@@ -316,18 +316,66 @@ namespace xsimd
         }
 
         // load
-        template <class A, class T, class = typename std::enable_if<batch_bool<T, A>::size == 64, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<avx512bw>) noexcept
         {
-            __m512i bool_val = _mm512_loadu_si512((__m512i const*)mem);
-            return _mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
+            using mask_type = typename batch_bool<T, A>::register_type;
+            XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 64)
+            {
+                __m512i bool_val = _mm512_loadu_si512((__m512i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
+            }
+            else XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 32)
+            {
+                __m256i bpack = _mm256_loadu_si256((__m256i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu16_mask(_mm512_cvtepu8_epi16(bpack), _mm512_setzero_si512());
+            }
+            else XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 16)
+            {
+                __m128i bpack = _mm_loadu_si128((__m128i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu32_mask(_mm512_cvtepu8_epi32(bpack), _mm512_setzero_si512());
+            }
+            else XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 8)
+            {
+                __m128i bpack = _mm_loadl_epi64((__m128i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu64_mask(_mm512_cvtepu8_epi64(bpack), _mm512_setzero_si512());
+            }
+            else
+            {
+                assert(false && "unexpected batch size");
+                return {};
+            }
         }
 
-        template <class A, class T, class = typename std::enable_if<batch_bool<T, A>::size == 64, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A>, requires_arch<avx512bw>) noexcept
         {
-            __m512i bool_val = _mm512_load_si512((__m512i const*)mem);
-            return _mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
+            using mask_type = typename batch_bool<T, A>::register_type;
+            XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 64)
+            {
+                __m512i bool_val = _mm512_load_si512((__m512i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu8_mask(bool_val, _mm512_setzero_si512());
+            }
+            else XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 32)
+            {
+                __m256i bpack = _mm256_load_si256((__m256i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu16_mask(_mm512_cvtepu8_epi16(bpack), _mm512_setzero_si512());
+            }
+            else XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 16)
+            {
+                __m128i bpack = _mm_load_si128((__m128i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu32_mask(_mm512_cvtepu8_epi32(bpack), _mm512_setzero_si512());
+            }
+            else XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size == 8)
+            {
+                __m128i bpack = _mm_loadl_epi64((__m128i const*)mem);
+                return (mask_type)_mm512_cmpgt_epu64_mask(_mm512_cvtepu8_epi64(bpack), _mm512_setzero_si512());
+            }
+            else
+            {
+                assert(false && "unexpected batch size");
+                return {};
+            }
         }
 
         // max
