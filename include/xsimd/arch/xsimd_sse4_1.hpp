@@ -123,65 +123,53 @@ namespace xsimd
         }
 
         // load_unaligned<batch_bool>
-        namespace detail
+
+        template <class T, class A, class = typename std::enable_if<(std::is_integral<T>::value && sizeof(T) > 1), void>::type>
+        XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<sse4_1>) noexcept
         {
-            template <class T>
-            XSIMD_INLINE __m128i load_bool_sse4_1(bool const* mem) noexcept
+            // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
+            // GCC/Clang/MSVC will turn it into the correct load.
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-                {
-                    return _mm_sub_epi8(_mm_set1_epi8(0), _mm_loadu_si128((__m128i const*)mem));
-                }
-                // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
-                // GCC/Clang/MSVC will turn it into the correct load.
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-                {
 #if defined(__x86_64__)
-                    uint64_t tmp;
-                    memcpy(&tmp, mem, sizeof(tmp));
-                    auto val = _mm_cvtsi64_si128(tmp);
+                uint64_t tmp;
+                memcpy(&tmp, mem, sizeof(tmp));
+                auto val = _mm_cvtsi64_si128(tmp);
 #else
-                    __m128i val;
-                    memcpy(&val, mem, sizeof(uint64_t));
+                __m128i val;
+                memcpy(&val, mem, sizeof(uint64_t));
 #endif
-                    return _mm_sub_epi16(_mm_set1_epi8(0), _mm_cvtepu8_epi16(val));
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-                {
-                    uint32_t tmp;
-                    memcpy(&tmp, mem, sizeof(tmp));
-                    return _mm_sub_epi32(_mm_set1_epi8(0), _mm_cvtepu8_epi32(_mm_cvtsi32_si128(tmp)));
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-                {
-                    uint16_t tmp;
-                    memcpy(&tmp, mem, sizeof(tmp));
-                    return _mm_sub_epi64(_mm_set1_epi8(0), _mm_cvtepu8_epi64(_mm_cvtsi32_si128((uint32_t)tmp)));
-                }
-                else
-                {
-                    assert(false && "unsupported arch/op combination");
-                    return __m128i {};
-                }
+                return { _mm_sub_epi16(_mm_set1_epi8(0), _mm_cvtepu8_epi16(val)) };
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                uint32_t tmp;
+                memcpy(&tmp, mem, sizeof(tmp));
+                return { _mm_sub_epi32(_mm_set1_epi8(0), _mm_cvtepu8_epi32(_mm_cvtsi32_si128(tmp))) };
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                uint16_t tmp;
+                memcpy(&tmp, mem, sizeof(tmp));
+                return { _mm_sub_epi64(_mm_set1_epi8(0), _mm_cvtepu8_epi64(_mm_cvtsi32_si128((uint32_t)tmp))) };
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return __m128i {};
             }
         }
 
-        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
-        XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<sse4_1>) noexcept
+        template <class A>
+        XSIMD_INLINE batch_bool<float, A> load_unaligned(bool const* mem, batch_bool<float, A>, requires_arch<sse4_1> r) noexcept
         {
-            return batch_bool<T, A>(detail::load_bool_sse4_1<T>(mem));
+            return { _mm_castsi128_ps(load_unaligned(mem, batch_bool<uint32_t, A> {}, r)) };
         }
 
         template <class A>
-        XSIMD_INLINE batch_bool<float, A> load_unaligned(bool const* mem, batch_bool<float, A>, requires_arch<sse4_1>) noexcept
+        XSIMD_INLINE batch_bool<double, A> load_unaligned(bool const* mem, batch_bool<double, A>, requires_arch<sse4_1> r) noexcept
         {
-            return batch_bool<float, A>(_mm_castsi128_ps(detail::load_bool_sse4_1<float>(mem)));
-        }
-
-        template <class A>
-        XSIMD_INLINE batch_bool<double, A> load_unaligned(bool const* mem, batch_bool<double, A>, requires_arch<sse4_1>) noexcept
-        {
-            return batch_bool<double, A>(_mm_castsi128_pd(detail::load_bool_sse4_1<double>(mem)));
+            return { _mm_castsi128_pd(load_unaligned(mem, batch_bool<uint64_t, A> {}, r)) };
         }
 
         // max
