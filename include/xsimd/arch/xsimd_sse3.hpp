@@ -59,7 +59,6 @@ namespace xsimd
             __m128 tmp2 = _mm_mul_ps(tmp1, _mm_movehdup_ps(tmp1));
             return _mm_cvtss_f32(tmp2);
         }
-
     }
 
 }
