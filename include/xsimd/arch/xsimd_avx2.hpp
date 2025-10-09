@@ -16,6 +16,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_avx2_register.hpp"
+#include "../types/xsimd_batch_constant.hpp"
 
 #include <limits>
 
@@ -114,6 +115,160 @@ namespace xsimd
             {
                 return avg(self, other, common {});
             }
+        }
+
+        // load_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<avx2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            // confined to lower 128-bit half (4 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
+                const auto lo = load_masked(mem, mlo, convert<int32_t> {}, Mode {}, sse4_2 {});
+                return _mm256_zextsi128_si256(lo.data);
+            }
+            // confined to upper 128-bit half (4 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                const auto hi = load_masked(mem + 4, mhi, convert<int32_t> {}, Mode {}, sse4_2 {});
+                return _mm256_insertf128_si256(_mm256_setzero_si256(), hi.data, 1);
+            }
+            else
+            {
+                return _mm256_maskload_epi32(mem, mask.as_batch());
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, Values...>, convert<uint32_t>, Mode, requires_arch<avx2>) noexcept
+        {
+            const auto r = load_masked<A>(reinterpret_cast<int32_t const*>(mem), batch_bool_constant<int32_t, A, Values...> {}, convert<int32_t> {}, Mode {}, avx2 {});
+            return bitwise_cast<uint32_t>(r);
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int64_t, A> load_masked(int64_t const* mem, batch_bool_constant<int64_t, A, Values...> mask, convert<int64_t>, Mode, requires_arch<avx2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            // confined to lower 128-bit half (2 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 2)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
+                const auto lo = load_masked(mem, mlo, convert<int64_t> {}, Mode {}, sse4_2 {});
+                return _mm256_zextsi128_si256(lo.data);
+            }
+            // confined to upper 128-bit half (2 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 2)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                const auto hi = load_masked(mem + 2, mhi, convert<int64_t> {}, Mode {}, sse4_2 {});
+                return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+            }
+            else
+            {
+                return _mm256_maskload_epi64(reinterpret_cast<long long const*>(mem), mask.as_batch());
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<uint64_t, A> load_masked(uint64_t const* mem, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<avx2>) noexcept
+        {
+            const auto r = load_masked<A>(reinterpret_cast<int64_t const*>(mem), batch_bool_constant<int64_t, A, Values...> {}, convert<int64_t> {}, Mode {}, avx2 {});
+            return bitwise_cast<uint64_t>(r);
+        }
+
+        // store_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src, batch_bool_constant<int32_t, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            // confined to lower 128-bit half (4 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
+                const batch<int32_t, sse4_2> lo(_mm256_castsi256_si128(src));
+                store_masked<sse4_2>(mem, lo, mlo, Mode {}, sse4_2 {});
+            }
+            // confined to upper 128-bit half (4 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                const batch<int32_t, sse4_2> hi(_mm256_extractf128_si256(src, 1));
+                store_masked<sse4_2>(mem + 4, hi, mhi, Mode {}, sse4_2 {});
+            }
+            else
+            {
+                _mm256_maskstore_epi32(reinterpret_cast<int*>(mem), mask.as_batch(), src);
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
+        {
+            const auto s32 = bitwise_cast<int32_t>(src);
+            store_masked<A>(reinterpret_cast<int32_t*>(mem), s32, mask, Mode {}, avx2 {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(int64_t* mem, batch<int64_t, A> const& src, batch_bool_constant<int64_t, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            // confined to lower 128-bit half (2 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 2)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
+                const batch<int64_t, sse4_2> lo(_mm256_castsi256_si128(src));
+                store_masked<sse4_2>(mem, lo, mlo, Mode {}, sse4_2 {});
+            }
+            // confined to upper 128-bit half (2 lanes) → forward to SSE
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 2)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                const batch<int64_t, sse4_2> hi(_mm256_extractf128_si256(src, 1));
+                store_masked<sse4_2>(mem + 2, hi, mhi, Mode {}, sse4_2 {});
+            }
+            else
+            {
+                _mm256_maskstore_epi64(reinterpret_cast<long long*>(mem), mask.as_batch(), src);
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(uint64_t* mem, batch<uint64_t, A> const& src, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<avx2>) noexcept
+        {
+            const auto s64 = bitwise_cast<int64_t>(src);
+            store_masked<A>(reinterpret_cast<int64_t*>(mem), s64, batch_bool_constant<int64_t, A, Values...> {}, Mode {}, avx2 {});
         }
 
         // bitwise_and

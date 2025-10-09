@@ -17,6 +17,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_avx512f_register.hpp"
+#include "../types/xsimd_batch_constant.hpp"
 
 namespace xsimd
 {
@@ -41,20 +42,35 @@ namespace xsimd
 
         namespace detail
         {
-            XSIMD_INLINE void split_avx512(__m512 val, __m256& low, __m256& high) noexcept
+            XSIMD_INLINE __m256 lower_half(__m512 self) noexcept
             {
-                low = _mm512_castps512_ps256(val);
-                high = _mm512_extractf32x8_ps(val, 1);
+                return _mm512_castps512_ps256(self);
             }
-            XSIMD_INLINE void split_avx512(__m512d val, __m256d& low, __m256d& high) noexcept
+            XSIMD_INLINE __m256d lower_half(__m512d self) noexcept
             {
-                low = _mm512_castpd512_pd256(val);
-                high = _mm512_extractf64x4_pd(val, 1);
+                return _mm512_castpd512_pd256(self);
             }
-            XSIMD_INLINE void split_avx512(__m512i val, __m256i& low, __m256i& high) noexcept
+            XSIMD_INLINE __m256i lower_half(__m512i self) noexcept
             {
-                low = _mm512_castsi512_si256(val);
-                high = _mm512_extracti64x4_epi64(val, 1);
+                return _mm512_castsi512_si256(self);
+            }
+            XSIMD_INLINE __m256 upper_half(__m512 self) noexcept
+            {
+                return _mm512_extractf32x8_ps(self, 1);
+            }
+            XSIMD_INLINE __m256d upper_half(__m512d self) noexcept
+            {
+                return _mm512_extractf64x4_pd(self, 1);
+            }
+            XSIMD_INLINE __m256i upper_half(__m512i self) noexcept
+            {
+                return _mm512_extracti64x4_epi64(self, 1);
+            }
+            template <class Full, class Half>
+            XSIMD_INLINE void split_avx512(Full const& val, Half& low, Half& high) noexcept
+            {
+                low = lower_half(val);
+                high = upper_half(val);
             }
             XSIMD_INLINE __m512i merge_avx(__m256i low, __m256i high) noexcept
             {
@@ -68,6 +84,7 @@ namespace xsimd
             {
                 return _mm512_insertf64x4(_mm512_castpd256_pd512(low), high, 1);
             }
+
             template <class F>
             __m512i fwd_to_avx(F f, __m512i self)
             {
@@ -227,6 +244,91 @@ namespace xsimd
                     }
                 }
             }
+        }
+
+        // load_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm512_setzero_si512();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 8) // Forward to AVX2 when confined to a 256-bit half (8 lanes)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = load_masked<avx2>(mem, mlo, convert<int32_t> {}, Mode {}, avx2 {});
+                return _mm512_zextsi256_si512(lo);
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    return _mm512_maskz_load_epi32(mask.mask(), mem);
+                }
+                else
+                {
+                    return _mm512_maskz_loadu_epi32(mask.mask(), mem);
+                }
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, Values...>, convert<uint32_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            const auto r = load_masked<A>(reinterpret_cast<int32_t const*>(mem),
+                                          batch_bool_constant<int32_t, A, Values...> {},
+                                          convert<int32_t> {}, Mode {}, avx512f {});
+            return bitwise_cast<uint32_t>(r);
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int64_t, A> load_masked(int64_t const* mem, batch_bool_constant<int64_t, A, Values...> mask, convert<int64_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm512_setzero_si512();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4) // Forward to AVX2 when confined to a 256-bit half (4 lanes)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = load_masked<avx2>(mem, mlo, convert<int64_t> {}, Mode {}, avx2 {});
+                return _mm512_zextsi256_si512(lo);
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = load_masked<avx2>(mem + 4, mhi, convert<int64_t> {}, Mode {}, avx2 {});
+                return _mm512_inserti64x4(_mm512_setzero_si512(), hi, 1);
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    return _mm512_maskz_load_epi64(mask.mask(), mem);
+                }
+                else
+                {
+                    return _mm512_maskz_loadu_epi64(mask.mask(), mem);
+                }
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<uint64_t, A> load_masked(uint64_t const* mem, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            const auto r = load_masked<A>(reinterpret_cast<int64_t const*>(mem),
+                                          batch_bool_constant<int64_t, A, Values...> {},
+                                          convert<int64_t> {}, Mode {}, avx512f {});
+            return bitwise_cast<uint64_t>(r);
         }
 
         // abs
@@ -866,11 +968,11 @@ namespace xsimd
 
             XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                return _mm512_mask_sub_epi32(self, mask.data, self, _mm512_set1_epi32(1));
+                return _mm512_mask_sub_epi32(self, mask, self, _mm512_set1_epi32(1));
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
-                return _mm512_mask_sub_epi64(self, mask.data, self, _mm512_set1_epi64(1));
+                return _mm512_mask_sub_epi64(self, mask, self, _mm512_set1_epi64(1));
             }
             else
             {
@@ -1389,6 +1491,238 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> load_unaligned(double const* mem, convert<double>, requires_arch<avx512f>) noexcept
         {
             return _mm512_loadu_pd(mem);
+        }
+
+        // load_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, Values...> mask, convert<float>, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm512_setzero_ps();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 8) // Forward to AVX2 when confined to a 256-bit half
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = load_masked<avx2>(mem, mlo, convert<float> {}, Mode {}, avx2 {});
+                return _mm512_zextps256_ps512(lo);
+            }
+            else
+            {
+                // Last resort: 512-bit masked load
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    return _mm512_maskz_load_ps(static_cast<__mmask16>(mask.mask()), mem);
+                }
+                else
+                {
+                    return _mm512_maskz_loadu_ps(static_cast<__mmask16>(mask.mask()), mem);
+                }
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<double, A> load_masked(double const* mem, batch_bool_constant<double, A, Values...> mask, convert<double>, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm512_setzero_pd();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4) // Forward to AVX2 when confined to a 256-bit half
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = load_masked<avx2>(mem, mlo, convert<double> {}, Mode {}, avx2 {});
+                return _mm512_zextpd256_pd512(lo);
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = load_masked<avx2>(mem + 4, mhi, convert<double> {}, Mode {}, avx2 {});
+                return _mm512_insertf64x4(_mm512_setzero_pd(), hi, 1);
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    return _mm512_maskz_load_pd(mask.mask(), mem);
+                }
+                else
+                {
+                    return _mm512_maskz_loadu_pd(mask.mask(), mem);
+                }
+            }
+        }
+
+        // store_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 8) // Forward to AVX2 when confined to a 256-bit half
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = detail::lower_half(src);
+                store_masked<avx2>(mem, lo, mlo, Mode {}, avx2 {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 8)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = detail::upper_half(src);
+                store_masked<avx2>(mem + 8, hi, mhi, Mode {}, avx2 {});
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    _mm512_mask_store_ps(mem, mask.mask(), src);
+                }
+                else
+                {
+                    _mm512_mask_storeu_ps(mem, mask.mask(), src);
+                }
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, Values...> mask, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4) // Forward to AVX2 when confined to a 256-bit half
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = detail::lower_half(src);
+                store_masked<avx2>(mem, lo, mlo, Mode {}, avx2 {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = detail::upper_half(src);
+                store_masked<avx2>(mem + 4, hi, mhi, Mode {}, avx2 {});
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    _mm512_mask_store_pd(mem, mask.mask(), src);
+                }
+                else
+                {
+                    _mm512_mask_storeu_pd(mem, mask.mask(), src);
+                }
+            }
+        }
+
+        // store_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src, batch_bool_constant<int32_t, A, Values...> mask, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 8) // Forward to AVX2 when confined to a 256-bit half (8 lanes)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = detail::lower_half(src);
+                store_masked<avx2>(mem, lo, mlo, Mode {}, avx2 {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 8)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = detail::upper_half(src);
+                store_masked<avx2>(mem + 8, hi, mhi, Mode {}, avx2 {});
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    _mm512_mask_store_epi32(mem, mask.mask(), src);
+                }
+                else
+                {
+                    _mm512_mask_storeu_epi32(mem, mask.mask(), src);
+                }
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...>, Mode, requires_arch<avx512f>) noexcept
+        {
+            auto s32 = bitwise_cast<int32_t>(src);
+            store_masked<A>(reinterpret_cast<int32_t*>(mem), s32,
+                            batch_bool_constant<int32_t, A, Values...> {},
+                            Mode {}, avx512f {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(int64_t* mem, batch<int64_t, A> const& src, batch_bool_constant<int64_t, A, Values...> mask, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4) // Forward to AVX2 when confined to a 256-bit half (4 lanes)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                const auto lo = detail::lower_half(src);
+                store_masked<avx2>(mem, lo, mlo, Mode {}, avx2 {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = detail::upper_half(src);
+                store_masked<avx2>(mem + 4, hi, mhi, Mode {}, avx2 {});
+            }
+            else
+            {
+                XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
+                    _mm512_mask_store_epi64(mem, mask.mask(), src);
+                }
+                else
+                {
+                    _mm512_mask_storeu_epi64(mem, mask.mask(), src);
+                }
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(uint64_t* mem, batch<uint64_t, A> const& src, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<avx512f>) noexcept
+        {
+            auto s64 = bitwise_cast<int64_t>(src);
+            store_masked<A>(reinterpret_cast<int64_t*>(mem), s64,
+                            batch_bool_constant<int64_t, A, Values...> {},
+                            Mode {}, avx512f {});
         }
 
         // lt
