@@ -13,6 +13,7 @@
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #include <random>
+#include <type_traits>
 
 #include "test_utils.hpp"
 
@@ -173,6 +174,33 @@ private:
     };
 #endif
 
+    template <class Ptr>
+    void stream_load_if_same(Ptr const* ptr, batch_type& b, array_type const& expected_values, const std::string& name,
+                             std::true_type) const
+    {
+        b = xsimd::load(ptr, xsimd::stream_mode());
+        INFO(name, " stream (load)");
+        CHECK_BATCH_EQ(b, expected_values);
+    }
+
+    template <class Ptr>
+    void stream_load_if_same(Ptr const*, batch_type&, array_type const&, const std::string&, std::false_type) const
+    {
+    }
+
+    template <class Vec>
+    void stream_store_if_same(Vec& res, batch_type const& b, Vec const& reference, const std::string& name, std::true_type) const
+    {
+        xsimd::store(res.data(), b, xsimd::stream_mode());
+        INFO(name, " stream (store)");
+        CHECK_VECTOR_EQ(res, reference);
+    }
+
+    template <class Vec>
+    void stream_store_if_same(Vec&, batch_type const&, Vec const&, const std::string&, std::false_type) const
+    {
+    }
+
     template <class V>
     void test_load_impl(const V& v, const std::string& name)
     {
@@ -186,6 +214,10 @@ private:
         INFO(name, " aligned");
         CHECK_BATCH_EQ(b, expected);
 
+        b = batch_type::load(v.data(), xsimd::stream_mode());
+        INFO(name, " stream (batch::load)");
+        CHECK_BATCH_EQ(b, expected);
+
         b = xsimd::load_as<value_type>(v.data(), xsimd::unaligned_mode());
         INFO(name, " unaligned (load_as)");
         CHECK_BATCH_EQ(b, expected);
@@ -193,6 +225,13 @@ private:
         b = xsimd::load_as<value_type>(v.data(), xsimd::aligned_mode());
         INFO(name, " aligned (load_as)");
         CHECK_BATCH_EQ(b, expected);
+
+        b = xsimd::load_as<value_type>(v.data(), xsimd::stream_mode());
+        INFO(name, " stream (load_as)");
+        CHECK_BATCH_EQ(b, expected);
+
+        stream_load_if_same(v.data(), b, expected, name,
+                            std::integral_constant<bool, std::is_same<typename V::value_type, value_type>::value> {});
     }
 
     struct test_load_char
@@ -227,6 +266,17 @@ private:
         xsimd::store_as(res.data(), b, xsimd::aligned_mode());
         INFO(name, " aligned (store_as)");
         CHECK_VECTOR_EQ(res, v);
+
+        b.store(res.data(), xsimd::stream_mode());
+        INFO(name, " stream (batch::store)");
+        CHECK_VECTOR_EQ(res, v);
+
+        xsimd::store_as(res.data(), b, xsimd::stream_mode());
+        INFO(name, " stream (store_as)");
+        CHECK_VECTOR_EQ(res, v);
+
+        stream_store_if_same(res, b, v, name,
+                             std::integral_constant<bool, std::is_same<typename V::value_type, value_type>::value> {});
     }
 
     template <class V>
@@ -300,5 +350,11 @@ TEST_CASE_TEMPLATE("[load store]", B, BATCH_TYPES)
     SUBCASE("gather") { Test.test_gather(); }
 
     SUBCASE("scatter") { Test.test_scatter(); }
+}
+
+TEST_CASE("[fence] sequential consistency")
+{
+    xsimd::fence();
+    CHECK(true);
 }
 #endif
