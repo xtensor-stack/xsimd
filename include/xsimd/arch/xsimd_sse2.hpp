@@ -2092,6 +2092,333 @@ namespace xsimd
         {
             return _mm_unpacklo_pd(self, other);
         }
+
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem,
+                                                 batch_bool<float, A> const& mask,
+                                                 convert<float>,
+                                                 aligned_mode,
+                                                 requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_ps(mask);
+            if (mb == 0)
+            {
+                return _mm_setzero_ps();
+            }
+            if (mb == 0xF)
+            {
+                return _mm_load_ps(mem);
+            }
+            if (mb == 0x3)
+            {
+                return _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem));
+            }
+            if (mb == 0xC)
+            {
+                return _mm_loadh_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem + 2));
+            }
+            return load_masked<A>(mem, mask, convert<float> {}, aligned_mode {}, requires_arch<common> {});
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem,
+                                                 batch_bool<float, A> const& mask,
+                                                 convert<float>,
+                                                 unaligned_mode,
+                                                 requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_ps(mask);
+            if (mb == 0)
+            {
+                return _mm_setzero_ps();
+            }
+            if (mb == 0xF)
+            {
+                return _mm_loadu_ps(mem);
+            }
+            if (mb == 0x3)
+            {
+                return _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem));
+            }
+            if (mb == 0xC)
+            {
+                return _mm_loadh_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem + 2));
+            }
+            return load_masked<A>(mem, mask, convert<float> {}, unaligned_mode {}, requires_arch<common> {});
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_masked(double const* mem,
+                                                  batch_bool<double, A> const& mask,
+                                                  convert<double>,
+                                                  aligned_mode,
+                                                  requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_pd(mask);
+            if (mb == 0)
+            {
+                return _mm_setzero_pd();
+            }
+            if (mb == 0x3)
+            {
+                return _mm_load_pd(mem);
+            }
+            if (mb == 0x1)
+            {
+                return _mm_move_sd(_mm_setzero_pd(), _mm_load_sd(mem));
+            }
+            if (mb == 0x2)
+            {
+                return _mm_loadh_pd(_mm_setzero_pd(), mem + 1);
+            }
+            return load_masked<A>(mem, mask, convert<double> {}, aligned_mode {}, requires_arch<common> {});
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_masked(double const* mem,
+                                                  batch_bool<double, A> const& mask,
+                                                  convert<double>,
+                                                  unaligned_mode,
+                                                  requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_pd(mask);
+            if (mb == 0)
+            {
+                return _mm_setzero_pd();
+            }
+            if (mb == 0x3)
+            {
+                return _mm_loadu_pd(mem);
+            }
+            if (mb == 0x1)
+            {
+                return _mm_move_sd(_mm_setzero_pd(), _mm_load_sd(mem));
+            }
+            if (mb == 0x2)
+            {
+                return _mm_loadh_pd(_mm_setzero_pd(), mem + 1);
+            }
+            return load_masked<A>(mem, mask, convert<double> {}, unaligned_mode {}, requires_arch<common> {});
+        }
+
+        // load_masked compile-time
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem,
+                                                 batch_bool_constant<float, A, Values...> mask,
+                                                 convert<float>,
+                                                 aligned_mode,
+                                                 requires_arch<sse2>) noexcept
+        {
+            constexpr int mb = batch_bool_constant<float, A, Values...>::mask();
+            XSIMD_IF_CONSTEXPR(mb == 0)
+            {
+                return _mm_setzero_ps();
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0xF)
+            {
+                return _mm_load_ps(mem);
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x3)
+            {
+                return _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0xC)
+            {
+                return _mm_loadh_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem + 2));
+            }
+            else
+            {
+                return load_masked<A>(mem, mask.as_batch_bool(), convert<float> {}, aligned_mode {}, requires_arch<common> {});
+            }
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem,
+                                                 batch_bool_constant<float, A, Values...> mask,
+                                                 convert<float>,
+                                                 unaligned_mode,
+                                                 requires_arch<sse2>) noexcept
+        {
+            constexpr int mb = batch_bool_constant<float, A, Values...>::mask();
+            XSIMD_IF_CONSTEXPR(mb == 0)
+            {
+                return _mm_setzero_ps();
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0xF)
+            {
+                return _mm_loadu_ps(mem);
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x3)
+            {
+                return _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0xC)
+            {
+                return _mm_loadh_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem + 2));
+            }
+            else
+            {
+                return load_masked<A>(mem, mask.as_batch_bool(), convert<float> {}, unaligned_mode {}, requires_arch<common> {});
+            }
+        }
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<double, A> load_masked(double const* mem,
+                                                  batch_bool_constant<double, A, Values...> mask,
+                                                  convert<double>,
+                                                  aligned_mode,
+                                                  requires_arch<sse2>) noexcept
+        {
+            constexpr int mb = batch_bool_constant<double, A, Values...>::mask();
+            XSIMD_IF_CONSTEXPR(mb == 0)
+            {
+                return _mm_setzero_pd();
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x3)
+            {
+                return _mm_load_pd(mem);
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x1)
+            {
+                return _mm_move_sd(_mm_setzero_pd(), _mm_load_sd(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x2)
+            {
+                return _mm_loadh_pd(_mm_setzero_pd(), mem + 1);
+            }
+            else
+            {
+                return load_masked<A>(mem, mask.as_batch_bool(), convert<double> {}, aligned_mode {}, requires_arch<common> {});
+            }
+        }
+
+        template <class A, bool... Values>
+        XSIMD_INLINE batch<double, A> load_masked(double const* mem,
+                                                  batch_bool_constant<double, A, Values...> mask,
+                                                  convert<double>,
+                                                  unaligned_mode,
+                                                  requires_arch<sse2>) noexcept
+        {
+            constexpr int mb = batch_bool_constant<double, A, Values...>::mask();
+            XSIMD_IF_CONSTEXPR(mb == 0)
+            {
+                return _mm_setzero_pd();
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x3)
+            {
+                return _mm_loadu_pd(mem);
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x1)
+            {
+                return _mm_move_sd(_mm_setzero_pd(), _mm_load_sd(mem));
+            }
+            else XSIMD_IF_CONSTEXPR(mb == 0x2)
+            {
+                return _mm_loadh_pd(_mm_setzero_pd(), mem + 1);
+            }
+            else
+            {
+                return load_masked<A>(mem, mask.as_batch_bool(), convert<double> {}, unaligned_mode {}, requires_arch<common> {});
+            }
+        }
+
+        template <class A>
+        XSIMD_INLINE void store_masked(float* mem,
+                                       batch<float, A> const& src,
+                                       batch_bool<float, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_ps(mask);
+            if (mb == 0)
+                return;
+            if (mb == 0xF)
+            {
+                _mm_store_ps(mem, src);
+                return;
+            }
+            if (mb == 0x3)
+            {
+                _mm_storel_pi(reinterpret_cast<__m64*>(mem), src);
+                return;
+            }
+            if (mb == 0xC)
+            {
+                _mm_storeh_pi(reinterpret_cast<__m64*>(mem + 2), src);
+                return;
+            }
+            kernel::store_masked<A, float, float>(mem, src, mask, requires_arch<common> {});
+        }
+
+        template <class A>
+        XSIMD_INLINE void store_masked(float* mem,
+                                       batch<float, A> const& src,
+                                       batch_bool<float, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_ps(mask);
+            if (mb == 0)
+                return;
+            if (mb == 0xF)
+            {
+                _mm_storeu_ps(mem, src);
+                return;
+            }
+            if (mb == 0x3)
+            {
+                _mm_storel_pi(reinterpret_cast<__m64*>(mem), src);
+                return;
+            }
+            if (mb == 0xC)
+            {
+                _mm_storeh_pi(reinterpret_cast<__m64*>(mem + 2), src);
+                return;
+            }
+            kernel::store_masked<A, float, float>(mem, src, mask, requires_arch<common> {});
+        }
+
+        template <class A>
+        XSIMD_INLINE void store_masked(double* mem,
+                                       batch<double, A> const& src,
+                                       batch_bool<double, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_pd(mask);
+            if (mb == 0)
+                return;
+            if (mb == 0x3)
+            {
+                _mm_store_pd(mem, src);
+                return;
+            }
+            if (mb & 0x1)
+                _mm_store_sd(mem + 0, src);
+            if (mb & 0x2)
+                _mm_storeh_pd(mem + 1, src);
+        }
+
+        template <class A>
+        XSIMD_INLINE void store_masked(double* mem,
+                                       batch<double, A> const& src,
+                                       batch_bool<double, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<sse2>) noexcept
+        {
+            int mb = _mm_movemask_pd(mask);
+            if (mb == 0)
+                return;
+            if (mb == 0x3)
+            {
+                _mm_storeu_pd(mem, src);
+                return;
+            }
+            if (mb & 0x1)
+                _mm_store_sd(mem + 0, src);
+            if (mb & 0x2)
+                _mm_storeh_pd(mem + 1, src);
+        }
+
     }
 }
 

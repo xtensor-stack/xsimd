@@ -12,6 +12,8 @@
 #ifndef XSIMD_BATCH_CONSTANT_HPP
 #define XSIMD_BATCH_CONSTANT_HPP
 
+#include <utility>
+
 #include "./xsimd_batch.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -116,6 +118,149 @@ namespace xsimd
         constexpr batch_bool_constant<T, A, !Values...> operator~() const
         {
             return {};
+        }
+
+        // Mask utility helpers (C++11 constexpr)
+        static constexpr uint64_t truncated_mask() noexcept
+        {
+            return bits() & low_mask(size);
+        }
+
+        static constexpr std::size_t popcount() noexcept
+        {
+            return popcount_impl(truncated_mask());
+        }
+
+        static constexpr bool none() noexcept
+        {
+            return truncated_mask() == 0u;
+        }
+
+        static constexpr bool any() noexcept
+        {
+            return !none();
+        }
+
+        static constexpr bool all() noexcept
+        {
+            return truncated_mask() == low_mask(size);
+        }
+
+        static constexpr bool is_empty() noexcept { return none(); }
+        static constexpr bool is_full() noexcept { return all(); }
+
+        static constexpr std::size_t countr_zero() noexcept
+        {
+            return countr_zero_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t countl_zero() noexcept
+        {
+            return countl_zero_impl(truncated_mask(), size);
+        }
+
+        // trailing contiguous 1s (from LSB)
+        static constexpr std::size_t countr_one() noexcept
+        {
+            return countr_one_impl(truncated_mask(), size);
+        }
+
+        // leading contiguous 1s (from MSB)
+        static constexpr std::size_t countl_one() noexcept
+        {
+            return countl_one_impl(truncated_mask(), size);
+        }
+
+        static constexpr bool is_all_zeros() noexcept { return none(); }
+        static constexpr bool is_all_ones() noexcept { return all(); }
+
+        static constexpr std::size_t first_one_index() noexcept
+        {
+            return first_one_index_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t last_one_index() noexcept
+        {
+            return last_one_index_impl(truncated_mask(), size);
+        }
+
+        static constexpr bool is_prefix_ones() noexcept
+        {
+            return truncated_mask() == low_mask(countr_one());
+        }
+
+        static constexpr bool is_suffix_ones() noexcept
+        {
+            return truncated_mask() == (low_mask(countl_one()) << (size - (countl_one() > size ? size : countl_one())));
+        }
+
+    private:
+        // Build a 64-bit mask from Values... (LSB = index 0)
+        template <std::size_t I, bool... Remaining>
+        struct build_bits_helper;
+
+        template <std::size_t I>
+        struct build_bits_helper<I>
+        {
+            static constexpr uint64_t value = 0u;
+        };
+
+        template <std::size_t I, bool Current, bool... Remaining>
+        struct build_bits_helper<I, Current, Remaining...>
+        {
+            static constexpr uint64_t value = (Current ? (uint64_t(1) << I) : 0u)
+                | build_bits_helper<I + 1, Remaining...>::value;
+        };
+
+        static constexpr uint64_t bits() noexcept
+        {
+            return build_bits_helper<0, Values...>::value;
+        }
+
+        static constexpr uint64_t low_mask(std::size_t k) noexcept
+        {
+            return (k >= 64u) ? ~uint64_t(0) : ((uint64_t(1) << k) - 1u);
+        }
+
+        static constexpr std::size_t popcount_impl(uint64_t v) noexcept
+        {
+            return v == 0u ? 0u : (std::size_t(v & 1u) + popcount_impl(v >> 1));
+        }
+
+        static constexpr std::size_t countr_zero_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0 || (v & 1u) != 0u) ? 0u : (1u + countr_zero_impl(v >> 1, n - 1));
+        }
+
+        static constexpr std::size_t countr_one_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0 || (v & 1u) == 0u) ? 0u : (1u + countr_one_impl(v >> 1, n - 1));
+        }
+
+        static constexpr std::size_t countl_zero_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0)
+                ? 0u
+                : ((((v >> (n - 1)) & 1u) != 0u) ? 0u : (1u + countl_zero_impl(v, n - 1)));
+        }
+
+        static constexpr std::size_t countl_one_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0)
+                ? 0u
+                : ((((v >> (n - 1)) & 1u) == 0u) ? 0u : (1u + countl_one_impl(v, n - 1)));
+        }
+
+        static constexpr std::size_t first_one_index_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0) ? 0u : ((v & 1u) ? 0u : (1u + first_one_index_impl(v >> 1, n - 1)));
+        }
+
+        static constexpr std::size_t last_one_index_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0)
+                ? 0u
+                : ((((v >> (n - 1)) & 1u) ? (n - 1) : last_one_index_impl(v, n - 1)));
         }
     };
 
