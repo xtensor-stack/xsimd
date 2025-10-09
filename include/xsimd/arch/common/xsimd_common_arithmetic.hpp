@@ -17,6 +17,7 @@
 #include <type_traits>
 
 #include "./xsimd_common_details.hpp"
+#include "../../types/xsimd_batch_constant.hpp"
 
 namespace xsimd
 {
