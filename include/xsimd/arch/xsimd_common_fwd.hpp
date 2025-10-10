@@ -15,6 +15,7 @@
 
 #include "../types/xsimd_batch_constant.hpp"
 
+#include <cstddef>
 #include <type_traits>
 
 namespace xsimd
@@ -52,6 +53,15 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, STy other, requires_arch<common>) noexcept;
         template <size_t count, class A, class T>
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, requires_arch<common>) noexcept;
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE batch<T_out, A> load_masked(T_in const* mem, typename batch<T_out, A>::batch_bool_type const& mask, convert<T_out>, requires_arch<common>) noexcept;
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE void store_masked(T_out* mem, batch<T_in, A> const& src, typename batch<T_in, A>::batch_bool_type const& mask, requires_arch<common>) noexcept;
+        // compile-time load_masked / store_masked
+        template <class A, class T_in, class T_out, bool... Values>
+        XSIMD_INLINE batch<T_out, A> load_masked(T_in const* mem, batch_bool_constant<T_out, A, Values...> mask, convert<T_out>, requires_arch<common>) noexcept;
+        template <class A, class T_in, class T_out, bool... Values>
+        XSIMD_INLINE void store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, requires_arch<common>) noexcept;
         // Forward declarations for pack-level helpers
         namespace detail
         {

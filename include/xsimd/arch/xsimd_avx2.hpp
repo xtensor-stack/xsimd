@@ -26,6 +26,546 @@ namespace xsimd
     {
         using namespace types;
 
+        template <class A>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem,
+                                                   batch_bool<int32_t, A> const& mask,
+                                                   convert<int32_t>,
+                                                   aligned_mode,
+                                                   requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_load_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi32(mem, mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi32(mem + 4, mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi32(mem, mask.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem,
+                                                   batch_bool<int32_t, A> const& mask,
+                                                   convert<int32_t>,
+                                                   unaligned_mode,
+                                                   requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_loadu_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi32(mem, mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi32(mem + 4, mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi32(mem, mask.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem,
+                                                    batch_bool<uint32_t, A> const& mask,
+                                                    convert<uint32_t>,
+                                                    aligned_mode,
+                                                    requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_load_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi32(reinterpret_cast<int const*>(mem), mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi32(reinterpret_cast<int const*>(mem + 4), mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi32(reinterpret_cast<int const*>(mem), mask.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem,
+                                                    batch_bool<uint32_t, A> const& mask,
+                                                    convert<uint32_t>,
+                                                    unaligned_mode,
+                                                    requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_loadu_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi32(reinterpret_cast<int const*>(mem), mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi32(reinterpret_cast<int const*>(mem + 4), mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi32(reinterpret_cast<int const*>(mem), mask.data);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<int64_t, A> load_masked(int64_t const* mem,
+                                                   batch_bool<int64_t, A> const& mask,
+                                                   convert<int64_t>,
+                                                   aligned_mode,
+                                                   requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_load_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem), mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem + 2), mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi64(mem, mask.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<int64_t, A> load_masked(int64_t const* mem,
+                                                   batch_bool<int64_t, A> const& mask,
+                                                   convert<int64_t>,
+                                                   unaligned_mode,
+                                                   requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_loadu_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem), mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem + 2), mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi64(mem, mask.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint64_t, A> load_masked(uint64_t const* mem,
+                                                    batch_bool<uint64_t, A> const& mask,
+                                                    convert<uint64_t>,
+                                                    aligned_mode,
+                                                    requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_load_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem), mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem + 2), mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi64(reinterpret_cast<long long const*>(mem), mask.data);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint64_t, A> load_masked(uint64_t const* mem,
+                                                    batch_bool<uint64_t, A> const& mask,
+                                                    convert<uint64_t>,
+                                                    unaligned_mode,
+                                                    requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return _mm256_setzero_si256();
+            }
+            if (mask.all())
+            {
+                return _mm256_loadu_si256(reinterpret_cast<__m256i const*>(mem));
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    __m128i lo = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem), mask128);
+                    return _mm256_zextsi128_si256(lo);
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    __m128i hi = _mm_maskload_epi64(reinterpret_cast<long long const*>(mem + 2), mask128);
+                    return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
+                }
+            }
+            return _mm256_maskload_epi64(reinterpret_cast<long long const*>(mem), mask.data);
+        }
+
+        template <class A>
+        XSIMD_INLINE void store_masked(int32_t* mem,
+                                       batch<int32_t, A> const& src,
+                                       batch_bool<int32_t, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_store_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi32(mem, mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi32(mem + 4, mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi32(mem, mask.data, src);
+        }
+        template <class A>
+        XSIMD_INLINE void store_masked(int32_t* mem,
+                                       batch<int32_t, A> const& src,
+                                       batch_bool<int32_t, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_storeu_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi32(mem, mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi32(mem + 4, mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi32(mem, mask.data, src);
+        }
+        template <class A>
+        XSIMD_INLINE void store_masked(uint32_t* mem,
+                                       batch<uint32_t, A> const& src,
+                                       batch_bool<uint32_t, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_store_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi32(reinterpret_cast<int*>(mem), mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi32(reinterpret_cast<int*>(mem + 4), mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi32(reinterpret_cast<int*>(mem), mask.data, src);
+        }
+        template <class A>
+        XSIMD_INLINE void store_masked(uint32_t* mem,
+                                       batch<uint32_t, A> const& src,
+                                       batch_bool<uint32_t, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_storeu_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 4)
+            {
+                if (mask.countr_one() == 4)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi32(reinterpret_cast<int*>(mem), mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 4)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi32(reinterpret_cast<int*>(mem + 4), mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi32(reinterpret_cast<int*>(mem), mask.data, src);
+        }
+
+        template <class A>
+        XSIMD_INLINE void store_masked(int64_t* mem,
+                                       batch<int64_t, A> const& src,
+                                       batch_bool<int64_t, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_store_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem), mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem + 2), mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi64(mem, mask.data, src);
+        }
+        template <class A>
+        XSIMD_INLINE void store_masked(int64_t* mem,
+                                       batch<int64_t, A> const& src,
+                                       batch_bool<int64_t, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_storeu_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem), mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem + 2), mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi64(mem, mask.data, src);
+        }
+        template <class A>
+        XSIMD_INLINE void store_masked(uint64_t* mem,
+                                       batch<uint64_t, A> const& src,
+                                       batch_bool<uint64_t, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_store_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem), mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem + 2), mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi64(reinterpret_cast<long long*>(mem), mask.data, src);
+        }
+        template <class A>
+        XSIMD_INLINE void store_masked(uint64_t* mem,
+                                       batch<uint64_t, A> const& src,
+                                       batch_bool<uint64_t, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<avx2>) noexcept
+        {
+            if (mask.none())
+            {
+                return;
+            }
+            if (mask.all())
+            {
+                _mm256_storeu_si256(reinterpret_cast<__m256i*>(mem), src);
+                return;
+            }
+            const std::size_t pop = mask.popcount();
+            if (pop == 2)
+            {
+                if (mask.countr_one() == 2)
+                {
+                    __m128i mask128 = _mm256_castsi256_si128(mask.data);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem), mask128, _mm256_castsi256_si128(src));
+                    return;
+                }
+                if (mask.countl_one() == 2)
+                {
+                    __m128i mask128 = _mm256_extracti128_si256(mask.data, 1);
+                    _mm_maskstore_epi64(reinterpret_cast<long long*>(mem + 2), mask128, _mm256_extracti128_si256(src, 1));
+                    return;
+                }
+            }
+            _mm256_maskstore_epi64(reinterpret_cast<long long*>(mem), mask.data, src);
+        }
+
         // abs
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<avx2>) noexcept

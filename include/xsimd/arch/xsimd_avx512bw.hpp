@@ -378,6 +378,76 @@ namespace xsimd
             }
         }
 
+        // load_masked
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && (sizeof(T) == 1 || sizeof(T) == 2), void>::type>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem,
+                                             batch_bool<T, A> const& mask,
+                                             convert<T>,
+                                             aligned_mode,
+                                             requires_arch<avx512bw>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return _mm512_maskz_loadu_epi8(static_cast<__mmask64>(mask.mask()), mem);
+            }
+            else
+            {
+                return _mm512_maskz_loadu_epi16(static_cast<__mmask32>(mask.mask()), mem);
+            }
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && (sizeof(T) == 1 || sizeof(T) == 2), void>::type>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem,
+                                             batch_bool<T, A> const& mask,
+                                             convert<T>,
+                                             unaligned_mode,
+                                             requires_arch<avx512bw>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return _mm512_maskz_loadu_epi8(static_cast<__mmask64>(mask.mask()), mem);
+            }
+            else
+            {
+                return _mm512_maskz_loadu_epi16(static_cast<__mmask32>(mask.mask()), mem);
+            }
+        }
+
+        // store_masked
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && (sizeof(T) == 1 || sizeof(T) == 2), void>::type>
+        XSIMD_INLINE void store_masked(T* mem,
+                                       batch<T, A> const& src,
+                                       batch_bool<T, A> const& mask,
+                                       aligned_mode,
+                                       requires_arch<avx512bw>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                _mm512_mask_storeu_epi8(mem, static_cast<__mmask64>(mask.mask()), src);
+            }
+            else
+            {
+                _mm512_mask_storeu_epi16(mem, static_cast<__mmask32>(mask.mask()), src);
+            }
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && (sizeof(T) == 1 || sizeof(T) == 2), void>::type>
+        XSIMD_INLINE void store_masked(T* mem,
+                                       batch<T, A> const& src,
+                                       batch_bool<T, A> const& mask,
+                                       unaligned_mode,
+                                       requires_arch<avx512bw>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                _mm512_mask_storeu_epi8(mem, static_cast<__mmask64>(mask.mask()), src);
+            }
+            else
+            {
+                _mm512_mask_storeu_epi16(mem, static_cast<__mmask32>(mask.mask()), src);
+            }
+        }
+
         // max
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept

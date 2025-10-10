@@ -12,12 +12,12 @@
 #ifndef XSIMD_COMMON_MEMORY_HPP
 #define XSIMD_COMMON_MEMORY_HPP
 
-#include <algorithm>
-#include <complex>
-#include <stdexcept>
-
 #include "../../types/xsimd_batch_constant.hpp"
 #include "./xsimd_common_details.hpp"
+#include <algorithm>
+#include <array>
+#include <complex>
+#include <stdexcept>
 
 namespace xsimd
 {
@@ -346,6 +346,153 @@ namespace xsimd
         XSIMD_INLINE batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out> cvt, requires_arch<common>) noexcept
         {
             return detail::load_unaligned<A>(mem, cvt, common {}, detail::conversion_type<A, T_in, T_out> {});
+        }
+
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE batch<T_out, A> load_masked(T_in const* mem, typename batch<T_out, A>::batch_bool_type const& mask, convert<T_out>, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T_out, A>::size;
+            if (mask.none())
+                return batch<T_out, A>(0);
+            if (mask.all())
+                return batch<T_out, A>::load(mem, unaligned_mode {});
+            alignas(A::alignment()) std::array<T_out, size> buffer { 0 };
+            for (std::size_t idx = 0; idx < size; ++idx)
+            {
+                if (mask.get(idx))
+                {
+                    buffer[idx] = static_cast<T_out>(mem[idx]);
+                }
+            }
+            return batch<T_out, A>::load(buffer.data(), unaligned_mode {});
+        }
+
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE void store_masked(T_out* mem, batch<T_in, A> const& src, typename batch<T_in, A>::batch_bool_type const& mask, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T_in, A>::size;
+            if (mask.none())
+                return;
+            if (mask.all())
+            {
+                src.store(mem, unaligned_mode {});
+                return;
+            }
+            for (std::size_t idx = 0; idx < size; ++idx)
+            {
+                if (mask.get(idx))
+                {
+                    mem[idx] = static_cast<T_out>(src.get(idx));
+                }
+            }
+        }
+
+        // COMPILE-TIME (single version each, XSIMD_IF_CONSTEXPR)
+        template <class A, class T_in, class T_out, bool... Values>
+        XSIMD_INLINE batch<T_out, A> load_masked(T_in const* mem, batch_bool_constant<T_out, A, Values...> mask, convert<T_out>, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T_out, A>::size;
+            constexpr std::size_t n = mask.countr_one();
+            constexpr std::size_t l = mask.countl_one();
+
+            // All zeros / all ones fast paths
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return batch<T_out, A>(0);
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return batch<T_out, A>::load(mem, unaligned_mode {});
+            }
+            // Prefix-ones (n contiguous ones from LSB)
+            else XSIMD_IF_CONSTEXPR(n > 0)
+            {
+                alignas(A::alignment()) std::array<T_out, size> buffer { 0 };
+                for (std::size_t i = 0; i < n; ++i)
+                    buffer[i] = static_cast<T_out>(mem[i]);
+                return batch<T_out, A>::load(buffer.data(), aligned_mode {});
+            }
+            // Suffix-ones (l contiguous ones from MSB)
+            else XSIMD_IF_CONSTEXPR(l > 0)
+            {
+                alignas(A::alignment()) std::array<T_out, size> buffer { 0 };
+                const std::size_t start = size - l;
+                for (std::size_t i = 0; i < l; ++i)
+                    buffer[start + i] = static_cast<T_out>(mem[start + i]);
+                return batch<T_out, A>::load(buffer.data(), aligned_mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(mask.popcount() > 0)
+            {
+                constexpr std::size_t first = mask.first_one_index();
+                constexpr std::size_t last = mask.last_one_index();
+                constexpr std::size_t span = last >= first ? (last - first + 1) : 0;
+                XSIMD_IF_CONSTEXPR(span > 0 && mask.popcount() == span)
+                {
+                    alignas(A::alignment()) std::array<T_out, size> buffer { 0 };
+                    for (std::size_t i = 0; i < span; ++i)
+                        buffer[first + i] = static_cast<T_out>(mem[first + i]);
+                    return batch<T_out, A>::load(buffer.data(), aligned_mode {});
+                }
+                else
+                {
+                    return load_masked<A>(mem, mask.as_batch_bool(), convert<T_out> {}, common {});
+                }
+            }
+            else
+            {
+                // Fallback to runtime path for non prefix/suffix masks
+                return load_masked<A>(mem, mask.as_batch_bool(), convert<T_out> {}, common {});
+            }
+        }
+
+        template <class A, class T_in, class T_out, bool... Values>
+        XSIMD_INLINE void store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T_in, A>::size;
+            constexpr std::size_t n = mask.countr_one();
+            constexpr std::size_t l = mask.countl_one();
+
+            // All zeros / all ones fast paths
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, unaligned_mode {});
+            }
+            // Prefix-ones
+            else XSIMD_IF_CONSTEXPR(n > 0)
+            {
+                for (std::size_t i = 0; i < n; ++i)
+                    mem[i] = static_cast<T_out>(src.get(i));
+            }
+            // Suffix-ones
+            else XSIMD_IF_CONSTEXPR(l > 0)
+            {
+                const std::size_t start = size - l;
+                for (std::size_t i = 0; i < l; ++i)
+                    mem[start + i] = static_cast<T_out>(src.get(start + i));
+            }
+            else XSIMD_IF_CONSTEXPR(mask.popcount() > 0)
+            {
+                constexpr std::size_t first = mask.first_one_index();
+                constexpr std::size_t last = mask.last_one_index();
+                constexpr std::size_t span = last >= first ? (last - first + 1) : 0;
+                XSIMD_IF_CONSTEXPR(span > 0 && mask.popcount() == span)
+                {
+                    for (std::size_t i = 0; i < span; ++i)
+                        mem[first + i] = static_cast<T_out>(src.get(first + i));
+                }
+                else
+                {
+                    store_masked<A>(mem, src, mask.as_batch_bool(), common {});
+                }
+            }
+            else
+            {
+                store_masked<A>(mem, src, mask.as_batch_bool(), common {});
+            }
         }
 
         // rotate_right
