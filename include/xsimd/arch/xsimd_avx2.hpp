@@ -1013,12 +1013,8 @@ namespace xsimd
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
-                    const auto bmask = _mm_set_epi8(
-                        -1, -1, -1, -1, -1, -1, -1, -1,
-                        -1, -1, -1, -1, -1, -1, 8, 0);
-                    auto pack = _mm_unpacklo_epi16(_mm_shuffle_epi8(b_lo, bmask), _mm_shuffle_epi8(b_hi, bmask));
-                    uint32_t val = _mm_cvtsi128_si32(_mm_sub_epi8(_mm_set1_epi8(0), pack));
-                    memcpy(mem, &val, sizeof(val));
+                    uint32_t mask = _mm256_movemask_epi8(_mm256_srli_epi64(b, 56));
+                    memcpy(mem, &mask, sizeof(mask));
                 }
                 else
                 {
