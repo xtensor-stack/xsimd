@@ -724,6 +724,43 @@ namespace xsimd
             store_complex_aligned(dst, src, A {});
         }
 
+        /*********************
+         * store<batch_bool> *
+         *********************/
+        template <class T, class A, detail::enable_sized_t<T, 1> = 0>
+        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
+        {
+            uint8x16_t val = vshrq_n_u8(b.data, 7);
+            vst1q_u8((uint8_t*)mem, val);
+        }
+
+        template <class T, class A, detail::enable_sized_t<T, 2> = 0>
+        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
+        {
+            uint8x8_t val = vshr_n_u8(vqmovn_u16(b.data), 7);
+            vst1_u8((uint8_t*)mem, val);
+        }
+
+        template <class T, class A, detail::enable_sized_t<T, 4> = 0>
+        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
+        {
+            uint8x8_t val = vshr_n_u8(vqmovn_u16(vcombine_u16(vqmovn_u32(b.data), vdup_n_u16(0))), 7);
+            vst1_lane_u32((uint32_t*)mem, vreinterpret_u32_u8(val), 0);
+        }
+
+        template <class T, class A, detail::enable_sized_t<T, 8> = 0>
+        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
+        {
+            uint8x8_t val = vshr_n_u8(vqmovn_u16(vcombine_u16(vqmovn_u32(vcombine_u32(vqmovn_u64(b.data), vdup_n_u32(0))), vdup_n_u16(0))), 7);
+            vst1_lane_u16((uint16_t*)mem, vreinterpret_u16_u8(val), 0);
+        }
+
+        template <class A>
+        XSIMD_INLINE void store(batch_bool<float, A> b, bool* mem, requires_arch<neon>) noexcept
+        {
+            store(batch_bool<uint32_t, A>(b.data), mem, A {});
+        }
+
         /*******
          * neg *
          *******/

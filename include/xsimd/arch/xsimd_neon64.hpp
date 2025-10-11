@@ -177,6 +177,16 @@ namespace xsimd
             return store_aligned<A>(dst, src, A {});
         }
 
+        /*********************
+         * store<batch_bool> *
+         *********************/
+
+        template <class A>
+        XSIMD_INLINE void store(batch_bool<double, A> b, bool* mem, requires_arch<neon>) noexcept
+        {
+            store(batch_bool<uint64_t, A>(b.data), mem, A {});
+        }
+
         /****************
          * load_complex *
          ****************/
