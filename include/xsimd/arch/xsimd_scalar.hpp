@@ -32,11 +32,6 @@
 
 namespace xsimd
 {
-    template <class T, class A>
-    class batch;
-    template <class T, class A>
-    class batch_bool;
-
     using std::abs;
 
     using std::acos;
@@ -779,20 +774,6 @@ namespace xsimd
 
     namespace detail
     {
-        template <class T>
-        struct value_type_or_type_helper
-        {
-            using type = T;
-        };
-        template <class T, class A>
-        struct value_type_or_type_helper<batch<T, A>>
-        {
-            using type = T;
-        };
-
-        template <class T>
-        using value_type_or_type = typename value_type_or_type_helper<T>::type;
-
         template <class T0, class T1>
         XSIMD_INLINE typename std::enable_if<std::is_integral<T1>::value, T0>::type
         ipow(const T0& x, const T1& n) noexcept
@@ -801,7 +782,7 @@ namespace xsimd
             T0 a = x;
             T1 b = n;
             bool const recip = b < 0;
-            T0 r(static_cast<value_type_or_type<T0>>(1));
+            T0 r(static_cast<T0>(1));
             while (1)
             {
                 if (b & 1)
