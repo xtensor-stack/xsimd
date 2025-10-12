@@ -63,7 +63,16 @@
 #include "memory/xsimd_aligned_allocator.hpp"
 
 #if defined(XSIMD_NO_SUPPORTED_ARCHITECTURE)
-// to type definition or anything appart from scalar definition and aligned allocator
+// no type definition or anything apart from scalar definition and aligned allocator
+namespace xsimd
+{
+    template <class T, class A = void>
+    class batch
+    {
+        static constexpr bool supported_architecture = sizeof(A*) == 0; // type-dependant but always false
+        static_assert(supported_architecture, "No SIMD architecture detected, cannot instantiate a batch");
+    };
+}
 #else
 #include "types/xsimd_batch.hpp"
 #include "types/xsimd_batch_constant.hpp"
