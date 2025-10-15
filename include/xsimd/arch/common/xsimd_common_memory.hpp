@@ -298,6 +298,12 @@ namespace xsimd
             return load_unaligned(mem, b, A {});
         }
 
+        template <class A, class T>
+        XSIMD_INLINE batch_bool<T, A> load_stream(bool const* mem, batch_bool<T, A> b, requires_arch<common>) noexcept
+        {
+            return load_aligned(mem, b, A {});
+        }
+
         // load_aligned
         namespace detail
         {
@@ -346,6 +352,12 @@ namespace xsimd
         XSIMD_INLINE batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out> cvt, requires_arch<common>) noexcept
         {
             return detail::load_unaligned<A>(mem, cvt, common {}, detail::conversion_type<A, T_in, T_out> {});
+        }
+
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE batch<T_out, A> load_stream(T_in const* mem, convert<T_out> cvt, requires_arch<common>) noexcept
+        {
+            return load_aligned<A>(mem, cvt, A {});
         }
 
         // rotate_right
@@ -589,6 +601,12 @@ namespace xsimd
                 mem[i] = bool(buffer[i]);
         }
 
+        template <class A, class T>
+        XSIMD_INLINE void store_stream(batch_bool<T, A> const& self, bool* mem, requires_arch<common>) noexcept
+        {
+            store(self, mem, A {});
+        }
+
         // store_aligned
         template <class A, class T_in, class T_out>
         XSIMD_INLINE void store_aligned(T_out* mem, batch<T_in, A> const& self, requires_arch<common>) noexcept
@@ -605,6 +623,12 @@ namespace xsimd
         {
             static_assert(!std::is_same<T_in, T_out>::value, "there should be a direct store for this type combination");
             return store_aligned<A>(mem, self, common {});
+        }
+
+        template <class A, class T_in, class T_out>
+        XSIMD_INLINE void store_stream(T_out* mem, batch<T_in, A> const& self, requires_arch<common>) noexcept
+        {
+            store_aligned<A>(mem, self, A {});
         }
 
         // swizzle
@@ -688,6 +712,12 @@ namespace xsimd
             return detail::load_complex(hi, lo, A {});
         }
 
+        template <class A, class T_out, class T_in>
+        XSIMD_INLINE batch<std::complex<T_out>, A> load_complex_stream(std::complex<T_in> const* mem, convert<std::complex<T_out>>, requires_arch<common>) noexcept
+        {
+            return load_complex_aligned<A>(mem, kernel::convert<std::complex<T_out>> {}, A {});
+        }
+
         // store_complex_aligned
         template <class A, class T_out, class T_in>
         XSIMD_INLINE void store_complex_aligned(std::complex<T_out>* dst, batch<std::complex<T_in>, A> const& src, requires_arch<common>) noexcept
@@ -710,6 +740,12 @@ namespace xsimd
             T_out* buffer = reinterpret_cast<T_out*>(dst);
             lo.store_unaligned(buffer);
             hi.store_unaligned(buffer + real_batch::size);
+        }
+
+        template <class A, class T_out, class T_in>
+        XSIMD_INLINE void store_complex_stream(std::complex<T_out>* dst, batch<std::complex<T_in>, A> const& src, requires_arch<common>) noexcept
+        {
+            store_complex_aligned<A>(dst, src, A {});
         }
 
         // transpose
