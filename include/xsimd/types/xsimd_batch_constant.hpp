@@ -12,6 +12,8 @@
 #ifndef XSIMD_BATCH_CONSTANT_HPP
 #define XSIMD_BATCH_CONSTANT_HPP
 
+#include <utility>
+
 #include "./xsimd_batch.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -40,6 +42,10 @@ namespace xsimd
         constexpr batch_type as_batch_bool() const noexcept { return { Values... }; }
 
         /**
+         * @brief Generate a batch of @p integers from this @p batch_bool_constant
+         */
+        constexpr batch<as_integer_t<T>, A> as_batch() const noexcept { return { as_integer_t<T>(Values)... }; }
+        /**
          * @brief Generate a batch of @p batch_type from this @p batch_bool_constant
          */
         constexpr operator batch_type() const noexcept { return as_batch_bool(); }
@@ -52,6 +58,41 @@ namespace xsimd
         static constexpr int mask() noexcept
         {
             return mask_helper(0, static_cast<int>(Values)...);
+        }
+
+        static constexpr bool none() noexcept
+        {
+            return truncated_mask() == 0u;
+        }
+
+        static constexpr bool any() noexcept
+        {
+            return !none();
+        }
+
+        static constexpr bool all() noexcept
+        {
+            return truncated_mask() == low_mask(size);
+        }
+
+        static constexpr std::size_t countr_zero() noexcept
+        {
+            return countr_zero_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t countl_zero() noexcept
+        {
+            return countl_zero_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t countr_one() noexcept
+        {
+            return countr_one_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t countl_one() noexcept
+        {
+            return countl_one_impl(truncated_mask(), size);
         }
 
     private:
@@ -91,11 +132,18 @@ namespace xsimd
             return apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>());
         }
 
+        template <class A2, std::size_t BeginIdx, std::size_t... Is>
+        static constexpr auto splice_impl(detail::index_sequence<Is...>) noexcept
+            -> batch_bool_constant<T, A2, std::tuple_element<BeginIdx + Is, std::tuple<std::integral_constant<bool, Values>...>>::type::value...>
+        {
+            return {};
+        }
+
     public:
 #define MAKE_BINARY_OP(OP, NAME)                                                      \
     template <bool... OtherValues>                                                    \
     constexpr auto operator OP(batch_bool_constant<T, A, OtherValues...> other) const \
-        -> decltype(apply<NAME>(*this, other))                                        \
+        ->decltype(apply<NAME>(*this, other))                                         \
     {                                                                                 \
         return apply<NAME>(*this, other);                                             \
     }
@@ -117,8 +165,88 @@ namespace xsimd
         {
             return {};
         }
-    };
 
+        // splice: build a sub-constant [Begin, End) targeting another arch A2
+        // Useful to forward compile-time masks to narrower lanes (e.g., AVX512 -> AVX halves).
+        template <class A2, std::size_t Begin, std::size_t End,
+                  std::size_t N = (End >= Begin ? (End - Begin) : 0)>
+        static constexpr auto splice() noexcept
+            -> decltype(splice_impl<A2, Begin>(detail::make_index_sequence<N>()))
+        {
+            static_assert(Begin <= End, "splice: Begin must be <= End");
+            static_assert(End <= size, "splice: End must be <= size");
+            static_assert(N == batch_bool<T, A2>::size, "splice: target arch size must match submask length");
+            return splice_impl<A2, Begin>(detail::make_index_sequence<N>());
+        }
+
+        // Convenience helpers for half splits (require even size and appropriate target arch)
+        template <class A2>
+        static constexpr auto lower_half() noexcept
+            -> decltype(splice<A2, 0, size / 2>())
+        {
+            static_assert(size % 2 == 0, "lower_half requires even size");
+            return splice<A2, 0, size / 2>();
+        }
+
+        template <class A2>
+        static constexpr auto upper_half() noexcept
+            -> decltype(splice<A2, size / 2, size>())
+        {
+            static_assert(size % 2 == 0, "upper_half requires even size");
+            return splice<A2, size / 2, size>();
+        }
+
+    private:
+        // Build a 64-bit mask from Values... (LSB = index 0)
+        template <std::size_t I, bool... Remaining>
+        struct build_bits_helper;
+
+        template <std::size_t I>
+        struct build_bits_helper<I>
+        {
+            static constexpr uint64_t value = 0u;
+        };
+
+        template <std::size_t I, bool Current, bool... Remaining>
+        struct build_bits_helper<I, Current, Remaining...>
+        {
+            static constexpr uint64_t value = (Current ? (uint64_t(1) << I) : 0u)
+                | build_bits_helper<I + 1, Remaining...>::value;
+        };
+
+        static constexpr uint64_t bits() noexcept
+        {
+            return build_bits_helper<0, Values...>::value;
+        }
+        static constexpr uint64_t low_mask(std::size_t k) noexcept
+        {
+            return (k >= 64u) ? ~uint64_t(0) : ((uint64_t(1) << k) - 1u);
+        }
+        static constexpr uint64_t truncated_mask() noexcept
+        {
+            return bits() & low_mask(size);
+        }
+        static constexpr std::size_t countr_zero_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0 || (v & 1u) != 0u) ? 0u : (1u + countr_zero_impl(v >> 1, n - 1));
+        }
+        static constexpr std::size_t countr_one_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0 || (v & 1u) == 0u) ? 0u : (1u + countr_one_impl(v >> 1, n - 1));
+        }
+        static constexpr std::size_t countl_zero_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0)
+                ? 0u
+                : ((((v >> (n - 1)) & 1u) != 0u) ? 0u : (1u + countl_zero_impl(v, n - 1)));
+        }
+        static constexpr std::size_t countl_one_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0)
+                ? 0u
+                : ((((v >> (n - 1)) & 1u) == 0u) ? 0u : (1u + countl_one_impl(v, n - 1)));
+        }
+    };
     /**
      * @brief batch of integral constants
      *
@@ -211,7 +339,7 @@ namespace xsimd
 #define MAKE_BINARY_OP(OP, NAME)                                                 \
     template <T... OtherValues>                                                  \
     constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
-        -> decltype(apply<NAME>(*this, other))                                   \
+        ->decltype(apply<NAME>(*this, other))                                    \
     {                                                                            \
         return apply<NAME>(*this, other);                                        \
     }
