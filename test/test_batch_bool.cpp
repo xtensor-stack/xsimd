@@ -518,6 +518,7 @@ struct batch_bool_test
         // neq
         {
             CHECK_BATCH_EQ(xsimd::neq(bool_g.half, bool_g.ihalf), bool_g.all_true);
+            CHECK_BATCH_EQ(xsimd::neq(bool_g.all_true, bool_g.all_true), bool_g.all_false);
         }
     }
 
