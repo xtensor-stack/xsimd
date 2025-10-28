@@ -125,7 +125,7 @@ namespace xsimd
 
         // load_unaligned<batch_bool>
 
-        template <class T, class A, class = typename std::enable_if<(std::is_integral<T>::value && sizeof(T) > 1)>::type>
+        template <class A, class T, class = typename std::enable_if<(std::is_integral<T>::value && sizeof(T) > 1)>::type>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<sse4_1>) noexcept
         {
             // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
