@@ -1144,7 +1144,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch_bool<float, A> neq(batch_bool<float, A> const& self, batch_bool<float, A> const& other, requires_arch<wasm>) noexcept
         {
-            return wasm_f32x4_ne(self, other);
+            return wasm_v128_xor(self, other);
         }
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<wasm>) noexcept
@@ -1160,7 +1160,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch_bool<double, A> neq(batch_bool<double, A> const& self, batch_bool<double, A> const& other, requires_arch<wasm>) noexcept
         {
-            return wasm_f64x2_ne(self, other);
+            return wasm_v128_xor(self, other);
         }
 
         // reciprocal
