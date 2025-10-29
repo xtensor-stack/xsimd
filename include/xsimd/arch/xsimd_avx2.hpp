@@ -1248,6 +1248,56 @@ namespace xsimd
                 return {};
             }
         }
+
+        // widen
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<avx2>) noexcept
+        {
+            __m128i x_lo = detail::lower_half(x);
+            __m128i x_hi = detail::upper_half(x);
+            __m256i lo, hi;
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm256_cvtepi32_epi64(x_lo);
+                    hi = _mm256_cvtepi32_epi64(x_hi);
+                }
+                else
+                {
+                    lo = _mm256_cvtepu32_epi64(x_lo);
+                    hi = _mm256_cvtepu32_epi64(x_hi);
+                }
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm256_cvtepi16_epi32(x_lo);
+                    hi = _mm256_cvtepi16_epi32(x_hi);
+                }
+                else
+                {
+                    lo = _mm256_cvtepu16_epi32(x_lo);
+                    hi = _mm256_cvtepu16_epi32(x_hi);
+                }
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm256_cvtepi8_epi16(x_lo);
+                    hi = _mm256_cvtepi8_epi16(x_hi);
+                }
+                else
+                {
+                    lo = _mm256_cvtepu8_epi16(x_lo);
+                    hi = _mm256_cvtepu8_epi16(x_hi);
+                }
+            }
+            return { lo, hi };
+        }
+
     }
 }
 

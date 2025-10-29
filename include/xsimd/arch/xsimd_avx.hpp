@@ -1918,6 +1918,23 @@ namespace xsimd
                 return {};
             }
         }
+
+        // widen
+        template <class A, class T>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<avx>) noexcept
+        {
+            auto pair_lo = widen(batch<T, sse4_2>(detail::lower_half(x)), sse4_2 {});
+            auto pair_hi = widen(batch<T, sse4_2>(detail::upper_half(x)), sse4_2 {});
+            return { detail::merge_sse(pair_lo[0], pair_lo[1]), detail::merge_sse(pair_hi[0], pair_hi[1]) };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<double, A>, 2> widen(batch<float, A> const& x, requires_arch<avx>) noexcept
+        {
+            __m256d lo = _mm256_cvtps_pd(detail::lower_half(x));
+            __m256d hi = _mm256_cvtps_pd(detail::upper_half(x));
+            return { lo, hi };
+        }
+
     }
 }
 

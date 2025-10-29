@@ -244,5 +244,36 @@ TEST_CASE_TEMPLATE("[conversion]", T, uint8_t, uint16_t, uint32_t, uint64_t)
     }
 }
 
+template <class T>
+struct widening_test
+{
+
+    void test_widen(T value)
+    {
+        xsimd::batch<T> bvalue(value);
+        xsimd::batch<xsimd::widen_t<T>> wvalue(value);
+
+        auto widened_batch = xsimd::widen(bvalue);
+        CHECK_BATCH_EQ(widened_batch[0], wvalue);
+        CHECK_BATCH_EQ(widened_batch[1], wvalue);
+    }
+};
+
+TEST_CASE_TEMPLATE("[widening]", T, int8_t, int16_t, int32_t, uint8_t, uint16_t, uint32_t, float)
+{
+    widening_test<T> Test;
+
+    SUBCASE("widen")
+    {
+        Test.test_widen(1);
+    }
+
+    SUBCASE("limits")
+    {
+        Test.test_widen(std::numeric_limits<T>::max());
+        Test.test_widen(std::numeric_limits<T>::min());
+    }
+}
+
 #endif
 #endif

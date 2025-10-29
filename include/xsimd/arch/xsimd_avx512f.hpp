@@ -2642,6 +2642,55 @@ namespace xsimd
             }
         }
 
+        // widen
+        template <class A, class T>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<avx512f>) noexcept
+        {
+            __m256i x_lo = detail::lower_half(x);
+            __m256i x_hi = detail::upper_half(x);
+            __m512i lo, hi;
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm512_cvtepi32_epi64(x_lo);
+                    hi = _mm512_cvtepi32_epi64(x_hi);
+                }
+                else
+                {
+                    lo = _mm512_cvtepu32_epi64(x_lo);
+                    hi = _mm512_cvtepu32_epi64(x_hi);
+                }
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm512_cvtepi16_epi32(x_lo);
+                    hi = _mm512_cvtepi16_epi32(x_hi);
+                }
+                else
+                {
+                    lo = _mm512_cvtepu16_epi32(x_lo);
+                    hi = _mm512_cvtepu16_epi32(x_hi);
+                }
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                auto pair_lo = widen(batch<T, avx2>(x_lo), avx2 {});
+                auto pair_hi = widen(batch<T, avx2>(x_hi), avx2 {});
+                return { detail::merge_avx(pair_lo[0], pair_lo[1]), detail::merge_avx(pair_hi[0], pair_hi[1]) };
+            }
+            return { lo, hi };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<double, A>, 2> widen(batch<float, A> const& x, requires_arch<avx512f>) noexcept
+        {
+            __m512d lo = _mm512_cvtps_pd(detail::lower_half(x));
+            __m512d hi = _mm512_cvtps_pd(detail::upper_half(x));
+            return { lo, hi };
+        }
+
     }
 }
 

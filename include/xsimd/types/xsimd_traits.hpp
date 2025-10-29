@@ -332,6 +332,38 @@ namespace xsimd
 
     template <class T>
     using mask_type_t = typename mask_type<T>::type;
+
+    namespace detail
+    {
+        template <typename T>
+        struct widen : widen<typename std::make_unsigned<T>::type>
+        {
+        };
+
+        template <>
+        struct widen<uint32_t>
+        {
+            using type = uint64_t;
+        };
+        template <>
+        struct widen<uint16_t>
+        {
+            using type = uint32_t;
+        };
+        template <>
+        struct widen<uint8_t>
+        {
+            using type = uint16_t;
+        };
+        template <>
+        struct widen<float>
+        {
+            using type = double;
+        };
+    }
+    template <typename T>
+    using widen_t = typename detail::widen<T>::type;
+
 }
 
 #endif
