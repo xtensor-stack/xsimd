@@ -15,6 +15,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_sse4_1_register.hpp"
+#include "./common/xsimd_common_cast.hpp"
 
 namespace xsimd
 {
@@ -380,6 +381,63 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> trunc(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return _mm_round_pd(self, _MM_FROUND_TO_ZERO);
+        }
+
+        // widen
+        template <class A, class T>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<sse4_1>) noexcept
+        {
+            __m128i x_lo = x;
+            __m128i x_hi = _mm_unpackhi_epi64(x, x);
+            __m128i lo, hi;
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm_cvtepi32_epi64(x_lo);
+                    hi = _mm_cvtepi32_epi64(x_hi);
+                }
+                else
+                {
+                    lo = _mm_cvtepu32_epi64(x_lo);
+                    hi = _mm_cvtepu32_epi64(x_hi);
+                }
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm_cvtepi16_epi32(x_lo);
+                    hi = _mm_cvtepi16_epi32(x_hi);
+                }
+                else
+                {
+                    lo = _mm_cvtepu16_epi32(x_lo);
+                    hi = _mm_cvtepu16_epi32(x_hi);
+                }
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                XSIMD_IF_CONSTEXPR(std::is_signed<T>::value)
+                {
+                    lo = _mm_cvtepi8_epi16(x_lo);
+                    hi = _mm_cvtepi8_epi16(x_hi);
+                }
+                else
+                {
+                    lo = _mm_cvtepu8_epi16(x_lo);
+                    hi = _mm_cvtepu8_epi16(x_hi);
+                }
+            }
+            return { lo, hi };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<double, A>, 2> widen(batch<float, A> const& x, requires_arch<sse4_1>) noexcept
+        {
+            __m128 x_shuf = _mm_unpackhi_ps(x, x);
+            __m128d lo = _mm_cvtps_pd(x);
+            __m128d hi = _mm_cvtps_pd(x_shuf);
+            return { lo, hi };
         }
 
     }

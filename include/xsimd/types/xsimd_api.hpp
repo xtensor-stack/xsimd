@@ -2720,6 +2720,21 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_conversion
+     *
+     * Widen batch \c x from type \c T to a type with twice as many bytes and
+     * the same sign (for integers) or from float to double.
+     * @param x batch of \c T
+     * @return two batches of \c widen_t<T>
+     */
+    template <class T, class A>
+    XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::widen<A>(x, A {});
+    }
+
+    /**
      * @ingroup batch_miscellaneous
      *
      * Dump the content of batch \c x to stream \c o

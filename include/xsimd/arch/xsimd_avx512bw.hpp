@@ -643,6 +643,26 @@ namespace xsimd
             return swizzle(self, mask.as_batch(), avx512bw {});
         }
 
+        // widen
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<uint8_t>, A>, 2> widen(batch<uint8_t, A> const& x, requires_arch<avx512bw>) noexcept
+        {
+            __m256i x_lo = _mm512_extracti64x4_epi64(x, 0);
+            __m256i x_hi = _mm512_extracti64x4_epi64(x, 1);
+            __m512i lo = _mm512_cvtepu8_epi16(x_lo);
+            __m512i hi = _mm512_cvtepu8_epi16(x_hi);
+            return { lo, hi };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<int8_t>, A>, 2> widen(batch<int8_t, A> const& x, requires_arch<avx512bw>) noexcept
+        {
+            __m256i x_lo = _mm512_extracti64x4_epi64(x, 0);
+            __m256i x_hi = _mm512_extracti64x4_epi64(x, 1);
+            __m512i lo = _mm512_cvtepi8_epi16(x_lo);
+            __m512i hi = _mm512_cvtepi8_epi16(x_hi);
+            return { lo, hi };
+        }
+
         // zip_hi
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept

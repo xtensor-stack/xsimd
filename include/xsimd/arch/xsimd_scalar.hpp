@@ -1235,7 +1235,6 @@ namespace xsimd
     {
         return cond ? true_br : false_br;
     }
-
 }
 
 #endif

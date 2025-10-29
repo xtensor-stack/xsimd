@@ -13,6 +13,7 @@
 #define XSIMD_COMMON_HPP
 
 #include "./common/xsimd_common_arithmetic.hpp"
+#include "./common/xsimd_common_cast.hpp"
 #include "./common/xsimd_common_complex.hpp"
 #include "./common/xsimd_common_logical.hpp"
 #include "./common/xsimd_common_math.hpp"
