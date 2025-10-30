@@ -286,7 +286,7 @@ namespace xsimd
         }
 
         // copysign
-        template <class A, class T, class _ = typename std::enable_if<std::is_floating_point<T>::value>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
         XSIMD_INLINE batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return abs(self) | bitofsign(other);

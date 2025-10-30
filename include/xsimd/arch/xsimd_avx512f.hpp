@@ -1631,7 +1631,7 @@ namespace xsimd
         }
 
         // reduce_max
-        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) == 1)>::type>
+        template <class A, class T, class = typename std::enable_if<(sizeof(T) == 1)>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
             constexpr batch_constant<uint64_t, A, 5, 6, 7, 8, 0, 0, 0, 0> mask;
@@ -1642,7 +1642,7 @@ namespace xsimd
         }
 
         // reduce_min
-        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) == 1)>::type>
+        template <class A, class T, class = typename std::enable_if<(sizeof(T) == 1)>::type>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
             constexpr batch_constant<uint64_t, A, 5, 6, 7, 8, 0, 0, 0, 0> mask;
@@ -2350,7 +2350,7 @@ namespace xsimd
 
         }
 
-        template <class A, uint16_t... Idx, class _ = typename std::enable_if<detail::is_pair_of_contiguous_indices<uint16_t, A, Idx...>::value>::type>
+        template <class A, uint16_t... Idx, class = typename std::enable_if<detail::is_pair_of_contiguous_indices<uint16_t, A, Idx...>::value>::type>
         XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, Idx...>, requires_arch<avx512f>) noexcept
         {
             constexpr typename detail::fold_batch_constant<A, Idx...>::type mask32;

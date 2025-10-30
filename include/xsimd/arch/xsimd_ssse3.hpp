@@ -74,7 +74,7 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, class _ = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<ssse3>) noexcept
         {
             constexpr std::size_t size = batch<T, A>::size;
