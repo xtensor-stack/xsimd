@@ -850,7 +850,7 @@ struct batch_test
     }
 
     template <size_t N>
-    typename std::enable_if<4 <= N, void>::type test_common_horizontal_operations(std::integral_constant<size_t, N>) const
+    typename std::enable_if<4 <= N>::type test_common_horizontal_operations(std::integral_constant<size_t, N>) const
     {
         // reduce common
         {

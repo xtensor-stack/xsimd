@@ -739,7 +739,7 @@ namespace xsimd
         }
 
         // transpose
-        template <class A, class = typename std::enable_if<batch<int16_t, A>::size == 8, void>::type>
+        template <class A, class = typename std::enable_if<batch<int16_t, A>::size == 8>::type>
         XSIMD_INLINE void transpose(batch<int16_t, A>* matrix_begin, batch<int16_t, A>* matrix_end, requires_arch<common>) noexcept
         {
             assert((matrix_end - matrix_begin == batch<int16_t, A>::size) && "correctly sized matrix");
@@ -783,7 +783,7 @@ namespace xsimd
             transpose(reinterpret_cast<batch<int16_t, A>*>(matrix_begin), reinterpret_cast<batch<int16_t, A>*>(matrix_end), A {});
         }
 
-        template <class A, class = typename std::enable_if<batch<int8_t, A>::size == 16, void>::type>
+        template <class A, class = typename std::enable_if<batch<int8_t, A>::size == 16>::type>
         XSIMD_INLINE void transpose(batch<int8_t, A>* matrix_begin, batch<int8_t, A>* matrix_end, requires_arch<common>) noexcept
         {
             assert((matrix_end - matrix_begin == batch<int8_t, A>::size) && "correctly sized matrix");

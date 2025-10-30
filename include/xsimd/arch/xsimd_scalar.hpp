@@ -1144,21 +1144,21 @@ namespace xsimd
         struct common_sincosf
         {
             template <class T>
-            XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincosf, T), void>::type
+            XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincosf, T)>::type
             operator()(float val, T& s, T& c)
             {
                 sincosf(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && XSIMD_HASSINCOS(__sincosf, T), void>::type
+            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && XSIMD_HASSINCOS(__sincosf, T)>::type
             operator()(float val, T& s, T& c)
             {
                 __sincosf(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && !XSIMD_HASSINCOS(__sincosf, T), void>::type
+            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && !XSIMD_HASSINCOS(__sincosf, T)>::type
             operator()(float val, T& s, T& c)
             {
                 s = std::sin(val);
@@ -1169,21 +1169,21 @@ namespace xsimd
         struct common_sincos
         {
             template <class T>
-            XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincos, T), void>::type
+            XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincos, T)>::type
             operator()(double val, T& s, T& c)
             {
                 sincos(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && XSIMD_HASSINCOS(__sincos, T), void>::type
+            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && XSIMD_HASSINCOS(__sincos, T)>::type
             operator()(double val, T& s, T& c)
             {
                 __sincos(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && !XSIMD_HASSINCOS(__sincos, T), void>::type
+            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && !XSIMD_HASSINCOS(__sincos, T)>::type
             operator()(double val, T& s, T& c)
             {
                 s = std::sin(val);
@@ -1224,7 +1224,7 @@ namespace xsimd
     }
 #endif
 
-    template <class T, class _ = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+    template <class T, class _ = typename std::enable_if<std::is_floating_point<T>::value>::type>
     XSIMD_INLINE T frexp(T const& val, int& exp) noexcept
     {
         return std::frexp(val, &exp);

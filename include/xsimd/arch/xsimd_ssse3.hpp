@@ -26,7 +26,7 @@ namespace xsimd
         using namespace types;
 
         // abs
-        template <class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, void>::type>
+        template <class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value>::type>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
@@ -74,7 +74,7 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, class _ = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class _ = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<ssse3>) noexcept
         {
             constexpr std::size_t size = batch<T, A>::size;
@@ -83,7 +83,7 @@ namespace xsimd
         }
 
         // reduce_add
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)

@@ -433,7 +433,7 @@ namespace xsimd
         }
 
         // isnan
-        template <class A, typename T, size_t N = 8 * sizeof(T) * batch<T, A>::size, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+        template <class A, typename T, size_t N = 8 * sizeof(T) * batch<T, A>::size, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
         XSIMD_INLINE batch_bool<T, A> isnan(batch<T, A> const& self, requires_arch<emulated<N>>) noexcept
         {
             return detail::emulated_apply([](T v)

@@ -116,7 +116,7 @@ namespace xsimd
         }
 
         // isinf
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch_bool<T, A> isinf(batch<T, A> const&, requires_arch<common>) noexcept
         {
             return batch_bool<T, A>(false);
@@ -143,7 +143,7 @@ namespace xsimd
         }
 
         // isfinite
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch_bool<T, A> isfinite(batch<T, A> const&, requires_arch<common>) noexcept
         {
             return batch_bool<T, A>(true);
@@ -160,14 +160,14 @@ namespace xsimd
         }
 
         // isnan
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch_bool<T, A> isnan(batch<T, A> const&, requires_arch<common>) noexcept
         {
             return batch_bool<T, A>(false);
         }
 
         // le
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return (self < other) || (self == other);
