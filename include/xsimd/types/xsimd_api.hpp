@@ -1783,7 +1783,7 @@ namespace xsimd
      * @param y batch of integral values.
      * @return \c x raised to the power \c y.
      */
-    template <class T, class ITy, class A, class = typename std::enable_if<std::is_integral<ITy>::value, void>::type>
+    template <class T, class ITy, class A, class = typename std::enable_if<std::is_integral<ITy>::value>::type>
     XSIMD_INLINE batch<T, A> pow(batch<T, A> const& x, ITy y) noexcept
     {
         detail::static_check_supported_config<T, A>();
@@ -1827,7 +1827,7 @@ namespace xsimd
      * @param x batch of floating point numbers.
      * @return the reciprocal.
      */
-    template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+    template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
     XSIMD_INLINE batch<T, A> reciprocal(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();

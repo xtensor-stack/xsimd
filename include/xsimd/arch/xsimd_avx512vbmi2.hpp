@@ -69,7 +69,7 @@ namespace xsimd
         }
 
         // rotl
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, int32_t other, requires_arch<avx512vbmi2>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
@@ -82,7 +82,7 @@ namespace xsimd
             }
         }
 
-        template <size_t count, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <size_t count, class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, requires_arch<avx512vbmi2>) noexcept
         {
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
@@ -98,7 +98,7 @@ namespace xsimd
         }
 
         // rotr
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, int32_t other, requires_arch<avx512vbmi2>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
@@ -111,7 +111,7 @@ namespace xsimd
             }
         }
 
-        template <size_t count, class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <size_t count, class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, requires_arch<avx512vbmi2>) noexcept
         {
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;

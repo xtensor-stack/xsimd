@@ -207,7 +207,7 @@ struct batch_cast_test
 
 #if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
     template <size_t Align = A>
-    typename std::enable_if<Align >= 32, void>::type test_cast_sizeshift1() const
+    typename std::enable_if<Align >= 32>::type test_cast_sizeshift1() const
     {
         for (const auto& test_value : int_test_values)
         {
@@ -264,14 +264,14 @@ struct batch_cast_test
     }
 
     template <size_t Align = A>
-    typename std::enable_if<Align < 32, void>::type test_cast_sizeshift1() const
+    typename std::enable_if<Align < 32>::type test_cast_sizeshift1() const
     {
     }
 #endif
 
 #if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
     template <size_t Align = A>
-    typename std::enable_if<Align >= 64, void>::type test_cast_sizeshift2() const
+    typename std::enable_if<Align >= 64>::type test_cast_sizeshift2() const
     {
         for (const auto& test_value : int_test_values)
         {
@@ -314,7 +314,7 @@ struct batch_cast_test
     }
 
     template <size_t Align = A>
-    typename std::enable_if<Align < 64, void>::type test_cast_sizeshift2() const
+    typename std::enable_if<Align < 64>::type test_cast_sizeshift2() const
     {
     }
 #endif

@@ -158,7 +158,7 @@ namespace xsimd
          */
         namespace detail
         {
-            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+            template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
             XSIMD_INLINE batch<T, A>
             average(const batch<T, A>& x1, const batch<T, A>& x2) noexcept
             {

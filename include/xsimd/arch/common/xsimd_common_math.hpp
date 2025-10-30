@@ -286,7 +286,7 @@ namespace xsimd
         }
 
         // copysign
-        template <class A, class T, class _ = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+        template <class A, class T, class _ = typename std::enable_if<std::is_floating_point<T>::value>::type>
         XSIMD_INLINE batch<T, A> copysign(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return abs(self) | bitofsign(other);
@@ -1877,7 +1877,7 @@ namespace xsimd
         }
 
         // mod
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> mod(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept -> T
@@ -1886,7 +1886,7 @@ namespace xsimd
         }
 
         // nearbyint
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> nearbyint(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             return self;
@@ -1926,7 +1926,7 @@ namespace xsimd
         }
 
         // nearbyint_as_int
-        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> nearbyint_as_int(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             return self;
@@ -2088,7 +2088,7 @@ namespace xsimd
         }
 
         // reciprocal
-        template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value, void>::type>
+        template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
         XSIMD_INLINE batch<T, A> reciprocal(batch<T, A> const& self,
                                             requires_arch<common>) noexcept
         {
@@ -2103,7 +2103,7 @@ namespace xsimd
             return { reduce_add(self.real()), reduce_add(self.imag()) };
         }
 
-        template <class A, class T, class /*=typename std::enable_if<std::is_scalar<T>::value, void>::type*/>
+        template <class A, class T, class /*=typename std::enable_if<std::is_scalar<T>::value>::type*/>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) T buffer[batch<T, A>::size];
@@ -2175,7 +2175,7 @@ namespace xsimd
             return res;
         }
 
-        template <class A, class T, class /*=typename std::enable_if<std::is_scalar<T>::value, void>::type*/>
+        template <class A, class T, class /*=typename std::enable_if<std::is_scalar<T>::value>::type*/>
         XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) T buffer[batch<T, A>::size];
@@ -2199,7 +2199,7 @@ namespace xsimd
         {
             return fnma(nearbyint(self / other), other, self);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             auto mod = self % other;
@@ -2214,7 +2214,7 @@ namespace xsimd
         }
 
         // sign
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> sign(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
@@ -2260,7 +2260,7 @@ namespace xsimd
         }
 
         // signnz
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> signnz(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;

@@ -838,7 +838,7 @@ namespace xsimd
 
         WRAP_BINARY_UINT_EXCLUDING_64(vhaddq, detail::identity_return_type)
 
-        template <class A, class T, class = typename std::enable_if<(std::is_unsigned<T>::value && sizeof(T) != 8), void>::type>
+        template <class A, class T, class = typename std::enable_if<(std::is_unsigned<T>::value && sizeof(T) != 8)>::type>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
@@ -854,7 +854,7 @@ namespace xsimd
 
         WRAP_BINARY_UINT_EXCLUDING_64(vrhaddq, detail::identity_return_type)
 
-        template <class A, class T, class = typename std::enable_if<(std::is_unsigned<T>::value && sizeof(T) != 8), void>::type>
+        template <class A, class T, class = typename std::enable_if<(std::is_unsigned<T>::value && sizeof(T) != 8)>::type>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
