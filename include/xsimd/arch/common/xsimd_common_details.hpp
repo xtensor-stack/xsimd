@@ -190,7 +190,7 @@ namespace xsimd
 
             // Provide a common uint32_t -> float cast only if we have a
             // non-common int32_t -> float fast_cast
-            template <class A, class _ = decltype(fast_cast(std::declval<batch<int32_t, A> const&>(), std::declval<batch<float, A> const&>(), A {}))>
+            template <class A, class = decltype(fast_cast(std::declval<batch<int32_t, A> const&>(), std::declval<batch<float, A> const&>(), A {}))>
             XSIMD_INLINE batch<float, A> fast_cast(batch<uint32_t, A> const& v, batch<float, A> const&, requires_arch<common>) noexcept
             {
                 // see https://stackoverflow.com/questions/34066228/how-to-perform-uint32-float-conversion-with-sse
@@ -207,7 +207,7 @@ namespace xsimd
 
             // Provide a common float -> uint32_t cast only if we have a
             // non-common float -> int32_t fast_cast
-            template <class A, class _ = decltype(fast_cast(std::declval<batch<float, A> const&>(), std::declval<batch<int32_t, A> const&>(), A {}))>
+            template <class A, class = decltype(fast_cast(std::declval<batch<float, A> const&>(), std::declval<batch<int32_t, A> const&>(), A {}))>
             XSIMD_INLINE batch<uint32_t, A> fast_cast(batch<float, A> const& v, batch<uint32_t, A> const&, requires_arch<common>) noexcept
             {
                 auto is_large = v >= batch<float, A>(1u << 31);

@@ -1224,7 +1224,7 @@ namespace xsimd
     }
 #endif
 
-    template <class T, class _ = typename std::enable_if<std::is_floating_point<T>::value>::type>
+    template <class T, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
     XSIMD_INLINE T frexp(T const& val, int& exp) noexcept
     {
         return std::frexp(val, &exp);

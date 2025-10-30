@@ -1408,7 +1408,7 @@ namespace xsimd
         }
 
         // reduce_max
-        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2)>::type>
+        template <class A, class T, class = typename std::enable_if<(sizeof(T) <= 2)>::type>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
             constexpr auto mask0 = detail::shuffle(2, 3, 0, 0);
@@ -1430,7 +1430,7 @@ namespace xsimd
         }
 
         // reduce_min
-        template <class A, class T, class _ = typename std::enable_if<(sizeof(T) <= 2)>::type>
+        template <class A, class T, class = typename std::enable_if<(sizeof(T) <= 2)>::type>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
             constexpr auto mask0 = detail::shuffle(2, 3, 0, 0);
