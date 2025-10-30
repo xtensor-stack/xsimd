@@ -10,7 +10,7 @@ Data transfer
 From memory:
 
 +---------------------------------------+----------------------------------------------------+
-| :cpp:func:`load`                      | load values from memory                            |
+| :cpp:func:`load`                      | load values from memory (optionally masked)        |
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`load_aligned`              | load values from aligned memory                    |
 +---------------------------------------+----------------------------------------------------+
@@ -30,7 +30,7 @@ From a scalar:
 To memory:
 
 +---------------------------------------+----------------------------------------------------+
-| :cpp:func:`store`                     | store values to memory                             |
+| :cpp:func:`store`                     | store values to memory (optionally masked)         |
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`store_aligned`             | store values to aligned memory                     |
 +---------------------------------------+----------------------------------------------------+

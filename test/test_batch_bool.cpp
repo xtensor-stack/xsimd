@@ -12,13 +12,92 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include <array>
 #include <functional>
+#include <type_traits>
 #include <vector>
 
 #include "test_utils.hpp"
 
 namespace xsimd
 {
+
+    namespace test_detail
+    {
+        template <class T, std::size_t N>
+        struct ct_mask_arch
+        {
+            static constexpr bool supported() noexcept { return true; }
+            static constexpr bool available() noexcept { return true; }
+            static constexpr std::size_t alignment() noexcept { return 0; }
+            static constexpr bool requires_alignment() noexcept { return false; }
+            static constexpr char const* name() noexcept { return "ct_mask_arch"; }
+        };
+
+        template <class T, std::size_t N>
+        struct ct_mask_register
+        {
+            std::array<T, N> data {};
+        };
+
+        struct mask_all_false
+        {
+            static constexpr bool get(std::size_t, std::size_t) { return false; }
+        };
+
+        struct mask_all_true
+        {
+            static constexpr bool get(std::size_t, std::size_t) { return true; }
+        };
+
+        struct mask_prefix1
+        {
+            static constexpr bool get(std::size_t i, std::size_t) { return i < 1; }
+        };
+
+        struct mask_suffix1
+        {
+            static constexpr bool get(std::size_t i, std::size_t n) { return i >= (n - 1); }
+        };
+
+        struct mask_ends
+        {
+            static constexpr bool get(std::size_t i, std::size_t n)
+            {
+                return (i < 1) || (i >= (n - 1));
+            }
+        };
+
+        struct mask_interleaved
+        {
+            static constexpr bool get(std::size_t i, std::size_t) { return (i % 2) == 0; }
+        };
+
+        template <class T>
+        struct alternating_numeric
+        {
+            static constexpr T get(std::size_t i, std::size_t)
+            {
+                return (i % 2) ? T(2) : T(1);
+            }
+        };
+    }
+
+    namespace types
+    {
+        template <class T, std::size_t N>
+        struct simd_register<T, test_detail::ct_mask_arch<T, N>>
+        {
+            using register_type = test_detail::ct_mask_register<T, N>;
+            register_type data;
+            constexpr operator register_type() const noexcept { return data; }
+        };
+
+        template <class T, std::size_t N>
+        struct has_simd_register<T, test_detail::ct_mask_arch<T, N>> : std::true_type
+        {
+        };
+    }
 
     int popcount(int v)
     {
@@ -154,15 +233,187 @@ namespace xsimd
 
 }
 
-template <class B>
+template <class T>
 struct batch_bool_test
 {
-    using batch_type = B;
-    using value_type = typename B::value_type;
-    static constexpr size_t size = B::size;
-    using batch_bool_type = typename B::batch_bool_type;
+    using batch_type = T;
+    using value_type = typename T::value_type;
+    static constexpr size_t size = T::size;
+    using batch_bool_type = typename T::batch_bool_type;
     using array_type = std::array<value_type, size>;
     using bool_array_type = std::array<bool, size>;
+
+    // Compile-time check helpers for batch_bool_constant masks
+    template <class B, class Enable = void>
+    struct xsimd_ct_mask_checker;
+
+    // Small masks: safe to compare numeric masks at compile time
+    template <class B>
+    struct xsimd_ct_mask_checker<B, typename std::enable_if<(B::size <= 31)>::type>
+    {
+        static constexpr std::size_t sum_indices(uint64_t bits, std::size_t index, std::size_t remaining)
+        {
+            return remaining == 0
+                ? 0u
+                : ((bits & 1u ? index : 0u) + sum_indices(bits >> 1, index + 1, remaining - 1));
+        }
+
+        static constexpr uint32_t low_mask_bits(std::size_t width)
+        {
+            return width == 0 ? 0u : (static_cast<uint32_t>(1u << width) - 1u);
+        }
+
+        template <class Mask, class ValueType, bool Enable>
+        struct splice_checker
+        {
+            static void run()
+            {
+            }
+        };
+
+        template <class Mask, class ValueType>
+        struct splice_checker<Mask, ValueType, true>
+        {
+            static void run()
+            {
+                constexpr std::size_t begin = 1;
+                constexpr std::size_t end = (Mask::size > 3 ? 3 : Mask::size);
+                constexpr std::size_t length = (end > begin) ? (end - begin) : 0;
+                using slice_arch = xsimd::test_detail::ct_mask_arch<ValueType, length>;
+                constexpr auto slice = xsimd::detail::splice<slice_arch, begin, end>(Mask {});
+                constexpr uint32_t src_mask = static_cast<uint32_t>(Mask::mask());
+                constexpr uint32_t expected = (src_mask >> begin) & low_mask_bits(length);
+                static_assert(static_cast<uint32_t>(slice.mask()) == expected, "splice mask expected");
+                constexpr uint32_t slice_bits = static_cast<uint32_t>(slice.mask());
+                constexpr uint32_t shifted_source = src_mask >> begin;
+                static_assert((length == 0) || ((slice_bits & 1u) == (shifted_source & 1u)), "slice first bit matches");
+                static_assert((length <= 1) || (((slice_bits >> (length - 1)) & 1u) == ((shifted_source >> (length - 1)) & 1u)),
+                              "slice last bit matches");
+            }
+        };
+
+        template <class Mask, class ValueType, bool Enable>
+        struct half_checker
+        {
+            static void run()
+            {
+            }
+        };
+
+        template <class Mask, class ValueType>
+        struct half_checker<Mask, ValueType, true>
+        {
+            static void run()
+            {
+                constexpr std::size_t total = Mask::size;
+                constexpr std::size_t mid = total / 2;
+                using lower_arch = xsimd::test_detail::ct_mask_arch<ValueType, mid>;
+                using upper_arch = xsimd::test_detail::ct_mask_arch<ValueType, total - mid>;
+                constexpr auto lower = xsimd::detail::lower_half<lower_arch>(Mask {});
+                constexpr auto upper = xsimd::detail::upper_half<upper_arch>(Mask {});
+                constexpr uint32_t source_mask = static_cast<uint32_t>(Mask::mask());
+                static_assert(static_cast<uint32_t>(lower.mask()) == (source_mask & low_mask_bits(mid)),
+                              "lower_half mask matches");
+                static_assert(static_cast<uint32_t>(upper.mask()) == ((source_mask >> mid) & low_mask_bits(total - mid)),
+                              "upper_half mask matches");
+                constexpr auto lower_splice = xsimd::detail::splice<lower_arch, 0, mid>(Mask {});
+                constexpr auto upper_splice = xsimd::detail::splice<upper_arch, mid, total>(Mask {});
+                static_assert(lower.mask() == lower_splice.mask(), "lower_half equals splice");
+                static_assert(upper.mask() == upper_splice.mask(), "upper_half equals splice");
+                constexpr uint32_t lower_bits = static_cast<uint32_t>(lower.mask());
+                constexpr uint32_t upper_bits = static_cast<uint32_t>(upper.mask());
+                constexpr std::size_t upper_size = decltype(upper)::size;
+                static_assert((mid == 0) || ((lower_bits & 1u) == (source_mask & 1u)), "lower first element");
+                static_assert((mid <= 1) || (((lower_bits >> (mid - 1)) & 1u) == ((source_mask >> (mid - 1)) & 1u)),
+                              "lower last element");
+                static_assert((upper_size == 0) || ((upper_bits & 1u) == ((source_mask >> mid) & 1u)),
+                              "upper first element");
+                static_assert((upper_size <= 1) || (((upper_bits >> (upper_size - 1)) & 1u) == ((source_mask >> (total - 1)) & 1u)),
+                              "upper last element");
+            }
+        };
+
+        static void run()
+        {
+            using value_type = typename B::value_type;
+            using arch_type = typename B::arch_type;
+            constexpr auto m_zero = xsimd::make_batch_bool_constant<value_type, xsimd::test_detail::mask_all_false, arch_type>();
+            constexpr auto m_one = xsimd::make_batch_bool_constant<value_type, xsimd::test_detail::mask_all_true, arch_type>();
+            constexpr auto m_prefix = xsimd::make_batch_bool_constant<value_type, xsimd::test_detail::mask_prefix1, arch_type>();
+            constexpr auto m_suffix = xsimd::make_batch_bool_constant<value_type, xsimd::test_detail::mask_suffix1, arch_type>();
+            constexpr auto m_ends = xsimd::make_batch_bool_constant<value_type, xsimd::test_detail::mask_ends, arch_type>();
+            constexpr auto m_interleaved = xsimd::make_batch_bool_constant<value_type, xsimd::test_detail::mask_interleaved, arch_type>();
+
+            static_assert((m_zero | m_one).mask() == m_one.mask(), "0|1 == 1");
+            static_assert((m_zero & m_one).mask() == m_zero.mask(), "0&1 == 0");
+            static_assert((m_zero ^ m_zero).mask() == m_zero.mask(), "0^0 == 0");
+            static_assert((m_one ^ m_one).mask() == m_zero.mask(), "1^1 == 0");
+
+            static_assert((!m_zero).mask() == m_one.mask(), "!0 == 1");
+            static_assert((~m_zero).mask() == m_one.mask(), "~0 == 1");
+            static_assert((!m_one).mask() == m_zero.mask(), "!1 == 0");
+            static_assert((~m_one).mask() == m_zero.mask(), "~1 == 0");
+
+            static_assert(((m_prefix && m_suffix).mask()) == (m_prefix & m_suffix).mask(), "&& consistent");
+            static_assert(((m_prefix || m_suffix).mask()) == (m_prefix | m_suffix).mask(), "|| consistent");
+
+            static_assert((m_prefix | m_suffix).mask() == m_ends.mask(), "prefix|suffix == ends");
+            static_assert(B::size == 1 || (m_prefix & m_suffix).mask() == m_zero.mask(), "prefix&suffix == 0 when size>1");
+
+            static_assert(m_zero.none(), "zero mask none");
+            static_assert(!m_zero.any(), "zero mask any");
+            static_assert(!m_zero.all(), "zero mask all");
+            static_assert(m_zero.countr_zero() == B::size, "zero mask trailing zeros");
+            static_assert(m_zero.countl_zero() == B::size, "zero mask leading zeros");
+
+            static_assert(m_one.all(), "all mask all");
+            static_assert(m_one.any(), "all mask any");
+            static_assert(!m_one.none(), "all mask none");
+            static_assert(m_one.countr_zero() == 0, "all mask trailing zeros");
+            static_assert(m_one.countl_zero() == 0, "all mask leading zeros");
+
+            constexpr auto prefix_bits = static_cast<uint32_t>(m_prefix.mask());
+            constexpr auto suffix_bits = static_cast<uint32_t>(m_suffix.mask());
+            constexpr auto ends_bits_mask = static_cast<uint32_t>(m_ends.mask());
+
+            static_assert((B::size == 0) || ((prefix_bits & 1u) != 0u), "prefix first element set");
+            static_assert((B::size <= 1) || ((prefix_bits & (1u << 1)) == 0u), "prefix second element cleared");
+
+            static_assert((B::size == 0) || (((suffix_bits >> (B::size - 1)) & 1u) != 0u), "suffix last element set");
+            static_assert((B::size <= 1) || ((suffix_bits & 1u) == 0u), "suffix first element cleared");
+
+            static_assert((B::size == 0) || ((ends_bits_mask & 1u) != 0u), "ends first element set");
+            static_assert((B::size == 0) || (((ends_bits_mask >> (B::size - 1)) & 1u) != 0u), "ends last element set");
+            static_assert((B::size <= 2) || (((ends_bits_mask >> 1) & 1u) == 0u), "ends interior element cleared");
+
+            static_assert(std::is_same<decltype(m_prefix.as_batch_bool()), typename B::batch_bool_type>::value,
+                          "as_batch_bool type");
+            static_assert(std::is_same<decltype(static_cast<typename B::batch_bool_type>(m_prefix)), typename B::batch_bool_type>::value,
+                          "conversion operator type");
+
+            // splice API is validated indirectly via arch-specific masked implementations.
+
+            constexpr std::size_t prefix_zero = m_prefix.countr_zero();
+            constexpr std::size_t prefix_one = m_prefix.countr_one();
+            static_assert(prefix_zero == 0, "prefix mask zero leading zeros from LSB");
+            static_assert((B::size == 0 ? prefix_one == 0 : prefix_one == 1), "prefix mask trailing ones count");
+
+            constexpr std::size_t suffix_zero = m_suffix.countl_zero();
+            constexpr std::size_t suffix_one = m_suffix.countl_one();
+            static_assert(suffix_zero == 0, "suffix mask leading zeros count");
+            static_assert((B::size == 0 ? suffix_one == 0 : suffix_one == 1), "suffix mask trailing ones count");
+
+            splice_checker<decltype(m_interleaved), value_type, (B::size > 1)>::run();
+            half_checker<decltype(m_ends), value_type, (B::size > 0 && (B::size % 2 == 0))>::run();
+        }
+    };
+
+    // Large masks: avoid calling mask() in constant expressions
+    template <class B>
+    struct xsimd_ct_mask_checker<B, typename std::enable_if<(B::size > 31)>::type>
+    {
+        static void run() { }
+    };
 
     array_type lhs;
     array_type rhs;
@@ -522,6 +773,11 @@ struct batch_bool_test
         }
     }
 
+    void test_mask_compile_time() const
+    {
+        xsimd_ct_mask_checker<T>::run();
+    }
+
 private:
     batch_type batch_lhs() const
     {
@@ -555,5 +811,7 @@ TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
     SUBCASE("count") { Test.test_count(); }
 
     SUBCASE("eq neq") { Test.test_comparison(); }
+
+    SUBCASE("mask utils (compile-time)") { Test.test_mask_compile_time(); }
 }
 #endif

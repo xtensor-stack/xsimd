@@ -18,6 +18,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_avx_register.hpp"
+#include "../types/xsimd_batch_constant.hpp"
 
 namespace xsimd
 {
@@ -36,20 +37,35 @@ namespace xsimd
 
         namespace detail
         {
-            XSIMD_INLINE void split_avx(__m256i val, __m128i& low, __m128i& high) noexcept
+            XSIMD_INLINE __m128i lower_half(__m256i self) noexcept
             {
-                low = _mm256_castsi256_si128(val);
-                high = _mm256_extractf128_si256(val, 1);
+                return _mm256_castsi256_si128(self);
             }
-            XSIMD_INLINE void split_avx(__m256 val, __m128& low, __m128& high) noexcept
+            XSIMD_INLINE __m128 lower_half(__m256 self) noexcept
             {
-                low = _mm256_castps256_ps128(val);
-                high = _mm256_extractf128_ps(val, 1);
+                return _mm256_castps256_ps128(self);
             }
-            XSIMD_INLINE void split_avx(__m256d val, __m128d& low, __m128d& high) noexcept
+            XSIMD_INLINE __m128d lower_half(__m256d self) noexcept
             {
-                low = _mm256_castpd256_pd128(val);
-                high = _mm256_extractf128_pd(val, 1);
+                return _mm256_castpd256_pd128(self);
+            }
+            XSIMD_INLINE __m128i upper_half(__m256i self) noexcept
+            {
+                return _mm256_extractf128_si256(self, 1);
+            }
+            XSIMD_INLINE __m128 upper_half(__m256 self) noexcept
+            {
+                return _mm256_extractf128_ps(self, 1);
+            }
+            XSIMD_INLINE __m128d upper_half(__m256d self) noexcept
+            {
+                return _mm256_extractf128_pd(self, 1);
+            }
+            template <class Full, class Half>
+            XSIMD_INLINE void split_avx(Full val, Half& low, Half& high) noexcept
+            {
+                low = lower_half(val);
+                high = upper_half(val);
             }
             XSIMD_INLINE __m256i merge_sse(__m128i low, __m128i high) noexcept
             {
@@ -863,6 +879,134 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> load_unaligned(double const* mem, convert<double>, requires_arch<avx>) noexcept
         {
             return _mm256_loadu_pd(mem);
+        }
+
+        // load_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, Values...> mask, convert<float>, Mode, requires_arch<avx>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm256_setzero_ps();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            // confined to lower 128-bit half (4 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
+                const auto lo = load_masked(mem, mlo, convert<float> {}, Mode {}, sse4_2 {});
+                return batch<float, A>(detail::merge_sse(lo, batch<float, sse4_2>(0.f)));
+            }
+            // confined to upper 128-bit half (4 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                const auto hi = load_masked(mem + 4, mhi, convert<float> {}, Mode {}, sse4_2 {});
+                return batch<float, A>(detail::merge_sse(batch<float, sse4_2>(0.f), hi));
+            }
+            else
+            {
+                // crossing 128-bit boundary → use 256-bit masked load
+                return _mm256_maskload_ps(mem, mask.as_batch());
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<double, A> load_masked(double const* mem, batch_bool_constant<double, A, Values...> mask, convert<double>, Mode, requires_arch<avx>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return _mm256_setzero_pd();
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            // confined to lower 128-bit half (2 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 2)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
+                const auto lo = load_masked(mem, mlo, convert<double> {}, Mode {}, sse4_2 {});
+                return batch<double, A>(detail::merge_sse(lo, batch<double, sse4_2>(0.0)));
+            }
+            // confined to upper 128-bit half (2 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 2)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                const auto hi = load_masked(mem + 2, mhi, convert<double> {}, Mode {}, sse4_2 {});
+                return batch<double, A>(detail::merge_sse(batch<double, sse4_2>(0.0), hi));
+            }
+            else
+            {
+                // crossing 128-bit boundary → use 256-bit masked load
+                return _mm256_maskload_pd(mem, mask.as_batch());
+            }
+        }
+
+        // store_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<avx>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            // confined to lower 128-bit half (4 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 4)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
+                const batch<float, sse4_2> lo(_mm256_castps256_ps128(src));
+                store_masked<sse4_2>(mem, lo, mlo, Mode {}, sse4_2 {});
+            }
+            // confined to upper 128-bit half (4 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 4)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                const batch<float, sse4_2> hi(_mm256_extractf128_ps(src, 1));
+                store_masked<sse4_2>(mem + 4, hi, mhi, Mode {}, sse4_2 {});
+            }
+            else
+            {
+                _mm256_maskstore_ps(mem, mask.as_batch(), src);
+            }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, Values...> mask, Mode, requires_arch<avx>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            // confined to lower 128-bit half (2 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= 2)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<sse2>(mask);
+                const batch<double, sse2> lo(_mm256_castpd256_pd128(src));
+                store_masked<sse2>(mem, lo, mlo, Mode {}, sse4_2 {});
+            }
+            // confined to upper 128-bit half (2 lanes) → forward to SSE2
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 2)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<sse2>(mask);
+                const batch<double, sse2> hi(_mm256_extractf128_pd(src, 1));
+                store_masked<sse2>(mem + 2, hi, mhi, Mode {}, sse4_2 {});
+            }
+            else
+            {
+                _mm256_maskstore_pd(mem, mask.as_batch(), src);
+            }
         }
 
         // lt
