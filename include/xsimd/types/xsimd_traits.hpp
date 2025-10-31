@@ -336,8 +336,9 @@ namespace xsimd
     namespace detail
     {
         template <typename T>
-        struct widen : widen<typename std::make_unsigned<T>::type>
+        struct widen
         {
+            using type = typename std::make_signed<typename widen<typename std::make_unsigned<T>::type>::type>::type;
         };
 
         template <>
