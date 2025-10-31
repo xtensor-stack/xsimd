@@ -116,6 +116,23 @@ namespace xsimd
             }
         }
 
+        // load_stream
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<avx2>) noexcept
+        {
+            return _mm256_stream_load_si256((__m256i const*)mem);
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_stream(float const* mem, convert<float>, requires_arch<avx2>) noexcept
+        {
+            return _mm256_castsi256_ps(_mm256_stream_load_si256((__m256i const*)mem));
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_stream(double const* mem, convert<double>, requires_arch<avx2>) noexcept
+        {
+            return _mm256_castsi256_pd(_mm256_stream_load_si256((__m256i const*)mem));
+        }
+
         // bitwise_and
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept

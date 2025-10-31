@@ -1391,6 +1391,23 @@ namespace xsimd
             return _mm512_loadu_pd(mem);
         }
 
+        // load_stream
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_stream_load_si512((__m512i*)mem);
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_stream(float const* mem, convert<float>, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_castsi512_ps(_mm512_stream_load_si512((__m512i*)mem));
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_stream(double const* mem, convert<double>, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_castsi512_pd(_mm512_stream_load_si512((__m512i*)mem));
+        }
+
         // lt
         template <class A>
         XSIMD_INLINE batch_bool<float, A> lt(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
@@ -2169,6 +2186,23 @@ namespace xsimd
         XSIMD_INLINE void store_unaligned(double* mem, batch<double, A> const& self, requires_arch<avx512f>) noexcept
         {
             return _mm512_storeu_pd(mem, self);
+        }
+
+        // store_stream
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE void store_stream(T* mem, batch<T, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            _mm512_stream_si512((__m512i*)mem, self);
+        }
+        template <class A>
+        XSIMD_INLINE void store_stream(float* mem, batch<float, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            _mm512_stream_ps(mem, self);
+        }
+        template <class A>
+        XSIMD_INLINE void store_stream(double* mem, batch<double, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            _mm512_stream_pd(mem, self);
         }
 
         // sub
