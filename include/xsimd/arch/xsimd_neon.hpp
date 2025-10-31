@@ -20,6 +20,7 @@
 
 #include "../types/xsimd_neon_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "./common/xsimd_common_cast.hpp"
 
 // Wrap intrinsics so we can pass them as function pointers
 // - OP: intrinsics name prefix, e.g., vorrq
@@ -3211,6 +3212,41 @@ namespace xsimd
         {
             return vreinterpretq_f32_u32(swizzle(batch<uint32_t, A>(vreinterpretq_u32_f32(self)), mask, A {}));
         }
+
+        /*********
+         * widen *
+         *********/
+        template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return { batch<widen_t<T>, A>(vaddl_s8(vget_low_s8(x), vdup_n_s8(0))), batch<widen_t<T>, A>(vaddl_s8(vget_high_s8(x), vdup_n_s8(0))) };
+        }
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return { batch<widen_t<T>, A>(vaddl_u8(vget_low_u8(x), vdup_n_u8(0))), batch<widen_t<T>, A>(vaddl_u8(vget_high_u8(x), vdup_n_u8(0))) };
+        }
+        template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return { batch<widen_t<T>, A>(vaddl_s16(vget_low_s16(x), vdup_n_s16(0))), batch<widen_t<T>, A>(vaddl_s16(vget_high_s16(x), vdup_n_s16(0))) };
+        }
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return { batch<widen_t<T>, A>(vaddl_u16(vget_low_u16(x), vdup_n_u16(0))), batch<widen_t<T>, A>(vaddl_u16(vget_high_u16(x), vdup_n_u16(0))) };
+        }
+        template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return { batch<widen_t<T>, A>(vaddl_s32(vget_low_s32(x), vdup_n_s32(0))), batch<widen_t<T>, A>(vaddl_s32(vget_high_s32(x), vdup_n_s32(0))) };
+        }
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<neon>) noexcept
+        {
+            return { batch<widen_t<T>, A>(vaddl_u32(vget_low_u32(x), vdup_n_u32(0))), batch<widen_t<T>, A>(vaddl_u32(vget_high_u32(x), vdup_n_u32(0))) };
+        }
+
     }
 
 }
