@@ -41,20 +41,29 @@ namespace xsimd
 
         namespace detail
         {
-            XSIMD_INLINE void split_avx512(__m512 val, __m256& low, __m256& high) noexcept
+            XSIMD_INLINE __m256 lower_half(__m512 self) noexcept
             {
-                low = _mm512_castps512_ps256(val);
-                high = _mm512_extractf32x8_ps(val, 1);
+                return _mm512_castps512_ps256(self);
             }
-            XSIMD_INLINE void split_avx512(__m512d val, __m256d& low, __m256d& high) noexcept
+            XSIMD_INLINE __m256d lower_half(__m512d self) noexcept
             {
-                low = _mm512_castpd512_pd256(val);
-                high = _mm512_extractf64x4_pd(val, 1);
+                return _mm512_castpd512_pd256(self);
             }
-            XSIMD_INLINE void split_avx512(__m512i val, __m256i& low, __m256i& high) noexcept
+            XSIMD_INLINE __m256i lower_half(__m512i self) noexcept
             {
-                low = _mm512_castsi512_si256(val);
-                high = _mm512_extracti64x4_epi64(val, 1);
+                return _mm512_castsi512_si256(self);
+            }
+            XSIMD_INLINE __m256 upper_half(__m512 self) noexcept
+            {
+                return _mm512_extractf32x8_ps(self, 1);
+            }
+            XSIMD_INLINE __m256d upper_half(__m512d self) noexcept
+            {
+                return _mm512_extractf64x4_pd(self, 1);
+            }
+            XSIMD_INLINE __m256i upper_half(__m512i self) noexcept
+            {
+                return _mm512_extracti64x4_epi64(self, 1);
             }
             XSIMD_INLINE __m512i merge_avx(__m256i low, __m256i high) noexcept
             {
@@ -71,8 +80,7 @@ namespace xsimd
             template <class F>
             __m512i fwd_to_avx(F f, __m512i self)
             {
-                __m256i self_low, self_high;
-                split_avx512(self, self_low, self_high);
+                __m256i self_low = lower_half(self), self_high = upper_half(self);
                 __m256i res_low = f(self_low);
                 __m256i res_high = f(self_high);
                 return merge_avx(res_low, res_high);
@@ -80,9 +88,8 @@ namespace xsimd
             template <class F>
             __m512i fwd_to_avx(F f, __m512i self, __m512i other)
             {
-                __m256i self_low, self_high, other_low, other_high;
-                split_avx512(self, self_low, self_high);
-                split_avx512(other, other_low, other_high);
+                __m256i self_low = lower_half(self), self_high = upper_half(self),
+                        other_low = lower_half(other), other_high = upper_half(other);
                 __m256i res_low = f(self_low, other_low);
                 __m256i res_high = f(self_high, other_high);
                 return merge_avx(res_low, res_high);
@@ -90,8 +97,7 @@ namespace xsimd
             template <class F>
             __m512i fwd_to_avx(F f, __m512i self, int32_t other)
             {
-                __m256i self_low, self_high;
-                split_avx512(self, self_low, self_high);
+                __m256i self_low = lower_half(self), self_high = upper_half(self);
                 __m256i res_low = f(self_low, other);
                 __m256i res_high = f(self_high, other);
                 return merge_avx(res_low, res_high);
@@ -1624,8 +1630,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
-            __m256i low, high;
-            detail::split_avx512(self, low, high);
+            __m256i low = detail::lower_half(self), high = detail::upper_half(self);
             batch<T, avx2> blow(low), bhigh(high);
             return reduce_add(blow, avx2 {}) + reduce_add(bhigh, avx2 {});
         }
@@ -1676,8 +1681,7 @@ namespace xsimd
             }
             else
             {
-                __m256i low, high;
-                detail::split_avx512(self, low, high);
+                __m256i low = detail::lower_half(self), high = detail::upper_half(self);
                 batch<T, avx2> blow(low), bhigh(high);
                 return reduce_mul(blow, avx2 {}) * reduce_mul(bhigh, avx2 {});
             }
@@ -1773,11 +1777,8 @@ namespace xsimd
                 __m256i cond_low = batch<uint8_t, avx2>::load_aligned(&buffer[0]);
                 __m256i cond_hi = batch<uint8_t, avx2>::load_aligned(&buffer[32]);
 
-                __m256i true_low, true_hi;
-                detail::split_avx512(true_br, true_low, true_hi);
-
-                __m256i false_low, false_hi;
-                detail::split_avx512(false_br, false_low, false_hi);
+                __m256i true_low = detail::lower_half(true_br), true_hi = detail::upper_half(true_br);
+                __m256i false_low = detail::lower_half(false_br), false_hi = detail::upper_half(false_br);
 
                 __m256i res_low = select(batch_bool<T, avx2>(cond_low), batch<T, avx2>(true_low), batch<T, avx2>(false_low), avx2 {});
                 __m256i res_hi = select(batch_bool<T, avx2>(cond_hi), batch<T, avx2>(true_hi), batch<T, avx2>(false_hi), avx2 {});
@@ -1788,11 +1789,8 @@ namespace xsimd
                 __m256i cond_low = _mm512_maskz_cvtepi32_epi16((uint64_t)cond.data & 0xFFFF, _mm512_set1_epi32(~0));
                 __m256i cond_hi = _mm512_maskz_cvtepi32_epi16((uint64_t)cond.data >> 16, _mm512_set1_epi32(~0));
 
-                __m256i true_low, true_hi;
-                detail::split_avx512(true_br, true_low, true_hi);
-
-                __m256i false_low, false_hi;
-                detail::split_avx512(false_br, false_low, false_hi);
+                __m256i true_low = detail::lower_half(true_br), true_hi = detail::upper_half(true_br);
+                __m256i false_low = detail::lower_half(false_br), false_hi = detail::upper_half(false_br);
 
                 __m256i res_low = select(batch_bool<T, avx2>(cond_low), batch<T, avx2>(true_low), batch<T, avx2>(false_low), avx2 {});
                 __m256i res_hi = select(batch_bool<T, avx2>(cond_hi), batch<T, avx2>(true_hi), batch<T, avx2>(false_hi), avx2 {});
