@@ -36,20 +36,29 @@ namespace xsimd
 
         namespace detail
         {
-            XSIMD_INLINE void split_avx(__m256i val, __m128i& low, __m128i& high) noexcept
+            XSIMD_INLINE __m128i lower_half(__m256i self) noexcept
             {
-                low = _mm256_castsi256_si128(val);
-                high = _mm256_extractf128_si256(val, 1);
+                return _mm256_castsi256_si128(self);
             }
-            XSIMD_INLINE void split_avx(__m256 val, __m128& low, __m128& high) noexcept
+            XSIMD_INLINE __m128 lower_half(__m256 self) noexcept
             {
-                low = _mm256_castps256_ps128(val);
-                high = _mm256_extractf128_ps(val, 1);
+                return _mm256_castps256_ps128(self);
             }
-            XSIMD_INLINE void split_avx(__m256d val, __m128d& low, __m128d& high) noexcept
+            XSIMD_INLINE __m128d lower_half(__m256d self) noexcept
             {
-                low = _mm256_castpd256_pd128(val);
-                high = _mm256_extractf128_pd(val, 1);
+                return _mm256_castpd256_pd128(self);
+            }
+            XSIMD_INLINE __m128i upper_half(__m256i self) noexcept
+            {
+                return _mm256_extractf128_si256(self, 1);
+            }
+            XSIMD_INLINE __m128 upper_half(__m256 self) noexcept
+            {
+                return _mm256_extractf128_ps(self, 1);
+            }
+            XSIMD_INLINE __m128d upper_half(__m256d self) noexcept
+            {
+                return _mm256_extractf128_pd(self, 1);
             }
             XSIMD_INLINE __m256i merge_sse(__m128i low, __m128i high) noexcept
             {
@@ -66,8 +75,7 @@ namespace xsimd
             template <class F>
             XSIMD_INLINE __m256i fwd_to_sse(F f, __m256i self) noexcept
             {
-                __m128i self_low, self_high;
-                split_avx(self, self_low, self_high);
+                __m128i self_low = lower_half(self), self_high = upper_half(self);
                 __m128i res_low = f(self_low);
                 __m128i res_high = f(self_high);
                 return merge_sse(res_low, res_high);
@@ -75,9 +83,8 @@ namespace xsimd
             template <class F>
             XSIMD_INLINE __m256i fwd_to_sse(F f, __m256i self, __m256i other) noexcept
             {
-                __m128i self_low, self_high, other_low, other_high;
-                split_avx(self, self_low, self_high);
-                split_avx(other, other_low, other_high);
+                __m128i self_low = lower_half(self), self_high = upper_half(self),
+                        other_low = lower_half(other), other_high = upper_half(other);
                 __m128i res_low = f(self_low, other_low);
                 __m128i res_high = f(self_high, other_high);
                 return merge_sse(res_low, res_high);
@@ -85,8 +92,7 @@ namespace xsimd
             template <class F>
             XSIMD_INLINE __m256i fwd_to_sse(F f, __m256i self, int32_t other) noexcept
             {
-                __m128i self_low, self_high;
-                split_avx(self, self_low, self_high);
+                __m128i self_low = lower_half(self), self_high = upper_half(self);
                 __m128i res_low = f(self_low, other);
                 __m128i res_high = f(self_high, other);
                 return merge_sse(res_low, res_high);
@@ -891,8 +897,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1 || sizeof(T) == 2)
             {
-                __m128i self_low, self_high;
-                detail::split_avx(self, self_low, self_high);
+                __m128i self_low = detail::lower_half(self), self_high = detail::upper_half(self);
                 return mask(batch_bool<T, sse4_2>(self_low), sse4_2 {}) | (mask(batch_bool<T, sse4_2>(self_high), sse4_2 {}) << (128 / (8 * sizeof(T))));
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
@@ -1049,8 +1054,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            typename batch<T, sse4_2>::register_type low, high;
-            detail::split_avx(self, low, high);
+            typename batch<T, sse4_2>::register_type low = detail::lower_half(self), high = detail::upper_half(self);
             batch<T, sse4_2> blow(low), bhigh(high);
             return reduce_add(blow + bhigh);
         }
@@ -1081,8 +1085,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value, void>::type>
         XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            typename batch<T, sse4_2>::register_type low, high;
-            detail::split_avx(self, low, high);
+            typename batch<T, sse4_2>::register_type low = detail::lower_half(self), high = detail::upper_half(self);
             batch<T, sse4_2> blow(low), bhigh(high);
             return reduce_mul(blow * bhigh);
         }
@@ -1132,14 +1135,11 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx>) noexcept
         {
-            __m128i cond_low, cond_hi;
-            detail::split_avx(cond, cond_low, cond_hi);
+            __m128i cond_low = detail::lower_half(cond), cond_hi = detail::upper_half(cond);
 
-            __m128i true_low, true_hi;
-            detail::split_avx(true_br, true_low, true_hi);
+            __m128i true_low = detail::lower_half(true_br), true_hi = detail::upper_half(true_br);
 
-            __m128i false_low, false_hi;
-            detail::split_avx(false_br, false_low, false_hi);
+            __m128i false_low = detail::lower_half(false_br), false_hi = detail::upper_half(false_br);
 
             __m128i res_low = select(batch_bool<T, sse4_2>(cond_low), batch<T, sse4_2>(true_low), batch<T, sse4_2>(false_low), sse4_2 {});
             __m128i res_hi = select(batch_bool<T, sse4_2>(cond_hi), batch<T, sse4_2>(true_hi), batch<T, sse4_2>(false_hi), sse4_2 {});
