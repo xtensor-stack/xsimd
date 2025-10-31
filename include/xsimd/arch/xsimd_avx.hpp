@@ -1427,20 +1427,19 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx>) noexcept
         {
-            // duplicate low and high part of input
-            // Duplicate lanes separately
-            // 1) duplicate low and high lanes
-            __m256 lo = _mm256_permute2f128_ps(self, self, 0x00); // [low | low]
-            __m256 hi = _mm256_permute2f128_ps(self, self, 0x11); // [high| high]
+            // swap lanes
+            __m256 swapped = _mm256_permute2f128_ps(self, self, 0x01); // [high | low]
 
-            // normalize mask
-            batch<uint32_t, A> half_mask = mask % 4;
+            // normalize mask taking modulo 4
+            batch<uint32_t, A> half_mask = mask & 0b11u;
 
             // permute within each lane
-            __m256 r0 = _mm256_permutevar_ps(lo, half_mask);
-            __m256 r1 = _mm256_permutevar_ps(hi, half_mask);
+            __m256 r0 = _mm256_permutevar_ps(self, half_mask);
+            __m256 r1 = _mm256_permutevar_ps(swapped, half_mask);
 
-            batch_bool<uint32_t, A> blend_mask = mask >= 4;
+            // select lane by the mask index divided by 4
+            constexpr auto lane = batch_constant<uint32_t, A, 0, 0, 0, 0, 4, 4, 4, 4> {};
+            batch_bool<uint32_t, A> blend_mask = (mask & 0b100u) != lane;
             return _mm256_blendv_ps(r0, r1, batch_bool_cast<float>(blend_mask));
         }
 
