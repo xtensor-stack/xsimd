@@ -1447,14 +1447,15 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch<uint64_t, A> mask, requires_arch<avx>) noexcept
         {
             // swap lanes
-            __m256 swapped = _mm256_permute2f128_pd(self, self, 0x01); // [high | low]
+            __m256d swapped = _mm256_permute2f128_pd(self, self, 0x01); // [high | low]
 
-            // normalize mask taking modulo 2
-            batch<uint64_t, A> half_mask = mask & 0b1u;
+            // The half mask value is found in mask modulo 2, but the intrinsic expect it in the
+            // second least significant bit. We use negative as a cheap alternative to lshift.
+            batch<uint64_t, A> half_mask = -(mask & 0b1u);
 
             // permute within each lane
-            __m256 r0 = _mm256_permutevar_pd(self, half_mask);
-            __m256 r1 = _mm256_permutevar_pd(swapped, half_mask);
+            __m256d r0 = _mm256_permutevar_pd(self, half_mask);
+            __m256d r1 = _mm256_permutevar_pd(swapped, half_mask);
 
             // select lane by the mask index divided by 2
             constexpr auto lane = batch_constant<uint64_t, A, 0, 0, 2, 2> {};
