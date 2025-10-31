@@ -1547,6 +1547,15 @@ namespace xsimd
         {
             return batch<std::complex<double>>(swizzle(self.real(), idx, A()), swizzle(self.imag(), idx, A()));
         }
+
+        /*********
+         * widen *
+         *********/
+        template <class A, class T>
+        XSIMD_INLINE std::array<batch<double, A>, 2> widen(batch<float, A> const& x, requires_arch<neon64>) noexcept
+        {
+            return { batch<double, A>(vcvt_f64_f32(vget_low_f32(x))), batch<double, A>(vcvt_high_f64_f32(x)) };
+        }
     }
 }
 
