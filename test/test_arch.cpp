@@ -26,7 +26,7 @@ static_assert(xsimd::all_architectures::contains<xsimd::default_arch>(), "defaul
 #endif
 
 #if !XSIMD_WITH_SVE
-static_assert((std::is_same<xsimd::default_arch, xsimd::neon64>::value || !xsimd::neon64::supported()), "on arm, without sve, the best we can do is neon64");
+static_assert((std::is_base_of<xsimd::neon64, xsimd::default_arch>::value || !xsimd::neon64::supported()), "on arm, without sve, the best we can do is neon64");
 #endif
 
 struct check_supported
