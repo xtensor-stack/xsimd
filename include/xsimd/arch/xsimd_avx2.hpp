@@ -1097,6 +1097,34 @@ namespace xsimd
 
         // swizzle (dynamic mask)
         template <class A>
+        XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch<uint8_t, A> mask, requires_arch<avx2>) noexcept
+        {
+            // swap lanes
+            __m256i swapped = _mm256_permute2x128_si256(self, self, 0x01); // [high | low]
+
+            // normalize mask taking modulo 16
+            batch<uint8_t, A> half_mask = mask & 0b1111u;
+
+            // permute bytes within each lane (AVX2 only)
+            __m256i r0 = _mm256_shuffle_epi8(self, half_mask);
+            __m256i r1 = _mm256_shuffle_epi8(swapped, half_mask);
+
+            // select lane by the mask index divided by 16
+            constexpr auto lane = batch_constant<
+                uint8_t, A,
+                00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
+                16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16> {};
+            batch_bool<uint8_t, A> blend_mask = (mask & 0b10000u) != lane;
+            return _mm256_blendv_epi8(r0, r1, blend_mask);
+        }
+
+        template <class A, typename T, detail::enable_sized_t<T, 1> = 0>
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint8_t, A> const& mask, requires_arch<avx>) noexcept
+        {
+            return bitwise_cast<T>(swizzle(bitwise_cast<uint8_t>(self), mask));
+        }
+
+        template <class A>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
         {
             return swizzle(self, mask, avx {});
