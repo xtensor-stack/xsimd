@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         sys:
-          - { compiler: 'gcc',   version: '12'}
-          - { compiler: 'clang', version: '16'}
+          - { compiler: 'gcc',   version: '14'}
+          - { compiler: 'clang', version: '18'}
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
