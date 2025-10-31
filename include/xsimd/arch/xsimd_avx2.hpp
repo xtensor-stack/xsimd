@@ -1119,26 +1119,26 @@ namespace xsimd
         }
 
         template <class A, typename T, detail::enable_sized_t<T, 1> = 0>
-        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint8_t, A> const& mask, requires_arch<avx2>) noexcept
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint8_t, A> const& mask, requires_arch<avx2> req) noexcept
         {
-            return bitwise_cast<T>(swizzle(bitwise_cast<uint8_t>(self), mask));
+            return bitwise_cast<T>(swizzle(bitwise_cast<uint8_t>(self), mask, req));
         }
 
         template <class A>
         XSIMD_INLINE batch<uint16_t, A> swizzle(
-            batch<uint16_t, A> const& self, batch<uint16_t, A> mask, requires_arch<avx2>) noexcept
+            batch<uint16_t, A> const& self, batch<uint16_t, A> mask, requires_arch<avx2> req) noexcept
         {
             // No blend/shuffle for 16 bits, we need to use the 8 bits version
             const auto self_bytes = bitwise_cast<uint8_t>(self);
             // If a mask entry is k, we want 2k in low byte and 2k+1 in high byte
             const auto mask_2k_2kp1 = bitwise_cast<uint8_t>((mask << 1) | (mask << 9) | 0x100);
-            return bitwise_cast<uint16_t>(swizzle(self_bytes, mask_2k_2kp1, requires_arch<avx2>));
+            return bitwise_cast<uint16_t>(swizzle(self_bytes, mask_2k_2kp1, req));
         }
 
         template <class A, typename T, detail::enable_sized_t<T, 2> = 0>
-        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint16_t, A> const& mask, requires_arch<avx2>) noexcept
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint16_t, A> const& mask, requires_arch<avx2> req) noexcept
         {
-            return bitwise_cast<T>(swizzle(bitwise_cast<uint16_t>(self), mask));
+            return bitwise_cast<T>(swizzle(bitwise_cast<uint16_t>(self), mask, req));
         }
 
         template <class A>
