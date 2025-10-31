@@ -1095,7 +1095,7 @@ namespace xsimd
             }
         }
 
-        // swizzle (dynamic mask)
+        // swizzle (dynamic mask) on 8 and 16 bits; see avx for 32 and 64 bits versions
         template <class A>
         XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch<uint8_t, A> mask, requires_arch<avx2>) noexcept
         {
@@ -1139,40 +1139,6 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint16_t, A> const& mask, requires_arch<avx2> req) noexcept
         {
             return bitwise_cast<T>(swizzle(bitwise_cast<uint16_t>(self), mask, req));
-        }
-
-        template <class A>
-        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
-        {
-            return swizzle(self, mask, avx {});
-        }
-        template <class A>
-        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch<uint64_t, A> mask, requires_arch<avx2>) noexcept
-        {
-            batch<uint32_t, A> broadcaster = { 0, 1, 0, 1, 0, 1, 0, 1 };
-            constexpr uint64_t comb = 0x0000000100000001ul * 2;
-            return bitwise_cast<double>(swizzle(bitwise_cast<float>(self), bitwise_cast<uint32_t>(mask * comb) + broadcaster, avx2 {}));
-        }
-
-        template <class A>
-        XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self, batch<uint64_t, A> mask, requires_arch<avx2>) noexcept
-        {
-            return bitwise_cast<uint64_t>(swizzle(bitwise_cast<double>(self), mask, avx2 {}));
-        }
-        template <class A>
-        XSIMD_INLINE batch<int64_t, A> swizzle(batch<int64_t, A> const& self, batch<uint64_t, A> mask, requires_arch<avx2>) noexcept
-        {
-            return bitwise_cast<int64_t>(swizzle(bitwise_cast<double>(self), mask, avx2 {}));
-        }
-        template <class A>
-        XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
-        {
-            return swizzle(self, mask, avx {});
-        }
-        template <class A>
-        XSIMD_INLINE batch<int32_t, A> swizzle(batch<int32_t, A> const& self, batch<uint32_t, A> mask, requires_arch<avx2>) noexcept
-        {
-            return bitwise_cast<int32_t>(swizzle(bitwise_cast<uint32_t>(self), mask, avx2 {}));
         }
 
         // swizzle (constant mask)
