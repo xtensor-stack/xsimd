@@ -55,7 +55,7 @@ namespace xsimd
             }
             XSIMD_INLINE __m256 upper_half(__m512 self) noexcept
             {
-                return _mm512_extractf32x8_ps(self, 1);
+                return _mm256_castsi256_ps(_mm512_extracti64x4_epi64(_mm512_castps_si512(self), 1));
             }
             XSIMD_INLINE __m256d upper_half(__m512d self) noexcept
             {
