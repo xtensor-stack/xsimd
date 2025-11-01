@@ -246,14 +246,14 @@ namespace xsimd
     namespace detail
     {
         template <typename T, class G, class A, std::size_t... Is>
-        XSIMD_INLINE constexpr auto make_batch_constant(detail::index_sequence<Is...>) noexcept
-            -> batch_constant<T, A, (T)G::get(Is, sizeof...(Is))...>
+        XSIMD_INLINE constexpr batch_constant<T, A, (T)G::get(Is, sizeof...(Is))...>
+        make_batch_constant(detail::index_sequence<Is...>) noexcept
         {
             return {};
         }
         template <typename T, class G, class A, std::size_t... Is>
-        XSIMD_INLINE constexpr auto make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
-            -> batch_bool_constant<T, A, G::get(Is, sizeof...(Is))...>
+        XSIMD_INLINE constexpr batch_bool_constant<T, A, G::get(Is, sizeof...(Is))...>
+        make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
         {
             return {};
         }
@@ -281,18 +281,17 @@ namespace xsimd
      * @endcode
      */
     template <typename T, class G, class A = default_arch>
-    XSIMD_INLINE constexpr auto make_batch_constant() noexcept -> decltype(detail::make_batch_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    XSIMD_INLINE constexpr decltype(detail::make_batch_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    make_batch_constant() noexcept
     {
-        return detail::make_batch_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>());
+        return {};
     }
 
     template <typename T, class G, class A = default_arch>
-    XSIMD_INLINE constexpr auto make_batch_bool_constant() noexcept
-        -> decltype(detail::make_batch_bool_constant<T, G, A>(
-            detail::make_index_sequence<batch<T, A>::size>()))
+    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    make_batch_bool_constant() noexcept
     {
-        return detail::make_batch_bool_constant<T, G, A>(
-            detail::make_index_sequence<batch<T, A>::size>());
+        return {};
     }
 
 } // namespace xsimd
