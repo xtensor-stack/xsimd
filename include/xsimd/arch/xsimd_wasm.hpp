@@ -16,6 +16,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_wasm_register.hpp"
+#include "./common/xsimd_common_cast.hpp"
 
 namespace xsimd
 {
@@ -1699,6 +1700,44 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> trunc(batch<double, A> const& self, requires_arch<wasm>) noexcept
         {
             return wasm_f64x2_trunc(self);
+        }
+
+        // widen
+        template <class A>
+        XSIMD_INLINE std::array<batch<double, A>, 2> widen(batch<float, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return { batch<double, A>(wasm_f64x2_promote_low_f32x4(x)),
+                     batch<double, A>(wasm_f64x2_promote_low_f32x4(wasm_i32x4_shuffle(x, x, 2, 3, 0, 1))) };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<uint8_t>, A>, 2> widen(batch<uint8_t, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return { batch<widen_t<uint8_t>, A>(wasm_u16x8_extend_low_u8x16(x)), batch<widen_t<uint8_t>, A>(wasm_u16x8_extend_high_u8x16(x)) };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<int8_t>, A>, 2> widen(batch<int8_t, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return { batch<widen_t<int8_t>, A>(wasm_i16x8_extend_low_i8x16(x)), batch<widen_t<int8_t>, A>(wasm_i16x8_extend_high_i8x16(x)) };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<uint16_t>, A>, 2> widen(batch<uint16_t, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return { batch<widen_t<uint16_t>, A>(wasm_u32x4_extend_low_u16x8(x)), batch<widen_t<uint16_t>, A>(wasm_u32x4_extend_high_u16x8(x)) };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<int16_t>, A>, 2> widen(batch<int16_t, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return { batch<widen_t<int16_t>, A>(wasm_i32x4_extend_low_i16x8(x)), batch<widen_t<int16_t>, A>(wasm_i32x4_extend_high_i16x8(x)) };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<uint32_t>, A>, 2> widen(batch<uint32_t, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return { batch<widen_t<uint32_t>, A>(wasm_u64x2_extend_low_u32x4(x)), batch<widen_t<uint32_t>, A>(wasm_u64x2_extend_high_u32x4(x)) };
+        }
+        template <class A>
+        XSIMD_INLINE std::array<batch<widen_t<int32_t>, A>, 2> widen(batch<int32_t, A> const& x, requires_arch<wasm>) noexcept
+        {
+            return { batch<widen_t<int32_t>, A>(wasm_i64x2_extend_low_i32x4(x)), batch<widen_t<int32_t>, A>(wasm_i64x2_extend_high_i32x4(x)) };
         }
 
         // zip_hi
