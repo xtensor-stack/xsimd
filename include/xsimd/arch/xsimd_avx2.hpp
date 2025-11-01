@@ -573,7 +573,7 @@ namespace xsimd
 
         // load_unaligned<batch_bool>
 
-        template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<avx2>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
