@@ -247,6 +247,7 @@ struct swizzle_test
         using idx_t = typename xsimd::as_index<value_type>::type;
         auto idx_batch = xsimd::make_batch_constant<idx_t, Pattern<idx_t>, arch_type>();
 
+        CAPTURE(idx_batch.as_batch());
         CHECK_BATCH_EQ(xsimd::swizzle(b_lhs, idx_batch), b_expect);
         CHECK_BATCH_EQ(xsimd::swizzle(b_lhs,
                                       static_cast<xsimd::batch<idx_t, arch_type>>(idx_batch)),
