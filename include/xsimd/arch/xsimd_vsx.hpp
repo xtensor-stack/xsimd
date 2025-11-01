@@ -17,6 +17,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_vsx_register.hpp"
+#include "./common/xsimd_common_cast.hpp"
 
 #include <endian.h>
 
@@ -871,6 +872,20 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> trunc(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_trunc(self.data);
+        }
+
+        // widen
+        template <class A>
+        XSIMD_INLINE std::array<batch<double, A>, 2> widen(batch<float, A> const& x, requires_arch<vsx>) noexcept
+        {
+            return { batch<double, A>(vec_doublel(x.data)), batch<double, A>(vec_doubleh(x.data)) };
+        }
+        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<vsx>) noexcept
+        {
+            auto even = vec_mule(x.data, vec_splats(T(1))); // x0, x2, x4, x6
+            auto odd = vec_mulo(x.data, vec_splats(T(1))); // x1, x3, x5, x7
+            return { batch<widen_t<T>, A>(vec_mergel(even, odd)), batch<widen_t<T>, A>(vec_mergeh(even, odd)) };
         }
 
         // zip_hi
