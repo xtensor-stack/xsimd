@@ -9,6 +9,75 @@
 Changelog
 =========
 
+14.0.0
+------
+
+    * **New architecture**: VMX with VSX extension
+
+    * [API] Add ``xsimd::bitwise_[l|r]shift<N>(...)`` and ``xsimd::rot[l|r]<N>(...)``
+
+    * [API] Add ``xsimd::widen`` to widen a batch to a batch twice as big
+
+    * [API] Add ``xsimd::first()`` function to extract the first lane from a batch
+
+    * [API] Reorder ``xsimd::make_batch_constant`` and ``xsimd::make_batch_bool_constant`` template
+      arguments
+
+    * Bump CMake requirement to 3.10
+
+    * Provide generic and specialize implementation of ``xsimd::reduce_mul``
+
+    * Have ``xsimd::max`` / ``min`` behave as ``std::max`` / ``min`` when one argument is NaN
+
+    * Optimize batch_bool load/store from/to array of booleans
+
+    * Cleaner error when trying to instantiate a batch while no arch is
+      supported
+
+    * Fix ``XSIMD_INLINE`` for compilers that don't have always_inline
+
+    * Rename ``xsimd::generic`` in ``xsimd::common``
+
+    * Fix ``xsimd::log10`` implementation under ``-ffast-math``, and add ``-fast-math-support`` to
+      generic math algorithm and tests
+
+    * Bump xtl dependency requirement
+
+    * Provide a generic implementation of ``swizzle`` with constant mask
+
+    * Enable xsimd with only emulated arch
+
+    * Rename ``avx512vnni<vbmi>`` in ``avx512vnni<vbmi2>``
+
+    * [SSE2] Fix and improve ``xsimd::swizzle`` on ``[u]int16``
+
+    * [AVX512x] Specialize ``xsimd::insert``, ``xsimd::incr_if``, ``xsimd::decr_if``
+
+    * [AVX512F,AVX512VBMI] Sepcialize ``xsimd::slide_left`` and ``xsimd::slide_right``
+
+    * [AVX512F] Fix ``batch_bool`` xor
+
+    * [WASM] Fix neq for ``batch_bool``
+
+    * [AVX/AVX2/AVX512/ARM32] Improve implementation of ``xsimd::swizzle``
+
+    * [AVX512VBMI2] Speciliaze ``xsimd::compress`` and ``xsimd::expand``
+
+    * [SSE/AVX/AVX512] Improve ``xsimd::reduce_add``
+
+    * [SSSE3/AVX2] Fix ``xsimd::rotate_left`` implementation for ``[u]int16`` and optimize
+      the ``[u]int8`` implementation
+
+    * [AVX2] Fix implementation of ``xsimd::rotate_left``
+
+    * [AVX512] Disable faulty implementation of ``xsimd::rotate_left``
+
+    * [ARM64] Improve implementation of comparison operator for 64 bit integers
+
+    * [AVX512BW] Optimize ``xsimd::shift_left`` and ``xsimd::shift_right``
+
+    * [AVX512F] Fix ``batch_const`` with 16b and 8b integers
+
 13.2.0
 ------
 
