@@ -612,13 +612,6 @@ namespace xsimd
             return load_unaligned(mem, t, r);
         }
 
-        template <class A>
-        XSIMD_INLINE batch_bool<float, A> load_aligned(bool const* mem, batch_bool<float, A> t, requires_arch<neon> r) noexcept
-        {
-            uint8x8_t tmp = vreinterpret_u8_u32(vset_lane_u32(*(unsigned int*)mem, vdup_n_u32(0), 0));
-            return { 0 - vmovl_u16(vget_low_u16(vmovl_u8(tmp))) };
-        }
-
         /*********
          * store *
          *********/
