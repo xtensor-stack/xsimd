@@ -12,6 +12,8 @@
 #ifndef XSIMD_BATCH_CONSTANT_HPP
 #define XSIMD_BATCH_CONSTANT_HPP
 
+#include <utility>
+
 #include "./xsimd_batch.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -40,6 +42,10 @@ namespace xsimd
         constexpr batch_type as_batch_bool() const noexcept { return { Values... }; }
 
         /**
+         * @brief Generate a batch of @p integers from this @p batch_bool_constant
+         */
+        constexpr batch<as_integer_t<T>, A> as_batch() const noexcept { return { -as_integer_t<T>(Values)... }; } // the minus is important!
+        /**
          * @brief Generate a batch of @p batch_type from this @p batch_bool_constant
          */
         constexpr operator batch_type() const noexcept { return as_batch_bool(); }
@@ -52,6 +58,41 @@ namespace xsimd
         static constexpr int mask() noexcept
         {
             return mask_helper(0, static_cast<int>(Values)...);
+        }
+
+        static constexpr bool none() noexcept
+        {
+            return truncated_mask() == 0u;
+        }
+
+        static constexpr bool any() noexcept
+        {
+            return !none();
+        }
+
+        static constexpr bool all() noexcept
+        {
+            return truncated_mask() == low_mask(size);
+        }
+
+        static constexpr std::size_t countr_zero() noexcept
+        {
+            return countr_zero_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t countl_zero() noexcept
+        {
+            return countl_zero_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t countr_one() noexcept
+        {
+            return countr_one_impl(truncated_mask(), size);
+        }
+
+        static constexpr std::size_t countl_one() noexcept
+        {
+            return countl_one_impl(truncated_mask(), size);
         }
 
     private:
@@ -117,7 +158,99 @@ namespace xsimd
         {
             return {};
         }
+
+    private:
+        // Build a 64-bit mask from Values... (LSB = index 0)
+        template <std::size_t I, bool... Remaining>
+        struct build_bits_helper;
+
+        template <std::size_t I>
+        struct build_bits_helper<I>
+        {
+            static constexpr uint64_t value = 0u;
+        };
+
+        template <std::size_t I, bool Current, bool... Remaining>
+        struct build_bits_helper<I, Current, Remaining...>
+        {
+            static constexpr uint64_t value = (Current ? (uint64_t(1) << I) : 0u)
+                | build_bits_helper<I + 1, Remaining...>::value;
+        };
+
+        static constexpr uint64_t bits() noexcept
+        {
+            return build_bits_helper<0, Values...>::value;
+        }
+        static constexpr uint64_t low_mask(std::size_t k) noexcept
+        {
+            return (k >= 64u) ? ~uint64_t(0) : ((uint64_t(1) << k) - 1u);
+        }
+        static constexpr uint64_t truncated_mask() noexcept
+        {
+            return bits() & low_mask(size);
+        }
+        static constexpr std::size_t countr_zero_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0 || (v & 1u) != 0u) ? 0u : (1u + countr_zero_impl(v >> 1, n - 1));
+        }
+        static constexpr std::size_t countr_one_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0 || (v & 1u) == 0u) ? 0u : (1u + countr_one_impl(v >> 1, n - 1));
+        }
+        static constexpr std::size_t countl_zero_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0) ? 0u : ((((v >> (n - 1)) & 1u) != 0u) ? 0u : (1u + countl_zero_impl(v, n - 1)));
+        }
+        static constexpr std::size_t countl_one_impl(uint64_t v, std::size_t n) noexcept
+        {
+            return (n == 0) ? 0u : ((((v >> (n - 1)) & 1u) == 0u) ? 0u : (1u + countl_one_impl(v, n - 1)));
+        }
     };
+
+    namespace detail
+    {
+        template <class A2, std::size_t BeginIdx, typename T, class A, bool... Values, std::size_t... Is>
+        XSIMD_INLINE constexpr auto splice_impl(index_sequence<Is...>) noexcept
+            -> batch_bool_constant<
+                T, A2,
+                std::tuple_element<BeginIdx + Is,
+                                   std::tuple<std::integral_constant<bool, Values>...>>::type::value...>
+        {
+            return {};
+        }
+
+        template <class A2, std::size_t Begin, std::size_t End,
+                  typename T, class A, bool... Values,
+                  std::size_t N = (End >= Begin ? (End - Begin) : 0)>
+        XSIMD_INLINE constexpr auto splice(batch_bool_constant<T, A, Values...>) noexcept
+            -> decltype(splice_impl<A2, Begin, T, A, Values...>(make_index_sequence<N>()))
+        {
+            static_assert(Begin <= End, "splice: Begin must be <= End");
+            static_assert(End <= sizeof...(Values), "splice: End must be <= size");
+            static_assert(N == batch_bool<T, A2>::size, "splice: target arch size must match submask length");
+            return splice_impl<A2, Begin, T, A, Values...>(make_index_sequence<N>());
+        }
+
+        template <class A2, typename T, class A, bool... Values>
+        XSIMD_INLINE constexpr auto lower_half(batch_bool_constant<T, A, Values...>) noexcept
+            -> decltype(splice_impl<A2, 0, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>()))
+        {
+            static_assert(sizeof...(Values) % 2 == 0, "lower_half requires even size");
+            static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
+                          "lower_half: target arch size must match submask length");
+            return splice_impl<A2, 0, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>());
+        }
+
+        template <class A2, typename T, class A, bool... Values>
+        XSIMD_INLINE constexpr auto upper_half(batch_bool_constant<T, A, Values...>) noexcept
+            -> decltype(splice_impl<A2, sizeof...(Values) / 2, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>()))
+        {
+            static_assert(sizeof...(Values) % 2 == 0, "upper_half requires even size");
+            static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
+                          "upper_half: target arch size must match submask length");
+            return splice_impl<A2, sizeof...(Values) / 2, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>());
+        }
+    } // namespace detail
 
     /**
      * @brief batch of integral constants

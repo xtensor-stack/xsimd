@@ -17,6 +17,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_avx512f_register.hpp"
+#include "../types/xsimd_batch_constant.hpp"
 
 namespace xsimd
 {
@@ -77,6 +78,7 @@ namespace xsimd
             {
                 return _mm512_insertf64x4(_mm512_castpd256_pd512(low), high, 1);
             }
+
             template <class F>
             __m512i fwd_to_avx(F f, __m512i self)
             {
@@ -231,6 +233,142 @@ namespace xsimd
                     {
                         return (register_type)_mm512_cmp_epu64_mask(self, other, Cmp);
                     }
+                }
+            }
+        }
+
+        namespace detail
+        {
+            // --- compact unified helpers for masked loads/stores & zero-extension ---
+            struct high_tag
+            {
+            };
+
+            // zero-extend 256 -> 512 (low) and place-into-high variants
+            XSIMD_INLINE __m512i zero_extend(__m256i lo) noexcept { return _mm512_zextsi256_si512(lo); }
+            XSIMD_INLINE __m512 zero_extend(__m256 lo) noexcept { return _mm512_zextps256_ps512(lo); }
+            XSIMD_INLINE __m512d zero_extend(__m256d lo) noexcept { return _mm512_zextpd256_pd512(lo); }
+
+            XSIMD_INLINE __m512i zero_extend(__m256i hi, high_tag) noexcept { return _mm512_inserti64x4(_mm512_setzero_si512(), hi, 1); }
+            XSIMD_INLINE __m512 zero_extend(__m256 hi, high_tag) noexcept
+            {
+                return _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_setzero_ps()), _mm256_castps_pd(hi), 1));
+            }
+            XSIMD_INLINE __m512d zero_extend(__m256d hi, high_tag) noexcept { return _mm512_insertf64x4(_mm512_setzero_pd(), hi, 1); }
+
+            // pointer-level masked loads (overloads by pointer/value size and alignment)
+            XSIMD_INLINE __m512 load_masked(const float* mem, uint64_t m, aligned_mode) noexcept { return _mm512_maskz_load_ps((__mmask16)m, mem); }
+            XSIMD_INLINE __m512 load_masked(const float* mem, uint64_t m, unaligned_mode) noexcept { return _mm512_maskz_loadu_ps((__mmask16)m, mem); }
+            XSIMD_INLINE __m512d load_masked(const double* mem, uint64_t m, aligned_mode) noexcept { return _mm512_maskz_load_pd((__mmask8)m, mem); }
+            XSIMD_INLINE __m512d load_masked(const double* mem, uint64_t m, unaligned_mode) noexcept { return _mm512_maskz_loadu_pd((__mmask8)m, mem); }
+
+            XSIMD_INLINE __m512i load_masked(const int32_t* mem, uint64_t m, aligned_mode) noexcept { return _mm512_maskz_load_epi32((__mmask16)m, mem); }
+            XSIMD_INLINE __m512i load_masked(const int32_t* mem, uint64_t m, unaligned_mode) noexcept { return _mm512_maskz_loadu_epi32((__mmask16)m, mem); }
+            XSIMD_INLINE __m512i load_masked(const uint32_t* mem, uint64_t m, aligned_mode) noexcept { return _mm512_maskz_load_epi32((__mmask16)m, reinterpret_cast<const int32_t*>(mem)); }
+            XSIMD_INLINE __m512i load_masked(const uint32_t* mem, uint64_t m, unaligned_mode) noexcept { return _mm512_maskz_loadu_epi32((__mmask16)m, reinterpret_cast<const int32_t*>(mem)); }
+
+            XSIMD_INLINE __m512i load_masked(const int64_t* mem, uint64_t m, aligned_mode) noexcept { return _mm512_maskz_load_epi64((__mmask8)m, mem); }
+            XSIMD_INLINE __m512i load_masked(const int64_t* mem, uint64_t m, unaligned_mode) noexcept { return _mm512_maskz_loadu_epi64((__mmask8)m, mem); }
+            XSIMD_INLINE __m512i load_masked(const uint64_t* mem, uint64_t m, aligned_mode) noexcept { return _mm512_maskz_load_epi64((__mmask8)m, reinterpret_cast<const int64_t*>(mem)); }
+            XSIMD_INLINE __m512i load_masked(const uint64_t* mem, uint64_t m, unaligned_mode) noexcept { return _mm512_maskz_loadu_epi64((__mmask8)m, reinterpret_cast<const int64_t*>(mem)); }
+
+            // Register-level AVX2-forward helpers: accept 256-bit halves and return 512-bit
+            XSIMD_INLINE __m512 load_masked(__m256 lo) noexcept { return zero_extend(lo); }
+            XSIMD_INLINE __m512d load_masked(__m256d lo) noexcept { return zero_extend(lo); }
+            XSIMD_INLINE __m512i load_masked(__m256i lo) noexcept { return zero_extend(lo); }
+            XSIMD_INLINE __m512 load_masked(__m256 hi, high_tag) noexcept { return zero_extend(hi, high_tag {}); }
+            XSIMD_INLINE __m512d load_masked(__m256d hi, high_tag) noexcept { return zero_extend(hi, high_tag {}); }
+            XSIMD_INLINE __m512i load_masked(__m256i hi, high_tag) noexcept { return zero_extend(hi, high_tag {}); }
+
+            // pointer-level masked stores (overloads by pointer/value size and alignment)
+            XSIMD_INLINE void store_masked(float* mem, __m512 src, uint64_t m, aligned_mode) noexcept { _mm512_mask_store_ps(mem, (__mmask16)m, src); }
+            XSIMD_INLINE void store_masked(float* mem, __m512 src, uint64_t m, unaligned_mode) noexcept { _mm512_mask_storeu_ps(mem, (__mmask16)m, src); }
+            XSIMD_INLINE void store_masked(double* mem, __m512d src, uint64_t m, aligned_mode) noexcept { _mm512_mask_store_pd(mem, (__mmask8)m, src); }
+            XSIMD_INLINE void store_masked(double* mem, __m512d src, uint64_t m, unaligned_mode) noexcept { _mm512_mask_storeu_pd(mem, (__mmask8)m, src); }
+
+            XSIMD_INLINE void store_masked(int32_t* mem, __m512i src, uint64_t m, aligned_mode) noexcept { _mm512_mask_store_epi32(mem, (__mmask16)m, src); }
+            XSIMD_INLINE void store_masked(int32_t* mem, __m512i src, uint64_t m, unaligned_mode) noexcept { _mm512_mask_storeu_epi32(mem, (__mmask16)m, src); }
+            XSIMD_INLINE void store_masked(uint32_t* mem, __m512i src, uint64_t m, aligned_mode) noexcept { _mm512_mask_store_epi32(reinterpret_cast<int32_t*>(mem), (__mmask16)m, src); }
+            XSIMD_INLINE void store_masked(uint32_t* mem, __m512i src, uint64_t m, unaligned_mode) noexcept { _mm512_mask_storeu_epi32(reinterpret_cast<int32_t*>(mem), (__mmask16)m, src); }
+
+            XSIMD_INLINE void store_masked(int64_t* mem, __m512i src, uint64_t m, aligned_mode) noexcept { _mm512_mask_store_epi64(mem, (__mmask8)m, src); }
+            XSIMD_INLINE void store_masked(int64_t* mem, __m512i src, uint64_t m, unaligned_mode) noexcept { _mm512_mask_storeu_epi64(mem, (__mmask8)m, src); }
+            XSIMD_INLINE void store_masked(uint64_t* mem, __m512i src, uint64_t m, aligned_mode) noexcept { _mm512_mask_store_epi64(reinterpret_cast<int64_t*>(mem), (__mmask8)m, src); }
+            XSIMD_INLINE void store_masked(uint64_t* mem, __m512i src, uint64_t m, unaligned_mode) noexcept { _mm512_mask_storeu_epi64(reinterpret_cast<int64_t*>(mem), (__mmask8)m, src); }
+
+        } // namespace detail
+
+        template <class A, class T, bool... Values, class Mode,
+                  typename = typename std::enable_if<(sizeof(T) >= 4), void>::type>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem,
+                                             batch_bool_constant<T, A, Values...> mask,
+                                             convert<T>, Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return batch<T, A>(T { 0 });
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return load<A>(mem, Mode {});
+            }
+            else
+            {
+                constexpr auto half = batch<T, A>::size / 2;
+                XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
+                {
+                    constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                    const auto lo = load_masked<avx2>(mem, mlo, convert<T> {}, Mode {}, avx2 {});
+                    return detail::load_masked(lo); // zero-extend low half
+                }
+                else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper-half AVX2 forwarding
+                {
+                    constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                    const auto hi = load_masked<avx2>(mem + half, mhi, convert<T> {}, Mode {}, avx2 {});
+                    return detail::load_masked(hi, detail::high_tag {});
+                }
+                else
+                {
+                    // fallback to centralized pointer-level helper
+                    return detail::load_masked(mem, mask.mask(), Mode {});
+                }
+            }
+        }
+
+        template <class A, class T, bool... Values, class Mode,
+                  typename = typename std::enable_if<(sizeof(T) >= 4), void>::type>
+        XSIMD_INLINE void store_masked(T* mem,
+                                       batch<T, A> const& src,
+                                       batch_bool_constant<T, A, Values...> mask,
+                                       Mode, requires_arch<avx512f>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.none())
+            {
+                return;
+            }
+            else XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            else
+            {
+                constexpr auto half = batch<T, A>::size / 2;
+                XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
+                {
+                    constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
+                    const auto lo = detail::lower_half(src);
+                    store_masked<avx2>(mem, lo, mlo, Mode {}, avx2 {});
+                }
+                else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper-half AVX2 forwarding
+                {
+                    constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                    const auto hi = detail::upper_half(src);
+                    store_masked<avx2>(mem + half, hi, mhi, Mode {}, avx2 {});
+                }
+                else
+                {
+                    // fallback to centralized pointer-level helper
+                    detail::store_masked(mem, src, mask.mask(), Mode {});
                 }
             }
         }
