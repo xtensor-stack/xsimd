@@ -1419,6 +1419,45 @@ namespace xsimd
     /**
      * @ingroup batch_data_transfer
      *
+     * Creates a batch from the buffer \c ptr using a mask. Elements
+     * corresponding to \c false in the mask are not accessed in memory and are
+     * zero-initialized in the resulting batch.
+     * @param ptr the memory buffer to read
+     * @param mask selection mask for the elements to load
+     * @return a new batch instance
+     */
+    template <class T, class A = default_arch, bool... Values, class From>
+    XSIMD_INLINE batch<T, A> load(From const* ptr,
+                                  batch_bool_constant<T, A, Values...> const& mask,
+                                  aligned_mode = {}) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return batch<T, A>::load(ptr, mask, aligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Creates a batch from the buffer \c ptr using a mask. Elements
+     * corresponding to \c false in the mask are not accessed in memory and are
+     * zero-initialized in the resulting batch.
+     * @param ptr the memory buffer to read. The buffer does not need to be
+     *            aligned.
+     * @param mask selection mask for the elements to load
+     * @return a new batch instance
+     */
+    template <class T, class A = default_arch, bool... Values, class From>
+    XSIMD_INLINE batch<T, A> load(From const* ptr,
+                                  batch_bool_constant<T, A, Values...> const& mask,
+                                  unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return batch<T, A>::load(ptr, mask, unaligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
      * Creates a batch from the buffer \c ptr. The
      * memory needs to be aligned.
      * @param ptr the memory buffer to read
@@ -2411,6 +2450,46 @@ namespace xsimd
     XSIMD_INLINE void store(T* mem, batch<T, A> const& val, unaligned_mode) noexcept
     {
         store_as<T, A>(mem, val, unaligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Copy selected elements of batch \c val to the buffer \c mem using
+     * a mask. Elements corresponding to \c false in the mask are not
+     * written to memory.
+     * @param mem the memory buffer to write to
+     * @param val the batch to copy from
+     * @param mask selection mask for the elements to store
+     */
+    template <class T, class A = default_arch, bool... Values>
+    XSIMD_INLINE void store(T* mem,
+                            batch<T, A> const& val,
+                            batch_bool_constant<T, A, Values...> const& mask,
+                            aligned_mode = {}) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        val.store(mem, mask, aligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Copy selected elements of batch \c val to the buffer \c mem using a mask.
+     * Elements corresponding to \c false in the mask are not written to memory.
+     * @param mem the memory buffer to write to. The buffer does not need to be
+     *            aligned.
+     * @param val the batch to copy from
+     * @param mask selection mask for the elements to store
+     */
+    template <class T, class A = default_arch, bool... Values>
+    XSIMD_INLINE void store(T* mem,
+                            batch<T, A> const& val,
+                            batch_bool_constant<T, A, Values...> const& mask,
+                            unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        val.store(mem, mask, unaligned_mode {});
     }
 
     /**
