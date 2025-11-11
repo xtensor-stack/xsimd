@@ -60,15 +60,15 @@ namespace xsimd
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_identity(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
-            XSIMD_INLINE constexpr bool is_all_different(batch_constant<T, A, Vs...>) noexcept;
-            template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_lo(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_hi(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_cross_lane(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
-            XSIMD_INLINE constexpr bool no_duplicates(batch_constant<T, A, Vs...>) noexcept;
+            XSIMD_INLINE constexpr bool is_only_from_lo(batch_constant<T, A, Vs...>) noexcept;
+            template <typename T, class A, T... Vs>
+            XSIMD_INLINE constexpr bool is_only_from_hi(batch_constant<T, A, Vs...>) noexcept;
 
         }
     }
