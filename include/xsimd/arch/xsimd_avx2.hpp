@@ -1142,36 +1142,17 @@ namespace xsimd
         }
 
         // swizzle (constant mask)
-        template <
-            class A, typename T,
-            uint8_t V0, uint8_t V1, uint8_t V2, uint8_t V3, uint8_t V4, uint8_t V5, uint8_t V6, uint8_t V7,
-            uint8_t V8, uint8_t V9, uint8_t V10, uint8_t V11, uint8_t V12, uint8_t V13, uint8_t V14, uint8_t V15,
-            uint8_t V16, uint8_t V17, uint8_t V18, uint8_t V19, uint8_t V20, uint8_t V21, uint8_t V22, uint8_t V23,
-            uint8_t V24, uint8_t V25, uint8_t V26, uint8_t V27, uint8_t V28, uint8_t V29, uint8_t V30, uint8_t V31,
-            detail::enable_sized_t<T, 1> = 0>
-        XSIMD_INLINE batch<T, A> swizzle(
-            batch<T, A> const& self,
-            batch_constant<
-                uint8_t, A,
-                V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15,
-                V16, V17, V18, V19, V20, V21, V22, V23, V24, V25, V26, V27, V28, V29, V30, V31>
-                mask,
-            requires_arch<avx2> req) noexcept
+        template <class A, typename T, uint8_t... Vals, detail::enable_sized_t<T, 1> = 0>
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch_constant<uint8_t, A, Vals...> mask, requires_arch<avx2> req) noexcept
         {
+            static_assert(sizeof...(Vals) == 32, "Must contain as many uint8_t as can fit in avx register");
             return swizzle(self, mask.as_batch(), req);
         }
 
-        template <
-            class A, typename T,
-            uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7,
-            uint16_t V8, uint16_t V9, uint16_t V10, uint16_t V11, uint16_t V12, uint16_t V13, uint16_t V14, uint16_t V15,
-            detail::enable_sized_t<T, 2> = 0>
-        XSIMD_INLINE batch<T, A> swizzle(
-            batch<T, A> const& self,
-            batch_constant<uint16_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15>
-                mask,
-            requires_arch<avx2> req) noexcept
+        template <class A, typename T, uint16_t... Vals, detail::enable_sized_t<T, 2> = 0>
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch_constant<uint16_t, A, Vals...> mask, requires_arch<avx2> req) noexcept
         {
+            static_assert(sizeof...(Vals) == 16, "Must contain as many uint16_t as can fit in avx register");
             return swizzle(self, mask.as_batch(), req);
         }
 
