@@ -8,8 +8,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - 13
           - 14
+          - 15
+          - 15-intel
     runs-on: macos-${{ matrix.os }}
     name: 'macos-${{ matrix.os }}'
     steps:
