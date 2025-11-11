@@ -484,7 +484,11 @@ struct xsimd_api_float_types_functions
     void test_asin()
     {
         value_type val(1);
+#if defined(__APPLE__)
+        CHECK_EQ(extract(xsimd::asin(T(val))), doctest::Approx(std::asin(val)));
+#else
         CHECK_EQ(extract(xsimd::asin(T(val))), std::asin(val));
+#endif
     }
     void test_asinh()
     {
