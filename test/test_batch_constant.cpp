@@ -33,6 +33,16 @@ struct constant_batch_test
         }
     };
 
+    void test_init_from_constant() const
+    {
+        array_type expected;
+        std::generate(expected.begin(), expected.end(), []()
+                      { return 1; });
+        constexpr auto b = xsimd::make_batch_constant<value_type, 1, arch_type>();
+        INFO("batch(value_type)");
+        CHECK_BATCH_EQ((batch_type)b, expected);
+    }
+
     void test_init_from_generator() const
     {
         array_type expected;
@@ -83,7 +93,7 @@ struct constant_batch_test
         }
     };
 
-    void test_init_from_constant() const
+    void test_init_from_constant_generator() const
     {
         array_type expected;
         std::fill(expected.begin(), expected.end(), constant<3>::get(0, 0));
@@ -142,6 +152,8 @@ struct constant_batch_test
 TEST_CASE_TEMPLATE("[constant batch]", B, BATCH_INT_TYPES)
 {
     constant_batch_test<B> Test;
+    SUBCASE("init_from_constant") { Test.test_init_from_constant(); }
+
     SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
 
     SUBCASE("as_batch") { Test.test_cast(); }
@@ -151,7 +163,7 @@ TEST_CASE_TEMPLATE("[constant batch]", B, BATCH_INT_TYPES)
         Test.test_init_from_generator_arange();
     }
 
-    SUBCASE("init_from_constant") { Test.test_init_from_constant(); }
+    SUBCASE("init_from_constant_generator") { Test.test_init_from_constant_generator(); }
 
     SUBCASE("operators")
     {
@@ -177,6 +189,16 @@ struct constant_bool_batch_test
             return index % 2;
         }
     };
+
+    void test_init_from_constant() const
+    {
+        bool_array_type expected;
+        std::generate(expected.begin(), expected.end(), []()
+                      { return false; });
+        constexpr auto b = xsimd::make_batch_bool_constant<value_type, false, arch_type>();
+        INFO("batch_bool_constant(value_type)");
+        CHECK_BATCH_EQ((batch_bool_type)b, expected);
+    }
 
     void test_init_from_generator() const
     {
@@ -270,6 +292,8 @@ struct constant_bool_batch_test
 TEST_CASE_TEMPLATE("[constant bool batch]", B, BATCH_INT_TYPES)
 {
     constant_bool_batch_test<B> Test;
+    SUBCASE("init_from_constant") { Test.test_init_from_constant(); }
+
     SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
 
     SUBCASE("as_batch") { Test.test_cast(); }

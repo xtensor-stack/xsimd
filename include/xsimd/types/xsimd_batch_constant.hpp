@@ -251,8 +251,23 @@ namespace xsimd
         {
             return {};
         }
+
+        template <typename T, T Val, class A, std::size_t... Is>
+        XSIMD_INLINE constexpr batch_constant<T, A, (static_cast<T>(0 * Is) + Val)...>
+        make_batch_constant(detail::index_sequence<Is...>) noexcept
+        {
+            return {};
+        }
+
         template <typename T, class G, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_bool_constant<T, A, G::get(Is, sizeof...(Is))...>
+        make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
+        {
+            return {};
+        }
+
+        template <typename T, bool Val, class A, std::size_t... Is>
+        XSIMD_INLINE constexpr batch_bool_constant<T, A, ((static_cast<bool>(Is) | true) & Val)...>
         make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
         {
             return {};
@@ -287,8 +302,36 @@ namespace xsimd
         return {};
     }
 
+    /**
+     * @brief Build a @c batch_constant with a single repeated value.
+     *
+     * @tparam T type of the data held in the batch.
+     * @tparam Val The value to repeat.
+     * @tparam A Architecture that will be used when converting to a regular batch.
+     */
+    template <typename T, T Val, class A = default_arch>
+    XSIMD_INLINE constexpr decltype(detail::make_batch_constant<T, Val, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    make_batch_constant() noexcept
+    {
+        return {};
+    }
+
     template <typename T, class G, class A = default_arch>
     XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    make_batch_bool_constant() noexcept
+    {
+        return {};
+    }
+
+    /**
+     * @brief Build a @c batch_bool_constant with a single repeated value.
+     *
+     * @tparam T type of the data held in the batch.
+     * @tparam Val The value to repeat.
+     * @tparam A Architecture that will be used when converting to a regular batch.
+     */
+    template <typename T, bool Val, class A = default_arch>
+    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, Val, A>(detail::make_index_sequence<batch<T, A>::size>()))
     make_batch_bool_constant() noexcept
     {
         return {};
