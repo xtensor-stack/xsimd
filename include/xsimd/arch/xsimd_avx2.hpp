@@ -1287,15 +1287,28 @@ namespace xsimd
         }
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
-        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx2>) noexcept
+        XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx2>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(detail::is_all_different(mask) && !detail::is_identity(mask))
+            XSIMD_IF_CONSTEXPR(detail::is_identity(mask))
             {
-                // The intrinsic does NOT allow to copy the same element of the source vector to more than one element of the destination vector.
-                // one-shot 8-lane permute
-                return _mm256_permutevar8x32_ps(self, mask.as_batch());
+                return self;
             }
-            return swizzle(self, mask, avx {});
+            XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
+            {
+                constexpr auto lane_mask = mask % make_batch_constant<uint32_t, (mask.size / 2), A>();
+                // Cheaper intrinsics when not crossing lanes
+                // We could also use _mm256_permute_ps which uses a imm8 constant, though it has the
+                // same latency/throughput according to Intel manual.
+                batch<float, A> permuted = _mm256_permutevar_ps(bitwise_cast<float>(self), lane_mask.as_batch());
+                return bitwise_cast<uint32_t>(permuted);
+            }
+            return _mm256_permutevar8x32_epi32(self, mask.as_batch());
+        }
+
+        template <class A, typename T, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7, detail::enable_sized_t<T, 4> = 0>
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx2> req) noexcept
+        {
+            return bitwise_cast<T>(swizzle(bitwise_cast<uint32_t>(self), mask, req));
         }
 
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
@@ -1322,16 +1335,6 @@ namespace xsimd
         XSIMD_INLINE batch<int64_t, A> swizzle(batch<int64_t, A> const& self, batch_constant<uint64_t, A, V0, V1, V2, V3> mask, requires_arch<avx2>) noexcept
         {
             return bitwise_cast<int64_t>(swizzle(bitwise_cast<uint64_t>(self), mask, avx2 {}));
-        }
-        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
-        XSIMD_INLINE batch<uint32_t, A> swizzle(batch<uint32_t, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx2>) noexcept
-        {
-            return _mm256_permutevar8x32_epi32(self, mask.as_batch());
-        }
-        template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3, uint32_t V4, uint32_t V5, uint32_t V6, uint32_t V7>
-        XSIMD_INLINE batch<int32_t, A> swizzle(batch<int32_t, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3, V4, V5, V6, V7> mask, requires_arch<avx2>) noexcept
-        {
-            return bitwise_cast<int32_t>(swizzle(bitwise_cast<uint32_t>(self), mask, avx2 {}));
         }
 
         // zip_hi
