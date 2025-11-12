@@ -145,19 +145,11 @@ namespace xsimd
             template <typename T, T... Vs>
             XSIMD_INLINE constexpr bool is_identity() noexcept { return detail::identity_impl<0, T, Vs...>(); }
             template <typename T, T... Vs>
-            XSIMD_INLINE constexpr bool is_all_different() noexcept
-            {
-                return detail::bitmask_impl<0, sizeof...(Vs), T, Vs...>() == ((1u << sizeof...(Vs)) - 1);
-            }
-
-            template <typename T, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_lo() noexcept { return detail::dup_lo_impl<0, sizeof...(Vs), T, Vs...>(); }
             template <typename T, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_hi() noexcept { return detail::dup_hi_impl<0, sizeof...(Vs), T, Vs...>(); }
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_identity(batch_constant<T, A, Vs...>) noexcept { return is_identity<T, Vs...>(); }
-            template <typename T, class A, T... Vs>
-            XSIMD_INLINE constexpr bool is_all_different(batch_constant<T, A, Vs...>) noexcept { return is_all_different<T, Vs...>(); }
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_lo(batch_constant<T, A, Vs...>) noexcept { return is_dup_lo<T, Vs...>(); }
             template <typename T, class A, T... Vs>

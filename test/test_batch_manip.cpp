@@ -26,8 +26,7 @@ namespace xsimd
             //  compile-time tests (identity, all-different, dup-lo, dup-hi)
             //  8-lane identity
             static_assert(is_identity<std::uint32_t, 0, 1, 2, 3, 4, 5, 6, 7>(), "identity failed");
-            // 8-lane reverse is all-different but not identity
-            static_assert(is_all_different<std::uint32_t, 7, 6, 5, 4, 3, 2, 1, 0>(), "all-diff failed");
+            // 8-lane reverse is not identity
             static_assert(!is_identity<std::uint32_t, 7, 6, 5, 4, 3, 2, 1, 0>(), "identity on reverse");
             // 8-lane dup-lo (repeat 0..3 twice)
             static_assert(is_dup_lo<std::uint32_t, 0, 1, 2, 3, 0, 1, 2, 3>(), "dup_lo failed");
@@ -38,8 +37,7 @@ namespace xsimd
             // ────────────────────────────────────────────────────────────────────────
             //  4-lane identity
             static_assert(is_identity<std::uint32_t, 0, 1, 2, 3>(), "4-lane identity failed");
-            // 4-lane reverse all-different but not identity
-            static_assert(is_all_different<std::uint32_t, 3, 2, 1, 0>(), "4-lane all-diff failed");
+            // 4-lane reverse is not identity
             static_assert(!is_identity<std::uint32_t, 3, 2, 1, 0>(), "4-lane identity on reverse");
             // 4-lane dup-lo (repeat 0..1 twice)
             static_assert(is_dup_lo<std::uint32_t, 0, 1, 0, 1>(), "4-lane dup_lo failed");
