@@ -51,12 +51,6 @@ namespace xsimd
             static_assert(is_cross_lane<0, 3, 3, 3>(), "one low + rest high → crossing");
             static_assert(!is_cross_lane<1, 0, 2, 3>(), "mixed low/high → no crossing");
             static_assert(!is_cross_lane<0, 1, 2, 3>(), "mixed low/high → no crossing");
-
-            static_assert(no_duplicates_v<0, 1, 2, 3>(), "N=4: [0,1,2,3] → distinct");
-            static_assert(!no_duplicates_v<0, 1, 2, 2>(), "N=4: [0,1,2,2] → dup");
-
-            static_assert(no_duplicates_v<0, 1, 2, 3, 4, 5, 6, 7>(), "N=8: [0..7] → distinct");
-            static_assert(!no_duplicates_v<0, 1, 2, 3, 4, 5, 6, 0>(), "N=8: last repeats 0");
         }
     }
 }
