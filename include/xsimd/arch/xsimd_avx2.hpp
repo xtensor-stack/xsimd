@@ -1297,8 +1297,8 @@ namespace xsimd
             {
                 constexpr auto lane_mask = mask % make_batch_constant<uint32_t, (mask.size / 2), A>();
                 // Cheaper intrinsics when not crossing lanes
-                // We could also use _mm256_permute_ps which uses a imm8 constant, though it has the
-                // same latency/throughput according to Intel manual.
+                // Contrary to the uint64_t version, the limits of 8 bits for the immediate constant
+                // cannot make different permutations across lanes
                 batch<float, A> permuted = _mm256_permutevar_ps(bitwise_cast<float>(self), lane_mask.as_batch());
                 return bitwise_cast<uint32_t>(permuted);
             }
@@ -1320,7 +1320,7 @@ namespace xsimd
             }
             XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
             {
-                constexpr uint32_t lane_mask = (V0 % 2) | ((V1 % 2) << 1) | ((V2 % 2) << 2) | ((V3 % 2) << 3);
+                constexpr uint8_t lane_mask = (V0 % 2) | ((V1 % 2) << 1) | ((V2 % 2) << 2) | ((V3 % 2) << 3);
                 // Cheaper intrinsics when not crossing lanes
                 batch<double, A> permuted = _mm256_permute_pd(bitwise_cast<double>(self), lane_mask);
                 return bitwise_cast<uint64_t>(permuted);
