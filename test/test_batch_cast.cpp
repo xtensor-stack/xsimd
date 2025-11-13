@@ -341,6 +341,7 @@ private:
             T_out scalar_ref = static_cast<T_out>(in_test_value);
             T_out scalar_res = res.get(0);
             CHECK_SCALAR_EQ(scalar_ref, scalar_res);
+            CHECK_SCALAR_EQ(scalar_ref, xsimd::batch_cast<T_out>(in_test_value));
         }
     }
 
@@ -353,14 +354,22 @@ private:
         using B_common_out = xsimd::batch_bool<T_out>;
 
         B_common_in all_true_in(true);
-        B_common_out all_true_res = xsimd::batch_bool_cast<T_out>(all_true_in);
+        B_common_out all_true_res0 = xsimd::batch_bool_cast<T_out>(all_true_in);
+        B_common_out all_true_res1 = xsimd::batch_cast<T_out>(all_true_in);
         INFO(name);
-        CHECK_SCALAR_EQ(all_true_res.get(0), true);
+        CHECK_SCALAR_EQ(all_true_res0.get(0), true);
+        CHECK_SCALAR_EQ(all_true_res1.get(0), true);
+        CHECK_SCALAR_EQ(xsimd::batch_bool_cast<B_out>(true), true);
+        CHECK_SCALAR_EQ(xsimd::batch_cast<B_out>(true), true);
 
         B_common_in all_false_in(false);
-        B_common_out all_false_res = xsimd::batch_bool_cast<T_out>(all_false_in);
+        B_common_out all_false_res0 = xsimd::batch_bool_cast<T_out>(all_false_in);
+        B_common_out all_false_res1 = xsimd::batch_cast<T_out>(all_false_in);
         INFO(name);
-        CHECK_SCALAR_EQ(all_false_res.get(0), false);
+        CHECK_SCALAR_EQ(all_false_res0.get(0), false);
+        CHECK_SCALAR_EQ(all_false_res1.get(0), false);
+        CHECK_SCALAR_EQ(xsimd::batch_bool_cast<B_out>(false), false);
+        CHECK_SCALAR_EQ(xsimd::batch_cast<B_out>(false), false);
     }
 };
 
