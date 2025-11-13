@@ -1224,12 +1224,12 @@ namespace xsimd
             {
                 return _mm256_shuffle_epi8(self, lane_mask.as_batch());
             }
-            XSIMD_IF_CONSTEXPR(detail::is_dup_lo(mask))
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_lo(mask))
             {
                 __m256i broadcast = _mm256_permute2x128_si256(self, self, 0x00); // [low | low]
                 return _mm256_shuffle_epi8(broadcast, lane_mask.as_batch());
             }
-            XSIMD_IF_CONSTEXPR(detail::is_dup_hi(mask))
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_hi(mask))
             {
                 __m256i broadcast = _mm256_permute2x128_si256(self, self, 0x11); // [high | high]
                 return _mm256_shuffle_epi8(broadcast, lane_mask.as_batch());
