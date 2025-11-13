@@ -1320,15 +1320,9 @@ namespace xsimd
             }
             XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
             {
-                // The lane mask value is found in mask modulo 2, but the intrinsic expect it in the
-                // second least significant bit.
-                constexpr auto two = make_batch_constant<uint64_t, 2, A>();
-                constexpr auto half_size = make_batch_constant<uint64_t, (mask.size / 2), A>();
-                constexpr auto lane_mask = (mask % half_size) * two; // `* two` for `<< one`
+                constexpr uint32_t lane_mask = (V0 % 2) | ((V1 % 2) << 1) | ((V2 % 2) << 2) | ((V3 % 2) << 3);
                 // Cheaper intrinsics when not crossing lanes
-                // We could also use _mm256_permute_pd which uses a imm8 constant, though it has the
-                // same latency/throughput according to Intel manual.
-                batch<double, A> permuted = _mm256_permutevar_pd(bitwise_cast<double>(self), lane_mask.as_batch());
+                batch<double, A> permuted = _mm256_permute_pd(bitwise_cast<double>(self), lane_mask);
                 return bitwise_cast<uint64_t>(permuted);
             }
             constexpr auto mask_int = detail::mod_shuffle(V0, V1, V2, V3);
