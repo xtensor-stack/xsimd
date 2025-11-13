@@ -34,6 +34,12 @@ namespace xsimd
             // 8-lane dup-hi (repeat 4..7 twice)
             static_assert(is_dup_hi<std::uint32_t, 4, 5, 6, 7, 4, 5, 6, 7>(), "dup_hi failed");
             static_assert(!is_dup_lo<std::uint32_t, 4, 5, 6, 7, 4, 5, 6, 7>(), "dup_lo on dup_hi");
+            // 8-lane is-only-from-hi (repeat 4..7 twice)
+            static_assert(is_only_from_hi<std::uint32_t, 4, 5, 6, 7, 7, 7, 7, 7>(), "only_from_hi on hi");
+            static_assert(!is_only_from_hi<std::uint32_t, 4, 5, 6, 7, 7, 1, 7, 7>(), "only_from_hi failed");
+            // 8-lane is-only-from-lo (repeat 4..7 twice)
+            static_assert(is_only_from_lo<std::uint32_t, 0, 1, 2, 3, 3, 2, 1, 0>(), "only_from_lo on lo");
+            static_assert(!is_only_from_lo<std::uint32_t, 0, 1, 2, 7, 3, 2, 1, 0>(), "only_from_lo failed");
             // ────────────────────────────────────────────────────────────────────────
             //  4-lane identity
             static_assert(is_identity<std::uint32_t, 0, 1, 2, 3>(), "4-lane identity failed");
