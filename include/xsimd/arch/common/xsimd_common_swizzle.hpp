@@ -16,6 +16,8 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "../../config/xsimd_inline.hpp"
+
 namespace xsimd
 {
     template <typename T, class A, T... Values>
@@ -39,7 +41,7 @@ namespace xsimd
             };
 
             // ────────────────────────────────────────────────────────────────────────
-            //  1) identity_impl
+            // identity_impl
             template <std::size_t /*I*/, typename T>
             XSIMD_INLINE constexpr bool identity_impl() noexcept { return true; }
             template <std::size_t I, typename T, T V0, T... Vs>
@@ -50,18 +52,7 @@ namespace xsimd
             }
 
             // ────────────────────────────────────────────────────────────────────────
-            //  2) bitmask_impl
-            template <std::size_t /*I*/, std::size_t /*N*/, typename T>
-            XSIMD_INLINE constexpr std::uint32_t bitmask_impl() noexcept { return 0u; }
-            template <std::size_t I, std::size_t N, typename T, T V0, T... Vs>
-            XSIMD_INLINE constexpr std::uint32_t bitmask_impl() noexcept
-            {
-                return (1u << (static_cast<std::uint32_t>(V0) & (N - 1)))
-                    | bitmask_impl<I + 1, N, T, Vs...>();
-            }
-
-            // ────────────────────────────────────────────────────────────────────────
-            //  3) dup_lo_impl
+            // dup_lo_impl
             template <std::size_t I, std::size_t N, typename T,
                       T... Vs, typename std::enable_if<I == N / 2, int>::type = 0>
             XSIMD_INLINE constexpr bool dup_lo_impl() noexcept { return true; }
@@ -76,7 +67,7 @@ namespace xsimd
             }
 
             // ────────────────────────────────────────────────────────────────────────
-            //  4) dup_hi_impl
+            // dup_hi_impl
             template <std::size_t I, std::size_t N, typename T,
                       T... Vs, typename std::enable_if<I == N / 2, int>::type = 0>
             XSIMD_INLINE constexpr bool dup_hi_impl() noexcept { return true; }
@@ -90,6 +81,52 @@ namespace xsimd
                     && get_at<T, I + N / 2, Vs...>::value == get_at<T, I, Vs...>::value
                     && dup_hi_impl<I + 1, N, T, Vs...>();
             }
+
+            // ────────────────────────────────────────────────────────────────────────
+            // only_from_lo
+            template <typename T, T Size, T First, T... Vals>
+            struct only_from_lo_impl;
+
+            template <typename T, T Size, T Last>
+            struct only_from_lo_impl<T, Size, Last>
+            {
+                static constexpr bool value = (Last < (Size / 2));
+            };
+
+            template <typename T, T Size, T First, T... Vals>
+            struct only_from_lo_impl
+            {
+                static constexpr bool value = (First < (Size / 2)) && only_from_lo_impl<T, Size, Vals...>::value;
+            };
+
+            template <typename T, T... Vals>
+            constexpr bool is_only_from_lo()
+            {
+                return only_from_lo_impl<T, sizeof...(Vals), Vals...>::value;
+            };
+
+            // ────────────────────────────────────────────────────────────────────────
+            // only_from_hi
+            template <typename T, T Size, T First, T... Vals>
+            struct only_from_hi_impl;
+
+            template <typename T, T Size, T Last>
+            struct only_from_hi_impl<T, Size, Last>
+            {
+                static constexpr bool value = (Last >= (Size / 2));
+            };
+
+            template <typename T, T Size, T First, T... Vals>
+            struct only_from_hi_impl
+            {
+                static constexpr bool value = (First >= (Size / 2)) && only_from_hi_impl<T, Size, Vals...>::value;
+            };
+
+            template <typename T, T... Vals>
+            constexpr bool is_only_from_hi()
+            {
+                return only_from_hi_impl<T, sizeof...(Vals), Vals...>::value;
+            };
 
             // ────────────────────────────────────────────────────────────────────────
             //  1) helper to get the I-th value from the Vs pack
@@ -123,33 +160,15 @@ namespace xsimd
             {
                 static constexpr bool value = false;
             };
-            template <std::size_t I, std::size_t N, typename T,
-                      T... Vs>
-            XSIMD_INLINE constexpr bool no_duplicates_impl() noexcept
-            {
-                // build the bitmask of (Vs & (N-1)) across all lanes
-                return detail::bitmask_impl<0, N, T, Vs...>() == ((1u << N) - 1u);
-            }
-            template <uint32_t... Vs>
-            XSIMD_INLINE constexpr bool no_duplicates_v() noexcept
-            {
-                // forward to your existing no_duplicates_impl
-                return no_duplicates_impl<0, sizeof...(Vs), uint32_t, Vs...>();
-            }
             template <uint32_t... Vs>
             XSIMD_INLINE constexpr bool is_cross_lane() noexcept
             {
                 static_assert(sizeof...(Vs) >= 1, "Need at least one lane");
                 return cross_impl<0, sizeof...(Vs), sizeof...(Vs) / 2, Vs...>::value;
             }
+
             template <typename T, T... Vs>
             XSIMD_INLINE constexpr bool is_identity() noexcept { return detail::identity_impl<0, T, Vs...>(); }
-            template <typename T, T... Vs>
-            XSIMD_INLINE constexpr bool is_all_different() noexcept
-            {
-                return detail::bitmask_impl<0, sizeof...(Vs), T, Vs...>() == ((1u << sizeof...(Vs)) - 1);
-            }
-
             template <typename T, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_lo() noexcept { return detail::dup_lo_impl<0, sizeof...(Vs), T, Vs...>(); }
             template <typename T, T... Vs>
@@ -157,15 +176,15 @@ namespace xsimd
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_identity(batch_constant<T, A, Vs...>) noexcept { return is_identity<T, Vs...>(); }
             template <typename T, class A, T... Vs>
-            XSIMD_INLINE constexpr bool is_all_different(batch_constant<T, A, Vs...>) noexcept { return is_all_different<T, Vs...>(); }
-            template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_lo(batch_constant<T, A, Vs...>) noexcept { return is_dup_lo<T, Vs...>(); }
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_dup_hi(batch_constant<T, A, Vs...>) noexcept { return is_dup_hi<T, Vs...>(); }
             template <typename T, class A, T... Vs>
-            XSIMD_INLINE constexpr bool is_cross_lane(batch_constant<T, A, Vs...>) noexcept { return detail::is_cross_lane<Vs...>(); }
+            XSIMD_INLINE constexpr bool is_only_from_lo(batch_constant<T, A, Vs...>) noexcept { return detail::is_only_from_lo<T, Vs...>(); }
             template <typename T, class A, T... Vs>
-            XSIMD_INLINE constexpr bool no_duplicates(batch_constant<T, A, Vs...>) noexcept { return no_duplicates_impl<0, sizeof...(Vs), T, Vs...>(); }
+            XSIMD_INLINE constexpr bool is_only_from_hi(batch_constant<T, A, Vs...>) noexcept { return detail::is_only_from_hi<T, Vs...>(); }
+            template <typename T, class A, T... Vs>
+            XSIMD_INLINE constexpr bool is_cross_lane(batch_constant<T, A, Vs...>) noexcept { return detail::is_cross_lane<Vs...>(); }
 
         } // namespace detail
     } // namespace kernel
