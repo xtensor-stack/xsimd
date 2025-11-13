@@ -265,6 +265,19 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_conversion
+     *
+     * Perform a static_cast from \c T_in to \c T_out on \c x.
+     * @param x batch of \c T_in
+     * @return \c x cast to \c T_out
+     */
+    template <class T_out, class T_in, class A>
+    XSIMD_INLINE batch_bool<T_out, A> batch_cast(batch_bool<T_in, A> const& x) noexcept
+    {
+        return batch_bool_cast<T_out>(x);
+    }
+
+    /**
      * @ingroup batch_miscellaneous
      *
      * Computes the bit of sign of \c x
