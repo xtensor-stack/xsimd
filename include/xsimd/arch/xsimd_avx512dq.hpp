@@ -21,6 +21,31 @@ namespace xsimd
     {
         using namespace types;
 
+        // load_masked
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<avx512dq>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 8)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = load_masked<avx2>(mem + 8, mhi, convert<int32_t> {}, Mode {}, avx2 {});
+                return _mm512_inserti32x8(_mm512_setzero_si512(), hi, 1);
+            }
+            return load_masked<A>(mem, mask, convert<int32_t> {}, Mode {}, avx512f {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, Values...> mask, convert<float>, Mode, requires_arch<avx512dq>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 8)
+            {
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
+                const auto hi = load_masked<avx2>(mem + 8, mhi, convert<float> {}, Mode {}, avx2 {});
+                return _mm512_insertf32x8(_mm512_setzero_ps(), hi, 1);
+            }
+            return load_masked<A>(mem, mask, convert<float> {}, Mode {}, avx512f {});
+        }
+
         // bitwise_and
         template <class A>
         XSIMD_INLINE batch<float, A> bitwise_and(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512dq>) noexcept

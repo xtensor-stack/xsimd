@@ -13,6 +13,7 @@
 #define XSIMD_COMMON_MEMORY_HPP
 
 #include <algorithm>
+#include <array>
 #include <complex>
 #include <stdexcept>
 
@@ -339,6 +340,102 @@ namespace xsimd
         XSIMD_INLINE batch<T_out, A> load_unaligned(T_in const* mem, convert<T_out> cvt, requires_arch<common>) noexcept
         {
             return detail::load_unaligned<A>(mem, cvt, common {}, detail::conversion_type<A, T_in, T_out> {});
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> load(T const* mem, aligned_mode, requires_arch<A>) noexcept
+        {
+            return load_aligned<A>(mem, convert<T> {}, A {});
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> load(T const* mem, unaligned_mode, requires_arch<A>) noexcept
+        {
+            return load_unaligned<A>(mem, convert<T> {}, A {});
+        }
+
+        template <class A, class T_in, class T_out, bool... Values, class alignment>
+        XSIMD_INLINE batch<T_out, A>
+        load_masked(T_in const* mem, batch_bool_constant<T_out, A, Values...>, convert<T_out>, alignment, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T_out, A>::size;
+            alignas(A::alignment()) std::array<T_out, size> buffer {};
+            constexpr bool mask[size] = { Values... };
+
+            for (std::size_t i = 0; i < size; ++i)
+                buffer[i] = mask[i] ? static_cast<T_out>(mem[i]) : T_out(0);
+
+            return batch<T_out, A>::load(buffer.data(), aligned_mode {});
+        }
+
+        template <class A, class T_in, class T_out, bool... Values, class alignment>
+        XSIMD_INLINE void
+        store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T_in, A>::size;
+            constexpr bool mask[size] = { Values... };
+
+            for (std::size_t i = 0; i < size; ++i)
+                if (mask[i])
+                {
+                    mem[i] = static_cast<T_out>(src.get(i));
+                }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...>, convert<int32_t>, Mode, requires_arch<A>) noexcept
+        {
+            const auto f = load_masked<A>(reinterpret_cast<const float*>(mem), batch_bool_constant<float, A, Values...> {}, convert<float> {}, Mode {}, A {});
+            return bitwise_cast<int32_t>(f);
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, Values...>, convert<uint32_t>, Mode, requires_arch<A>) noexcept
+        {
+            const auto f = load_masked<A>(reinterpret_cast<const float*>(mem), batch_bool_constant<float, A, Values...> {}, convert<float> {}, Mode {}, A {});
+            return bitwise_cast<uint32_t>(f);
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, batch<int64_t, A>>::type
+        load_masked(int64_t const* mem, batch_bool_constant<int64_t, A, Values...>, convert<int64_t>, Mode, requires_arch<A>) noexcept
+        {
+            const auto d = load_masked<A>(reinterpret_cast<const double*>(mem), batch_bool_constant<double, A, Values...> {}, convert<double> {}, Mode {}, A {});
+            return bitwise_cast<int64_t>(d);
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, batch<uint64_t, A>>::type
+        load_masked(uint64_t const* mem, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<A>) noexcept
+        {
+            const auto d = load_masked<A>(reinterpret_cast<const double*>(mem), batch_bool_constant<double, A, Values...> {}, convert<double> {}, Mode {}, A {});
+            return bitwise_cast<uint64_t>(d);
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src, batch_bool_constant<int32_t, A, Values...>, Mode, requires_arch<A>) noexcept
+        {
+            store_masked<A>(reinterpret_cast<float*>(mem), bitwise_cast<float>(src), batch_bool_constant<float, A, Values...> {}, Mode {}, A {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...>, Mode, requires_arch<A>) noexcept
+        {
+            store_masked<A>(reinterpret_cast<float*>(mem), bitwise_cast<float>(src), batch_bool_constant<float, A, Values...> {}, Mode {}, A {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, void>::type
+        store_masked(int64_t* mem, batch<int64_t, A> const& src, batch_bool_constant<int64_t, A, Values...>, Mode, requires_arch<A>) noexcept
+        {
+            store_masked<A>(reinterpret_cast<double*>(mem), bitwise_cast<double>(src), batch_bool_constant<double, A, Values...> {}, Mode {}, A {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, void>::type
+        store_masked(uint64_t* mem, batch<uint64_t, A> const& src, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<A>) noexcept
+        {
+            store_masked<A>(reinterpret_cast<double*>(mem), bitwise_cast<double>(src), batch_bool_constant<double, A, Values...> {}, Mode {}, A {});
         }
 
         // rotate_right

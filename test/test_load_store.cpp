@@ -12,7 +12,10 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include <algorithm>
+#include <functional>
 #include <random>
+#include <type_traits>
 
 #include "test_utils.hpp"
 
@@ -22,6 +25,7 @@ struct load_store_test
     using batch_type = B;
     using value_type = typename B::value_type;
     using index_type = typename xsimd::as_integer_t<batch_type>;
+    using batch_bool_type = typename batch_type::batch_bool_type;
     template <class T>
     using allocator = xsimd::default_allocator<T, typename B::arch_type>;
     static constexpr size_t size = B::size;
@@ -42,6 +46,65 @@ struct load_store_test
 #if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
     using double_vector_type = std::vector<double, allocator<double>>;
 #endif
+
+    struct mask_none
+    {
+        static constexpr bool get(std::size_t, std::size_t) noexcept { return false; }
+    };
+
+    struct mask_first
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return index == 0; }
+    };
+
+    struct mask_first_half
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index < (size / 2); }
+    };
+
+    struct mask_last_half
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index >= (size / 2); }
+    };
+
+    struct mask_first_n
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept
+        {
+            return index < (size > 2 ? size / 3 : std::size_t(1));
+        }
+    };
+
+    struct mask_last_n
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept
+        {
+            return index >= size - (size > 2 ? size / 3 : std::size_t(1));
+        }
+    };
+
+    struct mask_even
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return (index % 2) == 0; }
+    };
+
+    struct mask_odd
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return (index % 2) == 1; }
+    };
+
+    struct mask_pseudo_random
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept
+        {
+            return ((index * 7) + 3) % size < (size > 2 ? size / 3 : std::size_t(1));
+        }
+    };
+
+    struct mask_all
+    {
+        static constexpr bool get(std::size_t, std::size_t) noexcept { return true; }
+    };
 
     int8_vector_type i8_vec;
     uint8_vector_type ui8_vec;
@@ -162,6 +225,73 @@ struct load_store_test
 #endif
     }
 
+    void test_masked()
+    {
+        using arch = typename B::arch_type;
+        using test_batch_type = xsimd::batch<float, arch>;
+        constexpr std::size_t test_size = test_batch_type::size;
+        using int_allocator_type = xsimd::default_allocator<int32_t, arch>;
+
+        std::vector<int32_t, int_allocator_type> source(test_size);
+        for (std::size_t i = 0; i < test_size; ++i)
+        {
+            source[i] = static_cast<int32_t>(i * 17 - 9);
+        }
+
+        struct cross_type_mask
+        {
+            static constexpr bool get(std::size_t index, std::size_t size) noexcept
+            {
+                return ((index & std::size_t(1)) != 0) || (size == std::size_t(1)) || ((index == size - std::size_t(1)) && ((size % std::size_t(2)) == 0));
+            }
+        };
+        auto mask = xsimd::make_batch_bool_constant<typename test_batch_type::value_type, cross_type_mask, arch>();
+
+        std::array<float, test_size> expected_load;
+        expected_load.fill(0.f);
+        for (std::size_t i = 0; i < test_size; ++i)
+        {
+            if (cross_type_mask::get(i, test_size))
+            {
+                expected_load[i] = static_cast<float>(source[i]);
+            }
+        }
+
+        auto loaded_aligned = test_batch_type::load(source.data(), mask, xsimd::aligned_mode());
+        INFO("cross-type masked load aligned");
+        CHECK_BATCH_EQ(loaded_aligned, expected_load);
+
+        auto loaded_unaligned = test_batch_type::load(source.data(), mask, xsimd::unaligned_mode());
+        INFO("cross-type masked load unaligned");
+        CHECK_BATCH_EQ(loaded_unaligned, expected_load);
+
+        std::array<float, test_size> values;
+        for (std::size_t i = 0; i < test_size; ++i)
+        {
+            values[i] = static_cast<float>(static_cast<int>(i) * 2 - 7) / 3.f;
+        }
+        auto value_batch = test_batch_type::load_unaligned(values.data());
+
+        std::vector<int32_t, int_allocator_type> destination(test_size, -19);
+        std::vector<int32_t, int_allocator_type> expected_store(test_size, -19);
+        for (std::size_t i = 0; i < test_size; ++i)
+        {
+            if (cross_type_mask::get(i, test_size))
+            {
+                expected_store[i] = static_cast<int32_t>(values[i]);
+            }
+        }
+
+        value_batch.store(destination.data(), mask, xsimd::aligned_mode());
+        INFO("cross-type masked store aligned");
+        CHECK_VECTOR_EQ(destination, expected_store);
+
+        std::fill(destination.begin(), destination.end(), -19);
+        value_batch.store(destination.data(), mask, xsimd::unaligned_mode());
+        INFO("cross-type masked store unaligned");
+        CHECK_VECTOR_EQ(destination, expected_store);
+    }
+
 private:
 #ifdef XSIMD_WITH_SSE2
     struct test_load_as_return_type
@@ -193,6 +323,122 @@ private:
         b = xsimd::load_as<value_type>(v.data(), xsimd::aligned_mode());
         INFO(name, " aligned (load_as)");
         CHECK_BATCH_EQ(b, expected);
+
+        run_mask_tests(v, name, b, expected, std::is_same<typename V::value_type, value_type> {});
+    }
+
+    template <class V>
+    void run_mask_tests(const V& v, const std::string& name, batch_type& b, const array_type& expected, std::true_type)
+    {
+        run_load_mask_pattern<mask_none>(v, name, b, expected, " masked none");
+        run_load_mask_pattern<mask_first>(v, name, b, expected, " masked first element");
+        run_load_mask_pattern<mask_first_half>(v, name, b, expected, " masked first half");
+        run_load_mask_pattern<mask_last_half>(v, name, b, expected, " masked last half");
+        run_load_mask_pattern<mask_first_n>(v, name, b, expected, " masked first N");
+        run_load_mask_pattern<mask_last_n>(v, name, b, expected, " masked last N");
+        run_load_mask_pattern<mask_even>(v, name, b, expected, " masked even elements");
+        run_load_mask_pattern<mask_odd>(v, name, b, expected, " masked odd elements");
+        run_load_mask_pattern<mask_pseudo_random>(v, name, b, expected, " masked pseudo random");
+        run_load_mask_pattern<mask_all>(v, name, b, expected, " masked all elements");
+    }
+
+    template <class V>
+    void run_mask_tests(const V&, const std::string&, batch_type&, const array_type&, std::false_type)
+    {
+    }
+
+    template <class Generator, class V>
+    void run_load_mask_pattern(const V& v, const std::string& name, batch_type& b, const array_type& expected, const std::string& label)
+    {
+        constexpr auto mask = xsimd::make_batch_bool_constant<value_type, Generator, typename batch_type::arch_type>();
+        array_type expected_masked { 0 };
+
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            const bool active = Generator::get(i, size);
+            expected_masked[i] = active ? expected[i] : value_type();
+        }
+
+        b = xsimd::load(v.data(), mask, xsimd::aligned_mode());
+        INFO(name, label + " aligned");
+        CHECK_BATCH_EQ(b, expected_masked);
+        b = xsimd::load(v.data(), mask, xsimd::unaligned_mode());
+        INFO(name, label + " unaligned");
+        CHECK_BATCH_EQ(b, expected_masked);
+    }
+
+    template <class Generator, class V>
+    void run_store_mask_pattern(const V& v, const std::string& name, batch_type& b, V& res, V& expected_masked, const std::string& label)
+    {
+        auto mask = xsimd::make_batch_bool_constant<value_type, Generator, typename batch_type::arch_type>();
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            expected_masked[i] = Generator::get(i, size) ? v[i] : value_type();
+        }
+        std::fill(res.begin(), res.end(), value_type());
+        b.store(res.data(), mask, xsimd::aligned_mode());
+        INFO(name, label + " aligned");
+        CHECK_VECTOR_EQ(res, expected_masked);
+        std::fill(res.begin(), res.end(), value_type());
+        b.store(res.data(), mask, xsimd::unaligned_mode());
+        INFO(name, label + " unaligned");
+        CHECK_VECTOR_EQ(res, expected_masked);
+    }
+
+    template <class V>
+    void run_store_mask_tests(const V& v, const std::string& name, batch_type& b, V& res, V& expected_masked, std::true_type)
+    {
+        run_store_mask_pattern<mask_first>(v, name, b, res, expected_masked, " masked first element");
+        run_store_mask_pattern<mask_first_half>(v, name, b, res, expected_masked, " masked first half");
+        run_store_mask_pattern<mask_last_half>(v, name, b, res, expected_masked, " masked last half");
+        run_store_mask_pattern<mask_first_n>(v, name, b, res, expected_masked, " masked first N");
+        run_store_mask_pattern<mask_last_n>(v, name, b, res, expected_masked, " masked last N");
+        run_store_mask_pattern<mask_even>(v, name, b, res, expected_masked, " masked even elements");
+        run_store_mask_pattern<mask_odd>(v, name, b, res, expected_masked, " masked odd elements");
+        run_store_mask_pattern<mask_pseudo_random>(v, name, b, res, expected_masked, " masked pseudo random");
+        run_store_mask_pattern<mask_all>(v, name, b, res, expected_masked, " masked all elements");
+    }
+
+    template <class V>
+    void run_store_mask_tests(const V&, const std::string&, batch_type&, V&, V&, std::false_type)
+    {
+    }
+
+    template <class V>
+    void run_store_mask_section(const V& v,
+                                const std::string& name,
+                                batch_type& b,
+                                V& res,
+                                V& expected_masked,
+                                std::true_type)
+    {
+        static constexpr auto sentinel = static_cast<value_type>(37);
+        V sentinel_expected(size, sentinel);
+
+        auto zero_mask = xsimd::make_batch_bool_constant<value_type, mask_none, typename batch_type::arch_type>();
+        std::fill(res.begin(), res.end(), sentinel);
+        b.store(res.data(), zero_mask, xsimd::aligned_mode());
+        INFO(name, " masked none aligned store");
+        CHECK_VECTOR_EQ(res, sentinel_expected);
+
+        V scratch(res.size() + size);
+        std::fill(scratch.begin(), scratch.end(), sentinel);
+        auto* scratch_ptr = scratch.data() + 1;
+        b.store(scratch_ptr, zero_mask, xsimd::unaligned_mode());
+        INFO(name, " masked none unaligned store");
+
+        V scratch_slice(res.size());
+        std::copy(scratch_ptr, scratch_ptr + scratch_slice.size(), scratch_slice.begin());
+        CHECK_VECTOR_EQ(scratch_slice, sentinel_expected);
+        CHECK(std::all_of(scratch.begin(), scratch.end(), [](const value_type v)
+                          { return v == sentinel; }));
+
+        run_store_mask_tests(v, name, b, res, expected_masked, std::true_type {});
+    }
+
+    template <class V>
+    void run_store_mask_section(const V&, const std::string&, batch_type&, V&, V&, std::false_type)
+    {
     }
 
     struct test_load_char
@@ -227,6 +473,10 @@ private:
         xsimd::store_as(res.data(), b, xsimd::aligned_mode());
         INFO(name, " aligned (store_as)");
         CHECK_VECTOR_EQ(res, v);
+
+        V expected_masked(size);
+
+        run_store_mask_section(v, name, b, res, expected_masked, std::is_same<typename V::value_type, value_type> {});
     }
 
     template <class V>
@@ -290,6 +540,9 @@ private:
     }
 };
 
+template <class B>
+constexpr size_t load_store_test<B>::size;
+
 TEST_CASE_TEMPLATE("[load store]", B, BATCH_TYPES)
 {
     load_store_test<B> Test;
@@ -300,5 +553,7 @@ TEST_CASE_TEMPLATE("[load store]", B, BATCH_TYPES)
     SUBCASE("gather") { Test.test_gather(); }
 
     SUBCASE("scatter") { Test.test_scatter(); }
+
+    SUBCASE("masked") { Test.test_masked(); }
 }
 #endif
