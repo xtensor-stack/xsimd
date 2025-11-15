@@ -69,5 +69,11 @@ as a template parameter:
 
 .. literalinclude:: ../../test/doc/explicit_use_of_an_instruction_set_mean_arch_independent.cpp
 
+Then you just need to ``#include`` that file, force instantiation for a specific
+architecture and pass the appropriate flag to the compiler. For instance:
+
+.. literalinclude:: ../../test/doc/sum_sse2.cpp
+
+
 This can be useful to implement runtime dispatching, based on the instruction set detected at runtime. `xsimd` provides a generic machinery :cpp:func:`xsimd::dispatch()` to implement
 this pattern. Based on the above example, instead of calling ``mean{}(arch, a, b, res, tag)``, one can use ``xsimd::dispatch(mean{})(a, b, res, tag)``. More about this can be found in the :ref:`Arch Dispatching` section.
