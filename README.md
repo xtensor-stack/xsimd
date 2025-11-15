@@ -142,7 +142,7 @@ This example outputs:
 
 ### Auto detection of the instruction set extension to be used
 
-The same computation operating on vectors and using the most performant instruction set available:
+The same computation operating on vectors and using the most performant instruction set available at compile time, based on the provided compiler flags (e.g. ``-mavx2`` for GCC and Clang to target AVX2):
 
 ```cpp
 #include <cstddef>

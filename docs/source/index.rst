@@ -12,15 +12,27 @@ C++ wrappers for SIMD intrinsics.
 Introduction
 ------------
 
-SIMD (Single Instruction, Multiple Data) is a feature of microprocessors that has been available for many years. SIMD instructions perform a single operation
+`SIMD`_ (Single Instruction, Multiple Data) is a feature of microprocessors that has been available for many years. SIMD instructions perform a single operation
 on a batch of values at once, and thus provide a way to significantly accelerate code execution. However, these instructions differ between microprocessor
 vendors and compilers.
 
 `xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of scalar and complex numbers with the same arithmetic
 operators and common mathematical functions as for single values.
 
-`xsimd` makes it easy to write a single algorithm, generate one version of the algorithm per micro-architecture and pick the best one at runtime, based on the
-running processor capability.
+There are several ways to use `xsimd`:
+
+- one can write a generic, vectorized, algorithm and compile it as part of their
+  application build, with the right architecture flag;
+
+- one can write a generic, vectorized, algorithm and compile several version of
+  it by just changing the architecture flags, then pick the best version at
+  runtime;
+
+- one can write a vectorized algorithm specialized for a given architecture and
+  still benefit from the high-level abstraction proposed by `xsimd`.
+
+Of course, nothing prevents the combination of several of those approach, but
+more about this in section :ref:`Writing vectorized code`.
 
 You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the `The C++ Scientist`_. The mathematical functions are a
 lightweight implementation of the algorithms also used in `boost.SIMD`_.
@@ -51,6 +63,10 @@ The following SIMD instruction set extensions are supported:
 | ARM          | ARMv7, ARMv8                                            |
 +--------------+---------------------------------------------------------+
 | WebAssembly  | WASM                                                    |
++--------------+---------------------------------------------------------+
+| Risc-V       | Vector ISA                                              |
++--------------+---------------------------------------------------------+
+| PowerPC      | VSX                                                     |
 +--------------+---------------------------------------------------------+
 
 Licensing
@@ -104,6 +120,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
 
 
 
+.. _SIMD: https://fr.wikipedia.org/wiki/Single_instruction_multiple_data
 .. _The C++ Scientist: http://johanmabille.github.io/blog/archives/
 .. _boost.SIMD: https://github.com/NumScale/boost.simd
 
