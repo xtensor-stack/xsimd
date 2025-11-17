@@ -296,6 +296,7 @@ namespace xsimd
         static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T); ///< Number of scalar elements in this batch.
 
         using value_type = bool; ///< Type of the scalar elements within this batch.
+        using operand_type = T;
         using arch_type = A; ///< SIMD Architecture abstracted by this batch.
         using register_type = typename base_type::register_type; ///< SIMD register type abstracted by this batch.
         using batch_type = batch<T, A>; ///< Associated batch type this batch represents logical operations for.
