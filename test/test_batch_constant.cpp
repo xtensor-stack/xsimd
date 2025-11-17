@@ -136,6 +136,14 @@ struct constant_batch_test
         constexpr auto n12_lxor_n3 = n12 ^ n3;
         static_assert(std::is_same<decltype(n12_lxor_n3), decltype(n15)>::value, "n12 ^ n3 == n15");
 
+        constexpr auto n96 = xsimd::make_batch_constant<value_type, constant<96>, arch_type>();
+        constexpr auto n12_lshift_n3 = n12 << n3;
+        static_assert(std::is_same<decltype(n12_lshift_n3), decltype(n96)>::value, "n12 << n3 == n96");
+
+        constexpr auto n1 = xsimd::make_batch_constant<value_type, constant<1>, arch_type>();
+        constexpr auto n12_rshift_n3 = n12 >> n3;
+        static_assert(std::is_same<decltype(n12_rshift_n3), decltype(n1)>::value, "n12 >> n3 == n1");
+
         constexpr auto n12_uadd = +n12;
         static_assert(std::is_same<decltype(n12_uadd), decltype(n12)>::value, "+n12 == n12");
 
@@ -146,6 +154,30 @@ struct constant_batch_test
         constexpr auto n12_usub = -n12;
         constexpr auto n12_usub_ = xsimd::make_batch_constant<value_type, constant<(value_type)-12>, arch_type>();
         static_assert(std::is_same<decltype(n12_usub), decltype(n12_usub_)>::value, "-n12 == n12_usub");
+
+        // comparison operators
+        using true_batch_type = decltype(xsimd::make_batch_bool_constant<value_type, true, arch_type>());
+        using false_batch_type = decltype(xsimd::make_batch_bool_constant<value_type, false, arch_type>());
+
+        static_assert(std::is_same<typename decltype(n12 == n12)::operand_type, typename decltype(n12)::value_type>::value, "same type");
+
+        static_assert(std::is_same<decltype(n12 == n12), true_batch_type>::value, "n12 == n12");
+        static_assert(std::is_same<decltype(n12 == n3), false_batch_type>::value, "n12 == n3");
+
+        static_assert(std::is_same<decltype(n12 != n12), false_batch_type>::value, "n12 != n12");
+        static_assert(std::is_same<decltype(n12 != n3), true_batch_type>::value, "n12 != n3");
+
+        static_assert(std::is_same<decltype(n12 < n12), false_batch_type>::value, "n12 < n12");
+        static_assert(std::is_same<decltype(n12 < n3), false_batch_type>::value, "n12 < n3");
+
+        static_assert(std::is_same<decltype(n12 > n12), false_batch_type>::value, "n12 > n12");
+        static_assert(std::is_same<decltype(n12 > n3), true_batch_type>::value, "n12 > n3");
+
+        static_assert(std::is_same<decltype(n12 <= n12), true_batch_type>::value, "n12 <= n12");
+        static_assert(std::is_same<decltype(n12 <= n3), false_batch_type>::value, "n12 <= n3");
+
+        static_assert(std::is_same<decltype(n12 >= n12), true_batch_type>::value, "n12 >= n12");
+        static_assert(std::is_same<decltype(n12 >= n3), true_batch_type>::value, "n12 >= n3");
     }
 };
 

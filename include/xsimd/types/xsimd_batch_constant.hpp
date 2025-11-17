@@ -12,6 +12,8 @@
 #ifndef XSIMD_BATCH_CONSTANT_HPP
 #define XSIMD_BATCH_CONSTANT_HPP
 
+#include <cstddef>
+
 #include "./xsimd_batch.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -31,6 +33,7 @@ namespace xsimd
         using batch_type = batch_bool<T, A>;
         static constexpr std::size_t size = sizeof...(Values);
         using value_type = bool;
+        using operand_type = T;
         static_assert(sizeof...(Values) == batch_type::size, "consistent batch size");
 
     public:
@@ -44,7 +47,7 @@ namespace xsimd
          */
         constexpr operator batch_type() const noexcept { return as_batch_bool(); }
 
-        constexpr bool get(size_t i) const noexcept
+        constexpr bool get(std::size_t i) const noexcept
         {
             return std::array<value_type, size> { { Values... } }[i];
         }
@@ -76,7 +79,7 @@ namespace xsimd
             constexpr bool operator()(bool x, bool y) const { return x ^ y; }
         };
 
-        template <class F, class SelfPack, class OtherPack, size_t... Indices>
+        template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
         static constexpr batch_bool_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
         apply(detail::index_sequence<Indices...>)
         {
@@ -88,7 +91,7 @@ namespace xsimd
             -> decltype(apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
-            return apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>());
+            return {};
         }
 
     public:
@@ -148,13 +151,13 @@ namespace xsimd
         /**
          * @brief Get the @p i th element of this @p batch_constant
          */
-        constexpr T get(size_t i) const noexcept
+        constexpr T get(std::size_t i) const noexcept
         {
             return get(i, std::array<T, size> { Values... });
         }
 
     private:
-        constexpr T get(size_t i, std::array<T, size> const& values) const noexcept
+        constexpr T get(std::size_t i, std::array<T, size> const& values) const noexcept
         {
             return values[i];
         }
@@ -191,8 +194,16 @@ namespace xsimd
         {
             constexpr T operator()(T x, T y) const { return x ^ y; }
         };
+        struct binary_rshift
+        {
+            constexpr T operator()(T x, T y) const { return x >> y; }
+        };
+        struct binary_lshift
+        {
+            constexpr T operator()(T x, T y) const { return x << y; }
+        };
 
-        template <class F, class SelfPack, class OtherPack, size_t... Indices>
+        template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
         static constexpr batch_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
         apply(detail::index_sequence<Indices...>)
         {
@@ -204,7 +215,7 @@ namespace xsimd
             -> decltype(apply<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
-            return apply<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>());
+            return {};
         }
 
     public:
@@ -224,8 +235,67 @@ namespace xsimd
         MAKE_BINARY_OP(&, binary_and)
         MAKE_BINARY_OP(|, binary_or)
         MAKE_BINARY_OP(^, binary_xor)
+        MAKE_BINARY_OP(<<, binary_lshift)
+        MAKE_BINARY_OP(>>, binary_rshift)
 
 #undef MAKE_BINARY_OP
+
+        struct boolean_eq
+        {
+            constexpr bool operator()(T x, T y) const { return x == y; }
+        };
+        struct boolean_ne
+        {
+            constexpr bool operator()(T x, T y) const { return x != y; }
+        };
+        struct boolean_gt
+        {
+            constexpr bool operator()(T x, T y) const { return x > y; }
+        };
+        struct boolean_ge
+        {
+            constexpr bool operator()(T x, T y) const { return x >= y; }
+        };
+        struct boolean_lt
+        {
+            constexpr bool operator()(T x, T y) const { return x < y; }
+        };
+        struct boolean_le
+        {
+            constexpr bool operator()(T x, T y) const { return x <= y; }
+        };
+
+        template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
+        static constexpr batch_bool_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
+        apply_bool(detail::index_sequence<Indices...>)
+        {
+            return {};
+        }
+
+        template <class F, T... OtherValues>
+        static constexpr auto apply_bool(batch_constant<T, A, Values...>, batch_constant<T, A, OtherValues...>)
+            -> decltype(apply_bool<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
+        {
+            static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
+            return {};
+        }
+
+#define MAKE_BINARY_BOOL_OP(OP, NAME)                                            \
+    template <T... OtherValues>                                                  \
+    constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
+        -> decltype(apply_bool<NAME>(*this, other))                              \
+    {                                                                            \
+        return {};                                                               \
+    }
+
+        MAKE_BINARY_BOOL_OP(==, boolean_eq)
+        MAKE_BINARY_BOOL_OP(!=, boolean_ne)
+        MAKE_BINARY_BOOL_OP(<, boolean_lt)
+        MAKE_BINARY_BOOL_OP(<=, boolean_le)
+        MAKE_BINARY_BOOL_OP(>, boolean_gt)
+        MAKE_BINARY_BOOL_OP(>=, boolean_ge)
+
+#undef MAKE_BINARY_BOOL_OP
 
         constexpr batch_constant<T, A, (T)-Values...> operator-() const
         {
