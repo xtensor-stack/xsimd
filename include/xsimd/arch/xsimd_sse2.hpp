@@ -16,6 +16,7 @@
 #include <limits>
 #include <type_traits>
 
+#include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_sse2_register.hpp"
 
 namespace xsimd
@@ -1952,8 +1953,7 @@ namespace xsimd
             return _mm_sub_pd(self, other);
         }
 
-        // swizzle
-
+        // swizzle (constant mask)
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<sse2>) noexcept
         {
@@ -2024,7 +2024,7 @@ namespace xsimd
                 return hi_all;
             }
             // Only pick elements from the low lane
-            XSIMD_IF_CONSTEXPR((V0 < 4) && (V1 < 4) && (V2 < 4) && (V3 < 4) && (V4 < 4) && (V5 < 4) && (V6 < 4) && (V7 < 4))
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_lo(mask))
             {
                 // permute within each sub lane
                 constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
@@ -2036,7 +2036,7 @@ namespace xsimd
                 return _mm_unpacklo_epi64(lol, loh);
             }
             // Only pick elements from the high lane
-            XSIMD_IF_CONSTEXPR((V0 >= 4) && (V1 >= 4) && (V2 >= 4) && (V3 >= 4) && (V4 >= 4) && (V5 >= 4) && (V6 >= 4) && (V7 >= 4))
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_hi(mask))
             {
                 // permute within each sub lane
                 constexpr auto mask_lo = detail::mod_shuffle(V0, V1, V2, V3);
@@ -2063,7 +2063,7 @@ namespace xsimd
             __m128i hi = _mm_unpackhi_epi64(hil, hih);
 
             // mask to choose the right lane
-            batch_bool_constant<uint16_t, A, (V0 < 4), (V1 < 4), (V2 < 4), (V3 < 4), (V4 < 4), (V5 < 4), (V6 < 4), (V7 < 4)> blend_mask;
+            constexpr auto blend_mask = mask < make_batch_constant<uint16_t, 4, A>();
 
             // blend the two permutes
             return select(blend_mask, batch<uint16_t, A>(lo), batch<uint16_t, A>(hi));
