@@ -217,6 +217,23 @@ namespace xsimd
             }
         }
 
+        // load_stream
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<sse4_1>) noexcept
+        {
+            return _mm_stream_load_si128((__m128i*)mem);
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_stream(float const* mem, convert<float>, requires_arch<sse4_1>) noexcept
+        {
+            return _mm_castsi128_ps(_mm_stream_load_si128((__m128i*)mem));
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_stream(double const* mem, convert<double>, requires_arch<sse4_1>) noexcept
+        {
+            return _mm_castsi128_pd(_mm_stream_load_si128((__m128i*)mem));
+        }
+
         // min
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept

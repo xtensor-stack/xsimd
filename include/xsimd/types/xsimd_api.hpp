@@ -12,6 +12,7 @@
 #ifndef XSIMD_API_HPP
 #define XSIMD_API_HPP
 
+#include <atomic>
 #include <complex>
 #include <cstddef>
 #include <limits>
@@ -1334,6 +1335,30 @@ namespace xsimd
         return kernel::load_complex_aligned<A>(ptr, kernel::convert<batch_value_type> {}, A {});
     }
 
+    template <class To, class A = default_arch, class From>
+    XSIMD_INLINE simd_return_type<From, To, A> load_as(From const* ptr, stream_mode) noexcept
+    {
+        using batch_value_type = typename simd_return_type<From, To, A>::value_type;
+        detail::static_check_supported_config<From, A>();
+        detail::static_check_supported_config<To, A>();
+        return kernel::load_stream<A>(ptr, kernel::convert<batch_value_type> {}, A {});
+    }
+
+    template <class To, class A = default_arch>
+    XSIMD_INLINE simd_return_type<bool, To, A> load_as(bool const* ptr, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<To, A>();
+        return simd_return_type<bool, To, A>::load_stream(ptr);
+    }
+
+    template <class To, class A = default_arch, class From>
+    XSIMD_INLINE simd_return_type<std::complex<From>, To, A> load_as(std::complex<From> const* ptr, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<To, A>();
+        using batch_value_type = typename simd_return_type<std::complex<From>, To, A>::value_type;
+        return kernel::load_complex_stream<A>(ptr, kernel::convert<batch_value_type> {}, A {});
+    }
+
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     template <class To, class A = default_arch, class From, bool i3ec>
     XSIMD_INLINE simd_return_type<xtl::xcomplex<From, From, i3ec>, To, A> load_as(xtl::xcomplex<From, From, i3ec> const* ptr, aligned_mode) noexcept
@@ -1341,6 +1366,14 @@ namespace xsimd
         detail::static_check_supported_config<To, A>();
         detail::static_check_supported_config<From, A>();
         return load_as<To>(reinterpret_cast<std::complex<From> const*>(ptr), aligned_mode());
+    }
+
+    template <class To, class A = default_arch, class From, bool i3ec>
+    XSIMD_INLINE simd_return_type<xtl::xcomplex<From, From, i3ec>, To, A> load_as(xtl::xcomplex<From, From, i3ec> const* ptr, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<To, A>();
+        detail::static_check_supported_config<From, A>();
+        return load_as<To>(reinterpret_cast<std::complex<From> const*>(ptr), stream_mode());
     }
 #endif
 
@@ -1414,6 +1447,13 @@ namespace xsimd
     {
         detail::static_check_supported_config<From, A>();
         return load_as<From, A>(ptr, unaligned_mode {});
+    }
+
+    template <class A = default_arch, class From>
+    XSIMD_INLINE batch<From, A> load(From const* ptr, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<From, A>();
+        return load_as<From, A>(ptr, stream_mode {});
     }
 
     /**
@@ -2339,11 +2379,39 @@ namespace xsimd
         kernel::store_complex_aligned<A>(dst, src, A {});
     }
 
+    template <class To, class A = default_arch, class From>
+    XSIMD_INLINE void store_as(To* dst, batch<From, A> const& src, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<From, A>();
+        kernel::store_stream<A>(dst, src, A {});
+    }
+
+    template <class A = default_arch, class From>
+    XSIMD_INLINE void store_as(bool* dst, batch_bool<From, A> const& src, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<From, A>();
+        kernel::store_stream<A>(src, dst, A {});
+    }
+
+    template <class To, class A = default_arch, class From>
+    XSIMD_INLINE void store_as(std::complex<To>* dst, batch<std::complex<From>, A> const& src, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<std::complex<From>, A>();
+        kernel::store_complex_stream<A>(dst, src, A {});
+    }
+
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     template <class To, class A = default_arch, class From, bool i3ec>
     XSIMD_INLINE void store_as(xtl::xcomplex<To, To, i3ec>* dst, batch<std::complex<From>, A> const& src, aligned_mode) noexcept
     {
         store_as(reinterpret_cast<std::complex<To>*>(dst), src, aligned_mode());
+    }
+
+    template <class To, class A = default_arch, class From, bool i3ec>
+    XSIMD_INLINE void store_as(xtl::xcomplex<To, To, i3ec>* dst, batch<std::complex<From>, A> const& src, stream_mode) noexcept
+    {
+        detail::static_check_supported_config<std::complex<From>, A>();
+        store_as(reinterpret_cast<std::complex<To>*>(dst), src, stream_mode());
     }
 #endif
 
@@ -2411,6 +2479,22 @@ namespace xsimd
     XSIMD_INLINE void store(T* mem, batch<T, A> const& val, unaligned_mode) noexcept
     {
         store_as<T, A>(mem, val, unaligned_mode {});
+    }
+
+    template <class A, class T>
+    XSIMD_INLINE void store(T* mem, batch<T, A> const& val, stream_mode) noexcept
+    {
+        store_as<T, A>(mem, val, stream_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Issues a sequentially consistent memory fence.
+     */
+    XSIMD_INLINE void fence() noexcept
+    {
+        std::atomic_thread_fence(std::memory_order_seq_cst);
     }
 
     /**
