@@ -79,42 +79,42 @@
     {
       "name": "dev-base",
       "hidden": true,
-      "inherits": ["debug-base", "xsimd-all"]
+      "inherits": ["dev-base", "xsimd-all"]
     },
     {
-      "name": "debug-native",
+      "name": "dev-native",
       "inherits": ["dev-base", "native-base"]
     },
     {
-      "name": "debug-sse2",
+      "name": "dev-sse2",
       "inherits": ["dev-base", "sse2-base"]
     },
     {
-      "name": "debug-sse3",
+      "name": "dev-sse3",
       "inherits": ["dev-base", "sse3-base"]
     },
     {
-      "name": "debug-ssse3",
+      "name": "dev-ssse3",
       "inherits": ["dev-base", "ssse3-base"]
     },
     {
-      "name": "debug-sse4.1",
+      "name": "dev-sse4.1",
       "inherits": ["dev-base", "sse4.1-base"]
     },
     {
-      "name": "debug-sse4.2",
+      "name": "dev-sse4.2",
       "inherits": ["dev-base", "sse4.2-base"]
     },
     {
-      "name": "debug-avx",
+      "name": "dev-avx",
       "inherits": ["dev-base", "avx-base"]
     },
     {
-      "name": "debug-avx2",
+      "name": "dev-avx2",
       "inherits": ["dev-base", "avx2-base"]
     },
     {
-      "name": "debug-neon",
+      "name": "dev-neon",
       "inherits": ["dev-base", "neon-base"]
     }
   ]
