@@ -1656,9 +1656,9 @@ namespace xsimd
 
             // select lane by the mask index divided by 4
             constexpr auto lane = batch_constant<uint32_t, A, 0, 0, 0, 0, 1, 1, 1, 1> {};
-            constexpr int lane_mask = ((mask / make_batch_constant<uint32_t, 4, A>()) != lane).mask();
+            constexpr int lane_idx = ((mask / make_batch_constant<uint32_t, 4, A>()) != lane).mask();
 
-            return _mm256_blend_ps(r0, r1, lane_mask);
+            return _mm256_blend_ps(r0, r1, lane_idx);
         }
 
         template <class A, uint64_t V0, uint64_t V1, uint64_t V2, uint64_t V3>
@@ -1698,10 +1698,10 @@ namespace xsimd
 
             // select lane by the mask index divided by 2
             constexpr auto lane = batch_constant<uint64_t, A, 0, 0, 1, 1> {};
-            constexpr int lane_mask = ((mask / make_batch_constant<uint64_t, 2, A>()) != lane).mask();
+            constexpr int lane_idx = ((mask / make_batch_constant<uint64_t, 2, A>()) != lane).mask();
 
             // blend the two permutes
-            return _mm256_blend_pd(r0, r1, lane_mask);
+            return _mm256_blend_pd(r0, r1, lane_idx);
         }
 
         template <
