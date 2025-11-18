@@ -100,7 +100,6 @@ cmake -B build/$PIXI_ENVIRONMENT_NAME/{{ preset }} -G Ninja \
   -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
 """
 inputs = ["**/CMakeLists.txt", "**/*.cmake.in", "cmake/"]
-outputs = ["build/$PIXI_ENVIRONMENT_NAME/{{ preset }}/CMakeCache.txt"]
 description = """
 Run the CMake configuration step with a given preset. \
 Build folders are stored in `build/` subdirectories.\
