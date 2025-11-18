@@ -1,4 +1,4 @@
-name: CMake integration
+name: Pixi
 on: [push, pull_request]
 
 concurrency:
