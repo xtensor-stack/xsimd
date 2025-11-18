@@ -1629,6 +1629,17 @@ namespace xsimd
                 }
                 return split;
             }
+            constexpr auto lane_mask = mask % make_batch_constant<uint32_t, (mask.size / 2), A>();
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_lo(mask))
+            {
+                __m256i broadcast = _mm256_permute2f128_pd(self, self, 0x00); // [low | low]
+                return _mm256_permutevar_ps(broadcast, lane_mask.as_batch());
+            }
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_hi(mask))
+            {
+                __m256i broadcast = _mm256_permute2f128_pd(self, self, 0x11); // [high | high]
+                return _mm256_permutevar_ps(broadcast, lane_mask.as_batch());
+            }
 
             // Fallback to general algorithm. This is the same as the dynamic version with the exception
             // that possible operations are done at compile time.
@@ -1655,10 +1666,24 @@ namespace xsimd
         {
             // cannot use detail::mod_shuffle as the mod and shift are different in this case
             constexpr auto imm = ((V0 % 2) << 0) | ((V1 % 2) << 1) | ((V2 % 2) << 2) | ((V3 % 2) << 3);
-            XSIMD_IF_CONSTEXPR(detail::is_identity(mask)) { return self; }
+            XSIMD_IF_CONSTEXPR(detail::is_identity(mask))
+            {
+                return self;
+            }
             XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
             {
                 return _mm256_permute_pd(self, imm);
+            }
+            constexpr auto lane_mask = mask % make_batch_constant<uint64_t, (mask.size / 2), A>();
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_lo(mask))
+            {
+                __m256i broadcast = _mm256_permute2f128_pd(self, self, 0x00); // [low | low]
+                return _mm256_permute_pd(broadcast, lane_mask.as_batch());
+            }
+            XSIMD_IF_CONSTEXPR(detail::is_only_from_hi(mask))
+            {
+                __m256i broadcast = _mm256_permute2f128_pd(self, self, 0x11); // [high | high]
+                return _mm256_permute_pd(broadcast, lane_mask.as_batch());
             }
 
             // Fallback to general algorithm. This is the same as the dynamic version with the exception
