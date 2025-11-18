@@ -42,6 +42,10 @@ llvm-openmp = "*"
 xtl = "*"
 doctest = "*"
 
+# Mostly to fix the CI
+[environments.default]
+features = ["lib"]
+
 # A set of clang dependencies that include a set of unconstrained needed packages.
 # We combine it with another feature to pin an exact version.
 [feature.clang-base.dependencies]
