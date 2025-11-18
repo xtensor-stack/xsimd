@@ -226,7 +226,7 @@ add_subdirectory(architectures)
 if(EMSCRIPTEN)
     set_target_properties(test_xsimd PROPERTIES LINK_FLAGS "-s MODULARIZE=1 -s EXPORT_NAME=test_xsimd_wasm -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -lembind")
     target_compile_options(test_xsimd
-        PUBLIC --std=c++14
+        PUBLIC --std=c++17
         PUBLIC "SHELL: -msimd128"
         PUBLIC "SHELL: -msse2"
     )
