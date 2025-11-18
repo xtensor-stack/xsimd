@@ -122,6 +122,22 @@ The preset can be used to test an older micro architecture on a machine (e.g. \
 testing SSE4.2 on a AVX2 machine).\
 """
 
+# A feature and environment to build documentation
+[feature.doc.dependencies]
+doxygen = "*"
+sphinx = "*"
+breathe = "*"
+sphinx_rtd_theme = "*"
+make = "*"
+
+[feature.doc.tasks.doc]
+cmd = "make html"
+cwd = "docs/"
+description = "Build the HTML documentation"
+
+[environments.doc]
+features = ["lib", "doc"]
+
 # A dev feature and environment that contains LSP, formatters etc.
 [feature.dev.dependencies]
 taplo = "*"
@@ -161,11 +177,6 @@ description = "Format the TOML files."
 [feature.dev.tasks]
 fmt = { depends-on = ["fmt-clang", "fmt-taplo"] }
 
-[environments]
-dev = { features = [
-  "build-tools",
-  "lib",
-  "clang-base",
-  "dev",
-  "cmd",
-], solve-group = "default" }
+[environments.dev]
+features = ["build-tools", "lib", "clang-base", "dev", "cmd"]
+solve-group = "default"
