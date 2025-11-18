@@ -33,47 +33,52 @@
     {
       "name": "native-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "native" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=native" }
     },
     {
       "name": "sse2-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "x86-64 -mno-sse3" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=x86-64 -msse2 -mno-sse3" }
     },
     {
       "name": "sse3-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "core2" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=x86-64 -msse3 -mno-ssse3" }
     },
     {
       "name": "ssse3-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "core2 -mssse3" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=x86-64 -mssse3 -mno-sse4.1" }
     },
     {
       "name": "sse4.1-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "nehalem" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=x86-64 -msse4.1 -mno-sse4.2" }
     },
     {
       "name": "sse4.2-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "nehalem" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=x86-64 -msse4.2 -mno-avx" }
     },
     {
       "name": "avx-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "nehalem -msse4.2" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=x86-64 -mavx -mno-avx2" }
     },
     {
       "name": "avx2-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "haswell" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=x86-64 -mavx2 -mno-avx512f" }
     },
     {
       "name": "neon-base",
       "hidden": true,
-      "cacheVariables": { "TARGET_ARCH": "armv8-a" }
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=armv8-a" }
+    },
+    {
+      "name": "sve-base",
+      "hidden": true,
+      "cacheVariables": { "CMAKE_CXX_FLAGS": "$CXXFLAGS -march=armv8.2-a+sve" }
     },
 
     {
@@ -116,6 +121,10 @@
     {
       "name": "dev-neon",
       "inherits": ["dev-base", "neon-base"]
+    },
+    {
+      "name": "dev-sve",
+      "inherits": ["dev-base", "sve-base"]
     }
   ]
 }
