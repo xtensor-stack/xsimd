@@ -97,16 +97,30 @@ cmake -B build/$PIXI_ENVIRONMENT_NAME/{{ preset }} -G Ninja \
 """
 inputs = ["**/CMakeLists.txt", "**/*.cmake.in", "cmake/"]
 outputs = ["build/$PIXI_ENVIRONMENT_NAME/{{ preset }}/CMakeCache.txt"]
+description = """
+Run the CMake configuration step with a given preset. \
+Build folders are stored in `build/` subdirectories.\
+"""
 
 [feature.cmd.tasks.build]
 args = ["preset"]
 cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/{{ preset }} --parallel"
 depends-on = [{ task = "configure", args = ["{{ preset }}"] }]
+# No caching configured here since CMake will do it better
+description = """
+Run the compilation steps in parallel via CMake. \
+CMake will detect files that have changed and need rebuilding.\
+"""
 
 [feature.cmd.tasks.test]
 args = [{ arg = "preset", default = "debug-native" }]
 cmd = "./build/$PIXI_ENVIRONMENT_NAME/{{ preset }}/test/test_xsimd"
 depends-on = [{ task = "build", args = ["{{ preset }}"] }]
+description = """
+Run the test suite for the given preset (launch recompilation as needed). \
+The preset can be used to test an older micro architecture on a machine (e.g. \
+testing SSE4.2 on a AVX2 machine).\
+"""
 
 # A dev feature and environment that contains LSP, formatters etc.
 [feature.dev.dependencies]
@@ -128,6 +142,7 @@ lldb = "*"
 cmd = "find . -name '*.[ch]pp' | xargs clang-format -i"
 inputs = ["**/*.*pp"]
 outputs = ["**/*.*pp"]
+description = "Run clang-format on the codebase."
 
 [feature.dev.tasks.init-lsp]
 cmd = "ln -sf build/dev/debug-native/compile_commands.json"
@@ -137,9 +152,13 @@ depends-on = [
   ], environment = "dev" },
 ]
 outputs = ["compile_commands.json"]
+description = "Initialize the compilation database for clangd."
+
+[feature.dev.tasks.fmt-taplo]
+cmd = "taplo fmt"
+description = "Format the TOML files."
 
 [feature.dev.tasks]
-fmt-taplo = "taplo fmt"
 fmt = { depends-on = ["fmt-clang", "fmt-taplo"] }
 
 [environments]
