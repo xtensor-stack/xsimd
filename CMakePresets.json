@@ -1,0 +1,121 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "xsimd-all",
+      "cacheVariables": {
+        "ENABLE_XTL_COMPLEX" :"ON",
+        "BUILD_TESTS": "ON",
+        "BUILD_BENCHMARK": "ON"
+      }
+    },
+
+    {
+      "name": "debug-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" :"Debug"
+      }
+    },
+    {
+      "name": "release-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE" :"Release"
+      }
+    },
+
+    {
+      "name": "native-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "native" }
+    },
+    {
+      "name": "sse2-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "x86-64 -mno-sse3" }
+    },
+    {
+      "name": "sse3-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "core2" }
+    },
+    {
+      "name": "ssse3-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "core2 -mssse3" }
+    },
+    {
+      "name": "sse4.1-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "nehalem" }
+    },
+    {
+      "name": "sse4.2-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "nehalem" }
+    },
+    {
+      "name": "avx-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "nehalem -msse4.2" }
+    },
+    {
+      "name": "avx2-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "haswell" }
+    },
+    {
+      "name": "neon-base",
+      "hidden": true,
+      "cacheVariables": { "TARGET_ARCH": "armv8-a" }
+    },
+
+    {
+      "name": "dev-base",
+      "hidden": true,
+      "inherits": ["debug-base", "xsimd-all"]
+    },
+    {
+      "name": "debug-native",
+      "inherits": ["dev-base", "native-base"]
+    },
+    {
+      "name": "debug-sse2",
+      "inherits": ["dev-base", "sse2-base"]
+    },
+    {
+      "name": "debug-sse3",
+      "inherits": ["dev-base", "sse3-base"]
+    },
+    {
+      "name": "debug-ssse3",
+      "inherits": ["dev-base", "ssse3-base"]
+    },
+    {
+      "name": "debug-sse4.1",
+      "inherits": ["dev-base", "sse4.1-base"]
+    },
+    {
+      "name": "debug-sse4.2",
+      "inherits": ["dev-base", "sse4.2-base"]
+    },
+    {
+      "name": "debug-avx",
+      "inherits": ["dev-base", "avx-base"]
+    },
+    {
+      "name": "debug-avx2",
+      "inherits": ["dev-base", "avx2-base"]
+    },
+    {
+      "name": "debug-neon",
+      "inherits": ["dev-base", "neon-base"]
+    }
+  ]
+}
