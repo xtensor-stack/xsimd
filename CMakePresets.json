@@ -79,7 +79,7 @@
     {
       "name": "dev-base",
       "hidden": true,
-      "inherits": ["dev-base", "xsimd-all"]
+      "inherits": ["debug-base", "xsimd-all"]
     },
     {
       "name": "dev-native",
