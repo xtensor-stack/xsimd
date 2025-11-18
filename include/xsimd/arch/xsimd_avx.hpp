@@ -1674,16 +1674,15 @@ namespace xsimd
             {
                 return _mm256_permute_pd(self, imm);
             }
-            constexpr auto lane_mask = mask % make_batch_constant<uint64_t, (mask.size / 2), A>();
             XSIMD_IF_CONSTEXPR(detail::is_only_from_lo(mask))
             {
                 __m256d broadcast = _mm256_permute2f128_pd(self, self, 0x00); // [low | low]
-                return _mm256_permute_pd(broadcast, lane_mask.as_batch());
+                return _mm256_permute_pd(broadcast, imm);
             }
             XSIMD_IF_CONSTEXPR(detail::is_only_from_hi(mask))
             {
                 __m256d broadcast = _mm256_permute2f128_pd(self, self, 0x11); // [high | high]
-                return _mm256_permute_pd(broadcast, lane_mask.as_batch());
+                return _mm256_permute_pd(broadcast, imm);
             }
 
             // Fallback to general algorithm. This is the same as the dynamic version with the exception
