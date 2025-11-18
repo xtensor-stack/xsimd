@@ -117,7 +117,7 @@ CMake will detect files that have changed and need rebuilding.\
 """
 
 [feature.cmd.tasks.test]
-args = [{ arg = "preset", default = "debug-native" }]
+args = [{ arg = "preset", default = "dev-native" }]
 cmd = "./build/$PIXI_ENVIRONMENT_NAME/{{ preset }}/test/test_xsimd"
 depends-on = [{ task = "build", args = ["{{ preset }}"] }]
 description = """
