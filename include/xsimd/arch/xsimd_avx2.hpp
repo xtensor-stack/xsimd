@@ -179,6 +179,12 @@ namespace xsimd
         {
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
             static_assert(shift < bits, "Shift must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                constexpr uint8_t mask8 = static_cast<uint8_t>(~0u << shift);
+                __m256i const mask = _mm256_set1_epi8(mask8);
+                return _mm256_and_si256(_mm256_slli_epi16(self, shift), mask);
+            }
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 return _mm256_slli_epi16(self, shift);
@@ -190,10 +196,6 @@ namespace xsimd
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 return _mm256_slli_epi64(self, shift);
-            }
-            else
-            {
-                return bitwise_lshift<shift>(self, avx {});
             }
         }
 
