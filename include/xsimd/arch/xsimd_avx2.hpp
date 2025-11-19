@@ -181,7 +181,8 @@ namespace xsimd
             static_assert(shift < bits, "Shift must be less than the number of bits in T");
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                constexpr uint8_t mask8 = static_cast<uint8_t>(~0u << shift);
+                // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
+                constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? (~0u << shift) : 0);
                 __m256i const mask = _mm256_set1_epi8(mask8);
                 return _mm256_and_si256(_mm256_slli_epi16(self, shift), mask);
             }
@@ -314,7 +315,8 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                    constexpr uint8_t mask8 = static_cast<uint8_t>((1u << shift) - 1u);
+                    // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
+                    constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? ((1u << shift) - 1u) : 0);
                     __m256i const mask = _mm256_set1_epi8(mask8);
                     return _mm256_and_si256(_mm256_srli_epi16(self, shift), mask);
                 }
