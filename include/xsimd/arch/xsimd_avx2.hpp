@@ -311,6 +311,15 @@ namespace xsimd
         {
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
             static_assert(shift < bits, "Shift must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                // 8-bit left shift via 16-bit shift + mask
+                __m256i shifted = _mm256_slli_epi16(self, shift);
+                // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
+                constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? (~0u << shift) : 0);
+                const __m256i mask = _mm256_set1_epi8(mask8);
+                return _mm256_and_si256(shifted, mask);
+            }
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
                 return _mm256_slli_epi16(self, shift);
@@ -322,10 +331,6 @@ namespace xsimd
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
                 return _mm256_slli_epi64(self, shift);
-            }
-            else
-            {
-                return bitwise_lshift<shift>(self, avx {});
             }
         }
 
@@ -444,10 +449,12 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                    const __m256i byte_mask = _mm256_set1_epi16(0x00FF);
-                    __m256i u16 = _mm256_and_si256(self, byte_mask);
-                    __m256i r16 = _mm256_srli_epi16(u16, shift);
-                    return _mm256_and_si256(r16, byte_mask);
+                    // 8-bit left shift via 16-bit shift + mask
+                    const __m256i shifted = _mm256_srli_epi16(self, shift);
+                    // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
+                    constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? ((1u << shift) - 1u) : 0);
+                    const __m256i mask = _mm256_set1_epi8(mask8);
+                    return _mm256_and_si256(shifted, mask);
                 }
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
@@ -460,10 +467,6 @@ namespace xsimd
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     return _mm256_srli_epi64(self, shift);
-                }
-                else
-                {
-                    return bitwise_rshift<shift>(self, avx {});
                 }
             }
         }
