@@ -358,7 +358,7 @@ struct xsimd_api_integral_types_functions
         value_type val1(shift);
         value_type r = val0 << val1;
         value_type ir = val0 << shift;
-        value_type cr = xsimd::bitwise_lshift<shift>(val0);
+        T cr = xsimd::bitwise_lshift<shift>(T(val0));
         CHECK_EQ(extract(xsimd::bitwise_lshift(T(val0), T(val1))), r);
         CHECK_EQ(extract(ir), r);
         CHECK_EQ(extract(cr), r);
@@ -371,7 +371,7 @@ struct xsimd_api_integral_types_functions
         value_type val1(shift);
         value_type r = val0 >> val1;
         value_type ir = val0 >> shift;
-        value_type cr = xsimd::bitwise_rshift<shift>(val0);
+        T cr = xsimd::bitwise_rshift<shift>(T(val0));
         CHECK_EQ(extract(xsimd::bitwise_rshift(T(val0), T(val1))), r);
         CHECK_EQ(extract(ir), r);
         CHECK_EQ(extract(cr), r);
@@ -391,7 +391,7 @@ struct xsimd_api_integral_types_functions
         value_type val0(12);
         value_type val1(count);
         value_type r = (val0 << val1) | (val0 >> (N - val1));
-        value_type cr = xsimd::rotl<count>(val0);
+        T cr = xsimd::rotl<count>(T(val0));
         CHECK_EQ(extract(xsimd::rotl(T(val0), T(val1))), r);
         CHECK_EQ(extract(cr), r);
     }
@@ -403,7 +403,7 @@ struct xsimd_api_integral_types_functions
         value_type val0(12);
         value_type val1(count);
         value_type r = (val0 >> val1) | (val0 << (N - val1));
-        value_type cr = xsimd::rotr<3>(val0);
+        T cr = xsimd::rotr<3>(T(val0));
         CHECK_EQ(extract(xsimd::rotr(T(val0), T(val1))), r);
         CHECK_EQ(extract(cr), r);
     }
