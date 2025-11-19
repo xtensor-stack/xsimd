@@ -314,10 +314,9 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                    const __m256i byte_mask = _mm256_set1_epi16(0x00FF);
-                    __m256i u16 = _mm256_and_si256(self, byte_mask);
-                    __m256i r16 = _mm256_srli_epi16(u16, shift);
-                    return _mm256_and_si256(r16, byte_mask);
+                    constexpr uint8_t mask8 = static_cast<uint8_t>((1u << shift) - 1u);
+                    __m256i const mask = _mm256_set1_epi8(mask8);
+                    return _mm256_and_si256(_mm256_srli_epi16(self, shift), mask);
                 }
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
@@ -330,10 +329,6 @@ namespace xsimd
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
                 {
                     return _mm256_srli_epi64(self, shift);
-                }
-                else
-                {
-                    return bitwise_rshift<shift>(self, avx {});
                 }
             }
         }
