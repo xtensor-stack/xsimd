@@ -305,7 +305,9 @@ namespace xsimd
             {
                 // 8-bit left shift via 16-bit shift + mask
                 __m128i shifted = _mm_slli_epi16(self, static_cast<int>(shift));
-                __m128i mask = _mm_set1_epi8(static_cast<char>(0xFF << shift));
+                // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
+                constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? (~0u << shift) : 0);
+                const __m128i mask = _mm_set1_epi8(mask8);
                 return _mm_and_si128(shifted, mask);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
@@ -488,10 +490,12 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
                 {
-                    // Emulate byte-wise logical right shift using 16-bit shifts + per-byte mask.
-                    __m128i s16 = _mm_srli_epi16(self, static_cast<int>(shift));
-                    __m128i mask = _mm_set1_epi8(static_cast<char>(0xFFu >> shift));
-                    return _mm_and_si128(s16, mask);
+                    // 8-bit left shift via 16-bit shift + mask
+                    __m128i shifted = _mm_srli_epi16(self, static_cast<int>(shift));
+                    // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
+                    constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? ((1u << shift) - 1u) : 0);
+                    const __m128i mask = _mm_set1_epi8(mask8);
+                    return _mm_and_si128(shifted, mask);
                 }
                 else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
                 {
