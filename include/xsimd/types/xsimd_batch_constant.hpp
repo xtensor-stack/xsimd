@@ -505,6 +505,20 @@ namespace xsimd
     }
 
     /**
+     * @brief Build a @c batch_bool_constant out of a generator function
+     *
+     * Similar to @c make_batch_constant for @c batch_bool_constant
+     */
+    template <typename T, class G, class A = default_arch>
+    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    make_batch_bool_constant() noexcept
+    {
+        return {};
+    }
+
+// FIXME: Skipping those for doxygen because of bad interaction with breathe.
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    /**
      * @brief Build a @c batch_constant with a single repeated value.
      *
      * @tparam T type of the data held in the batch.
@@ -518,19 +532,10 @@ namespace xsimd
         return {};
     }
 
-    template <typename T, class G, class A = default_arch>
-    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
-    make_batch_bool_constant() noexcept
-    {
-        return {};
-    }
-
-    /**
+    /*
      * @brief Build a @c batch_bool_constant with a single repeated value.
      *
-     * @tparam T type of the data held in the batch.
-     * @tparam Val The value to repeat.
-     * @tparam A Architecture that will be used when converting to a regular batch.
+     * Similar to @c make_batch_constant for @c batch_bool_constant
      */
     template <typename T, bool Val, class A = default_arch>
     XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, Val, A>(detail::make_index_sequence<batch<T, A>::size>()))
@@ -538,6 +543,8 @@ namespace xsimd
     {
         return {};
     }
+
+#endif
 
 } // namespace xsimd
 
