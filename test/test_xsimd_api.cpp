@@ -351,7 +351,15 @@ struct xsimd_api_integral_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-    void test_bitwise_lshift()
+    struct arrange
+    {
+        static constexpr value_type get(size_t index, size_t /*size*/)
+        {
+            return static_cast<value_type>(index);
+        }
+    };
+
+    void test_bitwise_lshift_single()
     {
         constexpr int shift = 3;
         value_type val0(12);
@@ -362,6 +370,25 @@ struct xsimd_api_integral_types_functions
         CHECK_EQ(extract(xsimd::bitwise_lshift(T(val0), T(val1))), r);
         CHECK_EQ(extract(ir), r);
         CHECK_EQ(extract(cr), r);
+    }
+
+    void test_bitwise_lshift_multiple()
+    {
+        constexpr auto Max = static_cast<value_type>(std::numeric_limits<value_type>::digits);
+        constexpr auto max_batch = xsimd::make_batch_constant<value_type, Max>();
+        constexpr auto shifts = xsimd::make_batch_constant<value_type, arrange>() % max_batch;
+
+        auto shifted = xsimd::bitwise_lshift(T(1), shifts.as_batch());
+        for (std::size_t i = 0; i < shifts.size; ++i)
+        {
+            CHECK_EQ(shifted.get(i), 1 << shifts.get(i));
+        }
+
+        auto shifted_cst = xsimd::bitwise_lshift(T(1), shifts);
+        for (std::size_t i = 0; i < shifts.size; ++i)
+        {
+            CHECK_EQ(shifted_cst.get(i), 1 << shifts.get(i));
+        }
     }
 
     void test_bitwise_rshift()
@@ -426,9 +453,17 @@ TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
 {
     xsimd_api_integral_types_functions<B> Test;
 
-    SUBCASE("bitwise_lshift")
+    SUBCASE("test_bitwise_lshift_single")
     {
-        Test.test_bitwise_lshift();
+        Test.test_bitwise_lshift_single();
+    }
+
+    SUBCASE("bitwise_lshift_multiple")
+    {
+        XSIMD_IF_CONSTEXPR(xsimd::is_batch<B>::value)
+        {
+            Test.test_bitwise_lshift_multiple();
+        }
     }
 
     SUBCASE("bitwise_rshift")
