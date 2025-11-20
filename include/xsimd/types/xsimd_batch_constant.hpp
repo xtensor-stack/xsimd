@@ -230,7 +230,7 @@ namespace xsimd
             static_assert(Begin <= End, "splice: Begin must be <= End");
             static_assert(End <= sizeof...(Values), "splice: End must be <= size");
             static_assert(N == batch_bool<T, A2>::size, "splice: target arch size must match submask length");
-            return splice_impl<A2, Begin, T, A, Values...>(make_index_sequence<N>());
+            return {};
         }
 
         template <class A2, typename T, class A, bool... Values>
@@ -240,7 +240,7 @@ namespace xsimd
             static_assert(sizeof...(Values) % 2 == 0, "lower_half requires even size");
             static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
                           "lower_half: target arch size must match submask length");
-            return splice_impl<A2, 0, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>());
+            return {};
         }
 
         template <class A2, typename T, class A, bool... Values>
@@ -250,7 +250,7 @@ namespace xsimd
             static_assert(sizeof...(Values) % 2 == 0, "upper_half requires even size");
             static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
                           "upper_half: target arch size must match submask length");
-            return splice_impl<A2, sizeof...(Values) / 2, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>());
+            return {};
         }
     } // namespace detail
 
