@@ -267,65 +267,6 @@ namespace xsimd
             return _mm_andnot_pd(other, self);
         }
 
-        // bitwise_lshift
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<sse2>) noexcept
-        {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                return _mm_and_si128(_mm_set1_epi8(0xFF << other), _mm_slli_epi32(self, other));
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-            {
-                return _mm_slli_epi16(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                return _mm_slli_epi32(self, other);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-                return _mm_slli_epi64(self, other);
-            }
-            else
-            {
-                assert(false && "unsupported arch/op combination");
-                return {};
-            }
-        }
-        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<sse2>) noexcept
-        {
-            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
-            static_assert(shift < bits, "Count must be less than the number of bits in T");
-            XSIMD_IF_CONSTEXPR(shift == 0)
-            {
-                return self;
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
-            {
-                // 8-bit left shift via 16-bit shift + mask
-                __m128i shifted = _mm_slli_epi16(self, static_cast<int>(shift));
-                // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
-                constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? (~0u << shift) : 0);
-                const __m128i mask = _mm_set1_epi8(mask8);
-                return _mm_and_si128(shifted, mask);
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
-            {
-                return _mm_slli_epi16(self, static_cast<int>(shift));
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-            {
-                return _mm_slli_epi32(self, static_cast<int>(shift));
-            }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-            {
-                return _mm_slli_epi64(self, static_cast<int>(shift));
-            }
-            return bitwise_lshift<shift>(self, common {});
-        }
-
         // bitwise_not
         template <class A>
         XSIMD_INLINE batch<float, A> bitwise_not(batch<float, A> const& self, requires_arch<sse2>) noexcept
@@ -580,6 +521,83 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_cast(batch<double, A> const& self, batch<T, A> const&, requires_arch<sse2>) noexcept
         {
             return _mm_castpd_si128(self);
+        }
+
+        // bitwise_lshift single (dynamic)
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                return _mm_and_si128(_mm_set1_epi8(0xFF << other), _mm_slli_epi32(self, other));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm_slli_epi16(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm_slli_epi32(self, other);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm_slli_epi64(self, other);
+            }
+            else
+            {
+                assert(false && "unsupported arch/op combination");
+                return {};
+            }
+        }
+
+        // bitwise_lshift single (constant)
+        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(shift < bits, "Count must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(shift == 0)
+            {
+                return self;
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                // 8-bit left shift via 16-bit shift + mask
+                __m128i shifted = _mm_slli_epi16(self, static_cast<int>(shift));
+                // TODO(C++17): without `if constexpr` we must ensure the compile-time shift does not overflow
+                constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? (~0u << shift) : 0);
+                const __m128i mask = _mm_set1_epi8(mask8);
+                return _mm_and_si128(shifted, mask);
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return _mm_slli_epi16(self, static_cast<int>(shift));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return _mm_slli_epi32(self, static_cast<int>(shift));
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm_slli_epi64(self, static_cast<int>(shift));
+            }
+            return bitwise_lshift<shift>(self, common {});
+        }
+
+        // bitwise_lshift multiple (constant)
+        template <class A, uint16_t... Vs>
+        XSIMD_INLINE batch<uint16_t, A> bitwise_lshift(
+            batch<uint16_t, A> const& self, batch_constant<uint16_t, A, Vs...> shifts, requires_arch<sse2>) noexcept
+        {
+            constexpr auto mults = batch_constant<uint16_t, A, static_cast<uint16_t>(1u << Vs)...>();
+            return _mm_mullo_epi16(self, mults.as_batch());
+        }
+
+        template <class A, uint8_t... Vs>
+        XSIMD_INLINE batch<uint8_t, A> bitwise_lshift(
+            batch<uint8_t, A> const& self, batch_constant<uint8_t, A, Vs...> shifts, requires_arch<sse2> req) noexcept
+        {
+            return utils::bitwise_lshift_as_twice_larger<uint8_t, uint16_t>(self, shifts, req);
         }
 
         // broadcast
