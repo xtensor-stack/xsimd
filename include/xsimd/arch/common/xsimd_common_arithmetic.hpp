@@ -16,6 +16,7 @@
 #include <limits>
 #include <type_traits>
 
+#include "../xsimd_common_fwd.hpp"
 #include "./xsimd_common_details.hpp"
 
 namespace xsimd
@@ -36,7 +37,7 @@ namespace xsimd
         }
 
         // bitwise_lshift multiple (constant)
-        template <class A, class T, T... Vals, detail::enable_integral_t<T> = 0>
+        template <class A, class T, T... Vals, detail::enable_integral_t<T>>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch_constant<T, A, Vals...> const& rhs, requires_arch<common> req) noexcept
         {
             return bitwise_lshift(lhs, rhs.as_batch(), req);
