@@ -17,6 +17,7 @@
 #include <type_traits>
 
 #include "../types/xsimd_sse2_register.hpp"
+#include "./utils/shifts.hpp"
 
 namespace xsimd
 {
@@ -594,7 +595,6 @@ namespace xsimd
         {
             return utils::bitwise_lshift_as_twice_larger<uint8_t, uint16_t>(self, shifts, req);
         }
-
 
         // broadcast
         template <class A>
