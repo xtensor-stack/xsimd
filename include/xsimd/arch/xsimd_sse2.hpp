@@ -588,7 +588,7 @@ namespace xsimd
         // bitwise_lshift multiple (constant)
         template <class A, uint16_t... Vs>
         XSIMD_INLINE batch<uint16_t, A> bitwise_lshift(
-            batch<uint16_t, A> const& self, batch_constant<uint16_t, A, Vs...> shifts, requires_arch<sse2>) noexcept
+            batch<uint16_t, A> const& self, batch_constant<uint16_t, A, Vs...>, requires_arch<sse2>) noexcept
         {
             constexpr auto mults = batch_constant<uint16_t, A, static_cast<uint16_t>(1u << Vs)...>();
             return _mm_mullo_epi16(self, mults.as_batch());
