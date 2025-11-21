@@ -47,6 +47,8 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<common>) noexcept;
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
+        template <class A, class T, T... Vals, detail::enable_integral_t<T> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch_constant<T, A, Vals...> const& rhs, requires_arch<common> req) noexcept;
         template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<common>) noexcept;
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
