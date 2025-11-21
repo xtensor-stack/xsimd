@@ -18,6 +18,7 @@
 
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_sse2_register.hpp"
+#include "./utils/shifts.hpp"
 
 namespace xsimd
 {
