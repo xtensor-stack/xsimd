@@ -28,7 +28,7 @@ namespace xsimd
                 static constexpr I values_array[] = { Vs... };
 
                 template <typename K>
-                static constexpr K get(K i, K n)
+                static constexpr K get(K i, K)
                 {
                     return static_cast<K>(values_array[length * i + offset]);
                 }
@@ -36,7 +36,7 @@ namespace xsimd
 
             template <class T, class T2, class A, class R, T... Vs>
             XSIMD_INLINE batch<T, A> bitwise_lshift_as_twice_larger(
-                batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, R req) noexcept
+                batch<T, A> const& self, batch_constant<T, A, Vs...>, R req) noexcept
             {
                 static_assert(sizeof(T2) == 2 * sizeof(T), "One size must be twice the other");
 
