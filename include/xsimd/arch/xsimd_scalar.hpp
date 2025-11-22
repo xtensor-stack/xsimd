@@ -1198,6 +1198,19 @@ namespace xsimd
     {
         return cond ? true_br : false_br;
     }
+
+    template <class T>
+    XSIMD_INLINE constexpr bool batch_bool_cast(bool b) noexcept
+    {
+        return b;
+    }
+
+    template <class T_out, class T_in>
+    XSIMD_INLINE constexpr T_out batch_cast(T_in const& val) noexcept
+    {
+        static_assert(!std::is_same<T_out, bool>::value, "cannot convert to bool, use !x or x != 0");
+        return static_cast<T_out>(val);
+    }
 }
 
 #endif
