@@ -32,8 +32,14 @@ Type Traits
 ===========
 
 `xsimd` provides a few type traits to interact with scalar and batch types in an
-uniformeous manner.
+uniform manner.
 
+
+Combined traits:
+
++---------------------------------------+----------------------------------------------------+
+| :cpp:class:`batch_traits`             | batch types and proprties                          |
++---------------------------------------+----------------------------------------------------+
 
 Type check:
 
