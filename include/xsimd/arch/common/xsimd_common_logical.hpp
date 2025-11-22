@@ -212,6 +212,35 @@ namespace xsimd
                     res |= 1ul << i;
             return res;
         }
+
+        // select
+        namespace detail
+        {
+            template <typename T, typename A>
+            using is_batch_bool_register_same = std::is_same<typename batch_bool<T, A>::register_type, typename batch<T, A>::register_type>;
+        }
+
+        template <class A, class T, typename std::enable_if<detail::is_batch_bool_register_same<T, A>::value, int>::type = 3>
+        XSIMD_INLINE batch_bool<T, A> select(batch_bool<T, A> const& cond, batch_bool<T, A> const& true_br, batch_bool<T, A> const& false_br, requires_arch<common>)
+        {
+            using register_type = typename batch_bool<T, A>::register_type;
+            // Do not cast, but rather reinterpret the masks as batches.
+            const auto true_v = batch<T, A> { static_cast<register_type>(true_br) };
+            const auto false_v = batch<T, A> { static_cast<register_type>(false_br) };
+            return batch_bool<T, A> { select(cond, true_v, false_v) };
+        }
+
+        template <class A, class T, typename std::enable_if<!detail::is_batch_bool_register_same<T, A>::value, int>::type = 3>
+        XSIMD_INLINE batch_bool<T, A> select(batch_bool<T, A> const& cond, batch_bool<T, A> const& true_br, batch_bool<T, A> const& false_br, requires_arch<common>)
+        {
+            return (true_br & cond) | (bitwise_andnot(false_br, cond));
+        }
+
+        template <class A, class T, bool... Values>
+        XSIMD_INLINE batch_bool<T, A> select(batch_bool_constant<T, A, Values...> const& cond, batch_bool<T, A> const& true_br, batch_bool<T, A> const& false_br, requires_arch<common>)
+        {
+            return (true_br & cond) | (false_br & ~cond);
+        }
     }
 }
 
