@@ -341,6 +341,7 @@ private:
             T_out scalar_ref = static_cast<T_out>(in_test_value);
             T_out scalar_res = res.get(0);
             CHECK_SCALAR_EQ(scalar_ref, scalar_res);
+            CHECK_SCALAR_EQ(scalar_ref, xsimd::batch_cast<T_out>(in_test_value));
         }
     }
 
@@ -356,11 +357,13 @@ private:
         B_common_out all_true_res = xsimd::batch_bool_cast<T_out>(all_true_in);
         INFO(name);
         CHECK_SCALAR_EQ(all_true_res.get(0), true);
+        CHECK_SCALAR_EQ(xsimd::batch_bool_cast<B_out>(true), true);
 
         B_common_in all_false_in(false);
         B_common_out all_false_res = xsimd::batch_bool_cast<T_out>(all_false_in);
         INFO(name);
         CHECK_SCALAR_EQ(all_false_res.get(0), false);
+        CHECK_SCALAR_EQ(xsimd::batch_bool_cast<B_out>(false), false);
     }
 };
 

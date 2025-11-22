@@ -83,53 +83,16 @@ namespace xsimd
     using std::tgamma;
     using std::trunc;
 
-    XSIMD_INLINE signed char abs(signed char v)
+    template <typename T>
+    XSIMD_INLINE constexpr typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, T>::type
+    abs(T v) noexcept
     {
         return v < 0 ? -v : v;
     }
 
-    namespace detail
-    {
-        // Use templated type here to prevent automatic instantiation that may
-        // ends up in a warning
-        template <typename char_type>
-        XSIMD_INLINE char abs(char_type v, std::true_type)
-        {
-            return v;
-        }
-        template <typename char_type>
-        XSIMD_INLINE char abs(char_type v, std::false_type)
-        {
-            return v < 0 ? -v : v;
-        }
-    }
-
-    XSIMD_INLINE char abs(char v)
-    {
-        return detail::abs(v, std::is_unsigned<char>::type {});
-    }
-
-    XSIMD_INLINE short abs(short v)
-    {
-        return v < 0 ? -v : v;
-    }
-    XSIMD_INLINE unsigned char abs(unsigned char v)
-    {
-        return v;
-    }
-    XSIMD_INLINE unsigned short abs(unsigned short v)
-    {
-        return v;
-    }
-    XSIMD_INLINE unsigned int abs(unsigned int v)
-    {
-        return v;
-    }
-    XSIMD_INLINE unsigned long abs(unsigned long v)
-    {
-        return v;
-    }
-    XSIMD_INLINE unsigned long long abs(unsigned long long v)
+    template <typename T>
+    XSIMD_INLINE constexpr typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+    abs(T v) noexcept
     {
         return v;
     }
@@ -1234,6 +1197,19 @@ namespace xsimd
     XSIMD_INLINE T select(bool cond, T const& true_br, T const& false_br) noexcept
     {
         return cond ? true_br : false_br;
+    }
+
+    template <class T>
+    XSIMD_INLINE constexpr bool batch_bool_cast(bool b) noexcept
+    {
+        return b;
+    }
+
+    template <class T_out, class T_in>
+    XSIMD_INLINE constexpr T_out batch_cast(T_in const& val) noexcept
+    {
+        static_assert(!std::is_same<T_out, bool>::value, "cannot convert to bool, use !x or x != 0");
+        return static_cast<T_out>(val);
     }
 }
 
