@@ -2139,6 +2139,27 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_bool_logical
+     *
+     * Ternary operator for conditions: selects values from the batches \c true_br or \c false_br
+     * depending on the boolean values in the constant batch \c cond. Equivalent to
+     * \code{.cpp}
+     * for(std::size_t i = 0; i < N; ++i)
+     *     res[i] = cond[i] ? true_br[i] : false_br[i];
+     * \endcode
+     * @param cond batch condition.
+     * @param true_br batch values for truthy condition.
+     * @param false_br batch value for falsy condition.
+     * @return the result of the selection.
+     */
+    template <class T, class A>
+    XSIMD_INLINE batch_bool<T, A> select(batch_bool<T, A> const& cond, batch_bool<T, A> const& true_br, batch_bool<T, A> const& false_br) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::select<A>(cond, true_br, false_br, A {});
+    }
+
+    /**
      * @ingroup batch_cond
      *
      * Ternary operator for batches: selects values from the batches \c true_br or \c false_br
@@ -2175,6 +2196,27 @@ namespace xsimd
      */
     template <class T, class A, bool... Values>
     XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::select<A>(cond, true_br, false_br, A {});
+    }
+
+    /**
+     * @ingroup batch_cond
+     *
+     * Ternary operator for mask batches: selects values from the masks \c true_br or \c false_br
+     * depending on the boolean values in the constant batch \c cond. Equivalent to
+     * \code{.cpp}
+     * for(std::size_t i = 0; i < N; ++i)
+     *     res[i] = cond[i] ? true_br[i] : false_br[i];
+     * \endcode
+     * @param cond constant batch condition.
+     * @param true_br batch values for truthy condition.
+     * @param false_br batch value for falsy condition.
+     * @return the result of the selection.
+     */
+    template <class T, class A, bool... Values>
+    XSIMD_INLINE batch_bool<T, A> select(batch_bool_constant<T, A, Values...> const& cond, batch_bool<T, A> const& true_br, batch_bool<T, A> const& false_br) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::select<A>(cond, true_br, false_br, A {});
