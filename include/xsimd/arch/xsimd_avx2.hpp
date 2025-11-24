@@ -162,26 +162,26 @@ namespace xsimd
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<avx2>) noexcept
         {
-            return load_masked<A>(mem, mask, convert<int32_t> {}, Mode {}, avx2 {});
+            return load_masked<A, int32_t>(mem, mask, convert<int32_t> {}, Mode {}, avx2 {});
         }
 
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, Values...>, convert<uint32_t>, Mode, requires_arch<avx2>) noexcept
         {
-            const auto r = load_masked<A>(reinterpret_cast<int32_t const*>(mem), batch_bool_constant<int32_t, A, Values...> {}, convert<int32_t> {}, Mode {}, avx2 {});
+            const auto r = load_masked<A, int32_t>(reinterpret_cast<int32_t const*>(mem), batch_bool_constant<int32_t, A, Values...> {}, convert<int32_t> {}, Mode {}, avx2 {});
             return bitwise_cast<uint32_t>(r);
         }
 
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<int64_t, A> load_masked(int64_t const* mem, batch_bool_constant<int64_t, A, Values...> mask, convert<int64_t>, Mode, requires_arch<avx2>) noexcept
         {
-            return load_masked<A>(mem, mask, convert<int64_t> {}, Mode {}, avx2 {});
+            return load_masked<A, int64_t>(mem, mask, convert<int64_t> {}, Mode {}, avx2 {});
         }
 
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<uint64_t, A> load_masked(uint64_t const* mem, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<avx2>) noexcept
         {
-            const auto r = load_masked<A>(reinterpret_cast<int64_t const*>(mem), batch_bool_constant<int64_t, A, Values...> {}, convert<int64_t> {}, Mode {}, avx2 {});
+            const auto r = load_masked<A, int64_t>(reinterpret_cast<int64_t const*>(mem), batch_bool_constant<int64_t, A, Values...> {}, convert<int64_t> {}, Mode {}, avx2 {});
             return bitwise_cast<uint64_t>(r);
         }
 
