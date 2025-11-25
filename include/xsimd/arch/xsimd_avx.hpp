@@ -920,16 +920,8 @@ namespace xsimd
             using int_t = as_integer_t<T>;
             constexpr size_t half_size = batch<T, A>::size / 2;
 
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return batch<T, A>(T { 0 });
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                return load<A>(mem, Mode {});
-            }
             // confined to lower 128-bit half → forward to SSE2
-            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
+            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(batch_bool_constant<int_t, A, Values...> {});
                 const auto lo = load_masked(reinterpret_cast<int_t const*>(mem), mlo, convert<int_t> {}, Mode {}, sse4_2 {});
@@ -970,16 +962,8 @@ namespace xsimd
         {
             constexpr size_t half_size = batch<T, A>::size / 2;
 
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return;
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                src.store(mem, Mode {});
-            }
             // confined to lower 128-bit half → forward to SSE2
-            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
+            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
                 const auto lo = detail::lower_half(src);

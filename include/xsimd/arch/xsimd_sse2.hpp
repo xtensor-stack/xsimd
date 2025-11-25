@@ -1071,15 +1071,7 @@ namespace xsimd
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<sse2>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return _mm_setzero_ps();
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                return load<A>(mem, Mode {});
-            }
-            else XSIMD_IF_CONSTEXPR(mask.countr_one() == 2)
+            XSIMD_IF_CONSTEXPR(mask.countr_one() == 2)
             {
                 return _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem));
             }
@@ -1095,15 +1087,7 @@ namespace xsimd
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<double, A> load_masked(double const* mem, batch_bool_constant<double, A, Values...> mask, Mode, requires_arch<sse2>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return _mm_setzero_pd();
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                return load<A>(mem, Mode {});
-            }
-            else XSIMD_IF_CONSTEXPR(mask.countr_one() == 1)
+            XSIMD_IF_CONSTEXPR(mask.countr_one() == 1)
             {
                 return _mm_move_sd(_mm_setzero_pd(), _mm_load_sd(mem));
             }
@@ -1121,15 +1105,7 @@ namespace xsimd
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<sse2>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return;
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                src.store(mem, Mode {});
-            }
-            else XSIMD_IF_CONSTEXPR(mask.countr_one() == 2)
+            XSIMD_IF_CONSTEXPR(mask.countr_one() == 2)
             {
                 _mm_storel_pi(reinterpret_cast<__m64*>(mem), src);
             }
@@ -1144,17 +1120,9 @@ namespace xsimd
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, Values...> mask, Mode mode, requires_arch<sse2>) noexcept
+        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, Values...> mask, Mode, requires_arch<sse2>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return;
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                src.store(mem, mode);
-            }
-            else XSIMD_IF_CONSTEXPR(mask.countr_one() == 1)
+            XSIMD_IF_CONSTEXPR(mask.countr_one() == 1)
             {
                 _mm_store_sd(mem, src);
             }
@@ -2205,15 +2173,7 @@ namespace xsimd
                                        aligned_mode,
                                        requires_arch<sse2>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return;
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                _mm_store_ps(mem, src);
-            }
-            else XSIMD_IF_CONSTEXPR(mask.countr_one() == 2)
+            XSIMD_IF_CONSTEXPR(mask.countr_one() == 2)
             {
                 _mm_storel_pi(reinterpret_cast<__m64*>(mem), src);
             }

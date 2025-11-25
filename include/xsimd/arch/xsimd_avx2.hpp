@@ -142,21 +142,10 @@ namespace xsimd
         XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value && (sizeof(T) >= 4), batch<T, A>>::type
         load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx2>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return _mm256_setzero_si256();
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                return load<A>(mem, Mode {});
-            }
-            else
-            {
-                static_assert(sizeof(T) == 4 || sizeof(T) == 8, "load_masked supports only 32/64-bit integers on AVX2");
-                using int_t = typename std::conditional<sizeof(T) == 4, int32_t, long long>::type;
-                // Use the raw register-level maskload helpers for the remaining cases.
-                return detail::maskload(reinterpret_cast<const int_t*>(mem), mask.as_batch());
-            }
+            static_assert(sizeof(T) == 4 || sizeof(T) == 8, "load_masked supports only 32/64-bit integers on AVX2");
+            using int_t = typename std::conditional<sizeof(T) == 4, int32_t, long long>::type;
+            // Use the raw register-level maskload helpers for the remaining cases.
+            return detail::maskload(reinterpret_cast<const int_t*>(mem), mask.as_batch());
         }
 
         template <class A, bool... Values, class Mode>
@@ -206,16 +195,8 @@ namespace xsimd
         {
             constexpr size_t lanes_per_half = sizeof(__m128i) / sizeof(T);
 
-            XSIMD_IF_CONSTEXPR(mask.none())
-            {
-                return;
-            }
-            else XSIMD_IF_CONSTEXPR(mask.all())
-            {
-                src.store(mem, Mode {});
-            }
             // confined to lower 128-bit half → forward to SSE
-            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= lanes_per_half)
+            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= lanes_per_half)
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
                 const auto lo = detail::lower_half(src);
