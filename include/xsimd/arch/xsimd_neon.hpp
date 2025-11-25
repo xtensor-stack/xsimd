@@ -613,6 +613,44 @@ namespace xsimd
             return load_unaligned(mem, t, r);
         }
 
+        /* masked version */
+        namespace detail
+        {
+            template <bool... Values>
+            struct load_masked;
+
+            template <>
+            struct load_masked<>
+            {
+                template <size_t I, class A, class T, bool Use>
+                static XSIMD_INLINE batch<T, A> apply(T const* mem, batch<T, A> acc, std::integral_constant<bool, Use>) noexcept
+                {
+                    return acc;
+                }
+            };
+            template <bool Value, bool... Values>
+            struct load_masked<Value, Values...>
+            {
+                template <size_t I, class A, class T>
+                static XSIMD_INLINE batch<T, A> apply(T const* mem, batch<T, A> acc, std::true_type) noexcept
+                {
+                    return load_masked<Values...>::template apply<I + 1>(mem, insert(acc, mem[I], index<I> {}), std::integral_constant<bool, Value> {});
+                }
+                template <size_t I, class A, class T>
+                static XSIMD_INLINE batch<T, A> apply(T const* mem, batch<T, A> acc, std::false_type) noexcept
+                {
+                    return load_masked<Values...>::template apply<I + 1>(mem, acc, std::integral_constant<bool, Value> {});
+                }
+            };
+        }
+
+        template <class A, class T, bool Value, bool... Values, class Mode>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Value, Values...> mask, Mode, requires_arch<neon>) noexcept
+        {
+            // Call insert whenever Values... are true
+            return detail::load_masked<Values...>::template apply<0>(mem, broadcast(T(0), A {}), std::integral_constant<bool, Value> {});
+        }
+
         /*********
          * store *
          *********/
