@@ -359,7 +359,7 @@ namespace xsimd
         XSIMD_INLINE batch<uint8_t, A> bitwise_lshift(
             batch<uint8_t, A> const& self, batch_constant<uint8_t, A, Vs...> shifts, requires_arch<avx2> req) noexcept
         {
-            return utils::bitwise_lshift_as_twice_larger<uint8_t, uint16_t>(self, shifts, req);
+            return utils::bitwise_lshift_as_twice_larger<uint8_t, uint16_t>(self, shifts);
         }
 
         // bitwise_rshift

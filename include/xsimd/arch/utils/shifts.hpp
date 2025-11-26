@@ -34,9 +34,15 @@ namespace xsimd
                 }
             };
 
-            template <class T, class T2, class A, class R, T... Vs>
+            template <typename I>
+            constexpr I lsb_mask(I bit_index)
+            {
+                return static_cast<I>((I { 1 } << bit_index) - I { 1 });
+            }
+
+            template <class T, class T2, class A, T... Vs>
             XSIMD_INLINE batch<T, A> bitwise_lshift_as_twice_larger(
-                batch<T, A> const& self, batch_constant<T, A, Vs...>, R req) noexcept
+                batch<T, A> const& self, batch_constant<T, A, Vs...>) noexcept
             {
                 static_assert(sizeof(T2) == 2 * sizeof(T), "One size must be twice the other");
 
@@ -44,17 +50,19 @@ namespace xsimd
 
                 // Lower byte: shift as twice the size and mask bits flowing to higher byte.
                 constexpr auto shifts_lo = make_batch_constant<T2, select_stride<T, 0, 2, Vs...>, A>();
-                const auto shifted_lo = bitwise_lshift<A>(self2, shifts_lo, req);
-                const batch<T2, A> mask_lo { T2 { 0x00FF } };
-                const auto masked_lo = bitwise_and<A>(shifted_lo, mask_lo, req);
+                constexpr auto mask_lo = lsb_mask<T2>(8 * sizeof(T));
+                const auto shifted_lo = bitwise_lshift(self2, shifts_lo);
+                const batch<T2, A> batch_mask_lo { mask_lo };
+                const auto masked_lo = bitwise_and(shifted_lo, batch_mask_lo);
 
                 // Higher byte: mask bits that would flow from lower byte and shift as twice the size.
                 constexpr auto shifts_hi = make_batch_constant<T2, select_stride<T, 1, 2, Vs...>, A>();
-                const batch<T2, A> mask_hi { T2 { 0xFF00 } };
-                const auto masked_hi = bitwise_and<A>(self2, mask_hi, req);
-                const auto shifted_hi = bitwise_lshift<A>(masked_hi, shifts_hi, req);
+                constexpr auto mask_hi = mask_lo << (8 * sizeof(T));
+                const batch<T2, A> batch_mask_hi { mask_hi };
+                const auto masked_hi = bitwise_and(self2, batch_mask_hi);
+                const auto shifted_hi = bitwise_lshift(masked_hi, shifts_hi);
 
-                return bitwise_cast<T>(bitwise_or(masked_lo, shifted_hi, req));
+                return bitwise_cast<T>(bitwise_or(masked_lo, shifted_hi));
             }
         }
     }
