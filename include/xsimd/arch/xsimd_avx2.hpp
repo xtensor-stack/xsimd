@@ -193,7 +193,7 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
         {
-            constexpr size_t lanes_per_half = sizeof(__m128i) / sizeof(T);
+            constexpr size_t lanes_per_half = batch<T, A>::size / 2;
 
             // confined to lower 128-bit half → forward to SSE
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= lanes_per_half)
