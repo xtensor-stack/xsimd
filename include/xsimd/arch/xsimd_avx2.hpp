@@ -347,19 +347,23 @@ namespace xsimd
         }
 
         // bitwise_lshift multiple (constant)
-        template <class A, uint16_t... Vs>
-        XSIMD_INLINE batch<uint16_t, A> bitwise_lshift(
-            batch<uint16_t, A> const& self, batch_constant<uint16_t, A, Vs...> shifts, requires_arch<avx2>) noexcept
+        template <class A, class T, T... Vs, detail::enable_integral_t<T> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(
+            batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<avx2> req) noexcept
         {
-            constexpr auto mults = batch_constant<uint16_t, A, static_cast<uint16_t>(1u << Vs)...>();
-            return _mm256_mullo_epi16(self, mults.as_batch());
-        }
-
-        template <class A, uint8_t... Vs>
-        XSIMD_INLINE batch<uint8_t, A> bitwise_lshift(
-            batch<uint8_t, A> const& self, batch_constant<uint8_t, A, Vs...> shifts, requires_arch<avx2> req) noexcept
-        {
-            return utils::bitwise_lshift_as_twice_larger<uint8_t, uint16_t>(self, shifts);
+            XSIMD_IF_CONSTEXPR(std::is_same<T, uint8_t>::value)
+            {
+                return utils::bitwise_lshift_as_twice_larger<uint8_t, uint16_t>(self, shifts);
+            }
+            XSIMD_IF_CONSTEXPR(std::is_same<T, uint16_t>::value)
+            {
+                constexpr auto mults = batch_constant<uint16_t, A, static_cast<uint16_t>(1u << Vs)...>();
+                return _mm256_mullo_epi16(self, mults.as_batch());
+            }
+            else
+            {
+                return bitwise_lshift(self, shifts.as_batch(), req);
+            }
         }
 
         // bitwise_rshift
