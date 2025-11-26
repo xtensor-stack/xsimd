@@ -39,6 +39,17 @@ namespace xsimd
             template <class T>
             svbool_t sve_ptrue() noexcept { return sve_ptrue_impl(index<sizeof(T)> {}); }
 
+            // predicate loading
+            template <bool M0, bool M1>
+            svbool_t sve_pmask() noexcept { return svdupq_b64(M0, M1); }
+            template <bool M0, bool M1, bool M2, bool M3>
+            svbool_t sve_pmask() noexcept { return svdupq_b32(M0, M1, M2, M3); }
+            template <bool M0, bool M1, bool M2, bool M3, bool M4, bool M5, bool M6, bool M7>
+            svbool_t sve_pmask() noexcept { return svdupq_b16(M0, M1, M2, M3, M4, M5, M6, M7); }
+            template <bool M0, bool M1, bool M2, bool M3, bool M4, bool M5, bool M6, bool M7,
+                      bool M8, bool M9, bool M10, bool M11, bool M12, bool M13, bool M14, bool M15>
+            svbool_t sve_pmask() noexcept { return svdupq_b8(M0, M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12, M13, M14, M15); }
+
             // count active lanes in a predicate
             XSIMD_INLINE uint64_t sve_pcount_impl(svbool_t p, index<1>) noexcept { return svcntp_b8(p, p); }
             XSIMD_INLINE uint64_t sve_pcount_impl(svbool_t p, index<2>) noexcept { return svcntp_b16(p, p); }
@@ -93,6 +104,13 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<sve>) noexcept
         {
             return load_aligned<A>(src, convert<T>(), sve {});
+        }
+
+        // load_masked
+        template <class A, class T, bool... Values, class Mode, detail::sve_enable_all_t<T> = 0>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<sve>) noexcept
+        {
+            return svld1(detail::sve_pmask<Values...>(), reinterpret_cast<detail::sve_fix_char_t<T> const*>(mem));
         }
 
         // load_complex
