@@ -4,7 +4,9 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Writing vectorized code
+.. _Writing Vectorized Code:
+
+Writing Vectorized Code
 =======================
 
 Assume that we have a simple function that computes the mean of two vectors, something like:
@@ -13,7 +15,7 @@ Assume that we have a simple function that computes the mean of two vectors, som
 
 How can we use `xsimd` to take advantage of vectorization?
 
-Explicit use of an instruction set
+Explicit Use of an Instruction Set
 ----------------------------------
 
 `xsimd` provides the template class :cpp:class:`xsimd::batch` parametrized by ``T`` and ``A`` types where ``T`` is the type of the values involved in SIMD
@@ -22,12 +24,14 @@ of ``batch``. For instance, assuming the AVX instruction set is available, the p
 
 .. literalinclude:: ../../test/doc/explicit_use_of_an_instruction_set_mean.cpp
 
+Note that the code is written in a form that's independent from the actual
+vector register width.
 
 However, if you want to write code that is portable, you cannot rely on the use of ``batch<double, xsimd::avx>``.
 Indeed this won't compile on a CPU where only SSE2 instruction set is available for instance. Fortunately, if you don't set the second template parameter, `xsimd` picks the best architecture among the one available, based on the compiler flag you use.
 
 
-Aligned vs unaligned memory
+Aligned vs Unaligned Memory
 ---------------------------
 
 In the previous example, you may have noticed the :cpp:func:`xsimd::batch::load_unaligned` and :cpp:func:`xsimd::batch::store_unaligned` functions. These
@@ -42,7 +46,7 @@ with STL containers. Let's change the previous code so it can take advantage of 
 .. literalinclude:: ../../test/doc/explicit_use_of_an_instruction_set_mean_aligned.cpp
 
 
-Memory alignment and tag dispatching
+Memory Alignment and Tag Dispatching
 ------------------------------------
 
 You may need to write code that can operate on any type of vectors or arrays, not only the STL ones. In that
@@ -60,7 +64,7 @@ of a ``get_alignment_tag`` meta-function in the code, the previous code can be i
 
     mean(a, b, res, get_alignment_tag<decltype(a)>());
 
-Writing arch-independent code
+Writing Arch-Independent Code
 -----------------------------
 
 If your code may target either SSE2, AVX2 or AVX512 instruction set, `xsimd`

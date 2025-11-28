@@ -16,10 +16,16 @@ Introduction
 on a batch of values at once, and thus provide a way to significantly accelerate code execution. However, these instructions differ between microprocessor
 vendors and compilers.
 
-`xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of scalar and complex numbers with the same arithmetic
-operators and common mathematical functions as for single values.
+`xsimd` provides a unified means for using these features for library authors.
 
-There are several ways to use `xsimd`:
+The core of the library consist in a parametrized vector type, :ref:`Batch Types`,
+and a set of operations to perform :ref:`Arithmetic Operations`,
+:ref:`Data Transfer`, and many common mathemtical functions, as for single
+values.
+
+
+There are several ways to use `xsimd` using those :ref:`Batch Types` and
+operations:
 
 - one can write a generic, vectorized, algorithm and compile it as part of their
   application build, with the right architecture flag;
@@ -34,20 +40,13 @@ There are several ways to use `xsimd`:
 Of course, nothing prevents the combination of several of those approach, but
 more about this in section :ref:`Writing vectorized code`.
 
-You can find out more about this implementation of C++ wrappers for SIMD intrinsics at the `The C++ Scientist`_. The mathematical functions are a
+You can find out more about this implementation of C++ wrappers for SIMD
+intrinsics at the `The C++ Scientist`_. The mathematical functions are a
 lightweight implementation of the algorithms also used in `boost.SIMD`_.
 
-`xsimd` requires a C++11 compliant compiler. The following C++ compilers are supported:
 
-+-------------------------+-------------------------------+
-| Compiler                | Version                       |
-+=========================+===============================+
-| Microsoft Visual Studio | MSVC 2015 update 2 and above  |
-+-------------------------+-------------------------------+
-| g++                     | 4.9 and above                 |
-+-------------------------+-------------------------------+
-| clang                   | 3.7 and above                 |
-+-------------------------+-------------------------------+
+Compiler and Architecture Support
+---------------------------------
 
 The following SIMD instruction set extensions are supported:
 
@@ -68,6 +67,19 @@ The following SIMD instruction set extensions are supported:
 +--------------+---------------------------------------------------------+
 | PowerPC      | VSX                                                     |
 +--------------+---------------------------------------------------------+
+
+
+`xsimd` requires a C++11 compliant compiler. The following C++ compilers are supported:
+
++-------------------------+-------------------------------+
+| Compiler                | Version                       |
++=========================+===============================+
+| Microsoft Visual Studio | MSVC 2015 update 2 and above  |
++-------------------------+-------------------------------+
+| g++                     | 4.9 and above                 |
++-------------------------+-------------------------------+
+| clang                   | 3.7 and above                 |
++-------------------------+-------------------------------+
 
 Licensing
 ---------
@@ -90,6 +102,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
 
    basic_usage
    vectorized_code
+   integration
 
 .. toctree::
    :caption: API REFERENCE

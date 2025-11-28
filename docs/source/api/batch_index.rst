@@ -4,7 +4,9 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Batch types
+.. _Batch Types:
+
+Batch Types
 ===========
 
 .. toctree::

@@ -26,7 +26,7 @@
    }
    </style>
 
-Instruction set macros
+Instruction Set Macros
 ======================
 
 Each of these macros corresponds to an instruction set supported by XSIMD. They
@@ -36,7 +36,7 @@ can be used to filter arch-specific code.
    :project: xsimd
    :content-only:
 
-Changing Default architecture
+Changing Default Architecture
 *****************************
 
 You can change the default instruction set used by xsimd (when none is provided

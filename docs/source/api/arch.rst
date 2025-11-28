@@ -4,7 +4,7 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Architecture manipulation
+Architecture Manipulation
 =========================
 
 xsimd provides an high level description of the instruction sets it manipulates.
@@ -19,7 +19,7 @@ The best available architecture is available at compile time through
    :members:
 
 
-Emulated mode
+Emulated Mode
 -------------
 
 When compiled with the macro ``XSIMD_WITH_EMULATED`` set to ``1``, xsimd also

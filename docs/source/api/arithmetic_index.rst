@@ -26,8 +26,10 @@
    }
    </style>
 
-Arithmetic operators
-====================
+.. _Arithmetic Operations:
+
+Arithmetic Operations
+=====================
 
 Binary operations:
 
