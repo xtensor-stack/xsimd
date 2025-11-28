@@ -375,6 +375,7 @@ struct xsimd_api_integral_types_functions
     template <typename U = T>
     void test_bitwise_lshift_multiple(typename std::enable_if<!std::is_integral<U>::value, int>::type = 0)
     {
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
         constexpr auto Max = static_cast<value_type>(std::numeric_limits<value_type>::digits);
         constexpr auto max_batch = xsimd::make_batch_constant<value_type, Max>();
         constexpr auto shifts = xsimd::make_batch_constant<value_type, arrange>() % max_batch;
@@ -390,6 +391,7 @@ struct xsimd_api_integral_types_functions
         {
             CHECK_EQ(shifted_cst.get(i), 1 << shifts.get(i));
         }
+#endif
     }
 
     template <typename U = T>
