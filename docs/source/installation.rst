@@ -28,7 +28,7 @@ Besides the `xsimd` headers, all these methods place the ``cmake`` project confi
 
 .. image:: conda.svg
 
-Using the conda-forge package
+Using the conda-forge Package
 -----------------------------
 
 A package for `xsimd` is available for the `mamba <https://mamba.readthedocs.io>`_ (or `conda <https://conda.io>`_) package manager.
@@ -39,7 +39,7 @@ A package for `xsimd` is available for the `mamba <https://mamba.readthedocs.io>
 
 .. image:: spack.svg
 
-Using the Spack package
+Using the Spack Package
 -----------------------
 
 A package for `xsimd` is available on the `Spack <https://spack.io>`_ package manager.
@@ -51,7 +51,7 @@ A package for `xsimd` is available on the `Spack <https://spack.io>`_ package ma
 
 .. image:: cmake.svg
 
-From source with cmake
+From Source with cmake
 ----------------------
 
 You can install `xsimd` from source with `cmake <https://cmake.org/>`_. On Unix platforms, from the source directory:

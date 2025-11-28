@@ -26,7 +26,7 @@
    }
    </style>
 
-Comparison operators
+Comparison Operators
 ====================
 
 Ordering:
