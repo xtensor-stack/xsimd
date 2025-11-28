@@ -367,20 +367,20 @@ namespace xsimd
         detail::static_check_supported_config<T, A>();
         return kernel::bitwise_lshift<A>(x, shift, A {});
     }
-    template <class T, class A>
-    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x, batch<T, A> const& shift) noexcept
-    {
-        detail::static_check_supported_config<T, A>();
-        return kernel::bitwise_lshift<A>(x, shift, A {});
-    }
     template <size_t shift, class T, class A>
     XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::bitwise_lshift<shift, A>(x, A {});
     }
-    template <class T, class A, class Vt, Vt... Values>
-    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x, batch_constant<Vt, A, Values...> shift) noexcept
+    template <class T, class A>
+    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x, batch<T, A> const& shift) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_lshift<A>(x, shift, A {});
+    }
+    template <class T, class A, T... Values>
+    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x, batch_constant<T, A, Values...> shift) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::bitwise_lshift<A>(x, shift, A {});
