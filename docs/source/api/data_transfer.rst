@@ -4,8 +4,10 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Data transfer
-=============
+.. _Data Transfer:
+
+Data Transfers
+==============
 
 From memory:
 

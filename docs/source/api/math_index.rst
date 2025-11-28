@@ -27,7 +27,7 @@
    </style>
 
 
-Mathematical functions
+Mathematical Functions
 ======================
 
 Basic functions:

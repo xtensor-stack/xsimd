@@ -4,7 +4,7 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Batch of conditions
+Batch of Conditions
 ===================
 
 .. _xsimd-batch-bool-ref:
@@ -13,7 +13,7 @@ Batch of conditions
    :project: xsimd
    :members:
 
-Logical operators
+Logical Operators
 -----------------
 
 .. doxygengroup:: batch_bool_logical

@@ -4,17 +4,17 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Alignment manipulation
+Alignment Manipulation
 ======================
 
-Aligned memory allocator
+Aligned Memory Allocator
 ------------------------
 
 .. doxygenclass:: xsimd::aligned_allocator
    :project: xsimd
    :members:
 
-Alignement checker
+Alignement Checker
 ------------------
 
 .. doxygenfunction:: xsimd::is_aligned
