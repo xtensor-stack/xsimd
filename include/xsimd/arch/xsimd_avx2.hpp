@@ -353,7 +353,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(std::is_same<T, uint8_t>::value)
             {
-                return utils::bitwise_lshift_as_twice_larger<uint8_t, uint16_t>(self, shifts);
+                return utils::bitwise_lshift_as_twice_larger<T, uint16_t>(self, shifts);
             }
             XSIMD_IF_CONSTEXPR(std::is_same<T, uint16_t>::value)
             {
