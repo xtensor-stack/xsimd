@@ -372,8 +372,8 @@ struct xsimd_api_integral_types_functions
         CHECK_EQ(extract(cr), r);
     }
 
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-    void test_bitwise_lshift_multiple()
+    template <typename U = T>
+    void test_bitwise_lshift_multiple(typename std::enable_if<!std::is_integral<U>::value, int>::type = 0)
     {
         constexpr auto Max = static_cast<value_type>(std::numeric_limits<value_type>::digits);
         constexpr auto max_batch = xsimd::make_batch_constant<value_type, Max>();
@@ -391,7 +391,11 @@ struct xsimd_api_integral_types_functions
             CHECK_EQ(shifted_cst.get(i), 1 << shifts.get(i));
         }
     }
-#endif
+
+    template <typename U = T>
+    void test_bitwise_lshift_multiple(typename std::enable_if<std::is_integral<U>::value, int>::type = 0)
+    {
+    }
 
     void test_bitwise_rshift()
     {
@@ -460,15 +464,10 @@ TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
         Test.test_bitwise_lshift_single();
     }
 
-#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
     SUBCASE("bitwise_lshift_multiple")
     {
-        XSIMD_IF_CONSTEXPR(xsimd::is_batch<B>::value)
-        {
-            Test.test_bitwise_lshift_multiple();
-        }
+        Test.test_bitwise_lshift_multiple();
     }
-#endif
 
     SUBCASE("bitwise_rshift")
     {
