@@ -347,23 +347,40 @@ namespace xsimd
         }
 
         // bitwise_lshift multiple (constant)
-        template <class A, class T, T... Vs, detail::enable_integral_t<T> = 0>
+        template <class T, class A, T... Vs, detail::enable_sized_integral_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> bitwise_lshift(
             batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<avx2> req) noexcept
         {
-            XSIMD_IF_CONSTEXPR(std::is_same<T, uint8_t>::value)
-            {
-                return utils::bitwise_lshift_as_twice_larger<T, uint16_t>(self, shifts);
-            }
-            XSIMD_IF_CONSTEXPR(std::is_same<T, uint16_t>::value)
-            {
-                constexpr auto mults = batch_constant<uint16_t, A, static_cast<uint16_t>(1u << Vs)...>();
-                return _mm256_mullo_epi16(self, mults.as_batch());
-            }
-            else
-            {
-                return bitwise_lshift(self, shifts.as_batch(), req);
-            }
+            return bitwise_lshift(self, shifts.as_batch(), req);
+        }
+
+        template <class T, class A, T... Vs, detail::enable_sized_integral_t<T, 4> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(
+            batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<avx2> req) noexcept
+        {
+            return bitwise_lshift(self, shifts.as_batch(), req);
+        }
+
+        template <class T, class A, T... Vs, detail::enable_sized_integral_t<T, 2> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(
+            batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<avx2>) noexcept
+        {
+            using uint_t = typename std::make_unsigned<T>::type;
+            return bitwise_cast<T>(
+                utils::bitwise_lshift_as_twice_larger<uint_t, uint32_t>(
+                    bitwise_cast<uint_t>(self),
+                    bitwise_cast<uint_t>(shifts)));
+        }
+
+        template <class T, class A, T... Vs, detail::enable_sized_integral_t<T, 1> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(
+            batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<avx2>) noexcept
+        {
+            using uint_t = typename std::make_unsigned<T>::type;
+            return bitwise_cast<T>(
+                utils::bitwise_lshift_as_twice_larger<uint_t, uint16_t>(
+                    bitwise_cast<uint_t>(self),
+                    bitwise_cast<uint_t>(shifts)));
         }
 
         // bitwise_rshift
