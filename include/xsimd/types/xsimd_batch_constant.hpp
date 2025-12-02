@@ -121,14 +121,14 @@ namespace xsimd
 
         template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
         static constexpr batch_bool_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
-        apply(detail::index_sequence<Indices...>)
+        apply(std::index_sequence<Indices...>)
         {
             return {};
         }
 
         template <class F, bool... OtherValues>
         static constexpr auto apply(batch_bool_constant<T, A, Values...>, batch_bool_constant<T, A, OtherValues...>)
-            -> decltype(apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
+            -> decltype(apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
             return {};
@@ -212,7 +212,7 @@ namespace xsimd
     namespace detail
     {
         template <class A2, std::size_t BeginIdx, typename T, class A, bool... Values, std::size_t... Is>
-        XSIMD_INLINE constexpr auto splice_impl(index_sequence<Is...>) noexcept
+        XSIMD_INLINE constexpr auto splice_impl(std::index_sequence<Is...>) noexcept
             -> batch_bool_constant<
                 T, A2,
                 std::tuple_element<BeginIdx + Is,
@@ -225,7 +225,7 @@ namespace xsimd
                   typename T, class A, bool... Values,
                   std::size_t N = (End >= Begin ? (End - Begin) : 0)>
         XSIMD_INLINE constexpr auto splice(batch_bool_constant<T, A, Values...>) noexcept
-            -> decltype(splice_impl<A2, Begin, T, A, Values...>(make_index_sequence<N>()))
+            -> decltype(splice_impl<A2, Begin, T, A, Values...>(std::make_index_sequence<N>()))
         {
             static_assert(Begin <= End, "splice: Begin must be <= End");
             static_assert(End <= sizeof...(Values), "splice: End must be <= size");
@@ -235,7 +235,7 @@ namespace xsimd
 
         template <class A2, typename T, class A, bool... Values>
         XSIMD_INLINE constexpr auto lower_half(batch_bool_constant<T, A, Values...>) noexcept
-            -> decltype(splice_impl<A2, 0, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>()))
+            -> decltype(splice_impl<A2, 0, T, A, Values...>(std::make_index_sequence<sizeof...(Values) / 2>()))
         {
             static_assert(sizeof...(Values) % 2 == 0, "lower_half requires even size");
             static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
@@ -245,7 +245,7 @@ namespace xsimd
 
         template <class A2, typename T, class A, bool... Values>
         XSIMD_INLINE constexpr auto upper_half(batch_bool_constant<T, A, Values...>) noexcept
-            -> decltype(splice_impl<A2, sizeof...(Values) / 2, T, A, Values...>(make_index_sequence<sizeof...(Values) / 2>()))
+            -> decltype(splice_impl<A2, sizeof...(Values) / 2, T, A, Values...>(std::make_index_sequence<sizeof...(Values) / 2>()))
         {
             static_assert(sizeof...(Values) % 2 == 0, "upper_half requires even size");
             static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
@@ -337,14 +337,14 @@ namespace xsimd
 
         template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
         static constexpr batch_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
-        apply(detail::index_sequence<Indices...>)
+        apply(std::index_sequence<Indices...>)
         {
             return {};
         }
 
         template <class F, T... OtherValues>
         static constexpr auto apply(batch_constant<T, A, Values...>, batch_constant<T, A, OtherValues...>)
-            -> decltype(apply<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
+            -> decltype(apply<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
             return {};
@@ -399,14 +399,14 @@ namespace xsimd
 
         template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
         static constexpr batch_bool_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
-        apply_bool(detail::index_sequence<Indices...>)
+        apply_bool(std::index_sequence<Indices...>)
         {
             return {};
         }
 
         template <class F, T... OtherValues>
         static constexpr auto apply_bool(batch_constant<T, A, Values...>, batch_constant<T, A, OtherValues...>)
-            -> decltype(apply_bool<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(detail::make_index_sequence<sizeof...(Values)>()))
+            -> decltype(apply_bool<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
             return {};
@@ -449,28 +449,28 @@ namespace xsimd
     {
         template <typename T, class G, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_constant<T, A, (T)G::get(Is, sizeof...(Is))...>
-        make_batch_constant(detail::index_sequence<Is...>) noexcept
+        make_batch_constant(std::index_sequence<Is...>) noexcept
         {
             return {};
         }
 
         template <typename T, T Val, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_constant<T, A, (static_cast<T>(0 * Is) + Val)...>
-        make_batch_constant(detail::index_sequence<Is...>) noexcept
+        make_batch_constant(std::index_sequence<Is...>) noexcept
         {
             return {};
         }
 
         template <typename T, class G, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_bool_constant<T, A, G::get(Is, sizeof...(Is))...>
-        make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
+        make_batch_bool_constant(std::index_sequence<Is...>) noexcept
         {
             return {};
         }
 
         template <typename T, bool Val, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_bool_constant<T, A, ((static_cast<bool>(Is) | true) & Val)...>
-        make_batch_bool_constant(detail::index_sequence<Is...>) noexcept
+        make_batch_bool_constant(std::index_sequence<Is...>) noexcept
         {
             return {};
         }
@@ -498,7 +498,7 @@ namespace xsimd
      * @endcode
      */
     template <typename T, class G, class A = default_arch>
-    XSIMD_INLINE constexpr decltype(detail::make_batch_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    XSIMD_INLINE constexpr decltype(detail::make_batch_constant<T, G, A>(std::make_index_sequence<batch<T, A>::size>()))
     make_batch_constant() noexcept
     {
         return {};
@@ -510,7 +510,7 @@ namespace xsimd
      * Similar to @c make_batch_constant for @c batch_bool_constant
      */
     template <typename T, class G, class A = default_arch>
-    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, G, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, G, A>(std::make_index_sequence<batch<T, A>::size>()))
     make_batch_bool_constant() noexcept
     {
         return {};
@@ -526,7 +526,7 @@ namespace xsimd
      * @tparam A Architecture that will be used when converting to a regular batch.
      */
     template <typename T, T Val, class A = default_arch>
-    XSIMD_INLINE constexpr decltype(detail::make_batch_constant<T, Val, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    XSIMD_INLINE constexpr decltype(detail::make_batch_constant<T, Val, A>(std::make_index_sequence<batch<T, A>::size>()))
     make_batch_constant() noexcept
     {
         return {};
@@ -538,7 +538,7 @@ namespace xsimd
      * Similar to @c make_batch_constant for @c batch_bool_constant
      */
     template <typename T, bool Val, class A = default_arch>
-    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, Val, A>(detail::make_index_sequence<batch<T, A>::size>()))
+    XSIMD_INLINE constexpr decltype(detail::make_batch_bool_constant<T, Val, A>(std::make_index_sequence<batch<T, A>::size>()))
     make_batch_bool_constant() noexcept
     {
         return {};

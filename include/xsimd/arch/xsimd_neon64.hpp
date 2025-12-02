@@ -15,6 +15,7 @@
 #include <complex>
 #include <cstddef>
 #include <tuple>
+#include <utility>
 
 #include "../types/xsimd_neon64_register.hpp"
 #include "../types/xsimd_utils.hpp"
@@ -1132,7 +1133,7 @@ namespace xsimd
         {
             template <class A, size_t I, size_t... Is>
             XSIMD_INLINE batch<double, A> extract_pair(batch<double, A> const& lhs, batch<double, A> const& rhs, std::size_t n,
-                                                       ::xsimd::detail::index_sequence<I, Is...>) noexcept
+                                                       std::index_sequence<I, Is...>) noexcept
             {
                 if (n == I)
                 {
@@ -1140,7 +1141,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return extract_pair(lhs, rhs, n, ::xsimd::detail::index_sequence<Is...>());
+                    return extract_pair(lhs, rhs, n, std::index_sequence<Is...>());
                 }
             }
         }
@@ -1150,7 +1151,7 @@ namespace xsimd
         {
             constexpr std::size_t size = batch<double, A>::size;
             assert(n < size && "index in bounds");
-            return detail::extract_pair(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
+            return detail::extract_pair(lhs, rhs, n, std::make_index_sequence<size>());
         }
 
         /******************
@@ -1396,8 +1397,6 @@ namespace xsimd
         namespace detail
         {
             using ::xsimd::batch_constant;
-            using ::xsimd::detail::integer_sequence;
-            using ::xsimd::detail::make_integer_sequence;
 
             template <class CB1, class CB2, class IS>
             struct index_burst_impl;
@@ -1405,7 +1404,7 @@ namespace xsimd
             template <typename T1, class A, typename T2, T2... V,
                       T2... incr>
             struct index_burst_impl<batch_constant<T1, A>, batch_constant<T2, A, V...>,
-                                    integer_sequence<T2, incr...>>
+                                    std::integer_sequence<T2, incr...>>
             {
                 using type = batch_constant<T2, A, V...>;
             };
@@ -1413,11 +1412,11 @@ namespace xsimd
             template <typename T1, class A, T1 V0, T1... V1,
                       typename T2, T2... V2, T2... incr>
             struct index_burst_impl<batch_constant<T1, A, V0, V1...>, batch_constant<T2, A, V2...>,
-                                    integer_sequence<T2, incr...>>
+                                    std::integer_sequence<T2, incr...>>
             {
                 using next_input = batch_constant<T1, A, V1...>;
                 using next_output = batch_constant<T2, A, V2..., (V0 + incr)...>;
-                using type = typename index_burst_impl<next_input, next_output, integer_sequence<T2, incr...>>::type;
+                using type = typename index_burst_impl<next_input, next_output, std::integer_sequence<T2, incr...>>::type;
             };
 
             template <class B, class T>
@@ -1429,7 +1428,7 @@ namespace xsimd
                 static constexpr size_t mul = sizeof(Tp) / sizeof(T);
                 using input = batch_constant<Tp, A, (mul * V)...>;
                 using output = batch_constant<T, A>;
-                using type = typename index_burst_impl<input, output, make_integer_sequence<T, mul>>::type;
+                using type = typename index_burst_impl<input, output, std::make_integer_sequence<T, mul>>::type;
             };
 
             template <class B, typename T>

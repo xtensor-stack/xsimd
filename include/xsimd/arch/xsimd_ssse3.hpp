@@ -57,20 +57,20 @@ namespace xsimd
         {
 
             template <class T, class A>
-            XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const&, batch<T, A> const& other, std::size_t, ::xsimd::detail::index_sequence<>) noexcept
+            XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const&, batch<T, A> const& other, std::size_t, std::index_sequence<>) noexcept
             {
                 return other;
             }
 
             template <class T, class A, std::size_t I, std::size_t... Is>
-            XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, ::xsimd::detail::index_sequence<I, Is...>) noexcept
+            XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, std::index_sequence<I, Is...>) noexcept
             {
                 if (i == I)
                 {
                     return _mm_alignr_epi8(self, other, sizeof(T) * I);
                 }
                 else
-                    return extract_pair(self, other, i, ::xsimd::detail::index_sequence<Is...>());
+                    return extract_pair(self, other, i, std::index_sequence<Is...>());
             }
         }
 
@@ -79,7 +79,7 @@ namespace xsimd
         {
             constexpr std::size_t size = batch<T, A>::size;
             assert(i < size && "index in bounds");
-            return detail::extract_pair(self, other, i, ::xsimd::detail::make_index_sequence<size>());
+            return detail::extract_pair(self, other, i, std::make_index_sequence<size>());
         }
 
         // reduce_add

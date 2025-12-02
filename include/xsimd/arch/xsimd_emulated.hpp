@@ -52,7 +52,7 @@ namespace xsimd
             }
 
             template <class F, class B, class... Bs, size_t... Is>
-            auto emulated_apply(F func, ::xsimd::detail::index_sequence<Is...>, B const& b, Bs const&... bs) -> std::array<decltype(func(b.data[0], bs.data[0]...)), B::size>
+            auto emulated_apply(F func, std::index_sequence<Is...>, B const& b, Bs const&... bs) -> std::array<decltype(func(b.data[0], bs.data[0]...)), B::size>
             {
                 return { emulated_apply<Is>(func, b, bs...)... };
             }
@@ -60,7 +60,7 @@ namespace xsimd
             template <class B, class F, class... Bs>
             auto emulated_apply(F func, B const& b, Bs const&... bs) -> std::array<decltype(func(b.data[0], bs.data[0]...)), B::size>
             {
-                return emulated_apply(func, ::xsimd::detail::make_index_sequence<B::size>(), b, bs...);
+                return emulated_apply(func, std::make_index_sequence<B::size>(), b, bs...);
             }
         }
 

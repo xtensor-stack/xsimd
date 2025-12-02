@@ -780,14 +780,14 @@ namespace xsimd
         namespace detail
         {
             template <class A, class T>
-            XSIMD_INLINE batch<T, A> sve_extract_pair(batch<T, A> const&, batch<T, A> const& /*rhs*/, std::size_t, ::xsimd::detail::index_sequence<>) noexcept
+            XSIMD_INLINE batch<T, A> sve_extract_pair(batch<T, A> const&, batch<T, A> const& /*rhs*/, std::size_t, std::index_sequence<>) noexcept
             {
                 assert(false && "extract_pair out of bounds");
                 return batch<T, A> {};
             }
 
             template <class A, class T, size_t I, size_t... Is>
-            XSIMD_INLINE batch<T, A> sve_extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, ::xsimd::detail::index_sequence<I, Is...>) noexcept
+            XSIMD_INLINE batch<T, A> sve_extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, std::index_sequence<I, Is...>) noexcept
             {
                 if (n == I)
                 {
@@ -795,12 +795,12 @@ namespace xsimd
                 }
                 else
                 {
-                    return sve_extract_pair(lhs, rhs, n, ::xsimd::detail::index_sequence<Is...>());
+                    return sve_extract_pair(lhs, rhs, n, std::index_sequence<Is...>());
                 }
             }
 
             template <class A, class T, size_t... Is>
-            XSIMD_INLINE batch<T, A> sve_extract_pair_impl(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, ::xsimd::detail::index_sequence<0, Is...>) noexcept
+            XSIMD_INLINE batch<T, A> sve_extract_pair_impl(batch<T, A> const& lhs, batch<T, A> const& rhs, std::size_t n, std::index_sequence<0, Is...>) noexcept
             {
                 if (n == 0)
                 {
@@ -808,7 +808,7 @@ namespace xsimd
                 }
                 else
                 {
-                    return sve_extract_pair(lhs, rhs, n, ::xsimd::detail::index_sequence<Is...>());
+                    return sve_extract_pair(lhs, rhs, n, std::index_sequence<Is...>());
                 }
             }
         }
@@ -818,7 +818,7 @@ namespace xsimd
         {
             constexpr std::size_t size = batch<T, A>::size;
             assert(n < size && "index in bounds");
-            return detail::sve_extract_pair_impl(lhs, rhs, n, ::xsimd::detail::make_index_sequence<size>());
+            return detail::sve_extract_pair_impl(lhs, rhs, n, std::make_index_sequence<size>());
         }
 
         // select

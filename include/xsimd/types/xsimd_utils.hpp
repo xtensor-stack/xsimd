@@ -17,6 +17,7 @@
 #include <cstring>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
 #include "xtl/xcomplex.hpp"
@@ -256,77 +257,18 @@ namespace xsimd
             using type = T;
         };
 
-#ifdef __cpp_lib_integer_sequence
-        using std::index_sequence;
-        using std::integer_sequence;
-        using std::make_index_sequence;
-        using std::make_integer_sequence;
-
-        using std::index_sequence_for;
-#else
-        template <typename T, T... Is>
-        struct integer_sequence
-        {
-            using value_type = T;
-            static constexpr std::size_t size() noexcept { return sizeof...(Is); }
-        };
-
-        template <typename Lhs, typename Rhs>
-        struct make_integer_sequence_concat;
-
-        template <typename T, T... Lhs, T... Rhs>
-        struct make_integer_sequence_concat<integer_sequence<T, Lhs...>,
-                                            integer_sequence<T, Rhs...>>
-            : identity<integer_sequence<T, Lhs..., (sizeof...(Lhs) + Rhs)...>>
-        {
-        };
-
-        template <typename T>
-        struct make_integer_sequence_impl;
-
-        template <typename T>
-        struct make_integer_sequence_impl<std::integral_constant<T, (T)0>> : identity<integer_sequence<T>>
-        {
-        };
-
-        template <typename T>
-        struct make_integer_sequence_impl<std::integral_constant<T, (T)1>> : identity<integer_sequence<T, 0>>
-        {
-        };
-
-        template <typename T, T N>
-        struct make_integer_sequence_impl<std::integral_constant<T, N>>
-            : make_integer_sequence_concat<typename make_integer_sequence_impl<std::integral_constant<T, N / 2>>::type,
-                                           typename make_integer_sequence_impl<std::integral_constant<T, N - (N / 2)>>::type>
-        {
-        };
-
-        template <typename T, T N>
-        using make_integer_sequence = typename make_integer_sequence_impl<std::integral_constant<T, N>>::type;
-
-        template <std::size_t... Is>
-        using index_sequence = integer_sequence<std::size_t, Is...>;
-
-        template <std::size_t N>
-        using make_index_sequence = make_integer_sequence<std::size_t, N>;
-
-        template <typename... Ts>
-        using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
-
-#endif
-
         template <int... Is>
-        using int_sequence = integer_sequence<int, Is...>;
+        using int_sequence = std::integer_sequence<int, Is...>;
 
         template <int N>
-        using make_int_sequence = make_integer_sequence<int, N>;
+        using make_int_sequence = std::make_integer_sequence<int, N>;
 
         template <typename... Ts>
         using int_sequence_for = make_int_sequence<(int)sizeof...(Ts)>;
 
         // Type-casted index sequence.
         template <class P, size_t... Is>
-        inline P indexes_from(index_sequence<Is...>) noexcept
+        inline P indexes_from(std::index_sequence<Is...>) noexcept
         {
             return { static_cast<typename P::value_type>(Is)... };
         }
@@ -334,7 +276,7 @@ namespace xsimd
         template <class P>
         inline P make_sequence_as_batch() noexcept
         {
-            return indexes_from<P>(make_index_sequence<P::size>());
+            return indexes_from<P>(std::make_index_sequence<P::size>());
         }
     }
 
@@ -345,23 +287,23 @@ namespace xsimd
     namespace detail
     {
         template <class T, class... Types, size_t I, size_t... Is>
-        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, T>, index_sequence<I, Is...>) noexcept
+        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, T>, std::index_sequence<I, Is...>) noexcept
         {
             return std::get<I>(t);
         }
 
         template <class T, class U, class... Types, size_t I, size_t... Is>
-        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, U>, index_sequence<I, Is...>) noexcept
+        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, U>, std::index_sequence<I, Is...>) noexcept
         {
             using tuple_elem = typename std::tuple_element<I + 1, std::tuple<Types...>>::type;
-            return get_impl<T>(t, std::is_same<T, tuple_elem>(), index_sequence<Is...>());
+            return get_impl<T>(t, std::is_same<T, tuple_elem>(), std::index_sequence<Is...>());
         }
 
         template <class T, class... Types>
         inline const T& get(const std::tuple<Types...>& t) noexcept
         {
             using tuple_elem = typename std::tuple_element<0, std::tuple<Types...>>::type;
-            return get_impl<T>(t, std::is_same<T, tuple_elem>(), make_index_sequence<sizeof...(Types)>());
+            return get_impl<T>(t, std::is_same<T, tuple_elem>(), std::make_index_sequence<sizeof...(Types)>());
         }
     }
 
@@ -406,7 +348,7 @@ namespace xsimd
         // std::array constructor from scalar value ("broadcast")
         template <typename T, std::size_t... Is>
         inline constexpr std::array<T, sizeof...(Is)>
-        array_from_scalar_impl(const T& scalar, index_sequence<Is...>) noexcept
+        array_from_scalar_impl(const T& scalar, std::index_sequence<Is...>) noexcept
         {
             // You can safely ignore this silly ternary, the "scalar" is all
             // that matters. The rest is just a dirty workaround...
@@ -417,13 +359,13 @@ namespace xsimd
         inline constexpr std::array<T, N>
         array_from_scalar(const T& scalar) noexcept
         {
-            return array_from_scalar_impl(scalar, make_index_sequence<N>());
+            return array_from_scalar_impl(scalar, std::make_index_sequence<N>());
         }
 
         // std::array constructor from C-style pointer (handled as an array)
         template <typename T, std::size_t... Is>
         inline constexpr std::array<T, sizeof...(Is)>
-        array_from_pointer_impl(const T* c_array, index_sequence<Is...>) noexcept
+        array_from_pointer_impl(const T* c_array, std::index_sequence<Is...>) noexcept
         {
             return std::array<T, sizeof...(Is)> { c_array[Is]... };
         }
@@ -432,7 +374,7 @@ namespace xsimd
         inline constexpr std::array<T, N>
         array_from_pointer(const T* c_array) noexcept
         {
-            return array_from_pointer_impl(c_array, make_index_sequence<N>());
+            return array_from_pointer_impl(c_array, std::make_index_sequence<N>());
         }
     }
 
