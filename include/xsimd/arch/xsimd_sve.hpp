@@ -87,11 +87,11 @@ namespace xsimd
         namespace detail
         {
             // "char" is not allowed in SVE load/store operations
-            using sve_fix_char_t_impl = typename std::conditional<std::is_signed<char>::value, int8_t, uint8_t>::type;
+            using sve_fix_char_t_impl = std::conditional_t<std::is_signed<char>::value, int8_t, uint8_t>;
 
             template <class T>
-            using sve_fix_char_t = typename std::conditional<std::is_same<char, typename std::decay<T>::type>::value,
-                                                             sve_fix_char_t_impl, T>::type;
+            using sve_fix_char_t = std::conditional_t<std::is_same<char, std::decay_t<T>>::value,
+                                                      sve_fix_char_t_impl, T>;
         }
 
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
@@ -150,7 +150,7 @@ namespace xsimd
         template <class A, class T, detail::sve_enable_floating_point_t<T> = 0>
         XSIMD_INLINE void store_complex_aligned(std::complex<T>* dst, batch<std::complex<T>, A> const& src, requires_arch<sve>) noexcept
         {
-            using v2type = typename std::conditional<(sizeof(T) == 4), svfloat32x2_t, svfloat64x2_t>::type;
+            using v2type = std::conditional_t<(sizeof(T) == 4), svfloat32x2_t, svfloat64x2_t>;
             v2type tmp {};
             tmp = svset2(tmp, 0, src.real());
             tmp = svset2(tmp, 1, src.imag());

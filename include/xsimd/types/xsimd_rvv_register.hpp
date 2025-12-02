@@ -298,11 +298,11 @@ namespace xsimd
             // It's difficult dealing with both char and whichever *int8_t type
             // is compatible with char, so just avoid it altogether.
             //
-            using rvv_char_t = typename std::conditional<std::is_signed<char>::value, int8_t, uint8_t>::type;
+            using rvv_char_t = std::conditional_t<std::is_signed<char>::value, int8_t, uint8_t>;
             template <class T>
-            using rvv_fix_char_t = typename std::conditional<
-                std::is_same<char, typename std::decay<T>::type>::value,
-                rvv_char_t, T>::type;
+            using rvv_fix_char_t = std::conditional_t<
+                std::is_same<char, std::decay_t<T>>::value,
+                rvv_char_t, T>;
 
             // An explicit constructor isn't really explicit enough to allow
             // implicit bit-casting operations between incompatible types, so
@@ -342,7 +342,7 @@ namespace xsimd
                 operator register_type() const noexcept { return value.get(); }
             };
             template <class T, size_t Width = XSIMD_RVV_BITS>
-            using rvv_reg_t = typename std::conditional<!std::is_void<T>::value, rvv_reg<rvv_fix_char_t<T>, Width>, void>::type;
+            using rvv_reg_t = std::conditional_t<!std::is_void<T>::value, rvv_reg<rvv_fix_char_t<T>, Width>, void>;
 
             // And some more of the same stuff for bool types, which have
             // similar problems and similar workarounds.
@@ -450,14 +450,14 @@ namespace xsimd
             using floating_point_rvv_vector_type = typename rvv_vector_type_impl<8 * sizeof(T)>::floating_point_type;
 
             template <class T>
-            using signed_int_or_floating_point_rvv_vector_type = typename std::conditional<std::is_floating_point<T>::value,
-                                                                                           floating_point_rvv_vector_type<T>,
-                                                                                           signed_int_rvv_vector_type<T>>::type;
+            using signed_int_or_floating_point_rvv_vector_type = std::conditional_t<std::is_floating_point<T>::value,
+                                                                                    floating_point_rvv_vector_type<T>,
+                                                                                    signed_int_rvv_vector_type<T>>;
 
             template <class T>
-            using rvv_vector_type = typename std::conditional<std::is_signed<T>::value,
-                                                              signed_int_or_floating_point_rvv_vector_type<T>,
-                                                              unsigned_int_rvv_vector_type<T>>::type;
+            using rvv_vector_type = std::conditional_t<std::is_signed<T>::value,
+                                                       signed_int_or_floating_point_rvv_vector_type<T>,
+                                                       unsigned_int_rvv_vector_type<T>>;
         } // namespace detail
 
         XSIMD_DECLARE_SIMD_REGISTER(bool, rvv, detail::rvv_vector_type<unsigned char>);

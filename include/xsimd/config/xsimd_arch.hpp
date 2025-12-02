@@ -133,8 +133,8 @@ namespace xsimd
         template <class L, class Arch, class... Archs>
         struct supported_helper<L, arch_list<Arch, Archs...>>
             : supported_helper<
-                  typename std::conditional<Arch::supported(),
-                                            typename L::template add<Arch>, L>::type,
+                  std::conditional_t<Arch::supported(),
+                                     typename L::template add<Arch>, L>,
                   arch_list<Archs...>>
         {
         };

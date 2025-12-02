@@ -402,7 +402,7 @@ namespace xsimd
         template <typename T>
         struct widen
         {
-            using type = typename std::make_signed<typename widen<typename std::make_unsigned<T>::type>::type>::type;
+            using type = std::make_signed_t<typename widen<std::make_unsigned_t<T>>::type>;
         };
 
         template <>

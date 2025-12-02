@@ -60,7 +60,7 @@ namespace xsimd
                 // Inspired by
                 // https://stackoverflow.com/questions/5697500/take-the-average-of-two-signed-numbers-in-c
                 auto t = (x & y) + ((x ^ y) >> 1);
-                auto t_u = bitwise_cast<typename std::make_unsigned<T>::type>(t);
+                auto t_u = bitwise_cast<std::make_unsigned_t<T>>(t);
                 auto avg = t + (bitwise_cast<T>(t_u >> (8 * sizeof(T) - 1)) & (x ^ y));
                 return avg;
             }

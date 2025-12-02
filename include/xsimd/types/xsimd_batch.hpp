@@ -1576,10 +1576,10 @@ namespace xsimd
         template <typename T, std::size_t N, class Arch, class... Archs>
         struct sized_batch<T, N, xsimd::arch_list<Arch, Archs...>>
         {
-            using type = typename std::conditional<
+            using type = std::conditional_t<
                 batch_trait<T, Arch>::size == N,
                 typename batch_trait<T, Arch>::type,
-                typename sized_batch<T, N, xsimd::arch_list<Archs...>>::type>::type;
+                typename sized_batch<T, N, xsimd::arch_list<Archs...>>::type>;
         };
     }
 

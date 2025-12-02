@@ -42,9 +42,9 @@ namespace xsimd
         template <class T>
         struct simd_avx512_bool_register
         {
-            using register_type = typename std::conditional<
-                (sizeof(T) < 4), std::conditional<(sizeof(T) == 1), __mmask64, __mmask32>,
-                std::conditional<(sizeof(T) == 4), __mmask16, __mmask8>>::type::type;
+            using register_type = std::conditional_t<
+                (sizeof(T) < 4), std::conditional_t<(sizeof(T) == 1), __mmask64, __mmask32>,
+                std::conditional_t<(sizeof(T) == 4), __mmask16, __mmask8>>;
             register_type data;
             simd_avx512_bool_register() = default;
             simd_avx512_bool_register(register_type r) { data = r; }

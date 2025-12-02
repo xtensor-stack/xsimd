@@ -78,13 +78,13 @@ namespace xsimd
             using unsigned_neon_vector_type = typename neon_vector_type_impl<8 * sizeof(T)>::unsigned_type;
 
             template <class T>
-            using neon_vector_type = typename std::conditional<std::is_signed<T>::value,
-                                                               signed_neon_vector_type<T>,
-                                                               unsigned_neon_vector_type<T>>::type;
+            using neon_vector_type = std::conditional_t<std::is_signed<T>::value,
+                                                        signed_neon_vector_type<T>,
+                                                        unsigned_neon_vector_type<T>>;
 
-            using char_neon_vector_type = typename std::conditional<std::is_signed<char>::value,
-                                                                    signed_neon_vector_type<char>,
-                                                                    unsigned_neon_vector_type<char>>::type;
+            using char_neon_vector_type = std::conditional_t<std::is_signed<char>::value,
+                                                             signed_neon_vector_type<char>,
+                                                             unsigned_neon_vector_type<char>>;
         }
 
         XSIMD_DECLARE_SIMD_REGISTER(signed char, neon, detail::neon_vector_type<signed char>);

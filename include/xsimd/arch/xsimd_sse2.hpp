@@ -551,7 +551,7 @@ namespace xsimd
         {
             return _mm_castsi128_ps(self);
         }
-        template <class A, class T, class Tp, class = std::enable_if_t<std::is_integral<typename std::common_type<T, Tp>::type>::value>>
+        template <class A, class T, class Tp, class = std::enable_if_t<std::is_integral<std::common_type_t<T, Tp>>::value>>
         XSIMD_INLINE batch<Tp, A> bitwise_cast(batch<T, A> const& self, batch<Tp, A> const&, requires_arch<sse2>) noexcept
         {
             return batch<Tp, A>(self.data);

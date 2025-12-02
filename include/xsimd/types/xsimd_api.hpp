@@ -524,9 +524,9 @@ namespace xsimd
     {
         detail::static_check_supported_config<From, A>();
         using batch_value_type = typename simd_return_type<From, To, A>::value_type;
-        using value_type = typename std::conditional<std::is_same<From, bool>::value,
-                                                     bool,
-                                                     batch_value_type>::type;
+        using value_type = std::conditional_t<std::is_same<From, bool>::value,
+                                              bool,
+                                              batch_value_type>;
         return simd_return_type<From, To, A>(value_type(v));
     }
 

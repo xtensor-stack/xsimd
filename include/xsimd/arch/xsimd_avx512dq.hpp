@@ -236,8 +236,9 @@ namespace xsimd
             XSIMD_IF_CONSTEXPR(dup_lo || dup_hi)
             {
                 const batch<float, avx2> half = _mm512_extractf32x8_ps(self, dup_lo ? 0 : 1);
-                constexpr typename std::conditional<dup_lo, batch_constant<uint32_t, avx2, V0 % 8, V1 % 8, V2 % 8, V3 % 8, V4 % 8, V5 % 8, V6 % 8, V7 % 8>,
-                                                    batch_constant<uint32_t, avx2, V8 % 8, V9 % 8, V10 % 8, V11 % 8, V12 % 8, V13 % 8, V14 % 8, V15 % 8>>::type half_mask {};
+                constexpr std::conditional_t<dup_lo, batch_constant<uint32_t, avx2, V0 % 8, V1 % 8, V2 % 8, V3 % 8, V4 % 8, V5 % 8, V6 % 8, V7 % 8>,
+                                             batch_constant<uint32_t, avx2, V8 % 8, V9 % 8, V10 % 8, V11 % 8, V12 % 8, V13 % 8, V14 % 8, V15 % 8>>
+                    half_mask {};
                 auto permuted = swizzle(half, half_mask, avx2 {});
                 // merge the two slices into an AVX512F register:
                 return _mm512_broadcast_f32x8(permuted); // duplicates the 256-bit perm into both halves
