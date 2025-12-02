@@ -13,6 +13,7 @@
 #define XSIMD_BATCH_CONSTANT_HPP
 
 #include <cstddef>
+#include <functional>
 #include <utility>
 
 #include "./xsimd_batch.hpp"
@@ -289,42 +290,12 @@ namespace xsimd
             return values[i];
         }
 
-        struct arithmetic_add
-        {
-            constexpr T operator()(T x, T y) const { return x + y; }
-        };
-        struct arithmetic_sub
-        {
-            constexpr T operator()(T x, T y) const { return x - y; }
-        };
-        struct arithmetic_mul
-        {
-            constexpr T operator()(T x, T y) const { return x * y; }
-        };
-        struct arithmetic_div
-        {
-            constexpr T operator()(T x, T y) const { return x / y; }
-        };
-        struct arithmetic_mod
-        {
-            constexpr T operator()(T x, T y) const { return x % y; }
-        };
-        struct binary_and
-        {
-            constexpr T operator()(T x, T y) const { return x & y; }
-        };
-        struct binary_or
-        {
-            constexpr T operator()(T x, T y) const { return x | y; }
-        };
-        struct binary_xor
-        {
-            constexpr T operator()(T x, T y) const { return x ^ y; }
-        };
+        template <typename = void>
         struct binary_rshift
         {
             constexpr T operator()(T x, T y) const { return x >> y; }
         };
+        template <typename = void>
         struct binary_lshift
         {
             constexpr T operator()(T x, T y) const { return x << y; }
@@ -349,46 +320,21 @@ namespace xsimd
     template <T... OtherValues>                                                  \
     constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
     {                                                                            \
-        return apply<NAME>(*this, other);                                        \
+        return apply<NAME<void>>(*this, other);                                  \
     }
 
-        MAKE_BINARY_OP(+, arithmetic_add)
-        MAKE_BINARY_OP(-, arithmetic_sub)
-        MAKE_BINARY_OP(*, arithmetic_mul)
-        MAKE_BINARY_OP(/, arithmetic_div)
-        MAKE_BINARY_OP(%, arithmetic_mod)
-        MAKE_BINARY_OP(&, binary_and)
-        MAKE_BINARY_OP(|, binary_or)
-        MAKE_BINARY_OP(^, binary_xor)
+        MAKE_BINARY_OP(+, std::plus)
+        MAKE_BINARY_OP(-, std::minus)
+        MAKE_BINARY_OP(*, std::multiplies)
+        MAKE_BINARY_OP(/, std::divides)
+        MAKE_BINARY_OP(%, std::modulus)
+        MAKE_BINARY_OP(&, std::bit_and)
+        MAKE_BINARY_OP(|, std::bit_or)
+        MAKE_BINARY_OP(^, std::bit_xor)
         MAKE_BINARY_OP(<<, binary_lshift)
         MAKE_BINARY_OP(>>, binary_rshift)
 
 #undef MAKE_BINARY_OP
-
-        struct boolean_eq
-        {
-            constexpr bool operator()(T x, T y) const { return x == y; }
-        };
-        struct boolean_ne
-        {
-            constexpr bool operator()(T x, T y) const { return x != y; }
-        };
-        struct boolean_gt
-        {
-            constexpr bool operator()(T x, T y) const { return x > y; }
-        };
-        struct boolean_ge
-        {
-            constexpr bool operator()(T x, T y) const { return x >= y; }
-        };
-        struct boolean_lt
-        {
-            constexpr bool operator()(T x, T y) const { return x < y; }
-        };
-        struct boolean_le
-        {
-            constexpr bool operator()(T x, T y) const { return x <= y; }
-        };
 
         template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
         static constexpr batch_bool_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
@@ -408,15 +354,15 @@ namespace xsimd
     template <T... OtherValues>                                                  \
     constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
     {                                                                            \
-        return apply_bool<NAME>(*this, other);                                   \
+        return apply_bool<NAME<void>>(*this, other);                             \
     }
 
-        MAKE_BINARY_BOOL_OP(==, boolean_eq)
-        MAKE_BINARY_BOOL_OP(!=, boolean_ne)
-        MAKE_BINARY_BOOL_OP(<, boolean_lt)
-        MAKE_BINARY_BOOL_OP(<=, boolean_le)
-        MAKE_BINARY_BOOL_OP(>, boolean_gt)
-        MAKE_BINARY_BOOL_OP(>=, boolean_ge)
+        MAKE_BINARY_BOOL_OP(==, std::equal_to)
+        MAKE_BINARY_BOOL_OP(!=, std::not_equal_to)
+        MAKE_BINARY_BOOL_OP(<, std::less)
+        MAKE_BINARY_BOOL_OP(<=, std::less_equal)
+        MAKE_BINARY_BOOL_OP(>, std::greater)
+        MAKE_BINARY_BOOL_OP(>=, std::greater_equal)
 
 #undef MAKE_BINARY_BOOL_OP
 
