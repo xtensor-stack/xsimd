@@ -299,7 +299,7 @@ namespace xsimd
         } // namespace detail
 
         template <class A, class T, bool... Values, class Mode,
-                  typename = std::enable_if_t<(sizeof(T) >= 4), void>>
+                  typename = std::enable_if_t<(sizeof(T) >= 4)>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem,
                                              batch_bool_constant<T, A, Values...> mask,
                                              convert<T>, Mode, requires_arch<avx512f>) noexcept
@@ -325,7 +325,7 @@ namespace xsimd
         }
 
         template <class A, class T, bool... Values, class Mode,
-                  typename = std::enable_if_t<(sizeof(T) >= 4), void>>
+                  typename = std::enable_if_t<(sizeof(T) >= 4)>>
         XSIMD_INLINE void store_masked(T* mem,
                                        batch<T, A> const& src,
                                        batch_bool_constant<T, A, Values...> mask,
