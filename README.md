@@ -37,7 +37,7 @@ The mathematical functions are a lightweight implementation of the algorithms or
 
 ## Requirements
 
-`xsimd` requires a C++11 compliant compiler. The following C++ compilers are supported:
+`xsimd` requires a C++14 compliant compiler. The following C++ compilers are supported:
 
 Compiler                | Version
 ------------------------|-------------------------------

@@ -69,7 +69,7 @@ The following SIMD instruction set extensions are supported:
 +--------------+---------------------------------------------------------+
 
 
-`xsimd` requires a C++11 compliant compiler. The following C++ compilers are supported:
+`xsimd` requires a C++14 compliant compiler. The following C++ compilers are supported:
 
 +-------------------------+-------------------------------+
 | Compiler                | Version                       |
