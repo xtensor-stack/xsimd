@@ -212,35 +212,35 @@ namespace xsimd
              **************************************/
 
             template <class T>
-            using enable_integral_t = typename std::enable_if<std::is_integral<T>::value, int>::type;
+            using enable_integral_t = std::enable_if_t<std::is_integral<T>::value, int>;
 
             template <class T, size_t S>
-            using enable_sized_signed_t = typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value && sizeof(T) == S, int>::type;
+            using enable_sized_signed_t = std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value && sizeof(T) == S, int>;
 
             template <class T, size_t S>
-            using enable_sized_unsigned_t = typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value && sizeof(T) == S, int>::type;
+            using enable_sized_unsigned_t = std::enable_if_t<std::is_integral<T>::value && !std::is_signed<T>::value && sizeof(T) == S, int>;
 
             template <class T, size_t S>
-            using enable_sized_integral_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) == S, int>::type;
+            using enable_sized_integral_t = std::enable_if_t<std::is_integral<T>::value && sizeof(T) == S, int>;
 
             template <class T, size_t S>
-            using enable_sized_t = typename std::enable_if<sizeof(T) == S, int>::type;
+            using enable_sized_t = std::enable_if_t<sizeof(T) == S, int>;
 
             template <class T, size_t S>
-            using enable_max_sized_integral_t = typename std::enable_if<std::is_integral<T>::value && sizeof(T) <= S, int>::type;
+            using enable_max_sized_integral_t = std::enable_if_t<std::is_integral<T>::value && sizeof(T) <= S, int>;
 
             /********************************
              * Matching & mismatching sizes *
              ********************************/
 
             template <class T, class U, class B = int>
-            using sizes_match_t = typename std::enable_if<sizeof(T) == sizeof(U), B>::type;
+            using sizes_match_t = std::enable_if_t<sizeof(T) == sizeof(U), B>;
 
             template <class T, class U, class B = int>
-            using sizes_mismatch_t = typename std::enable_if<sizeof(T) != sizeof(U), B>::type;
+            using sizes_mismatch_t = std::enable_if_t<sizeof(T) != sizeof(U), B>;
 
             template <class T, class U, class B = int>
-            using stride_match_t = typename std::enable_if<!std::is_same<T, U>::value && sizeof(T) == sizeof(U), B>::type;
+            using stride_match_t = std::enable_if_t<!std::is_same<T, U>::value && sizeof(T) == sizeof(U), B>;
         } // namespace detail
     } // namespace kernel
 

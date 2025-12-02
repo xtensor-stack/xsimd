@@ -61,23 +61,23 @@ namespace xsimd
 
             // enable for signed integers
             template <class T>
-            using sve_enable_signed_int_t = typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, int>::type;
+            using sve_enable_signed_int_t = std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, int>;
 
             // enable for unsigned integers
             template <class T>
-            using sve_enable_unsigned_int_t = typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, int>::type;
+            using sve_enable_unsigned_int_t = std::enable_if_t<std::is_integral<T>::value && !std::is_signed<T>::value, int>;
 
             // enable for floating points
             template <class T>
-            using sve_enable_floating_point_t = typename std::enable_if<std::is_floating_point<T>::value, int>::type;
+            using sve_enable_floating_point_t = std::enable_if_t<std::is_floating_point<T>::value, int>;
 
             // enable for signed integers or floating points
             template <class T>
-            using sve_enable_signed_int_or_floating_point_t = typename std::enable_if<std::is_signed<T>::value, int>::type;
+            using sve_enable_signed_int_or_floating_point_t = std::enable_if_t<std::is_signed<T>::value, int>;
 
             // enable for all SVE supported types
             template <class T>
-            using sve_enable_all_t = typename std::enable_if<std::is_arithmetic<T>::value, int>::type;
+            using sve_enable_all_t = std::enable_if_t<std::is_arithmetic<T>::value, int>;
         } // namespace detail
 
         /*********
@@ -171,7 +171,7 @@ namespace xsimd
         namespace detail
         {
             template <class T, class U>
-            using sve_enable_sg_t = typename std::enable_if<(sizeof(T) == sizeof(U) && (sizeof(T) == 4 || sizeof(T) == 8)), int>::type;
+            using sve_enable_sg_t = std::enable_if_t<(sizeof(T) == sizeof(U) && (sizeof(T) == 4 || sizeof(T) == 8)), int>;
         }
 
         // scatter
@@ -299,7 +299,7 @@ namespace xsimd
         }
 
         // div
-        template <class A, class T, typename std::enable_if<sizeof(T) >= 4, int>::type = 0>
+        template <class A, class T, std::enable_if_t<sizeof(T) >= 4, int> = 0>
         XSIMD_INLINE batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
             return svdiv_x(detail::sve_ptrue<T>(), lhs, rhs);

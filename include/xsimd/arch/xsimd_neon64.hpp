@@ -858,8 +858,8 @@ namespace xsimd
                                                                          uint64x2_t, int64x2_t,
                                                                          float32x4_t, float64x2_t>;
             template <class T>
-            using enable_neon64_type_t = typename std::enable_if<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value,
-                                                                 int>::type;
+            using enable_neon64_type_t = std::enable_if_t<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value,
+                                                          int>;
         }
 
         /**************

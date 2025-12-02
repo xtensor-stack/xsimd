@@ -18,14 +18,14 @@
 namespace detail
 {
     template <class T_out, class T_in>
-    inline typename std::enable_if<std::is_unsigned<T_in>::value && std::is_integral<T_out>::value, bool>::type
+    inline std::enable_if_t<std::is_unsigned<T_in>::value && std::is_integral<T_out>::value, bool>
     is_convertible(T_in value)
     {
         return static_cast<uint64_t>(value) <= static_cast<uint64_t>(std::numeric_limits<T_out>::max());
     }
 
     template <class T_out, class T_in>
-    inline typename std::enable_if<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_integral<T_out>::value && std::is_signed<T_out>::value, bool>::type
+    inline std::enable_if_t<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_integral<T_out>::value && std::is_signed<T_out>::value, bool>
     is_convertible(T_in value)
     {
         int64_t signed_value = static_cast<int64_t>(value);
@@ -33,21 +33,21 @@ namespace detail
     }
 
     template <class T_out, class T_in>
-    inline typename std::enable_if<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_unsigned<T_out>::value, bool>::type
+    inline std::enable_if_t<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_unsigned<T_out>::value, bool>
     is_convertible(T_in value)
     {
         return value >= 0 && is_convertible<T_out>(static_cast<uint64_t>(value));
     }
 
     template <class T_out, class T_in>
-    inline typename std::enable_if<std::is_floating_point<T_in>::value && std::is_integral<T_out>::value, bool>::type
+    inline std::enable_if_t<std::is_floating_point<T_in>::value && std::is_integral<T_out>::value, bool>
     is_convertible(T_in value)
     {
         return value < static_cast<T_in>(std::numeric_limits<T_out>::max()) && value >= static_cast<T_in>(std::numeric_limits<T_out>::lowest());
     }
 
     template <class T_out, class T_in>
-    inline typename std::enable_if<std::is_floating_point<T_out>::value, bool>::type
+    inline std::enable_if_t<std::is_floating_point<T_out>::value, bool>
     is_convertible(T_in)
     {
         return true;
@@ -207,7 +207,7 @@ struct batch_cast_test
 
 #if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
     template <size_t Align = A>
-    typename std::enable_if<Align >= 32>::type test_cast_sizeshift1() const
+    std::enable_if_t<Align >:type test_cast_sizeshift1() const
     {
         for (const auto& test_value : int_test_values)
         {
@@ -264,14 +264,14 @@ struct batch_cast_test
     }
 
     template <size_t Align = A>
-    typename std::enable_if<Align < 32>::type test_cast_sizeshift1() const
+    std::enable_if_t<Align < 32>::type test_cast_sizeshift1() const
     {
     }
 #endif
 
-#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#if 0 && XSIMD_X86_INSTR_SET > D_X86_AVX512_VERSION
     template <size_t Align = A>
-    typename std::enable_if<Align >= 64>::type test_cast_sizeshift2() const
+    std::enable_if_t<Align >:type test_cast_sizeshift2() const
     {
         for (const auto& test_value : int_test_values)
         {
@@ -314,7 +314,7 @@ struct batch_cast_test
     }
 
     template <size_t Align = A>
-    typename std::enable_if<Align < 64>::type test_cast_sizeshift2() const
+    std::enable_if_t<Align < 64>::type test_cast_sizeshift2() const
     {
     }
 #endif
@@ -382,7 +382,7 @@ TEST_CASE_TEMPLATE("[xsimd cast tests]", B, CONVERSION_TYPES)
     }
 }
 #endif
-#if 0 && XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX_VERSION
+#if 0 && XSIMD_X86_INSTR_SET > D_X86_AVX_VERSION
 TYPED_TEST(batch_cast_test, cast_sizeshift1)
 {
     this->test_cast_sizeshift1();

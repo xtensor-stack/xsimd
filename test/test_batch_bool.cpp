@@ -249,7 +249,7 @@ struct batch_bool_test
 
     // Small masks: safe to compare numeric masks at compile time
     template <class B>
-    struct xsimd_ct_mask_checker<B, typename std::enable_if<(B::size <= 31)>::type>
+    struct xsimd_ct_mask_checker<B, std::enable_if_t<(B::size <= 31)>>
     {
         static constexpr std::size_t sum_indices(uint64_t bits, std::size_t index, std::size_t remaining)
         {
@@ -410,7 +410,7 @@ struct batch_bool_test
 
     // Large masks: avoid calling mask() in constant expressions
     template <class B>
-    struct xsimd_ct_mask_checker<B, typename std::enable_if<(B::size > 31)>::type>
+    struct xsimd_ct_mask_checker<B, std::enable_if_t<(B::size > 31)>>
     {
         static void run() { }
     };

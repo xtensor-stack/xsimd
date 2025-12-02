@@ -49,7 +49,7 @@ namespace xsimd
         }
 
         // trunc
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> trunc(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             return self;

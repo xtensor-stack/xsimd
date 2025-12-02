@@ -43,27 +43,27 @@ namespace xsimd
     namespace kernel
     {
         // forward declaration
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
-        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <size_t shift, class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
-        template <size_t shift, class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <size_t shift, class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, requires_arch<common>) noexcept;
         template <class A, class T>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<common>) noexcept;
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<common>) noexcept;
         template <class A, class T, class STy>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, STy other, requires_arch<common>) noexcept;
@@ -86,17 +86,17 @@ namespace xsimd
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, Values...> mask, convert<uint32_t>, Mode, requires_arch<A>) noexcept;
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, batch<int64_t, A>>::type load_masked(int64_t const*, batch_bool_constant<int64_t, A, Values...>, convert<int64_t>, Mode, requires_arch<A>) noexcept;
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, batch<int64_t, A>> load_masked(int64_t const*, batch_bool_constant<int64_t, A, Values...>, convert<int64_t>, Mode, requires_arch<A>) noexcept;
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, batch<uint64_t, A>>::type load_masked(uint64_t const*, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<A>) noexcept;
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, batch<uint64_t, A>> load_masked(uint64_t const*, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<A>) noexcept;
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src, batch_bool_constant<int32_t, A, Values...> mask, Mode, requires_arch<A>) noexcept;
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...> mask, Mode, requires_arch<A>) noexcept;
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, void>::type store_masked(int64_t*, batch<int64_t, A> const&, batch_bool_constant<int64_t, A, Values...>, Mode, requires_arch<A>) noexcept;
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, void> store_masked(int64_t*, batch<int64_t, A> const&, batch_bool_constant<int64_t, A, Values...>, Mode, requires_arch<A>) noexcept;
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, void>::type store_masked(uint64_t*, batch<uint64_t, A> const&, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<A>) noexcept;
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, void> store_masked(uint64_t*, batch<uint64_t, A> const&, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<A>) noexcept;
 
         // Forward declarations for pack-level helpers
         namespace detail

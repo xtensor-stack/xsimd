@@ -53,28 +53,28 @@ namespace xsimd
         }
 
         // add
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_add(self.data, other.data);
         }
 
         // all
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE bool all(batch_bool<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_all_ne(self.data, vec_xor(self.data, self.data));
         }
 
         // any
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE bool any(batch_bool<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_any_ne(self.data, vec_xor(self.data, self.data));
         }
 
         // avgr
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && sizeof(T) < 8>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value && sizeof(T) < 8>>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_avg(self.data, other.data);
@@ -91,7 +91,7 @@ namespace xsimd
         }
 
         // avg
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) < 8)
@@ -124,31 +124,31 @@ namespace xsimd
         }
 
         // bitwise_and
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_and(self.data, other.data);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_and(self.data, other.data);
         }
 
         // bitwise_andnot
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_and(self.data, vec_nor(other.data, other.data));
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return self.data & ~other.data;
         }
 
         // bitwise_lshift
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<vsx>) noexcept
         {
             using shift_type = as_unsigned_integer_t<T>;
@@ -157,31 +157,31 @@ namespace xsimd
         }
 
         // bitwise_not
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_nor(self.data, self.data);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> bitwise_not(batch_bool<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_nor(self.data, self.data);
         }
 
         // bitwise_or
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_or(self.data, other.data);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_or(self.data, other.data);
         }
 
         // bitwise_rshift
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<vsx>) noexcept
         {
             using shift_type = as_unsigned_integer_t<T>;
@@ -197,12 +197,12 @@ namespace xsimd
         }
 
         // bitwise_xor
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_xor(self.data, other.data);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_xor(self.data, other.data);
@@ -216,14 +216,14 @@ namespace xsimd
         }
 
         // broadcast
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<vsx>) noexcept
         {
             return vec_splats(val);
         }
 
         // ceil
-        template <class A, class T, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> ceil(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_ceil(self.data);
@@ -257,7 +257,7 @@ namespace xsimd
         }
 
         // decr_if
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<vsx>) noexcept
         {
             return self + batch<T, A>((typename batch<T, A>::register_type)mask.data);
@@ -329,13 +329,13 @@ namespace xsimd
         }
 
         // eq
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             auto res = vec_cmpeq(self.data, other.data);
             return *reinterpret_cast<typename batch_bool<T, A>::register_type*>(&res);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<vsx>) noexcept
         {
             auto res = vec_cmpeq(self.data, other.data);
@@ -343,28 +343,28 @@ namespace xsimd
         }
 
         // first
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_extract(self.data, 0);
         }
 
         // floor
-        template <class A, class T, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> floor(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_floor(self.data);
         }
 
         // ge
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_cmpge(self.data, other.data);
         }
 
         // gt
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_cmpgt(self.data, other.data);
@@ -397,14 +397,14 @@ namespace xsimd
         }
 
         // incr_if
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<vsx>) noexcept
         {
             return self - batch<T, A>((typename batch<T, A>::register_type)mask.data);
         }
 
         // insert
-        template <class A, class T, size_t I, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, size_t I, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<vsx>) noexcept
         {
             return vec_insert(val, self.data, I);
@@ -423,14 +423,14 @@ namespace xsimd
         }
 
         // load_aligned
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<vsx>) noexcept
         {
             return vec_ld(0, reinterpret_cast<const typename batch<T, A>::register_type*>(mem));
         }
 
         // load_unaligned
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<vsx>) noexcept
         {
             return vec_vsx_ld(0, (typename batch<T, A>::register_type const*)mem);
@@ -454,54 +454,54 @@ namespace xsimd
         }
 
         // le
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_cmple(self.data, other.data);
         }
 
         // lt
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_cmplt(self.data, other.data);
         }
 
         // max
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_max(self.data, other.data);
         }
 
         // min
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_min(self.data, other.data);
         }
 
         // mul
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return self.data * other.data;
         }
 
         // neg
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return -(self.data);
         }
 
         // neq
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return ~vec_cmpeq(self.data, other.data);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> neq(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return ~vec_cmpeq(self.data, other.data);
@@ -557,7 +557,7 @@ namespace xsimd
             auto tmp1 = vec_add(self.data, tmp0); // v0 + v1, v1 + v0
             return vec_extract(tmp1, 0);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return reduce_add(self, common {});
@@ -599,14 +599,14 @@ namespace xsimd
             auto tmp1 = vec_mul(self.data, tmp0); // v0 * v1, v1 * v0
             return vec_extract(tmp1, 0);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return reduce_mul(self, common {});
         }
 
         // round
-        template <class A, class T, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> round(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_round(self.data);
@@ -625,12 +625,12 @@ namespace xsimd
         }
 
         // select
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<vsx>) noexcept
         {
             return vec_sel(false_br.data, true_br.data, cond.data);
         }
-        template <class A, class T, bool... Values, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, bool... Values, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<vsx>) noexcept
         {
             return select(batch_bool<T, A> { Values... }, true_br, false_br, vsx {});
@@ -716,7 +716,7 @@ namespace xsimd
         }
 
         // sadd
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value && sizeof(T) != 8>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value && sizeof(T) != 8>>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_adds(self.data, other.data);
@@ -730,7 +730,7 @@ namespace xsimd
             return typename batch<T, A>::register_type { values... };
         }
 
-        template <class A, class T, class... Values, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class... Values, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<vsx>, Values... values) noexcept
         {
             static_assert(sizeof...(Values) == batch_bool<T, A>::size, "consistent init");
@@ -739,28 +739,28 @@ namespace xsimd
 
         // ssub
 
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value && sizeof(T) == 1>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value && sizeof(T) == 1>>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_subs(self.data, other.data);
         }
 
         // store_aligned
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE void store_aligned(T* mem, batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_st(self.data, 0, reinterpret_cast<typename batch<T, A>::register_type*>(mem));
         }
 
         // store_unaligned
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE void store_unaligned(T* mem, batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_vsx_st(self.data, 0, reinterpret_cast<typename batch<T, A>::register_type*>(mem));
         }
 
         // sub
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_sub(self.data, other.data);
@@ -868,7 +868,7 @@ namespace xsimd
         }
 
         // trunc
-        template <class A, class T, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> trunc(batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_trunc(self.data);
@@ -880,7 +880,7 @@ namespace xsimd
         {
             return { batch<double, A>(vec_doublel(x.data)), batch<double, A>(vec_doubleh(x.data)) };
         }
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<vsx>) noexcept
         {
             auto even = vec_mule(x.data, vec_splats(T(1))); // x0, x2, x4, x6
@@ -889,14 +889,14 @@ namespace xsimd
         }
 
         // zip_hi
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_mergel(self.data, other.data);
         }
 
         // zip_lo
-        template <class A, class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
             return vec_mergeh(self.data, other.data);

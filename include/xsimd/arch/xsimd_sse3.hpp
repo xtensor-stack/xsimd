@@ -36,7 +36,7 @@ namespace xsimd
         }
 
         // load_unaligned
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<sse3>) noexcept
         {
             return _mm_lddqu_si128((__m128i const*)mem);

@@ -54,11 +54,11 @@ namespace xsimd
             // ────────────────────────────────────────────────────────────────────────
             // dup_lo_impl
             template <std::size_t I, std::size_t N, typename T,
-                      T... Vs, typename std::enable_if<I == N / 2, int>::type = 0>
+                      T... Vs, std::enable_if_t<I == N / 2, int> = 0>
             XSIMD_INLINE constexpr bool dup_lo_impl() noexcept { return true; }
 
             template <std::size_t I, std::size_t N, typename T,
-                      T... Vs, typename std::enable_if<(I < N / 2), int>::type = 0>
+                      T... Vs, std::enable_if_t<(I < N / 2), int> = 0>
             XSIMD_INLINE constexpr bool dup_lo_impl() noexcept
             {
                 return get_at<T, I, Vs...>::value < static_cast<T>(N / 2)
@@ -69,11 +69,11 @@ namespace xsimd
             // ────────────────────────────────────────────────────────────────────────
             // dup_hi_impl
             template <std::size_t I, std::size_t N, typename T,
-                      T... Vs, typename std::enable_if<I == N / 2, int>::type = 0>
+                      T... Vs, std::enable_if_t<I == N / 2, int> = 0>
             XSIMD_INLINE constexpr bool dup_hi_impl() noexcept { return true; }
 
             template <std::size_t I, std::size_t N, typename T,
-                      T... Vs, typename std::enable_if<(I < N / 2), int>::type = 0>
+                      T... Vs, std::enable_if_t<(I < N / 2), int> = 0>
             XSIMD_INLINE constexpr bool dup_hi_impl() noexcept
             {
                 return get_at<T, I, Vs...>::value >= static_cast<T>(N / 2)

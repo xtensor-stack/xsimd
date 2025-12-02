@@ -25,7 +25,7 @@ namespace xsimd
         using namespace types;
 
         // slide_left
-        template <size_t N, class A, class T, class = typename std::enable_if<(N & 3) != 0 && (N < 64)>::type>
+        template <size_t N, class A, class T, class = std::enable_if_t<(N & 3) != 0 && (N < 64)>>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<avx512vbmi>) noexcept
         {
             static_assert((N & 3) != 0 && N < 64, "The AVX512F implementation may have a lower latency.");
@@ -36,7 +36,7 @@ namespace xsimd
         }
 
         // slide_right
-        template <size_t N, class A, class T, class = typename std::enable_if<(N & 3) != 0 && (N < 64)>::type>
+        template <size_t N, class A, class T, class = std::enable_if_t<(N & 3) != 0 && (N < 64)>>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<avx512vbmi>) noexcept
         {
             static_assert((N & 3) != 0 && N < 64, "The AVX512F implementation may have a lower latency.");

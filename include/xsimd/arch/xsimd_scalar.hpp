@@ -84,14 +84,14 @@ namespace xsimd
     using std::trunc;
 
     template <typename T>
-    XSIMD_INLINE constexpr typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, T>::type
+    XSIMD_INLINE constexpr std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, T>
     abs(T v) noexcept
     {
         return v < 0 ? -v : v;
     }
 
     template <typename T>
-    XSIMD_INLINE constexpr typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+    XSIMD_INLINE constexpr std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value, T>
     abs(T v) noexcept
     {
         return v;
@@ -105,42 +105,42 @@ namespace xsimd
 
     // Windows defines catch all templates
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, bool>
     isfinite(T var) noexcept
     {
         return std::isfinite(var);
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, bool>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, bool>
     isfinite(T var) noexcept
     {
         return isfinite(double(var));
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, bool>
     isinf(T var) noexcept
     {
         return std::isinf(var);
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, bool>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, bool>
     isinf(T var) noexcept
     {
         return isinf(double(var));
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, bool>
     isnan(T var) noexcept
     {
         return std::isnan(var);
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, bool>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, bool>
     isnan(T var) noexcept
     {
         return isnan(double(var));
@@ -214,7 +214,7 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     bitwise_and(T x, T y) noexcept
     {
         return x & y;
@@ -252,14 +252,14 @@ namespace xsimd
     }
 
     template <class T0, class T1>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>
     bitwise_lshift(T0 x, T1 shift) noexcept
     {
         return x << shift;
     }
 
     template <size_t shift, class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     bitwise_lshift(T x) noexcept
     {
         constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
@@ -268,13 +268,13 @@ namespace xsimd
     }
 
     template <class T0, class T1>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>
     bitwise_rshift(T0 x, T1 shift) noexcept
     {
         return x >> shift;
     }
     template <size_t shift, class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     bitwise_rshift(T x) noexcept
     {
         constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
@@ -283,7 +283,7 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     bitwise_not(T x) noexcept
     {
         return ~x;
@@ -315,13 +315,13 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_scalar<T>::value, T>::type bitwise_andnot(T x, T y) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_scalar<T>::value, T> bitwise_andnot(T x, T y) noexcept
     {
         return bitwise_and(x, bitwise_not(y));
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     bitwise_or(T x, T y) noexcept
     {
         return x | y;
@@ -350,7 +350,7 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     bitwise_xor(T x, T y) noexcept
     {
         return x ^ y;
@@ -419,14 +419,14 @@ namespace xsimd
     }
 
     template <class T0, class T1>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>
     rotl(T0 x, T1 shift) noexcept
     {
         constexpr auto bits = std::numeric_limits<T0>::digits + std::numeric_limits<T0>::is_signed;
         return (x << shift) | (x >> (bits - shift));
     }
     template <size_t count, class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     rotl(T x) noexcept
     {
         constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
@@ -435,14 +435,14 @@ namespace xsimd
     }
 
     template <class T0, class T1>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T0>::value && std::is_integral<T1>::value, T0>
     rotr(T0 x, T1 shift) noexcept
     {
         constexpr auto bits = std::numeric_limits<T0>::digits + std::numeric_limits<T0>::is_signed;
         return (x >> shift) | (x << (bits - shift));
     }
     template <size_t count, class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T>
     rotr(T x) noexcept
     {
         constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
@@ -491,14 +491,14 @@ namespace xsimd
     using xtl::tanh;
 #endif
 
-    template <typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <typename T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE T clip(const T& val, const T& low, const T& hi) noexcept
     {
         assert(low <= hi && "ordered clipping bounds");
         return low > val ? low : (hi < val ? hi : val);
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool is_flint(const T& x) noexcept
     {
 #ifdef __FAST_MATH__
@@ -508,13 +508,13 @@ namespace xsimd
 #endif
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool is_even(const T& x) noexcept
     {
         return is_flint(x * T(0.5));
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool is_odd(const T& x) noexcept
     {
         return is_even(x - 1.);
@@ -530,7 +530,7 @@ namespace xsimd
         return static_cast<int64_t>(std::nearbyint(var));
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool eq(const T& x0, const T& x1) noexcept
     {
         return x0 == x1;
@@ -542,31 +542,31 @@ namespace xsimd
         return x0 == x1;
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool ge(const T& x0, const T& x1) noexcept
     {
         return x0 >= x1;
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool gt(const T& x0, const T& x1) noexcept
     {
         return x0 > x1;
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool le(const T& x0, const T& x1) noexcept
     {
         return x0 <= x1;
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool lt(const T& x0, const T& x1) noexcept
     {
         return x0 < x1;
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE bool neq(const T& x0, const T& x1) noexcept
     {
         return x0 != x1;
@@ -606,7 +606,7 @@ namespace xsimd
         return __builtin_exp10(x);
     }
 #elif defined(_WIN32)
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE T exp10(const T& x) noexcept
     {
         // Very inefficient but other implementations give incorrect results
@@ -626,7 +626,7 @@ namespace xsimd
     }
 #endif
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE auto rsqrt(const T& x) noexcept
     {
         using float_type = decltype(std::sqrt(x));
@@ -684,7 +684,7 @@ namespace xsimd
         return log(val) / std::log(T(2));
     }
 
-    template <typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <typename T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE T sadd(const T& lhs, const T& rhs) noexcept
     {
         if (std::numeric_limits<T>::is_signed)
@@ -715,7 +715,7 @@ namespace xsimd
         }
     }
 
-    template <typename T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <typename T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE T ssub(const T& lhs, const T& rhs) noexcept
     {
         if (std::numeric_limits<T>::is_signed)
@@ -738,7 +738,7 @@ namespace xsimd
     namespace detail
     {
         template <class T0, class T1>
-        XSIMD_INLINE typename std::enable_if<std::is_integral<T1>::value, T0>::type
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T1>::value, T0>
         ipow(const T0& x, const T1& n) noexcept
         {
             static_assert(std::is_integral<T1>::value, "second argument must be an integer");
@@ -764,13 +764,13 @@ namespace xsimd
     }
 
     template <class T0, class T1>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T1>::value, T0>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T1>::value, T0>
     pow(const T0& x, const T1& n) noexcept
     {
         return detail::ipow(x, n);
     }
 
-    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value && std::is_floating_point<T1>::value>::type>
+    template <class T0, class T1, class = std::enable_if_t<std::is_scalar<T0>::value && std::is_floating_point<T1>::value>>
     XSIMD_INLINE auto
     pow(const T0& t0, const T1& t1) noexcept
     {
@@ -778,27 +778,27 @@ namespace xsimd
     }
 
     template <class T0, class T1>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T1>::value, std::complex<T0>>::type
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T1>::value, std::complex<T0>>
     pow(const std::complex<T0>& t0, const T1& t1) noexcept
     {
         return detail::ipow(t0, t1);
     }
 
     template <class T0, class T1>
-    XSIMD_INLINE typename std::enable_if<!std::is_integral<T1>::value, std::complex<T0>>::type
+    XSIMD_INLINE std::enable_if_t<!std::is_integral<T1>::value, std::complex<T0>>
     pow(const std::complex<T0>& t0, const T1& t1) noexcept
     {
         return std::pow(t0, t1);
     }
 
-    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value>::type>
+    template <class T0, class T1, class = std::enable_if_t<std::is_scalar<T0>::value>>
     XSIMD_INLINE auto
     pow(const T0& t0, const std::complex<T1>& t1) noexcept
     {
         return std::pow(t0, t1);
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE T bitofsign(T const& x) noexcept
     {
         return T(x < T(0));
@@ -830,7 +830,7 @@ namespace xsimd
         return v;
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE T sign(const T& v) noexcept
     {
         return v < T(0) ? T(-1.) : v == T(0) ? T(0.)
@@ -873,7 +873,7 @@ namespace xsimd
         return 1;
     }
 
-    template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE T signnz(const T& v) noexcept
     {
         return v < T(0) ? T(-1.) : T(1.);
@@ -913,7 +913,7 @@ namespace xsimd
     }
 #endif
 
-    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value && std::is_scalar<T1>::value>::type>
+    template <class T0, class T1, class = std::enable_if_t<std::is_scalar<T0>::value && std::is_scalar<T1>::value>>
     XSIMD_INLINE auto min(T0 const& self, T1 const& other) noexcept
     {
         return self > other ? other : self;
@@ -927,7 +927,7 @@ namespace xsimd
         return (self.real() < other.real()) ? (self) : (self.real() == other.real() ? (self.imag() < other.imag() ? self : other) : other);
     }
 
-    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value && std::is_scalar<T1>::value>::type>
+    template <class T0, class T1, class = std::enable_if_t<std::is_scalar<T0>::value && std::is_scalar<T1>::value>>
     XSIMD_INLINE auto max(T0 const& self, T1 const& other) noexcept
     {
         return self < other ? other : self;
@@ -942,19 +942,19 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type fma(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T> fma(const T& a, const T& b, const T& c) noexcept
     {
         return a * b + c;
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_floating_point<T>::value, T>::type fma(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, T> fma(const T& a, const T& b, const T& c) noexcept
     {
         return std::fma(a, b, c);
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_scalar<T>::value, T>::type fms(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_scalar<T>::value, T> fms(const T& a, const T& b, const T& c) noexcept
     {
         return a * b - c;
     }
@@ -1008,13 +1008,13 @@ namespace xsimd
 #endif
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type fnma(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T> fnma(const T& a, const T& b, const T& c) noexcept
     {
         return -(a * b) + c;
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_floating_point<T>::value, T>::type fnma(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, T> fnma(const T& a, const T& b, const T& c) noexcept
     {
         return std::fma(-a, b, c);
     }
@@ -1044,13 +1044,13 @@ namespace xsimd
 #endif
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value, T>::type fnms(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, T> fnms(const T& a, const T& b, const T& c) noexcept
     {
         return -(a * b) - c;
     }
 
     template <class T>
-    XSIMD_INLINE typename std::enable_if<std::is_floating_point<T>::value, T>::type fnms(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, T> fnms(const T& a, const T& b, const T& c) noexcept
     {
         return -std::fma(a, b, c);
     }
@@ -1101,21 +1101,21 @@ namespace xsimd
         struct common_sincosf
         {
             template <class T>
-            XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincosf, T)>::type
+            XSIMD_INLINE std::enable_if_t<XSIMD_HASSINCOS(sincosf, T)>
             operator()(float val, T& s, T& c)
             {
                 sincosf(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && XSIMD_HASSINCOS(__sincosf, T)>::type
+            XSIMD_INLINE std::enable_if_t<!XSIMD_HASSINCOS(sincosf, T) && XSIMD_HASSINCOS(__sincosf, T)>
             operator()(float val, T& s, T& c)
             {
                 __sincosf(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincosf, T) && !XSIMD_HASSINCOS(__sincosf, T)>::type
+            XSIMD_INLINE std::enable_if_t<!XSIMD_HASSINCOS(sincosf, T) && !XSIMD_HASSINCOS(__sincosf, T)>
             operator()(float val, T& s, T& c)
             {
                 s = std::sin(val);
@@ -1126,21 +1126,21 @@ namespace xsimd
         struct common_sincos
         {
             template <class T>
-            XSIMD_INLINE typename std::enable_if<XSIMD_HASSINCOS(sincos, T)>::type
+            XSIMD_INLINE std::enable_if_t<XSIMD_HASSINCOS(sincos, T)>
             operator()(double val, T& s, T& c)
             {
                 sincos(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && XSIMD_HASSINCOS(__sincos, T)>::type
+            XSIMD_INLINE std::enable_if_t<!XSIMD_HASSINCOS(sincos, T) && XSIMD_HASSINCOS(__sincos, T)>
             operator()(double val, T& s, T& c)
             {
                 __sincos(val, &s, &c);
             }
 
             template <class T>
-            XSIMD_INLINE typename std::enable_if<!XSIMD_HASSINCOS(sincos, T) && !XSIMD_HASSINCOS(__sincos, T)>::type
+            XSIMD_INLINE std::enable_if_t<!XSIMD_HASSINCOS(sincos, T) && !XSIMD_HASSINCOS(__sincos, T)>
             operator()(double val, T& s, T& c)
             {
                 s = std::sin(val);
@@ -1181,7 +1181,7 @@ namespace xsimd
     }
 #endif
 
-    template <class T, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
+    template <class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
     XSIMD_INLINE T frexp(T const& val, int& exp) noexcept
     {
         return std::frexp(val, &exp);

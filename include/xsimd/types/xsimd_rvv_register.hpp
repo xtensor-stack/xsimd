@@ -385,7 +385,7 @@ namespace xsimd
                     : value(__riscv_vreinterpret_u8m1(v))
                 {
                 }
-                template <class U, typename std::enable_if<sizeof(T) == sizeof(U), int>::type = 0>
+                template <class U, std::enable_if_t<sizeof(T) == sizeof(U), int> = 0>
                 rvv_bool(rvv_bool<U, Width> v)
                     : value(v.value)
                 {
@@ -402,8 +402,8 @@ namespace xsimd
             };
 
             template <class T, size_t Width = XSIMD_RVV_BITS>
-            using rvv_bool_t = typename std::enable_if < !std::is_void<T>::value,
-                  rvv_bool<rvv_fix_char_t<T>, Width<rvv_width_m1 ? rvv_width_m1 : Width>>::type;
+            using rvv_bool_t = std::enable_if_t < !std::is_void<T>::value,
+                  rvv_bool<rvv_fix_char_t<T>, Width<rvv_width_m1 ? rvv_width_m1 : Width>>;
 
             template <size_t S>
             struct rvv_vector_type_impl;
