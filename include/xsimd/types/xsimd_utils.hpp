@@ -280,33 +280,6 @@ namespace xsimd
         }
     }
 
-    /***********************************
-     * Backport of std::get from C++14 *
-     ***********************************/
-
-    namespace detail
-    {
-        template <class T, class... Types, size_t I, size_t... Is>
-        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, T>, std::index_sequence<I, Is...>) noexcept
-        {
-            return std::get<I>(t);
-        }
-
-        template <class T, class U, class... Types, size_t I, size_t... Is>
-        inline const T& get_impl(const std::tuple<Types...>& t, std::is_same<T, U>, std::index_sequence<I, Is...>) noexcept
-        {
-            using tuple_elem = typename std::tuple_element<I + 1, std::tuple<Types...>>::type;
-            return get_impl<T>(t, std::is_same<T, tuple_elem>(), std::index_sequence<Is...>());
-        }
-
-        template <class T, class... Types>
-        inline const T& get(const std::tuple<Types...>& t) noexcept
-        {
-            using tuple_elem = typename std::tuple_element<0, std::tuple<Types...>>::type;
-            return get_impl<T>(t, std::is_same<T, tuple_elem>(), std::make_index_sequence<sizeof...(Types)>());
-        }
-    }
-
     /*********************************
      * Backport of void_t from C++17 *
      *********************************/
