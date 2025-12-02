@@ -203,7 +203,7 @@ struct batch_int_test
 
     batch_int_test()
     {
-        using signed_value_type = typename std::make_signed<value_type>::type;
+        using signed_value_type = std::make_signed_t<value_type>;
         for (size_t i = 0; i < size; ++i)
         {
             bool negative_lhs = std::is_signed<value_type>::value && (i % 2 == 1);

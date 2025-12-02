@@ -148,15 +148,15 @@ namespace xsimd
 #endif
 
     template <class T, class Tp>
-    XSIMD_INLINE typename std::common_type<T, Tp>::type add(T const& x, Tp const& y) noexcept
+    XSIMD_INLINE std::common_type_t<T, Tp> add(T const& x, Tp const& y) noexcept
     {
         return x + y;
     }
 
     template <class T, class Tp>
-    XSIMD_INLINE typename std::common_type<T, Tp>::type avg(T const& x, Tp const& y) noexcept
+    XSIMD_INLINE std::common_type_t<T, Tp> avg(T const& x, Tp const& y) noexcept
     {
-        using common_type = typename std::common_type<T, Tp>::type;
+        using common_type = std::common_type_t<T, Tp>;
         if (std::is_floating_point<common_type>::value)
             return (x + y) / 2;
         else if (std::is_unsigned<common_type>::value)
@@ -168,16 +168,16 @@ namespace xsimd
             // Inspired by
             // https://stackoverflow.com/questions/5697500/take-the-average-of-two-signed-numbers-in-c
             auto t = (x & y) + ((x ^ y) >> 1);
-            auto t_u = static_cast<typename std::make_unsigned<common_type>::type>(t);
+            auto t_u = static_cast<std::make_unsigned_t<common_type>>(t);
             auto avg = t + (static_cast<T>(t_u >> (8 * sizeof(T) - 1)) & (x ^ y));
             return avg;
         }
     }
 
     template <class T, class Tp>
-    XSIMD_INLINE typename std::common_type<T, Tp>::type avgr(T const& x, Tp const& y) noexcept
+    XSIMD_INLINE std::common_type_t<T, Tp> avgr(T const& x, Tp const& y) noexcept
     {
-        using common_type = typename std::common_type<T, Tp>::type;
+        using common_type = std::common_type_t<T, Tp>;
         if (std::is_floating_point<common_type>::value)
             return avg(x, y);
         else
@@ -379,7 +379,7 @@ namespace xsimd
     }
 
     template <class T, class Tp>
-    XSIMD_INLINE typename std::common_type<T, Tp>::type div(T const& x, Tp const& y) noexcept
+    XSIMD_INLINE std::common_type_t<T, Tp> div(T const& x, Tp const& y) noexcept
     {
         return x / y;
     }
@@ -391,7 +391,7 @@ namespace xsimd
     }
 
     template <class T, class Tp>
-    XSIMD_INLINE typename std::common_type<T, Tp>::type mul(T const& x, Tp const& y) noexcept
+    XSIMD_INLINE std::common_type_t<T, Tp> mul(T const& x, Tp const& y) noexcept
     {
         return x * y;
     }
@@ -880,7 +880,7 @@ namespace xsimd
     }
 
     template <class T, class Tp>
-    XSIMD_INLINE typename std::common_type<T, Tp>::type sub(T const& x, Tp const& y) noexcept
+    XSIMD_INLINE std::common_type_t<T, Tp> sub(T const& x, Tp const& y) noexcept
     {
         return x - y;
     }
@@ -921,7 +921,7 @@ namespace xsimd
 
     // numpy defines minimum operator on complex using lexical comparison
     template <class T0, class T1>
-    XSIMD_INLINE std::complex<typename std::common_type<T0, T1>::type>
+    XSIMD_INLINE std::complex<std::common_type_t<T0, T1>>
     min(std::complex<T0> const& self, std::complex<T1> const& other) noexcept
     {
         return (self.real() < other.real()) ? (self) : (self.real() == other.real() ? (self.imag() < other.imag() ? self : other) : other);
@@ -935,7 +935,7 @@ namespace xsimd
 
     // numpy defines maximum operator on complex using lexical comparison
     template <class T0, class T1>
-    XSIMD_INLINE std::complex<typename std::common_type<T0, T1>::type>
+    XSIMD_INLINE std::complex<std::common_type_t<T0, T1>>
     max(std::complex<T0> const& self, std::complex<T1> const& other) noexcept
     {
         return (self.real() > other.real()) ? (self) : (self.real() == other.real() ? (self.imag() > other.imag() ? self : other) : other);

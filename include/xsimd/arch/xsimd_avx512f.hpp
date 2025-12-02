@@ -816,7 +816,7 @@ namespace xsimd
         {
             return _mm512_castsi512_pd(self);
         }
-        template <class A, class T, class Tp, class = std::enable_if_t<std::is_integral<typename std::common_type<T, Tp>::type>::value>>
+        template <class A, class T, class Tp, class = std::enable_if_t<std::is_integral<std::common_type_t<T, Tp>>::value>>
         XSIMD_INLINE batch<Tp, A> bitwise_cast(batch<T, A> const& self, batch<Tp, A> const&, requires_arch<avx512f>) noexcept
         {
             return batch<Tp, A>(self.data);
@@ -2405,8 +2405,9 @@ namespace xsimd
             XSIMD_IF_CONSTEXPR(dup_lo || dup_hi)
             {
                 const batch<double, avx2> half = _mm512_extractf64x4_pd(self, dup_lo ? 0 : 1);
-                constexpr typename std::conditional<dup_lo, batch_constant<uint64_t, avx2, V0 % 4, V1 % 4, V2 % 4, V3 % 4>,
-                                                    batch_constant<uint64_t, avx2, V4 % 4, V5 % 4, V6 % 4, V7 % 4>>::type half_mask {};
+                constexpr std::conditional_t<dup_lo, batch_constant<uint64_t, avx2, V0 % 4, V1 % 4, V2 % 4, V3 % 4>,
+                                             batch_constant<uint64_t, avx2, V4 % 4, V5 % 4, V6 % 4, V7 % 4>>
+                    half_mask {};
                 return _mm512_broadcast_f64x4(swizzle(half, half_mask, avx2 {}));
             }
             // General case

@@ -206,7 +206,7 @@ struct sign_conversion_test
 {
 
     using unsigned_type = T;
-    using signed_type = typename std::make_signed<T>::type;
+    using signed_type = std::make_signed_t<T>;
 
     void test_to_signed()
     {

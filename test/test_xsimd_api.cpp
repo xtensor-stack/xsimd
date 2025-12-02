@@ -618,7 +618,7 @@ struct xsimd_api_float_types_functions
     {
         value_type val(3.3);
         int res;
-        typename std::conditional<std::is_floating_point<T>::value, int, xsimd::as_integer_t<T>>::type vres;
+        std::conditional_t<std::is_floating_point<T>::value, int, xsimd::as_integer_t<T>> vres;
         CHECK_EQ(extract(xsimd::frexp(T(val), vres)), std::frexp(val, &res));
         CHECK_EQ(extract(vres), res);
     }
@@ -647,7 +647,7 @@ struct xsimd_api_float_types_functions
     {
         value_type val0(4);
         xsimd::as_integer_t<value_type> val1(2);
-        using exponent_type = typename std::conditional<std::is_scalar<T>::value, int, xsimd::as_integer_t<T>>::type;
+        using exponent_type = std::conditional_t<std::is_scalar<T>::value, int, xsimd::as_integer_t<T>>;
         CHECK_EQ(extract(xsimd::ldexp(T(val0), exponent_type(val1))), std::ldexp(val0, static_cast<int>(val1)));
     }
     void test_lgamma()

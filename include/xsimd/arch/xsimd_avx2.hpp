@@ -143,7 +143,7 @@ namespace xsimd
         load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx2>) noexcept
         {
             static_assert(sizeof(T) == 4 || sizeof(T) == 8, "load_masked supports only 32/64-bit integers on AVX2");
-            using int_t = typename std::conditional<sizeof(T) == 4, int32_t, long long>::type;
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
             // Use the raw register-level maskload helpers for the remaining cases.
             return detail::maskload(reinterpret_cast<const int_t*>(mem), mask.as_batch());
         }
