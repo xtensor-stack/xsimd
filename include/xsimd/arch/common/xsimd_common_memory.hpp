@@ -136,14 +136,14 @@ namespace xsimd
         namespace detail
         {
             // Not using XSIMD_INLINE here as it makes msvc hand got ever on avx512
-            template <size_t N, typename T, typename A, typename U, typename V, typename std::enable_if<N == 0, int>::type = 0>
+            template <size_t N, typename T, typename A, typename U, typename V, std::enable_if_t<N == 0, int> = 0>
             inline batch<T, A> gather(U const* src, batch<V, A> const& index,
                                       ::xsimd::index<N> I) noexcept
             {
                 return insert(batch<T, A> {}, static_cast<T>(src[index.get(I)]), I);
             }
 
-            template <size_t N, typename T, typename A, typename U, typename V, typename std::enable_if<N != 0, int>::type = 0>
+            template <size_t N, typename T, typename A, typename U, typename V, std::enable_if_t<N != 0, int> = 0>
             inline batch<T, A>
             gather(U const* src, batch<V, A> const& index, ::xsimd::index<N> I) noexcept
             {
@@ -397,7 +397,7 @@ namespace xsimd
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, batch<int64_t, A>>::type
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, batch<int64_t, A>>
         load_masked(int64_t const* mem, batch_bool_constant<int64_t, A, Values...>, convert<int64_t>, Mode, requires_arch<A>) noexcept
         {
             const auto d = load_masked<A>(reinterpret_cast<const double*>(mem), batch_bool_constant<double, A, Values...> {}, convert<double> {}, Mode {}, A {});
@@ -405,7 +405,7 @@ namespace xsimd
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, batch<uint64_t, A>>::type
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, batch<uint64_t, A>>
         load_masked(uint64_t const* mem, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<A>) noexcept
         {
             const auto d = load_masked<A>(reinterpret_cast<const double*>(mem), batch_bool_constant<double, A, Values...> {}, convert<double> {}, Mode {}, A {});
@@ -425,14 +425,14 @@ namespace xsimd
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, void>::type
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, void>
         store_masked(int64_t* mem, batch<int64_t, A> const& src, batch_bool_constant<int64_t, A, Values...>, Mode, requires_arch<A>) noexcept
         {
             store_masked<A>(reinterpret_cast<double*>(mem), bitwise_cast<double>(src), batch_bool_constant<double, A, Values...> {}, Mode {}, A {});
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE typename std::enable_if<types::has_simd_register<double, A>::value, void>::type
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, void>
         store_masked(uint64_t* mem, batch<uint64_t, A> const& src, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<A>) noexcept
         {
             store_masked<A>(reinterpret_cast<double*>(mem), bitwise_cast<double>(src), batch_bool_constant<double, A, Values...> {}, Mode {}, A {});
@@ -483,7 +483,7 @@ namespace xsimd
         // Scatter with runtime indexes.
         namespace detail
         {
-            template <size_t N, typename T, typename A, typename U, typename V, typename std::enable_if<N == 0, int>::type = 0>
+            template <size_t N, typename T, typename A, typename U, typename V, std::enable_if_t<N == 0, int> = 0>
             XSIMD_INLINE void scatter(batch<T, A> const& src, U* dst,
                                       batch<V, A> const& index,
                                       ::xsimd::index<N> I) noexcept
@@ -491,7 +491,7 @@ namespace xsimd
                 dst[index.get(I)] = static_cast<U>(src.get(I));
             }
 
-            template <size_t N, typename T, typename A, typename U, typename V, typename std::enable_if<N != 0, int>::type = 0>
+            template <size_t N, typename T, typename A, typename U, typename V, std::enable_if_t<N != 0, int> = 0>
             XSIMD_INLINE void
             scatter(batch<T, A> const& src, U* dst, batch<V, A> const& index,
                     ::xsimd::index<N> I) noexcept
@@ -829,7 +829,7 @@ namespace xsimd
         }
 
         // transpose
-        template <class A, class = typename std::enable_if<batch<int16_t, A>::size == 8>::type>
+        template <class A, class = std::enable_if_t<batch<int16_t, A>::size == 8>>
         XSIMD_INLINE void transpose(batch<int16_t, A>* matrix_begin, batch<int16_t, A>* matrix_end, requires_arch<common>) noexcept
         {
             assert((matrix_end - matrix_begin == batch<int16_t, A>::size) && "correctly sized matrix");
@@ -873,7 +873,7 @@ namespace xsimd
             transpose(reinterpret_cast<batch<int16_t, A>*>(matrix_begin), reinterpret_cast<batch<int16_t, A>*>(matrix_end), A {});
         }
 
-        template <class A, class = typename std::enable_if<batch<int8_t, A>::size == 16>::type>
+        template <class A, class = std::enable_if_t<batch<int8_t, A>::size == 16>>
         XSIMD_INLINE void transpose(batch<int8_t, A>* matrix_begin, batch<int8_t, A>* matrix_end, requires_arch<common>) noexcept
         {
             assert((matrix_end - matrix_begin == batch<int8_t, A>::size) && "correctly sized matrix");

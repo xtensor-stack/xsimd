@@ -26,7 +26,7 @@ namespace xsimd
         using namespace types;
 
         // abs
-        template <class A, class T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value>::type>
+        template <class A, class T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
@@ -74,7 +74,7 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const& self, batch<T, A> const& other, std::size_t i, requires_arch<ssse3>) noexcept
         {
             constexpr std::size_t size = batch<T, A>::size;
@@ -83,7 +83,7 @@ namespace xsimd
         }
 
         // reduce_add
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
@@ -141,7 +141,7 @@ namespace xsimd
         }
 
         template <class A, class T, class IT>
-        XSIMD_INLINE typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+        XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
         swizzle(batch<T, A> const& self, batch<IT, A> mask, requires_arch<ssse3>) noexcept
         {
             constexpr auto pikes = static_cast<as_unsigned_integer_t<T>>(0x0706050403020100ul);

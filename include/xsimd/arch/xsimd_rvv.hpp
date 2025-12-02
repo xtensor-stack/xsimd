@@ -436,23 +436,23 @@ namespace xsimd
 
             // enable for signed integers
             template <class T>
-            using rvv_enable_signed_int_t = typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, int>::type;
+            using rvv_enable_signed_int_t = std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, int>;
 
             // enable for unsigned integers
             template <class T>
-            using rvv_enable_unsigned_int_t = typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, int>::type;
+            using rvv_enable_unsigned_int_t = std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value, int>;
 
             // enable for floating points
             template <class T>
-            using rvv_enable_floating_point_t = typename std::enable_if<std::is_floating_point<T>::value, int>::type;
+            using rvv_enable_floating_point_t = std::enable_if_t<std::is_floating_point<T>::value, int>;
 
             // enable for signed integers or floating points
             template <class T>
-            using rvv_enable_signed_int_or_floating_point_t = typename std::enable_if<std::is_signed<T>::value, int>::type;
+            using rvv_enable_signed_int_or_floating_point_t = std::enable_if_t<std::is_signed<T>::value, int>;
 
             // enable for all RVE supported types
             template <class T>
-            using rvv_enable_all_t = typename std::enable_if<std::is_arithmetic<T>::value, int>::type;
+            using rvv_enable_all_t = std::enable_if_t<std::is_arithmetic<T>::value, int>;
         } // namespace detail
 
         /********************
@@ -505,7 +505,7 @@ namespace xsimd
         // load_complex
         namespace detail
         {
-            template <class T, size_t W, typename std::enable_if<W >= types::detail::rvv_width_m1, int>::type = 0>
+            template <class T, size_t W, std::enable_if_t<W >= types::detail::rvv_width_m1, int> = 0>
             XSIMD_INLINE rvv_reg_t<T, W * 2> rvvabut(rvv_reg_t<T, W> const& lo, rvv_reg_t<T, W> const& hi) noexcept
             {
                 typename rvv_reg_t<T, W * 2>::register_type tmp;
@@ -513,7 +513,7 @@ namespace xsimd
                 return __riscv_vset(tmp, 1, hi);
             }
 
-            template <class T, size_t W, typename std::enable_if<W<types::detail::rvv_width_m1, int>::type = 0> XSIMD_INLINE rvv_reg_t<T, W * 2> rvvabut(rvv_reg_t<T, W> const& lo, rvv_reg_t<T, W> const& hi) noexcept
+            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int>::type = 0> D_INLINE rvv_reg_t<T, W * 2> rvvabut(rvv_reg_t<T, W> const& lo, rvv_reg_t<T, W> const& hi) noexcept
             {
                 return __riscv_vslideup(lo, hi, lo.vl, lo.vl * 2);
             }
@@ -521,24 +521,24 @@ namespace xsimd
             XSIMD_RVV_OVERLOAD(rvvget_lo_, (__riscv_vget_ XSIMD_RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 0)
             XSIMD_RVV_OVERLOAD(rvvget_hi_, (__riscv_vget_ XSIMD_RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 1)
 
-            template <class T, size_t W, typename std::enable_if<W >= types::detail::rvv_width_m1, int>::type = 0>
+            template <class T, size_t W, std::enable_if_t<W >= types::detail::rvv_width_m1, int> = 0>
             rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 typename rvv_reg_t<T, W>::register_type tmp = rvvget_lo_(T {}, vv);
                 return tmp;
             }
-            template <class T, size_t W, typename std::enable_if<W >= types::detail::rvv_width_m1, int>::type = 0>
+            template <class T, size_t W, std::enable_if_t<W >= types::detail::rvv_width_m1, int> = 0>
             rvv_reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 typename rvv_reg_t<T, W>::register_type tmp = rvvget_hi_(T {}, vv);
                 return tmp;
             }
-            template <class T, size_t W, typename std::enable_if<W<types::detail::rvv_width_m1, int>::type = 0> rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
+            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int> = 0> rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 typename rvv_reg_t<T, W>::register_type tmp = vv;
                 return tmp;
             }
-            template <class T, size_t W, typename std::enable_if<W<types::detail::rvv_width_m1, int>::type = 0> rvv_reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
+            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int>::type = 0> reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 return __riscv_vslidedown(vv, vv.vl / 2, vv.vl);
             }
@@ -579,7 +579,7 @@ namespace xsimd
         namespace detail
         {
             template <class T, class U>
-            using rvv_enable_sg_t = typename std::enable_if<(sizeof(T) == sizeof(U) && (sizeof(T) == 4 || sizeof(T) == 8)), int>::type;
+            using rvv_enable_sg_t = std::enable_if_t<(sizeof(T) == sizeof(U) && (sizeof(T) == 4 || sizeof(T) == 8)), int>;
             XSIMD_RVV_OVERLOAD(rvvloxei, (__riscv_vloxei XSIMD_RVV_S), , vec(T const*, uvec))
             XSIMD_RVV_OVERLOAD(rvvsoxei, (__riscv_vsoxei XSIMD_RVV_S), , void(T*, uvec, vec))
             XSIMD_RVV_OVERLOAD3(rvvmul_splat,
@@ -1289,9 +1289,9 @@ namespace xsimd
             XSIMD_RVV_OVERLOAD_INTS(rvvfcvt_f, (__riscv_vfcvt_f), , fvec(vec))
 
             template <class T, class U>
-            using rvv_enable_ftoi_t = typename std::enable_if<(sizeof(T) == sizeof(U) && std::is_floating_point<T>::value && !std::is_floating_point<U>::value), int>::type;
+            using rvv_enable_ftoi_t = std::enable_if_t<(sizeof(T) == sizeof(U) && std::is_floating_point<T>::value && !std::is_floating_point<U>::value), int>;
             template <class T, class U>
-            using rvv_enable_itof_t = typename std::enable_if<(sizeof(T) == sizeof(U) && !std::is_floating_point<T>::value && std::is_floating_point<U>::value), int>::type;
+            using rvv_enable_itof_t = std::enable_if_t<(sizeof(T) == sizeof(U) && !std::is_floating_point<T>::value && std::is_floating_point<U>::value), int>;
 
             template <class A, class T, class U, rvv_enable_ftoi_t<T, U> = 0>
             XSIMD_INLINE batch<U, A> fast_cast(batch<T, A> const& arg, batch<U, A> const&, requires_arch<rvv>) noexcept

@@ -1822,7 +1822,7 @@ namespace xsimd
      * @param y batch of integral values.
      * @return \c x raised to the power \c y.
      */
-    template <class T, class ITy, class A, class = typename std::enable_if<std::is_integral<ITy>::value>::type>
+    template <class T, class ITy, class A, class = std::enable_if_t<std::is_integral<ITy>::value>>
     XSIMD_INLINE batch<T, A> pow(batch<T, A> const& x, ITy y) noexcept
     {
         detail::static_check_supported_config<T, A>();
@@ -1866,7 +1866,7 @@ namespace xsimd
      * @param x batch of floating point numbers.
      * @return the reciprocal.
      */
-    template <class T, class A, class = typename std::enable_if<std::is_floating_point<T>::value>::type>
+    template <class T, class A, class = std::enable_if_t<std::is_floating_point<T>::value>>
     XSIMD_INLINE batch<T, A> reciprocal(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
@@ -2239,7 +2239,7 @@ namespace xsimd
      * @return combined batch
      */
     template <class T, class A, class Vt, Vt... Values>
-    XSIMD_INLINE typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+    XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
     shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
@@ -2588,7 +2588,7 @@ namespace xsimd
      * @return swizzled batch
      */
     template <class T, class A, class Vt, Vt... Values>
-    XSIMD_INLINE typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+    XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
     swizzle(batch<T, A> const& x, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
@@ -2614,7 +2614,7 @@ namespace xsimd
      * @return swizzled batch
      */
     template <class T, class A, class Vt>
-    XSIMD_INLINE typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+    XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
     swizzle(batch<T, A> const& x, batch<Vt, A> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
@@ -2776,7 +2776,7 @@ namespace xsimd
      * @param self batch_bool of \c T
      * @return \c self cast to a \c batch of \c T
      */
-    template <class T, class A, typename std::enable_if<std::is_integral<T>::value, int>::type = 3>
+    template <class T, class A, std::enable_if_t<std::is_integral<T>::value, int> = 3>
     XSIMD_INLINE batch<T, A> bitwise_cast(batch_bool<T, A> const& self) noexcept
     {
         T z(0);
@@ -2784,7 +2784,7 @@ namespace xsimd
         return select(self, batch<T, A>(T(~z)), batch<T, A>(z));
     }
 
-    template <class T, class A, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 3>
+    template <class T, class A, std::enable_if_t<std::is_floating_point<T>::value, int> = 3>
     XSIMD_INLINE batch<T, A> bitwise_cast(batch_bool<T, A> const& self) noexcept
     {
         T z0(0), z1(0);

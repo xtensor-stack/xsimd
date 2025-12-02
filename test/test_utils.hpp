@@ -186,25 +186,25 @@ namespace detail
     {
         // define some overloads here as integer versions do not exist for msvc
         template <class T>
-        inline typename std::enable_if<!std::is_integral<T>::value, bool>::type isinf(const T& c)
+        inline std::enable_if_t<!std::is_integral<T>::value, bool> isinf(const T& c)
         {
             return std::isinf(c);
         }
 
         template <class T>
-        inline typename std::enable_if<std::is_integral<T>::value, bool>::type isinf(const T&)
+        inline std::enable_if_t<std::is_integral<T>::value, bool> isinf(const T&)
         {
             return false;
         }
 
         template <class T>
-        inline typename std::enable_if<!std::is_integral<T>::value, bool>::type isnan(const T& c)
+        inline std::enable_if_t<!std::is_integral<T>::value, bool> isnan(const T& c)
         {
             return std::isnan(c);
         }
 
         template <class T>
-        inline typename std::enable_if<std::is_integral<T>::value, bool>::type isnan(const T&)
+        inline std::enable_if_t<std::is_integral<T>::value, bool> isnan(const T&)
         {
             return false;
         }
@@ -545,15 +545,11 @@ namespace xsimd
      * Enable metafunctions *
      ************************/
 
-    // Backport of C++14 std::enable_if
-    template <bool B, class T = void>
-    using enable_if_t = typename std::enable_if<B, T>::type;
+    template <class T, class R>
+    using enable_integral_t = std::enable_if_t<std::is_integral<T>::value, R>;
 
     template <class T, class R>
-    using enable_integral_t = enable_if_t<std::is_integral<T>::value, R>;
-
-    template <class T, class R>
-    using enable_floating_point_t = enable_if_t<std::is_floating_point<T>::value, R>;
+    using enable_floating_point_t = std::enable_if_t<std::is_floating_point<T>::value, R>;
 
     namespace mpl
     {

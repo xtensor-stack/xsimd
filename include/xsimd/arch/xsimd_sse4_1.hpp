@@ -24,7 +24,7 @@ namespace xsimd
     {
         using namespace types;
         // any
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE bool any(batch<T, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return !_mm_testz_si128(self, self);
@@ -69,7 +69,7 @@ namespace xsimd
         }
 
         // eq
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
@@ -95,7 +95,7 @@ namespace xsimd
         }
 
         // insert
-        template <class A, class T, size_t I, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, size_t I, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<sse4_1>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
@@ -125,7 +125,7 @@ namespace xsimd
 
         // load_unaligned<batch_bool>
 
-        template <class A, class T, class = typename std::enable_if<(std::is_integral<T>::value && sizeof(T) > 1)>::type>
+        template <class A, class T, class = std::enable_if_t<(std::is_integral<T>::value && sizeof(T) > 1)>>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<sse4_1>) noexcept
         {
             // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
@@ -174,7 +174,7 @@ namespace xsimd
         }
 
         // max
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             if (std::is_signed<T>::value)
@@ -218,7 +218,7 @@ namespace xsimd
         }
 
         // min
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             if (std::is_signed<T>::value)
@@ -262,7 +262,7 @@ namespace xsimd
         }
 
         // mul
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
@@ -318,7 +318,7 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             return _mm_blendv_epi8(false_br, true_br, cond);
@@ -334,7 +334,7 @@ namespace xsimd
             return _mm_blendv_pd(false_br, true_br, cond);
         }
 
-        template <class A, class T, bool... Values, class = typename std::enable_if<std::is_integral<T>::value>::type>
+        template <class A, class T, bool... Values, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             constexpr int mask = batch_bool_constant<T, A, Values...>::mask();

@@ -95,7 +95,7 @@ namespace xsimd
     template <class T, class A>
     XSIMD_INLINE batch<T, A> sqrt(batch<T, A> const& self) noexcept;
     template <class T, class A, class Vt, Vt... Values>
-    XSIMD_INLINE typename std::enable_if<std::is_arithmetic<T>::value, batch<T, A>>::type
+    XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
     swizzle(batch<T, A> const& x, batch_constant<Vt, A, Values...> mask) noexcept;
     template <class T, class A>
     XSIMD_INLINE batch<T, A> tan(batch<T, A> const& self) noexcept;
