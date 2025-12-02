@@ -198,14 +198,14 @@ namespace xsimd
             F functor;
 
             template <class Arch, class... Tys>
-            XSIMD_INLINE auto walk_archs(arch_list<Arch>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
+            XSIMD_INLINE auto walk_archs(arch_list<Arch>, Tys&&... args) noexcept
             {
                 assert(Arch::available() && "At least one arch must be supported during dispatch");
                 return functor(Arch {}, std::forward<Tys>(args)...);
             }
 
             template <class Arch, class ArchNext, class... Archs, class... Tys>
-            XSIMD_INLINE auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) noexcept -> decltype(functor(Arch {}, std::forward<Tys>(args)...))
+            XSIMD_INLINE auto walk_archs(arch_list<Arch, ArchNext, Archs...>, Tys&&... args) noexcept
             {
                 if (availables_archs.has(Arch {}))
                     return functor(Arch {}, std::forward<Tys>(args)...);
@@ -221,7 +221,7 @@ namespace xsimd
             }
 
             template <class... Tys>
-            XSIMD_INLINE auto operator()(Tys&&... args) noexcept -> decltype(functor(default_arch {}, std::forward<Tys>(args)...))
+            XSIMD_INLINE auto operator()(Tys&&... args) noexcept
             {
                 return walk_archs(ArchList {}, std::forward<Tys>(args)...);
             }

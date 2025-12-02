@@ -385,7 +385,7 @@ namespace xsimd
     }
 
     template <class T, class Tp>
-    XSIMD_INLINE auto mod(T const& x, Tp const& y) noexcept -> decltype(x % y)
+    XSIMD_INLINE auto mod(T const& x, Tp const& y) noexcept
     {
         return x % y;
     }
@@ -403,7 +403,7 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE auto pos(T const& x) noexcept -> decltype(+x)
+    XSIMD_INLINE auto pos(T const& x) noexcept
     {
         return +x;
     }
@@ -627,7 +627,7 @@ namespace xsimd
 #endif
 
     template <class T, class = typename std::enable_if<std::is_scalar<T>::value>::type>
-    XSIMD_INLINE auto rsqrt(const T& x) noexcept -> decltype(std::sqrt(x))
+    XSIMD_INLINE auto rsqrt(const T& x) noexcept
     {
         using float_type = decltype(std::sqrt(x));
         return static_cast<float_type>(1) / std::sqrt(x);
@@ -770,10 +770,9 @@ namespace xsimd
         return detail::ipow(x, n);
     }
 
-    template <class T0, class T1>
+    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value && std::is_floating_point<T1>::value>::type>
     XSIMD_INLINE auto
     pow(const T0& t0, const T1& t1) noexcept
-        -> typename std::enable_if<std::is_scalar<T0>::value && std::is_floating_point<T1>::value, decltype(std::pow(t0, t1))>::type
     {
         return std::pow(t0, t1);
     }
@@ -792,10 +791,9 @@ namespace xsimd
         return std::pow(t0, t1);
     }
 
-    template <class T0, class T1>
+    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value>::type>
     XSIMD_INLINE auto
     pow(const T0& t0, const std::complex<T1>& t1) noexcept
-        -> typename std::enable_if<std::is_scalar<T0>::value, decltype(std::pow(t0, t1))>::type
     {
         return std::pow(t0, t1);
     }
@@ -822,7 +820,7 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE auto signbit(T const& v) noexcept -> decltype(bitofsign(v))
+    XSIMD_INLINE auto signbit(T const& v) noexcept
     {
         return bitofsign(v);
     }
@@ -915,10 +913,8 @@ namespace xsimd
     }
 #endif
 
-    template <class T0, class T1>
+    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value && std::is_scalar<T1>::value>::type>
     XSIMD_INLINE auto min(T0 const& self, T1 const& other) noexcept
-        -> typename std::enable_if<std::is_scalar<T0>::value && std::is_scalar<T1>::value,
-                                   typename std::decay<decltype(self > other ? other : self)>::type>::type
     {
         return self > other ? other : self;
     }
@@ -931,10 +927,8 @@ namespace xsimd
         return (self.real() < other.real()) ? (self) : (self.real() == other.real() ? (self.imag() < other.imag() ? self : other) : other);
     }
 
-    template <class T0, class T1>
+    template <class T0, class T1, class = typename std::enable_if<std::is_scalar<T0>::value && std::is_scalar<T1>::value>::type>
     XSIMD_INLINE auto max(T0 const& self, T1 const& other) noexcept
-        -> typename std::enable_if<std::is_scalar<T0>::value && std::is_scalar<T1>::value,
-                                   typename std::decay<decltype(self > other ? other : self)>::type>::type
     {
         return self < other ? other : self;
     }

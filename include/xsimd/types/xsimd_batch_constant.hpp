@@ -128,17 +128,15 @@ namespace xsimd
 
         template <class F, bool... OtherValues>
         static constexpr auto apply(batch_bool_constant<T, A, Values...>, batch_bool_constant<T, A, OtherValues...>)
-            -> decltype(apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
-            return {};
+            return apply<F, std::tuple<std::integral_constant<bool, Values>...>, std::tuple<std::integral_constant<bool, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>());
         }
 
     public:
 #define MAKE_BINARY_OP(OP, NAME)                                                      \
     template <bool... OtherValues>                                                    \
     constexpr auto operator OP(batch_bool_constant<T, A, OtherValues...> other) const \
-        -> decltype(apply<NAME>(*this, other))                                        \
     {                                                                                 \
         return apply<NAME>(*this, other);                                             \
     }
@@ -212,11 +210,11 @@ namespace xsimd
     namespace detail
     {
         template <class A2, std::size_t BeginIdx, typename T, class A, bool... Values, std::size_t... Is>
-        XSIMD_INLINE constexpr auto splice_impl(std::index_sequence<Is...>) noexcept
-            -> batch_bool_constant<
-                T, A2,
-                std::tuple_element<BeginIdx + Is,
-                                   std::tuple<std::integral_constant<bool, Values>...>>::type::value...>
+        XSIMD_INLINE constexpr batch_bool_constant<
+            T, A2,
+            std::tuple_element<BeginIdx + Is,
+                               std::tuple<std::integral_constant<bool, Values>...>>::type::value...>
+        splice_impl(std::index_sequence<Is...>) noexcept
         {
             return {};
         }
@@ -225,32 +223,29 @@ namespace xsimd
                   typename T, class A, bool... Values,
                   std::size_t N = (End >= Begin ? (End - Begin) : 0)>
         XSIMD_INLINE constexpr auto splice(batch_bool_constant<T, A, Values...>) noexcept
-            -> decltype(splice_impl<A2, Begin, T, A, Values...>(std::make_index_sequence<N>()))
         {
             static_assert(Begin <= End, "splice: Begin must be <= End");
             static_assert(End <= sizeof...(Values), "splice: End must be <= size");
             static_assert(N == batch_bool<T, A2>::size, "splice: target arch size must match submask length");
-            return {};
+            return splice_impl<A2, Begin, T, A, Values...>(std::make_index_sequence<N>());
         }
 
         template <class A2, typename T, class A, bool... Values>
         XSIMD_INLINE constexpr auto lower_half(batch_bool_constant<T, A, Values...>) noexcept
-            -> decltype(splice_impl<A2, 0, T, A, Values...>(std::make_index_sequence<sizeof...(Values) / 2>()))
         {
             static_assert(sizeof...(Values) % 2 == 0, "lower_half requires even size");
             static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
                           "lower_half: target arch size must match submask length");
-            return {};
+            return splice_impl<A2, 0, T, A, Values...>(std::make_index_sequence<sizeof...(Values) / 2>());
         }
 
         template <class A2, typename T, class A, bool... Values>
         XSIMD_INLINE constexpr auto upper_half(batch_bool_constant<T, A, Values...>) noexcept
-            -> decltype(splice_impl<A2, sizeof...(Values) / 2, T, A, Values...>(std::make_index_sequence<sizeof...(Values) / 2>()))
         {
             static_assert(sizeof...(Values) % 2 == 0, "upper_half requires even size");
             static_assert(batch_bool<T, A2>::size == sizeof...(Values) / 2,
                           "upper_half: target arch size must match submask length");
-            return {};
+            return splice_impl<A2, sizeof...(Values) / 2, T, A, Values...>(std::make_index_sequence<sizeof...(Values) / 2>());
         }
     } // namespace detail
 
@@ -344,17 +339,15 @@ namespace xsimd
 
         template <class F, T... OtherValues>
         static constexpr auto apply(batch_constant<T, A, Values...>, batch_constant<T, A, OtherValues...>)
-            -> decltype(apply<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
-            return {};
+            return apply<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>());
         }
 
     public:
 #define MAKE_BINARY_OP(OP, NAME)                                                 \
     template <T... OtherValues>                                                  \
     constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
-        -> decltype(apply<NAME>(*this, other))                                   \
     {                                                                            \
         return apply<NAME>(*this, other);                                        \
     }
@@ -406,18 +399,16 @@ namespace xsimd
 
         template <class F, T... OtherValues>
         static constexpr auto apply_bool(batch_constant<T, A, Values...>, batch_constant<T, A, OtherValues...>)
-            -> decltype(apply_bool<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>()))
         {
             static_assert(sizeof...(Values) == sizeof...(OtherValues), "compatible constant batches");
-            return {};
+            return apply_bool<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>());
         }
 
 #define MAKE_BINARY_BOOL_OP(OP, NAME)                                            \
     template <T... OtherValues>                                                  \
     constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
-        -> decltype(apply_bool<NAME>(*this, other))                              \
     {                                                                            \
-        return {};                                                               \
+        return apply_bool<NAME>(*this, other);                                   \
     }
 
         MAKE_BINARY_BOOL_OP(==, boolean_eq)
