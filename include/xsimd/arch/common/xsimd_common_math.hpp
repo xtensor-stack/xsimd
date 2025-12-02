@@ -613,7 +613,7 @@ namespace xsimd
                 }
 
                 template <size_t... Is, class Tuple>
-                XSIMD_INLINE B eval(::xsimd::detail::index_sequence<Is...>, const Tuple& tuple)
+                XSIMD_INLINE B eval(std::index_sequence<Is...>, const Tuple& tuple)
                 {
                     return estrin { x * x }(std::get<Is>(tuple)...);
                 }
@@ -621,7 +621,7 @@ namespace xsimd
                 template <class... Args>
                 XSIMD_INLINE B eval(const std::tuple<Args...>& tuple) noexcept
                 {
-                    return eval(::xsimd::detail::make_index_sequence<sizeof...(Args)>(), tuple);
+                    return eval(std::make_index_sequence<sizeof...(Args)>(), tuple);
                 }
 
                 template <class... Args>

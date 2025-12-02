@@ -1287,7 +1287,7 @@ namespace xsimd
             }
 
             template <typename T, typename A, T... Vals, std::size_t... Ids>
-            constexpr auto swizzle_make_self_batch_impl(::xsimd::detail::index_sequence<Ids...>)
+            constexpr auto swizzle_make_self_batch_impl(std::index_sequence<Ids...>)
                 -> batch_constant<T, A, swizzle_self_val(Vals, T(Ids), static_cast<T>(sizeof...(Vals)))...>
             {
                 return {};
@@ -1295,7 +1295,7 @@ namespace xsimd
 
             template <typename T, typename A, T... Vals>
             constexpr auto swizzle_make_self_batch()
-                -> decltype(swizzle_make_self_batch_impl<T, A, Vals...>(::xsimd::detail::make_index_sequence<sizeof...(Vals)>()))
+                -> decltype(swizzle_make_self_batch_impl<T, A, Vals...>(std::make_index_sequence<sizeof...(Vals)>()))
             {
                 return {};
             }
@@ -1309,7 +1309,7 @@ namespace xsimd
             }
 
             template <typename T, typename A, T... Vals, std::size_t... Ids>
-            constexpr auto swizzle_make_cross_batch_impl(::xsimd::detail::index_sequence<Ids...>)
+            constexpr auto swizzle_make_cross_batch_impl(std::index_sequence<Ids...>)
                 -> batch_constant<T, A, swizzle_cross_val(Vals, T(Ids), static_cast<T>(sizeof...(Vals)))...>
             {
                 return {};
@@ -1317,7 +1317,7 @@ namespace xsimd
 
             template <typename T, typename A, T... Vals>
             constexpr auto swizzle_make_cross_batch()
-                -> decltype(swizzle_make_cross_batch_impl<T, A, Vals...>(::xsimd::detail::make_index_sequence<sizeof...(Vals)>()))
+                -> decltype(swizzle_make_cross_batch_impl<T, A, Vals...>(std::make_index_sequence<sizeof...(Vals)>()))
             {
                 return {};
             }

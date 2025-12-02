@@ -63,7 +63,7 @@ namespace xsimd
         namespace detail
         {
             template <class IT, class A, class I, size_t... Is>
-            XSIMD_INLINE batch<IT, A> create_compress_swizzle_mask(I bitmask, ::xsimd::detail::index_sequence<Is...>)
+            XSIMD_INLINE batch<IT, A> create_compress_swizzle_mask(I bitmask, std::index_sequence<Is...>)
             {
                 batch<IT, A> swizzle_mask(IT(0));
                 alignas(A::alignment()) IT mask_buffer[batch<IT, A>::size] = { Is... };
@@ -84,7 +84,7 @@ namespace xsimd
             constexpr std::size_t size = batch_bool<T, A>::size;
             auto bitmask = mask.mask();
             auto z = select(mask, x, batch<T, A>((T)0));
-            auto compress_mask = detail::create_compress_swizzle_mask<IT, A>(bitmask, ::xsimd::detail::make_index_sequence<size>());
+            auto compress_mask = detail::create_compress_swizzle_mask<IT, A>(bitmask, std::make_index_sequence<size>());
             return swizzle(z, compress_mask);
         }
 
