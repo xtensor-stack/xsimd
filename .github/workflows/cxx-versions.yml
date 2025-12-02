@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cxx-version: [11, 14, 17, 20]
+        cxx-version: [14, 17, 20]
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies

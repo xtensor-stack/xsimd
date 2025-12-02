@@ -20,7 +20,7 @@ sed -r -n '/^####/,$ p' < $0 > $query_file
 
 log_file=`mktemp -t`
 
-clang-query --extra-arg "-std=c++11" --extra-arg="-I$top_srcdir/include" -f $query_file $top_srcdir/include/xsimd/xsimd.hpp -- | tee $log_file
+clang-query --extra-arg "-std=c++14" --extra-arg="-I$top_srcdir/include" -f $query_file $top_srcdir/include/xsimd/xsimd.hpp -- | tee $log_file
 
 { grep -E '^0 matches.' $log_file && failed=0 ; } || failed=1
 
