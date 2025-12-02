@@ -222,7 +222,7 @@ namespace xsimd
         }
 
         template <class A, size_t I, class T>
-        XSIMD_INLINE auto get(batch<std::complex<T>, A> const& self, ::xsimd::index<I>, requires_arch<common>) noexcept -> typename batch<std::complex<T>, A>::value_type
+        XSIMD_INLINE typename batch<std::complex<T>, A>::value_type get(batch<std::complex<T>, A> const& self, ::xsimd::index<I>, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) T buffer[batch<std::complex<T>, A>::size];
             self.store_aligned(&buffer[0]);
@@ -246,7 +246,7 @@ namespace xsimd
         }
 
         template <class A, class T>
-        XSIMD_INLINE auto get(batch<std::complex<T>, A> const& self, std::size_t i, requires_arch<common>) noexcept -> typename batch<std::complex<T>, A>::value_type
+        XSIMD_INLINE typename batch<std::complex<T>, A>::value_type get(batch<std::complex<T>, A> const& self, std::size_t i, requires_arch<common>) noexcept
         {
             using T2 = typename batch<std::complex<T>, A>::value_type;
             alignas(A::alignment()) T2 buffer[batch<std::complex<T>, A>::size];
@@ -268,7 +268,7 @@ namespace xsimd
         }
 
         template <class A, class T>
-        XSIMD_INLINE auto first(batch<std::complex<T>, A> const& self, requires_arch<common>) noexcept -> typename batch<std::complex<T>, A>::value_type
+        XSIMD_INLINE typename batch<std::complex<T>, A>::value_type first(batch<std::complex<T>, A> const& self, requires_arch<common>) noexcept
         {
             return { first(self.real(), A {}), first(self.imag(), A {}) };
         }

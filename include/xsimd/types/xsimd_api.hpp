@@ -83,7 +83,7 @@ namespace xsimd
      * @return the sum of \c x and \c y
      */
     template <class T, class A>
-    XSIMD_INLINE auto add(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x + y)
+    XSIMD_INLINE batch<T, A> add(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x + y;
@@ -287,7 +287,7 @@ namespace xsimd
      * @return the result of the bitwise and.
      */
     template <class T, class A>
-    XSIMD_INLINE auto bitwise_and(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x & y)
+    XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x & y;
@@ -302,7 +302,7 @@ namespace xsimd
      * @return the result of the bitwise and.
      */
     template <class T, class A>
-    XSIMD_INLINE auto bitwise_and(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept -> decltype(x & y)
+    XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x & y;
@@ -417,7 +417,7 @@ namespace xsimd
      * @return the result of the bitwise or.
      */
     template <class T, class A>
-    XSIMD_INLINE auto bitwise_or(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x | y)
+    XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x | y;
@@ -432,7 +432,7 @@ namespace xsimd
      * @return the result of the bitwise or.
      */
     template <class T, class A>
-    XSIMD_INLINE auto bitwise_or(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept -> decltype(x | y)
+    XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x | y;
@@ -474,7 +474,7 @@ namespace xsimd
      * @return the result of the bitwise xor.
      */
     template <class T, class A>
-    XSIMD_INLINE auto bitwise_xor(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x ^ y)
+    XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x ^ y;
@@ -489,7 +489,7 @@ namespace xsimd
      * @return the result of the bitwise xor.
      */
     template <class T, class A>
-    XSIMD_INLINE auto bitwise_xor(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept -> decltype(x ^ y)
+    XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x ^ y;
@@ -699,7 +699,7 @@ namespace xsimd
      * @return the result of the division.
      */
     template <class T, class A>
-    XSIMD_INLINE auto div(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x / y)
+    XSIMD_INLINE batch<T, A> div(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x / y;
@@ -714,7 +714,7 @@ namespace xsimd
      * @return a boolean batch.
      */
     template <class T, class A>
-    XSIMD_INLINE auto eq(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x == y)
+    XSIMD_INLINE auto eq(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x == y;
@@ -729,7 +729,7 @@ namespace xsimd
      * @return a boolean batch.
      */
     template <class T, class A>
-    XSIMD_INLINE auto eq(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept -> decltype(x == y)
+    XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x == y;
@@ -1607,7 +1607,7 @@ namespace xsimd
      * @return the result of the modulo.
      */
     template <class T, class A>
-    XSIMD_INLINE auto mod(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x % y)
+    XSIMD_INLINE batch<T, A> mod(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x % y;
@@ -1623,7 +1623,7 @@ namespace xsimd
      * @return the result of the product.
      */
     template <class T, class A>
-    XSIMD_INLINE auto mul(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x * y)
+    XSIMD_INLINE batch<T, A> mul(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x * y;
@@ -1671,7 +1671,7 @@ namespace xsimd
      * @return a boolean batch.
      */
     template <class T, class A>
-    XSIMD_INLINE auto neq(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x != y)
+    XSIMD_INLINE auto neq(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x != y;
@@ -1686,7 +1686,7 @@ namespace xsimd
      * @return a boolean batch.
      */
     template <class T, class A>
-    XSIMD_INLINE auto neq(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept -> decltype(x != y)
+    XSIMD_INLINE batch_bool<T, A> neq(batch_bool<T, A> const& x, batch_bool<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x != y;
@@ -2572,7 +2572,7 @@ namespace xsimd
      * @return the difference between \c x and \c y
      */
     template <class T, class A>
-    XSIMD_INLINE auto sub(batch<T, A> const& x, batch<T, A> const& y) noexcept -> decltype(x - y)
+    XSIMD_INLINE batch<T, A> sub(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return x - y;

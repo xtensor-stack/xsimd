@@ -46,7 +46,7 @@ namespace xsimd
         namespace detail
         {
             template <size_t I, class F, class... Bs>
-            auto emulated_apply(F func, Bs const&... bs) -> decltype(func(bs.data[I]...))
+            auto emulated_apply(F func, Bs const&... bs)
             {
                 return func(bs.data[I]...);
             }
@@ -58,7 +58,7 @@ namespace xsimd
             }
 
             template <class B, class F, class... Bs>
-            auto emulated_apply(F func, B const& b, Bs const&... bs) -> std::array<decltype(func(b.data[0], bs.data[0]...)), B::size>
+            auto emulated_apply(F func, B const& b, Bs const&... bs)
             {
                 return emulated_apply(func, std::make_index_sequence<B::size>(), b, bs...);
             }
