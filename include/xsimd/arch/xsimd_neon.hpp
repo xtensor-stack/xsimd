@@ -169,7 +169,7 @@ namespace xsimd
                     return_type<U> apply(U rhs) const noexcept
                     {
                         using func_type = return_type<U> (*)(U);
-                        auto func = xsimd::detail::get<func_type>(m_func);
+                        auto func = std::get<func_type>(m_func);
                         return func(rhs);
                     }
                 };
@@ -183,7 +183,7 @@ namespace xsimd
                     return_type<U> apply(U lhs, U rhs) const noexcept
                     {
                         using func_type = return_type<U> (*)(U, U);
-                        auto func = xsimd::detail::get<func_type>(m_func);
+                        auto func = std::get<func_type>(m_func);
                         return func(lhs, rhs);
                     }
                 };
@@ -1866,7 +1866,7 @@ namespace xsimd
                 U apply(comp_return_type<U> cond, U lhs, U rhs) const noexcept
                 {
                     using func_type = U (*)(comp_return_type<U>, U, U);
-                    auto func = xsimd::detail::get<func_type>(m_func);
+                    auto func = std::get<func_type>(m_func);
                     return func(cond, lhs, rhs);
                 }
             };
@@ -2886,7 +2886,7 @@ namespace xsimd
                 R apply(U rhs) const noexcept
                 {
                     using func_type = R (*)(U);
-                    auto func = xsimd::detail::get<func_type>(m_func);
+                    auto func = std::get<func_type>(m_func);
                     return func(rhs);
                 }
             };
@@ -2915,7 +2915,7 @@ namespace xsimd
                 V apply(U rhs) const noexcept
                 {
                     using caster_type = bitwise_caster_impl<V, T...>;
-                    auto caster = xsimd::detail::get<caster_type>(m_caster);
+                    auto caster = std::get<caster_type>(m_caster);
                     return caster.apply(rhs);
                 }
             };

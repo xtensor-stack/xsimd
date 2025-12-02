@@ -1241,7 +1241,7 @@ namespace xsimd
                 V apply(float64x2_t rhs) const
                 {
                     using func_type = V (*)(float64x2_t);
-                    auto func = xsimd::detail::get<func_type>(m_func);
+                    auto func = std::get<func_type>(m_func);
                     return func(rhs);
                 }
             };
