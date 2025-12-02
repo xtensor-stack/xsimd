@@ -425,14 +425,14 @@ namespace xsimd
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, void>
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value>
         store_masked(int64_t* mem, batch<int64_t, A> const& src, batch_bool_constant<int64_t, A, Values...>, Mode, requires_arch<A>) noexcept
         {
             store_masked<A>(reinterpret_cast<double*>(mem), bitwise_cast<double>(src), batch_bool_constant<double, A, Values...> {}, Mode {}, A {});
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, void>
+        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value>
         store_masked(uint64_t* mem, batch<uint64_t, A> const& src, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<A>) noexcept
         {
             store_masked<A>(reinterpret_cast<double*>(mem), bitwise_cast<double>(src), batch_bool_constant<double, A, Values...> {}, Mode {}, A {});
