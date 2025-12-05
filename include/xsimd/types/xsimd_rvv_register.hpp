@@ -146,6 +146,27 @@ namespace xsimd
                 return __riscv_vreinterpret_i8m1(x);
             }
             template <>
+            XSIMD_INLINE rvv_type_info<int16_t, rvv_width_m1 * 1>::type
+            rvv_type_info<int16_t, rvv_width_m1 * 1>::bitcast<__rvv_uint8m1_t>(
+                __rvv_uint8m1_t x) noexcept
+            {
+                return __riscv_vreinterpret_i16m1(__riscv_vreinterpret_u16m1(x));
+            }
+            template <>
+            XSIMD_INLINE rvv_type_info<int32_t, rvv_width_m1 * 1>::type
+            rvv_type_info<int32_t, rvv_width_m1 * 1>::bitcast<__rvv_uint8m1_t>(
+                __rvv_uint8m1_t x) noexcept
+            {
+                return __riscv_vreinterpret_i32m1(__riscv_vreinterpret_u32m1(x));
+            }
+            template <>
+            XSIMD_INLINE rvv_type_info<int64_t, rvv_width_m1 * 1>::type
+            rvv_type_info<int64_t, rvv_width_m1 * 1>::bitcast<__rvv_uint8m1_t>(
+                __rvv_uint8m1_t x) noexcept
+            {
+                return __riscv_vreinterpret_i64m1(__riscv_vreinterpret_u64m1(x));
+            }
+            template <>
             XSIMD_INLINE rvv_type_info<uint16_t, rvv_width_m1 * 1>::type
             rvv_type_info<uint16_t, rvv_width_m1 * 1>::bitcast<__rvv_uint8m1_t>(
                 __rvv_uint8m1_t x) noexcept
@@ -180,6 +201,25 @@ namespace xsimd
             rvv_type_info<int8_t, rvv_width_m1 * 1>::as_bytes<__rvv_int8m1_t>(__rvv_int8m1_t x) noexcept
             {
                 return __riscv_vreinterpret_u8m1(x);
+            }
+
+            template <>
+            XSIMD_INLINE rvv_type_info<int16_t, rvv_width_m1 * 1>::byte_type
+            rvv_type_info<int16_t, rvv_width_m1 * 1>::as_bytes<__rvv_int16m1_t>(__rvv_int16m1_t x) noexcept
+            {
+                return __riscv_vreinterpret_u8m1(__riscv_vreinterpret_u16m1(x));
+            }
+            template <>
+            XSIMD_INLINE rvv_type_info<int32_t, rvv_width_m1 * 1>::byte_type
+            rvv_type_info<int32_t, rvv_width_m1 * 1>::as_bytes<__rvv_int32m1_t>(__rvv_int32m1_t x) noexcept
+            {
+                return __riscv_vreinterpret_u8m1(__riscv_vreinterpret_u32m1(x));
+            }
+            template <>
+            XSIMD_INLINE rvv_type_info<int64_t, rvv_width_m1 * 1>::byte_type
+            rvv_type_info<int64_t, rvv_width_m1 * 1>::as_bytes<__rvv_int64m1_t>(__rvv_int64m1_t x) noexcept
+            {
+                return __riscv_vreinterpret_u8m1(__riscv_vreinterpret_u64m1(x));
             }
 
             template <>
