@@ -354,8 +354,14 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
+#ifdef __FAST_MATH__
             const batch_type q = abs(self / other);
-            const batch_type z = detail::kernel_atan(q, batch_type(1.) / q);
+            const batch_type q_p = abs(other / self);
+#else
+            const batch_type q = abs(self / other);
+            const batch_type q_p = 1. / q;
+#endif
+            const batch_type z = detail::kernel_atan(q, q_p);
             return select(other > batch_type(0.), z, constants::pi<batch_type>() - z) * signnz(self);
         }
 
