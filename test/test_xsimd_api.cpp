@@ -502,9 +502,17 @@ struct xsimd_api_float_types_functions
     }
     void test_atan2()
     {
-        value_type val0(0);
-        value_type val1(1);
-        CHECK_EQ(extract(xsimd::atan2(T(val0), T(val1))), std::atan2(val0, val1));
+        {
+            value_type val0(0);
+            value_type val1(1);
+            CHECK_EQ(extract(xsimd::atan2(T(val0), T(val1))), std::atan2(val0, val1));
+        }
+
+        {
+            value_type val0(1);
+            value_type val1(0);
+            CHECK_EQ(extract(xsimd::atan2(T(val0), T(val1))), std::atan2(val0, val1));
+        }
     }
     void test_atanh()
     {
