@@ -3278,6 +3278,80 @@ namespace xsimd
             return { batch<widen_t<T>, A>(vaddl_u32(vget_low_u32(x), vdup_n_u32(0))), batch<widen_t<T>, A>(vaddl_u32(vget_high_u32(x), vdup_n_u32(0))) };
         }
 
+        /********
+         * mask *
+         ********/
+        template <class A, class T>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
+        {
+#ifdef XSIMD_LITTLE_ENDIAN
+            static constexpr bool do_swap = false;
+#else
+            static constexpr bool do_swap = true;
+#endif
+
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            {
+                uint8x16_t inner = self;
+                XSIMD_IF_CONSTEXPR(do_swap)
+                {
+                    inner = vrev16q_u8(inner);
+                }
+
+                uint16x8_t pairs = vreinterpretq_u16_u8(inner);
+                uint8x8_t narrowed = vshrn_n_u16(pairs, 4);
+                XSIMD_IF_CONSTEXPR(do_swap)
+                {
+                    narrowed = vrev64_u8(narrowed);
+                }
+
+                uint64_t mask = vget_lane_u64(vreinterpret_u64_u8(narrowed), 0);
+                mask &= 0x1111111111111111;
+                mask = mask | mask >> 3;
+                mask = (mask | mask >> 6) & 0x000F000F000F000F;
+                mask = (mask | mask >> 12) & 0x000000FF000000FF;
+                return (mask | mask >> 24) & 0xFFFF;
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                uint8x8_t narrowed = vmovn_u16(self);
+                XSIMD_IF_CONSTEXPR(do_swap)
+                {
+                    narrowed = vrev64_u8(narrowed);
+                }
+
+                uint64_t mask = vget_lane_u64(vreinterpret_u64_u8(narrowed), 0);
+                mask &= 0x0101010101010101;
+                mask = mask | mask >> 7;
+                mask = mask | mask >> 14;
+                return (mask | mask >> 28) & 0xFF;
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                uint16x4_t narrowed = vmovn_u32(self);
+                XSIMD_IF_CONSTEXPR(do_swap)
+                {
+                    narrowed = vrev64_u16(narrowed);
+                }
+
+                uint64_t mask = vget_lane_u64(vreinterpret_u64_u16(narrowed), 0);
+                mask &= 0x0001000100010001;
+                mask = mask | mask >> 15;
+                return (mask | mask >> 30) & 0xF;
+            }
+            else
+            {
+                uint32x2_t narrowed = vmovn_u64(self);
+                XSIMD_IF_CONSTEXPR(do_swap)
+                {
+                    narrowed = vrev64_u32(narrowed);
+                }
+
+                uint64_t mask32 = vget_lane_u64(vreinterpret_u64_u32(narrowed), 0);
+                mask32 &= 0x0000000100000001;
+                return (mask32 | mask32 >> 31) & 0x3;
+            }
+        }
     }
 
 }

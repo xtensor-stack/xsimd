@@ -16,6 +16,17 @@
 #define XSIMD_VERSION_MINOR 0
 #define XSIMD_VERSION_PATCH 0
 
+#if defined(__GNUC__) && defined(__BYTE_ORDER__)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define XSIMD_LITTLE_ENDIAN
+#endif
+#elif defined(_WIN32)
+// We can safely assume that Windows is always little endian
+#define XSIMD_LITTLE_ENDIAN
+#elif defined(i386) || defined(i486) || defined(intel) || defined(x86) || defined(i86pc) || defined(__alpha) || defined(__osf__)
+#define XSIMD_LITTLE_ENDIAN
+#endif
+
 /**
  * high level free functions
  *
