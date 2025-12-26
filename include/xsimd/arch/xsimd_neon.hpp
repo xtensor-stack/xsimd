@@ -3341,15 +3341,9 @@ namespace xsimd
             }
             else
             {
-                uint32x2_t narrowed = vmovn_u64(self);
-                XSIMD_IF_CONSTEXPR(do_swap)
-                {
-                    narrowed = vrev64_u32(narrowed);
-                }
-
-                uint64_t mask32 = vget_lane_u64(vreinterpret_u64_u32(narrowed), 0);
-                mask32 &= 0x0000000100000001;
-                return (mask32 | mask32 >> 31) & 0x3;
+                uint64_t mask_lo = vgetq_lane_u64(self, 0);
+                uint64_t mask_hi = vgetq_lane_u64(self, 1);
+                return ((mask_lo >> 63) | (mask_hi << 1)) & 0x3;
             }
         }
     }
