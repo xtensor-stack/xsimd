@@ -3293,56 +3293,61 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
         XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
         {
-            uint8x16_t inner = self;
+            // From https://github.com/DLTcollab/sse2neon/blob/master/sse2neon.h
+            uint8x16_t msbs = vshrq_n_u8(self, 7);
             XSIMD_IF_CONSTEXPR(detail::do_swap)
             {
-                inner = vrev16q_u8(inner);
+                msbs = vrev64q_u8(msbs);
             }
 
-            uint16x8_t pairs = vreinterpretq_u16_u8(inner);
-            uint8x8_t narrowed = vshrn_n_u16(pairs, 4);
-            XSIMD_IF_CONSTEXPR(detail::do_swap)
-            {
-                narrowed = vrev64_u8(narrowed);
-            }
+            uint64x2_t bits = vreinterpretq_u64_u8(msbs);
+            bits = vsraq_n_u64(bits, bits, 7);
+            bits = vsraq_n_u64(bits, bits, 14);
+            bits = vsraq_n_u64(bits, bits, 28);
 
-            uint64_t mask = vget_lane_u64(vreinterpret_u64_u8(narrowed), 0);
-            mask &= 0x1111111111111111;
-            mask = mask | mask >> 3;
-            mask = (mask | mask >> 6) & 0x000F000F000F000F;
-            mask = (mask | mask >> 12) & 0x000000FF000000FF;
-            return (mask | mask >> 24) & 0xFFFF;
+            uint8x16_t output = vreinterpretq_u8_u64(bits);
+            constexpr int offset = detail::do_swap ? 7 : 0;
+
+            return vgetq_lane_u8(output, offset) | vgetq_lane_u8(output, offset + 8) << 8;
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
         XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
         {
-            uint8x8_t narrowed = vmovn_u16(self);
+            // Adapted from https://github.com/DLTcollab/sse2neon/blob/master/sse2neon.h
+            uint16x8_t msbs = vshrq_n_u16(self, 15);
             XSIMD_IF_CONSTEXPR(detail::do_swap)
             {
-                narrowed = vrev64_u8(narrowed);
+                msbs = vrev64q_u16(msbs);
             }
 
-            uint64_t mask = vget_lane_u64(vreinterpret_u64_u8(narrowed), 0);
-            mask &= 0x0101010101010101;
-            mask = mask | mask >> 7;
-            mask = mask | mask >> 14;
-            return (mask | mask >> 28) & 0xFF;
+            uint64x2_t bits = vreinterpretq_u64_u16(msbs);
+            bits = vsraq_n_u64(bits, bits, 15);
+            bits = vsraq_n_u64(bits, bits, 30);
+
+            uint8x16_t output = vreinterpretq_u8_u64(bits);
+            constexpr int offset = detail::do_swap ? 7 : 0;
+
+            return vgetq_lane_u8(output, offset) | vgetq_lane_u8(output, offset + 8) << 4;
         }
 
         template <class A, class T, detail::enable_sized_t<T, 4> = 0>
         XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
         {
-            uint16x4_t narrowed = vmovn_u32(self);
+            // Adapted from https://github.com/DLTcollab/sse2neon/blob/master/sse2neon.h
+            uint32x4_t msbs = vshrq_n_u32(self, 31);
             XSIMD_IF_CONSTEXPR(detail::do_swap)
             {
-                narrowed = vrev64_u16(narrowed);
+                msbs = vrev64q_u32(msbs);
             }
 
-            uint64_t mask = vget_lane_u64(vreinterpret_u64_u16(narrowed), 0);
-            mask &= 0x0001000100010001;
-            mask = mask | mask >> 15;
-            return (mask | mask >> 30) & 0xF;
+            uint64x2_t bits = vreinterpretq_u64_u32(msbs);
+            bits = vsraq_n_u64(bits, bits, 31);
+
+            uint8x16_t output = vreinterpretq_u8_u64(bits);
+            constexpr int offset = detail::do_swap ? 7 : 0;
+
+            return vgetq_lane_u8(output, offset) | vgetq_lane_u8(output, offset + 8) << 2;
         }
 
         template <class A, class T, detail::enable_sized_t<T, 8> = 0>
