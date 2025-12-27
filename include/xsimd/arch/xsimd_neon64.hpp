@@ -608,6 +608,50 @@ namespace xsimd
             return vmaxq_f64(lhs, rhs);
         }
 
+        /********
+         * mask *
+         ********/
+
+        template <class A, class T, detail::enable_sized_t<T, 1> = 0>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
+        {
+            // From https://github.com/DLTcollab/sse2neon/blob/master/sse2neon.h
+            // Extract most significant bit
+            uint8x16_t msbs = vshrq_n_u8(self, 7);
+            // Position it appropriately
+            static constexpr int8_t shift_table[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7 };
+            int8x16_t shifts = vld1q_s8(shift_table);
+            uint8x16_t positioned = vshlq_u8(msbs, shifts);
+            // Horizontal reduction
+            return vaddv_u8(vget_low_u8(positioned)) | (vaddv_u8(vget_high_u8(positioned)) << 8);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 2> = 0>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
+        {
+            // Extract most significant bit
+            uint16x8_t msbs = vshrq_n_u16(self, 15);
+            // Position it appropriately
+            static constexpr int16_t shift_table[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+            int16x8_t shifts = vld1q_s16(shift_table);
+            uint16x8_t positioned = vshlq_u16(msbs, shifts);
+            // Horizontal reduction
+            return vaddvq_u16(positioned);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
+        {
+            // Extract most significant bit
+            uint32x4_t msbs = vshrq_n_u32(self, 31);
+            // Position it appropriately
+            static constexpr int32_t shift_table[4] = { 0, 1, 2, 3 };
+            int32x4_t shifts = vld1q_s32(shift_table);
+            uint32x4_t positioned = vshlq_u32(msbs, shifts);
+            // Horizontal reduction
+            return vaddvq_u32(positioned);
+        }
+
         /*******
          * abs *
          *******/
