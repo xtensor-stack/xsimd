@@ -72,8 +72,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) bool buffer[batch_bool<T, A>::size];
-            // This is inefficient but should never be called. It's just a
-            // temporary implementation until arm support is added.
+            // This is inefficient and should never be called.
             for (size_t i = 0; i < batch_bool<T, A>::size; ++i)
                 buffer[i] = mask & (1ull << i);
             return batch_bool<T, A>::load_aligned(buffer);
@@ -204,8 +203,7 @@ namespace xsimd
         {
             alignas(A::alignment()) bool buffer[batch_bool<T, A>::size];
             self.store_aligned(buffer);
-            // This is inefficient but should never be called. It's just a
-            // temporary implementation until arm support is added.
+            // This is inefficient and should never be called.
             uint64_t res = 0;
             for (size_t i = 0; i < batch_bool<T, A>::size; ++i)
                 if (buffer[i])
