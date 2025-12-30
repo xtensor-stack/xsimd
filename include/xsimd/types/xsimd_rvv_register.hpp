@@ -219,6 +219,25 @@ namespace xsimd
                 type get() const { return value; }
                 void set(type v) { value = v; }
             };
+
+            template <size_t div>
+            struct semitype;
+            template <>
+            struct semitype<2>
+            {
+                using type = vuint8mf2_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF2)));
+            };
+            template <>
+            struct semitype<4>
+            {
+                using type = vuint8mf4_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF4)));
+            };
+            template <>
+            struct semitype<8>
+            {
+                using type = vuint8mf8_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF8)));
+            };
+
             //
             // But sometimes we want our storage type to be less than a whole
             // register, while presenting as a whole register to the outside
@@ -233,53 +252,26 @@ namespace xsimd
                 using super = rvv_type_info<T, rvv_width_m1>;
                 static constexpr size_t width = rvv_width_m1 / divisor;
                 using typename super::type;
-                template <size_t div>
-                struct semitype;
-                template <>
-                struct semitype<2>
-                {
-                    using type = vuint8mf2_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF2)));
-                };
-                template <>
-                struct semitype<4>
-                {
-                    using type = vuint8mf4_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF4)));
-                };
-                template <>
-                struct semitype<8>
-                {
-                    using type = vuint8mf8_t __attribute__((riscv_rvv_vector_bits(XSIMD_RVV_WIDTH_MF8)));
-                };
                 using fixed_type = typename semitype<divisor>::type;
                 using super::as_bytes;
                 using super::bitcast;
 
                 fixed_type value;
-                template <size_t div>
-                vuint8m1_t get_bytes() const;
-                template <>
-                vuint8m1_t get_bytes<2>() const { return __riscv_vlmul_ext_v_u8mf2_u8m1(value); }
-                template <>
-                vuint8m1_t get_bytes<4>() const { return __riscv_vlmul_ext_v_u8mf4_u8m1(value); }
-                template <>
-                vuint8m1_t get_bytes<8>() const { return __riscv_vlmul_ext_v_u8mf8_u8m1(value); }
+                vuint8m1_t get_bytes(std::integral_constant<size_t, 2>) const { return __riscv_vlmul_ext_v_u8mf2_u8m1(value); }
+                vuint8m1_t get_bytes(std::integral_constant<size_t, 4>) const { return __riscv_vlmul_ext_v_u8mf4_u8m1(value); }
+                vuint8m1_t get_bytes(std::integral_constant<size_t, 8>) const { return __riscv_vlmul_ext_v_u8mf8_u8m1(value); }
                 type get() const noexcept
                 {
-                    vuint8m1_t bytes = get_bytes<divisor>();
+                    vuint8m1_t bytes = get_bytes(std::integral_constant<size_t, divisor>());
                     return bitcast(bytes);
                 }
-                template <size_t div>
-                void set_bytes(vuint8m1_t);
-                template <>
-                void set_bytes<2>(vuint8m1_t v) { value = __riscv_vlmul_trunc_v_u8m1_u8mf2(v); }
-                template <>
-                void set_bytes<4>(vuint8m1_t v) { value = __riscv_vlmul_trunc_v_u8m1_u8mf4(v); }
-                template <>
-                void set_bytes<8>(vuint8m1_t v) { value = __riscv_vlmul_trunc_v_u8m1_u8mf8(v); }
+                void set_bytes(vuint8m1_t v, std::integral_constant<size_t, 2>) { value = __riscv_vlmul_trunc_v_u8m1_u8mf2(v); }
+                void set_bytes(vuint8m1_t v, std::integral_constant<size_t, 4>) { value = __riscv_vlmul_trunc_v_u8m1_u8mf4(v); }
+                void set_bytes(vuint8m1_t v, std::integral_constant<size_t, 8>) { value = __riscv_vlmul_trunc_v_u8m1_u8mf8(v); }
                 void set(type v)
                 {
                     vuint8m1_t bytes = as_bytes(v);
-                    set_bytes<divisor>(bytes);
+                    set_bytes(bytes, std::integral_constant<size_t, divisor>());
                 }
             };
             template <class T>

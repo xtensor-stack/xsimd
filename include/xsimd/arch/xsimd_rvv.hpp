@@ -513,7 +513,7 @@ namespace xsimd
                 return __riscv_vset(tmp, 1, hi);
             }
 
-            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int>::type = 0> D_INLINE rvv_reg_t<T, W * 2> rvvabut(rvv_reg_t<T, W> const& lo, rvv_reg_t<T, W> const& hi) noexcept
+            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int> = 0> XSIMD_INLINE rvv_reg_t<T, W * 2> rvvabut(rvv_reg_t<T, W> const& lo, rvv_reg_t<T, W> const& hi) noexcept
             {
                 return __riscv_vslideup(lo, hi, lo.vl, lo.vl * 2);
             }
@@ -538,7 +538,7 @@ namespace xsimd
                 typename rvv_reg_t<T, W>::register_type tmp = vv;
                 return tmp;
             }
-            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int>::type = 0> reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
+            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int> = 0> rvv_reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 return __riscv_vslidedown(vv, vv.vl / 2, vv.vl);
             }
