@@ -1,7 +1,7 @@
 name: RISC-V RVV cross-compilation build
 on: [push, pull_request]
 concurrency:
-  group: ${{ github.workflow }}-${{ matrix.sys.compiler }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
