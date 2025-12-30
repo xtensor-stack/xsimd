@@ -391,6 +391,7 @@ namespace xsimd
                 {
                 }
                 operator type() const noexcept { return bool_info::bitcast(value); }
+                type as_mask() const noexcept { return (type) * this; }
             };
 
             template <class T, size_t Width = XSIMD_RVV_BITS>
