@@ -1507,6 +1507,18 @@ namespace xsimd
             const auto mask = abs(arg) < constants::maxflint<batch<T, A>>();
             return select(mask, to_float(detail::rvvfcvt_default(arg)), arg, rvv {});
         }
+
+        // mask
+        template <class A, class T>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<rvv>) noexcept
+        {
+            const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+            auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+            auto iota = detail::vindex<A, as_unsigned_integer_t<T>>();
+            auto upowers = detail::rvvsll(ones, iota);
+            auto r = __riscv_vredor(self.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+            return detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r);
+        }
     } // namespace kernel
 } // namespace xsimd
 
