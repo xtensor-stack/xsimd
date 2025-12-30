@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_rvv_register.hpp"
 #include "xsimd_constants.hpp"
 
@@ -1503,6 +1504,59 @@ namespace xsimd
             // Round according to current rounding mode.
             const auto mask = abs(arg) < constants::maxflint<batch<T, A>>();
             return select(mask, to_float(detail::rvvfcvt_default(arg)), arg, rvv {});
+        }
+
+        // mask
+        template <class A, class T>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<common>) noexcept;
+
+        template <class A, class T>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<rvv>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR((8 * sizeof(T)) >= batch_bool<T, A>::size)
+            {
+                // (A) Easy case: the number of slots fits in T.
+                const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+                auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+                auto iota = detail::rvvid(as_unsigned_integer_t<T> {});
+                auto upowers = detail::rvvsll(ones, iota);
+                auto r = __riscv_vredor(self.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+                return detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r);
+            }
+            else XSIMD_IF_CONSTEXPR((2 * 8 * sizeof(T)) == batch_bool<T, A>::size)
+            {
+                // (B) We need two rounds, one for the low part, one for the high part.
+
+                struct LowerHalf
+                {
+                    static constexpr bool get(unsigned i, unsigned n) { return i < n / 2; }
+                };
+                struct UpperHalf
+                {
+                    static constexpr bool get(unsigned i, unsigned n) { return i >= n / 2; }
+                };
+
+                // The low part is similar to the approach in (A).
+                const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+                auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+                auto iota = detail::rvvid(as_unsigned_integer_t<T> {});
+                auto upowers = detail::rvvsll(ones, iota);
+                auto low_mask = self & make_batch_bool_constant<T, LowerHalf, A>();
+                auto r_low = __riscv_vredor(low_mask.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+
+                // The high part requires to slide the upower filter to match the high mask.
+                upowers = detail::rvvslideup(upowers, upowers, 8 * sizeof(T));
+                auto high_mask = self & make_batch_bool_constant<T, UpperHalf, A>();
+                auto r_high = __riscv_vredor(high_mask.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+
+                // Concatenate the two parts.
+                return (uint64_t)detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r_low) | ((uint64_t)detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r_high) << (8 * sizeof(T)));
+            }
+            else
+            {
+                // (C) we could generalize (B) but we already cover a lot of case now.
+                return mask(self, common {});
+            }
         }
     } // namespace kernel
 } // namespace xsimd
