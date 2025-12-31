@@ -197,8 +197,11 @@ namespace xsimd
                 // https://docs.kernel.org/admin-guide/hw-vuln/gather_data_sampling.html
 
                 unsigned sse_state_os_enabled = 1;
-                unsigned avx_state_os_enabled = 1;
-                unsigned avx512_state_os_enabled = 1;
+                // AVX and AVX512 strictly require OSXSAVE to be enabled by the OS.
+                // If OSXSAVE is disabled (e.g., via bcdedit /set xsavedisable 1),
+                // AVX state won't be preserved across context switches, so AVX cannot be used.
+                unsigned avx_state_os_enabled = 0;
+                unsigned avx512_state_os_enabled = 0;
 
                 // OSXSAVE: A value of 1 indicates that the OS has set CR4.OSXSAVE[bit
                 // 18] to enable XSETBV/XGETBV instructions to access XCR0 and
