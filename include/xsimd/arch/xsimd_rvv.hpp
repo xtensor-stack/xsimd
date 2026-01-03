@@ -1509,15 +1509,25 @@ namespace xsimd
         }
 
         // mask
-        template <class A, class T, class = std::enable_if_t<sizeof(T) >= batch_bool<T, A>::size>>
+        template <class A, class T>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<common>) noexcept;
+
+        template <class A, class T>
         XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<rvv>) noexcept
         {
-            const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
-            auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
-            auto iota = detail::vindex<A, as_unsigned_integer_t<T>>();
-            auto upowers = detail::rvvsll(ones, iota);
-            auto r = __riscv_vredor(self.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
-            return detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r);
+            XSIMD_IF_CONSTEXPR((8 * sizeof(T)) >= batch_bool<T, A>::size)
+            {
+                const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+                auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+                auto iota = detail::vindex<A, as_unsigned_integer_t<T>>();
+                auto upowers = detail::rvvsll(ones, iota);
+                auto r = __riscv_vredor(self.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+                return detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r);
+            }
+            else
+            {
+                return mask(self, common {});
+            }
         }
     } // namespace kernel
 } // namespace xsimd
