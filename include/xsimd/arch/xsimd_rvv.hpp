@@ -1509,7 +1509,7 @@ namespace xsimd
         }
 
         // mask
-        template <class A, class T>
+        template <class A, class T, class = std::enable_if_t<sizeof(T) >= batch_bool<T, A>::size>>
         XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<rvv>) noexcept
         {
             const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
