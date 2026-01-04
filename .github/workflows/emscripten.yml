@@ -24,4 +24,4 @@ jobs:
         run: |
             echo "Build script for wasm"
             playwright install
-            ./test/test_wasm/test_wasm.sh
+            ./test/test_wasm/test_wasm.sh 4.0.21
