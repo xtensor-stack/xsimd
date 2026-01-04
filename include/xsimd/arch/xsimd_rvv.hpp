@@ -1507,6 +1507,48 @@ namespace xsimd
             const auto mask = abs(arg) < constants::maxflint<batch<T, A>>();
             return select(mask, to_float(detail::rvvfcvt_default(arg)), arg, rvv {});
         }
+
+        // mask
+        template <class A, class T>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<common>) noexcept;
+
+        template <class A, class T>
+        XSIMD_INLINE uint64_t mask(batch_bool<T, A> const& self, requires_arch<rvv>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR((8 * sizeof(T)) >= batch_bool<T, A>::size)
+            {
+                // (A) Easy case: the number of slots fits in T.
+                const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+                auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+                auto iota = detail::vindex<A, as_unsigned_integer_t<T>>();
+                auto upowers = detail::rvvsll(ones, iota);
+                auto r = __riscv_vredor(self.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+                return detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r);
+            }
+            else XSIMD_IF_CONSTEXPR((2 * 8 * sizeof(T)) == batch_bool<T, A>::size)
+            {
+                // (B) We need two rounds, one for the low part, one for the high part.
+
+                // The low part is similar to the approach in (A).
+                const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+                auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+                auto iota_low = detail::vindex<A, as_unsigned_integer_t<T>>();
+                auto upowers_low = detail::rvvsll(ones, iota_low);
+                auto r_low = __riscv_vredor(self.data.as_mask(), upowers_low, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+
+                // The high part requires a sub before the shift. The lower part
+                // gets a negative number interpreted as a very high positive
+                // number because we work on unsigned number.
+                auto iota_high = __riscv_vsub(iota_low, 8 * sizeof(T), batch_bool<T, A>::size);
+                auto upowers_high = detail::rvvsll(ones, iota_high);
+                auto r_high = __riscv_vredor(self.data.as_mask(), upowers_high, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
+                return detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r_low) | (detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r_high) << 8 * sizeof(T));
+            }
+            else
+            {
+                return mask(self, common {});
+            }
+        }
     } // namespace kernel
 } // namespace xsimd
 
