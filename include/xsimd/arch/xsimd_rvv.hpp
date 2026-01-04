@@ -135,10 +135,9 @@
     template <class Ret, class... Args>                       \
     struct impl<KEY, Ret(Args...)>                            \
     {                                                         \
-        using ctx = ctx<KEY>;                                 \
         constexpr Ret operator()(Args... args) const noexcept \
         {                                                     \
-            return CALLEE(args..., ctx::vl);                  \
+            return CALLEE(args..., ctx<KEY>::vl);             \
         };                                                    \
     };
 #define XSIMD_RVV_WRAPPER_NOVL(KEY, CALLEE, ...)              \
@@ -154,20 +153,18 @@
     template <class Ret, class First, class... Args>                 \
     struct impl<KEY, Ret(First, Args...)>                            \
     {                                                                \
-        using ctx = ctx<KEY>;                                        \
         constexpr Ret operator()(First, Args... args) const noexcept \
         {                                                            \
-            return CALLEE(args..., ctx::vl);                         \
+            return CALLEE(args..., ctx<KEY>::vl);                    \
         };                                                           \
     };
 #define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS(KEY, CALLEE, SIGNATURE, ...) \
     template <class Ret, class First, class... Args>                        \
     struct impl<KEY, Ret(First, Args...)>                                   \
     {                                                                       \
-        using ctx = ctx<KEY>;                                               \
         constexpr Ret operator()(First, Args... args) const noexcept        \
         {                                                                   \
-            return CALLEE(__VA_ARGS__, ctx::vl);                            \
+            return CALLEE(__VA_ARGS__, ctx<KEY>::vl);                       \
         };                                                                  \
     };
 #define XSIMD_RVV_WRAPPER_DROP_1ST_CUSTOM_ARGS_NOVL(KEY, CALLEE, SIGNATURE, ...) \
