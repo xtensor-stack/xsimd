@@ -8,14 +8,14 @@ SRC_DIR=$TEST_WASM_DIR/../..
 
 # the emsdk dir can be passed as optional argument
 # if not passed, it will be downloaded in the current dir
-if [ $# -eq 0 ]
+if [ $# -eq 0 -o ! -d "$1" ]
 then
+    EMSCRIPTEN_VERSION=${1:-latest}
     git clone https://github.com/emscripten-core/emsdk
     cd emsdk
-    ./emsdk install latest
-    ./emsdk activate latest
+    ./emsdk install ${EMSCRIPTEN_VERSION}
+    ./emsdk activate ${EMSCRIPTEN_VERSION}
     source ./emsdk_env.sh
-
 else
     EMSCRIPTEN_DIR=$1
     source $EMSCRIPTEN_DIR/emsdk_env.sh
