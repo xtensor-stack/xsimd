@@ -538,6 +538,13 @@ namespace detail
         INFO(#v2 ":", v2);                                 \
         CHECK_UNARY(::detail::expect_vector_near(v1, v2)); \
     } while (0)
+#define CHECK_ARRAY_EQ(v1, v2)                            \
+    do                                                    \
+    {                                                     \
+        INFO(#v1 ":", v1);                                \
+        INFO(#v2 ":", v2);                                \
+        CHECK_UNARY(::detail::expect_array_near(v1, v2)); \
+    } while (0)
 
 namespace xsimd
 {
