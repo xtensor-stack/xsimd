@@ -17,6 +17,7 @@ jobs:
           - { compiler: 'gcc',   version: '13',  flags: 'enable_xtl_complex' }
           - { compiler: 'gcc',   version: '14',  flags: 'avx' }
           - { compiler: 'gcc',   version: '13', flags: 'avx512' }
+          - { compiler: 'gcc',   version: '10', flags: 'avx512' }
           - { compiler: 'gcc',   version: '12', flags: 'i386' }
           - { compiler: 'gcc',   version: '13', flags: 'avx512pf' }
           - { compiler: 'gcc',   version: '13', flags: 'avx512vbmi' }
