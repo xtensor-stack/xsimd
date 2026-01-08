@@ -52,11 +52,39 @@ namespace xsimd
             static_assert(is_dup_hi<std::uint32_t, 2, 3, 2, 3>(), "4-lane dup_hi failed");
             static_assert(!is_dup_lo<std::uint32_t, 2, 3, 2, 3>(), "4-lane dup_lo on dup_hi");
 
-            static_assert(is_cross_lane<0, 1, 0, 1>(), "dup-lo only → crossing");
-            static_assert(is_cross_lane<2, 3, 2, 3>(), "dup-hi only → crossing");
-            static_assert(is_cross_lane<0, 3, 3, 3>(), "one low + rest high → crossing");
-            static_assert(!is_cross_lane<1, 0, 2, 3>(), "mixed low/high → no crossing");
-            static_assert(!is_cross_lane<0, 1, 2, 3>(), "mixed low/high → no crossing");
+            static_assert(is_cross_lane<double, 0, 1, 0, 1>(), "dup-lo only → crossing");
+            static_assert(is_cross_lane<double, 2, 3, 2, 3>(), "dup-hi only → crossing");
+            static_assert(is_cross_lane<double, 0, 3, 3, 3>(), "one low + rest high → crossing");
+            static_assert(!is_cross_lane<double, 1, 0, 2, 3>(), "mixed low/high → no crossing");
+            static_assert(!is_cross_lane<double, 0, 1, 2, 3>(), "mixed low/high → no crossing");
+            // 8-element 128-bit lane crossing checks
+            // For 8 doubles (64 bytes): lanes are [0-1], [2-3], [4-5], [6-7]
+            static_assert(!is_cross_lane<double, 1, 0, 3, 2, 5, 4, 7, 6>(), "8-lane reverse within 128-bit lanes → no crossing");
+            static_assert(!is_cross_lane<double, 0, 1, 2, 3, 4, 5, 6, 7>(), "identity 8-lane → no crossing");
+            static_assert(is_cross_lane<double, 2, 3, 0, 1, 4, 5, 6, 7>(), "8-lane double swap first two 128-bit lanes → crossing");
+            // For 8 int32 (32 bytes): lanes are [0-3], [4-7]
+            static_assert(is_cross_lane<std::int32_t, 4, 5, 6, 7, 0, 1, 2, 3>(), "8-lane int32_t swap 128-bit lanes → crossing");
+
+            // Additional compile-time checks for 16-element batches (e.g. float/int32)
+            static_assert(is_cross_lane<float, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7>(),
+                          "16-lane 128-bit swap → crossing");
+            static_assert(!is_cross_lane<float, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15>(),
+                          "identity 16-lane → no crossing");
+            static_assert(is_cross_lane<std::uint32_t, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7>(),
+                          "16-lane uint32_t swap → crossing");
+
+            // Explicit 128-bit lane boundary checks (LaneSizeBytes = 16)
+            // For float (4 bytes): 16 bytes = 4 elements per 128-bit lane
+            static_assert(detail::is_cross_lane_with_lane_size<16, float, std::size_t, 4, 5, 6, 7, 0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15>(),
+                          "float: swap first two 128-bit lanes → crossing");
+            static_assert(!detail::is_cross_lane_with_lane_size<16, float, std::size_t, 3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12>(),
+                          "float: reverse within each 128-bit lane → no crossing");
+
+            // For double (8 bytes): 16 bytes = 2 elements per 128-bit lane
+            static_assert(detail::is_cross_lane_with_lane_size<16, double, std::size_t, 2, 3, 0, 1, 4, 5, 6, 7>(),
+                          "double: swap first two 128-bit lanes → crossing");
+            static_assert(!detail::is_cross_lane_with_lane_size<16, double, std::size_t, 1, 0, 3, 2, 5, 4, 7, 6>(),
+                          "double: reverse within each 128-bit lane → no crossing");
         }
     }
 }
