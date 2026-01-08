@@ -2737,15 +2737,15 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
             {
-                return static_cast<T>(_mm512_cvtsi512_si32(self) & 0xFF);
+                return static_cast<T>(_mm_cvtsi128_si32(_mm512_castsi512_si128(self)) & 0xFF);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
             {
-                return static_cast<T>(_mm512_cvtsi512_si32(self) & 0xFFFF);
+                return static_cast<T>(_mm_cvtsi128_si32(_mm512_castsi512_si128(self)) & 0xFFFF);
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                return static_cast<T>(_mm512_cvtsi512_si32(self));
+                return static_cast<T>(_mm_cvtsi128_si32(_mm512_castsi512_si128(self)));
             }
             else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
             {
