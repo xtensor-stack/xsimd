@@ -672,10 +672,15 @@ struct shuffle_test
             }
         };
 
+#if defined(__GNUC__) && (__GNUC__ == 10) && !defined(__clang__) && XSIMD_WITH_AVX512F
+        // Use zip_lo as a stable reference for the expected interleave.
+        B b_ref_lo = xsimd::zip_lo(b_lhs, b_rhs);
+#else
         std::array<value_type, size> ref_lo;
         for (size_t i = 0; i < size; ++i)
             ref_lo[i] = (i & 1) ? rhs[i / 2] : lhs[i / 2];
         B b_ref_lo = B::load_unaligned(ref_lo.data());
+#endif
 
         INFO("zip_lo");
         B b_res_lo = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, zip_lo_generator, arch_type>());
@@ -689,12 +694,17 @@ struct shuffle_test
             }
         };
 
+#if defined(__GNUC__) && (__GNUC__ == 10) && !defined(__clang__) && XSIMD_WITH_AVX512F
+        // Use zip_hi as a stable reference for the expected interleave.
+        B b_ref_hi = xsimd::zip_hi(b_lhs, b_rhs);
+#else
         std::array<value_type, size> ref_hi;
         for (size_t i = 0; i < size; ++i)
         {
             ref_hi[i] = (i & 1) ? rhs[size / 2 + i / 2] : lhs[size / 2 + i / 2];
         }
         B b_ref_hi = B::load_unaligned(ref_hi.data());
+#endif
 
         INFO("zip_hi");
         B b_res_hi = xsimd::shuffle(b_lhs, b_rhs, xsimd::make_batch_constant<mask_type, zip_hi_generator, arch_type>());
