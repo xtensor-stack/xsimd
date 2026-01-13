@@ -30,7 +30,6 @@ struct complex_trigonometric_test
     vector_type ainput;
     vector_type atan_input;
     vector_type expected;
-    vector_type res;
 
     complex_trigonometric_test()
     {
@@ -48,7 +47,6 @@ struct complex_trigonometric_test
                                        real_value_type(-9.) + i * real_value_type(21.) / nb_input);
         }
         expected.resize(nb_input);
-        res.resize(nb_input);
     }
 
     void test_sin()
@@ -56,15 +54,14 @@ struct complex_trigonometric_test
         std::transform(input.cbegin(), input.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::sin; return sin(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, input, i);
             out = sin(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_cos()
@@ -72,15 +69,14 @@ struct complex_trigonometric_test
         std::transform(input.cbegin(), input.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::cos; return cos(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, input, i);
             out = cos(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_sincos()
@@ -92,18 +88,18 @@ struct complex_trigonometric_test
         std::transform(input.cbegin(), input.cend(), expected2.begin(),
                        [](const value_type& v)
                        { using std::cos; return cos(v); });
-        batch_type in, out1, out2;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out1, out2, ref1, ref2;
             detail::load_batch(in, input, i);
             std::tie(out1, out2) = sincos(in);
-            detail::store_batch(out1, res, i);
-            detail::store_batch(out2, res2, i);
+
+            detail::load_batch(ref1, expected, i);
+            CHECK_BATCH_EQ(ref1, out1);
+
+            detail::load_batch(ref2, expected2, i);
+            CHECK_BATCH_EQ(ref2, out2);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
-        diff = detail::get_nb_diff(res2, expected2);
-        CHECK_EQ(diff, 0);
     }
 
     void test_tan()
@@ -116,15 +112,14 @@ struct complex_trigonometric_test
         std::transform(ainput.cbegin(), ainput.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::asin; return asin(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, ainput, i);
             out = asin(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_acos()
@@ -132,15 +127,14 @@ struct complex_trigonometric_test
         std::transform(ainput.cbegin(), ainput.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::acos; return acos(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, ainput, i);
             out = acos(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_atan()
@@ -148,15 +142,14 @@ struct complex_trigonometric_test
         std::transform(atan_input.cbegin(), atan_input.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::atan; return atan(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, atan_input, i);
             out = atan(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
 private:
@@ -165,15 +158,14 @@ private:
         std::transform(input.cbegin(), input.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::tan; return tan(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, input, i);
             out = tan(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     template <class T, std::enable_if_t<!std::is_same<T, float>::value, int> = 0>

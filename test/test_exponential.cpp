@@ -26,7 +26,6 @@ struct exponential_test
     vector_type exp_input;
     vector_type log_input;
     vector_type expected;
-    vector_type res;
 
     exponential_test()
     {
@@ -39,7 +38,6 @@ struct exponential_test
             log_input[i] = value_type(0.001 + i * 100 / nb_input);
         }
         expected.resize(nb_input);
-        res.resize(nb_input);
     }
 
     void test_exponential_functions()
@@ -49,16 +47,15 @@ struct exponential_test
             std::transform(exp_input.cbegin(), exp_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::exp(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, exp_input, i);
                 out = exp(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("exp");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("exp");
-            CHECK_EQ(diff, 0);
         }
 
         // exp2
@@ -66,16 +63,15 @@ struct exponential_test
             std::transform(exp_input.cbegin(), exp_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::exp2(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, exp_input, i);
                 out = exp2(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("exp2");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("exp2");
-            CHECK_EQ(diff, 0);
         }
 
         // exp10
@@ -84,16 +80,15 @@ struct exponential_test
                            /* imprecise but enough for testing version of exp10 */
                            [](const value_type& v)
                            { return exp(log(10) * v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, exp_input, i);
                 out = exp10(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("exp10");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("exp10");
-            CHECK_EQ(diff, 0);
         }
 
         // expm1
@@ -101,16 +96,15 @@ struct exponential_test
             std::transform(exp_input.cbegin(), exp_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::expm1(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, exp_input, i);
                 out = expm1(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("expm1");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("expm1");
-            CHECK_EQ(diff, 0);
         }
     }
 
@@ -121,16 +115,15 @@ struct exponential_test
             std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::log(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, log_input, i);
                 out = log(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("log");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("log");
-            CHECK_EQ(diff, 0);
         }
 
         // log2
@@ -138,16 +131,15 @@ struct exponential_test
             std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::log2(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, log_input, i);
                 out = log2(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("log2");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("log2");
-            CHECK_EQ(diff, 0);
         }
 
         // log10
@@ -155,16 +147,15 @@ struct exponential_test
             std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::log10(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, log_input, i);
                 out = log10(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("log10");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("log10");
-            CHECK_EQ(diff, 0);
         }
 
         // log1p
@@ -172,15 +163,14 @@ struct exponential_test
             std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::log1p(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, log_input, i);
                 out = log1p(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            CHECK_EQ(diff, 0);
         }
     }
 };

@@ -29,7 +29,6 @@ struct power_test
     vector_type lhs_input;
     vector_type rhs_input;
     vector_type expected;
-    vector_type res;
 
     power_test()
     {
@@ -47,7 +46,6 @@ struct power_test
         }
 
         expected.resize(nb_input);
-        res.resize(nb_input);
     }
 
     void test_power_functions()
@@ -57,34 +55,32 @@ struct power_test
             std::transform(lhs_input.cbegin(), lhs_input.cend(), rhs_input.cbegin(), expected.begin(),
                            [](const value_type& l, const value_type& r)
                            { return std::pow(l, r); });
-            batch_type lhs_in, rhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type lhs_in, rhs_in, out, ref;
                 detail::load_batch(lhs_in, lhs_input, i);
                 detail::load_batch(rhs_in, rhs_input, i);
                 out = pow(lhs_in, rhs_in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("pow");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("pow");
-            CHECK_EQ(diff, 0);
         }
         // pow zero
         {
             std::transform(zlhs_input.cbegin(), zlhs_input.cend(), rhs_input.cbegin(), expected.begin(),
                            [](const value_type& l, const value_type& r)
                            { return std::pow(l, r); });
-            batch_type zlhs_in, rhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type zlhs_in, rhs_in, out, ref;
                 detail::load_batch(zlhs_in, zlhs_input, i);
                 detail::load_batch(rhs_in, rhs_input, i);
                 out = pow(zlhs_in, rhs_in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("0 ^ x");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("0 ^ x");
-            CHECK_EQ(diff, 0);
 
 // use of undeclared identifier '_MM_SET_EXCEPTION_MASK for emscripten
 #if defined(__SSE__) && !defined(EMSCRIPTEN)
@@ -93,15 +89,15 @@ struct power_test
             _MM_SET_EXCEPTION_MASK(mask & ~_MM_MASK_INVALID);
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type zlhs_in, rhs_in, out, ref;
                 detail::load_batch(zlhs_in, zlhs_input, i);
                 detail::load_batch(rhs_in, rhs_input, i);
                 out = pow(zlhs_in, rhs_in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("0 ^ x with exception");
+                CHECK_BATCH_EQ(ref, out);
             }
             _MM_SET_EXCEPTION_MASK(mask);
-            diff = detail::get_nb_diff(res, expected);
-            INFO("0 ^ x with exception");
-            CHECK_EQ(diff, 0);
 #endif
         }
 #ifndef __FAST_MATH__
@@ -110,17 +106,16 @@ struct power_test
             std::transform(zero_input.cbegin(), zero_input.cend(), rhs_input.cbegin(), expected.begin(),
                            [](const value_type& z, const value_type& r)
                            { return std::pow(z, -r); });
-            batch_type zero_in, rhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type zero_in, rhs_in, out, ref;
                 detail::load_batch(zero_in, zero_input, i);
                 detail::load_batch(rhs_in, rhs_input, i);
                 out = pow(zero_in, -rhs_in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("pow(0, -x)");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("pow(0, -x)");
-            CHECK_EQ(diff, 0);
         }
 #endif
         // ipow
@@ -129,49 +124,46 @@ struct power_test
             std::transform(lhs_input.cbegin(), lhs_input.cend(), expected.begin(),
                            [&k, this](const value_type& l)
                            { auto arg = k / size / 8000 - nb_input / size / 8000 / 2; ++k; return std::pow(l, arg); });
-            batch_type lhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type lhs_in, out, ref;
                 detail::load_batch(lhs_in, lhs_input, i);
                 out = pow(lhs_in, i / size / 8000 - nb_input / size / 8000 / 2);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("ipow");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("ipow");
-            CHECK_EQ(diff, 0);
         }
         // hypot
         {
             std::transform(lhs_input.cbegin(), lhs_input.cend(), rhs_input.cbegin(), expected.begin(),
                            [](const value_type& l, const value_type& r)
                            { return std::hypot(l, r); });
-            batch_type lhs_in, rhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type lhs_in, rhs_in, out, ref;
                 detail::load_batch(lhs_in, lhs_input, i);
                 detail::load_batch(rhs_in, rhs_input, i);
                 out = hypot(lhs_in, rhs_in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("hypot");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("hypot");
-            CHECK_EQ(diff, 0);
         }
         // cbrt
         {
             std::transform(lhs_input.cbegin(), lhs_input.cend(), expected.begin(),
                            [](const value_type& l)
                            { return std::cbrt(l); });
-            batch_type lhs_in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type lhs_in, out, ref;
                 detail::load_batch(lhs_in, lhs_input, i);
                 out = cbrt(lhs_in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("cbrt");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("cbrt");
-            CHECK_EQ(diff, 0);
         }
     }
 };

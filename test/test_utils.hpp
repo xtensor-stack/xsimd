@@ -42,107 +42,6 @@ struct precision_t
 #endif
 };
 
-/*******************
- * Pretty printers *
- *******************/
-
-class simd_test_names
-{
-public:
-    template <class T>
-    static std::string GetName(int)
-    {
-        using value_type = typename T::value_type;
-        std::string prefix;
-#if XSIMD_WITH_SSE
-        size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
-        if (register_size == size_t(128))
-        {
-            prefix = "sse_";
-        }
-        else if (register_size == size_t(256))
-        {
-            prefix = "avx_";
-        }
-        else if (register_size == size_t(512))
-        {
-            prefix = "avx512_";
-        }
-#elif XSIMD_WITH_NEON
-        size_t register_size = T::size * sizeof(value_type) * CHAR_BIT;
-        if (register_size == size_t(128))
-        {
-            prefix = "arm_";
-        }
-#endif
-        if (std::is_same<value_type, uint8_t>::value)
-        {
-            return prefix + "uint8_t";
-        }
-        if (std::is_same<value_type, int8_t>::value)
-        {
-            return prefix + "int8_t";
-        }
-        if (std::is_same<value_type, uint16_t>::value)
-        {
-            return prefix + "uint16_t";
-        }
-        if (std::is_same<value_type, int16_t>::value)
-        {
-            return prefix + "int16_t";
-        }
-        if (std::is_same<value_type, uint32_t>::value)
-        {
-            return prefix + "uint32_t";
-        }
-        if (std::is_same<value_type, int32_t>::value)
-        {
-            return prefix + "int32_t";
-        }
-        if (std::is_same<value_type, uint64_t>::value)
-        {
-            return prefix + "uint64_t";
-        }
-        if (std::is_same<value_type, int64_t>::value)
-        {
-            return prefix + "int64_t";
-        }
-        if (std::is_same<value_type, float>::value)
-        {
-            return prefix + "float";
-        }
-        if (std::is_same<value_type, double>::value)
-        {
-            return prefix + "double";
-        }
-        if (std::is_same<value_type, std::complex<float>>::value)
-        {
-            return prefix + "complex<float>";
-        }
-        if (std::is_same<value_type, std::complex<double>>::value)
-        {
-            return prefix + "complex<double>";
-        }
-#ifdef XSIMD_ENABLE_XTL_COMPLEX
-        if (std::is_same<value_type, xtl::xcomplex<float>>::value)
-        {
-            return prefix + "xcomplex<float>";
-        }
-        if (std::is_same<value_type, xtl::xcomplex<double>>::value)
-        {
-            return prefix + "xcomplex<double>";
-        }
-#endif
-
-        return prefix + "unknow_type";
-    }
-};
-
-inline std::string print_function_name(const std::string& func)
-{
-    return std::string("  while testing ") + func;
-}
-
 /************************
  * Comparison functions *
  ************************/
@@ -245,7 +144,6 @@ namespace detail
     template <class T>
     bool check_is_small(const T& value, const T& tolerance)
     {
-        using std::abs;
         return uabs(value) < uabs(tolerance);
     }
 
@@ -448,33 +346,6 @@ namespace detail
         return expect_batch_near(tmp, rhs);
     }
 
-    template <class It>
-    size_t get_nb_diff(It lhs_begin, It lhs_end, It rhs_begin)
-    {
-        size_t res = 0;
-        using value_type = typename std::iterator_traits<It>::value_type;
-        while (lhs_begin != lhs_end)
-        {
-            if (!scalar_comparison<value_type>::run(*lhs_begin++, *rhs_begin++))
-            {
-                ++res;
-            }
-        }
-        return res;
-    }
-
-    template <class T, class A>
-    size_t get_nb_diff(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs)
-    {
-        return get_nb_diff(lhs.begin(), lhs.end(), rhs.begin());
-    }
-
-    template <class T, size_t N>
-    size_t get_nb_diff(const std::array<T, N>& lhs, const std::array<T, N>& rhs)
-    {
-        return get_nb_diff(lhs.begin(), lhs.end(), rhs.begin());
-    }
-
     template <class T, class A>
     size_t get_nb_diff_near(const std::vector<T, A>& lhs, const std::vector<T, A>& rhs, float precision)
     {
@@ -538,30 +409,6 @@ namespace detail
         INFO(#v2 ":", v2);                                 \
         CHECK_UNARY(::detail::expect_vector_near(v1, v2)); \
     } while (0)
-
-namespace xsimd
-{
-    /************************
-     * Enable metafunctions *
-     ************************/
-
-    template <class T, class R>
-    using enable_integral_t = std::enable_if_t<std::is_integral<T>::value, R>;
-
-    template <class T, class R>
-    using enable_floating_point_t = std::enable_if_t<std::is_floating_point<T>::value, R>;
-
-    namespace mpl
-    {
-        /**************
-         * types_list *
-         **************/
-        template <class... T>
-        struct type_list
-        {
-        };
-    }
-}
 
 /***********************
  * Testing types lists *

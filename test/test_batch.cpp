@@ -920,35 +920,35 @@ private:
         return batch_type::load_unaligned(rhs.data());
     }
 
-    template <class T = value_type>
-    xsimd::enable_integral_t<T, void> init_operands()
+    void init_operands()
     {
-        for (size_t i = 0; i < size; ++i)
+        XSIMD_IF_CONSTEXPR(std::is_integral<value_type>::value)
         {
-            bool negative_lhs = std::is_signed<T>::value && (i % 2 == 1);
-            lhs[i] = value_type(i) * (negative_lhs ? -3 : 3);
-            if (lhs[i] == value_type(0))
+            for (size_t i = 0; i < size; ++i)
             {
-                lhs[i] += value_type(1);
+                bool negative_lhs = std::is_signed<value_type>::value && (i % 2 == 1);
+                lhs[i] = value_type(i) * (negative_lhs ? -3 : 3);
+                if (lhs[i] == value_type(0))
+                {
+                    lhs[i] += value_type(1);
+                }
+                rhs[i] = value_type(i) + value_type(2);
             }
-            rhs[i] = value_type(i) + value_type(2);
+            scalar = value_type(3);
         }
-        scalar = value_type(3);
-    }
-
-    template <class T = value_type>
-    xsimd::enable_floating_point_t<T, void> init_operands()
-    {
-        for (size_t i = 0; i < size; ++i)
+        else
         {
-            lhs[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
-            if (lhs[i] == value_type(0))
+            for (size_t i = 0; i < size; ++i)
             {
-                lhs[i] += value_type(0.1);
+                lhs[i] = value_type(i) / 4 + value_type(1.2) * std::sqrt(value_type(i + 0.25));
+                if (lhs[i] == value_type(0))
+                {
+                    lhs[i] += value_type(0.1);
+                }
+                rhs[i] = value_type(10.2) / (i + 2) + value_type(0.25);
             }
-            rhs[i] = value_type(10.2) / (i + 2) + value_type(0.25);
+            scalar = value_type(1.2);
         }
-        scalar = value_type(1.2);
     }
 };
 

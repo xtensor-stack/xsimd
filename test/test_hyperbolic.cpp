@@ -27,7 +27,6 @@ struct hyperbolic_test
     vector_type acosh_input;
     vector_type atanh_input;
     vector_type expected;
-    vector_type res;
 
     hyperbolic_test()
     {
@@ -42,7 +41,6 @@ struct hyperbolic_test
             atanh_input[i] = value_type(-0.95) + i * value_type(1.9) / nb_input;
         }
         expected.resize(nb_input);
-        res.resize(nb_input);
     }
 
     void test_hyperbolic_functions()
@@ -52,48 +50,45 @@ struct hyperbolic_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::sinh(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = sinh(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("sinh");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("sinh");
-            CHECK_EQ(diff, 0);
         }
         // cosh
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::cosh(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = cosh(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("cosh");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("cosh");
-            CHECK_EQ(diff, 0);
         }
         // tanh
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::tanh(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = tanh(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("tanh");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("tanh");
-            CHECK_EQ(diff, 0);
         }
     }
 
@@ -104,48 +99,45 @@ struct hyperbolic_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::asinh(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = asinh(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("asinh");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("asinh");
-            CHECK_EQ(diff, 0);
         }
         // acosh
         {
             std::transform(acosh_input.cbegin(), acosh_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::acosh(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, acosh_input, i);
                 out = acosh(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("acosh");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("acosh");
-            CHECK_EQ(diff, 0);
         }
         // atanh
         {
             std::transform(atanh_input.cbegin(), atanh_input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::atanh(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_input; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, atanh_input, i);
                 out = atanh(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("atanh");
+                CHECK_BATCH_EQ(ref, out);
             }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("atanh");
-            CHECK_EQ(diff, 0);
         }
     }
 };
