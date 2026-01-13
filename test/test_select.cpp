@@ -29,12 +29,10 @@ struct select_test
     vector_type lhs_input;
     vector_type rhs_input;
     vector_type expected;
-    vector_type res;
 
     vector_bool_type lhs_input_b;
     vector_bool_type rhs_input_b;
     vector_bool_type expected_b;
-    vector_bool_type res_b;
 
     select_test()
     {
@@ -59,24 +57,22 @@ struct select_test
             expected_b[i] = lhs_input[i] > value_type(3) ? lhs_input_b[i] : rhs_input_b[i];
         }
 
-        batch_type lhs_in, rhs_in;
-        batch_bool_type lhs_in_b, rhs_in_b;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type lhs_in, rhs_in, out, ref;
             detail::load_batch(lhs_in, lhs_input, i);
             detail::load_batch(rhs_in, rhs_input, i);
-            const auto out = xsimd::select(lhs_in > value_type(3), lhs_in, rhs_in);
-            detail::store_batch(out, res, i);
+            out = xsimd::select(lhs_in > value_type(3), lhs_in, rhs_in);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
 
+            batch_bool_type lhs_in_b, rhs_in_b, out_b, ref_b;
             detail::load_batch(lhs_in_b, lhs_input_b, i);
             detail::load_batch(rhs_in_b, rhs_input_b, i);
-            const auto out_b = xsimd::select(lhs_in > value_type(3), lhs_in_b, rhs_in_b);
-            detail::store_batch(out_b, res_b, i);
+            out_b = xsimd::select(lhs_in > value_type(3), lhs_in_b, rhs_in_b);
+            detail::load_batch(ref_b, expected_b, i);
+            CHECK_BATCH_EQ(ref_b, out_b);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        size_t diff_b = detail::get_nb_diff(res_b, expected_b);
-        CHECK_EQ(diff, 0);
-        CHECK_EQ(diff_b, 0);
     }
     struct pattern
     {
@@ -93,24 +89,22 @@ struct select_test
             expected_b[i] = mask.get(i % size) ? lhs_input_b[i] : rhs_input_b[i];
         }
 
-        batch_type lhs_in, rhs_in;
-        batch_bool_type lhs_in_b, rhs_in_b;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type lhs_in, rhs_in, out, ref;
+            batch_bool_type lhs_in_b, rhs_in_b, out_b, ref_b;
             detail::load_batch(lhs_in, lhs_input, i);
             detail::load_batch(rhs_in, rhs_input, i);
-            const auto out = xsimd::select(mask, lhs_in, rhs_in);
-            detail::store_batch(out, res, i);
+            out = xsimd::select(mask, lhs_in, rhs_in);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
 
             detail::load_batch(lhs_in_b, lhs_input_b, i);
             detail::load_batch(rhs_in_b, rhs_input_b, i);
-            const auto out_b = xsimd::select(mask, lhs_in_b, rhs_in_b);
-            detail::store_batch(out_b, res_b, i);
+            out_b = xsimd::select(mask, lhs_in_b, rhs_in_b);
+            detail::load_batch(ref_b, expected_b, i);
+            CHECK_BATCH_EQ(ref_b, out_b);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        size_t diff_b = detail::get_nb_diff(res_b, expected_b);
-        CHECK_EQ(diff, 0);
-        CHECK_EQ(diff_b, 0);
     }
 };
 

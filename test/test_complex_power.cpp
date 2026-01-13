@@ -66,16 +66,15 @@ struct complex_power_test
         std::transform(lhs_np.cbegin(), lhs_np.cend(), real_expected.begin(),
                        [](const value_type& v)
                        { using std::abs; return abs(v); });
-        batch_type in;
-        real_batch_type out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in;
+            real_batch_type out, ref;
             detail::load_batch(in, lhs_np, i);
             out = abs(in);
-            detail::store_batch(out, real_res, i);
+            detail::load_batch(ref, real_expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(real_res, real_expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_arg()
@@ -84,16 +83,15 @@ struct complex_power_test
         std::transform(lhs_np.cbegin(), lhs_np.cend(), real_expected.begin(),
                        [](const value_type& v)
                        { using std::arg; return arg(v); });
-        batch_type in;
-        real_batch_type out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in;
+            real_batch_type out, ref;
             detail::load_batch(in, lhs_np, i);
             out = arg(in);
-            detail::store_batch(out, real_res, i);
+            detail::load_batch(ref, real_expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(real_res, real_expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_pow()
@@ -154,15 +152,14 @@ struct complex_power_test
         std::transform(lhs_nn.cbegin(), lhs_nn.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::sqrt; return sqrt(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, lhs_nn, i);
             out = sqrt(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_sqrt_pn()
@@ -170,15 +167,14 @@ struct complex_power_test
         std::transform(lhs_pn.cbegin(), lhs_pn.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::sqrt; return sqrt(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, lhs_pn, i);
             out = sqrt(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_sqrt_np()
@@ -186,15 +182,14 @@ struct complex_power_test
         std::transform(lhs_np.cbegin(), lhs_np.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::sqrt; return sqrt(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, lhs_np, i);
             out = sqrt(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 
     void test_sqrt_pp()
@@ -202,15 +197,14 @@ struct complex_power_test
         std::transform(lhs_pp.cbegin(), lhs_pp.cend(), expected.begin(),
                        [](const value_type& v)
                        { using std::sqrt; return sqrt(v); });
-        batch_type in, out;
         for (size_t i = 0; i < nb_input; i += size)
         {
+            batch_type in, out, ref;
             detail::load_batch(in, lhs_pp, i);
             out = sqrt(in);
-            detail::store_batch(out, res, i);
+            detail::load_batch(ref, expected, i);
+            CHECK_BATCH_EQ(ref, out);
         }
-        size_t diff = detail::get_nb_diff(res, expected);
-        CHECK_EQ(diff, 0);
     }
 };
 

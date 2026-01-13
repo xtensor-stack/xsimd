@@ -28,7 +28,6 @@ struct rounding_test
 
     std::array<value_type, nb_input> input;
     std::array<value_type, nb_input> expected;
-    std::array<value_type, nb_input> res;
 
     rounding_test()
     {
@@ -57,143 +56,107 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::ceil(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = ceil(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("ceil");
+                CHECK_BATCH_EQ(ref, out);
             }
-            for (size_t i = nb_batches; i < nb_input; ++i)
-            {
-                res[i] = std::ceil(input[i]);
-            }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("ceil");
-            CHECK_EQ(diff, 0);
         }
         // floor
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::floor(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = floor(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("floor");
+                CHECK_BATCH_EQ(ref, out);
             }
-            for (size_t i = nb_batches; i < nb_input; ++i)
-            {
-                res[i] = std::floor(input[i]);
-            }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("floor");
-            CHECK_EQ(diff, 0);
         }
         // trunc
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::trunc(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = trunc(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("trunc");
+                CHECK_BATCH_EQ(ref, out);
             }
-            for (size_t i = nb_batches; i < nb_input; ++i)
-            {
-                res[i] = std::trunc(input[i]);
-            }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("trunc");
-            CHECK_EQ(diff, 0);
         }
         // round
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::round(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = round(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("round");
+                CHECK_BATCH_EQ(ref, out);
             }
-            for (size_t i = nb_batches; i < nb_input; ++i)
-            {
-                res[i] = std::round(input[i]);
-            }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("round");
-            CHECK_EQ(diff, 0);
         }
         // nearbyint
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::nearbyint(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = nearbyint(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("nearbyint");
+                CHECK_BATCH_EQ(ref, out);
             }
-            for (size_t i = nb_batches; i < nb_input; ++i)
-            {
-                res[i] = std::nearbyint(input[i]);
-            }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("nearbyint");
-            CHECK_EQ(diff, 0);
         }
         // nearbyint_as_int
         {
             std::array<int_value_type, nb_input> expected;
-            std::array<int_value_type, nb_input> res;
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return xsimd::nearbyint_as_int(v); });
-            batch_type in;
-            int_batch_type out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
+                batch_type in;
+                int_batch_type out, ref;
                 detail::load_batch(in, input, i);
                 out = nearbyint_as_int(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("nearbyint_as_int");
+                CHECK_BATCH_EQ(ref, out);
             }
-            for (size_t i = nb_batches; i < nb_input; ++i)
-            {
-                res[i] = xsimd::nearbyint_as_int(input[i]);
-            }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("nearbyint_as_int");
-            CHECK_EQ(diff, 0);
         }
         // rint
         {
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::rint(v); });
-            batch_type in, out;
             for (size_t i = 0; i < nb_batches; i += size)
             {
+                batch_type in, out, ref;
                 detail::load_batch(in, input, i);
                 out = rint(in);
-                detail::store_batch(out, res, i);
+                detail::load_batch(ref, expected, i);
+                INFO("rint");
+                CHECK_BATCH_EQ(ref, out);
             }
-            for (size_t i = nb_batches; i < nb_input; ++i)
-            {
-                res[i] = std::rint(input[i]);
-            }
-            size_t diff = detail::get_nb_diff(res, expected);
-            INFO("rint");
-            CHECK_EQ(diff, 0);
         }
     }
 };

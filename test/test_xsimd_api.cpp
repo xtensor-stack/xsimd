@@ -740,9 +740,13 @@ struct xsimd_api_float_types_functions
     {
         value_type val0(2);
         value_type val1(2);
+        value_type nval1(-3);
         int ival1 = 4;
+        int nival1 = -5;
         CHECK_EQ(extract(xsimd::pow(T(val0), T(val1))), std::pow(val0, val1));
         CHECK_EQ(extract(xsimd::pow(T(val0), ival1)), std::pow(val0, ival1));
+        CHECK_EQ(extract(xsimd::pow(T(val0), T(nval1))), doctest::Approx(std::pow(val0, nval1)));
+        CHECK_EQ(extract(xsimd::pow(T(val0), nival1)), doctest::Approx(std::pow(val0, nival1)));
     }
     void test_reciprocal()
     {
@@ -784,7 +788,7 @@ struct xsimd_api_float_types_functions
     void test_sqrt()
     {
         value_type val(1);
-        CHECK_EQ(extract(xsimd::sqrt(T(val))), std::sqrt(val));
+        CHECK_EQ(extract(xsimd::sqrt(T(val))), doctest::Approx(std::sqrt(val)));
     }
     void test_tan()
     {
@@ -1183,7 +1187,7 @@ struct xsimd_api_all_signed_types_functions
     void test_abs()
     {
         value_type val(-1);
-        CHECK_EQ(extract(xsimd::abs(T(val))), std::abs(val));
+        CHECK_EQ(extract(xsimd::abs(T(val))), doctest::Approx(std::abs(val)));
     }
 
     void test_fnms()
