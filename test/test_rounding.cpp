@@ -23,7 +23,7 @@ struct rounding_test
     using int_value_type = xsimd::as_integer_t<value_type>;
     using int_batch_type = xsimd::batch<int_value_type, arch_type>;
     static constexpr size_t size = B::size;
-    static constexpr size_t nb_input = 8;
+    static constexpr size_t nb_input = 16;
     static constexpr size_t nb_batches = nb_input / size;
 
     std::array<value_type, nb_input> input;
@@ -32,14 +32,22 @@ struct rounding_test
 
     rounding_test()
     {
-        input[0] = value_type(-3.5);
-        input[1] = value_type(-2.7);
-        input[2] = value_type(-2.5);
-        input[3] = value_type(-2.3);
-        input[4] = value_type(2.3);
-        input[5] = value_type(2.5);
-        input[6] = value_type(2.7);
-        input[7] = value_type(3.5);
+        input[0] = value_type(-3.7);
+        input[1] = value_type(-3.5);
+        input[2] = value_type(-3.3);
+        input[3] = value_type(-3.1);
+        input[4] = value_type(-2.9);
+        input[5] = value_type(-2.0);
+        input[6] = value_type(-1.9);
+        input[7] = value_type(-0.5);
+        input[8] = value_type(0.5);
+        input[9] = value_type(1.9);
+        input[10] = value_type(2.0);
+        input[11] = value_type(2.9);
+        input[12] = value_type(3.1);
+        input[13] = value_type(3.3);
+        input[14] = value_type(3.5);
+        input[15] = value_type(3.7);
     }
 
     void test_rounding_functions()
