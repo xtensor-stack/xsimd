@@ -1613,7 +1613,7 @@ namespace xsimd
                 }
                 return split;
             }
-            constexpr auto lane_mask = mask % make_batch_constant<uint32_t, (mask.size / 2), A>();
+            constexpr auto lane_mask = mask % std::integral_constant<uint32_t, (mask.size / 2)>();
             XSIMD_IF_CONSTEXPR(detail::is_only_from_lo(mask))
             {
                 __m256 broadcast = _mm256_permute2f128_ps(self, self, 0x00); // [low | low]
@@ -1632,7 +1632,7 @@ namespace xsimd
             __m256 swapped = _mm256_permute2f128_ps(self, self, 0x01); // [high | low]
 
             // normalize mask taking modulo 4
-            constexpr auto half_mask = mask % make_batch_constant<uint32_t, 4, A>();
+            constexpr auto half_mask = mask % std::integral_constant<uint32_t, 4>();
 
             // permute within each lane
             __m256 r0 = _mm256_permutevar_ps(self, half_mask.as_batch());
@@ -1640,7 +1640,7 @@ namespace xsimd
 
             // select lane by the mask index divided by 4
             constexpr auto lane = batch_constant<uint32_t, A, 0, 0, 0, 0, 1, 1, 1, 1> {};
-            constexpr int lane_idx = ((mask / make_batch_constant<uint32_t, 4, A>()) != lane).mask();
+            constexpr int lane_idx = ((mask / std::integral_constant<uint32_t, 4>()) != lane).mask();
 
             return _mm256_blend_ps(r0, r1, lane_idx);
         }
@@ -1681,7 +1681,7 @@ namespace xsimd
 
             // select lane by the mask index divided by 2
             constexpr auto lane = batch_constant<uint64_t, A, 0, 0, 1, 1> {};
-            constexpr int lane_idx = ((mask / make_batch_constant<uint64_t, 2, A>()) != lane).mask();
+            constexpr int lane_idx = ((mask / std::integral_constant<uint64_t, 2>()) != lane).mask();
 
             // blend the two permutes
             return _mm256_blend_pd(r0, r1, lane_idx);

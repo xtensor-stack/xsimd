@@ -1332,7 +1332,7 @@ namespace xsimd
                 return self;
             }
 
-            constexpr auto lane_mask = mask % make_batch_constant<uint8_t, (mask.size / 2), A>();
+            constexpr auto lane_mask = mask % std::integral_constant<uint8_t, (mask.size / 2)>();
 
             XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
             {
@@ -1409,7 +1409,7 @@ namespace xsimd
             }
             XSIMD_IF_CONSTEXPR(!detail::is_cross_lane(mask))
             {
-                constexpr auto lane_mask = mask % make_batch_constant<uint32_t, (mask.size / 2), A>();
+                constexpr auto lane_mask = mask % std::integral_constant<uint32_t, (mask.size / 2)>();
                 // Cheaper intrinsics when not crossing lanes
                 // Contrary to the uint64_t version, the limits of 8 bits for the immediate constant
                 // cannot make different permutations across lanes
