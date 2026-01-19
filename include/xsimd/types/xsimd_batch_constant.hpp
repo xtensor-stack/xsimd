@@ -483,6 +483,29 @@ namespace xsimd
 
 #endif
 
+    namespace generator
+    {
+        template <class T>
+        struct iota
+        {
+            static constexpr T get(size_t index, size_t)
+            {
+                return static_cast<T>(index);
+            }
+        };
+    }
+    /**
+     * @brief Build a @c batch_constant as an enumerated range
+     *
+     * @tparam T type of the data held in the batch.
+     * @tparam A Architecture that will be used when converting to a regular batch.
+     */
+    template <typename T, class A = default_arch>
+    XSIMD_INLINE constexpr auto make_iota_batch_constant() noexcept
+    {
+        return make_batch_constant<T, generator::iota<T>, A>();
+    }
+
 } // namespace xsimd
 
 #endif

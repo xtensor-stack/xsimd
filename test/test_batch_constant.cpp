@@ -82,6 +82,10 @@ struct constant_batch_test
         constexpr auto b = xsimd::make_batch_constant<value_type, arange, arch_type>();
         INFO("batch(value_type)");
         CHECK_BATCH_EQ((batch_type)b, expected);
+
+        constexpr auto b_p = xsimd::make_iota_batch_constant<value_type, arch_type>();
+        INFO("batch(value_type)");
+        CHECK_BATCH_EQ((batch_type)b_p, expected);
     }
 
     template <value_type V>
