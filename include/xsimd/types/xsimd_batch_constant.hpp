@@ -316,11 +316,16 @@ namespace xsimd
         }
 
     public:
-#define MAKE_BINARY_OP(OP, NAME)                                                 \
-    template <T... OtherValues>                                                  \
-    constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
-    {                                                                            \
-        return apply<NAME<void>>(*this, other);                                  \
+#define MAKE_BINARY_OP(OP, NAME)                                                                                       \
+    template <T... OtherValues>                                                                                        \
+    constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const                                       \
+    {                                                                                                                  \
+        return apply<NAME<void>>(*this, other);                                                                        \
+    }                                                                                                                  \
+    template <T OtherValue>                                                                                            \
+    constexpr batch_constant<T, A, (Values OP OtherValue)...> operator OP(std::integral_constant<T, OtherValue>) const \
+    {                                                                                                                  \
+        return {};                                                                                                     \
     }
 
         MAKE_BINARY_OP(+, std::plus)
@@ -350,11 +355,16 @@ namespace xsimd
             return apply_bool<F, std::tuple<std::integral_constant<T, Values>...>, std::tuple<std::integral_constant<T, OtherValues>...>>(std::make_index_sequence<sizeof...(Values)>());
         }
 
-#define MAKE_BINARY_BOOL_OP(OP, NAME)                                            \
-    template <T... OtherValues>                                                  \
-    constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const \
-    {                                                                            \
-        return apply_bool<NAME<void>>(*this, other);                             \
+#define MAKE_BINARY_BOOL_OP(OP, NAME)                                                                                       \
+    template <T... OtherValues>                                                                                             \
+    constexpr auto operator OP(batch_constant<T, A, OtherValues...> other) const                                            \
+    {                                                                                                                       \
+        return apply_bool<NAME<void>>(*this, other);                                                                        \
+    }                                                                                                                       \
+    template <T OtherValue>                                                                                                 \
+    constexpr batch_bool_constant<T, A, (Values OP OtherValue)...> operator OP(std::integral_constant<T, OtherValue>) const \
+    {                                                                                                                       \
+        return {};                                                                                                          \
     }
 
         MAKE_BINARY_BOOL_OP(==, std::equal_to)

@@ -2074,7 +2074,7 @@ namespace xsimd
             __m128i hi = _mm_unpackhi_epi64(hil, hih);
 
             // mask to choose the right lane
-            constexpr auto blend_mask = mask < make_batch_constant<uint16_t, 4, A>();
+            constexpr auto blend_mask = mask < std::integral_constant<uint16_t, 4>();
 
             // blend the two permutes
             return select(blend_mask, batch<uint16_t, A>(lo), batch<uint16_t, A>(hi));
