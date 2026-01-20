@@ -64,7 +64,7 @@ jobs:
                   -DCMAKE_CXX_FLAGS="-DXSIMD_DEFAULT_ARCH=emulated\<128\> -DXSIMD_WITH_EMULATED=1 ${CXXFLAGS}" \
                   -G Ninja
     - name: Build
-      run: ninja -C _build
+      run: ninja -j1 -C _build
     - name: Test
       run: |
         cd _build/test
