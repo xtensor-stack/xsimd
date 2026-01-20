@@ -37,7 +37,7 @@ jobs:
                   -DBUILD_EXAMPLES=ON \
                   -DDOWNLOAD_DOCTEST=ON \
                   -DCMAKE_BUILD_TYPE=Debug \
-                  -DCMAKE_CXX_FLAGS='-f${{ matrix.flags }} -O0 -g -fno-inline' \
+                  -DCMAKE_CXX_FLAGS='-f${{ matrix.flags }} -O1 -g' \
                   -G Ninja
     - name: Build
       run: ninja -C _build
