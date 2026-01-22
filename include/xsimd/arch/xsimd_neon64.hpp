@@ -182,11 +182,15 @@ namespace xsimd
          * store<batch_bool> *
          *********************/
 
+#if !defined(__GNUC__) && !defined(__clang__)
+        // FIXME: reproduce the issue and understand why it fails, see
+        // https://github.com/xtensor-stack/xsimd/issues/1232
         template <class A>
         XSIMD_INLINE void store(batch_bool<double, A> b, bool* mem, requires_arch<neon>) noexcept
         {
             store(batch_bool<uint64_t, A>(b.data), mem, A {});
         }
+#endif
 
         /****************
          * load_complex *
