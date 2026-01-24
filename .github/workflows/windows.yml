@@ -91,3 +91,31 @@ jobs:
       - name: Test
         run: |
           cd _build && ./test/test_xsimd
+
+  build-windows-arm64:
+    name: 'MSVC arm64'
+    defaults:
+      run:
+        shell: bash {0}
+    runs-on: windows-11-arm
+    steps:
+    - name: Setup compiler
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+    - name: Setup Ninja
+      run: |
+        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install ninja
+    - name: Checkout xsimd
+      uses: actions/checkout@v3
+    - name: Setup
+      run: |
+        mkdir _build
+        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
+    - name: Build
+      run: |
+        cd _build && cmake --build .
+    - name: Testing xsimd
+      run: |
+        cd _build && ./test/test_xsimd
