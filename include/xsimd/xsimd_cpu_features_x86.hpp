@@ -263,7 +263,12 @@ namespace xsimd
         inline void get_cpuid(int reg[4], int level, int count) noexcept
         {
 #if !XSIMD_TARGET_X86
-            reg = {}; // Fill zeros
+            reg[0] = 0;
+            reg[1] = 0;
+            reg[2] = 0;
+            reg[3] = 0;
+            (void)level;
+            (void)count;
 
 #elif defined(_MSC_VER)
             __cpuidex(reg, level, count);
