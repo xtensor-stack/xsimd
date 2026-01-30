@@ -76,7 +76,7 @@ namespace xsimd
         }
 
         /** Read the XCR0 register from the CPU if on the correct architecture. */
-        static x86_xcr0 read()
+        inline static x86_xcr0 read()
         {
             return x86_xcr0(detail::get_xcr0_low());
         }
@@ -129,7 +129,7 @@ namespace xsimd
          *
          * @see cpu_id::osxsave
          */
-        static x86_cpu_id read()
+        inline static x86_cpu_id read()
         {
             cpu_id_regs regs = {};
             detail::get_cpuid(regs.reg1, 0x1);

@@ -3,7 +3,7 @@
 # Usage: $0 top_srcdir
 #
 # This script walks all headers in $top_srcdir/include and makes sure that all
-# functions declared tehre are marked as inline or constexpr (which implies
+# functions declared there are marked as inline or constexpr (which implies
 # inline). This makes sure the xsimd headers does not define symbol with global
 # linkage, and somehow convey our itnent to have all functions in xsimd being
 # inlined by the compiler.
