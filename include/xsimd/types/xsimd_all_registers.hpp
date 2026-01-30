@@ -9,6 +9,8 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "../config/xsimd_inline.hpp"
+
 #include "xsimd_fma3_sse_register.hpp"
 #include "xsimd_fma4_register.hpp"
 #include "xsimd_sse2_register.hpp"
