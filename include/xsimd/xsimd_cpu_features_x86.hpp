@@ -78,7 +78,7 @@ namespace xsimd
 
         constexpr bool avx512_state_os_enabled() const noexcept
         {
-            // Check all SSE, AVX, and AVX52 bits even though AVX512 must
+            // Check all SSE, AVX, and AVX512 bits even though AVX512 must
             // imply AVX and SSE
             return utils::bit_is_set<1, 2, 6>(m_low);
         }
@@ -247,16 +247,18 @@ namespace xsimd
     {
         inline cpuid_reg_t get_cpuid(int level, int count) noexcept
         {
+            cpuid_reg_t reg = {};
+
 #if !XSIMD_TARGET_X86
             (void)level;
             (void)count;
             return {}; // All bits to zero
 
 #elif defined(_MSC_VER)
-            __cpuidex(reg, level, count);
+            __cpuidex(reg.data(), level, count);
 
 #elif defined(__INTEL_COMPILER)
-            __cpuid(reg, level);
+            __cpuid(reg.data(), level);
 
 #elif defined(__GNUC__) || defined(__clang__)
 
@@ -274,6 +276,7 @@ namespace xsimd
                     : "0"(level), "2"(count));
 #endif
 #endif
+            return reg;
         }
 
         inline xcr0_reg_t get_xcr0_low() noexcept
