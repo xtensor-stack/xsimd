@@ -15,35 +15,16 @@
 #include <cstdint>
 
 #include "./config/xsimd_config.hpp"
+#include "./utils/bits.hpp"
 
 #if XSIMD_TARGET_X86 && defined(_MSC_VER)
-// Contains the definition of __cpuidex
-#include <intrin.h>
+#include <intrin.h> // Contains the definition of __cpuidex
 #endif
 
 namespace xsimd
 {
     namespace detail
     {
-        template <typename I>
-        constexpr I make_bit_mask(I bit)
-        {
-            return static_cast<I>(I { 1 } << bit);
-        }
-
-        template <typename I, typename... Args>
-        constexpr I make_bit_mask(I bit, Args... bits)
-        {
-            return make_bit_mask<I>(bit) | make_bit_mask<I>(static_cast<I>(bits)...);
-        }
-
-        template <int... Bits, typename I>
-        constexpr bool bit_is_set(I value)
-        {
-            constexpr I mask = make_bit_mask<I>(static_cast<I>(Bits)...);
-            return (value & mask) == mask;
-        }
-
         inline void get_cpuid(int reg[4], int level, int count = 0) noexcept;
 
         inline std::uint32_t get_xcr0_low() noexcept;
@@ -83,20 +64,20 @@ namespace xsimd
 
         constexpr bool sse_state_os_enabled() const noexcept
         {
-            return detail::bit_is_set<1>(m_low);
+            return utils::bit_is_set<1>(m_low);
         }
 
         constexpr bool avx_state_os_enabled() const noexcept
         {
             // Check both SSE and AVX bits even though AVX must imply SSE
-            return detail::bit_is_set<1, 2>(m_low);
+            return utils::bit_is_set<1, 2>(m_low);
         }
 
         constexpr bool avx512_state_os_enabled() const noexcept
         {
             // Check all SSE, AVX, and AVX52 bits even though AVX512 must
             // imply AVX and SSE
-            return detail::bit_is_set<1, 2, 6>(m_low);
+            return utils::bit_is_set<1, 2, 6>(m_low);
         }
 
     private:
@@ -141,32 +122,32 @@ namespace xsimd
 
         constexpr bool sse2() const noexcept
         {
-            return detail::bit_is_set<26>(m_regs.reg1[3]);
+            return utils::bit_is_set<26>(m_regs.reg1[3]);
         }
 
         constexpr bool sse3() const noexcept
         {
-            return detail::bit_is_set<0>(m_regs.reg1[2]);
+            return utils::bit_is_set<0>(m_regs.reg1[2]);
         }
 
         constexpr bool ssse3() const noexcept
         {
-            return detail::bit_is_set<9>(m_regs.reg1[2]);
+            return utils::bit_is_set<9>(m_regs.reg1[2]);
         }
 
         constexpr bool sse4_1() const noexcept
         {
-            return detail::bit_is_set<19>(m_regs.reg1[2]);
+            return utils::bit_is_set<19>(m_regs.reg1[2]);
         }
 
         constexpr bool sse4_2() const noexcept
         {
-            return detail::bit_is_set<20>(m_regs.reg1[2]);
+            return utils::bit_is_set<20>(m_regs.reg1[2]);
         }
 
         constexpr bool fma3() const noexcept
         {
-            return detail::bit_is_set<12>(m_regs.reg1[2]);
+            return utils::bit_is_set<12>(m_regs.reg1[2]);
         }
 
         /**
@@ -181,77 +162,77 @@ namespace xsimd
          */
         constexpr bool osxsave() const noexcept
         {
-            return detail::bit_is_set<27>(m_regs.reg1[2]);
+            return utils::bit_is_set<27>(m_regs.reg1[2]);
         }
 
         constexpr bool avx() const noexcept
         {
-            return detail::bit_is_set<28>(m_regs.reg1[2]);
+            return utils::bit_is_set<28>(m_regs.reg1[2]);
         }
 
         constexpr bool avx2() const noexcept
         {
-            return detail::bit_is_set<5>(m_regs.reg7[1]);
+            return utils::bit_is_set<5>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512f() const noexcept
         {
-            return detail::bit_is_set<16>(m_regs.reg7[1]);
+            return utils::bit_is_set<16>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512dq() const noexcept
         {
-            return detail::bit_is_set<17>(m_regs.reg7[1]);
+            return utils::bit_is_set<17>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512ifma() const noexcept
         {
-            return detail::bit_is_set<21>(m_regs.reg7[1]);
+            return utils::bit_is_set<21>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512pf() const noexcept
         {
-            return detail::bit_is_set<26>(m_regs.reg7[1]);
+            return utils::bit_is_set<26>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512er() const noexcept
         {
-            return detail::bit_is_set<27>(m_regs.reg7[1]);
+            return utils::bit_is_set<27>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512cd() const noexcept
         {
-            return detail::bit_is_set<28>(m_regs.reg7[1]);
+            return utils::bit_is_set<28>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512bw() const noexcept
         {
-            return detail::bit_is_set<30>(m_regs.reg7[1]);
+            return utils::bit_is_set<30>(m_regs.reg7[1]);
         }
 
         constexpr bool avx512vbmi() const noexcept
         {
-            return detail::bit_is_set<1>(m_regs.reg7[2]);
+            return utils::bit_is_set<1>(m_regs.reg7[2]);
         }
 
         constexpr bool avx512vbmi2() const noexcept
         {
-            return detail::bit_is_set<6>(m_regs.reg7[2]);
+            return utils::bit_is_set<6>(m_regs.reg7[2]);
         }
 
         constexpr bool avx512vnni_bw() const noexcept
         {
-            return detail::bit_is_set<11>(m_regs.reg7[2]);
+            return utils::bit_is_set<11>(m_regs.reg7[2]);
         }
 
         constexpr bool avxvnni() const noexcept
         {
-            return detail::bit_is_set<4>(m_regs.reg7a[0]);
+            return utils::bit_is_set<4>(m_regs.reg7a[0]);
         }
 
         constexpr bool fma4() const noexcept
         {
-            return detail::bit_is_set<16>(m_regs.reg8[2]);
+            return utils::bit_is_set<16>(m_regs.reg8[2]);
         }
 
     private:
