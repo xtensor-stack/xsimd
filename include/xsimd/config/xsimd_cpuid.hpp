@@ -12,8 +12,6 @@
 #ifndef XSIMD_CPUID_HPP
 #define XSIMD_CPUID_HPP
 
-#include <cstring>
-
 #include "../types/xsimd_all_registers.hpp"
 #include "../xsimd_cpu_features_x86.hpp"
 #include "xsimd_inline.hpp"
@@ -36,7 +34,7 @@ namespace xsimd
         {
 
 #define ARCH_FIELD_EX(arch, field_name) \
-    unsigned field_name;                \
+    unsigned field_name = 0;            \
     XSIMD_INLINE bool has(::xsimd::arch) const { return this->field_name; }
 
 #define ARCH_FIELD_EX_REUSE(arch, field_name) \
@@ -86,8 +84,6 @@ namespace xsimd
 
             XSIMD_INLINE supported_arch() noexcept
             {
-                memset(this, 0, sizeof(supported_arch));
-
 #if XSIMD_WITH_WASM
                 wasm = 1;
 #endif
