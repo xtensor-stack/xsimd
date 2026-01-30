@@ -14,6 +14,8 @@
 
 #include <type_traits>
 
+#include "../config/xsimd_inline.hpp"
+
 namespace xsimd
 {
     namespace types
