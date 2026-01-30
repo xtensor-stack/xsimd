@@ -36,6 +36,17 @@
 /**
  * @ingroup xsimd_config_macro
  *
+ * Set to 1 if the target is the x86 architecture family.
+ */
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
+#define XSIMD_TARGET_X86 1
+#else
+#define XSIMD_TARGET_X86 0
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
  * Set to 1 if SSE2 is available at compile-time, to 0 otherwise.
  */
 #ifdef __SSE2__
