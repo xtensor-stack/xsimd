@@ -116,6 +116,7 @@ namespace xsimd
         inline static x86_cpu_id read()
         {
             cpu_id_regs regs = {};
+            // TODO(C++20): Use designated initializer
             regs.reg1 = detail::get_cpuid(0x1);
             regs.reg7 = detail::get_cpuid(0x7);
             regs.reg7a = detail::get_cpuid(0x7, 0x1);

@@ -25,6 +25,7 @@ namespace xsimd
         template <typename I, typename... Args>
         constexpr I make_bit_mask(I bit, Args... bits)
         {
+            // TODO(C++17): Use fold expression
             return make_bit_mask<I>(bit) | make_bit_mask<I>(static_cast<I>(bits)...);
         }
 
