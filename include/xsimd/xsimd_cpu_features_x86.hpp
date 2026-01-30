@@ -12,6 +12,7 @@
 #ifndef XSIMD_CPU_FEATURES_X86_HPP
 #define XSIMD_CPU_FEATURES_X86_HPP
 
+#include <array>
 #include <cstdint>
 
 #include "./config/xsimd_config.hpp"
@@ -25,9 +26,11 @@ namespace xsimd
 {
     namespace detail
     {
-        inline void get_cpuid(int reg[4], int level, int count = 0) noexcept;
+        using cpuid_reg_t = std::array<int, 4>;
+        inline cpuid_reg_t get_cpuid(int level, int count = 0) noexcept;
 
-        inline std::uint32_t get_xcr0_low() noexcept;
+        using xcr0_reg_t = std::uint32_t;
+        inline xcr0_reg_t get_xcr0_low() noexcept;
     }
 
     /*
@@ -42,7 +45,7 @@ namespace xsimd
     class x86_xcr0
     {
     public:
-        using reg_t = std::uint32_t;
+        using reg_t = detail::xcr0_reg_t;
 
         /** Parse a XCR0 value into individual components. */
         constexpr explicit x86_xcr0(reg_t low) noexcept
@@ -81,7 +84,7 @@ namespace xsimd
         }
 
     private:
-        std::uint32_t m_low = {};
+        reg_t m_low = {};
     };
 
     class x86_cpu_id
@@ -89,7 +92,7 @@ namespace xsimd
     public:
         struct cpu_id_regs
         {
-            using reg_t = int[4];
+            using reg_t = detail::cpuid_reg_t;
 
             reg_t reg1 = {};
             reg_t reg7 = {};
@@ -113,10 +116,10 @@ namespace xsimd
         inline static x86_cpu_id read()
         {
             cpu_id_regs regs = {};
-            detail::get_cpuid(regs.reg1, 0x1);
-            detail::get_cpuid(regs.reg7, 0x7);
-            detail::get_cpuid(regs.reg7a, 0x7, 0x1);
-            detail::get_cpuid(regs.reg8, 0x80000001);
+            regs.reg1 = detail::get_cpuid(0x1);
+            regs.reg7 = detail::get_cpuid(0x7);
+            regs.reg7a = detail::get_cpuid(0x7, 0x1);
+            regs.reg8 = detail::get_cpuid(0x80000001);
             return x86_cpu_id(regs);
         }
 
@@ -241,15 +244,12 @@ namespace xsimd
 
     namespace detail
     {
-        inline void get_cpuid(int reg[4], int level, int count) noexcept
+        inline cpuid_reg_t get_cpuid(int level, int count) noexcept
         {
 #if !XSIMD_TARGET_X86
-            reg[0] = 0;
-            reg[1] = 0;
-            reg[2] = 0;
-            reg[3] = 0;
             (void)level;
             (void)count;
+            return {}; // All bits to zero
 
 #elif defined(_MSC_VER)
             __cpuidex(reg, level, count);
@@ -275,16 +275,16 @@ namespace xsimd
 #endif
         }
 
-        inline std::uint32_t get_xcr0_low() noexcept
+        inline xcr0_reg_t get_xcr0_low() noexcept
         {
 #if !XSIMD_TARGET_X86
-            return {}; // return 0;
+            return {}; // All bits to zero
 
 #elif defined(_MSC_VER) && _MSC_VER >= 1400
-            return static_cast<std::uint32_t>(_xgetbv(0));
+            return static_cast<xcr0_reg_t>(_xgetbv(0));
 
 #elif defined(__GNUC__)
-            std::uint32_t xcr0 = {};
+            xcr0_reg_t xcr0 = {};
             __asm__(
                 "xorl %%ecx, %%ecx\n"
                 "xgetbv\n"
