@@ -65,18 +65,18 @@ namespace xsimd
             return x86_xcr0(detail::get_xcr0_low());
         }
 
-        constexpr bool sse_state_os_enabled() const noexcept
+        constexpr bool sse_enabled() const noexcept
         {
             return utils::bit_is_set<1>(m_low);
         }
 
-        constexpr bool avx_state_os_enabled() const noexcept
+        constexpr bool avx_enabled() const noexcept
         {
             // Check both SSE and AVX bits even though AVX must imply SSE
             return utils::bit_is_set<1, 2>(m_low);
         }
 
-        constexpr bool avx512_state_os_enabled() const noexcept
+        constexpr bool avx512_enabled() const noexcept
         {
             // Check all SSE, AVX, and AVX512 bits even though AVX512 must
             // imply AVX and SSE
