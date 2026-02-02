@@ -343,14 +343,12 @@
 
 #endif
 
-#ifdef __ARM_NEON
-
 /**
  * @ingroup xsimd_config_macro
  *
  * Set to 1 if NEON is available at compile-time, to 0 otherwise.
  */
-#if __ARM_ARCH >= 7
+#if defined(__ARM_NEON) && __ARM_ARCH >= 7
 #define XSIMD_WITH_NEON 1
 #else
 #define XSIMD_WITH_NEON 0
@@ -361,13 +359,9 @@
  *
  * Set to 1 if NEON64 is available at compile-time, to 0 otherwise.
  */
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 #define XSIMD_WITH_NEON64 1
 #else
-#define XSIMD_WITH_NEON64 0
-#endif
-#else
-#define XSIMD_WITH_NEON 0
 #define XSIMD_WITH_NEON64 0
 #endif
 
