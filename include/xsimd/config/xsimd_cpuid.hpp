@@ -105,17 +105,13 @@ namespace xsimd
                 neon64 = 1;
 #if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
                 i8mm_neon64 = bool(getauxval(AT_HWCAP2) & HWCAP2_I8MM);
+                sve = bool(getauxval(AT_HWCAP) & HWCAP_SVE);
 #endif
+
 #elif defined(__ARM_NEON) || defined(_M_ARM)
 
 #if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
                 neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
-#endif
-
-#elif defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE_BITS) && __ARM_FEATURE_SVE_BITS > 0
-
-#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
-                sve = bool(getauxval(AT_HWCAP) & HWCAP_SVE);
 #endif
 
 #elif defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0
