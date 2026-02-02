@@ -87,6 +87,15 @@ namespace xsimd
         reg_t m_low = {};
     };
 
+    /**
+     * CPU Identification (CPUID) instruction results.
+     *
+     * The CPUID instruction provides detailed information about the processor,
+     * including supported instruction set extensions (SSE, AVX, AVX-512, etc.).
+     * This utility parses CPUID leaf values to detect available CPU features.
+     *
+     * @see https://en.wikipedia.org/wiki/CPUID
+     */
     class x86_cpu_id
     {
     public:
