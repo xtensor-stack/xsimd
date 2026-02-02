@@ -124,35 +124,17 @@ namespace xsimd
             return x86_cpu_id(regs);
         }
 
-        constexpr bool sse2() const noexcept
-        {
-            return utils::bit_is_set<26>(m_regs.reg1[3]);
-        }
+        constexpr bool sse2() const noexcept { return utils::bit_is_set<26>(m_regs.reg1[3]); }
 
-        constexpr bool sse3() const noexcept
-        {
-            return utils::bit_is_set<0>(m_regs.reg1[2]);
-        }
+        constexpr bool sse3() const noexcept { return utils::bit_is_set<0>(m_regs.reg1[2]); }
 
-        constexpr bool ssse3() const noexcept
-        {
-            return utils::bit_is_set<9>(m_regs.reg1[2]);
-        }
+        constexpr bool ssse3() const noexcept { return utils::bit_is_set<9>(m_regs.reg1[2]); }
 
-        constexpr bool sse4_1() const noexcept
-        {
-            return utils::bit_is_set<19>(m_regs.reg1[2]);
-        }
+        constexpr bool sse4_1() const noexcept { return utils::bit_is_set<19>(m_regs.reg1[2]); }
 
-        constexpr bool sse4_2() const noexcept
-        {
-            return utils::bit_is_set<20>(m_regs.reg1[2]);
-        }
+        constexpr bool sse4_2() const noexcept { return utils::bit_is_set<20>(m_regs.reg1[2]); }
 
-        constexpr bool fma3() const noexcept
-        {
-            return utils::bit_is_set<12>(m_regs.reg1[2]);
-        }
+        constexpr bool fma3() const noexcept { return utils::bit_is_set<12>(m_regs.reg1[2]); }
 
         /**
          * Indicates whether the OS has enabled extended state management.
@@ -164,80 +146,35 @@ namespace xsimd
          * This value is read from CPUID leaf 0x1, ECX bit 27, which reflects
          * the state of CR4.OSXSAVE.
          */
-        constexpr bool osxsave() const noexcept
-        {
-            return utils::bit_is_set<27>(m_regs.reg1[2]);
-        }
+        constexpr bool osxsave() const noexcept { return utils::bit_is_set<27>(m_regs.reg1[2]); }
 
-        constexpr bool avx() const noexcept
-        {
-            return utils::bit_is_set<28>(m_regs.reg1[2]);
-        }
+        constexpr bool avx() const noexcept { return utils::bit_is_set<28>(m_regs.reg1[2]); }
 
-        constexpr bool avx2() const noexcept
-        {
-            return utils::bit_is_set<5>(m_regs.reg7[1]);
-        }
+        constexpr bool avx2() const noexcept { return utils::bit_is_set<5>(m_regs.reg7[1]); }
 
-        constexpr bool avx512f() const noexcept
-        {
-            return utils::bit_is_set<16>(m_regs.reg7[1]);
-        }
+        constexpr bool avx512f() const noexcept { return utils::bit_is_set<16>(m_regs.reg7[1]); }
 
-        constexpr bool avx512dq() const noexcept
-        {
-            return utils::bit_is_set<17>(m_regs.reg7[1]);
-        }
+        constexpr bool avx512dq() const noexcept { return utils::bit_is_set<17>(m_regs.reg7[1]); }
 
-        constexpr bool avx512ifma() const noexcept
-        {
-            return utils::bit_is_set<21>(m_regs.reg7[1]);
-        }
+        constexpr bool avx512ifma() const noexcept { return utils::bit_is_set<21>(m_regs.reg7[1]); }
 
-        constexpr bool avx512pf() const noexcept
-        {
-            return utils::bit_is_set<26>(m_regs.reg7[1]);
-        }
+        constexpr bool avx512pf() const noexcept { return utils::bit_is_set<26>(m_regs.reg7[1]); }
 
-        constexpr bool avx512er() const noexcept
-        {
-            return utils::bit_is_set<27>(m_regs.reg7[1]);
-        }
+        constexpr bool avx512er() const noexcept { return utils::bit_is_set<27>(m_regs.reg7[1]); }
 
-        constexpr bool avx512cd() const noexcept
-        {
-            return utils::bit_is_set<28>(m_regs.reg7[1]);
-        }
+        constexpr bool avx512cd() const noexcept { return utils::bit_is_set<28>(m_regs.reg7[1]); }
 
-        constexpr bool avx512bw() const noexcept
-        {
-            return utils::bit_is_set<30>(m_regs.reg7[1]);
-        }
+        constexpr bool avx512bw() const noexcept { return utils::bit_is_set<30>(m_regs.reg7[1]); }
 
-        constexpr bool avx512vbmi() const noexcept
-        {
-            return utils::bit_is_set<1>(m_regs.reg7[2]);
-        }
+        constexpr bool avx512vbmi() const noexcept { return utils::bit_is_set<1>(m_regs.reg7[2]); }
 
-        constexpr bool avx512vbmi2() const noexcept
-        {
-            return utils::bit_is_set<6>(m_regs.reg7[2]);
-        }
+        constexpr bool avx512vbmi2() const noexcept { return utils::bit_is_set<6>(m_regs.reg7[2]); }
 
-        constexpr bool avx512vnni_bw() const noexcept
-        {
-            return utils::bit_is_set<11>(m_regs.reg7[2]);
-        }
+        constexpr bool avx512vnni_bw() const noexcept { return utils::bit_is_set<11>(m_regs.reg7[2]); }
 
-        constexpr bool avxvnni() const noexcept
-        {
-            return utils::bit_is_set<4>(m_regs.reg7a[0]);
-        }
+        constexpr bool avxvnni() const noexcept { return utils::bit_is_set<4>(m_regs.reg7a[0]); }
 
-        constexpr bool fma4() const noexcept
-        {
-            return utils::bit_is_set<16>(m_regs.reg8[2]);
-        }
+        constexpr bool fma4() const noexcept { return utils::bit_is_set<16>(m_regs.reg8[2]); }
 
     private:
         cpu_id_regs m_regs = {};
