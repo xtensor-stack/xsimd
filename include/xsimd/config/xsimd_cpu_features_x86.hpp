@@ -15,8 +15,8 @@
 #include <array>
 #include <cstdint>
 
-#include "./config/xsimd_config.hpp"
-#include "./utils/bits.hpp"
+#include "../utils/bits.hpp"
+#include "./xsimd_config.hpp"
 
 #if XSIMD_TARGET_X86 && defined(_MSC_VER)
 #include <intrin.h> // Contains the definition of __cpuidex

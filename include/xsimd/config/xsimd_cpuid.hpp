@@ -13,7 +13,7 @@
 #define XSIMD_CPUID_HPP
 
 #include "../types/xsimd_all_registers.hpp"
-#include "../xsimd_cpu_features_x86.hpp"
+#include "./xsimd_cpu_features_x86.hpp"
 #include "xsimd_inline.hpp"
 
 #if defined(__linux__) && (defined(__ARM_NEON) || defined(_M_ARM) || defined(__riscv_vector))
