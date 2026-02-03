@@ -47,16 +47,29 @@ namespace xsimd
     public:
         using reg_t = detail::xcr0_reg_t;
 
+        static constexpr reg_t sse_bit = 1;
+        static constexpr reg_t avx_bit = 2;
+        static constexpr reg_t avx512_bit = 6;
+
         /** Parse a XCR0 value into individual components. */
         constexpr explicit x86_xcr0(reg_t low) noexcept
             : m_low(low)
         {
         }
 
-        /** Create an object that has all features set to false. */
-        static constexpr x86_xcr0 make_false()
+        /**
+         * Create a default value with only SSE enabled.
+         *
+         * AVX and AVX512 strictly require OSXSAVE to be enabled by the OS.
+         * If OSXSAVE is disabled (e.g., via bcdedit /set xsavedisable 1), AVX state won't
+         * be preserved across context switches, so AVX cannot be used.
+         * SSE is therefore the only value safe to assume.
+         */
+        constexpr static x86_xcr0 safe_default() noexcept
         {
-            return x86_xcr0(0);
+            reg_t low = {};
+            low = utils::set_bit<sse_bit>(low);
+            return x86_xcr0(low);
         }
 
         /** Read the XCR0 register from the CPU if on the correct architecture. */
@@ -67,20 +80,20 @@ namespace xsimd
 
         constexpr bool sse_enabled() const noexcept
         {
-            return utils::bit_is_set<1>(m_low);
+            return utils::bit_is_set<sse_bit>(m_low);
         }
 
         constexpr bool avx_enabled() const noexcept
         {
             // Check both SSE and AVX bits even though AVX must imply SSE
-            return utils::bit_is_set<1, 2>(m_low);
+            return utils::bit_is_set<sse_bit, avx_bit>(m_low);
         }
 
         constexpr bool avx512_enabled() const noexcept
         {
             // Check all SSE, AVX, and AVX512 bits even though AVX512 must
             // imply AVX and SSE
-            return utils::bit_is_set<1, 2, 6>(m_low);
+            return utils::bit_is_set<sse_bit, avx_bit, avx512_bit>(m_low);
         }
 
     private:

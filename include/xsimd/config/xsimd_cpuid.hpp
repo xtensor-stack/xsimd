@@ -115,52 +115,37 @@ namespace xsimd
                 rvv = bool(getauxval(AT_HWCAP) & HWCAP_V);
 #endif
 #endif
+                // Safe on all platforms, we simply be false
                 const auto cpuid = xsimd::x86_cpu_id::read();
-                auto xcr0 = xsimd::x86_xcr0::make_false();
+                const auto xcr0 = cpuid.osxsave() ? x86_xcr0::read() : x86_xcr0::safe_default();
 
-                bool sse_enabled = true;
-                // AVX and AVX512 strictly require OSXSAVE to be enabled by the OS.
-                // If OSXSAVE is disabled (e.g., via bcdedit /set xsavedisable 1),
-                // AVX state won't be preserved across context switches, so AVX cannot be used.
-                bool avx_enabled = false;
-                bool avx512_enabled = false;
-
-                if (cpuid.osxsave())
-                {
-                    xcr0 = xsimd::x86_xcr0::read();
-
-                    sse_enabled = xcr0.sse_enabled();
-                    avx_enabled = xcr0.avx_enabled();
-                    avx512_enabled = xcr0.avx512_enabled();
-                }
-
-                sse2 = cpuid.sse2() && sse_enabled;
-                sse3 = cpuid.sse3() && sse_enabled;
-                ssse3 = cpuid.ssse3() && sse_enabled;
-                sse4_1 = cpuid.sse4_1() && sse_enabled;
-                sse4_2 = cpuid.sse4_2() && sse_enabled;
-                fma3_sse42 = cpuid.fma3() && sse_enabled;
+                sse2 = cpuid.sse2() && xcr0.sse_enabled();
+                sse3 = cpuid.sse3() && xcr0.sse_enabled();
+                ssse3 = cpuid.ssse3() && xcr0.sse_enabled();
+                sse4_1 = cpuid.sse4_1() && xcr0.sse_enabled();
+                sse4_2 = cpuid.sse4_2() && xcr0.sse_enabled();
+                fma3_sse42 = cpuid.fma3() && xcr0.sse_enabled();
 
                 // sse4a not implemented in cpu_id yet
                 // xop not implemented in cpu_id yet
 
-                avx = cpuid.avx() && avx_enabled;
+                avx = cpuid.avx() && xcr0.avx_enabled();
                 fma3_avx = avx && fma3_sse42;
-                fma4 = cpuid.fma4() && avx_enabled;
-                avx2 = cpuid.avx2() && avx_enabled;
-                avxvnni = cpuid.avxvnni() && avx_enabled;
+                fma4 = cpuid.fma4() && xcr0.avx_enabled();
+                avx2 = cpuid.avx2() && xcr0.avx_enabled();
+                avxvnni = cpuid.avxvnni() && xcr0.avx_enabled();
                 fma3_avx2 = avx2 && fma3_sse42;
 
-                avx512f = cpuid.avx512f() && avx512_enabled;
-                avx512cd = cpuid.avx512cd() && avx512_enabled;
-                avx512dq = cpuid.avx512dq() && avx512_enabled;
-                avx512bw = cpuid.avx512bw() && avx512_enabled;
-                avx512er = cpuid.avx512er() && avx512_enabled;
-                avx512pf = cpuid.avx512pf() && avx512_enabled;
-                avx512ifma = cpuid.avx512ifma() && avx512_enabled;
-                avx512vbmi = cpuid.avx512vbmi() && avx512_enabled;
-                avx512vbmi2 = cpuid.avx512vbmi2() && avx512_enabled;
-                avx512vnni_bw = cpuid.avx512vnni_bw() && avx512_enabled;
+                avx512f = cpuid.avx512f() && xcr0.avx512_enabled();
+                avx512cd = cpuid.avx512cd() && xcr0.avx512_enabled();
+                avx512dq = cpuid.avx512dq() && xcr0.avx512_enabled();
+                avx512bw = cpuid.avx512bw() && xcr0.avx512_enabled();
+                avx512er = cpuid.avx512er() && xcr0.avx512_enabled();
+                avx512pf = cpuid.avx512pf() && xcr0.avx512_enabled();
+                avx512ifma = cpuid.avx512ifma() && xcr0.avx512_enabled();
+                avx512vbmi = cpuid.avx512vbmi() && xcr0.avx512_enabled();
+                avx512vbmi2 = cpuid.avx512vbmi2() && xcr0.avx512_enabled();
+                avx512vnni_bw = cpuid.avx512vnni_bw() && xcr0.avx512_enabled();
                 avx512vnni_vbmi2 = avx512vbmi2 && avx512vnni_bw;
             }
         };

@@ -35,6 +35,13 @@ namespace xsimd
             constexpr I mask = make_bit_mask<I>(static_cast<I>(Bits)...);
             return (value & mask) == mask;
         }
+
+        template <int Bit, typename I>
+        constexpr I set_bit(I value)
+        {
+            constexpr I mask = make_bit_mask<I>(static_cast<I>(Bit));
+            return value | mask;
+        }
     }
 }
 
