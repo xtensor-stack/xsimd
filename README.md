@@ -202,6 +202,8 @@ cmake . -DBUILD_TESTS=ON
 make xtest
 ```
 
+See also [CONTRIBUTING.md](CONTRIBUTING.md) for instruction to build and test automatically with Pixi.
+
 ## Building the HTML Documentation
 
 xsimd's documentation is built with three tools
@@ -229,6 +231,8 @@ make html
 ```
 
 from the `docs` subdirectory.
+
+See also [CONTRIBUTING.md](CONTRIBUTING.md) for a Pixi task to build the doc.
 
 ## License
 
