@@ -17,6 +17,7 @@
 
 #include "../types/xsimd_avx2_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
+#include "./utils/shifts.hpp"
 
 #include <limits>
 
@@ -330,6 +331,29 @@ namespace xsimd
             {
                 return bitwise_lshift(self, other, avx {});
             }
+        }
+
+        // bitwise_lshift multiple (constant) specific implementations.
+        // Missing implementations are dispatched to the `batch` overload in xsimd_api.
+        // The 1 byte constant implementation calls the 2 bytes constant version, the 2 bytes
+        // constant version calls into the 4 bytes version which resolves to the dynamic one above.
+        template <class A, class T, T... Vs,
+                  std::enable_if_t<std::is_integral<T>::value && (sizeof(T) <= 2), int> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(
+            batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<avx2> req) noexcept
+        {
+            using uint_t = typename std::make_unsigned<T>::type;
+
+            // AVX2 only supports 16-bit shifts with a uniform bitshift value,
+            // otherwise emulate using 32-bit shifts.
+            XSIMD_IF_CONSTEXPR(utils::all_equals(shifts))
+            {
+                return bitwise_lshift<shifts.get(0), A>(self, req);
+            }
+            return bitwise_cast<T>(
+                utils::bitwise_lshift_as_twice_larger<uint_t>(
+                    bitwise_cast<uint_t>(self),
+                    batch_constant<uint_t, A, static_cast<uint_t>(Vs)...> {}));
         }
 
         // bitwise_or

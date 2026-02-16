@@ -353,6 +353,43 @@ namespace xsimd
         return kernel::bitwise_cast<A>(x, batch<T_out, A> {}, A {});
     }
 
+    namespace detail
+    {
+        // Detection for kernel overloads accepting ``batch_constant`` in ``bitwise_lshift``
+        // directly (or in a parent register function).
+        // The ``batch_constant`` overload is a rare but useful optimization.
+        // Running the detection here is less error prone than to add a fallback to all
+        // architectures.
+
+        template <class Arch, class Batch, class BatchConstant, class = void>
+        struct has_bitwise_lshift_batch_const : std::false_type
+        {
+        };
+
+        template <class Arch, class Batch, class BatchConstant>
+        struct has_bitwise_lshift_batch_const<
+            Arch, Batch, BatchConstant,
+            void_t<decltype(kernel::bitwise_lshift<Arch>(
+                std::declval<Batch>(), std::declval<BatchConstant>(), Arch {}))>>
+            : std::true_type
+        {
+        };
+
+        template <class Arch, class T, T... Values>
+        XSIMD_INLINE batch<T, Arch> bitwise_lshift_batch_const(batch<T, Arch> const& x, batch_constant<T, Arch, Values...> shift, std::true_type) noexcept
+        {
+            // Optimized ``batch_constant`` implementation
+            return kernel::bitwise_lshift<Arch>(x, shift, Arch {});
+        }
+
+        template <class Arch, class T, T... Values>
+        XSIMD_INLINE batch<T, Arch> bitwise_lshift_batch_const(batch<T, Arch> const& x, batch_constant<T, Arch, Values...> shift, std::false_type) noexcept
+        {
+            // Fallback to regular run-time implementation
+            return kernel::bitwise_lshift<Arch>(x, shift.as_batch(), Arch {});
+        }
+    }
+
     /**
      * @ingroup batch_bitwise
      *
@@ -367,17 +404,24 @@ namespace xsimd
         detail::static_check_supported_config<T, A>();
         return kernel::bitwise_lshift<A>(x, shift, A {});
     }
+    template <size_t shift, class T, class A>
+    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::bitwise_lshift<shift, A>(x, A {});
+    }
     template <class T, class A>
     XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x, batch<T, A> const& shift) noexcept
     {
         detail::static_check_supported_config<T, A>();
         return kernel::bitwise_lshift<A>(x, shift, A {});
     }
-    template <size_t shift, class T, class A>
-    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x) noexcept
+    template <class T, class A, T... Values>
+    XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x, batch_constant<T, A, Values...> shift) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::bitwise_lshift<shift, A>(x, A {});
+        using has_batch_const_impl = detail::has_bitwise_lshift_batch_const<A, decltype(x), decltype(shift)>;
+        return detail::bitwise_lshift_batch_const<A>(x, shift, has_batch_const_impl {});
     }
 
     /**

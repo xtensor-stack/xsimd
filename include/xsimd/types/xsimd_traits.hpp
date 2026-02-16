@@ -12,6 +12,7 @@
 #ifndef XSIMD_TRAITS_HPP
 #define XSIMD_TRAITS_HPP
 
+#include <cstdint>
 #include <type_traits>
 
 #include "xsimd_batch.hpp"
@@ -419,6 +420,21 @@ namespace xsimd
         struct widen<uint8_t>
         {
             using type = uint16_t;
+        };
+        template <>
+        struct widen<int32_t>
+        {
+            using type = int64_t;
+        };
+        template <>
+        struct widen<int16_t>
+        {
+            using type = int32_t;
+        };
+        template <>
+        struct widen<int8_t>
+        {
+            using type = int16_t;
         };
         template <>
         struct widen<float>
