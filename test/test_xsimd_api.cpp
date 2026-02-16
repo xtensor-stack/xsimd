@@ -351,7 +351,7 @@ struct xsimd_api_integral_types_functions
 {
     using value_type = typename scalar_type<T>::type;
 
-    void test_bitwise_lshift()
+    void test_bitwise_lshift_single()
     {
         constexpr int shift = 3;
         value_type val0(12);
@@ -362,6 +362,35 @@ struct xsimd_api_integral_types_functions
         CHECK_EQ(extract(xsimd::bitwise_lshift(T(val0), T(val1))), r);
         CHECK_EQ(extract(ir), r);
         CHECK_EQ(extract(cr), r);
+    }
+
+    /* Test when T is a batch_constant only, not a scalar. */
+    template <typename U = T>
+    void test_bitwise_lshift_multiple(T const& vals, typename std::enable_if<!std::is_integral<U>::value, int>::type = 0)
+    {
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+        constexpr auto Max = static_cast<value_type>(std::numeric_limits<value_type>::digits);
+        constexpr auto max_batch = xsimd::make_batch_constant<value_type, Max>();
+        constexpr auto shifts = xsimd::make_iota_batch_constant<value_type>() % max_batch;
+
+        {
+            auto shifted = xsimd::bitwise_lshift(vals, shifts.as_batch());
+            auto shifted_cst = xsimd::bitwise_lshift(vals, shifts);
+
+            for (std::size_t i = 0; i < shifts.size; ++i)
+            {
+                const auto expected = static_cast<value_type>(vals.get(i) << shifts.get(i));
+                CHECK_EQ(shifted.get(i), expected);
+                CHECK_EQ(shifted_cst.get(i), expected);
+            }
+        }
+#endif
+    }
+
+    /* Test multiple does not make sense when T is scalar. */
+    template <typename U = T>
+    void test_bitwise_lshift_multiple(T const&, typename std::enable_if<std::is_integral<U>::value, int>::type = 0)
+    {
     }
 
     void test_bitwise_rshift()
@@ -424,11 +453,20 @@ struct xsimd_api_integral_types_functions
 
 TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
 {
-    xsimd_api_integral_types_functions<B> Test;
+    using test_type = xsimd_api_integral_types_functions<B>;
 
-    SUBCASE("bitwise_lshift")
+    test_type Test;
+
+    SUBCASE("test_bitwise_lshift_single")
     {
-        Test.test_bitwise_lshift();
+        Test.test_bitwise_lshift_single();
+    }
+
+    SUBCASE("bitwise_lshift_multiple")
+    {
+        Test.test_bitwise_lshift_multiple({ 1 });
+        Test.test_bitwise_lshift_multiple({ 3 });
+        Test.test_bitwise_lshift_multiple({ 127 });
     }
 
     SUBCASE("bitwise_rshift")

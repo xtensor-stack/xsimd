@@ -18,6 +18,7 @@
 
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_sse2_register.hpp"
+#include "./utils/shifts.hpp"
 
 namespace xsimd
 {
@@ -324,6 +325,36 @@ namespace xsimd
                 return _mm_slli_epi64(self, static_cast<int>(shift));
             }
             return bitwise_lshift<shift>(self, common {});
+        }
+
+        // bitwise_lshift multiple (constant)
+        // Missing implementations are dispacthed to the `batch` overload in xsimd_api.
+        template <class A, class T, T... Vs, detail::enable_sized_integral_t<T, 2> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(
+            batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<sse2> req) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(utils::all_equals(shifts))
+            {
+                return bitwise_lshift<shifts.get(0), A>(self, req);
+            }
+            constexpr auto mults = batch_constant<T, A, static_cast<T>(1u << Vs)...>();
+            return _mm_mullo_epi16(self, mults.as_batch());
+        }
+
+        template <class A, class T, T... Vs, detail::enable_sized_integral_t<T, 1> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_lshift(
+            batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<sse2> req) noexcept
+        {
+            using uint_t = typename std::make_unsigned<T>::type;
+
+            XSIMD_IF_CONSTEXPR(utils::all_equals(shifts))
+            {
+                return bitwise_lshift<shifts.get(0), A>(self, req);
+            }
+            return bitwise_cast<T>(
+                utils::bitwise_lshift_as_twice_larger<uint_t>(
+                    bitwise_cast<uint_t>(self),
+                    batch_constant<uint_t, A, static_cast<uint_t>(Vs)...> {}));
         }
 
         // bitwise_not
