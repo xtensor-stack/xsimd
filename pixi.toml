@@ -90,9 +90,10 @@ features = ["cmd", "build-tools", "lib", "gcc-base", "gcc-15"]
 
 # A feature to group a set of build and test tasks that can be included in multiple environment
 [feature.cmd.tasks.configure]
-args = ["preset"]
+args = [{ arg = "preset", default = "dev-native" }]
 cmd = """
-cmake -B build/$PIXI_ENVIRONMENT_NAME/{{ preset }} -G Ninja \
+mkdir -p build/{{ pixi.environment.name }}/ && \
+cmake -B build/{{ pixi.environment.name }}/{{ preset }} -G Ninja \
   --preset {{ preset }} \
   -D CMAKE_COLOR_DIAGNOSTICS=ON \
   -D CMAKE_C_COMPILER_LAUNCHER="sccache" \
@@ -100,14 +101,15 @@ cmake -B build/$PIXI_ENVIRONMENT_NAME/{{ preset }} -G Ninja \
   -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
 """
 inputs = ["**/CMakeLists.txt", "**/*.cmake.in", "cmake/"]
+outputs = ["build/{{ pixi.environment.name }}/{{ preset }}/CMakeCache.txt"]
 description = """
 Run the CMake configuration step with a given preset. \
 Build folders are stored in `build/` subdirectories.\
 """
 
 [feature.cmd.tasks.build]
-args = ["preset"]
-cmd = "cmake --build build/$PIXI_ENVIRONMENT_NAME/{{ preset }} --parallel"
+args = [{ arg = "preset", default = "dev-native" }]
+cmd = "cmake --build build/{{ pixi.environment.name }}/{{ preset }} --parallel"
 depends-on = [{ task = "configure", args = ["{{ preset }}"] }]
 # No caching configured here since CMake will do it better
 description = """
@@ -117,12 +119,20 @@ CMake will detect files that have changed and need rebuilding.\
 
 [feature.cmd.tasks.test]
 args = [{ arg = "preset", default = "dev-native" }]
-cmd = "./build/$PIXI_ENVIRONMENT_NAME/{{ preset }}/test/test_xsimd"
+cmd = "./build/{{ pixi.environment.name }}/{{ preset }}/test/test_xsimd"
 depends-on = [{ task = "build", args = ["{{ preset }}"] }]
 description = """
 Run the test suite for the given preset (launch recompilation as needed). \
 The preset can be used to test an older micro architecture on a machine (e.g. \
 testing SSE4.2 on a AVX2 machine).\
+"""
+
+[feature.cmd.tasks.show-asm]
+args = [{ arg = "preset", default = "dev-native" }]
+cmd = "$CXX -S -xc++ -o- - -Iinclude/ -DNDEBUG"
+description = """
+Show the assembly produced for the current compiler and preset for the \
+code passed through the standard input.
 """
 
 # A feature and environment to build documentation
