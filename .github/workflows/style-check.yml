@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Run clang-format style check for C/C++ programs.
-      uses: jidicula/clang-format-action@v4.11.0
-      with:
-        clang-format-version: '17'
-        exclude-regex: 'doctest.h'
+    - run: sudo apt install clang-format
+    - run: |
+        git fetch origin ${{ github.event.pull_request.base.sha }}
+        git clang-format --diff ${{ github.event.pull_request.base.sha }} | tee diff.patch
+        ! grep -q '^diff ' diff.patch
   inlining-check:
     runs-on: ubuntu-latest
     name: Check inline keyword usage
