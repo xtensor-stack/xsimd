@@ -9,6 +9,8 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include <numeric>
+
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
@@ -41,6 +43,22 @@ struct constant_batch_test
         constexpr auto b = xsimd::make_batch_constant<value_type, 1, arch_type>();
         INFO("batch(value_type)");
         CHECK_BATCH_EQ((batch_type)b, expected);
+    }
+
+    void test_init_from_array() const
+    {
+#if __cplusplus >= 202002L
+        constexpr array_type expected = []()
+        {
+            array_type out = {};
+            std::iota(out.begin(), out.end(), 0);
+            return out;
+        }();
+
+        constexpr auto b = xsimd::make_batch_constant<expected, arch_type>();
+        INFO("batch(value_type)");
+        CHECK_BATCH_EQ((batch_type)b, expected);
+#endif
     }
 
     void test_init_from_generator() const
@@ -217,6 +235,8 @@ TEST_CASE_TEMPLATE("[constant batch]", B, BATCH_INT_TYPES)
     constant_batch_test<B> Test;
     SUBCASE("init_from_constant") { Test.test_init_from_constant(); }
 
+    SUBCASE("test_init_from_array") { Test.test_init_from_array(); }
+
     SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
 
     SUBCASE("as_batch") { Test.test_cast(); }
@@ -261,6 +281,25 @@ struct constant_bool_batch_test
         constexpr auto b = xsimd::make_batch_bool_constant<value_type, false, arch_type>();
         INFO("batch_bool_constant(value_type)");
         CHECK_BATCH_EQ((batch_bool_type)b, expected);
+    }
+
+    void test_init_from_array() const
+    {
+#if __cplusplus >= 202002L
+        constexpr bool_array_type expected = []()
+        {
+            bool_array_type out = {};
+            for (std::size_t k = 0; k < out.size(); ++k)
+            {
+                out[k] = k % 2 == 0;
+            }
+            return out;
+        }();
+
+        constexpr auto b = xsimd::make_batch_bool_constant<value_type, expected, arch_type>();
+        INFO("batch_bool_constant(value_type)");
+        CHECK_BATCH_EQ((batch_bool_type)b, expected);
+#endif
     }
 
     void test_init_from_generator() const
@@ -356,6 +395,8 @@ TEST_CASE_TEMPLATE("[constant bool batch]", B, BATCH_INT_TYPES)
 {
     constant_bool_batch_test<B> Test;
     SUBCASE("init_from_constant") { Test.test_init_from_constant(); }
+
+    SUBCASE("test_init_from_array") { Test.test_init_from_array(); }
 
     SUBCASE("init_from_generator") { Test.test_init_from_generator(); }
 
