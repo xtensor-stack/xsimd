@@ -408,6 +408,15 @@ namespace xsimd
             return {};
         }
 
+#if __cplusplus >= 202002L
+        template <std::array Arr, class A, std::size_t... Is>
+        XSIMD_INLINE constexpr batch_constant<typename decltype(Arr)::value_type, A, Arr[Is]...>
+        make_batch_constant(std::index_sequence<Is...>) noexcept
+        {
+            return {};
+        }
+#endif
+
         template <typename T, class G, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_bool_constant<T, A, G::get(Is, sizeof...(Is))...>
         make_batch_bool_constant(std::index_sequence<Is...>) noexcept
@@ -421,6 +430,15 @@ namespace xsimd
         {
             return {};
         }
+
+#if __cplusplus >= 202002L
+        template <typename T, std::array Arr, class A, std::size_t... Is>
+        XSIMD_INLINE constexpr batch_bool_constant<T, A, Arr[Is]...>
+        make_batch_bool_constant(std::index_sequence<Is...>) noexcept
+        {
+            return {};
+        }
+#endif
 
     } // namespace detail
 
@@ -479,6 +497,21 @@ namespace xsimd
         return {};
     }
 
+#if __cplusplus >= 202002L
+    /**
+     * @brief Build a @c batch_constant from a std::array (C++20)
+     *
+     * @tparam Arr The std::array containing the values (non type template argument).
+     * @tparam A Architecture that will be used when converting to a regular batch.
+     */
+    template <std::array Arr, class A = default_arch>
+        requires(Arr.size() == batch<typename decltype(Arr)::value_type, A>::size)
+    XSIMD_INLINE constexpr auto make_batch_constant() noexcept
+    {
+        return detail::make_batch_constant<Arr, A>(std::make_index_sequence<Arr.size()>());
+    }
+#endif
+
     /*
      * @brief Build a @c batch_bool_constant with a single repeated value.
      *
@@ -490,6 +523,23 @@ namespace xsimd
     {
         return {};
     }
+
+#if __cplusplus >= 202002L
+    /**
+     * @brief Build a @c batch_constant from a std::array of boolean (C++20)
+     *
+     * @tparam Arr The std::array containing the boolean values (non type template argument).
+     * @tparam A Architecture that will be used when converting to a regular batch.
+     */
+    template <typename T, std::array Arr, class A = default_arch>
+        requires(
+            (Arr.size() == batch_bool<T, A>::size)
+            && std::is_same_v<typename decltype(Arr)::value_type, bool>)
+    XSIMD_INLINE constexpr auto make_batch_bool_constant() noexcept
+    {
+        return detail::make_batch_bool_constant<T, Arr, A>(std::make_index_sequence<Arr.size()>());
+    }
+#endif
 
 #endif
 
