@@ -528,6 +528,13 @@ namespace xsimd
                                                  0xFFFF, 0xFFFF, 0x0000, 0x0000, 0xFFFF, 0xFFFF, 0x0000, 0x0000);
                 __m256i xL = _mm256_or_si256(_mm256_and_si256(mask, x), _mm256_andnot_si256(mask, _mm256_castpd_si256(_mm256_set1_pd(0x0010000000000000)))); //  2^52
                 __m256d f = _mm256_sub_pd(_mm256_castsi256_pd(xH), _mm256_set1_pd(19342813118337666422669312.)); //  2^84 + 2^52
+                // With -ffast-math, the compiler may reassociate (xH-C)+xL into
+                // xH+(xL-C). Since xL<<C this causes catastrophic cancellation.
+                // The asm barrier forces f into a register before the add, blocking
+                // the reorder. It emits zero instructions.
+#if defined(__GNUC__)
+                __asm__ volatile("" : "+x"(f));
+#endif
                 return _mm256_add_pd(f, _mm256_castsi256_pd(xL));
             }
 
@@ -543,6 +550,10 @@ namespace xsimd
                                                  0xFFFF, 0xFFFF, 0xFFFF, 0x0000, 0xFFFF, 0xFFFF, 0xFFFF, 0x0000);
                 __m256i xL = _mm256_or_si256(_mm256_and_si256(mask, x), _mm256_andnot_si256(mask, _mm256_castpd_si256(_mm256_set1_pd(0x0010000000000000)))); //  2^52
                 __m256d f = _mm256_sub_pd(_mm256_castsi256_pd(xH), _mm256_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
+                // See above: prevent -ffast-math from reassociating (xH-C)+xL.
+#if defined(__GNUC__)
+                __asm__ volatile("" : "+x"(f));
+#endif
                 return _mm256_add_pd(f, _mm256_castsi256_pd(xL));
             }
         }
