@@ -12,7 +12,6 @@
 #ifndef XSIMD_API_HPP
 #define XSIMD_API_HPP
 
-#include <atomic>
 #include <complex>
 #include <cstddef>
 #include <limits>
@@ -2566,16 +2565,6 @@ namespace xsimd
     XSIMD_INLINE void store(T* mem, batch<T, A> const& val, stream_mode) noexcept
     {
         store_as<T, A>(mem, val, stream_mode {});
-    }
-
-    /**
-     * @ingroup batch_data_transfer
-     *
-     * Issues a sequentially consistent memory fence.
-     */
-    XSIMD_INLINE void fence() noexcept
-    {
-        std::atomic_thread_fence(std::memory_order_seq_cst);
     }
 
     /**

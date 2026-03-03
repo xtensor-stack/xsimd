@@ -14,6 +14,7 @@
 
 #include <complex>
 #include <cstddef>
+#include <cstring>
 #include <tuple>
 #include <utility>
 
@@ -177,6 +178,89 @@ namespace xsimd
         {
             return store_aligned<A>(dst, src, A {});
         }
+
+        /****************
+         * store_stream *
+         ****************/
+
+#if defined(__GNUC__)
+        template <class A>
+        XSIMD_INLINE void store_stream(float* mem, batch<float, A> const& val, requires_arch<neon64>) noexcept
+        {
+            float32x2_t lo = vget_low_f32(val);
+            float32x2_t hi = vget_high_f32(val);
+            __asm__ __volatile__("stnp %d[lo], %d[hi], [%[mem]]"
+                                 :
+                                 : [lo] "w"(lo), [hi] "w"(hi), [mem] "r"(mem)
+                                 : "memory");
+        }
+
+        template <class A>
+        XSIMD_INLINE void store_stream(double* mem, batch<double, A> const& val, requires_arch<neon64>) noexcept
+        {
+            float64x1_t lo = vget_low_f64(val);
+            float64x1_t hi = vget_high_f64(val);
+            __asm__ __volatile__("stnp %d[lo], %d[hi], [%[mem]]"
+                                 :
+                                 : [lo] "w"(lo), [hi] "w"(hi), [mem] "r"(mem)
+                                 : "memory");
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE void store_stream(T* mem, batch<T, A> const& val, requires_arch<neon64>) noexcept
+        {
+            uint64x2_t u64;
+            std::memcpy(&u64, &val, sizeof(u64));
+            uint64x1_t lo = vget_low_u64(u64);
+            uint64x1_t hi = vget_high_u64(u64);
+            __asm__ __volatile__("stnp %d[lo], %d[hi], [%[mem]]"
+                                 :
+                                 : [lo] "w"(lo), [hi] "w"(hi), [mem] "r"(mem)
+                                 : "memory");
+        }
+#endif
+
+        /***************
+         * load_stream *
+         ***************/
+
+#if defined(__GNUC__)
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_stream(float const* mem, convert<float>, requires_arch<neon64>) noexcept
+        {
+            float32x2_t lo, hi;
+            __asm__ __volatile__("ldnp %d[lo], %d[hi], [%[mem]]"
+                                 : [lo] "=w"(lo), [hi] "=w"(hi)
+                                 : [mem] "r"(mem)
+                                 : "memory");
+            return vcombine_f32(lo, hi);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_stream(double const* mem, convert<double>, requires_arch<neon64>) noexcept
+        {
+            float64x1_t lo, hi;
+            __asm__ __volatile__("ldnp %d[lo], %d[hi], [%[mem]]"
+                                 : [lo] "=w"(lo), [hi] "=w"(hi)
+                                 : [mem] "r"(mem)
+                                 : "memory");
+            return vcombine_f64(lo, hi);
+        }
+
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<neon64>) noexcept
+        {
+            uint64x1_t lo, hi;
+            __asm__ __volatile__("ldnp %d[lo], %d[hi], [%[mem]]"
+                                 : [lo] "=w"(lo), [hi] "=w"(hi)
+                                 : [mem] "r"(mem)
+                                 : "memory");
+            uint64x2_t u64 = vcombine_u64(lo, hi);
+            batch<T, A> result;
+            std::memcpy(&result, &u64, sizeof(u64));
+            return result;
+        }
+#endif
 
         /*********************
          * store<batch_bool> *
