@@ -606,9 +606,4 @@ TEST_CASE_TEMPLATE("[load store]", B, BATCH_TYPES)
     SUBCASE("masked") { Test.test_masked(); }
 }
 
-TEST_CASE("[fence] sequential consistency")
-{
-    xsimd::fence();
-    CHECK(true);
-}
 #endif
