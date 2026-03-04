@@ -12,6 +12,7 @@
 #ifndef XSIMD_NEON64_HPP
 #define XSIMD_NEON64_HPP
 
+#include <cassert>
 #include <complex>
 #include <cstddef>
 #include <tuple>
@@ -1212,6 +1213,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB anyways
+            assert(detail::all_positive(rhs));
             return vshlq_u64(lhs, vnegq_s64(vreinterpretq_s64_u64(rhs)));
         }
 
