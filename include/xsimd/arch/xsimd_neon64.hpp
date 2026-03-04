@@ -1236,9 +1236,10 @@ namespace xsimd
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires_arch<neon64>) noexcept
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon64>) noexcept
         {
-            return vshlq_u64(lhs, vnegq_s64(rhs));
+            // Blindly converting to signed since out of bounds shifts are UB anyways
+            return vshlq_u64(lhs, vnegq_s64(vreinterpretq_s64_u64(rhs)));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
