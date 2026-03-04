@@ -2653,6 +2653,18 @@ namespace xsimd
             return vshlq_s32(lhs, vnegq_s32(rhs));
         }
 
+        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<as_signed_integer_t<T>, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            return vshlq_u64(lhs, neg(rhs, neon {}).data);
+        }
+
+        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            return vshlq_s64(lhs, neg(rhs, neon {}).data);
+        }
+
         // immediate variant
         template <size_t shift, class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& x, requires_arch<neon>) noexcept
