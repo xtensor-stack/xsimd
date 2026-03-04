@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <complex>
 #include <tuple>
 #include <type_traits>
@@ -2372,6 +2373,17 @@ namespace xsimd
                     return bitwise_lshift(lhs, n, ::xsimd::detail::int_sequence<Is...>());
                 }
             }
+
+            template <class A, class T>
+            XSIMD_INLINE bool all_positive(batch<T, A> const& b) noexcept
+            {
+                for (std::size_t k = 0; k < b.size; ++k)
+                {
+                    if (b.get(k) < 0)
+                        return false;
+                }
+                return true;
+            }
         }
 
         template <class A, class T>
@@ -2386,6 +2398,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB anyways
+            assert(detail::all_positive(rhs));
             return vshlq_u8(lhs, vreinterpretq_s8_u8(rhs));
         }
 
@@ -2399,6 +2412,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB anyways
+            assert(detail::all_positive(rhs));
             return vshlq_u16(lhs, vreinterpretq_s16_u16(rhs));
         }
 
@@ -2412,6 +2426,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB anyways
+            assert(detail::all_positive(rhs));
             return vshlq_u32(lhs, vreinterpretq_s32_u32(rhs));
         }
 
@@ -2425,6 +2440,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB
+            assert(detail::all_positive(rhs));
             return vshlq_u64(lhs, vreinterpretq_s64_u64(rhs));
         }
 
@@ -2626,6 +2642,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB anyways
+            assert(detail::all_positive(rhs));
             return vshlq_u8(lhs, vnegq_s8(vreinterpretq_s8_u8(rhs)));
         }
 
@@ -2639,6 +2656,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB anyways
+            assert(detail::all_positive(rhs));
             return vshlq_u16(lhs, vnegq_s16(vreinterpretq_s16_u16(rhs)));
         }
 
@@ -2652,6 +2670,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             // Blindly converting to signed since out of bounds shifts are UB anyways
+            assert(detail::all_positive(rhs));
             return vshlq_u32(lhs, vnegq_s32(vreinterpretq_s32_u32(rhs)));
         }
 
