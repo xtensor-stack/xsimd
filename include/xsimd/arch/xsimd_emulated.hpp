@@ -508,7 +508,7 @@ namespace xsimd
             constexpr size_t size = batch<T, A>::size;
             uint64_t res = 0;
             for (size_t i = 0; i < size; ++i)
-                res |= (self.data[i] ? 1u : 0u) << i;
+                res |= (uint64_t)(self.data[i] ? 1u : 0u) << i;
             return res;
         }
 
