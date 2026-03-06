@@ -12,6 +12,7 @@
 #ifndef XSIMD_COMMON_LOGICAL_HPP
 #define XSIMD_COMMON_LOGICAL_HPP
 
+#include "./xsimd_common_bit.hpp"
 #include "./xsimd_common_details.hpp"
 
 #include <climits>
@@ -28,43 +29,37 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<common>) noexcept
         {
-            uint64_t m = self.mask();
-            XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size < 14)
-            {
-                // https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSet64
-                return (m * 0x200040008001ULL & 0x111111111111111ULL) % 0xf;
-            }
-            else
-            {
-#if defined __has_builtin
-#if __has_builtin(__builtin_popcountg)
-#define builtin_popcount(v) __builtin_popcountg(v)
-#endif
-#endif
+            return xsimd::detail::popcount(self.mask());
+        }
 
-#ifdef builtin_popcount
-                return builtin_popcount(m);
-#else
-                // FIXME: we could do better by dispatching to the appropriate
-                // popcount instruction depending on the arch...
-                XSIMD_IF_CONSTEXPR(batch_bool<T, A>::size <= 32)
-                {
-                    uint32_t m32 = static_cast<uint32_t>(m);
-                    // https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-                    m32 = m32 - ((m32 >> 1) & 0x55555555); // reuse input as temporary
-                    m32 = (m32 & 0x33333333) + ((m32 >> 2) & 0x33333333); // temp
-                    return (((m32 + (m32 >> 4)) & 0xF0F0F0F) * 0x1010101) >> 24; // count
-                }
-                else
-                {
-                    // https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
-                    m = m - ((m >> 1) & (uint64_t) ~(uint64_t)0 / 3); // temp
-                    m = (m & (uint64_t) ~(uint64_t)0 / 15 * 3) + ((m >> 2) & (uint64_t) ~(uint64_t)0 / 15 * 3); // temp
-                    m = (m + (m >> 4)) & (uint64_t) ~(uint64_t)0 / 255 * 15; // temp
-                    return (m * ((uint64_t) ~(uint64_t)0 / 255)) >> (sizeof(uint64_t) - 1) * CHAR_BIT; // count
-                }
-#endif
-            }
+        template <class A, class T>
+        XSIMD_INLINE size_t countl_zero(batch_bool<T, A> const& self, requires_arch<common>) noexcept
+        {
+            constexpr size_t unused_bits = 64 - batch_bool<T, A>::size;
+            constexpr uint64_t lower_mask = batch_bool<T, A>::size < 64 ? ((uint64_t)1 << (batch_bool<T, A>::size % 64)) - 1 : (uint64_t)-1;
+            return xsimd::detail::countl_zero(self.mask() & lower_mask) - unused_bits;
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE size_t countl_one(batch_bool<T, A> const& self, requires_arch<common>) noexcept
+        {
+            constexpr size_t unused_bits = 64 - batch_bool<T, A>::size;
+            constexpr uint64_t upper_mask = batch_bool<T, A>::size < 64 ? ~(((uint64_t)1 << (batch_bool<T, A>::size % 64)) - 1) : (uint64_t)0;
+            return xsimd::detail::countl_one(self.mask() | upper_mask) - unused_bits;
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE size_t countr_zero(batch_bool<T, A> const& self, requires_arch<common>) noexcept
+        {
+            constexpr uint64_t stop = batch_bool<T, A>::size < 64 ? (uint64_t)1 << (batch_bool<T, A>::size % 64) : 0;
+            return xsimd::detail::countr_zero(self.mask() | stop);
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE size_t countr_one(batch_bool<T, A> const& self, requires_arch<common>) noexcept
+        {
+            constexpr uint64_t stop = batch_bool<T, A>::size < 64 ? ~((uint64_t)1 << (batch_bool<T, A>::size % 64)) : (uint64_t)-1;
+            return xsimd::detail::countr_one(self.mask() & stop);
         }
 
         // from  mask

@@ -652,6 +652,33 @@ namespace xsimd
             return vaddvq_u32(positioned);
         }
 
+        /*********
+         * count *
+         *********/
+        template <class A, class T, detail::enable_sized_t<T, 1> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
+        {
+            return vaddvq_u8(vshrq_n_u8(self, 7));
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 2> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
+        {
+            return vaddvq_u16(vshrq_n_u16(self, 15));
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
+        {
+            return vaddvq_u32(vshrq_n_u32(self, 31));
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 8> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
+        {
+            return vaddvq_u64(vshrq_n_u64(self, 63));
+        }
+
         /*******
          * abs *
          *******/
