@@ -2841,6 +2841,62 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_bool_reducers
+     *
+     * Return the number of leading `false` values in the batch.
+     * @param x the batch to reduce.
+     * @return an integer scalar.
+     */
+    template <class T, class A>
+    XSIMD_INLINE size_t countl_zero(batch_bool<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::countl_zero<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_bool_reducers
+     *
+     * Return the number of leading `true` values in the batch.
+     * @param x the batch to reduce.
+     * @return an integer scalar.
+     */
+    template <class T, class A>
+    XSIMD_INLINE size_t countl_one(batch_bool<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::countl_one<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_bool_reducers
+     *
+     * Return the number of trailing `false` values in the batch.
+     * @param x the batch to reduce.
+     * @return an integer scalar.
+     */
+    template <class T, class A>
+    XSIMD_INLINE size_t countr_zero(batch_bool<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::countr_zero<A>(x, A {});
+    }
+
+    /**
+     * @ingroup batch_bool_reducers
+     *
+     * Return the number of trailing `true` values in the batch.
+     * @param x the batch to reduce.
+     * @return an integer scalar.
+     */
+    template <class T, class A>
+    XSIMD_INLINE size_t countr_one(batch_bool<T, A> const& x) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::countr_one<A>(x, A {});
+    }
+
+    /**
      * @ingroup batch_conversion
      *
      * Widen batch \c x from type \c T to a type with twice as many bytes and

@@ -20,6 +20,7 @@
 
 #include "../types/xsimd_neon_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "./common/xsimd_common_bit.hpp"
 #include "./common/xsimd_common_cast.hpp"
 
 // Wrap intrinsics so we can pass them as function pointers
@@ -3357,6 +3358,119 @@ namespace xsimd
             uint64_t mask_hi = vgetq_lane_u64(self, 1);
             return ((mask_lo >> 63) | (mask_hi << 1)) & 0x3;
         }
+
+        /*********
+         * count *
+         *********/
+
+        // NOTE: Extracting a u32 for the return value saves two instructions on 32-bit ARM:
+        // <https://godbolt.org/z/PYn4na8sY>.
+
+        template <class A, class T, detail::enable_sized_t<T, 1> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
+        {
+            uint8x16_t msbs = vshrq_n_u8(self, 7);
+            uint64x2_t psum = vpaddlq_u32(vpaddlq_u16(vpaddlq_u8(msbs)));
+            uint64x1_t total = vadd_u64(vget_low_u64(psum), vget_high_u64(psum));
+
+            assert(vget_lane_u64(total, 0) <= std::numeric_limits<uint32_t>::max());
+            return vget_lane_u32(vreinterpret_u32_u64(total), 0);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 2> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
+        {
+            uint16x8_t msbs = vshrq_n_u16(self, 15);
+            uint64x2_t psum = vpaddlq_u32(vpaddlq_u16(msbs));
+            uint64x1_t total = vadd_u64(vget_low_u64(psum), vget_high_u64(psum));
+
+            assert(vget_lane_u64(total, 0) <= std::numeric_limits<uint32_t>::max());
+            return vget_lane_u32(vreinterpret_u32_u64(total), 0);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
+        {
+            uint32x4_t msbs = vshrq_n_u32(self, 31);
+            uint64x2_t psum = vpaddlq_u32(msbs);
+            uint64x1_t total = vadd_u64(vget_low_u64(psum), vget_high_u64(psum));
+
+            assert(vget_lane_u64(total, 0) <= std::numeric_limits<uint32_t>::max());
+            return vget_lane_u32(vreinterpret_u32_u64(total), 0);
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 8> = 0>
+        XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon>) noexcept
+        {
+            uint64x2_t msbs = vshrq_n_u64(self, 63);
+            uint64x1_t total = vadd_u64(vget_low_u64(msbs), vget_high_u64(msbs));
+
+            assert(vget_lane_u64(total, 0) <= std::numeric_limits<uint32_t>::max());
+            return vget_lane_u32(vreinterpret_u32_u64(total), 0);
+        }
+
+#define WRAP_MASK_OP(OP)                                                               \
+    template <class A, class T, detail::enable_sized_t<T, 1> = 0>                      \
+    XSIMD_INLINE size_t OP(batch_bool<T, A> const& self, requires_arch<neon>) noexcept \
+    {                                                                                  \
+        uint8x16_t inner = self;                                                       \
+        XSIMD_IF_CONSTEXPR(detail::do_swap)                                            \
+        {                                                                              \
+            inner = vrev16q_u8(inner);                                                 \
+        }                                                                              \
+                                                                                       \
+        uint8x8_t narrowed = vshrn_n_u16(vreinterpretq_u16_u8(inner), 4);              \
+        XSIMD_IF_CONSTEXPR(detail::do_swap)                                            \
+        {                                                                              \
+            narrowed = vrev64_u8(narrowed);                                            \
+        }                                                                              \
+                                                                                       \
+        uint64_t result = vget_lane_u64(vreinterpret_u64_u8(narrowed), 0);             \
+        return xsimd::detail::OP(result) / 4;                                          \
+    }                                                                                  \
+    template <class A, class T, detail::enable_sized_t<T, 2> = 0>                      \
+    XSIMD_INLINE size_t OP(batch_bool<T, A> const& self, requires_arch<neon>) noexcept \
+    {                                                                                  \
+        uint8x8_t narrowed = vmovn_u16(self);                                          \
+        XSIMD_IF_CONSTEXPR(detail::do_swap)                                            \
+        {                                                                              \
+            narrowed = vrev64_u8(narrowed);                                            \
+        }                                                                              \
+                                                                                       \
+        uint64_t result = vget_lane_u64(vreinterpret_u64_u8(narrowed), 0);             \
+        return xsimd::detail::OP(result) / 8;                                          \
+    }                                                                                  \
+    template <class A, class T, detail::enable_sized_t<T, 4> = 0>                      \
+    XSIMD_INLINE size_t OP(batch_bool<T, A> const& self, requires_arch<neon>) noexcept \
+    {                                                                                  \
+        uint16x4_t narrowed = vmovn_u32(self);                                         \
+        XSIMD_IF_CONSTEXPR(detail::do_swap)                                            \
+        {                                                                              \
+            narrowed = vrev64_u16(narrowed);                                           \
+        }                                                                              \
+                                                                                       \
+        uint64_t result = vget_lane_u64(vreinterpret_u64_u16(narrowed), 0);            \
+        return xsimd::detail::OP(result) / 16;                                         \
+    }                                                                                  \
+    template <class A, class T, detail::enable_sized_t<T, 8> = 0>                      \
+    XSIMD_INLINE size_t OP(batch_bool<T, A> const& self, requires_arch<neon>) noexcept \
+    {                                                                                  \
+        uint32x2_t narrowed = vmovn_u64(self);                                         \
+        XSIMD_IF_CONSTEXPR(detail::do_swap)                                            \
+        {                                                                              \
+            narrowed = vrev64_u32(narrowed);                                           \
+        }                                                                              \
+                                                                                       \
+        uint64_t result = vget_lane_u64(vreinterpret_u64_u32(narrowed), 0);            \
+        return xsimd::detail::OP(result) / 32;                                         \
+    }
+
+        WRAP_MASK_OP(countl_zero)
+        WRAP_MASK_OP(countl_one)
+        WRAP_MASK_OP(countr_zero)
+        WRAP_MASK_OP(countr_one)
+
+#undef WRAP_MASK_OP
     }
 
 }

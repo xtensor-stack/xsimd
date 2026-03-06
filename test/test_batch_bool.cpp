@@ -99,17 +99,6 @@ namespace xsimd
         };
     }
 
-    int popcount(int v)
-    {
-        // from https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan
-        int c; // c accumulates the total bits set in v
-        for (c = 0; v; c++)
-        {
-            v &= v - 1; // clear the least significant bit set
-        }
-        return c;
-    }
-
     template <class T, std::size_t N>
     struct get_bool_base
     {
@@ -758,6 +747,123 @@ struct batch_bool_test
         CHECK_EQ(count(bool_g.half), batch_bool_type::size / 2);
     }
 
+    void test_count_lr() const
+    {
+        auto bool_g = xsimd::get_bool<batch_bool_type> {};
+
+        {
+            INFO("countl_zero");
+            CHECK_EQ(countl_zero(bool_g.all_false), batch_bool_type::size);
+            CHECK_EQ(countl_zero(bool_g.all_true), 0);
+            CHECK_EQ(countl_zero(bool_g.half), 0);
+            CHECK_EQ(countl_zero(bool_g.ihalf), batch_bool_type::size / 2);
+        }
+
+        {
+            INFO("countl_one");
+            CHECK_EQ(countl_one(bool_g.all_false), 0);
+            CHECK_EQ(countl_one(bool_g.all_true), batch_bool_type::size);
+            CHECK_EQ(countl_one(bool_g.half), batch_bool_type::size / 2);
+            CHECK_EQ(countl_one(bool_g.ihalf), 0);
+        }
+
+        {
+            INFO("countr_zero");
+            CHECK_EQ(countr_zero(bool_g.all_false), batch_bool_type::size);
+            CHECK_EQ(countr_zero(bool_g.all_true), 0);
+            CHECK_EQ(countr_zero(bool_g.half), batch_bool_type::size / 2);
+            CHECK_EQ(countr_zero(bool_g.ihalf), 0);
+        }
+
+        {
+            INFO("countr_one");
+            CHECK_EQ(countr_one(bool_g.all_false), 0);
+            CHECK_EQ(countr_one(bool_g.all_true), batch_bool_type::size);
+            CHECK_EQ(countr_one(bool_g.half), 0);
+            CHECK_EQ(countr_one(bool_g.ihalf), batch_bool_type::size / 2);
+        }
+
+        {
+            size_t i = 0;
+            for (const auto& vec : bool_g.almost_all_false())
+            {
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
+
+                if (i == 0)
+                {
+                    CHECK_EQ(countr_zero(b), 0);
+                    CHECK_EQ(countr_one(b), 1);
+                }
+                else
+                {
+                    CHECK_EQ(countr_zero(b), i);
+                    CHECK_EQ(countr_one(b), 0);
+                }
+
+                if (i == batch_bool_type::size - 1)
+                {
+                    CHECK_EQ(countl_zero(b), 0);
+                    CHECK_EQ(countl_one(b), 1);
+                }
+                else
+                {
+                    CHECK_EQ(countl_zero(b), batch_bool_type::size - 1 - i);
+                    CHECK_EQ(countl_one(b), 0);
+                }
+
+                i++;
+            }
+        }
+
+        {
+            size_t i = 0;
+            for (const auto& vec : bool_g.almost_all_true())
+            {
+                batch_bool_type b = batch_bool_type::load_unaligned(vec.data());
+
+                if (i == 0)
+                {
+                    CHECK_EQ(countr_zero(b), 1);
+                    CHECK_EQ(countr_one(b), 0);
+                }
+                else
+                {
+                    CHECK_EQ(countr_zero(b), 0);
+                    CHECK_EQ(countr_one(b), i);
+                }
+
+                if (i == batch_bool_type::size - 1)
+                {
+                    CHECK_EQ(countl_zero(b), 1);
+                    CHECK_EQ(countl_one(b), 0);
+                }
+                else
+                {
+                    CHECK_EQ(countl_zero(b), 0);
+                    CHECK_EQ(countl_one(b), batch_bool_type::size - 1 - i);
+                }
+
+                i++;
+            }
+        }
+
+        {
+            INFO("interspersed pattern");
+            CHECK_EQ(countr_zero(bool_g.interspersed), 1);
+            CHECK_EQ(countr_one(bool_g.interspersed), 0);
+            if (batch_bool_type::size % 2 == 0)
+            {
+                CHECK_EQ(countl_zero(bool_g.interspersed), 0);
+                CHECK_EQ(countl_one(bool_g.interspersed), 1);
+            }
+            else
+            {
+                CHECK_EQ(countl_zero(bool_g.interspersed), 1);
+                CHECK_EQ(countl_one(bool_g.interspersed), 0);
+            }
+        }
+    }
+
     void test_comparison() const
     {
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
@@ -809,6 +915,8 @@ TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
     SUBCASE("mask") { Test.test_mask(); }
 
     SUBCASE("count") { Test.test_count(); }
+
+    SUBCASE("count{l,r}_{zero,one}") { Test.test_count_lr(); }
 
     SUBCASE("eq neq") { Test.test_comparison(); }
 
