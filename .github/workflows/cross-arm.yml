@@ -15,6 +15,7 @@ jobs:
           - { platform: 'aarch64', arch: 'armv8-a', dir: 'aarch64-linux-gnu', flags: '', full: 'ON' }
         sys:
           - { compiler: 'gcc',   version: '10' }
+          - { compiler: 'gcc',   version: '14' }
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}

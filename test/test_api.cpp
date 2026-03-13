@@ -138,29 +138,31 @@ private:
         batch_type b = batch_type::load(v.data(), xsimd::aligned_mode());
         V res(size);
 
-        bool* b_data = new bool[size];
+        std::array<bool, size> b_data;
+
+        std::array<bool, size> b_ref;
+        std::fill(b_ref.begin(), b_ref.end(), true);
 
         xsimd::store_as(res.data(), b, xsimd::unaligned_mode());
         INFO(name, " unaligned");
         CHECK_VECTOR_EQ(res, v);
 
-        std::fill(b_data, b_data + size, false);
+        std::fill(b_data.begin(), b_data.end(), false);
         batch_bool_type bb = (b == b);
-        xsimd::store_as(b_data, bb, xsimd::unaligned_mode());
+        xsimd::store_as(&b_data[0], bb, xsimd::unaligned_mode());
+
         INFO(name, " batch_bool unaligned");
-        CHECK_UNARY(std::accumulate(b_data, b_data + size, true, std::logical_and<bool>()));
+        CHECK_ARRAY_EQ(b_ref, b_data);
 
         xsimd::store_as(res.data(), b, xsimd::aligned_mode());
         INFO(name, " aligned");
         CHECK_VECTOR_EQ(res, v);
 
-        std::fill(b_data, b_data + size, false);
+        std::fill(b_data.begin(), b_data.end(), false);
         bb = (b == b);
-        xsimd::store_as(b_data, bb, xsimd::aligned_mode());
+        xsimd::store_as(&b_data[0], bb, xsimd::aligned_mode());
         INFO(name, " batch_bool aligned");
-        CHECK_UNARY(std::accumulate(b_data, b_data + size, true, std::logical_and<bool>()));
-
-        delete[] b_data;
+        CHECK_ARRAY_EQ(b_ref, b_data);
     }
 
     template <class T>
