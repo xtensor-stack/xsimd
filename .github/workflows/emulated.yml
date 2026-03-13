@@ -39,6 +39,6 @@ jobs:
           -DCMAKE_CXX_FLAGS="-DXSIMD_DEFAULT_ARCH=emulated\<${{ matrix.sys.size }}\> -DXSIMD_WITH_EMULATED=1 $CXXFLAGS" \
           -GNinja
     - name: Build
-      run: ninja -C _build
+      run: ninja -j1 -C _build
     - name: Test
       run: ninja -C _build xtest
