@@ -16,6 +16,7 @@
 #include "./xsimd_config.hpp"
 
 #if XSIMD_WITH_LINUX_GETAUXVAL
+#include <asm/hwcap.h>
 #include <sys/auxv.h>
 #endif
 
