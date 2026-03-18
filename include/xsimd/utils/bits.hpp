@@ -75,8 +75,6 @@ namespace xsimd
             /* The enum type whose values name individual bits. */
             using key_type = K;
 
-            constexpr uint_bitset() noexcept = default;
-
             /* Construct from a raw bit pattern. */
             constexpr explicit uint_bitset(storage_type bitset = {}) noexcept
                 : m_bitset(bitset)
