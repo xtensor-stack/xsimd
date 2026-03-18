@@ -34,13 +34,14 @@ namespace xsimd
         class linux_auxval : private utils::uint_bitset<A, linux_getauxval_t>
         {
             using bitset_t = utils::uint_bitset<A, linux_getauxval_t>;
+            using bitset_t::bitset_t;
 
         public:
             using aux = A;
 
             inline static linux_auxval read()
             {
-                return bitset_t(linux_getauxval(type));
+                return linux_auxval(linux_getauxval(type));
             }
 
             /** Create a value which returns false to everything. */
