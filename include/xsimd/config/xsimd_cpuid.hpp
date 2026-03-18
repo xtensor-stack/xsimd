@@ -15,13 +15,11 @@
 #include "../types/xsimd_all_registers.hpp"
 #include "./xsimd_cpu_features_arm.hpp"
 #include "./xsimd_cpu_features_x86.hpp"
-#include "xsimd_inline.hpp"
+#include "./xsimd_inline.hpp"
 
 #if XSIMD_WITH_LINUX_GETAUXVAL
 #include <asm/hwcap.h>
 #include <sys/auxv.h>
-#endif
-
 #endif
 
 namespace xsimd
