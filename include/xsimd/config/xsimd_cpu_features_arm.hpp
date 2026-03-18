@@ -12,7 +12,6 @@
 #ifndef XSIMD_CPU_FEATURES_ARM_HPP
 #define XSIMD_CPU_FEATURES_ARM_HPP
 
-
 #include "./xsimd_config.hpp"
 
 #if XSIMD_WITH_LINUX_GETAUXVAL
@@ -39,7 +38,7 @@ namespace xsimd
         inline bool neon() const noexcept
         {
 #if XSIMD_TARGET_ARM && !XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
-            return get_hwcap().all_bits_set<linux_hwcap_traits::aux::neon>();
+            return hwcap().all_bits_set<linux_hwcap::aux::neon>();
 #else
             return static_cast<bool>(XSIMD_WITH_NEON);
 #endif
@@ -53,7 +52,7 @@ namespace xsimd
         inline bool sve() const noexcept
         {
 #if XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
-            return get_hwcap().all_bits_set<linux_hwcap_traits::aux::sve>();
+            return hwcap().all_bits_set<linux_hwcap::aux::sve>();
 #else
             return false;
 #endif
@@ -62,7 +61,7 @@ namespace xsimd
         inline bool i8mm() const noexcept
         {
 #if XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
-            return get_hwcap2().all_bits_set<linux_hwcap2_traits::aux::i8mm>();
+            return hwcap2().all_bits_set<linux_hwcap2::aux::i8mm>();
 #else
             return false;
 #endif
@@ -82,7 +81,7 @@ namespace xsimd
 
         mutable xsimd::linux_hwcap m_hwcap {};
 
-        inline xsimd::linux_hwcap const& get_hwcap() const noexcept
+        inline xsimd::linux_hwcap const& hwcap() const noexcept
         {
             if (!m_status.bit_is_set<status::hwcap_valid>())
             {
@@ -94,7 +93,8 @@ namespace xsimd
 
 #if XSIMD_TARGET_ARM64
         mutable xsimd::linux_hwcap2 m_hwcap2 {};
-        inline xsimd::linux_hwcap2 const& get_hwcap2() const noexcept
+
+        inline xsimd::linux_hwcap2 const& hwcap2() const noexcept
         {
             if (!m_status.bit_is_set<status::hwcap2_valid>())
             {

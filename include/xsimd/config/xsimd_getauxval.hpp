@@ -17,9 +17,6 @@
 
 #if XSIMD_WITH_LINUX_GETAUXVAL
 #include <sys/auxv.h> // getauxval
-#if XSIMD_TARGET_ARM
-#include <asm/hwcap.h> // HWCAP_XXX
-#endif
 #endif
 
 namespace xsimd
@@ -78,10 +75,10 @@ namespace xsimd
 #if XSIMD_WITH_LINUX_GETAUXVAL
 #if XSIMD_TARGET_ARM64
             /** Scalable Vector Extension. */
-            sve = HWCAP_SVE,
+            sve = 22,
 #elif XSIMD_TARGET_ARM
             /** Neon vector extension. */
-            neon = HWCAP_NEON,
+            neon = 12,
 #endif
 #endif
         };
@@ -109,11 +106,8 @@ namespace xsimd
         {
 #if XSIMD_WITH_LINUX_GETAUXVAL
 #if XSIMD_TARGET_ARM64
-#ifndef HWCAP2_I8MM
-#define HWCAP2_I8MM (1 << 13)
-#endif
             /** 8 bits integer matrix multiplication. */
-            i8mm = HWCAP2_I8MM,
+            i8mm = 13,
 #endif
 #endif
         };
