@@ -16,8 +16,10 @@
 #include "./xsimd_config.hpp"
 
 #if XSIMD_WITH_LINUX_GETAUXVAL
-#include <asm/hwcap.h>
-#include <sys/auxv.h>
+#include <sys/auxv.h> // getauxval
+#if XSIMD_TARGET_ARM
+#include <asm/hwcap.h> // HWCAP_XXX
+#endif
 #endif
 
 namespace xsimd
