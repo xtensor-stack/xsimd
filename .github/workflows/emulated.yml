@@ -27,6 +27,11 @@ jobs:
       if: ${{ matrix.sys.compiler == 'g++' }}
       run: |
         echo "CXXFLAGS=-Wno-noexcept-type -Wno-stringop-overflow -Wno-maybe-uninitialized" >> $GITHUB_ENV
+    - name: Set emulated arch
+      run: |
+        SIZE="${{ matrix.sys.size }}"
+        echo "add_compile_definitions(\"XSIMD_DEFAULT_ARCH=emulated<${SIZE}>\")" >  /tmp/emulated.cmake
+        echo "add_compile_definitions(XSIMD_WITH_EMULATED=1)"                    >> /tmp/emulated.cmake
     - name: Configure build
       run: |
         cmake -B_build \
@@ -36,7 +41,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_CXX_COMPILER=${{ matrix.sys.compiler }} \
           -DXSIMD_ENABLE_WERROR=ON \
-          -DXSIMD_EMULATED_SIZE=${{ matrix.sys.size }} \
+          -DCMAKE_PROJECT_INCLUDE=/tmp/emulated.cmake \
           -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
           -GNinja
     - name: Build

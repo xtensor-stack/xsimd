@@ -93,12 +93,6 @@ target_include_directories(xsimd INTERFACE
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" OFF)
 
-set(XSIMD_EMULATED_SIZE "" CACHE STRING "If set, compile with emulated<N> as the default arch (N = register size in bits)")
-if(XSIMD_EMULATED_SIZE)
-    add_compile_definitions("XSIMD_DEFAULT_ARCH=emulated<${XSIMD_EMULATED_SIZE}>")
-    add_compile_definitions(XSIMD_WITH_EMULATED=1)
-endif()
-
 if(ENABLE_XTL_COMPLEX)
     find_package(xtl 0.8.0 REQUIRED)
     target_compile_features(xsimd INTERFACE cxx_std_14)
