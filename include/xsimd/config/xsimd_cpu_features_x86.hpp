@@ -120,6 +120,8 @@ namespace xsimd
             sse4_1 = 19,
             /* Streaming SIMD Extensions 4.2. */
             sse4_2 = 20,
+            /* Population count instruction (POPCNT). */
+            popcnt = 23,
             /* OS has enabled XSAVE/XRSTOR for extended processor state management. */
             osxsave = 27,
             /* Advanced Vector Extensions (256-bit SIMD). */
@@ -154,8 +156,12 @@ namespace xsimd
         };
         enum class ebx
         {
+            /* Bit Manipulation Instruction Set 1. */
+            bmi1 = 3,
             /* Advanced Vector Extensions 2 (integer 256-bit SIMD). */
             avx2 = 5,
+            /* Bit Manipulation Instruction Set 2. */
+            bmi2 = 8,
             /* AVX-512 Foundation instructions. */
             avx512f = 16,
             /* AVX-512 Doubleword and Quadword instructions. */
@@ -404,11 +410,17 @@ namespace xsimd
 
         inline bool sse4_2() const noexcept { return sse_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::sse4_2>(); }
 
+        inline bool popcnt() const noexcept { return leaf1().all_bits_set<x86_cpuid_leaf1::ecx::popcnt>(); }
+
         inline bool fma3() const noexcept { return sse_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::fma3>(); }
 
         inline bool avx() const noexcept { return avx_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::avx>(); }
 
+        inline bool bmi1() const noexcept { return leaf7().all_bits_set<x86_cpuid_leaf7::ebx::bmi1>(); }
+
         inline bool avx2() const noexcept { return avx_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx2>(); }
+
+        inline bool bmi2() const noexcept { return leaf7().all_bits_set<x86_cpuid_leaf7::ebx::bmi2>(); }
 
         inline bool avx512f() const noexcept { return avx512_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx512f>(); }
 
