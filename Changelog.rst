@@ -9,6 +9,61 @@
 Changelog
 =========
 
+14.1.0
+------
+
+    * Add popcnt and bmi
+
+    * [API] Add bitwise-shift batch constant api
+
+    * Refactor x86 CPU features
+
+    * [NEON] Unsigned bitwise shifts are never called
+
+    * Improve coverage of emulated architectures
+
+    * Introduce `count{l,r}_{zero,one}` for `batch_bool`
+
+    * Fix emulated mask()
+
+    * [neon] Implement bitwise_rshift for 64 bit integers on arm32
+
+    * Fix fast_cast int64/uint64→double under -ffast-math
+
+    * Small complexity reduction
+
+    * Add make_batch_constant from std::array in C++20
+
+    * [ci] Use home-baked clang-format action
+
+    * Fix apple detection
+
+    * [ci] add GCC 10 with AVX-512 to test matrix
+
+    * Slighly less pessimistic detection of neon64
+
+    * Fix runtime detection of SVE
+
+    * [ci] Setup Windows arm64 runner
+
+    * iota batch constant and a few overloads
+
+    * [test] Improve testing logging and accuracy
+
+    * Fix default values for AVX and AVX512 OS state enabled flags
+
+    * Implement batch_bool::mask() for riscv
+
+    * [ci] Revert emscripten to 4.0.21
+
+    * Restore RISCV support
+
+    * Implement optimized movemasks for NEON
+
+    * Fix limit behavior of atan2 under -ffast-math
+
+    * Move to C++14
+
 14.0.0
 ------
 
