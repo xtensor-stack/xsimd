@@ -16,6 +16,9 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#if __cplusplus >= 201703L
+#include <string_view>
+#endif
 
 #include "../utils/bits.hpp"
 #include "./xsimd_config.hpp"
@@ -95,7 +98,84 @@ namespace xsimd
                                                    typename T::ebx,
                                                    typename T::ecx,
                                                    typename T::edx>;
+
+        template <bool extended>
+        struct x86_cpuid_highest_func
+        {
+        private:
+            using x86_reg32_t = detail::x86_reg32_t;
+            using manufacturer_str = std::array<char, 3 * sizeof(x86_reg32_t)>;
+
+        public:
+            static constexpr int leaf = extended ? 0x80000000 : 0x0;
+
+            inline static x86_cpuid_highest_func read()
+            {
+                auto regs = detail::x86_cpuid(0);
+                x86_cpuid_highest_func out {};
+                // Highest function parameter in EAX
+                out.m_highest_leaf = regs[0];
+
+                // Manufacturer string in EBX, EDX, ECX (in that order)
+                char* manuf = out.m_manufacturer_id.data();
+                std::memcpy(manuf + 0 * sizeof(x86_reg32_t), &regs[1], sizeof(x86_reg32_t));
+                std::memcpy(manuf + 1 * sizeof(x86_reg32_t), &regs[3], sizeof(x86_reg32_t));
+                std::memcpy(manuf + 2 * sizeof(x86_reg32_t), &regs[2], sizeof(x86_reg32_t));
+
+                return out;
+            }
+
+            constexpr x86_cpuid_highest_func() noexcept = default;
+
+            /**
+             * Highest available leaf in CPUID non-extended range.
+             *
+             * This is the highest function parameter (EAX) that can be passed to CPUID.
+             * This is valid in the specified range:
+             *   - if `extended` is `false`, that is below `0x80000000`,
+             *   - if `extended` is `true`, that is above `0x80000000`,
+             */
+            constexpr x86_reg32_t highest_leaf() const noexcept
+            {
+                return m_highest_leaf;
+            }
+
+            /**
+             * The manufacturer ID string in a static array.
+             *
+             * This raw character array is case specific and may contain both leading
+             * and trailing whitespaces.
+             * It cannot be assumed to be null terminated.
+             * This is not implemented for all manufacturer when `extended` is `true`.
+             */
+            constexpr manufacturer_str manufacturer_id_raw() const noexcept
+            {
+                return m_manufacturer_id;
+            }
+
+#if __cplusplus >= 201703L
+            constexpr std::string_view manufacturer_id() const noexcept
+            {
+                return { m_manufacturer_id.data(), m_manufacturer_id.size() };
+            }
+#endif
+
+        private:
+            manufacturer_str m_manufacturer_id {};
+            x86_reg32_t m_highest_leaf {};
+        };
+
     }
+
+    /**
+     * Highest CPUID Function Parameter and Manufacturer ID (EAX=0).
+     *
+     * Returns the highest leaf value supported by CPUID in the standard range
+     * (below 0x80000000), and the processor manufacturer ID string.
+     *
+     * @see https://en.wikipedia.org/wiki/CPUID
+     */
+    using x86_cpuid_leaf0 = detail::x86_cpuid_highest_func<false>;
 
     struct x86_cpuid_leaf1_traits
     {
@@ -235,6 +315,16 @@ namespace xsimd
      * @see https://en.wikipedia.org/wiki/CPUID
      */
     using x86_cpuid_leaf7sub1 = detail::make_x86_cpuid_regs<x86_cpuid_leaf7sub1_traits>;
+
+    /**
+     * Highest Extended CPUID Function Parameter (EAX=0x80000000).
+     *
+     * Returns the highest leaf value supported by CPUID in the extended range
+     * (at or above 0x80000000), and the processor manufacturer ID string.
+     *
+     * @see https://en.wikipedia.org/wiki/CPUID
+     */
+    using x86_cpuid_leaf80000000 = detail::x86_cpuid_highest_func<true>;
 
     struct x86_cpuid_leaf80000001_traits
     {
