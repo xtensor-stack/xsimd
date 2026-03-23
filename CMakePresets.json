@@ -90,6 +90,13 @@
             "name": "neon-base",
             "hidden": true,
             "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -DXSIMD_WITH_NEON64=0"
+            }
+        },
+        {
+            "name": "neon64-base",
+            "hidden": true,
+            "cacheVariables": {
                 "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8-a"
             }
         },
@@ -170,6 +177,13 @@
             "inherits": [
                 "dev-base",
                 "neon-base"
+            ]
+        },
+        {
+            "name": "dev-neon64",
+            "inherits": [
+                "dev-base",
+                "neon64-base"
             ]
         },
         {
