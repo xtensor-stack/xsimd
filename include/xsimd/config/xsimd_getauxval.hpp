@@ -12,7 +12,6 @@
 #ifndef XSIMD_GETAUXVAL_HPP
 #define XSIMD_GETAUXVAL_HPP
 
-#include "../utils/bits.hpp"
 #include "./xsimd_config.hpp"
 
 #if XSIMD_WITH_LINUX_GETAUXVAL
@@ -26,95 +25,48 @@ namespace xsimd
         using linux_getauxval_t = unsigned long;
 
         inline linux_getauxval_t linux_getauxval(linux_getauxval_t type) noexcept;
-
-        /**
-         * Base class for getauxval querying.
-         */
-        template <linux_getauxval_t type, typename A>
-        class linux_auxval : private utils::uint_bitset<A, linux_getauxval_t>
-        {
-            using bitset_t = utils::uint_bitset<A, linux_getauxval_t>;
-            using bitset_t::bitset_t;
-
-        public:
-            using aux = A;
-
-            inline static linux_auxval read()
-            {
-                return linux_auxval(linux_getauxval(type));
-            }
-
-            /** Create a value which returns false to everything. */
-            constexpr linux_auxval() noexcept = default;
-
-            using bitset_t::all_bits_set;
-        };
-
-        template <typename Traits>
-        using make_auxiliary_val_t = linux_auxval<Traits::type, typename Traits::aux>;
     }
 
     /*
-     * Hardware Capabilities Register (HWCAP) for Linux.
+     * Holds the value of a Linux auxiliary vector entry (e.g. AT_HWCAP).
      *
      * On Linux systems, the kernel exposes some CPU features through the
      * auxiliary vector, which can be queried via `getauxval(AT_HWCAP)`.
-     * This utility parses such bit values.
+     * Well defined on all platforms, and will return always falsw on
+     * non-linux platforms.
+     *
+     * Usage:
+     *   auto hwcap = linux_auxval::read(AT_HWCAP);
+     *   bool neon = hwcap.has_feature(HWCAP_NEON);
      *
      * @see https://www.kernel.org/doc/Documentation/arm64/elf_hwcaps.txt
      */
-    struct linux_hwcap_traits
+    class linux_auxval
     {
-#if XSIMD_WITH_LINUX_GETAUXVAL
-        static constexpr detail::linux_getauxval_t type = AT_HWCAP;
-#else
-        static constexpr detail::linux_getauxval_t type = 0;
-#endif
+    private:
+        using getauxval_t = detail::linux_getauxval_t;
 
-        enum class aux
+    public:
+        constexpr linux_auxval() noexcept = default;
+
+        inline static linux_auxval read(getauxval_t type) noexcept
         {
-#if XSIMD_WITH_LINUX_GETAUXVAL
-#if XSIMD_TARGET_ARM64
-            /** Scalable Vector Extension. */
-            sve = 22,
-#elif XSIMD_TARGET_ARM
-            /** Neon vector extension. */
-            neon = 12,
-#endif
-#endif
-        };
-    };
+            return linux_auxval(detail::linux_getauxval(type));
+        }
 
-    using linux_hwcap = detail::make_auxiliary_val_t<linux_hwcap_traits>;
-
-    /*
-     * Extended Hardware Capabilities Register (HWCAP2) for Linux.
-     *
-     * On Linux systems, the kernel exposes some CPU additional features through the
-     * auxiliary vector, which can be queried via `getauxval(AT_HWCAP2)`.
-     *
-     * @see https://www.kernel.org/doc/Documentation/arm64/elf_hwcaps.txt
-     */
-    struct linux_hwcap2_traits
-    {
-#if XSIMD_WITH_LINUX_GETAUXVAL
-        static constexpr detail::linux_getauxval_t type = AT_HWCAP2;
-#else
-        static constexpr detail::linux_getauxval_t type = 0;
-#endif
-
-        enum class aux
+        constexpr bool has_feature(getauxval_t feat) const noexcept
         {
-#if XSIMD_WITH_LINUX_GETAUXVAL
-#if XSIMD_TARGET_ARM64
-            /** 8 bits integer matrix multiplication. */
-            i8mm = 13,
-#endif
-#endif
-        };
-    };
+            return (m_auxval & feat) == feat;
+        }
 
-    using linux_hwcap2 = detail::make_auxiliary_val_t<linux_hwcap2_traits>;
+    private:
+        getauxval_t m_auxval = {};
+
+        constexpr explicit linux_auxval(getauxval_t v) noexcept
+            : m_auxval(v)
+        {
+        }
+    };
 
     /********************
      *  Implementation  *
@@ -128,7 +80,7 @@ namespace xsimd
             return getauxval(type);
         }
 #else
-        inline linux_getauxval_t linux_getauxval(linux_getauxval_t type) noexcept
+        inline linux_getauxval_t linux_getauxval(linux_getauxval_t) noexcept
         {
             return {}; // All bits set to 0
         }

@@ -14,9 +14,20 @@
 
 #include "./xsimd_config.hpp"
 
-#if XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_TARGET_ARM && XSIMD_WITH_LINUX_GETAUXVAL
+#include "../utils/bits.hpp"
 #include "./xsimd_getauxval.hpp"
+
+// HWCAP_XXX masks to use on getauxval results.
+// Header does not exists on all architectures and masks are architecture
+// specific.
+#include <asm/hwcap.h>
+
+// Port possibly missing mask. Should only be defined on Arm64.
+#if XSIMD_TARGET_ARM64 && !defined(HWCAP2_I8MM)
+#define HWCAP2_I8MM (1 << 13)
 #endif
+#endif // XSIMD_TARGET_ARM && XSIMD_WITH_LINUX_GETAUXVAL
 
 namespace xsimd
 {
@@ -27,8 +38,8 @@ namespace xsimd
      * On Linux, runtime detection uses getauxval to query the auxiliary vector.
      * On other platforms, only compile-time information is used.
      *
-     * This is well defined on all architectures. It will always return false on
-     * non-ARM architectures.
+     * This is well defined on all architectures.
+     * It will always return false on non-ARM architectures.
      */
     class arm_cpu_features
     {
@@ -38,7 +49,7 @@ namespace xsimd
         inline bool neon() const noexcept
         {
 #if XSIMD_TARGET_ARM && !XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
-            return hwcap().all_bits_set<linux_hwcap::aux::neon>();
+            return hwcap().has_feature(HWCAP_NEON);
 #else
             return static_cast<bool>(XSIMD_WITH_NEON);
 #endif
@@ -52,7 +63,7 @@ namespace xsimd
         inline bool sve() const noexcept
         {
 #if XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
-            return hwcap().all_bits_set<linux_hwcap::aux::sve>();
+            return hwcap().has_feature(HWCAP_SVE);
 #else
             return false;
 #endif
@@ -61,7 +72,7 @@ namespace xsimd
         inline bool i8mm() const noexcept
         {
 #if XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
-            return hwcap2().all_bits_set<linux_hwcap2::aux::i8mm>();
+            return hwcap2().has_feature(HWCAP2_I8MM);
 #else
             return false;
 #endif
@@ -79,26 +90,26 @@ namespace xsimd
 
         mutable status_bitset m_status {};
 
-        mutable xsimd::linux_hwcap m_hwcap {};
+        mutable xsimd::linux_auxval m_hwcap {};
 
-        inline xsimd::linux_hwcap const& hwcap() const noexcept
+        inline xsimd::linux_auxval const& hwcap() const noexcept
         {
             if (!m_status.bit_is_set<status::hwcap_valid>())
             {
-                m_hwcap = xsimd::linux_hwcap::read();
+                m_hwcap = xsimd::linux_auxval::read(AT_HWCAP);
                 m_status.set_bit<status::hwcap_valid>();
             }
             return m_hwcap;
         }
 
 #if XSIMD_TARGET_ARM64
-        mutable xsimd::linux_hwcap2 m_hwcap2 {};
+        mutable xsimd::linux_auxval m_hwcap2 {};
 
-        inline xsimd::linux_hwcap2 const& hwcap2() const noexcept
+        inline xsimd::linux_auxval const& hwcap2() const noexcept
         {
             if (!m_status.bit_is_set<status::hwcap2_valid>())
             {
-                m_hwcap2 = xsimd::linux_hwcap2::read();
+                m_hwcap2 = xsimd::linux_auxval::read(AT_HWCAP2);
                 m_status.set_bit<status::hwcap2_valid>();
             }
             return m_hwcap2;
