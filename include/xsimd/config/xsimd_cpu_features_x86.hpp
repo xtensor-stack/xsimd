@@ -528,12 +528,12 @@ namespace xsimd
             __cpuidex(buf, leaf, subleaf);
             std::memcpy(reg.data(), buf, sizeof(buf));
 
-#elif defined(__INTEL_COMPILER)
-            int buf[4];
-            __cpuid(buf, leaf);
-            std::memcpy(reg.data(), buf, sizeof(buf));
-
-#elif defined(__GNUC__) || defined(__clang__)
+// Intel compiler has long had support for `__cpuid`, but only recently for `__cpuidex`.
+// Modern Clang and GCC also now support `__cpuidex`.
+// It was decided to keep the inline ASM version for maximum compatibility, as the difference
+// in ASM is negligible compared to the cost of CPUID.
+// https://github.com/xtensor-stack/xsimd/pull/1278
+#elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
 
 #if defined(__i386__) && defined(__PIC__)
             // %ebx may be the PIC register
