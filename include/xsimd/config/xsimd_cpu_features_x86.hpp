@@ -114,7 +114,7 @@ namespace xsimd
             using manufacturer_str = std::array<char, 3 * sizeof(x86_reg32_t)>;
 
         public:
-            static constexpr int leaf = extended ? 0x80000000 : 0x0;
+            static constexpr x86_reg32_t leaf = extended ? 0x80000000 : 0x0;
 
             inline static x86_cpuid_highest_func read()
             {
