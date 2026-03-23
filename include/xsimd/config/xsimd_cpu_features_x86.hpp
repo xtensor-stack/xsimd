@@ -171,7 +171,6 @@ namespace xsimd
             manufacturer_str m_manufacturer_id {};
             x86_reg32_t m_highest_leaf {};
         };
-
     }
 
     /**
