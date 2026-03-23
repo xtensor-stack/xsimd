@@ -55,8 +55,13 @@ namespace xsimd
         template <typename E>
         using x86_reg32_bitset = utils::uint_bitset<E, x86_reg32_t>;
 
-        template <x86_reg32_t leaf, x86_reg32_t subleaf, typename A, typename B, typename C, typename D>
-        class x86_cpuid_regs : private x86_reg32_bitset<A>, x86_reg32_bitset<B>, x86_reg32_bitset<C>, x86_reg32_bitset<D>
+        template <x86_reg32_t leaf_num, x86_reg32_t subleaf_num,
+                  typename A, typename B, typename C, typename D>
+        class x86_cpuid_regs
+            : private x86_reg32_bitset<A>,
+              private x86_reg32_bitset<B>,
+              private x86_reg32_bitset<C>,
+              private x86_reg32_bitset<D>
         {
         private:
             using eax_bitset = x86_reg32_bitset<A>;
@@ -78,6 +83,8 @@ namespace xsimd
             using ebx = B;
             using ecx = C;
             using edx = D;
+            static constexpr x86_reg32_t leaf = leaf_num;
+            static constexpr x86_reg32_t subleaf = subleaf_num;
 
             inline static x86_cpuid_regs read()
             {
@@ -539,20 +546,24 @@ namespace xsimd
     private:
         enum class status
         {
-            leaf1_valid = 0,
-            leaf7_valid = 1,
-            leaf7sub1_valid = 2,
-            leaf80000001_valid = 3,
-            xcr0_valid = 4,
+            leaf0_valid = 0,
+            leaf1_valid = 1,
+            leaf7_valid = 2,
+            leaf7sub1_valid = 3,
+            leaf80000000_valid = 4,
+            leaf80000001_valid = 5,
+            xcr0_valid = 6,
         };
 
         using status_bitset = utils::uint_bitset<status, std::uint32_t>;
 
-        mutable x86_xcr0 m_xcr0 {};
+        mutable x86_cpuid_leaf0 m_leaf0 {};
         mutable x86_cpuid_leaf1 m_leaf1 {};
         mutable x86_cpuid_leaf7 m_leaf7 {};
         mutable x86_cpuid_leaf7sub1 m_leaf7sub1 {};
+        mutable x86_cpuid_leaf80000000 m_leaf80000000 {};
         mutable x86_cpuid_leaf80000001 m_leaf80000001 {};
+        mutable x86_xcr0 m_xcr0 {};
         mutable status_bitset m_status {};
 
         inline x86_xcr0 const& xcr0() const noexcept
@@ -565,11 +576,26 @@ namespace xsimd
             return m_xcr0;
         }
 
+        inline x86_cpuid_leaf0 const& leaf0() const
+        {
+            if (!m_status.bit_is_set<status::leaf0_valid>())
+            {
+                m_leaf0 = x86_cpuid_leaf0::read();
+                m_status.set_bit<status::leaf0_valid>();
+            }
+            return m_leaf0;
+        }
+
         inline x86_cpuid_leaf1 const& leaf1() const
         {
             if (!m_status.bit_is_set<status::leaf1_valid>())
             {
-                m_leaf1 = x86_cpuid_leaf1::read();
+                // Check if safe to call CPUID with this value
+                if (leaf0().highest_leaf() >= x86_cpuid_leaf1::leaf)
+                {
+                    m_leaf1 = x86_cpuid_leaf1::read();
+                }
+                // Otherwise leave it filled with zeros and mark as valid
                 m_status.set_bit<status::leaf1_valid>();
             }
             return m_leaf1;
@@ -579,7 +605,12 @@ namespace xsimd
         {
             if (!m_status.bit_is_set<status::leaf7_valid>())
             {
-                m_leaf7 = x86_cpuid_leaf7::read();
+                // Check if safe to call CPUID with this value
+                if (leaf0().highest_leaf() >= x86_cpuid_leaf7::leaf)
+                {
+                    m_leaf7 = x86_cpuid_leaf7::read();
+                }
+                // Otherwise leave it filled with zeros and mark as valid
                 m_status.set_bit<status::leaf7_valid>();
             }
             return m_leaf7;
@@ -589,17 +620,37 @@ namespace xsimd
         {
             if (!m_status.bit_is_set<status::leaf7sub1_valid>())
             {
-                m_leaf7sub1 = x86_cpuid_leaf7sub1::read();
+                // Check if safe to call CPUID with this value
+                if (leaf0().highest_leaf() >= x86_cpuid_leaf7::leaf)
+                {
+                    m_leaf7sub1 = x86_cpuid_leaf7sub1::read();
+                }
+                // Otherwise leave it filled with zeros and mark as valid
                 m_status.set_bit<status::leaf7sub1_valid>();
             }
             return m_leaf7sub1;
+        }
+
+        inline x86_cpuid_leaf80000000 const& leaf80000000() const
+        {
+            if (!m_status.bit_is_set<status::leaf80000000_valid>())
+            {
+                m_leaf80000000 = x86_cpuid_leaf80000000::read();
+                m_status.set_bit<status::leaf80000000_valid>();
+            }
+            return m_leaf80000000;
         }
 
         inline x86_cpuid_leaf80000001 const& leaf80000001() const
         {
             if (!m_status.bit_is_set<status::leaf80000001_valid>())
             {
-                m_leaf80000001 = x86_cpuid_leaf80000001::read();
+                // Check if safe to call CPUID with this value
+                if (leaf80000000().highest_leaf() >= x86_cpuid_leaf80000001::leaf)
+                {
+                    m_leaf80000001 = x86_cpuid_leaf80000001::read();
+                }
+                // Otherwise leave it filled with zeros and mark as valid
                 m_status.set_bit<status::leaf80000001_valid>();
             }
             return m_leaf80000001;
