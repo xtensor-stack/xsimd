@@ -586,51 +586,6 @@ namespace xsimd
             return m_leaf0;
         }
 
-        inline x86_cpuid_leaf1 const& leaf1() const
-        {
-            if (!m_status.bit_is_set<status::leaf1_valid>())
-            {
-                // Check if safe to call CPUID with this value
-                if (leaf0().highest_leaf() >= x86_cpuid_leaf1::leaf)
-                {
-                    m_leaf1 = x86_cpuid_leaf1::read();
-                }
-                // Otherwise leave it filled with zeros and mark as valid
-                m_status.set_bit<status::leaf1_valid>();
-            }
-            return m_leaf1;
-        }
-
-        inline x86_cpuid_leaf7 const& leaf7() const
-        {
-            if (!m_status.bit_is_set<status::leaf7_valid>())
-            {
-                // Check if safe to call CPUID with this value
-                if (leaf0().highest_leaf() >= x86_cpuid_leaf7::leaf)
-                {
-                    m_leaf7 = x86_cpuid_leaf7::read();
-                }
-                // Otherwise leave it filled with zeros and mark as valid
-                m_status.set_bit<status::leaf7_valid>();
-            }
-            return m_leaf7;
-        }
-
-        inline x86_cpuid_leaf7sub1 const& leaf7sub1() const
-        {
-            if (!m_status.bit_is_set<status::leaf7sub1_valid>())
-            {
-                // Check if safe to call CPUID with this value
-                if (leaf0().highest_leaf() >= x86_cpuid_leaf7::leaf)
-                {
-                    m_leaf7sub1 = x86_cpuid_leaf7sub1::read();
-                }
-                // Otherwise leave it filled with zeros and mark as valid
-                m_status.set_bit<status::leaf7sub1_valid>();
-            }
-            return m_leaf7sub1;
-        }
-
         inline x86_cpuid_leaf80000000 const& leaf80000000() const
         {
             if (!m_status.bit_is_set<status::leaf80000000_valid>())
@@ -641,19 +596,62 @@ namespace xsimd
             return m_leaf80000000;
         }
 
+        template <status status_id, typename L>
+        inline auto const& safe_get_leaf(L& leaf) const
+        {
+            // Check if already initialized
+            if (m_status.bit_is_set<status_id>())
+            {
+                return leaf;
+            }
+
+            // Limit where we need to check leaf0 or leaf 80000000.
+            constexpr auto extended_threshold = x86_cpuid_leaf80000000::leaf;
+
+            // Check if safe to call CPUID with this value.
+            // First we identify if the leaf is in the regular or extended range.
+            // TODO(C++17): if constexpr
+            if (L::leaf < extended_threshold)
+            {
+                // Check leaf0 in regular range
+                if (L::leaf <= leaf0().highest_leaf())
+                {
+                    leaf = L::read();
+                }
+            }
+            else
+            {
+                // Check leaf80000000 in extended range
+                if (L::leaf <= leaf80000000().highest_leaf())
+                {
+                    leaf = L::read();
+                }
+            }
+
+            // Mark as valid in all cases, including if it was not read.
+            // In this case it will be filled with zeros (all false).
+            m_status.set_bit<status_id>();
+            return leaf;
+        }
+
+        inline x86_cpuid_leaf1 const& leaf1() const
+        {
+            return safe_get_leaf<status::leaf1_valid>(m_leaf1);
+        }
+
+        inline x86_cpuid_leaf7 const& leaf7() const
+        {
+            return safe_get_leaf<status::leaf7_valid>(m_leaf7);
+        }
+
+        inline x86_cpuid_leaf7sub1 const& leaf7sub1() const
+        {
+            return safe_get_leaf<status::leaf7sub1_valid>(m_leaf7sub1);
+        }
+
         inline x86_cpuid_leaf80000001 const& leaf80000001() const
         {
-            if (!m_status.bit_is_set<status::leaf80000001_valid>())
-            {
-                // Check if safe to call CPUID with this value
-                if (leaf80000000().highest_leaf() >= x86_cpuid_leaf80000001::leaf)
-                {
-                    m_leaf80000001 = x86_cpuid_leaf80000001::read();
-                }
-                // Otherwise leave it filled with zeros and mark as valid
-                m_status.set_bit<status::leaf80000001_valid>();
-            }
-            return m_leaf80000001;
+            return safe_get_leaf<status::leaf80000001_valid>(m_leaf80000001);
         }
     };
 
