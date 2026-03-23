@@ -160,9 +160,9 @@ features = ["lib", "doc"]
 [feature.dev.dependencies]
 taplo = "*"
 cmake-format = "*"
-clang = "17.*"
-clangxx = "17.*"
-clang-tools = "17.*" # matching clang-format version in CI
+clang = "18.*"
+clangxx = "18.*"
+clang-tools = "18.*" # matching clang-format version in CI
 lld = "*"
 typos-lsp = "*"
 neocmakelsp = "*"
