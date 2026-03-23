@@ -70,6 +70,12 @@ clang = "21.*"
 [environments.clang-21]
 features = ["cmd", "build-tools", "lib", "clang-base", "clang-21"]
 
+# clang-22 compiler environment
+[feature.clang-22.dependencies]
+clang = "22.*"
+[environments.clang-22]
+features = ["cmd", "build-tools", "lib", "clang-base", "clang-22"]
+
 # A set of gcc dependencies that include a set of unconstrained needed packages.
 # We combine it with another feature to pin an exact version.
 [feature.gcc-base.target.linux.dependencies]
@@ -98,7 +104,7 @@ cmake -B build/{{ pixi.environment.name }}/{{ preset }} -G Ninja \
   -D CMAKE_COLOR_DIAGNOSTICS=ON \
   -D CMAKE_C_COMPILER_LAUNCHER="sccache" \
   -D CMAKE_CXX_COMPILER_LAUNCHER=sccache \
-  -D CMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -D CMAKE_EXPORT_COMPILE_COMMANDS=ON
 """
 inputs = ["**/CMakeLists.txt", "**/*.cmake.in", "cmake/"]
 outputs = ["build/{{ pixi.environment.name }}/{{ preset }}/CMakeCache.txt"]
@@ -128,8 +134,7 @@ testing SSE4.2 on a AVX2 machine).\
 """
 
 [feature.cmd.tasks.show-asm]
-args = [{ arg = "preset", default = "dev-native" }]
-cmd = "$CXX -S -xc++ -o- - -Iinclude/ -DNDEBUG"
+cmd = "$CXX -S -xc++ -o- - -Iinclude/ -DNDEBUG -O3"
 description = """
 Show the assembly produced for the current compiler and preset for the \
 code passed through the standard input.
@@ -177,7 +182,7 @@ description = "Run clang-format on the codebase."
 cmd = "ln -sf build/dev/debug-native/compile_commands.json"
 depends-on = [
   { task = "configure", args = [
-    "debug-native",
+    "dev-native",
   ], environment = "dev" },
 ]
 outputs = ["compile_commands.json"]
