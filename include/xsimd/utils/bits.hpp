@@ -46,6 +46,21 @@ namespace xsimd
             return value | mask;
         }
 
+        /**
+         * Return a mask with the `width` lowest bits set.
+         */
+        template <typename I>
+        constexpr I make_low_mask(I width) noexcept
+        {
+            assert(width >= 0);
+            assert(width <= static_cast<I>(8 * sizeof(I)));
+            if (width == static_cast<I>(8 * sizeof(I)))
+            {
+                return ~I { 0 };
+            }
+            return (I { 1 } << width) - I { 1 };
+        }
+
         /* A bitset over an unsigned integer type, indexed by an enum key type. */
         template <typename K, typename U>
         struct uint_bitset
@@ -80,6 +95,17 @@ namespace xsimd
             constexpr void set_bit() noexcept
             {
                 m_bitset = utils::set_bit<static_cast<storage_type>(bit)>(m_bitset);
+            }
+
+            /* Extract the bits in [start, end[, shifted down to start at bit 0. */
+            template <key_type start, key_type end>
+            constexpr storage_type get_range() const noexcept
+            {
+                constexpr storage_type start_bit = static_cast<storage_type>(start);
+                constexpr storage_type end_bit = static_cast<storage_type>(end);
+                constexpr storage_type width = end_bit - start_bit;
+                constexpr storage_type mask = make_low_mask<storage_type>(width);
+                return (m_bitset >> start_bit) & mask;
             }
 
         private:

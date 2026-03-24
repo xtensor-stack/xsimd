@@ -94,9 +94,13 @@ namespace xsimd
             constexpr x86_cpuid_regs() noexcept = default;
 
             using eax_bitset::all_bits_set;
+            using eax_bitset::get_range;
             using ebx_bitset::all_bits_set;
+            using ebx_bitset::get_range;
             using ecx_bitset::all_bits_set;
+            using ecx_bitset::get_range;
             using edx_bitset::all_bits_set;
+            using edx_bitset::get_range;
         };
 
         template <typename T>
@@ -239,6 +243,10 @@ namespace xsimd
 
         enum class eax
         {
+            /* Start bit for the encoding of the highest subleaf available. */
+            highest_subleaf_start = 0,
+            /* End bit for the encoding of the highest subleaf available. */
+            highest_subleaf_end = 32,
         };
         enum class ebx
         {
@@ -645,7 +653,25 @@ namespace xsimd
 
         inline x86_cpuid_leaf7sub1 const& leaf7sub1() const
         {
-            return safe_get_leaf<status::leaf7sub1_valid>(m_leaf7sub1);
+            // Check if already initialized
+            if (m_status.bit_is_set<status::leaf7sub1_valid>())
+            {
+                return m_leaf7sub1;
+            }
+
+            // Check if safe to call CPUID with this value as subleaf.
+            constexpr auto start = x86_cpuid_leaf7::eax::highest_subleaf_start;
+            constexpr auto end = x86_cpuid_leaf7::eax::highest_subleaf_end;
+            const auto highest_subleaf7 = leaf7().get_range<start, end>();
+            if (x86_cpuid_leaf7sub1::subleaf <= highest_subleaf7)
+            {
+                m_leaf7sub1 = x86_cpuid_leaf7sub1::read();
+            }
+
+            // Mark as valid in all cases, including if it was not read.
+            // In this case it will be filled with zeros (all false).
+            m_status.set_bit<status::leaf7sub1_valid>();
+            return m_leaf7sub1;
         }
 
         inline x86_cpuid_leaf80000001 const& leaf80000001() const
