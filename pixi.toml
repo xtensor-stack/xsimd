@@ -179,7 +179,7 @@ outputs = ["**/*.*pp"]
 description = "Run clang-format on the codebase."
 
 [feature.dev.tasks.init-lsp]
-cmd = "ln -sf build/dev/debug-native/compile_commands.json"
+cmd = "ln -sf build/dev/dev-native/compile_commands.json"
 depends-on = [
   { task = "configure", args = [
     "dev-native",
