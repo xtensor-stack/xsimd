@@ -615,7 +615,7 @@ namespace xsimd
             // Limit where we need to check leaf0 or leaf 80000000.
             constexpr auto extended_threshold = x86_cpuid_leaf80000000::leaf;
 
-            // Check if safe to call CPUID with this value.
+            // Check if it is safe to call CPUID with this value.
             // First we identify if the leaf is in the regular or extended range.
             // TODO(C++17): if constexpr
             if (L::leaf < extended_threshold)
