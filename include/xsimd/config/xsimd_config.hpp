@@ -528,9 +528,9 @@
  * Set to 1 if the target is a linux
  */
 #if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
-#define XSIMD_WITH_LINUX_GETAUXVAL 1
+#define XSIMD_HAVE_LINUX_GETAUXVAL 1
 #else
-#define XSIMD_WITH_LINUX_GETAUXVAL 0
+#define XSIMD_HAVE_LINUX_GETAUXVAL 0
 #endif
 
 #endif

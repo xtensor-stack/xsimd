@@ -14,7 +14,7 @@
 
 #include "./xsimd_config.hpp"
 
-#if XSIMD_TARGET_ARM && XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_TARGET_ARM && XSIMD_HAVE_LINUX_GETAUXVAL
 #include "../utils/bits.hpp"
 #include "./xsimd_getauxval.hpp"
 
@@ -27,7 +27,7 @@
 #if XSIMD_TARGET_ARM64 && !defined(HWCAP2_I8MM)
 #define HWCAP2_I8MM (1 << 13)
 #endif
-#endif // XSIMD_TARGET_ARM && XSIMD_WITH_LINUX_GETAUXVAL
+#endif // XSIMD_TARGET_ARM && XSIMD_HAVE_LINUX_GETAUXVAL
 
 namespace xsimd
 {
@@ -48,7 +48,7 @@ namespace xsimd
 
         inline bool neon() const noexcept
         {
-#if XSIMD_TARGET_ARM && !XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_TARGET_ARM && !XSIMD_TARGET_ARM64 && XSIMD_HAVE_LINUX_GETAUXVAL
             return hwcap().has_feature(HWCAP_NEON);
 #else
             return static_cast<bool>(XSIMD_WITH_NEON);
@@ -62,7 +62,7 @@ namespace xsimd
 
         inline bool sve() const noexcept
         {
-#if XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_TARGET_ARM64 && XSIMD_HAVE_LINUX_GETAUXVAL
             return hwcap().has_feature(HWCAP_SVE);
 #else
             return false;
@@ -71,7 +71,7 @@ namespace xsimd
 
         inline bool i8mm() const noexcept
         {
-#if XSIMD_TARGET_ARM64 && XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_TARGET_ARM64 && XSIMD_HAVE_LINUX_GETAUXVAL
             return hwcap2().has_feature(HWCAP2_I8MM);
 #else
             return false;
@@ -79,7 +79,7 @@ namespace xsimd
         }
 
     private:
-#if XSIMD_TARGET_ARM && XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_TARGET_ARM && XSIMD_HAVE_LINUX_GETAUXVAL
         enum class status
         {
             hwcap_valid = 0,
@@ -115,7 +115,7 @@ namespace xsimd
             return m_hwcap2;
         }
 #endif
-#endif // XSIMD_TARGET_ARM && XSIMD_WITH_LINUX_GETAUXVAL
+#endif // XSIMD_TARGET_ARM && XSIMD_HAVE_LINUX_GETAUXVAL
     };
 }
 #endif

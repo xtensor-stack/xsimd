@@ -14,7 +14,7 @@
 
 #include "./xsimd_config.hpp"
 
-#if XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_HAVE_LINUX_GETAUXVAL
 #include <sys/auxv.h> // getauxval
 #endif
 
@@ -74,7 +74,7 @@ namespace xsimd
 
     namespace detail
     {
-#if XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_HAVE_LINUX_GETAUXVAL
         inline linux_getauxval_t linux_getauxval(linux_getauxval_t type) noexcept
         {
             return getauxval(type);

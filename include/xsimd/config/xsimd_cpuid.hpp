@@ -17,7 +17,7 @@
 #include "./xsimd_cpu_features_x86.hpp"
 #include "./xsimd_inline.hpp"
 
-#if XSIMD_WITH_LINUX_GETAUXVAL && defined(__riscv_vector)
+#if XSIMD_HAVE_LINUX_GETAUXVAL && defined(__riscv_vector)
 #include <asm/hwcap.h>
 #include <sys/auxv.h>
 #endif
@@ -88,7 +88,7 @@ namespace xsimd
                 vsx = 1;
 #endif
 
-#if XSIMD_WITH_LINUX_GETAUXVAL
+#if XSIMD_HAVE_LINUX_GETAUXVAL
 #if defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0
 
 #ifndef HWCAP_V
