@@ -16,6 +16,7 @@
 #include "xsimd_register.hpp"
 
 #if XSIMD_WITH_NEON
+#define _ARM64_DISTINCT_NEON_TYPES
 #include <arm_neon.h>
 #endif
 
