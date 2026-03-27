@@ -820,7 +820,7 @@ namespace xsimd
 // It was decided to keep the inline ASM version for maximum compatibility, as the difference
 // in ASM is negligible compared to the cost of CPUID.
 // https://github.com/xtensor-stack/xsimd/pull/1278
-#elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
+#elif XSIMD_WITH_INLINE_ASM
 
 #if defined(__i386__) && defined(__PIC__)
             // %ebx may be the PIC register
@@ -848,7 +848,7 @@ namespace xsimd
 #error "_MSC_VER < 1400 is not supported"
 #endif
 
-#elif defined(__GNUC__)
+#elif XSIMD_WITH_INLINE_ASM
             x86_reg32_t xcr0 = {};
             __asm__(
                 "xorl %%ecx, %%ecx\n"

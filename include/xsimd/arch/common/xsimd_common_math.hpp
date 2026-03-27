@@ -743,7 +743,9 @@ namespace xsimd
                 static XSIMD_INLINE batch_type reduce(const batch_type& a, batch_type& x) noexcept
                 {
                     batch_type k = nearbyint(constants::invlog_2<batch_type>() * a);
+                    detail::reassociation_barrier(k, "compensated exp range reduction");
                     x = fnma(k, constants::log_2hi<batch_type>(), a);
+                    detail::reassociation_barrier(x, "compensated exp range reduction");
                     x = fnma(k, constants::log_2lo<batch_type>(), x);
                     return k;
                 }
@@ -769,7 +771,9 @@ namespace xsimd
                 static XSIMD_INLINE batch_type reduce(const batch_type& a, batch_type& x) noexcept
                 {
                     batch_type k = nearbyint(constants::invlog10_2<batch_type>() * a);
+                    detail::reassociation_barrier(k, "compensated exp10 range reduction");
                     x = fnma(k, constants::log10_2hi<batch_type>(), a);
+                    detail::reassociation_barrier(x, "compensated exp10 range reduction");
                     x -= k * constants::log10_2lo<batch_type>();
                     return k;
                 }
@@ -794,6 +798,7 @@ namespace xsimd
                 static XSIMD_INLINE batch_type reduce(const batch_type& a, batch_type& x) noexcept
                 {
                     batch_type k = nearbyint(a);
+                    detail::reassociation_barrier(k, "compensated exp2 range reduction");
                     x = (a - k);
                     return k;
                 }
@@ -819,7 +824,9 @@ namespace xsimd
                 static XSIMD_INLINE batch_type reduce(const batch_type& a, batch_type& hi, batch_type& lo, batch_type& x) noexcept
                 {
                     batch_type k = nearbyint(constants::invlog_2<batch_type>() * a);
+                    detail::reassociation_barrier(k, "compensated exp range reduction");
                     hi = fnma(k, constants::log_2hi<batch_type>(), a);
+                    detail::reassociation_barrier(hi, "compensated exp range reduction");
                     lo = k * constants::log_2lo<batch_type>();
                     x = hi - lo;
                     return k;
@@ -846,7 +853,9 @@ namespace xsimd
                 static XSIMD_INLINE batch_type reduce(const batch_type& a, batch_type&, batch_type&, batch_type& x) noexcept
                 {
                     batch_type k = nearbyint(constants::invlog10_2<batch_type>() * a);
+                    detail::reassociation_barrier(k, "compensated exp10 range reduction");
                     x = fnma(k, constants::log10_2hi<batch_type>(), a);
+                    detail::reassociation_barrier(x, "compensated exp10 range reduction");
                     x = fnma(k, constants::log10_2lo<batch_type>(), x);
                     return k;
                 }
@@ -878,6 +887,7 @@ namespace xsimd
                 {
                     batch_type k = nearbyint(a);
                     x = (a - k) * constants::log_2<batch_type>();
+                    detail::reassociation_barrier(x, "keep reduced exponent ordered before finalize");
                     return k;
                 }
 
@@ -937,7 +947,10 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch<T, A> exp10(batch<T, A> const& self, requires_arch<common>) noexcept
         {
-            return detail::exp<detail::exp10_tag>(self);
+            using batch_type = batch<T, A>;
+            batch_type out = detail::exp<detail::exp10_tag>(self);
+            detail::reassociation_barrier(out, "prevent folding exp10 for literal inputs");
+            return out;
         }
 
         // exp2
@@ -1494,6 +1507,7 @@ namespace xsimd
             batch_type R = t2 + t1;
             batch_type hfsq = batch_type(0.5) * f * f;
             batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "keep compensated k conversion before split log(2) scaling");
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, (hfsq + R), dk * constants::log_2lo<batch_type>()) - hfsq + f);
 #ifdef __FAST_MATH__
             return r;
@@ -1525,6 +1539,7 @@ namespace xsimd
             hx += 0x3ff00000 - 0x3fe6a09e;
             k += (hx >> 20) - 0x3ff;
             batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "keep compensated k conversion before split log(2) scaling");
             hx = (hx & i_type(0x000fffff)) + 0x3fe6a09e;
             x = ::xsimd::bitwise_cast<double>(hx << 32 | (i_type(0xffffffff) & ::xsimd::bitwise_cast<int_type>(x)));
 
@@ -1584,6 +1599,7 @@ namespace xsimd
             batch_type R = t1 + t2;
             batch_type hfsq = batch_type(0.5) * f * f;
             batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "prevent distributing multiplies through compensated exponent conversion");
             batch_type r = fma(fms(s, hfsq + R, hfsq) + f, constants::invlog_2<batch_type>(), dk);
 #ifdef __FAST_MATH__
             return r;
@@ -1629,7 +1645,9 @@ namespace xsimd
             batch_type val_hi = hi * constants::invlog_2hi<batch_type>();
             batch_type val_lo = fma(lo + hi, constants::invlog_2lo<batch_type>(), lo * constants::invlog_2hi<batch_type>());
             batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "Kahan compensated log2 summation");
             batch_type w1 = dk + val_hi;
+            detail::reassociation_barrier(w1, "Kahan compensated log2 summation");
             val_lo += (dk - w1) + val_hi;
             val_hi = w1;
             batch_type r = val_lo + val_hi;
@@ -1705,6 +1723,7 @@ namespace xsimd
             batch_type t2 = z * detail::horner<batch_type, 0x3f2aaaaa, 0x3e91e9ee>(w);
             batch_type R = t2 + t1;
             batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "prevent distributing multiplies through compensated exponent conversion");
             batch_type hfsq = batch_type(0.5) * f * f;
             batch_type hibits = f - hfsq;
             hibits &= ::xsimd::bitwise_cast<float>(i_type(0xfffff000));
@@ -1752,10 +1771,11 @@ namespace xsimd
 #endif
             hx += 0x3ff00000 - 0x3fe6a09e;
             k += (hx >> 20) - 0x3ff;
+            batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "prevent distributing multiplies through compensated exponent conversion");
             hx = (hx & i_type(0x000fffff)) + 0x3fe6a09e;
             x = ::xsimd::bitwise_cast<double>(hx << 32 | (i_type(0xffffffff) & ::xsimd::bitwise_cast<int_type>(x)));
             batch_type f = --x;
-            batch_type dk = to_float(k);
             batch_type s = f / (batch_type(2.) + f);
             batch_type z = s * s;
             batch_type w = z * z;
@@ -1818,6 +1838,7 @@ namespace xsimd
             batch_type R = t2 + t1;
             batch_type hfsq = batch_type(0.5) * f * f;
             batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "prevent distributing multiplies through compensated exponent conversion");
             /* correction term ~ log(1+x)-log(u), avoid underflow in c/u */
             batch_type c = select(batch_bool_cast<float>(k >= i_type(2)), batch_type(1.) - (uf - self), self - (uf - batch_type(1.))) / uf;
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, (hfsq + R), dk * constants::log_2lo<batch_type>() + c) - hfsq + f);
@@ -1853,6 +1874,7 @@ namespace xsimd
             batch_type t2 = z * detail::horner<batch_type, 0x3fe5555555555593ll, 0x3fd2492494229359ll, 0x3fc7466496cb03dell, 0x3fc2f112df3e5244ll>(w);
             batch_type R = t2 + t1;
             batch_type dk = to_float(k);
+            detail::reassociation_barrier(dk, "prevent distributing multiplies through compensated exponent conversion");
             batch_type r = fma(dk, constants::log_2hi<batch_type>(), fma(s, hfsq + R, dk * constants::log_2lo<batch_type>() + c) - hfsq + f);
 #ifdef __FAST_MATH__
             return r;
@@ -1900,17 +1922,9 @@ namespace xsimd
                 batch_type s = bitofsign(self);
                 batch_type v = self ^ s;
                 batch_type t2n = constants::twotonmb<batch_type>();
-                // Under fast-math, reordering is possible and the compiler optimizes d
-                // to v. That's not what we want, so prevent compiler optimization here.
-                // FIXME: it may be better to emit a memory barrier here (?).
-#ifdef __FAST_MATH__
                 batch_type d0 = v + t2n;
-                asm volatile("" ::"r"(&d0) : "memory");
+                detail::reassociation_barrier(d0, "prevent collapsing (v + 2^n) - 2^n back to v");
                 batch_type d = d0 - t2n;
-#else
-                batch_type d0 = v + t2n;
-                batch_type d = d0 - t2n;
-#endif
                 return s ^ select(v < t2n, d, v);
             }
         }
@@ -2192,12 +2206,16 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> remainder(batch<float, A> const& self, batch<float, A> const& other, requires_arch<common>) noexcept
         {
-            return fnma(nearbyint(self / other), other, self);
+            batch<float, A> q = nearbyint(self / other);
+            detail::reassociation_barrier(q, "prevent pulling multiply back through rounded quotient");
+            return fnma(q, other, self);
         }
         template <class A>
         XSIMD_INLINE batch<double, A> remainder(batch<double, A> const& self, batch<double, A> const& other, requires_arch<common>) noexcept
         {
-            return fnma(nearbyint(self / other), other, self);
+            batch<double, A> q = nearbyint(self / other);
+            detail::reassociation_barrier(q, "prevent pulling multiply back through rounded quotient");
+            return fnma(q, other, self);
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> remainder(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
