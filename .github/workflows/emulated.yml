@@ -25,11 +25,10 @@ jobs:
         environment-file: environment.yml
     - name: Setup GCC compiler
       if: ${{ matrix.sys.compiler == 'g++' }}
-      run: |
-        echo "CXXFLAGS=-Wno-noexcept-type -Wno-stringop-overflow -Wno-maybe-uninitialized" >> $GITHUB_ENV
+      run: echo "CXXFLAGS=-Wno-noexcept-type -Wno-stringop-overflow -Wno-maybe-uninitialized" >> $GITHUB_ENV
     - name: Configure build
       run: |
-        cmake -B_build \
+        cmake -B _build \
           -DBUILD_TESTS=ON \
           -DBUILD_BENCHMARK=ON \
           -DBUILD_EXAMPLES=ON \

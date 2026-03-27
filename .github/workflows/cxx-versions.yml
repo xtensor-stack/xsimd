@@ -11,13 +11,8 @@ jobs:
         cxx-version: [14, 17, 20]
     steps:
     - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: |
-          sudo apt install g++
     - name: Setup
-      run: |
-        mkdir _build
-        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=${{matrix.cxx-version}}
+      run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=${{matrix.cxx-version}}
     - name: Build
       run: cmake --build _build
 

@@ -25,12 +25,10 @@ jobs:
           TARGET: ${{ matrix.target }}
           API: ${{ matrix.api }}
         run: |
-          mkdir _build
           NDK="$($ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed | sed -E 's/( +[|] +)/|/g;s/ +$//' | grep '^  ndk' | cut -d '|' -f 4 | sort | head -n1)"
-          cd _build && \
-            cmake .. -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/$NDK/build/cmake/android.toolchain.cmake \
-                     -DANDROID_ABI=$ABI \
-                     -DANDROID_PLATFORM=android-$API \
-                     -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release
-
-          cmake --build . --verbose
+          cmake -B _build \
+                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/$NDK/build/cmake/android.toolchain.cmake \
+                -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
+                -DANDROID_ABI=$ABI -DANDROID_PLATFORM=android-$API \
+                -DCMAKE_BUILD_TYPE=Release
+          cmake --build _build --verbose

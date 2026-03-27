@@ -34,11 +34,15 @@ jobs:
       uses: actions/checkout@v3
     - name: Setup
       run: |
-        mkdir _build
-        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="${{ matrix.target.flags }}" -DCMAKE_CXX_FLAGS="${{ matrix.target.flags }}" -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
+        cmake -B _build \
+              -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
+              -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_C_FLAGS="${{ matrix.target.flags }}" \
+              -DCMAKE_CXX_FLAGS="${{ matrix.target.flags }}" \
+              -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
     - name: Build
       run: cmake --build _build --verbose -j1
     - name: Testing xsimd
-      run: |
-        qemu-${{ matrix.target.platform }} -cpu power10 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
+      run: qemu-${{ matrix.target.platform }} -cpu power10 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build

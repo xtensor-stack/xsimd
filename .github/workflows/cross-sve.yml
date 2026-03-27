@@ -30,11 +30,16 @@ jobs:
       uses: actions/checkout@v3
     - name: Setup
       run: |
-        mkdir _build
-        cd _build && cmake .. -GNinja -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DTARGET_ARCH=generic -DCMAKE_C_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" -DCMAKE_CXX_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/gcc-aarch64-linux-gnu.cmake
+        cmake -B _build \
+              -GNinja \
+              -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DTARGET_ARCH=generic \
+              -DCMAKE_C_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" \
+              -DCMAKE_CXX_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" \
+              -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/gcc-aarch64-linux-gnu.cmake
     - name: Build
       run: cmake --build _build
     - name: Testing xsimd
-      run: |
-        qemu-aarch64 --cpu max,sve${{ matrix.vector_bits }}=on -L /usr/aarch64-linux-gnu/ ./test/test_xsimd
+      run: qemu-aarch64 --cpu max,sve${{ matrix.vector_bits }}=on -L /usr/aarch64-linux-gnu/ ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build
