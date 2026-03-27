@@ -84,6 +84,49 @@ jobs:
       - name: Test
         run: ./_build/test/test_xsimd
 
+  build-windows-clang-cl:
+    name: 'clang-cl x64 ${{ matrix.config.name }}'
+    defaults:
+      run:
+        shell: bash {0}
+    strategy:
+      matrix:
+        config:
+          - { name: "AVX2", flags: "/arch:AVX2", benchmark: "ON", examples: "ON" }
+          - { name: "/fp:fast", flags: "/fp:fast", benchmark: "OFF", examples: "OFF" }
+    runs-on: windows-2025
+    steps:
+    - name: Setup compiler
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+    - name: Check clang-cl
+      run: |
+        command -v clang-cl
+        clang-cl --version
+    - name: Setup Ninja
+      run: |
+        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install ninja
+    - name: Checkout xsimd
+      uses: actions/checkout@v3
+    - name: Setup
+      run: |
+        cmake -B _build \
+              -DBUILD_TESTS=ON \
+              -DDOWNLOAD_DOCTEST=ON \
+              -DBUILD_BENCHMARK=${{ matrix.config.benchmark }} \
+              -DBUILD_EXAMPLES=${{ matrix.config.examples }} \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_C_COMPILER=clang-cl \
+              -DCMAKE_CXX_COMPILER=clang-cl \
+              -DCMAKE_CXX_FLAGS="${{ matrix.config.flags }} -DXSIMD_REASSOCIATIVE_MATH=1" \
+              -G Ninja
+    - name: Build
+      run: cmake --build _build
+    - name: Testing xsimd
+      run: ./_build/test/test_xsimd
+
   build-windows-arm64:
     name: 'MSVC arm64'
     defaults:
