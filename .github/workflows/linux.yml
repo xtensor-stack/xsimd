@@ -105,23 +105,21 @@ jobs:
         # Cheap way of spotting uninitialized read
         CXX_FLAGS="$CXX_FLAGS -ftrivial-auto-var-init=pattern"
 
-        mkdir _build
-        cd _build
-        cmake  .. -DBUILD_TESTS=ON \
-                  -DBUILD_BENCHMARK=ON \
-                  -DBUILD_EXAMPLES=ON \
-                  -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_C_COMPILER=$CC \
-                  -DCMAKE_CXX_COMPILER=$CXX \
-                  $CMAKE_EXTRA_ARGS \
-                  -DCMAKE_CXX_FLAGS='$CXX_FLAGS' \
-                  -G Ninja
+        cmake -B _build \
+              -DBUILD_TESTS=ON \
+              -DBUILD_BENCHMARK=ON \
+              -DBUILD_EXAMPLES=ON \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_C_COMPILER=$CC \
+              -DCMAKE_CXX_COMPILER=$CXX \
+              $CMAKE_EXTRA_ARGS \
+              -DCMAKE_CXX_FLAGS='$CXX_FLAGS' \
+              -G Ninja
     - name: Build
-      run: ninja -C _build
+      run: cmake --build _build
     - name: Test
       run: |
-        cd _build
-        cd test
+        cd _build/test
         if echo '${{ matrix.sys.flags }}' | grep -q 'avx512' ; then
           ../../sde-external-9.48.0-2024-11-25-lin/sde64 -tgl -- ./test_xsimd
         else

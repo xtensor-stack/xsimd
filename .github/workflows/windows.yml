@@ -43,16 +43,12 @@ jobs:
     - name: Checkout xsimd
       uses: actions/checkout@v3
     - name: Setup
-      run: |
-        mkdir _build
-        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="${{ matrix.sys.flags }}" -G Ninja
+      run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="${{ matrix.sys.flags }}" -G Ninja
     - name: Build
-      run: |
-        cd _build && cmake --build .
+      run: cmake --build _build
     - name: Testing xsimd
       if: ${{ !startsWith(matrix.sys.set, 'AVX512') }}
-      run: |
-        cd _build && ./test/test_xsimd
+      run: ./_build/test/test_xsimd
 
   build-windows-mingw:
     name: 'MSYS2 ${{ matrix.msystem }}'
@@ -82,15 +78,11 @@ jobs:
       - name: Checkout xsimd
         uses: actions/checkout@v2
       - name: Configure
-        run: |
-          mkdir _build
-          cd _build
-          cmake .. -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_DOCTEST=ON -G Ninja
+        run: cmake -B _build -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_DOCTEST=ON -G Ninja
       - name: Build
-        run: ninja -C _build
+        run: cmake --build _build
       - name: Test
-        run: |
-          cd _build && ./test/test_xsimd
+        run: ./_build/test/test_xsimd
 
   build-windows-arm64:
     name: 'MSVC arm64'
@@ -110,12 +102,8 @@ jobs:
     - name: Checkout xsimd
       uses: actions/checkout@v3
     - name: Setup
-      run: |
-        mkdir _build
-        cd _build && cmake .. -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
+      run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
     - name: Build
-      run: |
-        cd _build && cmake --build .
+      run: cmake --build _build
     - name: Testing xsimd
-      run: |
-        cd _build && ./test/test_xsimd
+      run: ./_build/test/test_xsimd

@@ -8,13 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: |
-        sudo apt install g++
     - name: Setup
-      run: |
-        mkdir _build
-        cd _build && cmake .. -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
+      run: cmake -B _build -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
     - name: Build
       run: cmake --build _build
     - name: Testing sequential
