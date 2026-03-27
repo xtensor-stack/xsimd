@@ -101,6 +101,11 @@ namespace xsimd
         // Forward declarations for pack-level helpers
         namespace detail
         {
+            template <class T>
+            XSIMD_INLINE void reassociation_barrier(T& x, const char*) noexcept;
+            template <class T, class A>
+            XSIMD_INLINE void reassociation_barrier(batch<T, A>& b, const char* reason) noexcept;
+
             template <typename T, T... Vs>
             XSIMD_INLINE constexpr bool is_identity() noexcept;
             template <typename T, class A, T... Vs>
@@ -115,7 +120,6 @@ namespace xsimd
             XSIMD_INLINE constexpr bool is_only_from_lo(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_only_from_hi(batch_constant<T, A, Vs...>) noexcept;
-
         }
     }
 }
