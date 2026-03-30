@@ -603,13 +603,32 @@ namespace xsimd
             return m_leaf80000000;
         }
 
+        /**
+         * Internal utility to lazily read and cache a CPUID leaf.
+         *
+         * @tparam status_id The status bit tracking whether this leaf has been read and cached.
+         * @tparam L The CPUID leaf type (e.g. x86_cpuid_leaf1, x86_cpuid_leaf7).
+         * @param leaf_cache A non-const reference to the class member that stores the leaf
+         *        value. It must be non-const because this function may write to it on first
+         *        call. It is passed explicitly (rather than accessed via `this`) to allow
+         *        factoring the caching logic across different leaf members.
+         * @return A const reference to `leaf_cache`. The non-const input / const-ref output
+         *         asymmetry is intentional: callers must not modify the cached value, but
+         *         this function needs write access to populate it.
+         *
+         * On first call, checks whether the leaf number is within the range advertised as
+         * supported by CPUID (via leaf 0 for the standard range, leaf 0x80000000 for the
+         * extended range). If supported, reads the leaf from the CPU; otherwise leaves
+         * `leaf_cache` at its zero-initialized default (all feature bits false). Either
+         * way, `status_id` is set so subsequent calls return immediately.
+         */
         template <status status_id, typename L>
-        inline auto const& safe_get_leaf(L& leaf) const
+        inline auto const& safe_read_leaf(L& leaf_cache) const
         {
             // Check if already initialized
             if (m_status.bit_is_set<status_id>())
             {
-                return leaf;
+                return leaf_cache;
             }
 
             // Limit where we need to check leaf0 or leaf 80000000.
@@ -623,7 +642,7 @@ namespace xsimd
                 // Check leaf0 in regular range
                 if (L::leaf <= leaf0().highest_leaf())
                 {
-                    leaf = L::read();
+                    leaf_cache = L::read();
                 }
             }
             else
@@ -631,24 +650,24 @@ namespace xsimd
                 // Check leaf80000000 in extended range
                 if (L::leaf <= leaf80000000().highest_leaf())
                 {
-                    leaf = L::read();
+                    leaf_cache = L::read();
                 }
             }
 
             // Mark as valid in all cases, including if it was not read.
             // In this case it will be filled with zeros (all false).
             m_status.set_bit<status_id>();
-            return leaf;
+            return leaf_cache;
         }
 
         inline x86_cpuid_leaf1 const& leaf1() const
         {
-            return safe_get_leaf<status::leaf1_valid>(m_leaf1);
+            return safe_read_leaf<status::leaf1_valid>(m_leaf1);
         }
 
         inline x86_cpuid_leaf7 const& leaf7() const
         {
-            return safe_get_leaf<status::leaf7_valid>(m_leaf7);
+            return safe_read_leaf<status::leaf7_valid>(m_leaf7);
         }
 
         inline x86_cpuid_leaf7sub1 const& leaf7sub1() const
@@ -676,7 +695,7 @@ namespace xsimd
 
         inline x86_cpuid_leaf80000001 const& leaf80000001() const
         {
-            return safe_get_leaf<status::leaf80000001_valid>(m_leaf80000001);
+            return safe_read_leaf<status::leaf80000001_valid>(m_leaf80000001);
         }
     };
 
