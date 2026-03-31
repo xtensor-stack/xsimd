@@ -94,7 +94,7 @@ jobs:
     - name: Setup compiler
       uses: ilammy/msvc-dev-cmd@v1
       with:
-        arch: amd64
+        arch: arm64
     - name: Setup Ninja
       run: |
         python3 -m pip install --upgrade pip setuptools wheel
@@ -107,3 +107,52 @@ jobs:
       run: cmake --build _build
     - name: Testing xsimd
       run: ./_build/test/test_xsimd
+    - name: Run benchmark
+      run: ./_build/benchmark/benchmark_xsimd
+    - name: Run example
+      run: ./_build/examples/mandelbrot
+
+  build-windows-arm64-clang:
+    name: 'MSYS2 CLANG64 arm64'
+    runs-on: windows-11-arm
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Setup MSYS2 with Clang (ARM64)
+        uses: msys2/setup-msys2@v2
+        with:
+          # CLANG64 environment: uses clang/clang++ targeting Windows ARM64 natively.
+          # This is the ARM64-native MSYS2 Clang toolchain — not a cross-compiler.
+          msystem: CLANG64
+          update: true
+          path-type: minimal
+          pacboy: >-
+            cc:p
+            cmake:p
+            ninja:p
+
+      - name: Checkout xsimd
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          cmake -B _build \
+            -DBUILD_TESTS=ON \
+            -DDOWNLOAD_DOCTEST=ON \
+            -DBUILD_BENCHMARK=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja
+
+      - name: Build
+        run: cmake --build _build
+
+      - name: Test xsimd
+        run: ./_build/test/test_xsimd
+
+      - name: Run benchmark
+        run: ./_build/benchmark/benchmark_xsimd
+
+      - name: Run mandelbrot example
+        run: ./_build/examples/mandelbrot

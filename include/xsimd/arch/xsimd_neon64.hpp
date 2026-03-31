@@ -12,6 +12,8 @@
 #ifndef XSIMD_NEON64_HPP
 #define XSIMD_NEON64_HPP
 
+#include <algorithm>
+#include <array>
 #include <cassert>
 #include <complex>
 #include <cstddef>
@@ -117,16 +119,30 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<double, A> set(batch<double, A> const&, requires_arch<neon64>, double d0, double d1) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            alignas(16) double data[] = { d0, d1 };
+            return vld1q_f64(data);
+#else
             return float64x2_t { d0, d1 };
+#endif
         }
 
         template <class A>
         XSIMD_INLINE batch_bool<double, A> set(batch_bool<double, A> const&, requires_arch<neon64>, bool b0, bool b1) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            using unsigned_type = as_unsigned_integer_t<double>;
+            alignas(16) unsigned_type data[] = {
+                static_cast<unsigned_type>(b0 ? -1LL : 0LL),
+                static_cast<unsigned_type>(b1 ? -1LL : 0LL)
+            };
+            return vld1q_u64(data);
+#else
             using register_type = typename batch_bool<double, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<double>;
             return register_type { static_cast<unsigned_type>(b0 ? -1LL : 0LL),
                                    static_cast<unsigned_type>(b1 ? -1LL : 0LL) };
+#endif
         }
 
         /*************
@@ -145,7 +161,11 @@ namespace xsimd
 #if defined(__clang__) || defined(__GNUC__)
 #define xsimd_aligned_load(inst, type, expr) inst((type)__builtin_assume_aligned(expr, 16))
 #elif defined(_MSC_VER)
+#if defined(_M_ARM64)
+#define xsimd_aligned_load(inst, type, expr) inst((type)expr)
+#else
 #define xsimd_aligned_load(inst, type, expr) inst##_ex((type)expr, 128)
+#endif
 #else
 #define xsimd_aligned_load(inst, type, expr) inst((type)expr)
 #endif
@@ -194,18 +214,18 @@ namespace xsimd
          ****************/
 
         template <class A>
-        XSIMD_INLINE batch<std::complex<double>, A> load_complex_aligned(std::complex<double> const* mem, convert<std::complex<double>>, requires_arch<neon64>) noexcept
+        XSIMD_INLINE batch<::std::complex<double>, A> load_complex_aligned(::std::complex<double> const* mem, convert<::std::complex<double>>, requires_arch<neon64>) noexcept
         {
             using real_batch = batch<double, A>;
             const double* buf = reinterpret_cast<const double*>(mem);
             float64x2x2_t tmp = vld2q_f64(buf);
             real_batch real = tmp.val[0],
                        imag = tmp.val[1];
-            return batch<std::complex<double>, A> { real, imag };
+            return batch<::std::complex<double>, A> { real, imag };
         }
 
         template <class A>
-        XSIMD_INLINE batch<std::complex<double>, A> load_complex_unaligned(std::complex<double> const* mem, convert<std::complex<double>> cvt, requires_arch<neon64>) noexcept
+        XSIMD_INLINE batch<::std::complex<double>, A> load_complex_unaligned(::std::complex<double> const* mem, convert<::std::complex<double>> cvt, requires_arch<neon64>) noexcept
         {
             return load_complex_aligned<A>(mem, cvt, A {});
         }
@@ -215,7 +235,7 @@ namespace xsimd
          *****************/
 
         template <class A>
-        XSIMD_INLINE void store_complex_aligned(std::complex<double>* dst, batch<std::complex<double>, A> const& src, requires_arch<neon64>) noexcept
+        XSIMD_INLINE void store_complex_aligned(::std::complex<double>* dst, batch<::std::complex<double>, A> const& src, requires_arch<neon64>) noexcept
         {
             float64x2x2_t tmp;
             tmp.val[0] = src.real();
@@ -225,7 +245,7 @@ namespace xsimd
         }
 
         template <class A>
-        XSIMD_INLINE void store_complex_unaligned(std::complex<double>* dst, batch<std::complex<double>, A> const& src, requires_arch<neon64>) noexcept
+        XSIMD_INLINE void store_complex_unaligned(::std::complex<double>* dst, batch<::std::complex<double>, A> const& src, requires_arch<neon64>) noexcept
         {
             store_complex_aligned(dst, src, A {});
         }
@@ -725,7 +745,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<double, A>
         reciprocal(const batch<double, A>& x,
-                   kernel::requires_arch<neon64>) noexcept
+                   requires_arch<neon64>) noexcept
         {
             return vrecpeq_f64(x);
         }
@@ -794,7 +814,9 @@ namespace xsimd
 
         // Wrap reducer intrinsics so we can pass them as function pointers
         // - OP: intrinsics name prefix, e.g., vorrq
+        // On MSVC ARM64, skip these wrappers since all types are __n128
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64)
 #define WRAP_REDUCER_INT_EXCLUDING_64(OP)                     \
     namespace wrap                                            \
     {                                                         \
@@ -850,9 +872,16 @@ namespace xsimd
             return ::OP##_f64(a);                            \
         }                                                    \
     }
+#else
+// On MSVC ARM64, skip wrapper macros
+#define WRAP_REDUCER_INT_EXCLUDING_64(OP)
+#define WRAP_REDUCER_INT(OP)
+#define WRAP_REDUCER_FLOAT(OP)
+#endif
 
         namespace detail
         {
+#if !defined(_MSC_VER) || !defined(_M_ARM64)
             template <class R>
             struct reducer_return_type_impl;
 
@@ -929,6 +958,7 @@ namespace xsimd
                                                                          uint32x4_t, int32x4_t,
                                                                          uint64x2_t, int64x2_t,
                                                                          float32x4_t, float64x2_t>;
+#endif
             template <class T>
             using enable_neon64_type_t = std::enable_if_t<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value,
                                                           int>;
@@ -944,6 +974,40 @@ namespace xsimd
         template <class A, class T, detail::enable_neon64_type_t<T> = 0>
         XSIMD_INLINE typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            if constexpr (sizeof(T) == 1)
+            {
+                if constexpr (std::is_unsigned<T>::value)
+                    return vaddvq_u8(arg);
+                else
+                    return vaddvq_s8(arg);
+            }
+            else if constexpr (sizeof(T) == 2)
+            {
+                if constexpr (std::is_unsigned<T>::value)
+                    return vaddvq_u16(arg);
+                else
+                    return vaddvq_s16(arg);
+            }
+            else if constexpr (sizeof(T) == 4)
+            {
+                if constexpr (std::is_same<T, float>::value)
+                    return vaddvq_f32(arg);
+                else if constexpr (std::is_unsigned<T>::value)
+                    return vaddvq_u32(arg);
+                else
+                    return vaddvq_s32(arg);
+            }
+            else if constexpr (sizeof(T) == 8)
+            {
+                if constexpr (std::is_same<T, double>::value)
+                    return vaddvq_f64(arg);
+                else if constexpr (std::is_unsigned<T>::value)
+                    return vaddvq_u64(arg);
+                else
+                    return vaddvq_s64(arg);
+            }
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_reducer_dispatcher::unary dispatcher = {
                 std::make_tuple(wrap::vaddvq_u8, wrap::vaddvq_s8, wrap::vaddvq_u16, wrap::vaddvq_s16,
@@ -951,6 +1015,7 @@ namespace xsimd
                                 wrap::vaddvq_f32, wrap::vaddvq_f64)
             };
             return dispatcher.apply(register_type(arg));
+#endif
         }
 
         /**************
@@ -960,6 +1025,7 @@ namespace xsimd
         WRAP_REDUCER_INT_EXCLUDING_64(vmaxvq)
         WRAP_REDUCER_FLOAT(vmaxvq)
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64)
         namespace wrap
         {
             XSIMD_INLINE uint64_t vmaxvq_u64(uint64x2_t a) noexcept
@@ -972,10 +1038,45 @@ namespace xsimd
                 return std::max(vdupd_laneq_s64(a, 0), vdupd_laneq_s64(a, 1));
             }
         }
+#endif
 
         template <class A, class T, detail::enable_neon64_type_t<T> = 0>
         XSIMD_INLINE typename batch<T, A>::value_type reduce_max(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            if constexpr (sizeof(T) == 1)
+            {
+                if constexpr (std::is_unsigned<T>::value)
+                    return vmaxvq_u8(arg);
+                else
+                    return vmaxvq_s8(arg);
+            }
+            else if constexpr (sizeof(T) == 2)
+            {
+                if constexpr (std::is_unsigned<T>::value)
+                    return vmaxvq_u16(arg);
+                else
+                    return vmaxvq_s16(arg);
+            }
+            else if constexpr (sizeof(T) == 4)
+            {
+                if constexpr (std::is_same<T, float>::value)
+                    return vmaxvq_f32(arg);
+                else if constexpr (std::is_unsigned<T>::value)
+                    return vmaxvq_u32(arg);
+                else
+                    return vmaxvq_s32(arg);
+            }
+            else if constexpr (sizeof(T) == 8)
+            {
+                if constexpr (std::is_same<T, double>::value)
+                    return vmaxvq_f64(arg);
+                else if constexpr (std::is_unsigned<T>::value)
+                    return std::max(vdupd_laneq_u64(arg, 0), vdupd_laneq_u64(arg, 1));
+                else
+                    return std::max(vdupd_laneq_s64(arg, 0), vdupd_laneq_s64(arg, 1));
+            }
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_reducer_dispatcher::unary dispatcher = {
                 std::make_tuple(wrap::vmaxvq_u8, wrap::vmaxvq_s8, wrap::vmaxvq_u16, wrap::vmaxvq_s16,
@@ -983,6 +1084,7 @@ namespace xsimd
                                 wrap::vmaxvq_f32, wrap::vmaxvq_f64)
             };
             return dispatcher.apply(register_type(arg));
+#endif
         }
 
         /**************
@@ -992,6 +1094,7 @@ namespace xsimd
         WRAP_REDUCER_INT_EXCLUDING_64(vminvq)
         WRAP_REDUCER_FLOAT(vminvq)
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64)
         namespace wrap
         {
             XSIMD_INLINE uint64_t vminvq_u64(uint64x2_t a) noexcept
@@ -1004,10 +1107,45 @@ namespace xsimd
                 return std::min(vdupd_laneq_s64(a, 0), vdupd_laneq_s64(a, 1));
             }
         }
+#endif
 
         template <class A, class T, detail::enable_neon64_type_t<T> = 0>
         XSIMD_INLINE typename batch<T, A>::value_type reduce_min(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            if constexpr (sizeof(T) == 1)
+            {
+                if constexpr (std::is_unsigned<T>::value)
+                    return vminvq_u8(arg);
+                else
+                    return vminvq_s8(arg);
+            }
+            else if constexpr (sizeof(T) == 2)
+            {
+                if constexpr (std::is_unsigned<T>::value)
+                    return vminvq_u16(arg);
+                else
+                    return vminvq_s16(arg);
+            }
+            else if constexpr (sizeof(T) == 4)
+            {
+                if constexpr (std::is_same<T, float>::value)
+                    return vminvq_f32(arg);
+                else if constexpr (std::is_unsigned<T>::value)
+                    return vminvq_u32(arg);
+                else
+                    return vminvq_s32(arg);
+            }
+            else if constexpr (sizeof(T) == 8)
+            {
+                if constexpr (std::is_same<T, double>::value)
+                    return vminvq_f64(arg);
+                else if constexpr (std::is_unsigned<T>::value)
+                    return std::min(vdupd_laneq_u64(arg, 0), vdupd_laneq_u64(arg, 1));
+                else
+                    return std::min(vdupd_laneq_s64(arg, 0), vdupd_laneq_s64(arg, 1));
+            }
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_reducer_dispatcher::unary dispatcher = {
                 std::make_tuple(wrap::vminvq_u8, wrap::vminvq_s8, wrap::vminvq_u16, wrap::vminvq_s16,
@@ -1015,6 +1153,7 @@ namespace xsimd
                                 wrap::vminvq_f32, wrap::vminvq_f64)
             };
             return dispatcher.apply(register_type(arg));
+#endif
         }
 
 #undef WRAP_REDUCER_INT_EXCLUDING_64
@@ -1260,6 +1399,7 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64)
 #define WRAP_CAST(SUFFIX, TYPE)                                                \
     namespace wrap                                                             \
     {                                                                          \
@@ -1284,10 +1424,33 @@ namespace xsimd
         WRAP_CAST(f32, float32x4_t)
 
 #undef WRAP_CAST
+#endif
 
         template <class A, class T>
         XSIMD_INLINE batch<double, A> bitwise_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            using register_type = typename batch<T, A>::register_type;
+            register_type reg = arg;
+            if constexpr (std::is_same<T, uint8_t>::value)
+                return vreinterpretq_f64_u8(reg);
+            else if constexpr (std::is_same<T, int8_t>::value)
+                return vreinterpretq_f64_s8(reg);
+            else if constexpr (std::is_same<T, uint16_t>::value)
+                return vreinterpretq_f64_u16(reg);
+            else if constexpr (std::is_same<T, int16_t>::value)
+                return vreinterpretq_f64_s16(reg);
+            else if constexpr (std::is_same<T, uint32_t>::value)
+                return vreinterpretq_f64_u32(reg);
+            else if constexpr (std::is_same<T, int32_t>::value)
+                return vreinterpretq_f64_s32(reg);
+            else if constexpr (std::is_same<T, uint64_t>::value)
+                return vreinterpretq_f64_u64(reg);
+            else if constexpr (std::is_same<T, int64_t>::value)
+                return vreinterpretq_f64_s64(reg);
+            else if constexpr (std::is_same<T, float>::value)
+                return vreinterpretq_f64_f32(reg);
+#else
             using caster_type = detail::bitwise_caster_impl<float64x2_t,
                                                             uint8x16_t, int8x16_t,
                                                             uint16x8_t, int16x8_t,
@@ -1301,8 +1464,10 @@ namespace xsimd
             };
             using register_type = typename batch<T, A>::register_type;
             return caster.apply(register_type(arg));
+#endif
         }
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64)
         namespace detail
         {
             template <class S, class... R>
@@ -1320,10 +1485,33 @@ namespace xsimd
                 }
             };
         }
+#endif
 
         template <class A, class R>
         XSIMD_INLINE batch<R, A> bitwise_cast(batch<double, A> const& arg, batch<R, A> const&, requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            using src_register_type = typename batch<double, A>::register_type;
+            src_register_type reg = arg;
+            if constexpr (std::is_same<R, uint8_t>::value)
+                return vreinterpretq_u8_f64(reg);
+            else if constexpr (std::is_same<R, int8_t>::value)
+                return vreinterpretq_s8_f64(reg);
+            else if constexpr (std::is_same<R, uint16_t>::value)
+                return vreinterpretq_u16_f64(reg);
+            else if constexpr (std::is_same<R, int16_t>::value)
+                return vreinterpretq_s16_f64(reg);
+            else if constexpr (std::is_same<R, uint32_t>::value)
+                return vreinterpretq_u32_f64(reg);
+            else if constexpr (std::is_same<R, int32_t>::value)
+                return vreinterpretq_s32_f64(reg);
+            else if constexpr (std::is_same<R, uint64_t>::value)
+                return vreinterpretq_u64_f64(reg);
+            else if constexpr (std::is_same<R, int64_t>::value)
+                return vreinterpretq_s64_f64(reg);
+            else if constexpr (std::is_same<R, float>::value)
+                return vreinterpretq_f32_f64(reg);
+#else
             using caster_type = detail::bitwise_caster_neon64<float64x2_t,
                                                               uint8x16_t, int8x16_t,
                                                               uint16x8_t, int16x8_t,
@@ -1338,6 +1526,7 @@ namespace xsimd
             using src_register_type = typename batch<double, A>::register_type;
             using dst_register_type = typename batch<R, A>::register_type;
             return caster.apply<dst_register_type>(src_register_type(arg));
+#endif
         }
 
         template <class A>
@@ -1378,14 +1567,31 @@ namespace xsimd
         XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch<uint8_t, A> idx,
                                                requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            // MSVC ARM64: vqtbl1q_* are macro-based and conflict with our wrapper usage.
+            // Use the two-table lookup (vtbl2_u8) on low/high halves.
+            uint8x8x2_t tbl = { vget_low_u8(self), vget_high_u8(self) };
+            uint8x8_t lo = vtbl2_u8(tbl, vget_low_u8(idx));
+            uint8x8_t hi = vtbl2_u8(tbl, vget_high_u8(idx));
+            return vcombine_u8(lo, hi);
+#else
             return vqtbl1q_u8(self, idx);
+#endif
         }
 
         template <class A>
         XSIMD_INLINE batch<int8_t, A> swizzle(batch<int8_t, A> const& self, batch<uint8_t, A> idx,
                                               requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            // Same approach as above but for signed payload.
+            uint8x8x2_t tbl = { vreinterpret_u8_s8(vget_low_s8(self)), vreinterpret_u8_s8(vget_high_s8(self)) };
+            uint8x8_t lo = vtbl2_u8(tbl, vget_low_u8(idx));
+            uint8x8_t hi = vtbl2_u8(tbl, vget_high_u8(idx));
+            return vreinterpretq_s8_u8(vcombine_u8(lo, hi));
+#else
             return vqtbl1q_s8(self, idx);
+#endif
         }
 
         template <class A>
@@ -1395,9 +1601,26 @@ namespace xsimd
         {
             using batch_type = batch<uint8_t, A>;
             using index_type = batch<uint8_t, A>;
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            batch_type self_bytes = batch_type(vreinterpretq_u8_u16(self));
+            constexpr std::size_t lanes = batch<uint16_t, A>::size;
+            constexpr std::size_t elem_bytes = sizeof(uint16_t);
+            alignas(A::alignment()) uint16_t idx_in[lanes];
+            idx.store_aligned(&idx_in[0]);
+            alignas(A::alignment()) uint8_t idx_out[batch_type::size];
+            for (std::size_t j = 0; j < lanes; ++j)
+            {
+                std::size_t base = static_cast<std::size_t>(idx_in[j]) * elem_bytes;
+                for (std::size_t k = 0; k < elem_bytes; ++k)
+                    idx_out[j * elem_bytes + k] = static_cast<uint8_t>(base + k);
+            }
+            index_type indices = index_type::load_aligned(&idx_out[0]);
+            return vreinterpretq_u16_u8(swizzle(self_bytes, indices, neon64 {}));
+#else
             return vreinterpretq_u16_u8(swizzle(batch_type(vreinterpretq_u8_u16(self)),
                                                 index_type(vreinterpretq_u8_u16(idx * 0x0202 + 0x0100)),
                                                 neon64 {}));
+#endif
         }
 
         template <class A>
@@ -1415,9 +1638,26 @@ namespace xsimd
         {
             using batch_type = batch<uint8_t, A>;
             using index_type = batch<uint8_t, A>;
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            batch_type self_bytes = batch_type(vreinterpretq_u8_u32(self));
+            constexpr std::size_t lanes = batch<uint32_t, A>::size;
+            constexpr std::size_t elem_bytes = sizeof(uint32_t);
+            alignas(A::alignment()) uint32_t idx_in[lanes];
+            idx.store_aligned(&idx_in[0]);
+            alignas(A::alignment()) uint8_t idx_out[batch_type::size];
+            for (std::size_t j = 0; j < lanes; ++j)
+            {
+                std::size_t base = static_cast<std::size_t>(idx_in[j]) * elem_bytes;
+                for (std::size_t k = 0; k < elem_bytes; ++k)
+                    idx_out[j * elem_bytes + k] = static_cast<uint8_t>(base + k);
+            }
+            index_type indices = index_type::load_aligned(&idx_out[0]);
+            return vreinterpretq_u32_u8(swizzle(self_bytes, indices, neon64 {}));
+#else
             return vreinterpretq_u32_u8(swizzle(batch_type(vreinterpretq_u8_u32(self)),
                                                 index_type(vreinterpretq_u8_u32(idx * 0x04040404 + 0x03020100)),
                                                 neon64 {}));
+#endif
         }
 
         template <class A>
@@ -1435,9 +1675,26 @@ namespace xsimd
         {
             using batch_type = batch<uint8_t, A>;
             using index_type = batch<uint8_t, A>;
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            batch_type self_bytes = batch_type(vreinterpretq_u8_u64(self));
+            constexpr std::size_t lanes = batch<uint64_t, A>::size;
+            constexpr std::size_t elem_bytes = sizeof(uint64_t);
+            alignas(A::alignment()) uint64_t idx_in[lanes];
+            idx.store_aligned(&idx_in[0]);
+            alignas(A::alignment()) uint8_t idx_out[batch_type::size];
+            for (std::size_t j = 0; j < lanes; ++j)
+            {
+                std::size_t base = static_cast<std::size_t>(idx_in[j]) * elem_bytes;
+                for (std::size_t k = 0; k < elem_bytes; ++k)
+                    idx_out[j * elem_bytes + k] = static_cast<uint8_t>(base + k);
+            }
+            index_type indices_batch = index_type::load_aligned(&idx_out[0]);
+            return vreinterpretq_u64_u8(swizzle(self_bytes, indices_batch, neon64 {}));
+#else
             return vreinterpretq_u64_u8(swizzle(batch_type(vreinterpretq_u8_u64(self)),
                                                 index_type(vreinterpretq_u8_u64(idx * 0x0808080808080808ull + 0x0706050403020100ull)),
                                                 neon64 {}));
+#endif
         }
 
         template <class A>
@@ -1521,7 +1778,11 @@ namespace xsimd
                                                batch_constant<uint8_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
                                                requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            return swizzle(self, batch<uint8_t, A>(idx), neon64 {});
+#else
             return vqtbl1q_u8(self, batch<uint8_t, A>(idx));
+#endif
         }
 
         template <class A, uint8_t V0, uint8_t V1, uint8_t V2, uint8_t V3, uint8_t V4, uint8_t V5, uint8_t V6, uint8_t V7,
@@ -1530,7 +1791,11 @@ namespace xsimd
                                               batch_constant<uint8_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
                                               requires_arch<neon64>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64)
+            return swizzle(self, batch<uint8_t, A>(idx), neon64 {});
+#else
             return vqtbl1q_s8(self, batch<uint8_t, A>(idx));
+#endif
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
@@ -1569,6 +1834,35 @@ namespace xsimd
             return vreinterpretq_s32_s8(swizzle<A>(batch_type(vreinterpretq_s8_s32(self)), detail::burst_index<uint8_t>(idx), A()));
         }
 
+#if defined(_MSC_VER) && defined(_M_ARM64)
+        template <class A, uint64_t V0, uint64_t V1>
+        XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self,
+                                                batch_constant<uint64_t, A, V0, V1>,
+                                                requires_arch<neon64>) noexcept
+        {
+            static_assert(batch<uint64_t, A>::size == 2, "neon64 uint64 batch must have size 2");
+            uint64_t in[2];
+            uint64_t out[2];
+            self.store_unaligned(in);
+            out[0] = in[V0];
+            out[1] = in[V1];
+            return batch<uint64_t, A>::load_unaligned(out);
+        }
+
+        template <class A, uint64_t V0, uint64_t V1>
+        XSIMD_INLINE batch<int64_t, A> swizzle(batch<int64_t, A> const& self,
+                                               batch_constant<uint64_t, A, V0, V1>,
+                                               requires_arch<neon64>) noexcept
+        {
+            static_assert(batch<int64_t, A>::size == 2, "neon64 int64 batch must have size 2");
+            int64_t in[2];
+            int64_t out[2];
+            self.store_unaligned(in);
+            out[0] = in[V0];
+            out[1] = in[V1];
+            return batch<int64_t, A>::load_unaligned(out);
+        }
+#else
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self,
                                                 batch_constant<uint64_t, A, V0, V1> idx,
@@ -1586,6 +1880,7 @@ namespace xsimd
             using batch_type = batch<int8_t, A>;
             return vreinterpretq_s64_s8(swizzle<A>(batch_type(vreinterpretq_s8_s64(self)), detail::burst_index<uint8_t>(idx), A()));
         }
+#endif
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self,
@@ -1606,19 +1901,19 @@ namespace xsimd
         }
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
-        XSIMD_INLINE batch<std::complex<float>, A> swizzle(batch<std::complex<float>, A> const& self,
-                                                           batch_constant<uint32_t, A, V0, V1, V2, V3> idx,
-                                                           requires_arch<neon64>) noexcept
+        XSIMD_INLINE batch<::std::complex<float>, A> swizzle(batch<::std::complex<float>, A> const& self,
+                                                             batch_constant<uint32_t, A, V0, V1, V2, V3> idx,
+                                                             requires_arch<neon64>) noexcept
         {
-            return batch<std::complex<float>>(swizzle(self.real(), idx, A()), swizzle(self.imag(), idx, A()));
+            return batch<::std::complex<float>>(swizzle(self.real(), idx, A()), swizzle(self.imag(), idx, A()));
         }
 
         template <class A, uint64_t V0, uint64_t V1>
-        XSIMD_INLINE batch<std::complex<double>, A> swizzle(batch<std::complex<double>, A> const& self,
-                                                            batch_constant<uint64_t, A, V0, V1> idx,
-                                                            requires_arch<neon64>) noexcept
+        XSIMD_INLINE batch<::std::complex<double>, A> swizzle(batch<::std::complex<double>, A> const& self,
+                                                              batch_constant<uint64_t, A, V0, V1> idx,
+                                                              requires_arch<neon64>) noexcept
         {
-            return batch<std::complex<double>>(swizzle(self.real(), idx, A()), swizzle(self.imag(), idx, A()));
+            return batch<::std::complex<double>>(swizzle(self.real(), idx, A()), swizzle(self.imag(), idx, A()));
         }
 
         /*********

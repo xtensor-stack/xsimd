@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <array>
 #include <complex>
+#include <cstdio>
 #include <stdexcept>
 
 #include "../../types/xsimd_batch_constant.hpp"
@@ -71,6 +72,9 @@ namespace xsimd
                 for (size_t i = 0; i < sizeof...(Is); ++i)
                     if ((bitmask >> i) & 1u)
                         std::swap(mask_buffer[inserted++], mask_buffer[i]);
+                // Fill remaining positions with the last valid index to avoid undefined behavior
+                for (size_t i = inserted; i < sizeof...(Is); ++i)
+                    mask_buffer[i] = mask_buffer[inserted > 0 ? inserted - 1 : 0];
                 return batch<IT, A>::load_aligned(&mask_buffer[0]);
             }
         }
@@ -85,7 +89,12 @@ namespace xsimd
             auto bitmask = mask.mask();
             auto z = select(mask, x, batch<T, A>((T)0));
             auto compress_mask = detail::create_compress_swizzle_mask<IT, A>(bitmask, std::make_index_sequence<size>());
-            return swizzle(z, compress_mask);
+            alignas(A::alignment()) IT mask_out[size];
+            compress_mask.store_aligned(&mask_out[0]);
+            alignas(A::alignment()) T z_out[size];
+            z.store_aligned(&z_out[0]);
+            auto res = swizzle(z, compress_mask);
+            return res;
         }
 
         // expand
