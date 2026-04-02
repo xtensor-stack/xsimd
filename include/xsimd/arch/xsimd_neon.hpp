@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
  * Martin Renou                                                             *
  * Copyright (c) QuantStack                                                 *
@@ -230,7 +230,7 @@ namespace xsimd
                 using type = T;
             };
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <>
             struct comp_return_type_impl<int8x16_t>
             {
@@ -288,7 +288,7 @@ namespace xsimd
                 = std::enable_if_t<(std::is_integral<T>::value && sizeof(T) != 8) || std::is_same<T, float>::value, int>;
         }
 
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
         namespace detail {
             template <class T>
             XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_unsigned<T>::value, __n128>::type
@@ -630,7 +630,7 @@ namespace detail {
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             alignas(16) T data[] = { static_cast<T>(args)... };
             return detail::msvc_arm64_load<T>(data);
 #else
@@ -641,7 +641,7 @@ namespace detail {
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             using unsigned_type = as_unsigned_integer_t<T>;
             alignas(16) unsigned_type data[] = { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
             return detail::msvc_arm64_load_u<T>(data);
@@ -655,7 +655,7 @@ namespace detail {
         template <class A>
         XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<neon>, float f0, float f1, float f2, float f3) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64, use load from array instead of brace initialization
             alignas(16) float data[] = { f0, f1, f2, f3 };
             return vld1q_f32(data);
@@ -669,7 +669,7 @@ namespace detail {
                                                        std::complex<float> c0, std::complex<float> c1,
                                                        std::complex<float> c2, std::complex<float> c3) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64, use load from array instead of brace initialization
             alignas(16) float real_data[] = { c0.real(), c1.real(), c2.real(), c3.real() };
             alignas(16) float imag_data[] = { c0.imag(), c1.imag(), c2.imag(), c3.imag() };
@@ -683,7 +683,7 @@ namespace detail {
         template <class A, class... Args>
         XSIMD_INLINE batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64, use load from array instead of brace initialization
             using unsigned_type = as_unsigned_integer_t<float>;
             alignas(16) unsigned_type data[] = { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
@@ -1142,7 +1142,7 @@ namespace detail {
          * add *
          *******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vaddq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vaddq, detail::identity_return_type)
 #endif
@@ -1150,7 +1150,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_add<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1167,14 +1167,14 @@ namespace detail {
          * avg *
          *******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_UINT_EXCLUDING_64(vhaddq, detail::identity_return_type)
 #endif
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_avg<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1189,14 +1189,14 @@ namespace detail {
          * avgr *
          ********/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_UINT_EXCLUDING_64(vrhaddq, detail::identity_return_type)
 #endif
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_avgr<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1211,14 +1211,14 @@ namespace detail {
          * sadd *
          ********/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vqaddq, detail::identity_return_type)
 #endif
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_sadd<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1235,7 +1235,7 @@ namespace detail {
          * sub *
          *******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vsubq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vsubq, detail::identity_return_type)
 #endif
@@ -1243,7 +1243,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_sub<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1260,14 +1260,14 @@ namespace detail {
          * ssub *
          ********/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vqsubq, detail::identity_return_type)
 #endif
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_ssub<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1284,7 +1284,7 @@ namespace detail {
          * mul *
          *******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vmulq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vmulq, detail::identity_return_type)
 #endif
@@ -1292,7 +1292,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_mul<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1343,7 +1343,7 @@ namespace detail {
          * eq *
          ******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vceqq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vceqq, detail::comp_return_type)
 #endif
@@ -1351,7 +1351,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_eq<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1366,7 +1366,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_eq_bool<T>(lhs, rhs);
 #else
             using register_type = typename batch_bool<T, A>::register_type;
@@ -1438,7 +1438,7 @@ namespace detail {
          * lt *
          ******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcltq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcltq, detail::comp_return_type)
 #endif
@@ -1446,7 +1446,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_lt<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1477,7 +1477,7 @@ namespace detail {
          * le *
          ******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcleq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcleq, detail::comp_return_type)
 #endif
@@ -1485,7 +1485,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_le<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1519,7 +1519,7 @@ namespace detail {
             }
         }
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcgtq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcgtq, detail::comp_return_type)
 #endif
@@ -1527,7 +1527,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_gt<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1558,7 +1558,7 @@ namespace detail {
          * ge *
          ******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcgeq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcgeq, detail::comp_return_type)
 #endif
@@ -1566,7 +1566,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_ge<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1599,7 +1599,7 @@ namespace detail {
          * bitwise_and *
          ***************/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vandq, detail::identity_return_type)
 #endif
 
@@ -1611,7 +1611,7 @@ namespace detail {
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             V bitwise_and_neon(V const& lhs, V const& rhs)
             {
@@ -1628,7 +1628,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64 all NEON types are __n128; vandq_u32 works for all.
             return vandq_u32(lhs, rhs);
 #else
@@ -1640,7 +1640,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return vandq_u32(lhs, rhs);
 #else
             using register_type = typename batch_bool<T, A>::register_type;
@@ -1652,7 +1652,7 @@ namespace detail {
          * bitwise_or *
          **************/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vorrq, detail::identity_return_type)
 #endif
 
@@ -1664,7 +1664,7 @@ namespace detail {
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_or_neon(V const& lhs, V const& rhs) noexcept
             {
@@ -1681,7 +1681,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return vorrq_u32(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1692,7 +1692,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return vorrq_u32(lhs, rhs);
 #else
             using register_type = typename batch_bool<T, A>::register_type;
@@ -1704,7 +1704,7 @@ namespace detail {
          * bitwise_xor *
          ***************/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(veorq, detail::identity_return_type)
 #endif
 
@@ -1716,7 +1716,7 @@ namespace detail {
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_xor_neon(V const& lhs, V const& rhs) noexcept
             {
@@ -1733,7 +1733,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return veorq_u32(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1744,7 +1744,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return veorq_u32(lhs, rhs);
 #else
             using register_type = typename batch_bool<T, A>::register_type;
@@ -1766,7 +1766,7 @@ namespace detail {
          * bitwise_not *
          ***************/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_UNARY_INT_EXCLUDING_64(vmvnq)
 #endif
 
@@ -1777,7 +1777,7 @@ namespace detail {
                 return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(arg)));
             }
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_not_neon(V const& arg) noexcept
             {
@@ -1795,7 +1795,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64 all NEON types are __n128; vmvnq_u32 works for all.
             return vmvnq_u32(arg);
 #else
@@ -1807,7 +1807,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_not(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return vmvnq_u32(arg);
 #else
             using register_type = typename batch_bool<T, A>::register_type;
@@ -1819,7 +1819,7 @@ namespace detail {
          * bitwise_andnot *
          ******************/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vbicq, detail::identity_return_type)
 #endif
 
@@ -1830,7 +1830,7 @@ namespace detail {
                 return vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(lhs), vreinterpretq_u32_f32(rhs)));
             }
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_andnot_neon(V const& lhs, V const& rhs) noexcept
             {
@@ -1847,7 +1847,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64 all NEON types are __n128; vbicq_u32 works for all.
             return vbicq_u32(lhs, rhs);
 #else
@@ -1859,7 +1859,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return vbicq_u32(lhs, rhs);
 #else
             using register_type = typename batch_bool<T, A>::register_type;
@@ -1871,7 +1871,7 @@ namespace detail {
          * min *
          *******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vminq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vminq, detail::identity_return_type)
 #endif
@@ -1879,7 +1879,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_min<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1901,7 +1901,7 @@ namespace detail {
          * max *
          *******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vmaxq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vmaxq, detail::identity_return_type)
 #endif
@@ -1909,7 +1909,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_max<T>(lhs, rhs);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1931,7 +1931,7 @@ namespace detail {
          * abs *
          *******/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             XSIMD_INLINE int8x16_t vabsq_s8(int8x16_t a) noexcept { return ::vabsq_s8(a); }
@@ -1962,7 +1962,7 @@ namespace detail {
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_abs<T>(arg);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -2291,7 +2291,7 @@ namespace detail {
          * select *
          **********/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             XSIMD_INLINE uint8x16_t vbslq_u8(uint8x16_t a, uint8x16_t b, uint8x16_t c) noexcept { return ::vbslq_u8(a, b, c); }
@@ -2333,7 +2333,7 @@ namespace detail {
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& a, batch<T, A> const& b, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_select<T>(cond, a, b);
 #else
             using bool_register_type = typename batch_bool<T, A>::register_type;
@@ -3315,7 +3315,7 @@ namespace detail {
          * bitwise_cast *
          ****************/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
 #define WRAP_CAST(SUFFIX, TYPE)                                                \
     namespace wrap                                                             \
     {                                                                          \
@@ -3429,7 +3429,7 @@ namespace detail {
         template <class A, class T, class R>
         XSIMD_INLINE batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64, all NEON types are __n128, so just return the argument
             return arg.data;
 #else
@@ -3548,7 +3548,7 @@ namespace detail {
         /****************
          * rotate_left *
          ****************/
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             template <size_t N>
@@ -3575,7 +3575,7 @@ namespace detail {
         template <size_t N, class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> rotate_left(batch<T, A> const& a, requires_arch<neon>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_rotate_left<N, T>(a);
 #else
             using register_type = typename batch<T, A>::register_type;

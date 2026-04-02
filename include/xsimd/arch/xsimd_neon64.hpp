@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
  * Martin Renou                                                             *
  * Copyright (c) QuantStack                                                 *
@@ -805,7 +805,7 @@ namespace xsimd
         // - OP: intrinsics name prefix, e.g., vorrq
         // On MSVC ARM64, skip these wrappers since all types are __n128
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
 #define WRAP_REDUCER_INT_EXCLUDING_64(OP)                     \
     namespace wrap                                            \
     {                                                         \
@@ -870,7 +870,7 @@ namespace xsimd
 
         namespace detail
         {
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class R>
             struct reducer_return_type_impl;
 
@@ -957,7 +957,7 @@ namespace xsimd
          * reduce_add *
          **************/
 
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
         namespace detail {
             template <class T>
             XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, T>::type
@@ -1060,7 +1060,7 @@ namespace xsimd
         template <class A, class T, detail::enable_neon64_type_t<T> = 0>
         XSIMD_INLINE typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_reduce_add<T>(arg);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1080,7 +1080,7 @@ namespace xsimd
         WRAP_REDUCER_INT_EXCLUDING_64(vmaxvq)
         WRAP_REDUCER_FLOAT(vmaxvq)
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             XSIMD_INLINE uint64_t vmaxvq_u64(uint64x2_t a) noexcept
@@ -1098,7 +1098,7 @@ namespace xsimd
         template <class A, class T, detail::enable_neon64_type_t<T> = 0>
         XSIMD_INLINE typename batch<T, A>::value_type reduce_max(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_reduce_max<T>(arg);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1118,7 +1118,7 @@ namespace xsimd
         WRAP_REDUCER_INT_EXCLUDING_64(vminvq)
         WRAP_REDUCER_FLOAT(vminvq)
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             XSIMD_INLINE uint64_t vminvq_u64(uint64x2_t a) noexcept
@@ -1136,7 +1136,7 @@ namespace xsimd
         template <class A, class T, detail::enable_neon64_type_t<T> = 0>
         XSIMD_INLINE typename batch<T, A>::value_type reduce_min(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return detail::msvc_arm64_reduce_min<T>(arg);
 #else
             using register_type = typename batch<T, A>::register_type;
@@ -1392,7 +1392,7 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
 #define WRAP_CAST(SUFFIX, TYPE)                                                \
     namespace wrap                                                             \
     {                                                                          \
@@ -1422,7 +1422,7 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch<double, A> bitwise_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64, all NEON types are __n128; reinterpret is a no-op.
             return arg.data;
 #else
@@ -1442,7 +1442,7 @@ namespace xsimd
 #endif
         }
 
-#if !defined(_MSC_VER) || !defined(_M_ARM64)
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace detail
         {
             template <class S, class... R>
@@ -1465,7 +1465,7 @@ namespace xsimd
         template <class A, class R>
         XSIMD_INLINE batch<R, A> bitwise_cast(batch<double, A> const& arg, batch<R, A> const&, requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // On MSVC ARM64, all NEON types are __n128; reinterpret is a no-op.
             return arg.data;
 #else
@@ -1524,7 +1524,7 @@ namespace xsimd
         XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch<uint8_t, A> idx,
                                                requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // MSVC ARM64: vqtbl1q_* are macro-based and conflict with our wrapper usage.
             // Use the two-table lookup (vtbl2_u8) on low/high halves.
             uint8x8x2_t tbl = { vget_low_u8(self), vget_high_u8(self) };
@@ -1540,7 +1540,7 @@ namespace xsimd
         XSIMD_INLINE batch<int8_t, A> swizzle(batch<int8_t, A> const& self, batch<uint8_t, A> idx,
                                               requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             // Same approach as above but for signed payload.
             uint8x8x2_t tbl = { vreinterpret_u8_s8(vget_low_s8(self)), vreinterpret_u8_s8(vget_high_s8(self)) };
             uint8x8_t lo = vtbl2_u8(tbl, vget_low_u8(idx));
@@ -1558,7 +1558,7 @@ namespace xsimd
         {
             using batch_type = batch<uint8_t, A>;
             using index_type = batch<uint8_t, A>;
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             batch_type self_bytes = batch_type(vreinterpretq_u8_u16(self));
             constexpr std::size_t lanes = batch<uint16_t, A>::size;
             constexpr std::size_t elem_bytes = sizeof(uint16_t);
@@ -1595,7 +1595,7 @@ namespace xsimd
         {
             using batch_type = batch<uint8_t, A>;
             using index_type = batch<uint8_t, A>;
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             batch_type self_bytes = batch_type(vreinterpretq_u8_u32(self));
             constexpr std::size_t lanes = batch<uint32_t, A>::size;
             constexpr std::size_t elem_bytes = sizeof(uint32_t);
@@ -1632,7 +1632,7 @@ namespace xsimd
         {
             using batch_type = batch<uint8_t, A>;
             using index_type = batch<uint8_t, A>;
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             batch_type self_bytes = batch_type(vreinterpretq_u8_u64(self));
             constexpr std::size_t lanes = batch<uint64_t, A>::size;
             constexpr std::size_t elem_bytes = sizeof(uint64_t);
@@ -1735,7 +1735,7 @@ namespace xsimd
                                                batch_constant<uint8_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
                                                requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return swizzle(self, batch<uint8_t, A>(idx), neon64 {});
 #else
             return vqtbl1q_u8(self, batch<uint8_t, A>(idx));
@@ -1748,7 +1748,7 @@ namespace xsimd
                                               batch_constant<uint8_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
                                               requires_arch<neon64>) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             return swizzle(self, batch<uint8_t, A>(idx), neon64 {});
 #else
             return vqtbl1q_s8(self, batch<uint8_t, A>(idx));
@@ -1791,7 +1791,7 @@ namespace xsimd
             return vreinterpretq_s32_s8(swizzle<A>(batch_type(vreinterpretq_s8_s32(self)), detail::burst_index<uint8_t>(idx), A()));
         }
 
-#if defined(_MSC_VER) && defined(_M_ARM64)
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
         template <class A, uint64_t V0, uint64_t V1>
         XSIMD_INLINE batch<uint64_t, A> swizzle(batch<uint64_t, A> const& self,
                                                 batch_constant<uint64_t, A, V0, V1>,
