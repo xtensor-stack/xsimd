@@ -187,6 +187,85 @@ namespace xsimd
      */
     using x86_cpuid_leaf0 = detail::x86_cpuid_highest_func<false>;
 
+    /**
+     * Known processor manufacturer ID strings returned by CPUID leaf 0.
+     *
+     * The 12-byte manufacturer ID is stored in EBX, EDX, ECX (in that order).
+     * Some strings are shared across physical CPUs, emulators, and virtual machines.
+     * Obscure, defunct, and soft-core CPUs are not represented; they map to `unknown`.
+     *
+     * @see https://en.wikipedia.org/wiki/CPUID
+     */
+    enum class x86_manufacturer
+    {
+        /**
+         * AMD ("AuthenticAMD", "AMD ISBETTER").
+         *
+         * "AMD ISBETTER" was used by early K5 engineering samples.
+         */
+        amd,
+        /**
+         * Intel ("GenuineIntel", "GenuineIotel").
+         *
+         * "GenuineIotel" is a rare typo variant seen on some chips.
+         */
+        intel,
+        /**
+         * VIA / Centaur ("CentaurHauls", "VIA VIA VIA ").
+         *
+         * Centaur Technology was acquired by VIA in 1999;
+         * older chips report "CentaurHauls", newer ones "VIA VIA VIA ".
+         */
+        via,
+        /** Zhaoxin ("  Shanghai  "). */
+        zhaoxin,
+        /** Hygon ("HygonGenuine"). */
+        hygon,
+        /**
+         * Transmeta ("TransmetaCPU", "GenuineTMx86").
+         *
+         * Two different ID strings were used across product lines.
+         */
+        transmeta,
+        /** MCST Elbrus ("E2K MACHINE "). */
+        elbrus,
+        /** Microsoft Virtual PC / x86-to-ARM ("Virtual CPU "). */
+        microsoft_vpc,
+        /** Unrecognized manufacturer ID string. */
+        unknown,
+    };
+
+    /**
+     * Parse a 12-byte CPUID manufacturer ID into an @ref x86_manufacturer value.
+     *
+     * The input is the raw character array returned by @ref x86_cpuid_leaf0::manufacturer_id_raw.
+     * Unrecognized strings map to @ref x86_manufacturer::unknown.
+     */
+    inline x86_manufacturer x86_parse_manufacturer(const std::array<char, 12>& id) noexcept
+    {
+        auto eq = [&id](const char(&s)[13]) noexcept -> bool
+        {
+            return std::memcmp(id.data(), s, 12) == 0;
+        };
+        if (eq("GenuineIntel") || eq("GenuineIotel"))
+            return x86_manufacturer::intel;
+        if (eq("AuthenticAMD") || eq("AMD ISBETTER"))
+            return x86_manufacturer::amd;
+        if (eq("CentaurHauls") || eq("VIA VIA VIA "))
+            return x86_manufacturer::via;
+        if (eq("  Shanghai  "))
+            return x86_manufacturer::zhaoxin;
+        if (eq("HygonGenuine"))
+            return x86_manufacturer::hygon;
+        if (eq("TransmetaCPU") || eq("GenuineTMx86"))
+            return x86_manufacturer::transmeta;
+        if (eq("E2K MACHINE "))
+            return x86_manufacturer::elbrus;
+        if (eq("Virtual CPU "))
+            return x86_manufacturer::microsoft_vpc;
+        return x86_manufacturer::unknown;
+    };
+
     struct x86_cpuid_leaf1_traits
     {
         static constexpr detail::x86_reg32_t leaf = 1;
@@ -490,6 +569,31 @@ namespace xsimd
         {
             // Check all SSE, AVX, and AVX512 bits even though AVX512 must imply AVX and SSE
             return xcr0().all_bits_set<x86_xcr0::xcr0::sse, x86_xcr0::xcr0::avx, x86_xcr0::xcr0::zmm_hi256>();
+        }
+
+        /**
+         * The manufacturer ID string in a static array.
+         *
+         * This raw character array is case specific and may contain both leading
+         * and trailing whitespaces.
+         * It cannot be assumed to be null terminated.
+         */
+        inline auto manufacturer_id_raw() const noexcept
+        {
+            return leaf0().manufacturer_id_raw();
+        }
+
+#if __cplusplus >= 201703L
+        inline std::string_view manufacturer_id() const noexcept
+        {
+            return leaf0().manufacturer_id();
+        }
+#endif
+
+        /** The manufacturer ID string parsed into known common vendors. */
+        inline x86_manufacturer known_manufacturer() const noexcept
+        {
+            return x86_parse_manufacturer(manufacturer_id_raw());
         }
 
         /**
