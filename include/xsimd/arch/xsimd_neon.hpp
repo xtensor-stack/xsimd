@@ -289,22 +289,7 @@ namespace xsimd
         }
 
 #if defined(_MSC_VER) && defined(_M_ARM64)
-        // -----------------------------------------------------------------------
-        // C++14-compatible dispatch helpers for MSVC ARM64.
-        //
-        // On MSVC ARM64, all NEON types are the same underlying type (__n128),
-        // so overload resolution on NEON types does not work and the existing
-        // std::tuple-based dispatcher cannot be used.  The original workaround
-        // used `if constexpr` (C++17).  The helpers below replace that with
-        // std::enable_if overloads, which are valid C++14.
-        //
-        // Each helper is a function template parameterised on the *element* type
-        // T.  The correct intrinsic is selected at compile time via enable_if on
-        // sizeof(T) and std::is_unsigned<T> / std::is_floating_point<T>.
-        // -----------------------------------------------------------------------
         namespace detail {
-
-            // -- load (for set<integral>) --
             template <class T>
             XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_unsigned<T>::value, __n128>::type
             msvc_arm64_load(const T* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
@@ -330,7 +315,6 @@ namespace xsimd
             XSIMD_INLINE typename std::enable_if<sizeof(T) == 8 && std::is_signed<T>::value, __n128>::type
             msvc_arm64_load(const T* d) noexcept { return vld1q_s64(reinterpret_cast<const int64_t*>(d)); }
 
-            // -- load_u (for set<batch_bool>) -- loads from unsigned element array
             template <class T>
             XSIMD_INLINE typename std::enable_if<sizeof(T) == 1, __n128>::type
             msvc_arm64_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
@@ -344,7 +328,6 @@ namespace xsimd
             XSIMD_INLINE typename std::enable_if<sizeof(T) == 8, __n128>::type
             msvc_arm64_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u64(reinterpret_cast<const uint64_t*>(d)); }
 
-            // -- eq for batch_bool (unsigned comparison by size) --
             template <class T>
             XSIMD_INLINE typename std::enable_if<sizeof(T)==1, __n128>::type
             msvc_arm64_eq_bool(__n128 a, __n128 b) noexcept { return vceqq_u8(a,b); }
@@ -355,10 +338,8 @@ namespace xsimd
             XSIMD_INLINE typename std::enable_if<sizeof(T)==4, __n128>::type
             msvc_arm64_eq_bool(__n128 a, __n128 b) noexcept { return vceqq_u32(a,b); }
 
-        } // namespace detail (MSVC ARM64 helpers)
+        }
 
-// Macro to generate C++14 enable_if dispatch overloads for a full binary op
-// (all 9 NEON element types: u8,s8,u16,s16,u32,s32,u64,s64,f32).
 #define XSIMD_MSVC_ARM64_BINARY_FULL(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, u64fn, s64fn, f32fn) \
     namespace detail { \
         template <class T> \
@@ -390,7 +371,6 @@ namespace xsimd
         fname(__n128 a, __n128 b) noexcept { return s64fn(a,b); } \
     }
 
-// Macro for binary ops excluding int64 (u8,s8,u16,s16,u32,s32,f32).
 #define XSIMD_MSVC_ARM64_BINARY_EX64(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, f32fn) \
     namespace detail { \
         template <class T> \
@@ -416,7 +396,6 @@ namespace xsimd
         fname(__n128 a, __n128 b) noexcept { return f32fn(a,b); } \
     }
 
-// Macro for unsigned-only binary ops excluding int64 (u8,u16,u32).
 #define XSIMD_MSVC_ARM64_BINARY_UINT_EX64(fname, u8fn, u16fn, u32fn) \
     namespace detail { \
         template <class T> \
@@ -430,7 +409,6 @@ namespace xsimd
         fname(__n128 a, __n128 b) noexcept { return u32fn(a,b); } \
     }
 
-// Macro for unary ops excluding int64 (u8,s8,u16,s16,u32,s32,f32).
 #define XSIMD_MSVC_ARM64_UNARY_EX64(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, f32fn) \
     namespace detail { \
         template <class T> \
@@ -456,7 +434,6 @@ namespace xsimd
         fname(__n128 a) noexcept { return f32fn(a); } \
     }
 
-// Macro for select (ternary: cond, a, b) — all 9 types.
 #define XSIMD_MSVC_ARM64_SELECT_FULL(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, u64fn, s64fn, f32fn) \
     namespace detail { \
         template <class T> \
@@ -488,7 +465,6 @@ namespace xsimd
         fname(__n128 c, __n128 a, __n128 b) noexcept { return s64fn(c,a,b); } \
     }
 
-// Macro for bitwise ops on batch_bool (unsigned only, all sizes).
 #define XSIMD_MSVC_ARM64_BINARY_UINT_ALL(fname, u8fn, u16fn, u32fn, u64fn) \
     namespace detail { \
         template <class T> \
@@ -505,7 +481,6 @@ namespace xsimd
         fname##_bool(__n128 a, __n128 b) noexcept { return u64fn(a,b); } \
     }
 
-// Macro for bitwise unary ops on batch_bool (unsigned only, all sizes).
 #define XSIMD_MSVC_ARM64_UNARY_UINT_ALL(fname, u8fn, u16fn, u32fn, u64fn) \
     namespace detail { \
         template <class T> \
@@ -522,7 +497,6 @@ namespace xsimd
         fname##_bool(__n128 a) noexcept { return u64fn(a); } \
     }
 
-// Generate all dispatch helpers used by the MSVC ARM64 paths below.
 XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_add, vaddq_u8, vaddq_s8, vaddq_u16, vaddq_s16, vaddq_u32, vaddq_s32, vaddq_u64, vaddq_s64, vaddq_f32)
 XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_sadd, vqaddq_u8, vqaddq_s8, vqaddq_u16, vqaddq_s16, vqaddq_u32, vqaddq_s32, vqaddq_u64, vqaddq_s64, vaddq_f32)
 XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_sub, vsubq_u8, vsubq_s8, vsubq_u16, vsubq_s16, vsubq_u32, vsubq_s32, vsubq_u64, vsubq_s64, vsubq_f32)
@@ -544,26 +518,22 @@ namespace detail {
 }
 XSIMD_MSVC_ARM64_UNARY_EX64(msvc_arm64_abs, msvc_arm64_abs_u8, vabsq_s8, msvc_arm64_abs_u16, vabsq_s16, msvc_arm64_abs_u32, vabsq_s32, vabsq_f32)
 
-// bitwise ops on batch<T,A>
 XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_and, vandq_u8, vandq_u8, vandq_u16, vandq_u16, vandq_u32, vandq_u32, vandq_u64, vandq_u64, vandq_u8)
 XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_or,  vorrq_u8, vorrq_u8, vorrq_u16, vorrq_u16, vorrq_u32, vorrq_u32, vorrq_u64, vorrq_u64, vorrq_u8)
 XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_xor, veorq_u8, veorq_u8, veorq_u16, veorq_u16, veorq_u32, veorq_u32, veorq_u64, veorq_u64, veorq_u8)
 XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_andn, vbicq_u8, vbicq_u8, vbicq_u16, vbicq_u16, vbicq_u32, vbicq_u32, vbicq_u64, vbicq_u64, vbicq_u8)
-// bitwise ops on batch_bool<T,A>
+
 XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_and, vandq_u8, vandq_u16, vandq_u32, vandq_u64)
 XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_or,  vorrq_u8, vorrq_u16, vorrq_u32, vorrq_u64)
 XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_xor, veorq_u8, veorq_u16, veorq_u32, veorq_u64)
 XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_andn, vbicq_u8, vbicq_u16, vbicq_u32, vbicq_u64)
 namespace detail {
-    // On MSVC ARM64 all NEON types are __n128, so vmvnq_u32 works for any lane width.
     XSIMD_INLINE __n128 msvc_arm64_not_u64_impl(__n128 a) noexcept { return vmvnq_u32(a); }
 }
 XSIMD_MSVC_ARM64_UNARY_UINT_ALL(msvc_arm64_not, vmvnq_u8, vmvnq_u16, vmvnq_u32, msvc_arm64_not_u64_impl)
 
-// select
 XSIMD_MSVC_ARM64_SELECT_FULL(msvc_arm64_select, vbslq_u8, vbslq_s8, vbslq_u16, vbslq_s16, vbslq_u32, vbslq_s32, vbslq_u64, vbslq_s64, vbslq_f32)
 
-// rotate_left (N is a compile-time constant)
 namespace detail {
     template <size_t N, class T>
     XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, __n128>::type
@@ -592,7 +562,7 @@ namespace detail {
     template <size_t N, class T>
     XSIMD_INLINE typename std::enable_if<sizeof(T)==8 && std::is_signed<T>::value, __n128>::type
     msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_s64(a, a, N % 2); }
-} // namespace detail
+}
 #endif
 
         /*************
