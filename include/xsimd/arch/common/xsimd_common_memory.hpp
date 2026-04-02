@@ -71,6 +71,9 @@ namespace xsimd
                 for (size_t i = 0; i < sizeof...(Is); ++i)
                     if ((bitmask >> i) & 1u)
                         std::swap(mask_buffer[inserted++], mask_buffer[i]);
+                // Fill remaining (don't-care) tail positions with index 0.
+                for (size_t i = inserted; i < sizeof...(Is); ++i)
+                    mask_buffer[i] = 0;
                 return batch<IT, A>::load_aligned(&mask_buffer[0]);
             }
         }
