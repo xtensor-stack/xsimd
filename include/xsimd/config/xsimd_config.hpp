@@ -381,7 +381,7 @@
  *
  * Set to 1 if NEON is available at compile-time, to 0 otherwise.
  */
-#if (defined(__ARM_ARCH) && (__ARM_ARCH >= 7) && defined(__ARM_NEON)) || XSIMD_TARGET_ARM64
+#if (defined(__ARM_NEON) && (__ARM_ARCH >= 7)) || XSIMD_TARGET_ARM64
 #define XSIMD_WITH_NEON 1
 #else
 #define XSIMD_WITH_NEON 0
