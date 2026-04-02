@@ -13,6 +13,8 @@
 #define XSIMD_CPUID_UTILS_HPP
 
 #include <cassert>
+#include <type_traits>
+
 namespace xsimd
 {
     namespace utils
@@ -20,7 +22,7 @@ namespace xsimd
         template <typename I>
         constexpr I make_bit_mask(I bit)
         {
-            assert(bit >= 0);
+            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
             assert(bit < static_cast<I>(8 * sizeof(I)));
             return static_cast<I>(I { 1 } << bit);
         }
@@ -29,12 +31,14 @@ namespace xsimd
         constexpr I make_bit_mask(I bit, Args... bits)
         {
             // TODO(C++17): Use fold expression
+            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
             return make_bit_mask<I>(bit) | make_bit_mask<I>(static_cast<I>(bits)...);
         }
 
         template <int... Bits, typename I>
         constexpr bool all_bits_set(I value)
         {
+            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
             constexpr I mask = make_bit_mask<I>(static_cast<I>(Bits)...);
             return (value & mask) == mask;
         }
@@ -42,8 +46,24 @@ namespace xsimd
         template <int Bit, typename I>
         constexpr I set_bit(I value)
         {
+            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
             constexpr I mask = make_bit_mask<I>(static_cast<I>(Bit));
             return value | mask;
+        }
+
+        /**
+         * Return a mask with the `width` lowest bits set.
+         */
+        template <typename I>
+        constexpr I make_low_mask(I width) noexcept
+        {
+            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
+            assert(width <= static_cast<I>(8 * sizeof(I)));
+            if (width == static_cast<I>(8 * sizeof(I)))
+            {
+                return ~I { 0 };
+            }
+            return (I { 1 } << width) - I { 1 };
         }
 
         /* A bitset over an unsigned integer type, indexed by an enum key type. */
@@ -80,6 +100,17 @@ namespace xsimd
             constexpr void set_bit() noexcept
             {
                 m_bitset = utils::set_bit<static_cast<storage_type>(bit)>(m_bitset);
+            }
+
+            /* Extract the bits in [start, end[, shifted down to start at bit 0. */
+            template <key_type start, key_type end>
+            constexpr storage_type get_range() const noexcept
+            {
+                constexpr storage_type start_bit = static_cast<storage_type>(start);
+                constexpr storage_type end_bit = static_cast<storage_type>(end);
+                constexpr storage_type width = end_bit - start_bit;
+                constexpr storage_type mask = make_low_mask<storage_type>(width);
+                return (m_bitset >> start_bit) & mask;
             }
 
         private:

@@ -16,6 +16,9 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#if __cplusplus >= 201703L
+#include <string_view>
+#endif
 
 #include "../utils/bits.hpp"
 #include "./xsimd_config.hpp"
@@ -52,8 +55,13 @@ namespace xsimd
         template <typename E>
         using x86_reg32_bitset = utils::uint_bitset<E, x86_reg32_t>;
 
-        template <x86_reg32_t leaf, x86_reg32_t subleaf, typename A, typename B, typename C, typename D>
-        class x86_cpuid_regs : private x86_reg32_bitset<A>, x86_reg32_bitset<B>, x86_reg32_bitset<C>, x86_reg32_bitset<D>
+        template <x86_reg32_t leaf_num, x86_reg32_t subleaf_num,
+                  typename A, typename B, typename C, typename D>
+        class x86_cpuid_regs
+            : private x86_reg32_bitset<A>,
+              private x86_reg32_bitset<B>,
+              private x86_reg32_bitset<C>,
+              private x86_reg32_bitset<D>
         {
         private:
             using eax_bitset = x86_reg32_bitset<A>;
@@ -75,6 +83,8 @@ namespace xsimd
             using ebx = B;
             using ecx = C;
             using edx = D;
+            static constexpr x86_reg32_t leaf = leaf_num;
+            static constexpr x86_reg32_t subleaf = subleaf_num;
 
             inline static x86_cpuid_regs read()
             {
@@ -84,9 +94,13 @@ namespace xsimd
             constexpr x86_cpuid_regs() noexcept = default;
 
             using eax_bitset::all_bits_set;
+            using eax_bitset::get_range;
             using ebx_bitset::all_bits_set;
+            using ebx_bitset::get_range;
             using ecx_bitset::all_bits_set;
+            using ecx_bitset::get_range;
             using edx_bitset::all_bits_set;
+            using edx_bitset::get_range;
         };
 
         template <typename T>
@@ -95,7 +109,83 @@ namespace xsimd
                                                    typename T::ebx,
                                                    typename T::ecx,
                                                    typename T::edx>;
+
+        template <bool extended>
+        struct x86_cpuid_highest_func
+        {
+        private:
+            using x86_reg32_t = detail::x86_reg32_t;
+            using manufacturer_str = std::array<char, 3 * sizeof(x86_reg32_t)>;
+
+        public:
+            static constexpr x86_reg32_t leaf = extended ? 0x80000000 : 0x0;
+
+            inline static x86_cpuid_highest_func read()
+            {
+                auto regs = detail::x86_cpuid(0);
+                x86_cpuid_highest_func out {};
+                // Highest function parameter in EAX
+                out.m_highest_leaf = regs[0];
+
+                // Manufacturer string in EBX, EDX, ECX (in that order)
+                char* manuf = out.m_manufacturer_id.data();
+                std::memcpy(manuf + 0 * sizeof(x86_reg32_t), &regs[1], sizeof(x86_reg32_t));
+                std::memcpy(manuf + 1 * sizeof(x86_reg32_t), &regs[3], sizeof(x86_reg32_t));
+                std::memcpy(manuf + 2 * sizeof(x86_reg32_t), &regs[2], sizeof(x86_reg32_t));
+
+                return out;
+            }
+
+            constexpr x86_cpuid_highest_func() noexcept = default;
+
+            /**
+             * Highest available leaf in CPUID non-extended range.
+             *
+             * This is the highest function parameter (EAX) that can be passed to CPUID.
+             * This is valid in the specified range:
+             *   - if `extended` is `false`, that is below `0x80000000`,
+             *   - if `extended` is `true`, that is above `0x80000000`,
+             */
+            constexpr x86_reg32_t highest_leaf() const noexcept
+            {
+                return m_highest_leaf;
+            }
+
+            /**
+             * The manufacturer ID string in a static array.
+             *
+             * This raw character array is case specific and may contain both leading
+             * and trailing whitespaces.
+             * It cannot be assumed to be null terminated.
+             * This is not implemented for all manufacturer when `extended` is `true`.
+             */
+            constexpr manufacturer_str manufacturer_id_raw() const noexcept
+            {
+                return m_manufacturer_id;
+            }
+
+#if __cplusplus >= 201703L
+            constexpr std::string_view manufacturer_id() const noexcept
+            {
+                return { m_manufacturer_id.data(), m_manufacturer_id.size() };
+            }
+#endif
+
+        private:
+            manufacturer_str m_manufacturer_id {};
+            x86_reg32_t m_highest_leaf {};
+        };
     }
+
+    /**
+     * Highest CPUID Function Parameter and Manufacturer ID (EAX=0).
+     *
+     * Returns the highest leaf value supported by CPUID in the standard range
+     * (below 0x80000000), and the processor manufacturer ID string.
+     *
+     * @see https://en.wikipedia.org/wiki/CPUID
+     */
+    using x86_cpuid_leaf0 = detail::x86_cpuid_highest_func<false>;
 
     struct x86_cpuid_leaf1_traits
     {
@@ -153,6 +243,10 @@ namespace xsimd
 
         enum class eax
         {
+            /* Start bit for the encoding of the highest subleaf available. */
+            highest_subleaf_start = 0,
+            /* End bit for the encoding of the highest subleaf available. */
+            highest_subleaf_end = 32,
         };
         enum class ebx
         {
@@ -235,6 +329,16 @@ namespace xsimd
      * @see https://en.wikipedia.org/wiki/CPUID
      */
     using x86_cpuid_leaf7sub1 = detail::make_x86_cpuid_regs<x86_cpuid_leaf7sub1_traits>;
+
+    /**
+     * Highest Extended CPUID Function Parameter (EAX=0x80000000).
+     *
+     * Returns the highest leaf value supported by CPUID in the extended range
+     * (at or above 0x80000000), and the processor manufacturer ID string.
+     *
+     * @see https://en.wikipedia.org/wiki/CPUID
+     */
+    using x86_cpuid_leaf80000000 = detail::x86_cpuid_highest_func<true>;
 
     struct x86_cpuid_leaf80000001_traits
     {
@@ -449,20 +553,24 @@ namespace xsimd
     private:
         enum class status
         {
-            leaf1_valid = 0,
-            leaf7_valid = 1,
-            leaf7sub1_valid = 2,
-            leaf80000001_valid = 3,
-            xcr0_valid = 4,
+            leaf0_valid = 0,
+            leaf1_valid = 1,
+            leaf7_valid = 2,
+            leaf7sub1_valid = 3,
+            leaf80000000_valid = 4,
+            leaf80000001_valid = 5,
+            xcr0_valid = 6,
         };
 
         using status_bitset = utils::uint_bitset<status, std::uint32_t>;
 
-        mutable x86_xcr0 m_xcr0 {};
+        mutable x86_cpuid_leaf0 m_leaf0 {};
         mutable x86_cpuid_leaf1 m_leaf1 {};
         mutable x86_cpuid_leaf7 m_leaf7 {};
         mutable x86_cpuid_leaf7sub1 m_leaf7sub1 {};
+        mutable x86_cpuid_leaf80000000 m_leaf80000000 {};
         mutable x86_cpuid_leaf80000001 m_leaf80000001 {};
+        mutable x86_xcr0 m_xcr0 {};
         mutable status_bitset m_status {};
 
         inline x86_xcr0 const& xcr0() const noexcept
@@ -475,44 +583,119 @@ namespace xsimd
             return m_xcr0;
         }
 
+        inline x86_cpuid_leaf0 const& leaf0() const
+        {
+            if (!m_status.bit_is_set<status::leaf0_valid>())
+            {
+                m_leaf0 = x86_cpuid_leaf0::read();
+                m_status.set_bit<status::leaf0_valid>();
+            }
+            return m_leaf0;
+        }
+
+        inline x86_cpuid_leaf80000000 const& leaf80000000() const
+        {
+            if (!m_status.bit_is_set<status::leaf80000000_valid>())
+            {
+                m_leaf80000000 = x86_cpuid_leaf80000000::read();
+                m_status.set_bit<status::leaf80000000_valid>();
+            }
+            return m_leaf80000000;
+        }
+
+        /**
+         * Internal utility to lazily read and cache a CPUID leaf.
+         *
+         * @tparam status_id The status bit tracking whether this leaf has been read and cached.
+         * @tparam L The CPUID leaf type (e.g. x86_cpuid_leaf1, x86_cpuid_leaf7).
+         * @param leaf_cache A non-const reference to the class member that stores the leaf
+         *        value. It must be non-const because this function may write to it on first
+         *        call. It is passed explicitly (rather than accessed via `this`) to allow
+         *        factoring the caching logic across different leaf members.
+         * @return A const reference to `leaf_cache`. The non-const input / const-ref output
+         *         asymmetry is intentional: callers must not modify the cached value, but
+         *         this function needs write access to populate it.
+         *
+         * On first call, checks whether the leaf number is within the range advertised as
+         * supported by CPUID (via leaf 0 for the standard range, leaf 0x80000000 for the
+         * extended range). If supported, reads the leaf from the CPU; otherwise leaves
+         * `leaf_cache` at its zero-initialized default (all feature bits false). Either
+         * way, `status_id` is set so subsequent calls return immediately.
+         */
+        template <status status_id, typename L>
+        inline auto const& safe_read_leaf(L& leaf_cache) const
+        {
+            // Check if already initialized
+            if (m_status.bit_is_set<status_id>())
+            {
+                return leaf_cache;
+            }
+
+            // Limit where we need to check leaf0 or leaf 80000000.
+            constexpr auto extended_threshold = x86_cpuid_leaf80000000::leaf;
+
+            // Check if it is safe to call CPUID with this value.
+            // First we identify if the leaf is in the regular or extended range.
+            // TODO(C++17): if constexpr
+            if (L::leaf < extended_threshold)
+            {
+                // Check leaf0 in regular range
+                if (L::leaf <= leaf0().highest_leaf())
+                {
+                    leaf_cache = L::read();
+                }
+            }
+            else
+            {
+                // Check leaf80000000 in extended range
+                if (L::leaf <= leaf80000000().highest_leaf())
+                {
+                    leaf_cache = L::read();
+                }
+            }
+
+            // Mark as valid in all cases, including if it was not read.
+            // In this case it will be filled with zeros (all false).
+            m_status.set_bit<status_id>();
+            return leaf_cache;
+        }
+
         inline x86_cpuid_leaf1 const& leaf1() const
         {
-            if (!m_status.bit_is_set<status::leaf1_valid>())
-            {
-                m_leaf1 = x86_cpuid_leaf1::read();
-                m_status.set_bit<status::leaf1_valid>();
-            }
-            return m_leaf1;
+            return safe_read_leaf<status::leaf1_valid>(m_leaf1);
         }
 
         inline x86_cpuid_leaf7 const& leaf7() const
         {
-            if (!m_status.bit_is_set<status::leaf7_valid>())
-            {
-                m_leaf7 = x86_cpuid_leaf7::read();
-                m_status.set_bit<status::leaf7_valid>();
-            }
-            return m_leaf7;
+            return safe_read_leaf<status::leaf7_valid>(m_leaf7);
         }
 
         inline x86_cpuid_leaf7sub1 const& leaf7sub1() const
         {
-            if (!m_status.bit_is_set<status::leaf7sub1_valid>())
+            // Check if already initialized
+            if (m_status.bit_is_set<status::leaf7sub1_valid>())
+            {
+                return m_leaf7sub1;
+            }
+
+            // Check if safe to call CPUID with this value as subleaf.
+            constexpr auto start = x86_cpuid_leaf7::eax::highest_subleaf_start;
+            constexpr auto end = x86_cpuid_leaf7::eax::highest_subleaf_end;
+            const auto highest_subleaf7 = leaf7().get_range<start, end>();
+            if (x86_cpuid_leaf7sub1::subleaf <= highest_subleaf7)
             {
                 m_leaf7sub1 = x86_cpuid_leaf7sub1::read();
-                m_status.set_bit<status::leaf7sub1_valid>();
             }
+
+            // Mark as valid in all cases, including if it was not read.
+            // In this case it will be filled with zeros (all false).
+            m_status.set_bit<status::leaf7sub1_valid>();
             return m_leaf7sub1;
         }
 
         inline x86_cpuid_leaf80000001 const& leaf80000001() const
         {
-            if (!m_status.bit_is_set<status::leaf80000001_valid>())
-            {
-                m_leaf80000001 = x86_cpuid_leaf80000001::read();
-                m_status.set_bit<status::leaf80000001_valid>();
-            }
-            return m_leaf80000001;
+            return safe_read_leaf<status::leaf80000001_valid>(m_leaf80000001);
         }
     };
 
