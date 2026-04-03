@@ -1,4 +1,4 @@
-name: Linux build
+name: Linux x86 build
 on: [push, pull_request]
 concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
@@ -6,6 +6,7 @@ concurrency:
 defaults:
   run:
     shell: bash -l {0}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,9 +14,9 @@ jobs:
     strategy:
       matrix:
         sys:
-          - { compiler: 'gcc',   version: '12',  flags: 'force_no_instr_set' }
-          - { compiler: 'gcc',   version: '13',  flags: 'enable_xtl_complex' }
-          - { compiler: 'gcc',   version: '14',  flags: 'avx' }
+          - { compiler: 'gcc',   version: '12', flags: 'force_no_instr_set' }
+          - { compiler: 'gcc',   version: '13', flags: 'enable_xtl_complex' }
+          - { compiler: 'gcc',   version: '14', flags: 'avx' }
           - { compiler: 'gcc',   version: '13', flags: 'avx512' }
           - { compiler: 'gcc',   version: '10', flags: 'avx512' }
           - { compiler: 'gcc',   version: '12', flags: 'i386' }
@@ -23,7 +24,7 @@ jobs:
           - { compiler: 'gcc',   version: '13', flags: 'avx512vbmi' }
           - { compiler: 'gcc',   version: '14', flags: 'avx512vbmi2' }
           - { compiler: 'gcc',   version: '13', flags: 'avx512vnni' }
-          - { compiler: 'clang', version: '16',  flags: 'force_no_instr_set' }
+          - { compiler: 'clang', version: '16', flags: 'force_no_instr_set' }
           - { compiler: 'clang', version: '16', flags: 'enable_xtl_complex' }
           - { compiler: 'clang', version: '17', flags: 'avx' }
           - { compiler: 'clang', version: '17', flags: 'sse3' }
@@ -119,9 +120,17 @@ jobs:
       run: cmake --build _build
     - name: Test
       run: |
+        # Set CPU feature test expectations, 0 is explicit absence of the feature
+        export XSIMD_TEST_CPU_ASSUME_NEON64="0"
         cd _build/test
         if echo '${{ matrix.sys.flags }}' | grep -q 'avx512' ; then
+          # Running with emulation, must have AVX512, lower tier are checked by implications in tests
+          export XSIMD_TEST_CPU_ASSUME_AVX512F="1"
           ../../sde-external-9.48.0-2024-11-25-lin/sde64 -tgl -- ./test_xsimd
         else
+          export XSIMD_TEST_CPU_ASSUME_SSE4_2=$(grep -q 'sse4_2' /proc/cpuinfo && echo "1" || echo "0")
+          export XSIMD_TEST_CPU_ASSUME_AVX=$(grep -q 'avx' /proc/cpuinfo && echo "1" || echo "0")
+          export XSIMD_TEST_CPU_ASSUME_AVX512F=$(grep -q 'avx512f' /proc/cpuinfo && echo "1" || echo "0")
+          export XSIMD_TEST_CPU_ASSUME_MANUFACTURER="intel,amd"
           ./test_xsimd
         fi

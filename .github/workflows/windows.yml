@@ -3,8 +3,9 @@ on: [push, pull_request]
 concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
-  build:
+  build-windows-x86:
     name: 'MSVC ${{ matrix.os }}, ${{ matrix.target }} ${{ matrix.sys.set }}'
     defaults:
       run:
@@ -48,6 +49,13 @@ jobs:
       run: cmake --build _build
     - name: Testing xsimd
       if: ${{ !startsWith(matrix.sys.set, 'AVX512') }}
+      env:
+        # Set CPU feature test expectations
+        # Assuming the runner always has AVX2 (independent of compilation option)
+        XSIMD_TEST_CPU_ASSUME_NEON64: "0"
+        XSIMD_TEST_CPU_ASSUME_SSE4_2: "1"
+        XSIMD_TEST_CPU_ASSUME_AVX2: "1"
+        XSIMD_TEST_CPU_ASSUME_MANUFACTURER: "intel,amd"
       run: ./_build/test/test_xsimd
 
   build-windows-mingw:
