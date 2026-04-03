@@ -42,7 +42,7 @@ jobs:
       run: |
         sudo apt-get -y -qq install ninja-build
     - name: Checkout xsimd
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     - name: Setup
       run: >
         cmake -S . -B _build

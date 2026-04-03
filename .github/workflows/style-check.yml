@@ -8,7 +8,7 @@ jobs:
     name: Format check
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
     - run: sudo apt install clang-format
     - run: |
         git fetch origin ${{ github.event.pull_request.base.sha }}
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check inline keyword usage
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
     - run: sudo apt install clang-tools
     - run: sh ./test/check_inline_specifier.sh .
 
