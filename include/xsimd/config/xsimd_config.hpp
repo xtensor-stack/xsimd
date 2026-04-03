@@ -357,12 +357,23 @@
 /**
  * @ingroup xsimd_config_macro
  *
- * Set to 1 if NEON64 is available at compile-time, to 0 otherwise.
+ * Set to 1 if the target is in the ARM architecture family in 64 bits, to 0 otherwise
  */
 #if defined(__aarch64__) || defined(_M_ARM64)
-#define XSIMD_WITH_NEON64 1
+#define XSIMD_TARGET_ARM64 1
 #else
-#define XSIMD_WITH_NEON64 0
+#define XSIMD_TARGET_ARM64 0
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if the target is in the ARM architecture family, to 0 otherwise
+ */
+#if defined(__arm__) || defined(_M_ARM) || XSIMD_TARGET_ARM64
+#define XSIMD_TARGET_ARM 1
+#else
+#define XSIMD_TARGET_ARM 0
 #endif
 
 /**
@@ -370,10 +381,24 @@
  *
  * Set to 1 if NEON is available at compile-time, to 0 otherwise.
  */
-#if (defined(__ARM_NEON) && __ARM_ARCH >= 7) || XSIMD_WITH_NEON64
+#if (defined(__ARM_NEON) && (__ARM_ARCH >= 7)) || XSIMD_TARGET_ARM64
 #define XSIMD_WITH_NEON 1
 #else
 #define XSIMD_WITH_NEON 0
+#endif
+
+// Neon is always available on Arm64, though it is theoritially possible to compile
+// without it, such as -march=armv8-a+nosimd.
+// Note that MSVC may never define __ARM_NEON even when available.
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if NEON64 is available at compile-time, to 0 otherwise.
+ */
+#if XSIMD_TARGET_ARM64
+#define XSIMD_WITH_NEON64 1
+#else
+#define XSIMD_WITH_NEON64 0
 #endif
 
 /**
@@ -495,6 +520,17 @@
 
 #if !XSIMD_WITH_SSE2 && !XSIMD_WITH_SSE3 && !XSIMD_WITH_SSSE3 && !XSIMD_WITH_SSE4_1 && !XSIMD_WITH_SSE4_2 && !XSIMD_WITH_AVX && !XSIMD_WITH_AVX2 && !XSIMD_WITH_AVXVNNI && !XSIMD_WITH_FMA3_SSE && !XSIMD_WITH_FMA4 && !XSIMD_WITH_FMA3_AVX && !XSIMD_WITH_FMA3_AVX2 && !XSIMD_WITH_AVX512F && !XSIMD_WITH_AVX512CD && !XSIMD_WITH_AVX512DQ && !XSIMD_WITH_AVX512BW && !XSIMD_WITH_AVX512ER && !XSIMD_WITH_AVX512PF && !XSIMD_WITH_AVX512IFMA && !XSIMD_WITH_AVX512VBMI && !XSIMD_WITH_AVX512VBMI2 && !XSIMD_WITH_NEON && !XSIMD_WITH_NEON64 && !XSIMD_WITH_SVE && !XSIMD_WITH_RVV && !XSIMD_WITH_WASM && !XSIMD_WITH_VSX && !XSIMD_WITH_EMULATED
 #define XSIMD_NO_SUPPORTED_ARCHITECTURE
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
+ * Set to 1 if the target is a linux
+ */
+#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
+#define XSIMD_HAVE_LINUX_GETAUXVAL 1
+#else
+#define XSIMD_HAVE_LINUX_GETAUXVAL 0
 #endif
 
 #endif
