@@ -94,7 +94,7 @@ jobs:
     - name: Setup compiler
       uses: ilammy/msvc-dev-cmd@v1
       with:
-        arch: amd64
+        arch: arm64
     - name: Setup Ninja
       run: |
         python3 -m pip install --upgrade pip setuptools wheel
