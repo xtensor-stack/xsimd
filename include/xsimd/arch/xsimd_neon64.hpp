@@ -853,82 +853,18 @@ namespace xsimd
 
         namespace detail
         {
-            template <class R>
-            struct reducer_return_type_impl;
-
-            template <>
-            struct reducer_return_type_impl<uint8x16_t>
+            // Index for full neon64 type list including double:
+            // {u8, s8, u16, s16, u32, s32, u64, s64, f32, f64}
+            template <class T>
+            constexpr size_t neon64_full_index() noexcept
             {
-                using type = uint8_t;
-            };
+                return std::is_same<T, double>::value
+                    ? 9
+                    : std::is_same<T, float>::value
+                    ? 8
+                    : (sizeof(T) == 1 ? 0 : sizeof(T) == 2 ? 2 : sizeof(T) == 4 ? 4 : 6) + (std::is_signed<T>::value ? 1 : 0);
+            }
 
-            template <>
-            struct reducer_return_type_impl<int8x16_t>
-            {
-                using type = int8_t;
-            };
-
-            template <>
-            struct reducer_return_type_impl<uint16x8_t>
-            {
-                using type = uint16_t;
-            };
-
-            template <>
-            struct reducer_return_type_impl<int16x8_t>
-            {
-                using type = int16_t;
-            };
-
-            template <>
-            struct reducer_return_type_impl<uint32x4_t>
-            {
-                using type = uint32_t;
-            };
-
-            template <>
-            struct reducer_return_type_impl<int32x4_t>
-            {
-                using type = int32_t;
-            };
-
-            template <>
-            struct reducer_return_type_impl<uint64x2_t>
-            {
-                using type = uint64_t;
-            };
-
-            template <>
-            struct reducer_return_type_impl<int64x2_t>
-            {
-                using type = int64_t;
-            };
-
-            template <>
-            struct reducer_return_type_impl<float32x4_t>
-            {
-                using type = float;
-            };
-
-            template <>
-            struct reducer_return_type_impl<float64x2_t>
-            {
-                using type = double;
-            };
-
-            template <class R>
-            using reducer_return_type = typename reducer_return_type_impl<R>::type;
-
-            template <class... T>
-            struct neon_reducer_dispatcher_impl : neon_dispatcher_base<reducer_return_type, T...>
-            {
-            };
-
-            using neon_reducer_dispatcher = neon_reducer_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                         uint16x8_t, int16x8_t,
-                                                                         uint32x4_t, int32x4_t,
-                                                                         uint64x2_t, int64x2_t,
-                                                                         float32x4_t, float64x2_t>;
             template <class T>
             using enable_neon64_type_t = std::enable_if_t<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value,
                                                           int>;
@@ -945,12 +881,11 @@ namespace xsimd
         XSIMD_INLINE typename batch<T, A>::value_type reduce_add(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            const detail::neon_reducer_dispatcher::unary dispatcher = {
-                std::make_tuple(wrap::vaddvq_u8, wrap::vaddvq_s8, wrap::vaddvq_u16, wrap::vaddvq_s16,
-                                wrap::vaddvq_u32, wrap::vaddvq_s32, wrap::vaddvq_u64, wrap::vaddvq_s64,
-                                wrap::vaddvq_f32, wrap::vaddvq_f64)
-            };
-            return dispatcher.apply(register_type(arg));
+            const auto funcs = std::make_tuple(
+                wrap::vaddvq_u8, wrap::vaddvq_s8, wrap::vaddvq_u16, wrap::vaddvq_s16,
+                wrap::vaddvq_u32, wrap::vaddvq_s32, wrap::vaddvq_u64, wrap::vaddvq_s64,
+                wrap::vaddvq_f32, wrap::vaddvq_f64);
+            return std::get<detail::neon64_full_index<T>()>(funcs)(register_type(arg));
         }
 
         /**************
@@ -977,12 +912,11 @@ namespace xsimd
         XSIMD_INLINE typename batch<T, A>::value_type reduce_max(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            const detail::neon_reducer_dispatcher::unary dispatcher = {
-                std::make_tuple(wrap::vmaxvq_u8, wrap::vmaxvq_s8, wrap::vmaxvq_u16, wrap::vmaxvq_s16,
-                                wrap::vmaxvq_u32, wrap::vmaxvq_s32, wrap::vmaxvq_u64, wrap::vmaxvq_s64,
-                                wrap::vmaxvq_f32, wrap::vmaxvq_f64)
-            };
-            return dispatcher.apply(register_type(arg));
+            const auto funcs = std::make_tuple(
+                wrap::vmaxvq_u8, wrap::vmaxvq_s8, wrap::vmaxvq_u16, wrap::vmaxvq_s16,
+                wrap::vmaxvq_u32, wrap::vmaxvq_s32, wrap::vmaxvq_u64, wrap::vmaxvq_s64,
+                wrap::vmaxvq_f32, wrap::vmaxvq_f64);
+            return std::get<detail::neon64_full_index<T>()>(funcs)(register_type(arg));
         }
 
         /**************
@@ -1009,12 +943,11 @@ namespace xsimd
         XSIMD_INLINE typename batch<T, A>::value_type reduce_min(batch<T, A> const& arg, requires_arch<neon64>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            const detail::neon_reducer_dispatcher::unary dispatcher = {
-                std::make_tuple(wrap::vminvq_u8, wrap::vminvq_s8, wrap::vminvq_u16, wrap::vminvq_s16,
-                                wrap::vminvq_u32, wrap::vminvq_s32, wrap::vminvq_u64, wrap::vminvq_s64,
-                                wrap::vminvq_f32, wrap::vminvq_f64)
-            };
-            return dispatcher.apply(register_type(arg));
+            const auto funcs = std::make_tuple(
+                wrap::vminvq_u8, wrap::vminvq_s8, wrap::vminvq_u16, wrap::vminvq_s16,
+                wrap::vminvq_u32, wrap::vminvq_s32, wrap::vminvq_u64, wrap::vminvq_s64,
+                wrap::vminvq_f32, wrap::vminvq_f64);
+            return std::get<detail::neon64_full_index<T>()>(funcs)(register_type(arg));
         }
 
 #undef WRAP_REDUCER_INT_EXCLUDING_64

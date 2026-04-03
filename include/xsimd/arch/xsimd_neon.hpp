@@ -159,138 +159,158 @@ namespace xsimd
 
         namespace detail
         {
-            template <template <class> class return_type, class... T>
-            struct neon_dispatcher_base
+            /***************************
+             * scalar-to-register maps *
+             ***************************/
+
+            // Maps scalar type S to its NEON register type.
+            // On MSVC ARM all NEON types collapse to __n128, so dispatching
+            // on register types is impossible. Dispatching on scalar types
+            // (which are always distinct) avoids the problem.
+            template <class S>
+            using neon_reg_t = std::conditional_t<
+                std::is_same<S, float>::value,
+                float32x4_t,
+                types::detail::neon_vector_type<S>>;
+
+            // Maps scalar type S to the unsigned register type used as
+            // comparison result (e.g. int8_t -> uint8x16_t, float -> uint32x4_t).
+            template <class S>
+            using neon_comp_reg_t = std::conditional_t<
+                std::is_same<S, float>::value,
+                uint32x4_t,
+                types::detail::unsigned_neon_vector_type<S>>;
+
+            // Normalises any scalar type (char, long, …) to the fixed-width
+            // type used as dispatcher key (uint8_t, int32_t, float, …).
+            template <class T>
+            using neon_scalar_t = std::conditional_t<
+                std::is_floating_point<T>::value,
+                T,
+                std::conditional_t<std::is_signed<T>::value,
+                    std::conditional_t<sizeof(T) == 1, int8_t,
+                    std::conditional_t<sizeof(T) == 2, int16_t,
+                    std::conditional_t<sizeof(T) == 4, int32_t, int64_t>>>,
+                    std::conditional_t<sizeof(T) == 1, uint8_t,
+                    std::conditional_t<sizeof(T) == 2, uint16_t,
+                    std::conditional_t<sizeof(T) == 4, uint32_t, uint64_t>>>>>;
+
+            /******************
+             * index_of trait *
+             ******************/
+
+            template <class U, class First, class... Rest>
+            struct index_of : std::integral_constant<size_t, 1 + index_of<U, Rest...>::value>
             {
-                struct unary
-                {
-                    using container_type = std::tuple<return_type<T> (*)(T)...>;
-                    const container_type m_func;
+            };
 
-                    template <class U>
-                    return_type<U> apply(U rhs) const noexcept
-                    {
-                        using func_type = return_type<U> (*)(U);
-                        auto func = std::get<func_type>(m_func);
-                        return func(rhs);
-                    }
-                };
-
-                struct binary
-                {
-                    using container_type = std::tuple<return_type<T> (*)(T, T)...>;
-                    const container_type m_func;
-
-                    template <class U>
-                    return_type<U> apply(U lhs, U rhs) const noexcept
-                    {
-                        using func_type = return_type<U> (*)(U, U);
-                        auto func = std::get<func_type>(m_func);
-                        return func(lhs, rhs);
-                    }
-                };
+            template <class U, class... Rest>
+            struct index_of<U, U, Rest...> : std::integral_constant<size_t, 0>
+            {
             };
 
             /***************************
              *  arithmetic dispatchers *
              ***************************/
 
+            // Identity type alias, used by WRAP_BINARY_* macros with register types.
             template <class T>
             using identity_return_type = T;
 
-            template <class... T>
-            struct neon_dispatcher_impl : neon_dispatcher_base<identity_return_type, T...>
+            // Dispatchers are parameterised on scalar types S...
+            // return_reg<S> gives the register type of the return value.
+            template <template <class> class return_reg, class... S>
+            struct neon_dispatcher_base
+            {
+                struct unary
+                {
+                    using container_type = std::tuple<return_reg<S> (*)(neon_reg_t<S>)...>;
+                    const container_type m_func;
+
+                    template <class U>
+                    return_reg<U> apply(neon_reg_t<U> rhs) const noexcept
+                    {
+                        using key = neon_scalar_t<U>;
+                        return std::get<index_of<key, S...>::value>(m_func)(rhs);
+                    }
+                };
+
+                struct binary
+                {
+                    using container_type = std::tuple<return_reg<S> (*)(neon_reg_t<S>, neon_reg_t<S>)...>;
+                    const container_type m_func;
+
+                    template <class U>
+                    return_reg<U> apply(neon_reg_t<U> lhs, neon_reg_t<U> rhs) const noexcept
+                    {
+                        using key = neon_scalar_t<U>;
+                        return std::get<index_of<key, S...>::value>(m_func)(lhs, rhs);
+                    }
+                };
+            };
+
+            template <class... S>
+            struct neon_dispatcher_impl : neon_dispatcher_base<neon_reg_t, S...>
             {
             };
 
-            using neon_dispatcher = neon_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                         uint16x8_t, int16x8_t,
-                                                         uint32x4_t, int32x4_t,
-                                                         uint64x2_t, int64x2_t,
-                                                         float32x4_t>;
+            using neon_dispatcher = neon_dispatcher_impl<uint8_t, int8_t,
+                                                         uint16_t, int16_t,
+                                                         uint32_t, int32_t,
+                                                         uint64_t, int64_t,
+                                                         float>;
 
-            using excluding_int64_dispatcher = neon_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                    uint16x8_t, int16x8_t,
-                                                                    uint32x4_t, int32x4_t,
-                                                                    float32x4_t>;
-
-            using excluding_int64f32_dispatcher = neon_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                       uint16x8_t, int16x8_t,
-                                                                       uint32x4_t, int32x4_t>;
+            using excluding_int64_dispatcher = neon_dispatcher_impl<uint8_t, int8_t,
+                                                                    uint16_t, int16_t,
+                                                                    uint32_t, int32_t,
+                                                                    float>;
 
             /**************************
              * comparison dispatchers *
              **************************/
 
+            template <class... S>
+            struct neon_comp_dispatcher_impl : neon_dispatcher_base<neon_comp_reg_t, S...>
+            {
+            };
+
+            using excluding_int64_comp_dispatcher = neon_comp_dispatcher_impl<uint8_t, int8_t,
+                                                                              uint16_t, int16_t,
+                                                                              uint32_t, int32_t,
+                                                                              float>;
+
+            // Maps a NEON register type to its unsigned counterpart.
+            // Used by the WRAP_BINARY_* macros to type comparison wrapper return values.
+            // On MSVC ARM all NEON types are __n128 so this is just identity.
+#ifdef _MSC_VER
+            template <class T>
+            using comp_return_type = T;
+#else
             template <class T>
             struct comp_return_type_impl;
 
             template <>
-            struct comp_return_type_impl<uint8x16_t>
-            {
-                using type = uint8x16_t;
-            };
-
+            struct comp_return_type_impl<uint8x16_t> { using type = uint8x16_t; };
             template <>
-            struct comp_return_type_impl<int8x16_t>
-            {
-                using type = uint8x16_t;
-            };
-
+            struct comp_return_type_impl<int8x16_t> { using type = uint8x16_t; };
             template <>
-            struct comp_return_type_impl<uint16x8_t>
-            {
-                using type = uint16x8_t;
-            };
-
+            struct comp_return_type_impl<uint16x8_t> { using type = uint16x8_t; };
             template <>
-            struct comp_return_type_impl<int16x8_t>
-            {
-                using type = uint16x8_t;
-            };
-
+            struct comp_return_type_impl<int16x8_t> { using type = uint16x8_t; };
             template <>
-            struct comp_return_type_impl<uint32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-
+            struct comp_return_type_impl<uint32x4_t> { using type = uint32x4_t; };
             template <>
-            struct comp_return_type_impl<int32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-
+            struct comp_return_type_impl<int32x4_t> { using type = uint32x4_t; };
             template <>
-            struct comp_return_type_impl<uint64x2_t>
-            {
-                using type = uint64x2_t;
-            };
-
+            struct comp_return_type_impl<uint64x2_t> { using type = uint64x2_t; };
             template <>
-            struct comp_return_type_impl<int64x2_t>
-            {
-                using type = uint64x2_t;
-            };
-
+            struct comp_return_type_impl<int64x2_t> { using type = uint64x2_t; };
             template <>
-            struct comp_return_type_impl<float32x4_t>
-            {
-                using type = uint32x4_t;
-            };
+            struct comp_return_type_impl<float32x4_t> { using type = uint32x4_t; };
 
             template <class T>
             using comp_return_type = typename comp_return_type_impl<T>::type;
-
-            template <class... T>
-            struct neon_comp_dispatcher_impl : neon_dispatcher_base<comp_return_type, T...>
-            {
-            };
-
-            using excluding_int64_comp_dispatcher = neon_comp_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                              uint16x8_t, int16x8_t,
-                                                                              uint32x4_t, int32x4_t,
-                                                                              float32x4_t>;
+#endif
 
             /**************************************
              * enabling / disabling metafunctions *
@@ -863,7 +883,7 @@ namespace xsimd
                                 wrap::vaddq_u32, wrap::vaddq_s32, wrap::vaddq_u64, wrap::vaddq_s64,
                                 wrap::vaddq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -876,10 +896,10 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            const detail::neon_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary dispatcher = {
+            const detail::neon_dispatcher_impl<uint8_t, uint16_t, uint32_t>::binary dispatcher = {
                 std::make_tuple(wrap::vhaddq_u8, wrap::vhaddq_u16, wrap::vhaddq_u32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         /********
@@ -892,10 +912,10 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            const detail::neon_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary dispatcher = {
+            const detail::neon_dispatcher_impl<uint8_t, uint16_t, uint32_t>::binary dispatcher = {
                 std::make_tuple(wrap::vrhaddq_u8, wrap::vrhaddq_u16, wrap::vrhaddq_u32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         /********
@@ -913,7 +933,7 @@ namespace xsimd
                                 wrap::vqaddq_u32, wrap::vqaddq_s32, wrap::vqaddq_u64, wrap::vqaddq_s64,
                                 wrap::vaddq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -932,7 +952,7 @@ namespace xsimd
                                 wrap::vsubq_u32, wrap::vsubq_s32, wrap::vsubq_u64, wrap::vsubq_s64,
                                 wrap::vsubq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         /********
@@ -950,7 +970,7 @@ namespace xsimd
                                 wrap::vqsubq_u32, wrap::vqsubq_s32, wrap::vqsubq_u64, wrap::vqsubq_s64,
                                 wrap::vsubq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -968,7 +988,7 @@ namespace xsimd
                 std::make_tuple(wrap::vmulq_u8, wrap::vmulq_s8, wrap::vmulq_u16, wrap::vmulq_s16,
                                 wrap::vmulq_u32, wrap::vmulq_s32, wrap::vmulq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -1021,18 +1041,19 @@ namespace xsimd
                 std::make_tuple(wrap::vceqq_u8, wrap::vceqq_s8, wrap::vceqq_u16, wrap::vceqq_s16,
                                 wrap::vceqq_u32, wrap::vceqq_s32, wrap::vceqq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            using dispatcher_type = detail::neon_comp_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary;
+            using unsigned_T = types::detail::get_unsigned_type_t<sizeof(T)>;
+            using dispatcher_type = detail::neon_comp_dispatcher_impl<uint8_t, uint16_t, uint32_t>::binary;
             const dispatcher_type dispatcher = {
                 std::make_tuple(wrap::vceqq_u8, wrap::vceqq_u16, wrap::vceqq_u32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<unsigned_T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
@@ -1106,7 +1127,7 @@ namespace xsimd
                 std::make_tuple(wrap::vcltq_u8, wrap::vcltq_s8, wrap::vcltq_u16, wrap::vcltq_s16,
                                 wrap::vcltq_u32, wrap::vcltq_s32, wrap::vcltq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
@@ -1139,7 +1160,7 @@ namespace xsimd
                 std::make_tuple(wrap::vcleq_u8, wrap::vcleq_s8, wrap::vcleq_u16, wrap::vcleq_s16,
                                 wrap::vcleq_u32, wrap::vcleq_s32, wrap::vcleq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1175,7 +1196,7 @@ namespace xsimd
                 std::make_tuple(wrap::vcgtq_u8, wrap::vcgtq_s8, wrap::vcgtq_u16, wrap::vcgtq_s16,
                                 wrap::vcgtq_u32, wrap::vcgtq_s32, wrap::vcgtq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
@@ -1208,7 +1229,7 @@ namespace xsimd
                 std::make_tuple(wrap::vcgeq_u8, wrap::vcgeq_s8, wrap::vcgeq_u16, wrap::vcgeq_s16,
                                 wrap::vcgeq_u32, wrap::vcgeq_s32, wrap::vcgeq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1242,7 +1263,7 @@ namespace xsimd
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
-            template <class V>
+            template <class T, class V>
             V bitwise_and_neon(V const& lhs, V const& rhs)
             {
                 const neon_dispatcher::binary dispatcher = {
@@ -1250,7 +1271,7 @@ namespace xsimd
                                     wrap::vandq_u32, wrap::vandq_s32, wrap::vandq_u64, wrap::vandq_s64,
                                     bitwise_and_f32)
                 };
-                return dispatcher.apply(lhs, rhs);
+                return dispatcher.template apply<T>(lhs, rhs);
             }
         }
 
@@ -1258,14 +1279,15 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
+            return detail::bitwise_and_neon<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
+            using unsigned_T = types::detail::get_unsigned_type_t<sizeof(T)>;
+            return detail::bitwise_and_neon<unsigned_T>(register_type(lhs), register_type(rhs));
         }
 
         /**************
@@ -1282,7 +1304,7 @@ namespace xsimd
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
-            template <class V>
+            template <class T, class V>
             XSIMD_INLINE V bitwise_or_neon(V const& lhs, V const& rhs) noexcept
             {
                 const neon_dispatcher::binary dispatcher = {
@@ -1290,7 +1312,7 @@ namespace xsimd
                                     wrap::vorrq_u32, wrap::vorrq_s32, wrap::vorrq_u64, wrap::vorrq_s64,
                                     bitwise_or_f32)
                 };
-                return dispatcher.apply(lhs, rhs);
+                return dispatcher.template apply<T>(lhs, rhs);
             }
         }
 
@@ -1298,14 +1320,15 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_or_neon(register_type(lhs), register_type(rhs));
+            return detail::bitwise_or_neon<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_or_neon(register_type(lhs), register_type(rhs));
+            using unsigned_T = types::detail::get_unsigned_type_t<sizeof(T)>;
+            return detail::bitwise_or_neon<unsigned_T>(register_type(lhs), register_type(rhs));
         }
 
         /***************
@@ -1322,7 +1345,7 @@ namespace xsimd
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
-            template <class V>
+            template <class T, class V>
             XSIMD_INLINE V bitwise_xor_neon(V const& lhs, V const& rhs) noexcept
             {
                 const neon_dispatcher::binary dispatcher = {
@@ -1330,7 +1353,7 @@ namespace xsimd
                                     wrap::veorq_u32, wrap::veorq_s32, wrap::veorq_u64, wrap::veorq_s64,
                                     bitwise_xor_f32)
                 };
-                return dispatcher.apply(lhs, rhs);
+                return dispatcher.template apply<T>(lhs, rhs);
             }
         }
 
@@ -1338,14 +1361,15 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_xor_neon(register_type(lhs), register_type(rhs));
+            return detail::bitwise_xor_neon<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_xor_neon(register_type(lhs), register_type(rhs));
+            using unsigned_T = types::detail::get_unsigned_type_t<sizeof(T)>;
+            return detail::bitwise_xor_neon<unsigned_T>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -1371,7 +1395,7 @@ namespace xsimd
                 return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(arg)));
             }
 
-            template <class V>
+            template <class T, class V>
             XSIMD_INLINE V bitwise_not_neon(V const& arg) noexcept
             {
                 const neon_dispatcher::unary dispatcher = {
@@ -1380,7 +1404,7 @@ namespace xsimd
                                     bitwise_not_u64, bitwise_not_s64,
                                     bitwise_not_f32)
                 };
-                return dispatcher.apply(arg);
+                return dispatcher.template apply<T>(arg);
             }
         }
 
@@ -1388,14 +1412,15 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_not_neon(register_type(arg));
+            return detail::bitwise_not_neon<T>(register_type(arg));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_not(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_not_neon(register_type(arg));
+            using unsigned_T = types::detail::get_unsigned_type_t<sizeof(T)>;
+            return detail::bitwise_not_neon<unsigned_T>(register_type(arg));
         }
 
         /******************
@@ -1411,7 +1436,7 @@ namespace xsimd
                 return vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(lhs), vreinterpretq_u32_f32(rhs)));
             }
 
-            template <class V>
+            template <class T, class V>
             XSIMD_INLINE V bitwise_andnot_neon(V const& lhs, V const& rhs) noexcept
             {
                 const detail::neon_dispatcher::binary dispatcher = {
@@ -1419,7 +1444,7 @@ namespace xsimd
                                     wrap::vbicq_u32, wrap::vbicq_s32, wrap::vbicq_u64, wrap::vbicq_s64,
                                     bitwise_andnot_f32)
                 };
-                return dispatcher.apply(lhs, rhs);
+                return dispatcher.template apply<T>(lhs, rhs);
             }
         }
 
@@ -1427,14 +1452,15 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
+            return detail::bitwise_andnot_neon<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch_bool<T, A>::register_type;
-            return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
+            using unsigned_T = types::detail::get_unsigned_type_t<sizeof(T)>;
+            return detail::bitwise_andnot_neon<unsigned_T>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -1452,7 +1478,7 @@ namespace xsimd
                 std::make_tuple(wrap::vminq_u8, wrap::vminq_s8, wrap::vminq_u16, wrap::vminq_s16,
                                 wrap::vminq_u32, wrap::vminq_s32, wrap::vminq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1476,7 +1502,7 @@ namespace xsimd
                 std::make_tuple(wrap::vmaxq_u8, wrap::vmaxq_s8, wrap::vmaxq_u16, wrap::vmaxq_s16,
                                 wrap::vmaxq_u32, wrap::vmaxq_s32, wrap::vmaxq_f32)
             };
-            return dispatcher.apply(register_type(lhs), register_type(rhs));
+            return dispatcher.template apply<T>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1523,7 +1549,7 @@ namespace xsimd
                 std::make_tuple(detail::abs_u8, wrap::vabsq_s8, detail::abs_u16, wrap::vabsq_s16,
                                 detail::abs_u32, wrap::vabsq_s32, wrap::vabsq_f32)
             };
-            return dispatcher.apply(register_type(arg));
+            return dispatcher.template apply<T>(register_type(arg));
         }
 
         /********
@@ -1858,26 +1884,25 @@ namespace xsimd
 
         namespace detail
         {
-            template <class... T>
+            template <class... S>
             struct neon_select_dispatcher_impl
             {
-                using container_type = std::tuple<T (*)(comp_return_type<T>, T, T)...>;
+                using container_type = std::tuple<neon_reg_t<S> (*)(neon_comp_reg_t<S>, neon_reg_t<S>, neon_reg_t<S>)...>;
                 const container_type m_func;
 
                 template <class U>
-                U apply(comp_return_type<U> cond, U lhs, U rhs) const noexcept
+                neon_reg_t<U> apply(neon_comp_reg_t<U> cond, neon_reg_t<U> lhs, neon_reg_t<U> rhs) const noexcept
                 {
-                    using func_type = U (*)(comp_return_type<U>, U, U);
-                    auto func = std::get<func_type>(m_func);
-                    return func(cond, lhs, rhs);
+                    using key = neon_scalar_t<U>;
+                    return std::get<index_of<key, S...>::value>(m_func)(cond, lhs, rhs);
                 }
             };
 
-            using neon_select_dispatcher = neon_select_dispatcher_impl<uint8x16_t, int8x16_t,
-                                                                       uint16x8_t, int16x8_t,
-                                                                       uint32x4_t, int32x4_t,
-                                                                       uint64x2_t, int64x2_t,
-                                                                       float32x4_t>;
+            using neon_select_dispatcher = neon_select_dispatcher_impl<uint8_t, int8_t,
+                                                                       uint16_t, int16_t,
+                                                                       uint32_t, int32_t,
+                                                                       uint64_t, int64_t,
+                                                                       float>;
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -1890,7 +1915,7 @@ namespace xsimd
                                 wrap::vbslq_u32, wrap::vbslq_s32, wrap::vbslq_u64, wrap::vbslq_s64,
                                 wrap::vbslq_f32)
             };
-            return dispatcher.apply(bool_register_type(cond), register_type(a), register_type(b));
+            return dispatcher.template apply<T>(bool_register_type(cond), register_type(a), register_type(b));
         }
 
         template <class A, class T, bool... b, detail::enable_neon_type_t<T> = 0>
@@ -3119,7 +3144,7 @@ namespace xsimd
                                 wrap::rotate_left_u32<N % 4>, wrap::rotate_left_s32<N % 4>, wrap::rotate_left_u64<N % 2>, wrap::rotate_left_s64<N % 2>,
                                 wrap::rotate_left_f32<N % 4>)
             };
-            return dispatcher.apply(register_type(a), register_type(a));
+            return dispatcher.template apply<T>(register_type(a), register_type(a));
         }
     }
 
