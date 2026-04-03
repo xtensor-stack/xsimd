@@ -22,7 +22,7 @@ jobs:
       CXX: clang++-${{ matrix.llvm-version }}
     steps:
     - name: Checkout xsimd
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     - name: Setup compiler
       run: |
           wget https://apt.llvm.org/llvm.sh

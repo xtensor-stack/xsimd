@@ -41,7 +41,7 @@ jobs:
         python3 -m pip install --upgrade pip setuptools wheel
         python3 -m pip install ninja
     - name: Checkout xsimd
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     - name: Setup
       run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="${{ matrix.sys.flags }}" -G Ninja
     - name: Build
@@ -76,7 +76,7 @@ jobs:
             cmake:p
             ninja:p
       - name: Checkout xsimd
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
       - name: Configure
         run: cmake -B _build -DBUILD_TESTS=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_DOCTEST=ON -G Ninja
       - name: Build
@@ -100,7 +100,7 @@ jobs:
         python3 -m pip install --upgrade pip setuptools wheel
         python3 -m pip install ninja
     - name: Checkout xsimd
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     - name: Setup
       run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
     - name: Build

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout xsimd
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
     - name: Configure build
       run: cmake -B _build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=_install
     - name: Build
