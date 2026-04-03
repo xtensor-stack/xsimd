@@ -3,6 +3,7 @@ on: [push, pull_request]
 concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   build:
     strategy:
@@ -21,5 +22,16 @@ jobs:
       run: cmake --build _build --verbose
     - name: Testing sequential
       run: cmake --build _build --target xbenchmark --verbose
+    - name: Set CPU feature test expectations
+      run: |
+        if echo '${{ matrix.os }}' | grep -q intel; then
+          echo "XSIMD_TEST_CPU_ASSUME_NEON64=0" >> "$GITHUB_ENV"
+          echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=1" >> "$GITHUB_ENV"
+          echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=intel" >> "$GITHUB_ENV"
+        else
+          echo "XSIMD_TEST_CPU_ASSUME_NEON64=1" >> "$GITHUB_ENV"
+          echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=0" >> "$GITHUB_ENV"
+          echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"
+        fi
     - name: Testing xsimd
       run: ${{github.workspace}}/_build/test/test_xsimd

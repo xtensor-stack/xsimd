@@ -266,6 +266,33 @@ namespace xsimd
         return x86_manufacturer::unknown;
     };
 
+    /** Return a string representation of an @ref x86_manufacturer value. */
+    constexpr const char* x86_manufacturer_name(x86_manufacturer m) noexcept
+    {
+        switch (m)
+        {
+        case x86_manufacturer::intel:
+            return "intel";
+        case x86_manufacturer::amd:
+            return "amd";
+        case x86_manufacturer::via:
+            return "via";
+        case x86_manufacturer::zhaoxin:
+            return "zhaoxin";
+        case x86_manufacturer::hygon:
+            return "hygon";
+        case x86_manufacturer::transmeta:
+            return "transmeta";
+        case x86_manufacturer::elbrus:
+            return "elbrus";
+        case x86_manufacturer::microsoft_vpc:
+            return "microsoft_vpc";
+        case x86_manufacturer::unknown:
+            return "unknown";
+        }
+        return "invalid";
+    }
+
     struct x86_cpuid_leaf1_traits
     {
         static constexpr detail::x86_reg32_t leaf = 1;
@@ -567,8 +594,9 @@ namespace xsimd
 
         inline bool avx512_enabled() const noexcept
         {
-            // Check all SSE, AVX, and AVX512 bits even though AVX512 must imply AVX and SSE
-            return xcr0().all_bits_set<x86_xcr0::xcr0::sse, x86_xcr0::xcr0::avx, x86_xcr0::xcr0::zmm_hi256>();
+            // Check all SSE, AVX, optmask, and AVX512 bits even though AVX512 must
+            // imply AVX, SSE, and masked operations.
+            return xcr0().all_bits_set<x86_xcr0::xcr0::sse, x86_xcr0::xcr0::avx, x86_xcr0::xcr0::opmask, x86_xcr0::xcr0::zmm_hi256>();
         }
 
         /**
