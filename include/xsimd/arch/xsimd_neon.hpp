@@ -256,6 +256,12 @@ namespace xsimd
             };
 
             template <>
+            struct comp_return_type_impl<uint64x2_t>
+            {
+                using type = uint64x2_t;
+            };
+
+            template <>
             struct comp_return_type_impl<float32x4_t>
             {
                 using type = uint32x4_t;
@@ -290,43 +296,9 @@ namespace xsimd
 
 #if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
         namespace detail {
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_unsigned<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_signed<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_s8(reinterpret_cast<const int8_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2 && std::is_unsigned<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_u16(reinterpret_cast<const uint16_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2 && std::is_signed<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_s16(reinterpret_cast<const int16_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4 && std::is_unsigned<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_u32(reinterpret_cast<const uint32_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_s32(reinterpret_cast<const int32_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8 && std::is_unsigned<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_u64(reinterpret_cast<const uint64_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8 && std::is_signed<T>::value, __n128>::type
-            msvc_arm64_load(const T* d) noexcept { return vld1q_s64(reinterpret_cast<const int64_t*>(d)); }
-
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1, __n128>::type
-            msvc_arm64_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2, __n128>::type
-            msvc_arm64_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u16(reinterpret_cast<const uint16_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4, __n128>::type
-            msvc_arm64_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u32(reinterpret_cast<const uint32_t*>(d)); }
-            template <class T>
-            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8, __n128>::type
-            msvc_arm64_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u64(reinterpret_cast<const uint64_t*>(d)); }
+            // msvc_arm64_load / msvc_arm64_load_u have been superseded by the
+            // cross-platform detail::neon_load<T> / detail::neon_load_u<T> helpers
+            // defined below (outside this block).  They are no longer used here.
 
             template <class T>
             XSIMD_INLINE typename std::enable_if<sizeof(T)==1, __n128>::type
@@ -565,6 +537,51 @@ namespace detail {
 }
 #endif
 
+        namespace detail
+        {
+            // Cross-platform helpers: load a NEON register from an aligned array.
+            // On GCC/Clang the return type is the specific NEON vector type;
+            // on MSVC ARM64 all NEON types are __n128, so the same code works.
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_unsigned<T>::value, uint8x16_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_signed<T>::value, int8x16_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s8(reinterpret_cast<const int8_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2 && std::is_unsigned<T>::value, uint16x8_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u16(reinterpret_cast<const uint16_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2 && std::is_signed<T>::value, int16x8_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s16(reinterpret_cast<const int16_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4 && std::is_unsigned<T>::value, uint32x4_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u32(reinterpret_cast<const uint32_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, int32x4_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s32(reinterpret_cast<const int32_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8 && std::is_unsigned<T>::value, uint64x2_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u64(reinterpret_cast<const uint64_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8 && std::is_signed<T>::value, int64x2_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s64(reinterpret_cast<const int64_t*>(d)); }
+
+            // Load the unsigned-integer representation of T from an aligned array.
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1, uint8x16_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2, uint16x8_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u16(reinterpret_cast<const uint16_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4, uint32x4_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u32(reinterpret_cast<const uint32_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8, uint64x2_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u64(reinterpret_cast<const uint64_t*>(d)); }
+        }
+
         /*************
          * broadcast *
          *************/
@@ -630,38 +647,25 @@ namespace detail {
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            // Use load-from-array on all platforms: avoids brace-init of NEON types
+            // (which MSVC ARM64 does not support) while remaining portable.
             alignas(16) T data[] = { static_cast<T>(args)... };
-            return detail::msvc_arm64_load<T>(data);
-#else
-            return xsimd::types::detail::neon_vector_type<T> { args... };
-#endif
+            return detail::neon_load<T>(data);
         }
 
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
             using unsigned_type = as_unsigned_integer_t<T>;
             alignas(16) unsigned_type data[] = { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
-            return detail::msvc_arm64_load_u<T>(data);
-#else
-            using register_type = typename batch_bool<T, A>::register_type;
-            using unsigned_type = as_unsigned_integer_t<T>;
-            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
-#endif
+            return detail::neon_load_u<T>(data);
         }
 
         template <class A>
         XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<neon>, float f0, float f1, float f2, float f3) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
-            // On MSVC ARM64, use load from array instead of brace initialization
             alignas(16) float data[] = { f0, f1, f2, f3 };
             return vld1q_f32(data);
-#else
-            return float32x4_t { f0, f1, f2, f3 };
-#endif
         }
 
         template <class A>
@@ -669,30 +673,17 @@ namespace detail {
                                                        std::complex<float> c0, std::complex<float> c1,
                                                        std::complex<float> c2, std::complex<float> c3) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
-            // On MSVC ARM64, use load from array instead of brace initialization
             alignas(16) float real_data[] = { c0.real(), c1.real(), c2.real(), c3.real() };
             alignas(16) float imag_data[] = { c0.imag(), c1.imag(), c2.imag(), c3.imag() };
             return batch<std::complex<float>, A>(vld1q_f32(real_data), vld1q_f32(imag_data));
-#else
-            return batch<std::complex<float>, A>(float32x4_t { c0.real(), c1.real(), c2.real(), c3.real() },
-                                                 float32x4_t { c0.imag(), c1.imag(), c2.imag(), c3.imag() });
-#endif
         }
 
         template <class A, class... Args>
         XSIMD_INLINE batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
-            // On MSVC ARM64, use load from array instead of brace initialization
             using unsigned_type = as_unsigned_integer_t<float>;
             alignas(16) unsigned_type data[] = { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
             return vld1q_u32(data);
-#else
-            using register_type = typename batch_bool<float, A>::register_type;
-            using unsigned_type = as_unsigned_integer_t<float>;
-            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
-#endif
         }
 
         /*************
