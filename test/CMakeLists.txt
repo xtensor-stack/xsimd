@@ -108,6 +108,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         # Nothing specific
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "powerpc")
         # Nothing specific
+    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "s390x")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=z14 -mzvector")
     elseif(NOT WIN32 AND NOT EMSCRIPTEN)
         if(NOT CMAKE_CXX_FLAGS MATCHES "-march" AND NOT CMAKE_CXX_FLAGS MATCHES "-arch" AND NOT CMAKE_OSX_ARCHITECTURES)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH}")

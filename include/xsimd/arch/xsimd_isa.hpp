@@ -136,6 +136,10 @@
 #include "./xsimd_vsx.hpp"
 #endif
 
+#if XSIMD_WITH_VXE
+#include "./xsimd_vxe.hpp"
+#endif
+
 // Must come last to have access to all conversion specializations.
 #include "./xsimd_common.hpp"
 
