@@ -50,6 +50,8 @@
 
 #include "xsimd_vsx_register.hpp"
 
+#include "xsimd_vxe_register.hpp"
+
 #if XSIMD_WITH_EMULATED
 #include "xsimd_emulated_register.hpp"
 #endif

@@ -69,6 +69,7 @@ namespace xsimd
             ARCH_FIELD_EX(detail::rvv<128>, rvv128)
             ARCH_FIELD(wasm)
             ARCH_FIELD(vsx)
+            ARCH_FIELD(vxe)
 
 #undef ARCH_FIELD
 

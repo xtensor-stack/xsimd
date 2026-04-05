@@ -15,6 +15,7 @@
 #include "./xsimd_cpu_features_arm.hpp"
 #include "./xsimd_cpu_features_ppc.hpp"
 #include "./xsimd_cpu_features_riscv.hpp"
+#include "./xsimd_cpu_features_s390x.hpp"
 #include "./xsimd_cpu_features_x86.hpp"
 
 namespace xsimd
