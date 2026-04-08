@@ -111,6 +111,69 @@ namespace xsimd
 
         namespace detail
         {
+            // Prevent -ffast-math from reassociating floating-point
+            // arithmetic across this point.  The reason string
+            // documents *why* at each call site; unused at runtime.
+            //
+            // Zero-cost register constraints per target:
+            //   x86  "+x"  (XMM/YMM/ZMM, also scalar float/double)
+            //   ARM  "+w"  (V-reg / SVE Z-reg, also scalar float/double)
+            //   PPC  "+wa" (VS register, also scalar float/double)
+            //   RISC-V "+f" (F/D register, scalar float/double)
+            //   RISC-V RVV "+vr" (V register; GCC 15+ / Clang 20+)
+            //
+            // On unknown targets the "+m" fallback spills; it is
+            // only emitted when the compiler can actually reassociate.
+            template <class T>
+            XSIMD_INLINE void reassociation_barrier(T& x, const char*) noexcept
+            {
+#if XSIMD_REASSOCIATIVE_MATH && XSIMD_WITH_INLINE_ASM && !defined(__EMSCRIPTEN__)
+#if XSIMD_WITH_SSE2
+                __asm__ volatile("" : "+x"(x));
+#elif XSIMD_WITH_NEON || XSIMD_WITH_SVE
+                __asm__ volatile("" : "+w"(x));
+#elif XSIMD_WITH_VSX
+                __asm__ volatile("" : "+wa"(x));
+#else
+                __asm__ volatile("" : "+m"(x));
+#endif
+#else
+                (void)x;
+#endif
+            }
+
+            // RISC-V scalar float/double: use F/D registers instead of
+            // spilling through "+m".  These overloads also serve
+            // emulated batches on RISC-V via the std::array overload.
+#if XSIMD_REASSOCIATIVE_MATH && XSIMD_WITH_INLINE_ASM && defined(__riscv)
+            XSIMD_INLINE void reassociation_barrier(float& x, const char*) noexcept
+            {
+                __asm__ volatile("" : "+f"(x));
+            }
+            XSIMD_INLINE void reassociation_barrier(double& x, const char*) noexcept
+            {
+                __asm__ volatile("" : "+f"(x));
+            }
+#endif
+
+            template <class T, size_t N>
+            XSIMD_INLINE void reassociation_barrier(std::array<T, N>& arr, const char* reason) noexcept
+            {
+                for (auto& v : arr)
+                    reassociation_barrier(v, reason);
+            }
+
+            template <class T, class A>
+            XSIMD_INLINE void reassociation_barrier(batch<T, A>& b, const char* reason) noexcept
+            {
+#if XSIMD_REASSOCIATIVE_MATH && XSIMD_WITH_RVV && XSIMD_WITH_INLINE_ASM && ((__GNUC__ >= 15) || (__clang_major__ >= 20))
+                __asm__ volatile("" : "+vr"(b.data.value.value));
+                (void)reason;
+#else
+                reassociation_barrier(b.data, reason);
+#endif
+            }
+
             template <class F, class A, class T, class... Batches>
             XSIMD_INLINE batch<T, A> apply(F&& func, batch<T, A> const& self, batch<T, A> const& other) noexcept
             {

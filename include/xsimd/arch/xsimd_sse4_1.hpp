@@ -62,13 +62,7 @@ namespace xsimd
                 xH = _mm_add_epi64(xH, _mm_castpd_si128(_mm_set1_pd(442721857769029238784.))); //  3*2^67
                 __m128i xL = _mm_blend_epi16(x, _mm_castpd_si128(_mm_set1_pd(0x0010000000000000)), 0x88); //  2^52
                 __m128d f = _mm_sub_pd(_mm_castsi128_pd(xH), _mm_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
-                // With -ffast-math, the compiler may reassociate (xH-C)+xL into
-                // xH+(xL-C). Since xL<<C this causes catastrophic cancellation.
-                // The asm barrier forces f into a register before the add, blocking
-                // the reorder. It emits zero instructions.
-#if defined(__GNUC__)
-                __asm__ volatile("" : "+x"(f));
-#endif
+                detail::reassociation_barrier(f, "prevent (xH-C)+xL -> xH+(xL-C)");
                 return _mm_add_pd(f, _mm_castsi128_pd(xL));
             }
 
@@ -80,10 +74,7 @@ namespace xsimd
                 xH = _mm_or_si128(xH, _mm_castpd_si128(_mm_set1_pd(19342813113834066795298816.))); //  2^84
                 __m128i xL = _mm_blend_epi16(x, _mm_castpd_si128(_mm_set1_pd(0x0010000000000000)), 0xcc); //  2^52
                 __m128d f = _mm_sub_pd(_mm_castsi128_pd(xH), _mm_set1_pd(19342813118337666422669312.)); //  2^84 + 2^52
-                // See above: prevent -ffast-math from reassociating (xH-C)+xL.
-#if defined(__GNUC__)
-                __asm__ volatile("" : "+x"(f));
-#endif
+                detail::reassociation_barrier(f, "prevent (xH-C)+xL -> xH+(xL-C)");
                 return _mm_add_pd(f, _mm_castsi128_pd(xL));
             }
         }
@@ -235,6 +226,23 @@ namespace xsimd
                     return max(self, other, ssse3 {});
                 }
             }
+        }
+
+        // load_stream
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<sse4_1>) noexcept
+        {
+            return _mm_stream_load_si128((__m128i*)mem);
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_stream(float const* mem, convert<float>, requires_arch<sse4_1>) noexcept
+        {
+            return _mm_castsi128_ps(_mm_stream_load_si128((__m128i*)mem));
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_stream(double const* mem, convert<double>, requires_arch<sse4_1>) noexcept
+        {
+            return _mm_castsi128_pd(_mm_stream_load_si128((__m128i*)mem));
         }
 
         // min

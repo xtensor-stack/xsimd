@@ -551,33 +551,45 @@ namespace xsimd
                     {
                         auto test = x > constants::pio4<B>();
                         xr = x - constants::pio2_1<B>();
+                        detail::reassociation_barrier(xr, "ordered pio2 subtraction");
                         xr -= constants::pio2_2<B>();
+                        detail::reassociation_barrier(xr, "ordered pio2 subtraction");
                         xr -= constants::pio2_3<B>();
+                        detail::reassociation_barrier(xr, "ordered pio2 subtraction");
                         xr = select(test, xr, x);
                         return select(test, B(1.), B(0.));
                     }
                     else if (all(x <= constants::twentypi<B>()))
                     {
                         B xi = nearbyint(x * constants::twoopi<B>());
+                        detail::reassociation_barrier(xi, "preserve quadrant selection");
                         xr = fnma(xi, constants::pio2_1<B>(), x);
+                        detail::reassociation_barrier(xr, "compensated range reduction");
                         xr -= xi * constants::pio2_2<B>();
+                        detail::reassociation_barrier(xr, "compensated range reduction");
                         xr -= xi * constants::pio2_3<B>();
+                        detail::reassociation_barrier(xr, "compensated range reduction");
                         return quadrant(xi);
                     }
                     else if (all(x <= constants::mediumpi<B>()))
                     {
                         B fn = nearbyint(x * constants::twoopi<B>());
+                        detail::reassociation_barrier(fn, "multi-term range reduction");
                         B r = x - fn * constants::pio2_1<B>();
+                        detail::reassociation_barrier(r, "multi-term range reduction");
                         B w = fn * constants::pio2_1t<B>();
                         B t = r;
                         w = fn * constants::pio2_2<B>();
                         r = t - w;
+                        detail::reassociation_barrier(r, "multi-term range reduction");
                         w = fn * constants::pio2_2t<B>() - ((t - r) - w);
                         t = r;
                         w = fn * constants::pio2_3<B>();
                         r = t - w;
+                        detail::reassociation_barrier(r, "multi-term range reduction");
                         w = fn * constants::pio2_3t<B>() - ((t - r) - w);
                         xr = r - w;
+                        detail::reassociation_barrier(xr, "multi-term range reduction");
                         return quadrant(fn);
                     }
                     else

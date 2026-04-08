@@ -230,6 +230,23 @@ namespace xsimd
             store_masked<A>(reinterpret_cast<int64_t*>(mem), s64, batch_bool_constant<int64_t, A, Values...> {}, Mode {}, avx2 {});
         }
 
+        // load_stream
+        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<avx2>) noexcept
+        {
+            return _mm256_stream_load_si256((__m256i const*)mem);
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> load_stream(float const* mem, convert<float>, requires_arch<avx2>) noexcept
+        {
+            return _mm256_castsi256_ps(_mm256_stream_load_si256((__m256i const*)mem));
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> load_stream(double const* mem, convert<double>, requires_arch<avx2>) noexcept
+        {
+            return _mm256_castsi256_pd(_mm256_stream_load_si256((__m256i const*)mem));
+        }
+
         // bitwise_and
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept
@@ -552,13 +569,7 @@ namespace xsimd
                                                  0xFFFF, 0xFFFF, 0x0000, 0x0000, 0xFFFF, 0xFFFF, 0x0000, 0x0000);
                 __m256i xL = _mm256_or_si256(_mm256_and_si256(mask, x), _mm256_andnot_si256(mask, _mm256_castpd_si256(_mm256_set1_pd(0x0010000000000000)))); //  2^52
                 __m256d f = _mm256_sub_pd(_mm256_castsi256_pd(xH), _mm256_set1_pd(19342813118337666422669312.)); //  2^84 + 2^52
-                // With -ffast-math, the compiler may reassociate (xH-C)+xL into
-                // xH+(xL-C). Since xL<<C this causes catastrophic cancellation.
-                // The asm barrier forces f into a register before the add, blocking
-                // the reorder. It emits zero instructions.
-#if defined(__GNUC__)
-                __asm__ volatile("" : "+x"(f));
-#endif
+                detail::reassociation_barrier(f, "prevent (xH-C)+xL -> xH+(xL-C)");
                 return _mm256_add_pd(f, _mm256_castsi256_pd(xL));
             }
 
@@ -574,10 +585,7 @@ namespace xsimd
                                                  0xFFFF, 0xFFFF, 0xFFFF, 0x0000, 0xFFFF, 0xFFFF, 0xFFFF, 0x0000);
                 __m256i xL = _mm256_or_si256(_mm256_and_si256(mask, x), _mm256_andnot_si256(mask, _mm256_castpd_si256(_mm256_set1_pd(0x0010000000000000)))); //  2^52
                 __m256d f = _mm256_sub_pd(_mm256_castsi256_pd(xH), _mm256_set1_pd(442726361368656609280.)); //  3*2^67 + 2^52
-                // See above: prevent -ffast-math from reassociating (xH-C)+xL.
-#if defined(__GNUC__)
-                __asm__ volatile("" : "+x"(f));
-#endif
+                detail::reassociation_barrier(f, "prevent (xH-C)+xL -> xH+(xL-C)");
                 return _mm256_add_pd(f, _mm256_castsi256_pd(xL));
             }
         }

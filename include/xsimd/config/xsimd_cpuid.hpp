@@ -13,17 +13,13 @@
 #define XSIMD_CPUID_HPP
 
 #include "../types/xsimd_all_registers.hpp"
+#include "./xsimd_cpu_features_arm.hpp"
 #include "./xsimd_cpu_features_x86.hpp"
-#include "xsimd_inline.hpp"
+#include "./xsimd_inline.hpp"
 
-#if defined(__linux__) && (defined(__ARM_NEON) || defined(_M_ARM) || defined(__riscv_vector))
+#if XSIMD_HAVE_LINUX_GETAUXVAL && defined(__riscv_vector)
 #include <asm/hwcap.h>
 #include <sys/auxv.h>
-
-#ifndef HWCAP2_I8MM
-#define HWCAP2_I8MM (1 << 13)
-#endif
-
 #endif
 
 namespace xsimd
@@ -92,29 +88,24 @@ namespace xsimd
                 vsx = 1;
 #endif
 
-#if defined(__aarch64__) || defined(_M_ARM64)
-                neon = 1;
-                neon64 = 1;
-#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
-                i8mm_neon64 = bool(getauxval(AT_HWCAP2) & HWCAP2_I8MM);
-                sve = bool(getauxval(AT_HWCAP) & HWCAP_SVE);
-#endif
+#if XSIMD_HAVE_LINUX_GETAUXVAL
+#if defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0
 
-#elif defined(__ARM_NEON) || defined(_M_ARM)
-
-#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
-                neon = bool(getauxval(AT_HWCAP) & HWCAP_NEON);
-#endif
-
-#elif defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0
-
-#if defined(__linux__) && (!defined(__ANDROID_API__) || __ANDROID_API__ >= 18)
 #ifndef HWCAP_V
 #define HWCAP_V (1 << ('V' - 'A'))
 #endif
                 rvv = bool(getauxval(AT_HWCAP) & HWCAP_V);
 #endif
 #endif
+
+                // Safe on all platforms, it will be all false if non arm.
+                const auto arm_cpu = xsimd::arm_cpu_features();
+
+                neon = arm_cpu.neon();
+                neon64 = arm_cpu.neon64();
+                i8mm_neon64 = arm_cpu.neon64() && arm_cpu.i8mm();
+                sve = arm_cpu.sve();
+
                 // Safe on all platforms, it will be all false if non x86.
                 const auto x86_cpu = xsimd::x86_cpu_features();
 

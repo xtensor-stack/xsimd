@@ -591,12 +591,16 @@ struct xsimd_api_float_types_functions
     void test_exp()
     {
         value_type val(2);
+#if defined(__FAST_MATH__) || XSIMD_REASSOCIATIVE_MATH
+        CHECK_EQ(extract(xsimd::exp(T(val))), doctest::Approx(std::exp(val)));
+#else
         CHECK_EQ(extract(xsimd::exp(T(val))), std::exp(val));
+#endif
     }
     void test_exp10()
     {
         value_type val(2);
-#ifdef EMSCRIPTEN
+#if defined(EMSCRIPTEN) || defined(__FAST_MATH__)
         CHECK_EQ(extract(xsimd::exp10(T(val))), doctest::Approx(std::pow(value_type(10), val)));
 #else
         CHECK_EQ(extract(xsimd::exp10(T(val))), std::pow(value_type(10), val));
