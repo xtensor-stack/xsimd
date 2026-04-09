@@ -16,6 +16,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <type_traits>
 #if __cplusplus >= 201703L
 #include <string_view>
 #endif
@@ -52,39 +53,69 @@ namespace xsimd
 
         inline x86_reg32_t x86_xcr0_low() noexcept;
 
+        /** A strongly type bitset for a 32 bits register. */
         template <typename E>
         using x86_reg32_bitset = utils::uint_bitset<E, x86_reg32_t>;
 
-        template <x86_reg32_t leaf_num, x86_reg32_t subleaf_num,
-                  typename A, typename B, typename C, typename D>
-        class x86_cpuid_regs
-            : private x86_reg32_bitset<A>,
-              private x86_reg32_bitset<B>,
-              private x86_reg32_bitset<C>,
-              private x86_reg32_bitset<D>
+        /** A wrapper to attach a register bitfield descriptor and its CPUID index. */
+        template <typename E, x86_reg32_t I>
+        struct x86_reg_id
+        {
+            static constexpr x86_reg32_t index = I;
+            using bits = E;
+
+            static_assert(index >= 0 && index < 4, "At most 4 register in CPUID");
+        };
+
+        /** Find the register id with index k. */
+        template <x86_reg32_t K, typename... reg_ids>
+        struct find_reg_k;
+
+        /** Find the register id with index k (empty / nothing found case). */
+        template <x86_reg32_t K, typename... reg_ids>
+        struct find_reg_k
+        {
+            using type = x86_reg_id<void, 0>;
+        };
+
+        /** Find the register id with index k (recursive case). */
+        template <x86_reg32_t K, typename reg_id_head, typename... reg_id_tail>
+        struct find_reg_k<K, reg_id_head, reg_id_tail...>
+        {
+            using type = std::conditional_t<
+                reg_id_head::index == K,
+                reg_id_head,
+                typename find_reg_k<K, reg_id_tail...>::type>;
+        };
+
+        /**
+         * A class with strongly typed bitfield for `CPUID` registers.
+         *
+         * The class stores a variable number of register (up to four) from the CPUID
+         * output. This is a space optimization to avoid storing many zeros in the
+         * final `x86_cpu_features`.
+         * As a result, some of the type aliases `eax`, `ebx`, `ecx`, `edx` may be `void`.
+         */
+        template <x86_reg32_t leaf_num, x86_reg32_t subleaf_num, typename... reg_ids>
+        class x86_cpuid_regs : private x86_reg32_bitset<typename reg_ids::bits>...
         {
         private:
-            using eax_bitset = x86_reg32_bitset<A>;
-            using ebx_bitset = x86_reg32_bitset<B>;
-            using ecx_bitset = x86_reg32_bitset<C>;
-            using edx_bitset = x86_reg32_bitset<D>;
+            static_assert(sizeof...(reg_ids) <= 4, "At most 4 register in CPUID");
 
             /* Parse CPUINFO register value into individual bit components.*/
             constexpr explicit x86_cpuid_regs(const cpuid_reg_t& regs) noexcept
-                : eax_bitset(regs[0])
-                , ebx_bitset(regs[1])
-                , ecx_bitset(regs[2])
-                , edx_bitset(regs[3])
+                : x86_reg32_bitset<typename reg_ids::bits>(regs[reg_ids::index])...
             {
             }
 
         public:
-            using eax = A;
-            using ebx = B;
-            using ecx = C;
-            using edx = D;
             static constexpr x86_reg32_t leaf = leaf_num;
             static constexpr x86_reg32_t subleaf = subleaf_num;
+
+            using eax = typename find_reg_k<0, reg_ids...>::type::bits;
+            using ebx = typename find_reg_k<1, reg_ids...>::type::bits;
+            using ecx = typename find_reg_k<2, reg_ids...>::type::bits;
+            using edx = typename find_reg_k<3, reg_ids...>::type::bits;
 
             inline static x86_cpuid_regs read()
             {
@@ -93,22 +124,76 @@ namespace xsimd
 
             constexpr x86_cpuid_regs() noexcept = default;
 
-            using eax_bitset::all_bits_set;
-            using eax_bitset::get_range;
-            using ebx_bitset::all_bits_set;
-            using ebx_bitset::get_range;
-            using ecx_bitset::all_bits_set;
-            using ecx_bitset::get_range;
-            using edx_bitset::all_bits_set;
-            using edx_bitset::get_range;
-        };
+            // TODO(C++17) compact version for which this was designed.
+            // The else clause contains a very verbose port.
+#if 0
+            using x86_reg32_bitset<typename reg_ids::bits>::all_bits_set...;
+            using x86_reg32_bitset<typename reg_ids::bits>::get_range...;
+#else
 
-        template <typename T>
-        using make_x86_cpuid_regs = x86_cpuid_regs<T::leaf, T::subleaf,
-                                                   typename T::eax,
-                                                   typename T::ebx,
-                                                   typename T::ecx,
-                                                   typename T::edx>;
+        private:
+            template <int N>
+            struct m_empty_reg
+            {
+                enum class type {};
+            };
+
+            using eax_or_empty = typename std::conditional<std::is_void<eax>::value, typename m_empty_reg<0>::type, eax>::type;
+            using ebx_or_empty = typename std::conditional<std::is_void<ebx>::value, typename m_empty_reg<1>::type, ebx>::type;
+            using ecx_or_empty = typename std::conditional<std::is_void<ecx>::value, typename m_empty_reg<2>::type, ecx>::type;
+            using edx_or_empty = typename std::conditional<std::is_void<edx>::value, typename m_empty_reg<3>::type, edx>::type;
+
+        public:
+            template <eax_or_empty... bits, typename T = eax, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr bool all_bits_set() const noexcept
+            {
+                return x86_reg32_bitset<eax>::template all_bits_set<bits...>();
+            }
+
+            template <eax_or_empty start, eax_or_empty end, typename T = eax, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr x86_reg32_t get_range() const noexcept
+            {
+                return x86_reg32_bitset<eax>::template get_range<start, end>();
+            }
+
+            template <ebx_or_empty... bits, typename T = ebx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr bool all_bits_set() const noexcept
+            {
+                return x86_reg32_bitset<ebx>::template all_bits_set<bits...>();
+            }
+
+            template <ebx_or_empty start, ebx_or_empty end, typename T = ebx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr x86_reg32_t get_range() const noexcept
+            {
+                return x86_reg32_bitset<ebx>::template get_range<start, end>();
+            }
+
+            template <ecx_or_empty... bits, typename T = ecx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr bool all_bits_set() const noexcept
+            {
+                return x86_reg32_bitset<ecx>::template all_bits_set<bits...>();
+            }
+
+            template <ecx_or_empty start, ecx_or_empty end, typename T = ecx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr x86_reg32_t get_range() const noexcept
+            {
+                return x86_reg32_bitset<ecx>::template get_range<start, end>();
+            }
+
+            template <edx_or_empty... bits, typename T = edx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr bool all_bits_set() const noexcept
+            {
+                return x86_reg32_bitset<edx>::template all_bits_set<bits...>();
+            }
+
+            template <edx_or_empty start, edx_or_empty end, typename T = edx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            constexpr x86_reg32_t get_range() const noexcept
+            {
+                return x86_reg32_bitset<edx>::template get_range<start, end>();
+            }
+
+#endif // C++17
+        };
 
         template <bool extended>
         struct x86_cpuid_highest_func
@@ -298,12 +383,6 @@ namespace xsimd
         static constexpr detail::x86_reg32_t leaf = 1;
         static constexpr detail::x86_reg32_t subleaf = 0;
 
-        enum class eax
-        {
-        };
-        enum class ebx
-        {
-        };
         enum class ecx
         {
             /* Streaming SIMD Extensions 3. */
@@ -328,6 +407,10 @@ namespace xsimd
             /* Streaming SIMD Extensions 2. */
             sse2 = 26,
         };
+
+        using regs_t = detail::x86_cpuid_regs<leaf, subleaf,
+                                              detail::x86_reg_id<ecx, 2>,
+                                              detail::x86_reg_id<edx, 3>>;
     };
 
     /**
@@ -340,7 +423,7 @@ namespace xsimd
      *
      * @see https://en.wikipedia.org/wiki/CPUID
      */
-    using x86_cpuid_leaf1 = detail::make_x86_cpuid_regs<x86_cpuid_leaf1_traits>;
+    using x86_cpuid_leaf1 = typename x86_cpuid_leaf1_traits::regs_t;
 
     struct x86_cpuid_leaf7_traits
     {
@@ -386,9 +469,11 @@ namespace xsimd
             /* AVX-512 Vector Neural Network instructions. */
             avx512vnni_bw = 11,
         };
-        enum class edx
-        {
-        };
+
+        using regs_t = detail::x86_cpuid_regs<leaf, subleaf,
+                                              detail::x86_reg_id<eax, 0>,
+                                              detail::x86_reg_id<ebx, 1>,
+                                              detail::x86_reg_id<ecx, 2>>;
     };
 
     /**
@@ -401,7 +486,7 @@ namespace xsimd
      *
      * @see https://en.wikipedia.org/wiki/CPUID
      */
-    using x86_cpuid_leaf7 = detail::make_x86_cpuid_regs<x86_cpuid_leaf7_traits>;
+    using x86_cpuid_leaf7 = typename x86_cpuid_leaf7_traits::regs_t;
 
     struct x86_cpuid_leaf7sub1_traits
     {
@@ -413,15 +498,9 @@ namespace xsimd
             /* AVX (VEX-encoded) Vector Neural Network instructions. */
             avxvnni = 4,
         };
-        enum class ebx
-        {
-        };
-        enum class ecx
-        {
-        };
-        enum class edx
-        {
-        };
+
+        using regs_t = detail::x86_cpuid_regs<leaf, subleaf,
+                                              detail::x86_reg_id<eax, 0>>;
     };
 
     /**
@@ -434,7 +513,7 @@ namespace xsimd
      *
      * @see https://en.wikipedia.org/wiki/CPUID
      */
-    using x86_cpuid_leaf7sub1 = detail::make_x86_cpuid_regs<x86_cpuid_leaf7sub1_traits>;
+    using x86_cpuid_leaf7sub1 = typename x86_cpuid_leaf7sub1_traits::regs_t;
 
     /**
      * Highest Extended CPUID Function Parameter (EAX=0x80000000).
@@ -451,20 +530,14 @@ namespace xsimd
         static constexpr detail::x86_reg32_t leaf = 0x80000001;
         static constexpr detail::x86_reg32_t subleaf = 0;
 
-        enum class eax
-        {
-        };
-        enum class ebx
-        {
-        };
         enum class ecx
         {
             /* AMD Fused multiply-add with 4 operands (FMA4). */
             fma4 = 16,
         };
-        enum class edx
-        {
-        };
+
+        using regs_t = detail::x86_cpuid_regs<leaf, subleaf,
+                                              detail::x86_reg_id<ecx, 2>>;
     };
 
     /**
@@ -477,7 +550,7 @@ namespace xsimd
      *
      * @see https://en.wikipedia.org/wiki/CPUID
      */
-    using x86_cpuid_leaf80000001 = detail::make_x86_cpuid_regs<x86_cpuid_leaf80000001_traits>;
+    using x86_cpuid_leaf80000001 = typename x86_cpuid_leaf80000001_traits::regs_t;
 
     /*
      * Extended Control Register 0 (XCR0).
