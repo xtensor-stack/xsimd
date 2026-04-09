@@ -154,3 +154,10 @@ TEST_CASE("[cpu_features] arm features from environment")
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_SVE", cpu.sve());
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_I8MM", cpu.i8mm());
 }
+
+TEST_CASE("[cpu_features] risc-v features from environment")
+{
+    xsimd::riscv_cpu_features cpu;
+
+    CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_RVV", cpu.rvv());
+}
