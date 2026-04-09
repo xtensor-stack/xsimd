@@ -12,6 +12,7 @@
 #ifndef XSIMD_GETAUXVAL_HPP
 #define XSIMD_GETAUXVAL_HPP
 
+#include "../utils/bits.hpp"
 #include "./xsimd_config.hpp"
 
 #if XSIMD_HAVE_LINUX_GETAUXVAL
@@ -68,6 +69,41 @@ namespace xsimd
         }
     };
 
+    class linux_hwcap_backend_full
+    {
+    public:
+        inline linux_auxval hwcap() const noexcept;
+
+        inline linux_auxval hwcap2() const noexcept;
+
+    private:
+        enum class status
+        {
+            hwcap_valid = 0,
+            hwcap2_valid = 1,
+        };
+
+        using status_bitset = utils::uint_bitset<status, std::uint32_t>;
+
+        mutable status_bitset m_status {};
+        mutable xsimd::linux_auxval m_hwcap {};
+        mutable xsimd::linux_auxval m_hwcap2 {};
+    };
+
+    class linux_hwcap_backend_noop
+    {
+    public:
+        inline linux_auxval hwcap() const noexcept { return {}; }
+
+        inline linux_auxval hwcap2() const noexcept { return {}; }
+    };
+
+#if XSIMD_HAVE_LINUX_GETAUXVAL
+    using linux_hwcap_backend_default = linux_hwcap_backend_full;
+#else
+    using linux_hwcap_backend_default = linux_hwcap_backend_noop;
+#endif
+
     /********************
      *  Implementation  *
      ********************/
@@ -85,6 +121,30 @@ namespace xsimd
             return {}; // All bits set to 0
         }
 #endif
+    }
+
+    inline linux_auxval linux_hwcap_backend_full::hwcap() const noexcept
+    {
+        if (!m_status.bit_is_set<status::hwcap_valid>())
+        {
+#if XSIMD_HAVE_LINUX_GETAUXVAL
+            m_hwcap = linux_auxval::read(AT_HWCAP);
+#endif
+            m_status.set_bit<status::hwcap_valid>();
+        }
+        return m_hwcap;
+    }
+
+    inline linux_auxval linux_hwcap_backend_full::hwcap2() const noexcept
+    {
+        if (!m_status.bit_is_set<status::hwcap2_valid>())
+        {
+#if XSIMD_HAVE_LINUX_GETAUXVAL
+            m_hwcap2 = linux_auxval::read(AT_HWCAP2);
+#endif
+            m_status.set_bit<status::hwcap2_valid>();
+        }
+        return m_hwcap2;
     }
 }
 
