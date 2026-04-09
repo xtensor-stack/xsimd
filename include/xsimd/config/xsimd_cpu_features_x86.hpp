@@ -567,6 +567,99 @@ namespace xsimd
     };
 
     /**
+     * Orchestrator for `CPUID` calls.
+     *
+     * This class orchestrate `CPUID` and `XCR0` calls so that they are made in the appropriate
+     * order. It also implements lazy calling and cache mechanism around those calls.
+     * Works on all platforms, and return all zeros on non `x86` platforms.
+     */
+    class x86_cpu_features_backend_cpuid
+    {
+    public:
+        x86_cpu_features_backend_cpuid() noexcept = default;
+
+        inline x86_xcr0 const& xcr0() const noexcept;
+        inline x86_cpuid_leaf0 const& leaf0() const;
+        inline x86_cpuid_leaf80000000 const& leaf80000000() const;
+        inline x86_cpuid_leaf1 const& leaf1() const;
+        inline x86_cpuid_leaf7 const& leaf7() const;
+        inline x86_cpuid_leaf7sub1 const& leaf7sub1() const;
+        inline x86_cpuid_leaf80000001 const& leaf80000001() const;
+
+    private:
+        enum class status
+        {
+            leaf0_valid = 0,
+            leaf1_valid = 1,
+            leaf7_valid = 2,
+            leaf7sub1_valid = 3,
+            leaf80000000_valid = 4,
+            leaf80000001_valid = 5,
+            xcr0_valid = 6,
+        };
+
+        using status_bitset = utils::uint_bitset<status, std::uint32_t>;
+
+        mutable x86_cpuid_leaf0 m_leaf0 {};
+        mutable x86_cpuid_leaf1 m_leaf1 {};
+        mutable x86_cpuid_leaf7 m_leaf7 {};
+        mutable x86_cpuid_leaf7sub1 m_leaf7sub1 {};
+        mutable x86_cpuid_leaf80000000 m_leaf80000000 {};
+        mutable x86_cpuid_leaf80000001 m_leaf80000001 {};
+        mutable x86_xcr0 m_xcr0 {};
+        mutable status_bitset m_status {};
+
+        inline bool osxsave() const noexcept;
+
+        /**
+         * Internal utility to lazily read and cache a CPUID leaf.
+         *
+         * @tparam status_id The status bit tracking whether this leaf has been read and cached.
+         * @tparam L The CPUID leaf type (e.g. x86_cpuid_leaf1, x86_cpuid_leaf7).
+         * @param leaf_cache A non-const reference to the class member that stores the leaf
+         *        value. It must be non-const because this function may write to it on first
+         *        call. It is passed explicitly (rather than accessed via `this`) to allow
+         *        factoring the caching logic across different leaf members.
+         * @return A const reference to `leaf_cache`. The non-const input / const-ref output
+         *         asymmetry is intentional: callers must not modify the cached value, but
+         *         this function needs write access to populate it.
+         *
+         * On first call, checks whether the leaf number is within the range advertised as
+         * supported by CPUID (via leaf 0 for the standard range, leaf 0x80000000 for the
+         * extended range). If supported, reads the leaf from the CPU; otherwise leaves
+         * `leaf_cache` at its zero-initialized default (all feature bits false). Either
+         * way, `status_id` is set so subsequent calls return immediately.
+         */
+        template <status status_id, typename L>
+        inline auto const& safe_read_leaf(L& leaf_cache) const;
+    };
+
+    /**
+     * No-Op orchestrator for `CPUID` calls
+     *
+     * This does nothing and return zero-constructed objects on all calls.
+     * This is meant as an optimization on non `x86` platforms as the
+     * `x86_cpu_features_backend_cpuid` can be slightly large (hundred of bytes).
+     */
+    class x86_cpu_features_backend_noop
+    {
+    public:
+        constexpr x86_xcr0 xcr0() const noexcept { return {}; }
+        constexpr x86_cpuid_leaf0 leaf0() const { return {}; }
+        constexpr x86_cpuid_leaf80000000 leaf80000000() const { return {}; }
+        constexpr x86_cpuid_leaf1 leaf1() const { return {}; }
+        constexpr x86_cpuid_leaf7 leaf7() const { return {}; }
+        constexpr x86_cpuid_leaf7sub1 leaf7sub1() const { return {}; }
+        constexpr x86_cpuid_leaf80000001 leaf80000001() const { return {}; }
+    };
+
+#if XSIMD_TARGET_X86
+    using x86_cpu_features_backend_default = x86_cpu_features_backend_cpuid;
+#else
+    using x86_cpu_features_backend_default = x86_cpu_features_backend_noop;
+#endif
+
+    /**
      * An opiniated CPU feature detection utility for x86.
      *
      * These are high level features that combine multiple registers reads in sequence.
@@ -576,7 +669,7 @@ namespace xsimd
      * This is well defined on all architectures. It will always return false on
      * non-x86 architectures.
      */
-    class x86_cpu_features
+    class x86_cpu_features : private x86_cpu_features_backend_default
     {
     public:
         x86_cpu_features() noexcept = default;
@@ -681,155 +774,122 @@ namespace xsimd
         inline bool avxvnni() const noexcept { return avx_enabled() && leaf7sub1().all_bits_set<x86_cpuid_leaf7sub1::eax::avxvnni>(); }
 
         inline bool fma4() const noexcept { return avx_enabled() && leaf80000001().all_bits_set<x86_cpuid_leaf80000001::ecx::fma4>(); }
+    };
 
-    private:
-        enum class status
+    /********************
+     *  Implementation  *
+     ********************/
+
+    template <x86_cpu_features_backend_cpuid::status status_id, typename L>
+    inline auto const& x86_cpu_features_backend_cpuid::safe_read_leaf(L& leaf_cache) const
+    {
+        // Check if already initialized
+        if (m_status.bit_is_set<status_id>())
         {
-            leaf0_valid = 0,
-            leaf1_valid = 1,
-            leaf7_valid = 2,
-            leaf7sub1_valid = 3,
-            leaf80000000_valid = 4,
-            leaf80000001_valid = 5,
-            xcr0_valid = 6,
-        };
-
-        using status_bitset = utils::uint_bitset<status, std::uint32_t>;
-
-        mutable x86_cpuid_leaf0 m_leaf0 {};
-        mutable x86_cpuid_leaf1 m_leaf1 {};
-        mutable x86_cpuid_leaf7 m_leaf7 {};
-        mutable x86_cpuid_leaf7sub1 m_leaf7sub1 {};
-        mutable x86_cpuid_leaf80000000 m_leaf80000000 {};
-        mutable x86_cpuid_leaf80000001 m_leaf80000001 {};
-        mutable x86_xcr0 m_xcr0 {};
-        mutable status_bitset m_status {};
-
-        inline x86_xcr0 const& xcr0() const noexcept
-        {
-            if (!m_status.bit_is_set<status::xcr0_valid>())
-            {
-                m_xcr0 = osxsave() ? x86_xcr0::read() : x86_xcr0::safe_default();
-                m_status.set_bit<status::xcr0_valid>();
-            }
-            return m_xcr0;
-        }
-
-        inline x86_cpuid_leaf0 const& leaf0() const
-        {
-            if (!m_status.bit_is_set<status::leaf0_valid>())
-            {
-                m_leaf0 = x86_cpuid_leaf0::read();
-                m_status.set_bit<status::leaf0_valid>();
-            }
-            return m_leaf0;
-        }
-
-        inline x86_cpuid_leaf80000000 const& leaf80000000() const
-        {
-            if (!m_status.bit_is_set<status::leaf80000000_valid>())
-            {
-                m_leaf80000000 = x86_cpuid_leaf80000000::read();
-                m_status.set_bit<status::leaf80000000_valid>();
-            }
-            return m_leaf80000000;
-        }
-
-        /**
-         * Internal utility to lazily read and cache a CPUID leaf.
-         *
-         * @tparam status_id The status bit tracking whether this leaf has been read and cached.
-         * @tparam L The CPUID leaf type (e.g. x86_cpuid_leaf1, x86_cpuid_leaf7).
-         * @param leaf_cache A non-const reference to the class member that stores the leaf
-         *        value. It must be non-const because this function may write to it on first
-         *        call. It is passed explicitly (rather than accessed via `this`) to allow
-         *        factoring the caching logic across different leaf members.
-         * @return A const reference to `leaf_cache`. The non-const input / const-ref output
-         *         asymmetry is intentional: callers must not modify the cached value, but
-         *         this function needs write access to populate it.
-         *
-         * On first call, checks whether the leaf number is within the range advertised as
-         * supported by CPUID (via leaf 0 for the standard range, leaf 0x80000000 for the
-         * extended range). If supported, reads the leaf from the CPU; otherwise leaves
-         * `leaf_cache` at its zero-initialized default (all feature bits false). Either
-         * way, `status_id` is set so subsequent calls return immediately.
-         */
-        template <status status_id, typename L>
-        inline auto const& safe_read_leaf(L& leaf_cache) const
-        {
-            // Check if already initialized
-            if (m_status.bit_is_set<status_id>())
-            {
-                return leaf_cache;
-            }
-
-            // Limit where we need to check leaf0 or leaf 80000000.
-            constexpr auto extended_threshold = x86_cpuid_leaf80000000::leaf;
-
-            // Check if it is safe to call CPUID with this value.
-            // First we identify if the leaf is in the regular or extended range.
-            // TODO(C++17): if constexpr
-            if (L::leaf < extended_threshold)
-            {
-                // Check leaf0 in regular range
-                if (L::leaf <= leaf0().highest_leaf())
-                {
-                    leaf_cache = L::read();
-                }
-            }
-            else
-            {
-                // Check leaf80000000 in extended range
-                if (L::leaf <= leaf80000000().highest_leaf())
-                {
-                    leaf_cache = L::read();
-                }
-            }
-
-            // Mark as valid in all cases, including if it was not read.
-            // In this case it will be filled with zeros (all false).
-            m_status.set_bit<status_id>();
             return leaf_cache;
         }
 
-        inline x86_cpuid_leaf1 const& leaf1() const
+        // Limit where we need to check leaf0 or leaf 80000000.
+        constexpr auto extended_threshold = x86_cpuid_leaf80000000::leaf;
+
+        // Check if it is safe to call CPUID with this value.
+        // First we identify if the leaf is in the regular or extended range.
+        // TODO(C++17): if constexpr
+        if (L::leaf < extended_threshold)
         {
-            return safe_read_leaf<status::leaf1_valid>(m_leaf1);
+            // Check leaf0 in regular range
+            if (L::leaf <= leaf0().highest_leaf())
+            {
+                leaf_cache = L::read();
+            }
+        }
+        else
+        {
+            // Check leaf80000000 in extended range
+            if (L::leaf <= leaf80000000().highest_leaf())
+            {
+                leaf_cache = L::read();
+            }
         }
 
-        inline x86_cpuid_leaf7 const& leaf7() const
+        // Mark as valid in all cases, including if it was not read.
+        // In this case it will be filled with zeros (all false).
+        m_status.set_bit<status_id>();
+        return leaf_cache;
+    }
+
+    inline x86_xcr0 const& x86_cpu_features_backend_cpuid::xcr0() const noexcept
+    {
+        if (!m_status.bit_is_set<status::xcr0_valid>())
         {
-            return safe_read_leaf<status::leaf7_valid>(m_leaf7);
+            m_xcr0 = osxsave() ? x86_xcr0::read() : x86_xcr0::safe_default();
+            m_status.set_bit<status::xcr0_valid>();
         }
+        return m_xcr0;
+    }
 
-        inline x86_cpuid_leaf7sub1 const& leaf7sub1() const
+    inline x86_cpuid_leaf0 const& x86_cpu_features_backend_cpuid::leaf0() const
+    {
+        if (!m_status.bit_is_set<status::leaf0_valid>())
         {
-            // Check if already initialized
-            if (m_status.bit_is_set<status::leaf7sub1_valid>())
-            {
-                return m_leaf7sub1;
-            }
+            m_leaf0 = x86_cpuid_leaf0::read();
+            m_status.set_bit<status::leaf0_valid>();
+        }
+        return m_leaf0;
+    }
 
-            // Check if safe to call CPUID with this value as subleaf.
-            constexpr auto start = x86_cpuid_leaf7::eax::highest_subleaf_start;
-            constexpr auto end = x86_cpuid_leaf7::eax::highest_subleaf_end;
-            const auto highest_subleaf7 = leaf7().get_range<start, end>();
-            if (x86_cpuid_leaf7sub1::subleaf <= highest_subleaf7)
-            {
-                m_leaf7sub1 = x86_cpuid_leaf7sub1::read();
-            }
+    inline x86_cpuid_leaf80000000 const& x86_cpu_features_backend_cpuid::leaf80000000() const
+    {
+        if (!m_status.bit_is_set<status::leaf80000000_valid>())
+        {
+            m_leaf80000000 = x86_cpuid_leaf80000000::read();
+            m_status.set_bit<status::leaf80000000_valid>();
+        }
+        return m_leaf80000000;
+    }
 
-            // Mark as valid in all cases, including if it was not read.
-            // In this case it will be filled with zeros (all false).
-            m_status.set_bit<status::leaf7sub1_valid>();
+    inline x86_cpuid_leaf1 const& x86_cpu_features_backend_cpuid::leaf1() const
+    {
+        return safe_read_leaf<status::leaf1_valid>(m_leaf1);
+    }
+
+    inline x86_cpuid_leaf7 const& x86_cpu_features_backend_cpuid::leaf7() const
+    {
+        return safe_read_leaf<status::leaf7_valid>(m_leaf7);
+    }
+
+    inline x86_cpuid_leaf7sub1 const& x86_cpu_features_backend_cpuid::leaf7sub1() const
+    {
+        // Check if already initialized
+        if (m_status.bit_is_set<status::leaf7sub1_valid>())
+        {
             return m_leaf7sub1;
         }
 
-        inline x86_cpuid_leaf80000001 const& leaf80000001() const
+        // Check if safe to call CPUID with this value as subleaf.
+        constexpr auto start = x86_cpuid_leaf7::eax::highest_subleaf_start;
+        constexpr auto end = x86_cpuid_leaf7::eax::highest_subleaf_end;
+        const auto highest_subleaf7 = leaf7().get_range<start, end>();
+        if (x86_cpuid_leaf7sub1::subleaf <= highest_subleaf7)
         {
-            return safe_read_leaf<status::leaf80000001_valid>(m_leaf80000001);
+            m_leaf7sub1 = x86_cpuid_leaf7sub1::read();
         }
-    };
+
+        // Mark as valid in all cases, including if it was not read.
+        // In this case it will be filled with zeros (all false).
+        m_status.set_bit<status::leaf7sub1_valid>();
+        return m_leaf7sub1;
+    }
+
+    inline x86_cpuid_leaf80000001 const& x86_cpu_features_backend_cpuid::leaf80000001() const
+    {
+        return safe_read_leaf<status::leaf80000001_valid>(m_leaf80000001);
+    }
+
+    inline bool x86_cpu_features_backend_cpuid::osxsave() const noexcept
+    {
+        return leaf1().all_bits_set<x86_cpuid_leaf1::ecx::osxsave>();
+    }
 
     namespace detail
     {
