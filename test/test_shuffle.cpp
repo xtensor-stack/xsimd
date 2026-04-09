@@ -620,10 +620,10 @@ struct shuffle_test
     void transpose()
     {
         B b_lhs = B::load_unaligned(lhs.data());
-        std::array<B, size> b_matrix;
+        alignas(arch_type::alignment()) std::array<B, size> b_matrix = {};
         for (size_t i = 0; i < size; ++i)
             b_matrix[i] = b_lhs;
-        std::array<value_type, size * size> ref_matrix;
+        alignas(arch_type::alignment()) std::array<value_type, size * size> ref_matrix = {};
         for (size_t i = 0; i < size; ++i)
             for (size_t j = 0; j < size; ++j)
                 ref_matrix[i * size + j] = lhs[i];
