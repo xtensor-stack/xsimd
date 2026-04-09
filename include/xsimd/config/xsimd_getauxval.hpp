@@ -69,7 +69,7 @@ namespace xsimd
         }
     };
 
-    class linux_hwcap_backend_full
+    class linux_hwcap_backend
     {
     public:
         inline linux_auxval hwcap() const noexcept;
@@ -99,9 +99,17 @@ namespace xsimd
     };
 
 #if XSIMD_HAVE_LINUX_GETAUXVAL
-    using linux_hwcap_backend_default = linux_hwcap_backend_full;
+    using linux_hwcap_backend_default = linux_hwcap_backend;
 #else
-    using linux_hwcap_backend_default = linux_hwcap_backend_noop;
+    // Contrary to CPUID that is only used on one architecture, HWCAP are
+    // available on multiple architectures with different meaning for the
+    // different bit fields.
+    // We use the Linux `HWCAP` constants directly to avoid repetition, so
+    // we could not use a default implementation without already being on
+    // Linux anyways.
+    struct linux_hwcap_backend_default
+    {
+    };
 #endif
 
     /********************
@@ -123,7 +131,7 @@ namespace xsimd
 #endif
     }
 
-    inline linux_auxval linux_hwcap_backend_full::hwcap() const noexcept
+    inline linux_auxval linux_hwcap_backend::hwcap() const noexcept
     {
         if (!m_status.bit_is_set<status::hwcap_valid>())
         {
@@ -135,7 +143,7 @@ namespace xsimd
         return m_hwcap;
     }
 
-    inline linux_auxval linux_hwcap_backend_full::hwcap2() const noexcept
+    inline linux_auxval linux_hwcap_backend::hwcap2() const noexcept
     {
         if (!m_status.bit_is_set<status::hwcap2_valid>())
         {

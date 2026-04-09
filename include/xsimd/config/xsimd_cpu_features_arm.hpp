@@ -37,45 +37,51 @@ namespace xsimd
     class arm_cpu_features : private linux_hwcap_backend_default
     {
     public:
-        arm_cpu_features() noexcept = default;
+        inline bool neon() const noexcept;
+        inline bool neon64() const noexcept;
+        inline bool sve() const noexcept;
+        inline bool i8mm() const noexcept;
+    };
 
-        inline bool neon() const noexcept
-        {
+    /********************
+     *  Implementation  *
+     ********************/
+
+    inline bool arm_cpu_features::neon() const noexcept
+    {
 #if XSIMD_TARGET_ARM && !XSIMD_TARGET_ARM64 && XSIMD_HAVE_LINUX_GETAUXVAL
-            return hwcap().has_feature(HWCAP_NEON);
+        return hwcap().has_feature(HWCAP_NEON);
 #else
-            return static_cast<bool>(XSIMD_WITH_NEON);
+        return static_cast<bool>(XSIMD_WITH_NEON);
 #endif
-        }
+    }
 
-        constexpr bool neon64() const noexcept
-        {
-            return static_cast<bool>(XSIMD_WITH_NEON64);
-        }
+    inline bool arm_cpu_features::neon64() const noexcept
+    {
+        return static_cast<bool>(XSIMD_WITH_NEON64);
+    }
 
-        inline bool sve() const noexcept
-        {
+    inline bool arm_cpu_features::sve() const noexcept
+    {
 #if XSIMD_TARGET_ARM64 && XSIMD_HAVE_LINUX_GETAUXVAL
-            return hwcap().has_feature(HWCAP_SVE);
+        return hwcap().has_feature(HWCAP_SVE);
 #else
-            return false;
+        return false;
 #endif
-        }
+    }
 
-        inline bool i8mm() const noexcept
-        {
-
+    inline bool arm_cpu_features::i8mm() const noexcept
+    {
 #if XSIMD_TARGET_ARM64 && XSIMD_HAVE_LINUX_GETAUXVAL
 #ifdef HWCAP2_I8MM
-            return hwcap2().has_feature(HWCAP2_I8MM);
+        return hwcap2().has_feature(HWCAP2_I8MM);
 #else
-            // Possibly missing on older Linux distributions
-            return hwcap2().has_feature(1 << 13);
+        // Possibly missing on older Linux distributions
+        return hwcap2().has_feature(1 << 13);
 #endif
 #else
-            return false;
+        return false;
 #endif
-        }
-    };
+    }
 }
 #endif
