@@ -9,6 +9,8 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include <vector>
+
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
@@ -620,13 +622,14 @@ struct shuffle_test
     void transpose()
     {
         B b_lhs = B::load_unaligned(lhs.data());
-        std::array<B, size> b_matrix;
+        // Due to issue with Qemu AVX512, we rely on vector for this otherwise static array
+        std::vector<B, xsimd::aligned_allocator<B>> b_matrix = {};
         for (size_t i = 0; i < size; ++i)
-            b_matrix[i] = b_lhs;
-        std::array<value_type, size * size> ref_matrix;
+            b_matrix.emplace_back(b_lhs);
+        std::vector<value_type, xsimd::aligned_allocator<value_type>> ref_matrix = {};
         for (size_t i = 0; i < size; ++i)
             for (size_t j = 0; j < size; ++j)
-                ref_matrix[i * size + j] = lhs[i];
+                ref_matrix.emplace_back(lhs[i]);
 
         INFO("transpose");
         xsimd::transpose(b_matrix.data(), b_matrix.data() + b_matrix.size());
