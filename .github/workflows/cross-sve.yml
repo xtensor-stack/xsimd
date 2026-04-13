@@ -3,23 +3,35 @@ on: [push, pull_request]
 concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   build:
-    runs-on: ubuntu-latest
-    name: 'Arm SVE${{ matrix.vector_bits }}'
+    runs-on: ubuntu-24.04-arm
+    name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - Arm SVE${{ matrix.vector_bits }}'
     strategy:
       matrix:
         vector_bits:
           - 128
           - 256
           - 512
+        sys:
+          - { compiler: 'gcc',   version: '14' }
+          - { compiler: 'clang', version: '20' }
     steps:
-    - name: Setup compiler
+    - name: Setup GCC
+      if: ${{ matrix.sys.compiler == 'gcc' }}
       run: |
         sudo apt-get update || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install g++-10-aarch64-linux-gnu || exit 1
-        sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 20
-        sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10 20
+        sudo apt-get --no-install-suggests --no-install-recommends install g++-${{ matrix.sys.version }} || exit 1
+        echo "CC=gcc-${{ matrix.sys.version }}"   >> $GITHUB_ENV
+        echo "CXX=g++-${{ matrix.sys.version }}"  >> $GITHUB_ENV
+    - name: Setup Clang
+      if: ${{ matrix.sys.compiler == 'clang' }}
+      run: |
+        sudo apt-get update || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install clang-${{ matrix.sys.version }} || exit 1
+        echo "CC=clang-${{ matrix.sys.version }}"    >> $GITHUB_ENV
+        echo "CXX=clang++-${{ matrix.sys.version }}" >> $GITHUB_ENV
     - name: Setup QEMU
       run: |
         sudo apt-get --no-install-suggests --no-install-recommends install qemu-user
@@ -34,10 +46,11 @@ jobs:
               -GNinja \
               -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
               -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_C_COMPILER=${{ env.CC }} \
+              -DCMAKE_CXX_COMPILER=${{ env.CXX }} \
               -DTARGET_ARCH=generic \
               -DCMAKE_C_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" \
-              -DCMAKE_CXX_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" \
-              -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/gcc-aarch64-linux-gnu.cmake
+              -DCMAKE_CXX_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}"
     - name: Build
       run: cmake --build _build
     - name: Set CPU feature test expectations
@@ -48,5 +61,5 @@ jobs:
         echo "XSIMD_TEST_CPU_ASSUME_SVE=1"    >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"
     - name: Testing xsimd
-      run: qemu-aarch64 --cpu max,sve${{ matrix.vector_bits }}=on -L /usr/aarch64-linux-gnu/ ./test/test_xsimd
+      run: qemu-aarch64 --cpu max,sve${{ matrix.vector_bits }}=on ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build
