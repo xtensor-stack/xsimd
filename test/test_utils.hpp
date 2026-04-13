@@ -386,27 +386,47 @@ namespace detail
         b.store_unaligned(dst.data() + i);
     }
 
+    // Non-template context scope to avoid per-instantiation vtable issues with MinGW GCC.
+    // INFO() creates a ContextScope<Lambda> with a unique vtable per template instantiation.
+    // This concrete class has a single vtable definition shared across all instantiations.
+    struct StringContextScope : doctest::detail::ContextScopeBase
+    {
+        std::string msg_;
+        explicit StringContextScope(std::string msg)
+            : msg_(std::move(msg))
+        {
+        }
+        void stringify(std::ostream* os) const override { *os << msg_; }
+    };
+
+    template <class T>
+    StringContextScope make_context_info(const char* name, const T& val)
+    {
+        return StringContextScope(std::string(name) + ":" + doctest::toString(val).c_str());
+    }
 }
 
-#define CHECK_BATCH_EQ(b1, b2)                            \
-    do                                                    \
-    {                                                     \
-        INFO(#b1 ":", b1);                                \
-        INFO(#b2 ":", b2);                                \
-        CHECK_UNARY(::detail::expect_batch_near(b1, b2)); \
+// Use make_context_info instead of INFO() to avoid MinGW GCC vtable issues
+// (see StringContextScope above).
+#define CHECK_BATCH_EQ(b1, b2)                             \
+    do                                                     \
+    {                                                      \
+        auto _ctx1 = ::detail::make_context_info(#b1, b1); \
+        auto _ctx2 = ::detail::make_context_info(#b2, b2); \
+        CHECK_UNARY(::detail::expect_batch_near(b1, b2));  \
     } while (0)
 #define CHECK_SCALAR_EQ(s1, s2)                            \
     do                                                     \
     {                                                      \
-        INFO(#s1 ":", s1);                                 \
-        INFO(#s2 ":", s2);                                 \
+        auto _ctx1 = ::detail::make_context_info(#s1, s1); \
+        auto _ctx2 = ::detail::make_context_info(#s2, s2); \
         CHECK_UNARY(::detail::expect_scalar_near(s1, s2)); \
     } while (0)
 #define CHECK_VECTOR_EQ(v1, v2)                            \
     do                                                     \
     {                                                      \
-        INFO(#v1 ":", v1);                                 \
-        INFO(#v2 ":", v2);                                 \
+        auto _ctx1 = ::detail::make_context_info(#v1, v1); \
+        auto _ctx2 = ::detail::make_context_info(#v2, v2); \
         CHECK_UNARY(::detail::expect_vector_near(v1, v2)); \
     } while (0)
 
