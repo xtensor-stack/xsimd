@@ -406,28 +406,47 @@ namespace detail
     }
 }
 
-// Use make_context_info instead of INFO() to avoid MinGW GCC vtable issues
-// (see StringContextScope above).
-#define CHECK_BATCH_EQ(b1, b2)                             \
-    do                                                     \
-    {                                                      \
-        auto _ctx1 = ::detail::make_context_info(#b1, b1); \
-        auto _ctx2 = ::detail::make_context_info(#b2, b2); \
-        CHECK_UNARY(::detail::expect_batch_near(b1, b2));  \
+// We use make_context_info instead of INFO() to avoid MinGW GCC vtable issues
+// (see StringContextScope above). Unlike INFO(), make_context_info is eager:
+// it stringifies its operands at construction. To keep the happy path cheap
+// (these macros are called in tight loops and QEMU-emulated CI targets like
+// ppc64le blow past wall-clock otherwise), we first evaluate the predicate
+// and only build the context when it fails. On failure the predicate is
+// re-evaluated inside CHECK_UNARY so doctest records the expression text;
+// this requires the operands to be side-effect-free, which holds for all
+// call sites here.
+#define CHECK_BATCH_EQ(b1, b2)                                 \
+    do                                                         \
+    {                                                          \
+        const bool batches_are_near = ::detail::expect_batch_near(b1, b2); \
+        if (!batches_are_near)                                 \
+        {                                                      \
+            auto _ctx1 = ::detail::make_context_info(#b1, b1); \
+            auto _ctx2 = ::detail::make_context_info(#b2, b2); \
+            CHECK_UNARY(::detail::expect_batch_near(b1, b2));  \
+        }                                                      \
     } while (0)
-#define CHECK_SCALAR_EQ(s1, s2)                            \
-    do                                                     \
-    {                                                      \
-        auto _ctx1 = ::detail::make_context_info(#s1, s1); \
-        auto _ctx2 = ::detail::make_context_info(#s2, s2); \
-        CHECK_UNARY(::detail::expect_scalar_near(s1, s2)); \
+#define CHECK_SCALAR_EQ(s1, s2)                                \
+    do                                                         \
+    {                                                          \
+        const bool scalars_are_near = ::detail::expect_scalar_near(s1, s2); \
+        if (!scalars_are_near)                                 \
+        {                                                      \
+            auto _ctx1 = ::detail::make_context_info(#s1, s1); \
+            auto _ctx2 = ::detail::make_context_info(#s2, s2); \
+            CHECK_UNARY(::detail::expect_scalar_near(s1, s2)); \
+        }                                                      \
     } while (0)
-#define CHECK_VECTOR_EQ(v1, v2)                            \
-    do                                                     \
-    {                                                      \
-        auto _ctx1 = ::detail::make_context_info(#v1, v1); \
-        auto _ctx2 = ::detail::make_context_info(#v2, v2); \
-        CHECK_UNARY(::detail::expect_vector_near(v1, v2)); \
+#define CHECK_VECTOR_EQ(v1, v2)                                \
+    do                                                         \
+    {                                                          \
+        const bool vectors_are_near = ::detail::expect_vector_near(v1, v2); \
+        if (!vectors_are_near)                                 \
+        {                                                      \
+            auto _ctx1 = ::detail::make_context_info(#v1, v1); \
+            auto _ctx2 = ::detail::make_context_info(#v2, v2); \
+            CHECK_UNARY(::detail::expect_vector_near(v1, v2)); \
+        }                                                      \
     } while (0)
 
 /***********************
