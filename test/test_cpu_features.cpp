@@ -142,7 +142,7 @@ TEST_CASE("[cpu_features] arm implication chains")
 
     CHECK_IMPLICATION(cpu.neon64(), cpu.neon());
     CHECK_IMPLICATION(cpu.sve(), cpu.neon64());
-    CHECK_IMPLICATION(cpu.sve(), cpu.sve_size_bytes() >= 128);
+    CHECK_IMPLICATION(cpu.sve(), cpu.sve_size_bytes() >= (128 / 8));
     CHECK_IMPLICATION(cpu.i8mm(), cpu.neon64());
 }
 
@@ -160,7 +160,7 @@ TEST_CASE("[cpu_features] risc-v implication chains")
 {
     xsimd::riscv_cpu_features cpu;
 
-    CHECK_IMPLICATION(cpu.rvv(), cpu.rvv_size_bytes() >= 128);
+    CHECK_IMPLICATION(cpu.rvv(), cpu.rvv_size_bytes() >= (128 / 8));
 }
 
 TEST_CASE("[cpu_features] risc-v features from environment")
