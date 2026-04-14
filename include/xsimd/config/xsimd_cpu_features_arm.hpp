@@ -12,6 +12,9 @@
 #ifndef XSIMD_CPU_FEATURES_ARM_HPP
 #define XSIMD_CPU_FEATURES_ARM_HPP
 
+#include <cstddef>
+#include <cstdint>
+
 #include "./xsimd_config.hpp"
 #include "./xsimd_getauxval.hpp"
 
@@ -24,6 +27,24 @@
 
 namespace xsimd
 {
+
+    namespace detail
+    {
+        using arm_reg64_t = std::uint64_t;
+
+        /**
+         * Return the SVE vector length in bytes for the current thread.
+         *
+         * SVE vector length can be restricted
+         * Contrary to `svcntb` this does not require to be compiles with SVE, which
+         * should not be done in a dynamic dispatch jump function.
+         *
+         * Safety: It is the user responsibility to first make sure that SVE is
+         * available.
+         */
+        inline arm_reg64_t arm_rdvl_unsafe();
+    }
+
     /**
      * An opinionated CPU feature detection utility for ARM.
      *
@@ -40,12 +61,27 @@ namespace xsimd
         inline bool neon() const noexcept;
         inline bool neon64() const noexcept;
         inline bool sve() const noexcept;
+        inline std::size_t sve_size_bytes() const noexcept;
         inline bool i8mm() const noexcept;
     };
 
     /********************
      *  Implementation  *
      ********************/
+
+    namespace detail
+    {
+#if XSIMD_TARGET_ARM64 && (defined(__GNUC__) || defined(__clang__))
+        __attribute__((target("arch=armv8-a+sve"))) inline arm_reg64_t arm_rdvl_unsafe()
+        {
+            arm_reg64_t vl;
+            __asm__ volatile("rdvl %0, #1" : "=r"(vl));
+            return vl;
+        }
+#else
+        inline arm_reg64_t arm_rdvl_unsafe() { return 0; }
+#endif
+    }
 
     inline bool arm_cpu_features::neon() const noexcept
     {
@@ -68,6 +104,15 @@ namespace xsimd
 #else
         return false;
 #endif
+    }
+
+    inline std::size_t arm_cpu_features::sve_size_bytes() const noexcept
+    {
+        if (sve())
+        {
+            return detail::arm_rdvl_unsafe();
+        }
+        return 0;
     }
 
     inline bool arm_cpu_features::i8mm() const noexcept
