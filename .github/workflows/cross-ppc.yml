@@ -3,10 +3,11 @@ on: [push, pull_request]
 concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: '${{ matrix.target.arch }}, ${{ matrix.sys.compiler }} ${{ matrix.sys.version }}'
+    name: '${{ matrix.target.platform }}, ${{ matrix.sys.compiler }} ${{ matrix.sys.version }}'
     strategy:
       matrix:
         target:
