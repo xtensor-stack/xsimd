@@ -156,6 +156,13 @@ TEST_CASE("[cpu_features] arm features from environment")
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_I8MM", cpu.i8mm());
 }
 
+TEST_CASE("[cpu_features] risc-v implication chains")
+{
+    xsimd::riscv_cpu_features cpu;
+
+    CHECK_IMPLICATION(cpu.rvv(), cpu.rvv_size_bytes() >= 128);
+}
+
 TEST_CASE("[cpu_features] risc-v features from environment")
 {
     xsimd::riscv_cpu_features cpu;
