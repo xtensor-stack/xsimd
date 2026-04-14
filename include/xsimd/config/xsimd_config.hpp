@@ -467,6 +467,17 @@
 /**
  * @ingroup xsimd_config_macro
  *
+ * Set to 1 if the target is the RISC-V architecture family.
+ */
+#ifdef __riscv
+#define XSIMD_TARGET_RISCV 1
+#else
+#define XSIMD_TARGET_RISCV 0
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
  * Set to 1 if RVV is available and bit width is pre-set at compile-time, to 0 otherwise.
  */
 #if defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0

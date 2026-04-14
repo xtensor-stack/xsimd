@@ -24,6 +24,7 @@ jobs:
       run: cmake --build _build --target xbenchmark --verbose
     - name: Set CPU feature test expectations
       run: |
+        echo "XSIMD_TEST_CPU_ASSUME_RVV=0" >> "$GITHUB_ENV"
         if echo '${{ matrix.os }}' | grep -q intel; then
           echo "XSIMD_TEST_CPU_ASSUME_NEON64=0" >> "$GITHUB_ENV"
           echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=1" >> "$GITHUB_ENV"

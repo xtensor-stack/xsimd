@@ -43,6 +43,7 @@ jobs:
     - name: Set CPU feature test expectations
       run: |
         echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_RVV=0" >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_NEON64=1" >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_SVE=1"    >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"

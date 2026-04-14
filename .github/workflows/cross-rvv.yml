@@ -56,6 +56,11 @@ jobs:
         -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-riscv64-linux-gnu.cmake
     - name: Build
       run: cmake --build _build
+    - name: Set CPU feature test expectations
+      run: |
+        echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_SVE=0"    >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_RVV=1" >> "$GITHUB_ENV"
     - name: Testing xsimd
       run: >
         QEMU_CPU="rv64,zba=true,zbb=true,zbs=true,v=true,vlen=${{ matrix.vector_bits }},elen=64,vext_spec=v1.0"

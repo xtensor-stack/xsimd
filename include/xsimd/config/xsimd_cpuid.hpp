@@ -14,13 +14,9 @@
 
 #include "../types/xsimd_all_registers.hpp"
 #include "./xsimd_cpu_features_arm.hpp"
+#include "./xsimd_cpu_features_riscv.hpp"
 #include "./xsimd_cpu_features_x86.hpp"
 #include "./xsimd_inline.hpp"
-
-#if XSIMD_HAVE_LINUX_GETAUXVAL && defined(__riscv_vector)
-#include <asm/hwcap.h>
-#include <sys/auxv.h>
-#endif
 
 namespace xsimd
 {
@@ -88,15 +84,10 @@ namespace xsimd
                 vsx = 1;
 #endif
 
-#if XSIMD_HAVE_LINUX_GETAUXVAL
-#if defined(__riscv_vector) && defined(__riscv_v_fixed_vlen) && __riscv_v_fixed_vlen > 0
+                // Safe on all platforms, it will be all false if non risc-v.
+                const auto riscv_cpu = xsimd::riscv_cpu_features();
 
-#ifndef HWCAP_V
-#define HWCAP_V (1 << ('V' - 'A'))
-#endif
-                rvv = bool(getauxval(AT_HWCAP) & HWCAP_V);
-#endif
-#endif
+                rvv = riscv_cpu.rvv();
 
                 // Safe on all platforms, it will be all false if non arm.
                 const auto arm_cpu = xsimd::arm_cpu_features();

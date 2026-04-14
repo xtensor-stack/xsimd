@@ -22,11 +22,6 @@
 // Header does not exists on all architectures and masks are architecture
 // specific.
 #include <asm/hwcap.h>
-
-// Port possibly missing mask. Should only be defined on Arm64.
-#if XSIMD_TARGET_ARM64 && !defined(HWCAP2_I8MM)
-#define HWCAP2_I8MM (1 << 13)
-#endif
 #endif // XSIMD_TARGET_ARM && XSIMD_HAVE_LINUX_GETAUXVAL
 
 namespace xsimd
@@ -71,8 +66,14 @@ namespace xsimd
 
         inline bool i8mm() const noexcept
         {
+
 #if XSIMD_TARGET_ARM64 && XSIMD_HAVE_LINUX_GETAUXVAL
+#ifdef HWCAP2_I8MM
             return hwcap2().has_feature(HWCAP2_I8MM);
+#else
+            // Possibly missing on older Linux distributions
+            return hwcap2().has_feature(1 << 13);
+#endif
 #else
             return false;
 #endif
