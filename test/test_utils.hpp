@@ -423,9 +423,10 @@ namespace detail
         {                                                                  \
             auto _ctx1 = ::detail::make_context_info(#b1, b1);             \
             auto _ctx2 = ::detail::make_context_info(#b2, b2);             \
-            CHECK_UNARY(::detail::expect_batch_near(b1, b2));              \
+            CHECK_UNARY(batches_are_near);                                 \
         }                                                                  \
     } while (0)
+
 #define CHECK_SCALAR_EQ(s1, s2)                                             \
     do                                                                      \
     {                                                                       \
@@ -434,9 +435,10 @@ namespace detail
         {                                                                   \
             auto _ctx1 = ::detail::make_context_info(#s1, s1);              \
             auto _ctx2 = ::detail::make_context_info(#s2, s2);              \
-            CHECK_UNARY(::detail::expect_scalar_near(s1, s2));              \
+            CHECK_UNARY(scalars_are_near);                                  \
         }                                                                   \
     } while (0)
+
 #define CHECK_VECTOR_EQ(v1, v2)                                             \
     do                                                                      \
     {                                                                       \
@@ -445,7 +447,7 @@ namespace detail
         {                                                                   \
             auto _ctx1 = ::detail::make_context_info(#v1, v1);              \
             auto _ctx2 = ::detail::make_context_info(#v2, v2);              \
-            CHECK_UNARY(::detail::expect_vector_near(v1, v2));              \
+            CHECK_UNARY(vectors_are_near);                                  \
         }                                                                   \
     } while (0)
 
