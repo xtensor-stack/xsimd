@@ -502,6 +502,17 @@
 /**
  * @ingroup xsimd_config_macro
  *
+ * Set to 1 if the target is in the PowerPC architecture family, to 0 otherwise
+ */
+#if defined(__powerpc__) || defined(__powerpc64__) || defined(_ARCH_PPC) || defined(_ARCH_PPC64)
+#define XSIMD_TARGET_PPC 1
+#else
+#define XSIMD_TARGET_PPC 0
+#endif
+
+/**
+ * @ingroup xsimd_config_macro
+ *
  * Set to 1 if VMX with VSX extension is available at compile-time, to 0 otherwise.
  */
 #if defined(__VEC__) && defined(__VSX__)

@@ -169,3 +169,10 @@ TEST_CASE("[cpu_features] risc-v features from environment")
 
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_RVV", cpu.rvv());
 }
+
+TEST_CASE("[cpu_features] ppc features from environment")
+{
+    xsimd::ppc_cpu_features cpu;
+
+    CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_VSX", cpu.vsx());
+}
