@@ -63,12 +63,12 @@ namespace xsimd
             ARCH_FIELD(neon)
             ARCH_FIELD(neon64)
             ARCH_FIELD_EX(i8mm<::xsimd::neon64>, i8mm_neon64)
-            ARCH_FIELD_EX(detail::sve<512>, sve)
-            ARCH_FIELD_EX_REUSE(detail::sve<256>, sve)
-            ARCH_FIELD_EX_REUSE(detail::sve<128>, sve)
-            ARCH_FIELD_EX(detail::rvv<512>, rvv)
-            ARCH_FIELD_EX_REUSE(detail::rvv<256>, rvv)
-            ARCH_FIELD_EX_REUSE(detail::rvv<128>, rvv)
+            ARCH_FIELD_EX(detail::sve<512>, sve512)
+            ARCH_FIELD_EX(detail::sve<256>, sve256)
+            ARCH_FIELD_EX(detail::sve<128>, sve128)
+            ARCH_FIELD_EX(detail::rvv<512>, rvv512)
+            ARCH_FIELD_EX(detail::rvv<256>, rvv256)
+            ARCH_FIELD_EX(detail::rvv<128>, rvv128)
             ARCH_FIELD(wasm)
             ARCH_FIELD(vsx)
 
@@ -87,7 +87,9 @@ namespace xsimd
                 // Safe on all platforms, it will be all false if non risc-v.
                 const auto riscv_cpu = xsimd::riscv_cpu_features();
 
-                rvv = riscv_cpu.rvv();
+                rvv128 = riscv_cpu.rvv() && (riscv_cpu.rvv_size_bytes() >= (128 / 8));
+                rvv256 = riscv_cpu.rvv() && (riscv_cpu.rvv_size_bytes() >= (256 / 8));
+                rvv512 = riscv_cpu.rvv() && (riscv_cpu.rvv_size_bytes() >= (512 / 8));
 
                 // Safe on all platforms, it will be all false if non arm.
                 const auto arm_cpu = xsimd::arm_cpu_features();
@@ -95,7 +97,9 @@ namespace xsimd
                 neon = arm_cpu.neon();
                 neon64 = arm_cpu.neon64();
                 i8mm_neon64 = arm_cpu.neon64() && arm_cpu.i8mm();
-                sve = arm_cpu.sve();
+                sve128 = arm_cpu.sve() && (arm_cpu.sve_size_bytes() >= (128 / 8));
+                sve256 = arm_cpu.sve() && (arm_cpu.sve_size_bytes() >= (256 / 8));
+                sve512 = arm_cpu.sve() && (arm_cpu.sve_size_bytes() >= (512 / 8));
 
                 // Safe on all platforms, it will be all false if non x86.
                 const auto x86_cpu = xsimd::x86_cpu_features();
