@@ -42,7 +42,7 @@ jobs:
       uses: actions/checkout@v6
     - name: Setup
       run: |
-        cmake -B _build \
+        cmake -B build/ \
               -GNinja \
               -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
               -DCMAKE_BUILD_TYPE=Release \
@@ -52,7 +52,7 @@ jobs:
               -DCMAKE_C_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" \
               -DCMAKE_CXX_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}"
     - name: Build
-      run: cmake --build _build
+      run: cmake --build build/
     - name: Set CPU feature test expectations
       run: |
         echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=0" >> "$GITHUB_ENV"
@@ -61,5 +61,4 @@ jobs:
         echo "XSIMD_TEST_CPU_ASSUME_SVE=1"    >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"
     - name: Testing xsimd
-      run: qemu-aarch64 --cpu max,sve${{ matrix.vector_bits }}=on ./test/test_xsimd
-      working-directory: ${{ github.workspace }}/_build
+      run: qemu-aarch64 --cpu max,sve${{ matrix.vector_bits }}=on ./build/test/test_xsimd
