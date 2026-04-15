@@ -108,7 +108,7 @@ namespace xsimd
 
         // load_masked
         template <class A, class T, bool... Values, class Mode, detail::sve_enable_all_t<T> = 0>
-        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<sve>) noexcept
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<float, A, Values...>, Mode, requires_arch<sve>) noexcept
         {
             return svld1(detail::sve_pmask<Values...>(), reinterpret_cast<detail::sve_fix_char_t<T> const*>(mem));
         }
