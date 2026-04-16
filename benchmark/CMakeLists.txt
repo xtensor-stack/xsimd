@@ -9,13 +9,12 @@
 # The full license is in the file LICENSE, distributed with this software. #
 ############################################################################
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     project(xsimd-benchmark)
 
     find_package(xsimd REQUIRED CONFIG)
-    set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIRS})
 endif ()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -63,18 +62,16 @@ if(MSVC)
     endforeach()
 endif()
 
-include_directories(${XSIMD_INCLUDE_DIR})
-
-set(XSIMD_BENCHMARK
+set(XSIMD_BENCHMARK_SRC
     main.cpp
     xsimd_benchmark.hpp
 )
 
-set(XSIMD_BENCHMARK_TARGET benchmark_xsimd)
-add_executable(${XSIMD_BENCHMARK_TARGET} ${XSIMD_BENCHMARK} ${XSIMD_HEADERS})
+add_executable(benchmark_xsimd ${XSIMD_BENCHMARK_SRC})
+target_link_libraries(benchmark_xsimd PRIVATE xsimd)
 
 if(ENABLE_XTL_COMPLEX)
     target_link_libraries(benchmark_xsimd PRIVATE xtl)
 endif()
 
-add_custom_target(xbenchmark COMMAND benchmark_xsimd DEPENDS ${XSIMD_BENCHMARK_TARGET})
+add_custom_target(xbenchmark COMMAND benchmark_xsimd DEPENDS benchmark_xsimd)

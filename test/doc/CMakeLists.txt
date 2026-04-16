@@ -3,6 +3,10 @@
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" AND NOT CMAKE_OSX_ARCHITECTURES)
 
+if(NOT TARGET xsimd)
+    find_package(xsimd REQUIRED CONFIG)
+endif()
+
 if(ENABLE_XTL_COMPLEX)
   add_compile_definitions(XSIMD_ENABLE_XTL_COMPLEX=1)
   include_directories(${xtl_INCLUDE_DIRS})
@@ -16,19 +20,19 @@ add_library(test_doc_any_arch OBJECT
             manipulating_abstract_batches.cpp
             manipulating_parametric_batches.cpp
             writing_vectorized_code.cpp)
-target_include_directories(test_doc_any_arch PRIVATE ${XSIMD_INCLUDE_DIR})
+target_link_libraries(test_doc_any_arch PRIVATE xsimd)
 target_compile_options(test_doc_any_arch PRIVATE -mavx)
 
 add_library(test_doc_avx2 OBJECT
             explicit_use_of_an_instruction_set.cpp
             sum_avx2.cpp)
+target_link_libraries(test_doc_avx2 PRIVATE xsimd)
 target_compile_options(test_doc_avx2 PRIVATE -mavx2)
-target_include_directories(test_doc_avx2 PRIVATE ${XSIMD_INCLUDE_DIR})
 
 add_library(test_doc_sse2 OBJECT
             sum_sse2.cpp)
+target_link_libraries(test_doc_sse2 PRIVATE xsimd)
 target_compile_options(test_doc_sse2 PRIVATE -msse2)
-target_include_directories(test_doc_sse2 PRIVATE ${XSIMD_INCLUDE_DIR})
 
 add_dependencies(xtest test_doc_any_arch test_doc_avx2 test_doc_sse2)
 
