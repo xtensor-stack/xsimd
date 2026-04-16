@@ -123,8 +123,6 @@ if(${XSIMD_SKIP_INSTALL})
     return() # skip installation
 endif ()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(JoinPaths)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
