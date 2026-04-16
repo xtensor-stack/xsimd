@@ -9,15 +9,13 @@
 # The full license is in the file LICENSE, distributed with this software. #
 ############################################################################
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
+
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     project(xsimd-examples)
 
     find_package(xsimd REQUIRED CONFIG)
-    set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIR})
 endif ()
-
-include_directories(${XSIMD_INCLUDE_DIR})
 
 if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "Setting examples build type to Release")
@@ -35,7 +33,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     endif()
 endif()
 
-add_executable(mandelbrot mandelbrot.cpp ${XSIMD_HEADERS})
+add_executable(mandelbrot mandelbrot.cpp)
+target_link_libraries(mandelbrot PRIVATE xsimd)
 set_property(TARGET mandelbrot PROPERTY CXX_STANDARD 14)
 if(ENABLE_XTL_COMPLEX)
     target_link_libraries(mandelbrot PRIVATE xtl)

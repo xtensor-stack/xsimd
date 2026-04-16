@@ -9,7 +9,7 @@
 # The full license is in the file LICENSE, distributed with this software. #
 ############################################################################
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     project(xsimd-test)
@@ -17,7 +17,6 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     enable_testing()
 
     find_package(xsimd REQUIRED CONFIG)
-    set(XSIMD_INCLUDE_DIR ${xsimd_INCLUDE_DIRS})
 endif ()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -174,8 +173,8 @@ if(NOT MSVC)
     list(APPEND XSIMD_TESTS test_gnu_source.cpp)
 endif()
 
-add_executable(test_xsimd ${XSIMD_TESTS} ${XSIMD_HEADERS})
-target_include_directories(test_xsimd PRIVATE ${XSIMD_INCLUDE_DIR})
+add_executable(test_xsimd ${XSIMD_TESTS})
+target_link_libraries(test_xsimd PRIVATE xsimd)
 
 option(DOWNLOAD_DOCTEST OFF)
 find_package(doctest QUIET)
