@@ -912,6 +912,16 @@ namespace xsimd
             {
                 return _mm256_mullo_epi32(self, other);
             }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm256_add_epi64(
+                    _mm256_mul_epu32(self, other),
+                    _mm256_slli_epi64(
+                        _mm256_add_epi64(
+                            _mm256_mul_epu32(other, _mm256_shuffle_epi32(self, _MM_SHUFFLE(2, 3, 0, 1))),
+                            _mm256_mul_epu32(self, _mm256_shuffle_epi32(other, _MM_SHUFFLE(2, 3, 0, 1)))),
+                        32));
+            }
             else
             {
                 return mul(self, other, avx {});
