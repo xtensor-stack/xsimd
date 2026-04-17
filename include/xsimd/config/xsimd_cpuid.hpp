@@ -14,6 +14,7 @@
 
 #include "../types/xsimd_all_registers.hpp"
 #include "./xsimd_cpu_features_arm.hpp"
+#include "./xsimd_cpu_features_ppc.hpp"
 #include "./xsimd_cpu_features_riscv.hpp"
 #include "./xsimd_cpu_features_x86.hpp"
 #include "./xsimd_inline.hpp"
@@ -80,9 +81,10 @@ namespace xsimd
                 wasm = 1;
 #endif
 
-#if XSIMD_WITH_VSX
-                vsx = 1;
-#endif
+                // Safe on all platforms, it will be false if non PowerPC.
+                const auto ppc_cpu = xsimd::ppc_cpu_features();
+
+                vsx = ppc_cpu.vsx();
 
                 // Safe on all platforms, it will be all false if non risc-v.
                 const auto riscv_cpu = xsimd::riscv_cpu_features();

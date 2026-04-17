@@ -35,7 +35,7 @@ jobs:
       uses: actions/checkout@v6
     - name: Setup
       run: |
-        cmake -B _build \
+        cmake -B build/ \
               -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
               -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} \
               -DCMAKE_BUILD_TYPE=Release \
@@ -43,7 +43,15 @@ jobs:
               -DCMAKE_CXX_FLAGS="${{ matrix.target.flags }}" \
               -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
     - name: Build
-      run: cmake --build _build --verbose -j1
+      run: cmake --build build/ --verbose -j1
+    - name: Set CPU feature test expectations
+      run: |
     - name: Testing xsimd
-      run: qemu-${{ matrix.target.platform }} -cpu power10 -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
-      working-directory: ${{ github.workspace }}/_build
+      run: |
+        # Set CPU feature test expectations, 0 is explicit absence of the feature
+        export XSIMD_TEST_CPU_ASSUME_SSE4_2="0"
+        export XSIMD_TEST_CPU_ASSUME_NEON64="0"
+        export XSIMD_TEST_CPU_ASSUME_RVV="0"
+        export XSIMD_TEST_CPU_ASSUME_VSX="1"
+
+        qemu-${{ matrix.target.platform }} -cpu power10 -L /usr/${{ matrix.target.dir}}/ ./build/test/test_xsimd
