@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <utility>
 
 namespace xsimd
 {
@@ -57,6 +58,11 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>>
+        mul_hilo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
@@ -120,6 +126,15 @@ namespace xsimd
             XSIMD_INLINE constexpr bool is_only_from_lo(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_only_from_hi(batch_constant<T, A, Vs...>) noexcept;
+
+            template <class A, class WMul>
+            XSIMD_INLINE batch<uint64_t, A> mulhi_u64_core(batch<uint64_t, A> const& x,
+                                                           batch<uint64_t, A> const& y,
+                                                           WMul mul_epu32) noexcept;
+            template <class A, class WMul>
+            XSIMD_INLINE batch<int64_t, A> mulhi_i64_core(batch<int64_t, A> const& x,
+                                                          batch<int64_t, A> const& y,
+                                                          WMul mul_epu32) noexcept;
         }
     }
 }
