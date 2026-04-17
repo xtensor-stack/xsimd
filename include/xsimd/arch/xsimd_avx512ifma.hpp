@@ -12,9 +12,6 @@
 #ifndef XSIMD_AVX512IFMA_HPP
 #define XSIMD_AVX512IFMA_HPP
 
-#include <array>
-#include <type_traits>
-
 #include "../types/xsimd_avx512ifma_register.hpp"
 
 #endif

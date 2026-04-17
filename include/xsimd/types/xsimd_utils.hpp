@@ -12,10 +12,10 @@
 #ifndef XSIMD_UTILS_HPP
 #define XSIMD_UTILS_HPP
 
+#include <array>
 #include <complex>
 #include <cstdint>
 #include <cstring>
-#include <tuple>
 #include <type_traits>
 #include <utility>
 

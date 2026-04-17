@@ -1,6 +1,5 @@
 #include "xsimd/xsimd.hpp"
 #include <cstddef>
-#include <vector>
 
 template <class C, class Tag>
 void mean(const C& a, const C& b, C& res, Tag)

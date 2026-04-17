@@ -14,6 +14,7 @@ jobs:
         git fetch origin ${{ github.event.pull_request.base.sha }}
         git clang-format --diff ${{ github.event.pull_request.base.sha }} | tee diff.patch
         ! grep -q '^diff ' diff.patch
+
   inlining-check:
     runs-on: ubuntu-latest
     name: Check inline keyword usage
@@ -22,3 +23,10 @@ jobs:
     - run: sudo apt install clang-tools
     - run: sh ./test/check_inline_specifier.sh .
 
+  include-check:
+    runs-on: ubuntu-latest
+    name: Check unused standard includes
+    steps:
+    - uses: actions/checkout@v6
+    - run: pip install diskarzhan
+    - run: diskarzhan `find -name '*.[ch]pp'`

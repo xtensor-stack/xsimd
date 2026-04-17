@@ -12,7 +12,6 @@
 
 #include <complex>
 #include <type_traits>
-#include <utility>
 
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_rvv_register.hpp"

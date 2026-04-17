@@ -13,7 +13,6 @@
 #define XSIMD_EMULATED_HPP
 
 #include <complex>
-#include <limits>
 #include <numeric>
 #include <type_traits>
 

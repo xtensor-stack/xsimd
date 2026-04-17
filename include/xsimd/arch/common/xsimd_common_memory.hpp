@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <array>
 #include <complex>
-#include <stdexcept>
 
 #include "../../types/xsimd_batch_constant.hpp"
 #include "./xsimd_common_details.hpp"

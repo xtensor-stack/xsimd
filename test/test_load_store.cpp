@@ -13,7 +13,6 @@
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #include <algorithm>
-#include <functional>
 #include <random>
 #include <type_traits>
 

@@ -12,7 +12,6 @@
 #ifndef XSIMD_AVX512VBMI2_HPP
 #define XSIMD_AVX512VBMI2_HPP
 
-#include <array>
 #include <type_traits>
 
 #include "../types/xsimd_avx512vbmi2_register.hpp"
