@@ -1772,6 +1772,41 @@ namespace xsimd
             }
         }
 
+        // mulhi
+        template <class A>
+        XSIMD_INLINE batch<int32_t, A> mulhi(batch<int32_t, A> const& self, batch<int32_t, A> const& other, requires_arch<avx512f>) noexcept
+        {
+            __m512i even = _mm512_mul_epi32(self, other);
+            __m512i odd = _mm512_mul_epi32(_mm512_shuffle_epi32(self, _MM_PERM_ENUM(_MM_SHUFFLE(3, 3, 1, 1))),
+                                           _mm512_shuffle_epi32(other, _MM_PERM_ENUM(_MM_SHUFFLE(3, 3, 1, 1))));
+            __m512i even_hi = _mm512_srli_epi64(even, 32);
+            // merge: even_hi has hi in low-32 of each 64, odd has hi in high-32 of each 64
+            return _mm512_mask_blend_epi32(static_cast<__mmask16>(0xAAAA), even_hi, odd);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint32_t, A> mulhi(batch<uint32_t, A> const& self, batch<uint32_t, A> const& other, requires_arch<avx512f>) noexcept
+        {
+            __m512i even = _mm512_mul_epu32(self, other);
+            __m512i odd = _mm512_mul_epu32(_mm512_srli_epi64(self, 32), _mm512_srli_epi64(other, 32));
+            __m512i even_hi = _mm512_srli_epi64(even, 32);
+            return _mm512_mask_blend_epi32(static_cast<__mmask16>(0xAAAA), even_hi, odd);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<uint64_t, A> mulhi(batch<uint64_t, A> const& self, batch<uint64_t, A> const& other, requires_arch<avx512f>) noexcept
+        {
+            return detail::mulhi_u64_core<A>(self, other,
+                                             [](batch<uint64_t, A> a, batch<uint64_t, A> b)
+                                             { return batch<uint64_t, A>(_mm512_mul_epu32(a, b)); });
+        }
+        template <class A>
+        XSIMD_INLINE batch<int64_t, A> mulhi(batch<int64_t, A> const& self, batch<int64_t, A> const& other, requires_arch<avx512f>) noexcept
+        {
+            return detail::mulhi_i64_core<A>(self, other,
+                                             [](batch<uint64_t, A> a, batch<uint64_t, A> b)
+                                             { return batch<uint64_t, A>(_mm512_mul_epu32(a, b)); });
+        }
+
         // nearbyint
         template <class A>
         XSIMD_INLINE batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<avx512f>) noexcept

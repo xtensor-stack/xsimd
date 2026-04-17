@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <limits>
 #include <ostream>
+#include <utility>
 
 #include "../arch/xsimd_isa.hpp"
 #include "../types/xsimd_batch.hpp"
@@ -1742,6 +1743,75 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return x * y;
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
+     * Computes the low N bits of the 2N-bit product of integer batches \c x and \c y.
+     * Equivalent to ``mul(x, y)`` — the low half of the full product is identical for
+     * both signed and unsigned interpretations.
+     *
+     * The function behaves as if it computes the per-slot product of \c x and \c y using
+     * double the input width as an intermediate representation (e.g. 64 bits for 32-bit
+     * inputs), then returns the lower half of the result (the lower 32 bits in this
+     * example).
+     * @tparam T integer element type of the batch.
+     * @param x batch involved in the product.
+     * @param y batch involved in the product.
+     * @return the low N bits of the product, lane-wise.
+     */
+    template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+    XSIMD_INLINE batch<T, A> mullo(batch<T, A> const& x, batch<T, A> const& y) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return x * y;
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
+     * Computes the high N bits of the 2N-bit product of integer batches \c x and \c y.
+     * Signed and unsigned variants differ; the element type of \c x / \c y decides the
+     * interpretation.
+     *
+     * The function behaves as if it computes the per-slot product of \c x and \c y using
+     * double the input width as an intermediate representation (e.g. 64 bits for 32-bit
+     * inputs), then returns the upper half of the result (the upper 32 bits in this
+     * example).
+     * @tparam T integer element type of the batch.
+     * @param x batch involved in the product.
+     * @param y batch involved in the product.
+     * @return the high N bits of the product, lane-wise.
+     */
+    template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+    XSIMD_INLINE batch<T, A> mulhi(batch<T, A> const& x, batch<T, A> const& y) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return kernel::mulhi<A>(x, y, A {});
+    }
+
+    /**
+     * @ingroup batch_arithmetic
+     *
+     * Computes the full 2N-bit product of integer batches \c x and \c y, returning both
+     * the high and low N-bit halves as ``std::pair{hi, lo}``.
+     *
+     * The function behaves as if it computes the per-slot product of \c x and \c y using
+     * double the input width as an intermediate representation (e.g. 64 bits for 32-bit
+     * inputs), then returns both halves of the result (the upper and lower 32 bits in
+     * this example).
+     * @tparam T integer element type of the batch.
+     * @param x batch involved in the product.
+     * @param y batch involved in the product.
+     * @return pair of batches ``{hi, lo}``.
+     */
+    template <class T, class A, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+    XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>>
+    mulhilo(batch<T, A> const& x, batch<T, A> const& y) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return std::pair<batch<T, A>, batch<T, A>> { mulhi<T, A>(x, y), x * y };
     }
 
     /**

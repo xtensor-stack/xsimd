@@ -567,6 +567,9 @@ namespace xsimd
                                 (__riscv_vmul),
                                 (__riscv_vmul),
                                 (__riscv_vfmul), , vec(vec, vec))
+            XSIMD_RVV_OVERLOAD2(rvvmulh,
+                                (__riscv_vmulh),
+                                (__riscv_vmulhu), , vec(vec, vec))
             XSIMD_RVV_OVERLOAD3(rvvdiv,
                                 (__riscv_vdiv),
                                 (__riscv_vdivu),
@@ -657,6 +660,13 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
             return detail_rvv::rvvmul(lhs, rhs);
+        }
+
+        // mulhi
+        template <class A, class T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+        XSIMD_INLINE batch<T, A> mulhi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
+        {
+            return detail_rvv::rvvmulh(lhs, rhs);
         }
 
         // div

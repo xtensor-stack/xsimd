@@ -928,6 +928,50 @@ namespace xsimd
             }
         }
 
+        // mulhi
+        template <class A>
+        XSIMD_INLINE batch<int16_t, A> mulhi(batch<int16_t, A> const& self, batch<int16_t, A> const& other, requires_arch<avx2>) noexcept
+        {
+            return _mm256_mulhi_epi16(self, other);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint16_t, A> mulhi(batch<uint16_t, A> const& self, batch<uint16_t, A> const& other, requires_arch<avx2>) noexcept
+        {
+            return _mm256_mulhi_epu16(self, other);
+        }
+        template <class A>
+        XSIMD_INLINE batch<int32_t, A> mulhi(batch<int32_t, A> const& self, batch<int32_t, A> const& other, requires_arch<avx2>) noexcept
+        {
+            __m256i even = _mm256_mul_epi32(self, other);
+            __m256i odd = _mm256_mul_epi32(_mm256_shuffle_epi32(self, _MM_SHUFFLE(3, 3, 1, 1)),
+                                           _mm256_shuffle_epi32(other, _MM_SHUFFLE(3, 3, 1, 1)));
+            __m256i even_hi = _mm256_srli_epi64(even, 32);
+            return _mm256_blend_epi16(even_hi, odd, 0xCC);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint32_t, A> mulhi(batch<uint32_t, A> const& self, batch<uint32_t, A> const& other, requires_arch<avx2>) noexcept
+        {
+            __m256i even = _mm256_mul_epu32(self, other);
+            __m256i odd = _mm256_mul_epu32(_mm256_srli_epi64(self, 32), _mm256_srli_epi64(other, 32));
+            __m256i even_hi = _mm256_srli_epi64(even, 32);
+            return _mm256_blend_epi16(even_hi, odd, 0xCC);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<uint64_t, A> mulhi(batch<uint64_t, A> const& self, batch<uint64_t, A> const& other, requires_arch<avx2>) noexcept
+        {
+            return detail::mulhi_u64_core<A>(self, other,
+                                             [](batch<uint64_t, A> a, batch<uint64_t, A> b)
+                                             { return batch<uint64_t, A>(_mm256_mul_epu32(a, b)); });
+        }
+        template <class A>
+        XSIMD_INLINE batch<int64_t, A> mulhi(batch<int64_t, A> const& self, batch<int64_t, A> const& other, requires_arch<avx2>) noexcept
+        {
+            return detail::mulhi_i64_core<A>(self, other,
+                                             [](batch<uint64_t, A> a, batch<uint64_t, A> b)
+                                             { return batch<uint64_t, A>(_mm256_mul_epu32(a, b)); });
+        }
+
         // reduce_add
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx2>) noexcept

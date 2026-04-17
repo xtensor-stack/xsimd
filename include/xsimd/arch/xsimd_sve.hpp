@@ -293,6 +293,13 @@ namespace xsimd
             return svmul_x(detail_sve::ptrue<T>(), lhs, rhs);
         }
 
+        // mulhi
+        template <class A, class T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+        XSIMD_INLINE batch<T, A> mulhi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
+        {
+            return svmulh_x(detail_sve::ptrue<T>(), lhs, rhs);
+        }
+
         // div
         template <class A, class T, std::enable_if_t<sizeof(T) >= 4, int> = 0>
         XSIMD_INLINE batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept

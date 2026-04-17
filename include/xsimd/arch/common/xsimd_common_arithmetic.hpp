@@ -177,6 +177,118 @@ namespace xsimd
                                  self, other);
         }
 
+        // mulhi
+        namespace detail
+        {
+            template <class T>
+            struct mulhi_helper
+            {
+                // default: use a wider native integer type
+                using wider = typename std::conditional<
+                    std::is_signed<T>::value,
+                    typename std::conditional<sizeof(T) == 1, int16_t,
+                                              typename std::conditional<sizeof(T) == 2, int32_t, int64_t>::type>::type,
+                    typename std::conditional<sizeof(T) == 1, uint16_t,
+                                              typename std::conditional<sizeof(T) == 2, uint32_t, uint64_t>::type>::type>::type;
+
+                static XSIMD_INLINE T compute(T x, T y) noexcept
+                {
+                    constexpr int shift = 8 * sizeof(T);
+                    return static_cast<T>((static_cast<wider>(x) * static_cast<wider>(y)) >> shift);
+                }
+            };
+
+            // 64-bit unsigned software mulhi via 32-bit splits
+            XSIMD_INLINE uint64_t mulhi_u64(uint64_t x, uint64_t y) noexcept
+            {
+#if defined(__SIZEOF_INT128__)
+                return static_cast<uint64_t>((static_cast<unsigned __int128>(x) * static_cast<unsigned __int128>(y)) >> 64);
+#else
+                uint64_t xl = x & 0xffffffffULL;
+                uint64_t xh = x >> 32;
+                uint64_t yl = y & 0xffffffffULL;
+                uint64_t yh = y >> 32;
+                uint64_t ll = xl * yl;
+                uint64_t lh = xl * yh;
+                uint64_t hl = xh * yl;
+                uint64_t hh = xh * yh;
+                uint64_t mid = (ll >> 32) + (lh & 0xffffffffULL) + (hl & 0xffffffffULL);
+                return hh + (lh >> 32) + (hl >> 32) + (mid >> 32);
+#endif
+            }
+
+            XSIMD_INLINE int64_t mulhi_i64(int64_t x, int64_t y) noexcept
+            {
+#if defined(__SIZEOF_INT128__)
+                return static_cast<int64_t>((static_cast<__int128>(x) * static_cast<__int128>(y)) >> 64);
+#else
+                uint64_t uhi = mulhi_u64(static_cast<uint64_t>(x), static_cast<uint64_t>(y));
+                if (x < 0)
+                    uhi -= static_cast<uint64_t>(y);
+                if (y < 0)
+                    uhi -= static_cast<uint64_t>(x);
+                return static_cast<int64_t>(uhi);
+#endif
+            }
+
+            template <>
+            struct mulhi_helper<uint64_t>
+            {
+                static XSIMD_INLINE uint64_t compute(uint64_t x, uint64_t y) noexcept { return mulhi_u64(x, y); }
+            };
+
+            template <>
+            struct mulhi_helper<int64_t>
+            {
+                static XSIMD_INLINE int64_t compute(int64_t x, int64_t y) noexcept { return mulhi_i64(x, y); }
+            };
+
+            // Compute the high 64 bits of each lane-wise 64x64 unsigned product,
+            // given a "widening mul" functor WMul that takes two batch<uint64_t,A>
+            // and returns batch<uint64_t,A> containing the 64-bit product of the
+            // low 32 bits of each 64-bit lane (i.e. _mm*_mul_epu32 wrapped).
+            template <class A, class WMul>
+            XSIMD_INLINE batch<uint64_t, A> mulhi_u64_core(batch<uint64_t, A> const& x,
+                                                           batch<uint64_t, A> const& y,
+                                                           WMul mul_epu32) noexcept
+            {
+                using B = batch<uint64_t, A>;
+                const B mask(uint64_t(0xffffffffULL));
+                B xl = x & mask;
+                B xh = x >> 32;
+                B yl = y & mask;
+                B yh = y >> 32;
+                B ll = mul_epu32(xl, yl);
+                B lh = mul_epu32(xl, yh);
+                B hl = mul_epu32(xh, yl);
+                B hh = mul_epu32(xh, yh);
+                B mid = (ll >> 32) + (lh & mask) + (hl & mask);
+                return hh + (lh >> 32) + (hl >> 32) + (mid >> 32);
+            }
+
+            // Signed variant: unsigned core + sign fixup via arithmetic shift-by-63.
+            template <class A, class WMul>
+            XSIMD_INLINE batch<int64_t, A> mulhi_i64_core(batch<int64_t, A> const& x,
+                                                          batch<int64_t, A> const& y,
+                                                          WMul mul_epu32) noexcept
+            {
+                auto ux = ::xsimd::bitwise_cast<uint64_t>(x);
+                auto uy = ::xsimd::bitwise_cast<uint64_t>(y);
+                auto uhi = mulhi_u64_core<A>(ux, uy, mul_epu32);
+                auto sa = ::xsimd::bitwise_cast<uint64_t>(x >> 63);
+                auto sb = ::xsimd::bitwise_cast<uint64_t>(y >> 63);
+                return ::xsimd::bitwise_cast<int64_t>(uhi - (uy & sa) - (ux & sb));
+            }
+        }
+
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        XSIMD_INLINE batch<T, A> mulhi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
+        {
+            return detail::apply([](T x, T y) noexcept -> T
+                                 { return detail::mulhi_helper<T>::compute(x, y); },
+                                 self, other);
+        }
+
         // rotl
         template <class A, class T, class STy>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, STy other, requires_arch<common>) noexcept
