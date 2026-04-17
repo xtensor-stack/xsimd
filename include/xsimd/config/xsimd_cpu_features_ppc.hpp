@@ -15,13 +15,6 @@
 #include "./xsimd_config.hpp"
 #include "./xsimd_getauxval.hpp"
 
-#if XSIMD_TARGET_PPC && XSIMD_HAVE_LINUX_GETAUXVAL
-// HWCAP_XXX masks to use on getauxval results.
-// Header does not exists on all architectures and masks are architecture
-// specific.
-#include <asm/hwcap.h>
-#endif // XSIMD_TARGET_PPC && XSIMD_HAVE_LINUX_GETAUXVAL
-
 namespace xsimd
 {
     /**
