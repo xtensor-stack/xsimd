@@ -130,13 +130,22 @@ namespace xsimd
         XSIMD_INLINE explicit batch(batch_bool_type const& b) noexcept;
         XSIMD_INLINE batch(register_type reg) noexcept;
 
-        /* Redeclare the conversion operator at the most-derived level. Some
-         * compilers fail to invoke the conversion inherited from
+        /* Re-expose the conversion to register_type at the most-derived
+         * level. Some compilers fail to invoke the conversion inherited from
          * types::simd_register when a batch is fed to an intrinsic defined as
-         * a macro (e.g. certain GCC shift/mullo imm intrinsics), because the
+         * a macro (e.g. certain GCC shift/mul_lo imm intrinsics), because the
          * textual C-style cast inside the macro does not traverse the alias
-         * inheritance chain. Declaring the operator here makes it visible on
-         * the batch type directly. */
+         * inheritance chain.
+         *
+         * NOTE: this has to be a redefined member, not a using-declaration of
+         * `simd_register<T, A>::operator register_type`. The using-decl is
+         * evaluated at class-template instantiation, but `simd_register<T, A>`
+         * is only specialised (and therefore only carries `operator
+         * register_type`) for *supported* (T, A) pairs — for unsupported
+         * pairs the generic `simd_register` is empty and a using-decl would
+         * fail to compile. A redefined member is only instantiated when
+         * actually called, which keeps unsupported batches well-formed up to
+         * the point a user tries to use them. */
         XSIMD_INLINE operator register_type() const noexcept
         {
             return this->data;
