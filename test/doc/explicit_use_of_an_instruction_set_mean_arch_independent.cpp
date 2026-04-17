@@ -1,6 +1,5 @@
 #include "xsimd/xsimd.hpp"
 #include <cstddef>
-#include <vector>
 
 struct mean
 {

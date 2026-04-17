@@ -12,9 +12,6 @@
 #ifndef XSIMD_AVXVNNI_HPP
 #define XSIMD_AVXVNNI_HPP
 
-#include <array>
-#include <type_traits>
-
 #include "../types/xsimd_avxvnni_register.hpp"
 
 #endif

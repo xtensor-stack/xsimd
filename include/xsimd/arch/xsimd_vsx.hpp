@@ -13,7 +13,6 @@
 #define XSIMD_VSX_HPP
 
 #include <complex>
-#include <limits>
 #include <type_traits>
 
 #include "../types/xsimd_vsx_register.hpp"
