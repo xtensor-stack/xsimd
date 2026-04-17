@@ -130,6 +130,18 @@ namespace xsimd
         XSIMD_INLINE explicit batch(batch_bool_type const& b) noexcept;
         XSIMD_INLINE batch(register_type reg) noexcept;
 
+        /* Redeclare the conversion operator at the most-derived level. Some
+         * compilers fail to invoke the conversion inherited from
+         * types::simd_register when a batch is fed to an intrinsic defined as
+         * a macro (e.g. certain GCC shift/mullo imm intrinsics), because the
+         * textual C-style cast inside the macro does not traverse the alias
+         * inheritance chain. Declaring the operator here makes it visible on
+         * the batch type directly. */
+        XSIMD_INLINE operator register_type() const noexcept
+        {
+            return this->data;
+        }
+
         template <class U>
         XSIMD_NO_DISCARD static XSIMD_INLINE batch broadcast(U val) noexcept;
 
