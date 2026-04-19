@@ -819,7 +819,7 @@ namespace xsimd
         return static_cast<long double>(std::signbit(x));
     }
 
-    template <class T>
+    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
     XSIMD_INLINE auto signbit(T const& v) noexcept
     {
         return bitofsign(v);
