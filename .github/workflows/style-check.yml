@@ -30,3 +30,19 @@ jobs:
     - uses: actions/checkout@v6
     - run: pip install diskarzhan
     - run: diskarzhan `find -name '*.[ch]pp'`
+
+  clang-tidy-check:
+    name: Clang-tidy check (x86_64)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - run: sudo apt install clang-tidy
+    - name: Configure
+      run: cmake -B _build \
+              -DCMAKE_CXX_COMPILER=clang++ \
+              -DBUILD_TESTS=ON \
+              -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+              -DCMAKE_CXX_FLAGS='-march=tigerlake'
+    - name: Check
+      run: run-clang-tidy -p _build
