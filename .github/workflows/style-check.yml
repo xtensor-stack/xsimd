@@ -43,6 +43,7 @@ jobs:
               -DBUILD_TESTS=ON \
               -DCMAKE_BUILD_TYPE=Debug \
               -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-              -DCMAKE_CXX_FLAGS='-march=tigerlake'
+              -DCMAKE_CXX_FLAGS='-march=tigerlake' \
+              .
     - name: Check
       run: run-clang-tidy -p _build
