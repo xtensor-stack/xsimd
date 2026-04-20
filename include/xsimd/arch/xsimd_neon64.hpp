@@ -31,6 +31,13 @@ namespace xsimd
     {
         using namespace types;
 
+        // get
+        template <class A, size_t I>
+        XSIMD_INLINE double get(batch<double, A> const& self, ::xsimd::index<I>, requires_arch<neon64>) noexcept
+        {
+            return vgetq_lane_f64(self, I);
+        }
+
         // first
         template <class A>
         XSIMD_INLINE double first(batch<double, A> const& self, requires_arch<neon64>) noexcept
