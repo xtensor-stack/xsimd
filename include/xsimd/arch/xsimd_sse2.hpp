@@ -2276,6 +2276,57 @@ namespace xsimd
             }
         }
 
+        // get (must appear after first and swizzle so it can delegate through the xsimd API)
+        namespace detail
+        {
+            // broadcast lane index I across a batch_constant<IdxT, A, I, I, ..., I> matching batch<T, A>::size
+            template <class T, class A, size_t I, size_t... Is>
+            XSIMD_INLINE auto broadcast_lane_index(std::index_sequence<Is...>) noexcept
+                -> batch_constant<as_unsigned_integer_t<T>, A, static_cast<as_unsigned_integer_t<T>>(Is * 0 + I)...>
+            {
+                return {};
+            }
+
+            template <class T, class A, size_t I>
+            XSIMD_INLINE auto broadcast_lane_index() noexcept
+                -> decltype(broadcast_lane_index<T, A, I>(std::make_index_sequence<batch<T, A>::size> {}))
+            {
+                return {};
+            }
+        }
+
+        template <class A, size_t I, class T>
+        XSIMD_INLINE typename std::enable_if<std::is_integral<T>::value && sizeof(T) <= 2, T>::type
+        get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(I == 0)
+            {
+                return first(self, A {});
+            }
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            {
+                return static_cast<T>(_mm_extract_epi16(self, I));
+            }
+            else
+            {
+                // SSE2 has no pextrb; byte-lane shift + movd is the shortest path for I>0.
+                return static_cast<T>(_mm_cvtsi128_si32(_mm_srli_si128(self, I)) & 0xFF);
+            }
+        }
+
+        template <class A, size_t I, class T>
+        XSIMD_INLINE typename std::enable_if<(std::is_integral<T>::value && sizeof(T) >= 4) || std::is_floating_point<T>::value, T>::type
+        get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<sse2>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(I == 0)
+            {
+                return first(self, A {});
+            }
+            else
+            {
+                return first(swizzle(self, detail::broadcast_lane_index<T, A, I>(), A {}), A {});
+            }
+        }
     }
 }
 

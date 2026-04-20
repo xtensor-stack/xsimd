@@ -2743,6 +2743,61 @@ namespace xsimd
             return vshrq_n_s64(x, shift);
         }
 
+        // get
+        template <class A, size_t I>
+        XSIMD_INLINE float get(batch<float, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_f32(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u8(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_signed_t<T, 1> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s8(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u16(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_signed_t<T, 2> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s16(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u32(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_signed_t<T, 4> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s32(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_u64(self, I);
+        }
+
+        template <class A, size_t I, class T, detail::enable_sized_signed_t<T, 8> = 0>
+        XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<neon>) noexcept
+        {
+            return vgetq_lane_s64(self, I);
+        }
+
         // first
         template <class A>
         XSIMD_INLINE float first(batch<float, A> const& self, requires_arch<neon>) noexcept

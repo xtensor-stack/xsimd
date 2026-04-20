@@ -223,7 +223,8 @@ namespace xsimd
         template <class A, size_t I, class T>
         XSIMD_INLINE typename batch<std::complex<T>, A>::value_type get(batch<std::complex<T>, A> const& self, ::xsimd::index<I>, requires_arch<common>) noexcept
         {
-            alignas(A::alignment()) T buffer[batch<std::complex<T>, A>::size];
+            using value_type = typename batch<std::complex<T>, A>::value_type;
+            alignas(A::alignment()) value_type buffer[batch<std::complex<T>, A>::size];
             self.store_aligned(&buffer[0]);
             return buffer[I];
         }

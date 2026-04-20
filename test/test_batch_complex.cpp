@@ -182,6 +182,21 @@ struct batch_complex_test
         CHECK_EQ(res.first(), lhs[0]);
     }
 
+    template <size_t... Is>
+    void test_get_impl(batch_type const& res, std::index_sequence<Is...>) const
+    {
+        array_type extracted = { xsimd::get<Is>(res)... };
+        CHECK_EQ(extracted, lhs);
+        CHECK_BATCH_EQ(batch_type::load_unaligned(extracted.data()), res);
+    }
+
+    void test_get() const
+    {
+        batch_type res = batch_lhs();
+        CHECK_EQ(xsimd::get<0>(res), res.first());
+        test_get_impl(res, std::make_index_sequence<size> {});
+    }
+
     void test_arithmetic() const
     {
         // +batch
@@ -688,6 +703,8 @@ TEST_CASE_TEMPLATE("[xsimd complex batches]", B, BATCH_COMPLEX_TYPES)
     SUBCASE("access_operator") { Test.test_access_operator(); }
 
     SUBCASE("first element") { Test.test_first_element(); }
+
+    SUBCASE("get") { Test.test_get(); }
 
     SUBCASE("arithmetic") { Test.test_arithmetic(); }
 

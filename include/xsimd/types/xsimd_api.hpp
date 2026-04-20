@@ -1111,6 +1111,37 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_data_transfer
+     *
+     * Extract the scalar element at compile-time index \c I from batch \c b.
+     * @param b the batch to extract from.
+     * @return the scalar element at index \c I.
+     */
+    template <size_t I, class T, class A>
+    XSIMD_INLINE T get(batch<T, A> const& b) noexcept
+    {
+        static_assert(I < batch<T, A>::size, "index out of bounds");
+        detail::static_check_supported_config<T, A>();
+        return kernel::get(b, index<I> {}, A {});
+    }
+
+    template <size_t I, class T, class A>
+    XSIMD_INLINE bool get(batch_bool<T, A> const& b) noexcept
+    {
+        static_assert(I < batch_bool<T, A>::size, "index out of bounds");
+        detail::static_check_supported_config<T, A>();
+        return kernel::get(b, index<I> {}, A {});
+    }
+
+    template <size_t I, class T, class A>
+    XSIMD_INLINE typename batch<std::complex<T>, A>::value_type get(batch<std::complex<T>, A> const& b) noexcept
+    {
+        static_assert(I < batch<std::complex<T>, A>::size, "index out of bounds");
+        detail::static_check_supported_config<T, A>();
+        return kernel::get(b, index<I> {}, A {});
+    }
+
+    /**
      * @ingroup batch_reducers
      *
      * Parallel horizontal addition: adds the scalars of each batch
