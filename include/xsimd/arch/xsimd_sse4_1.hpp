@@ -229,7 +229,7 @@ namespace xsimd
         }
 
         // load_stream
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value, void>>
         XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<sse4_1>) noexcept
         {
             return _mm_stream_load_si128((__m128i*)mem);

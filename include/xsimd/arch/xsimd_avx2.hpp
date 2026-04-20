@@ -231,7 +231,7 @@ namespace xsimd
         }
 
         // load_stream
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value, void>>
         XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<avx2>) noexcept
         {
             return _mm256_stream_load_si256((__m256i const*)mem);
@@ -359,7 +359,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_lshift(
             batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<avx2> req) noexcept
         {
-            using uint_t = typename std::make_unsigned<T>::type;
+            using uint_t = std::make_unsigned_t<T>;
 
             // AVX2 only supports 16-bit shifts with a uniform bitshift value,
             // otherwise emulate using 32-bit shifts.

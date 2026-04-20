@@ -1514,7 +1514,7 @@ namespace xsimd
         }
 
         // load_stream
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value, void>>
         XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<avx512f>) noexcept
         {
             return _mm512_stream_load_si512((__m512i*)mem);
@@ -2303,7 +2303,7 @@ namespace xsimd
         }
 
         // store_stream
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value, void>>
         XSIMD_INLINE void store_stream(T* mem, batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
             _mm512_stream_si512((__m512i*)mem, self);
@@ -2483,7 +2483,7 @@ namespace xsimd
             };
 
             template <class T, class A, T Idx0, T Idx1, T... Idx>
-            struct is_pair_of_contiguous_indices<T, A, Idx0, Idx1, Idx...> : std::conditional<(Idx0 % 2 == 0) && (Idx0 + 1 == Idx1), is_pair_of_contiguous_indices<T, A, Idx...>, std::false_type>::type
+            struct is_pair_of_contiguous_indices<T, A, Idx0, Idx1, Idx...> : std::conditional_t<(Idx0 % 2 == 0) && (Idx0 + 1 == Idx1), is_pair_of_contiguous_indices<T, A, Idx...>, std::false_type>
             {
             };
 
