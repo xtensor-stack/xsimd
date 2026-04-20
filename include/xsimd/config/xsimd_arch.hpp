@@ -52,7 +52,7 @@ namespace xsimd
         template <class T, class Ty, class... Tys>
         struct contains<T, Ty, Tys...>
             : std::conditional_t<std::is_same<Ty, T>::value, std::true_type,
-                               contains<T, Tys...>>
+                                 contains<T, Tys...>>
         {
         };
 
