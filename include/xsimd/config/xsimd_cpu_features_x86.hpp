@@ -138,55 +138,55 @@ namespace xsimd
                 enum class type {};
             };
 
-            using eax_or_empty = typename std::conditional<std::is_void<eax>::value, typename m_empty_reg<0>::type, eax>::type;
-            using ebx_or_empty = typename std::conditional<std::is_void<ebx>::value, typename m_empty_reg<1>::type, ebx>::type;
-            using ecx_or_empty = typename std::conditional<std::is_void<ecx>::value, typename m_empty_reg<2>::type, ecx>::type;
-            using edx_or_empty = typename std::conditional<std::is_void<edx>::value, typename m_empty_reg<3>::type, edx>::type;
+            using eax_or_empty = std::conditional_t<std::is_void<eax>::value, typename m_empty_reg<0>::type, eax>;
+            using ebx_or_empty = std::conditional_t<std::is_void<ebx>::value, typename m_empty_reg<1>::type, ebx>;
+            using ecx_or_empty = std::conditional_t<std::is_void<ecx>::value, typename m_empty_reg<2>::type, ecx>;
+            using edx_or_empty = std::conditional_t<std::is_void<edx>::value, typename m_empty_reg<3>::type, edx>;
 
         public:
-            template <eax_or_empty... bits, typename T = eax, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <eax_or_empty... bits, typename T = eax, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr bool all_bits_set() const noexcept
             {
                 return x86_reg32_bitset<eax>::template all_bits_set<bits...>();
             }
 
-            template <eax_or_empty start, eax_or_empty end, typename T = eax, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <eax_or_empty start, eax_or_empty end, typename T = eax, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr x86_reg32_t get_range() const noexcept
             {
                 return x86_reg32_bitset<eax>::template get_range<start, end>();
             }
 
-            template <ebx_or_empty... bits, typename T = ebx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <ebx_or_empty... bits, typename T = ebx, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr bool all_bits_set() const noexcept
             {
                 return x86_reg32_bitset<ebx>::template all_bits_set<bits...>();
             }
 
-            template <ebx_or_empty start, ebx_or_empty end, typename T = ebx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <ebx_or_empty start, ebx_or_empty end, typename T = ebx, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr x86_reg32_t get_range() const noexcept
             {
                 return x86_reg32_bitset<ebx>::template get_range<start, end>();
             }
 
-            template <ecx_or_empty... bits, typename T = ecx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <ecx_or_empty... bits, typename T = ecx, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr bool all_bits_set() const noexcept
             {
                 return x86_reg32_bitset<ecx>::template all_bits_set<bits...>();
             }
 
-            template <ecx_or_empty start, ecx_or_empty end, typename T = ecx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <ecx_or_empty start, ecx_or_empty end, typename T = ecx, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr x86_reg32_t get_range() const noexcept
             {
                 return x86_reg32_bitset<ecx>::template get_range<start, end>();
             }
 
-            template <edx_or_empty... bits, typename T = edx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <edx_or_empty... bits, typename T = edx, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr bool all_bits_set() const noexcept
             {
                 return x86_reg32_bitset<edx>::template all_bits_set<bits...>();
             }
 
-            template <edx_or_empty start, edx_or_empty end, typename T = edx, typename std::enable_if<!std::is_void<T>::value, int>::type = 0>
+            template <edx_or_empty start, edx_or_empty end, typename T = edx, std::enable_if_t<!std::is_void<T>::value, int> = 0>
             constexpr x86_reg32_t get_range() const noexcept
             {
                 return x86_reg32_bitset<edx>::template get_range<start, end>();

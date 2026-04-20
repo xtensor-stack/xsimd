@@ -345,7 +345,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_lshift(
             batch<T, A> const& self, batch_constant<T, A, Vs...> shifts, requires_arch<sse2> req) noexcept
         {
-            using uint_t = typename std::make_unsigned<T>::type;
+            using uint_t = std::make_unsigned_t<T>;
 
             XSIMD_IF_CONSTEXPR(utils::all_equals(shifts))
             {
@@ -1966,7 +1966,7 @@ namespace xsimd
         {
             _mm_stream_ps(mem, self);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value, void>>
         XSIMD_INLINE void store_stream(T* mem, batch<T, A> const& self, requires_arch<sse2>) noexcept
         {
             _mm_stream_si128((__m128i*)mem, self);

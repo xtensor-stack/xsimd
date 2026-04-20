@@ -1526,7 +1526,7 @@ namespace xsimd
         {
             _mm256_stream_pd(mem, self);
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value, void>>
         XSIMD_INLINE void store_stream(T* mem, batch<T, A> const& self, requires_arch<avx>) noexcept
         {
             _mm256_stream_si256((__m256i*)mem, self);

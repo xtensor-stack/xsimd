@@ -366,7 +366,7 @@ struct xsimd_api_integral_types_functions
 
     /* Test when T is a batch_constant only, not a scalar. */
     template <typename U = T>
-    void test_bitwise_lshift_multiple(T const& vals, typename std::enable_if<!std::is_integral<U>::value, int>::type = 0)
+    void test_bitwise_lshift_multiple(T const& vals, std::enable_if_t<!std::is_integral<U>::value, int> = 0)
     {
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
         constexpr auto Max = static_cast<value_type>(std::numeric_limits<value_type>::digits);
@@ -389,7 +389,7 @@ struct xsimd_api_integral_types_functions
 
     /* Test multiple does not make sense when T is scalar. */
     template <typename U = T>
-    void test_bitwise_lshift_multiple(T const&, typename std::enable_if<std::is_integral<U>::value, int>::type = 0)
+    void test_bitwise_lshift_multiple(T const&, std::enable_if_t<std::is_integral<U>::value, int> = 0)
     {
     }
 
