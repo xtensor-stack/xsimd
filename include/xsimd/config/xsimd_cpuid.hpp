@@ -13,10 +13,7 @@
 #define XSIMD_CPUID_HPP
 
 #include "../types/xsimd_all_registers.hpp"
-#include "./xsimd_cpu_features_arm.hpp"
-#include "./xsimd_cpu_features_ppc.hpp"
-#include "./xsimd_cpu_features_riscv.hpp"
-#include "./xsimd_cpu_features_x86.hpp"
+#include "./xsimd_cpu_features.hpp"
 #include "./xsimd_inline.hpp"
 
 namespace xsimd
@@ -81,58 +78,54 @@ namespace xsimd
                 wasm = 1;
 #endif
 
-                // Safe on all platforms, it will be false if non PowerPC.
-                const auto ppc_cpu = xsimd::ppc_cpu_features();
+                const auto cpu = xsimd::cpu_features();
 
-                vsx = ppc_cpu.vsx();
+                vsx = cpu.vsx();
 
-                // Safe on all platforms, it will be all false if non risc-v.
-                const auto riscv_cpu = xsimd::riscv_cpu_features();
+                rvv128 = cpu.rvv() && (cpu.rvv_size_bytes() >= (128 / 8));
+                rvv256 = cpu.rvv() && (cpu.rvv_size_bytes() >= (256 / 8));
+                rvv512 = cpu.rvv() && (cpu.rvv_size_bytes() >= (512 / 8));
 
-                rvv128 = riscv_cpu.rvv() && (riscv_cpu.rvv_size_bytes() >= (128 / 8));
-                rvv256 = riscv_cpu.rvv() && (riscv_cpu.rvv_size_bytes() >= (256 / 8));
-                rvv512 = riscv_cpu.rvv() && (riscv_cpu.rvv_size_bytes() >= (512 / 8));
+                neon = cpu.neon();
+                neon64 = cpu.neon64();
+                i8mm_neon64 = cpu.neon64() && cpu.i8mm();
 
-                // Safe on all platforms, it will be all false if non arm.
-                const auto arm_cpu = xsimd::arm_cpu_features();
+                // Running SVE128 on a SVE256 machine is more tricky than the x86 equivalent
+                // of running SSE code on an AVX machine and requires to explicitly change the
+                // vector length using `prctl` (per thread setting).
+                // This is something we have not tested and not integrated in xsimd so the safe
+                // default is to assume only one valid SVE width at runtime.
+                sve128 = cpu.sve() && (cpu.sve_size_bytes() * 8 == 128);
+                sve256 = cpu.sve() && (cpu.sve_size_bytes() * 8 == 256);
+                sve512 = cpu.sve() && (cpu.sve_size_bytes() * 8 == 512);
 
-                neon = arm_cpu.neon();
-                neon64 = arm_cpu.neon64();
-                i8mm_neon64 = arm_cpu.neon64() && arm_cpu.i8mm();
-                sve128 = arm_cpu.sve() && (arm_cpu.sve_size_bytes() >= (128 / 8));
-                sve256 = arm_cpu.sve() && (arm_cpu.sve_size_bytes() >= (256 / 8));
-                sve512 = arm_cpu.sve() && (arm_cpu.sve_size_bytes() >= (512 / 8));
-
-                // Safe on all platforms, it will be all false if non x86.
-                const auto x86_cpu = xsimd::x86_cpu_features();
-
-                sse2 = x86_cpu.sse2();
-                sse3 = x86_cpu.sse3();
-                ssse3 = x86_cpu.ssse3();
-                sse4_1 = x86_cpu.sse4_1();
-                sse4_2 = x86_cpu.sse4_2();
-                fma3_sse42 = x86_cpu.fma3();
+                sse2 = cpu.sse2();
+                sse3 = cpu.sse3();
+                ssse3 = cpu.ssse3();
+                sse4_1 = cpu.sse4_1();
+                sse4_2 = cpu.sse4_2();
+                fma3_sse42 = cpu.fma3();
 
                 // sse4a not implemented in cpu_id yet
                 // xop not implemented in cpu_id yet
 
-                avx = x86_cpu.avx();
+                avx = cpu.avx();
                 fma3_avx = avx && fma3_sse42;
-                fma4 = x86_cpu.fma4();
-                avx2 = x86_cpu.avx2();
-                avxvnni = x86_cpu.avxvnni();
+                fma4 = cpu.fma4();
+                avx2 = cpu.avx2();
+                avxvnni = cpu.avxvnni();
                 fma3_avx2 = avx2 && fma3_sse42;
 
-                avx512f = x86_cpu.avx512f();
-                avx512cd = x86_cpu.avx512cd();
-                avx512dq = x86_cpu.avx512dq();
-                avx512bw = x86_cpu.avx512bw();
-                avx512er = x86_cpu.avx512er();
-                avx512pf = x86_cpu.avx512pf();
-                avx512ifma = x86_cpu.avx512ifma();
-                avx512vbmi = x86_cpu.avx512vbmi();
-                avx512vbmi2 = x86_cpu.avx512vbmi2();
-                avx512vnni_bw = x86_cpu.avx512vnni_bw();
+                avx512f = cpu.avx512f();
+                avx512cd = cpu.avx512cd();
+                avx512dq = cpu.avx512dq();
+                avx512bw = cpu.avx512bw();
+                avx512er = cpu.avx512er();
+                avx512pf = cpu.avx512pf();
+                avx512ifma = cpu.avx512ifma();
+                avx512vbmi = cpu.avx512vbmi();
+                avx512vbmi2 = cpu.avx512vbmi2();
+                avx512vnni_bw = cpu.avx512vnni_bw();
                 avx512vnni_vbmi2 = avx512vbmi2 && avx512vnni_bw;
             }
         };
