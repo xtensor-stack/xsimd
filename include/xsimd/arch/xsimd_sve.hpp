@@ -37,18 +37,18 @@ namespace xsimd
             XSIMD_INLINE svbool_t sve_ptrue_impl(index<8>) noexcept { return svptrue_b64(); }
 
             template <class T>
-            svbool_t sve_ptrue() noexcept { return sve_ptrue_impl(index<sizeof(T)> {}); }
+            XSIMD_INLINE svbool_t sve_ptrue() noexcept { return sve_ptrue_impl(index<sizeof(T)> {}); }
 
             // predicate loading
             template <bool M0, bool M1>
-            svbool_t sve_pmask() noexcept { return svdupq_b64(M0, M1); }
+            XSIMD_INLINE svbool_t sve_pmask() noexcept { return svdupq_b64(M0, M1); }
             template <bool M0, bool M1, bool M2, bool M3>
-            svbool_t sve_pmask() noexcept { return svdupq_b32(M0, M1, M2, M3); }
+            XSIMD_INLINE svbool_t sve_pmask() noexcept { return svdupq_b32(M0, M1, M2, M3); }
             template <bool M0, bool M1, bool M2, bool M3, bool M4, bool M5, bool M6, bool M7>
-            svbool_t sve_pmask() noexcept { return svdupq_b16(M0, M1, M2, M3, M4, M5, M6, M7); }
+            XSIMD_INLINE svbool_t sve_pmask() noexcept { return svdupq_b16(M0, M1, M2, M3, M4, M5, M6, M7); }
             template <bool M0, bool M1, bool M2, bool M3, bool M4, bool M5, bool M6, bool M7,
                       bool M8, bool M9, bool M10, bool M11, bool M12, bool M13, bool M14, bool M15>
-            svbool_t sve_pmask() noexcept { return svdupq_b8(M0, M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12, M13, M14, M15); }
+            XSIMD_INLINE svbool_t sve_pmask() noexcept { return svdupq_b8(M0, M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12, M13, M14, M15); }
 
             // count active lanes in a predicate
             XSIMD_INLINE uint64_t sve_pcount_impl(svbool_t p, index<1>) noexcept { return svcntp_b8(p, p); }
