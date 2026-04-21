@@ -9,35 +9,33 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_HPP
-#define XSIMD_HPP
+#ifndef XSIMD_BATCH_FWD_HPP
+#define XSIMD_BATCH_FWD_HPP
 
-#include "config/xsimd_config.hpp"
-#include "config/xsimd_macros.hpp"
+#include "../config/xsimd_config.hpp"
 
-#include "arch/xsimd_scalar.hpp"
-#include "memory/xsimd_aligned_allocator.hpp"
-#include "types/xsimd_batch_fwd.hpp"
-
+// TODO this is somehow redundant with XSIMD_DEFAULT_ARCH but is only supported
+// when an architecture is defined.
 #if defined(XSIMD_NO_SUPPORTED_ARCHITECTURE)
+#define XSIMD_BATCH_DEFAULT_ARCH_IMPL void
+#else
+#include "../config/xsimd_arch.hpp"
+#define XSIMD_BATCH_DEFAULT_ARCH_IMPL default_arch
+#endif // XSIMD_NO_SUPPORTED_ARCHITECTURE
+
 namespace xsimd
 {
-    // no type definition or anything apart from scalar definition and aligned allocator
-    template <class T, class A>
-    class batch
-    {
-        static constexpr bool supported_architecture = sizeof(A*) == 0; // type-dependant but always false
-        static_assert(supported_architecture, "No SIMD architecture detected, cannot instantiate a batch");
-    };
+    template <class T, class A = XSIMD_BATCH_DEFAULT_ARCH_IMPL>
+    class batch_bool;
+
+    template <typename T, class A, bool... Values>
+    struct batch_bool_constant;
+
+    template <class T, class A = XSIMD_BATCH_DEFAULT_ARCH_IMPL>
+    class batch;
+
+    template <typename T, class A, T... Values>
+    struct batch_constant;
 }
-
-#else
-#include "types/xsimd_batch.hpp"
-#include "types/xsimd_batch_constant.hpp"
-#include "types/xsimd_traits.hpp"
-
-// This include must come last
-#include "types/xsimd_api.hpp"
-#endif // XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #endif

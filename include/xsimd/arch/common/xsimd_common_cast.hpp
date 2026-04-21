@@ -12,7 +12,10 @@
 #ifndef XSIMD_COMMON_CAST_HPP
 #define XSIMD_COMMON_CAST_HPP
 
-#include "../../types/xsimd_traits.hpp"
+#include <array>
+
+#include "../../config/xsimd_macros.hpp"
+#include "../../utils/xsimd_type_traits.hpp"
 
 namespace xsimd
 {

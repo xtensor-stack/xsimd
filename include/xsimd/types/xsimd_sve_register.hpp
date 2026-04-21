@@ -67,55 +67,115 @@ namespace xsimd
             struct sve_vector_type_impl;
 
             template <>
-            struct sve_vector_type_impl<8>
+            struct sve_vector_type_impl<1>
             {
                 using signed_type = sve_int8_t;
                 using unsigned_type = sve_uint8_t;
                 using floating_point_type = void;
+                using sizeless_unsigned_type = svuint8_t;
+                using sizeless_signed_type = svint8_t;
+                using sizeless_floating_point_type = void;
             };
 
             template <>
-            struct sve_vector_type_impl<16>
+            struct sve_vector_type_impl<2>
             {
                 using signed_type = sve_int16_t;
                 using unsigned_type = sve_uint16_t;
                 using floating_point_type = void;
+                using sizeless_unsigned_type = svuint16_t;
+                using sizeless_signed_type = svint16_t;
+                using sizeless_floating_point_type = void;
             };
 
             template <>
-            struct sve_vector_type_impl<32>
+            struct sve_vector_type_impl<4>
             {
                 using signed_type = sve_int32_t;
                 using unsigned_type = sve_uint32_t;
                 using floating_point_type = sve_float32_t;
+                using sizeless_unsigned_type = svuint32_t;
+                using sizeless_signed_type = svint32_t;
+                using sizeless_floating_point_type = svfloat32_t;
             };
 
             template <>
-            struct sve_vector_type_impl<64>
+            struct sve_vector_type_impl<8>
             {
                 using signed_type = sve_int64_t;
                 using unsigned_type = sve_uint64_t;
                 using floating_point_type = sve_float64_t;
+                using sizeless_unsigned_type = svuint64_t;
+                using sizeless_signed_type = svint64_t;
+                using sizeless_floating_point_type = svfloat64_t;
             };
 
             template <class T>
-            using signed_int_sve_vector_type = typename sve_vector_type_impl<8 * sizeof(T)>::signed_type;
+            using signed_int_sve_vector_type = typename sve_vector_type_impl<sizeof(T)>::signed_type;
 
             template <class T>
-            using unsigned_int_sve_vector_type = typename sve_vector_type_impl<8 * sizeof(T)>::unsigned_type;
+            using unsigned_int_sve_vector_type = typename sve_vector_type_impl<sizeof(T)>::unsigned_type;
 
             template <class T>
-            using floating_point_sve_vector_type = typename sve_vector_type_impl<8 * sizeof(T)>::floating_point_type;
+            using floating_point_sve_vector_type = typename sve_vector_type_impl<sizeof(T)>::floating_point_type;
 
             template <class T>
-            using signed_int_or_floating_point_sve_vector_type = std::conditional_t<std::is_floating_point<T>::value,
-                                                                                    floating_point_sve_vector_type<T>,
-                                                                                    signed_int_sve_vector_type<T>>;
+            using sizeless_signed_int_sve_vector_type = typename sve_vector_type_impl<sizeof(T)>::sizeless_signed_type;
 
             template <class T>
-            using sve_vector_type = std::conditional_t<std::is_signed<T>::value,
-                                                       signed_int_or_floating_point_sve_vector_type<T>,
-                                                       unsigned_int_sve_vector_type<T>>;
+            using sizeless_unsigned_int_sve_vector_type = typename sve_vector_type_impl<sizeof(T)>::sizeless_unsigned_type;
+
+            template <class T>
+            using sizeless_floating_point_sve_vector_type = typename sve_vector_type_impl<sizeof(T)>::sizeless_floating_point_type;
+
+            template <typename T, typename = void>
+            struct sve_vector_impl;
+
+            template <typename T>
+            struct sve_vector_impl<T, std::enable_if_t<std::is_floating_point<T>::value>>
+            {
+                using type = floating_point_sve_vector_type<T>;
+            };
+
+            template <typename T>
+            struct sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_signed<T>::value>>
+            {
+                using type = signed_int_sve_vector_type<T>;
+            };
+
+            template <typename T>
+            struct sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_unsigned<T>::value>>
+            {
+                using type = unsigned_int_sve_vector_type<T>;
+            };
+
+            template <typename T, typename = void>
+            struct sizeless_sve_vector_impl;
+
+            template <typename T>
+            struct sizeless_sve_vector_impl<T, std::enable_if_t<std::is_floating_point<T>::value>>
+            {
+                using type = sizeless_floating_point_sve_vector_type<T>;
+            };
+
+            template <typename T>
+            struct sizeless_sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_signed<T>::value>>
+            {
+                using type = sizeless_signed_int_sve_vector_type<T>;
+            };
+
+            template <typename T>
+            struct sizeless_sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_unsigned<T>::value>>
+            {
+                using type = sizeless_unsigned_int_sve_vector_type<T>;
+            };
+
+            template <class T>
+            using sve_vector_type = typename detail::sve_vector_impl<T>::type;
+
+            template <class T>
+            using sizeless_sve_vector_type = typename detail::sizeless_sve_vector_impl<T>::type;
+
         } // namespace detail
 
         XSIMD_DECLARE_SIMD_REGISTER(signed char, sve, detail::sve_vector_type<signed char>);

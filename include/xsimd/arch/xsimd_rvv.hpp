@@ -16,6 +16,7 @@
 #include "../config/xsimd_macros.hpp"
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_rvv_register.hpp"
+#include "../utils/xsimd_type_traits.hpp"
 #include "./xsimd_constants.hpp"
 
 // This set of macros allows the synthesis of identifiers using a template and
@@ -86,32 +87,32 @@
 // for the function signature argument(s) to XSIMD_RVV_OVERLOAD.  That signature can
 // also reference the template argument T, because it's a text substitution
 // into the template.
-#define XSIMD_RVV_WRAPPER_HEAD(NAME, SIGNATURE, ...)                      \
-    namespace NAME##_cruft                                                \
-    {                                                                     \
-        template <class T>                                                \
-        struct ctx                                                        \
-        {                                                                 \
-            static constexpr size_t width = XSIMD_RVV_BITS;               \
-            static constexpr size_t vl = width / (sizeof(T) * 8);         \
-            using vec = rvv_reg_t<T, width>;                              \
-            using uvec = rvv_reg_t<as_unsigned_relaxed_t<T>, width>;      \
-            using svec = rvv_reg_t<as_signed_relaxed_t<T>, width>;        \
-            using fvec = rvv_reg_t<as_float_relaxed_t<T>, width>;         \
-            using bvec = rvv_bool_t<T, width>;                            \
-            using scalar_vec = rvv_reg_t<T, types::detail::rvv_width_m1>; \
-            using wide_vec = rvv_reg_t<T, width * 2>;                     \
-            using narrow_vec = rvv_reg_t<T, width / 2>;                   \
-            using type = SIGNATURE;                                       \
-        };                                                                \
-        template <class T>                                                \
-        using sig_t = typename ctx<T>::type;                              \
-        template <class K, class T>                                       \
-        struct impl                                                       \
-        {                                                                 \
-            void operator()() const noexcept {};                          \
-        };                                                                \
-        template <class K>                                                \
+#define XSIMD_RVV_WRAPPER_HEAD(NAME, SIGNATURE, ...)                       \
+    namespace NAME##_cruft                                                 \
+    {                                                                      \
+        template <class T>                                                 \
+        struct ctx                                                         \
+        {                                                                  \
+            static constexpr size_t width = XSIMD_RVV_BITS;                \
+            static constexpr size_t vl = width / (sizeof(T) * 8);          \
+            using vec = rvv_reg_t<T, width>;                               \
+            using uvec = rvv_reg_t<xsimd::sized_uint_t<sizeof(T)>, width>; \
+            using svec = rvv_reg_t<xsimd::sized_int_t<sizeof(T)>, width>;  \
+            using fvec = rvv_reg_t<as_float_relaxed_t<T>, width>;          \
+            using bvec = rvv_bool_t<T, width>;                             \
+            using scalar_vec = rvv_reg_t<T, types::detail::rvv_width_m1>;  \
+            using wide_vec = rvv_reg_t<T, width * 2>;                      \
+            using narrow_vec = rvv_reg_t<T, width / 2>;                    \
+            using type = SIGNATURE;                                        \
+        };                                                                 \
+        template <class T>                                                 \
+        using sig_t = typename ctx<T>::type;                               \
+        template <class K, class T>                                        \
+        struct impl                                                        \
+        {                                                                  \
+            void operator()() const noexcept {};                           \
+        };                                                                 \
+        template <class K>                                                 \
         using impl_t = impl<K, sig_t<K>>;
 
 #define XSIMD_RVV_WRAPPER_HEAD_NOVL(...) XSIMD_RVV_WRAPPER_HEAD(__VA_ARGS__)
@@ -294,56 +295,11 @@ namespace xsimd
             template <class T, size_t Width = XSIMD_RVV_BITS>
             using rvv_bool_t = types::detail::rvv_bool_t<T, Width>;
 
-            template <size_t>
-            struct as_signed_relaxed;
-            template <>
-            struct as_signed_relaxed<1>
+            template <std::size_t S>
+            struct as_float_relaxed
             {
-                using type = int8_t;
+                using type = xsimd::sized_fp_t<S>;
             };
-            template <>
-            struct as_signed_relaxed<2>
-            {
-                using type = int16_t;
-            };
-            template <>
-            struct as_signed_relaxed<4>
-            {
-                using type = int32_t;
-            };
-            template <>
-            struct as_signed_relaxed<8>
-            {
-                using type = int64_t;
-            };
-            template <class T>
-            using as_signed_relaxed_t = typename as_signed_relaxed<sizeof(T)>::type;
-            template <size_t>
-            struct as_unsigned_relaxed;
-            template <>
-            struct as_unsigned_relaxed<1>
-            {
-                using type = uint8_t;
-            };
-            template <>
-            struct as_unsigned_relaxed<2>
-            {
-                using type = uint16_t;
-            };
-            template <>
-            struct as_unsigned_relaxed<4>
-            {
-                using type = uint32_t;
-            };
-            template <>
-            struct as_unsigned_relaxed<8>
-            {
-                using type = uint64_t;
-            };
-            template <class T>
-            using as_unsigned_relaxed_t = typename as_unsigned_relaxed<sizeof(T)>::type;
-            template <size_t>
-            struct as_float_relaxed;
             template <>
             struct as_float_relaxed<1>
             {
@@ -353,16 +309,6 @@ namespace xsimd
             struct as_float_relaxed<2>
             {
                 using type = int16_t;
-            };
-            template <>
-            struct as_float_relaxed<4>
-            {
-                using type = float;
-            };
-            template <>
-            struct as_float_relaxed<8>
-            {
-                using type = double;
             };
             template <class T>
             using as_float_relaxed_t = typename as_float_relaxed<sizeof(T)>::type;
