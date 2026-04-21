@@ -13,9 +13,10 @@
 #include <complex>
 #include <type_traits>
 
+#include "../config/xsimd_macros.hpp"
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_rvv_register.hpp"
-#include "xsimd_constants.hpp"
+#include "./xsimd_constants.hpp"
 
 // This set of macros allows the synthesis of identifiers using a template and
 // variable macro arguments.  A single template can then be used by multiple
@@ -24,11 +25,9 @@
 //
 // First some logic to paste text together...
 //
-#define XSIMD_RVV_JOIN_(x, y) x##y
-#define XSIMD_RVV_JOIN(x, y) XSIMD_RVV_JOIN_(x, y)
-#define XSIMD_RVV_PREFIX_T(T, S, then) XSIMD_RVV_JOIN(T, then)
-#define XSIMD_RVV_PREFIX_S(T, S, then) XSIMD_RVV_JOIN(S, then)
-#define XSIMD_RVV_PREFIX_M(T, S, then) XSIMD_RVV_JOIN(m1, then)
+#define XSIMD_RVV_PREFIX_T(T, S, then) XSIMD_CONCAT(T, then)
+#define XSIMD_RVV_PREFIX_S(T, S, then) XSIMD_CONCAT(S, then)
+#define XSIMD_RVV_PREFIX_M(T, S, then) XSIMD_CONCAT(m1, then)
 #define XSIMD_RVV_PREFIX(T, S, then) then
 //
 // XSIMD_RVV_IDENTIFIER accepts type and size parameters, and a template for
@@ -39,15 +38,15 @@
 // join two or more variables together.
 //
 #define XSIMD_RVV_IDENTIFIER9(T, S, t, ...) t
-#define XSIMD_RVV_IDENTIFIER8(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER9(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER7(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER8(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER6(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER7(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER5(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER6(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER4(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER5(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER3(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER4(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER2(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER3(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER1(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER2(T, S, __VA_ARGS__)))
-#define XSIMD_RVV_IDENTIFIER0(T, S, t, p, ...) XSIMD_RVV_JOIN(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER1(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER8(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER9(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER7(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER8(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER6(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER7(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER5(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER6(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER4(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER5(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER3(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER4(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER2(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER3(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER1(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER2(T, S, __VA_ARGS__)))
+#define XSIMD_RVV_IDENTIFIER0(T, S, t, p, ...) XSIMD_CONCAT(t, XSIMD_RVV_PREFIX##p(T, S, XSIMD_RVV_IDENTIFIER1(T, S, __VA_ARGS__)))
 //
 // UNBRACKET and REPARSE force the preprocessor to handle expansion in a
 // specific order.  XSIMD_RVV_UNBRACKET strips the parentheses from the template

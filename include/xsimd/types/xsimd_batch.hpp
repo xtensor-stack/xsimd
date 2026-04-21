@@ -16,6 +16,7 @@
 #include <complex>
 
 #include "../config/xsimd_arch.hpp"
+#include "../config/xsimd_macros.hpp"
 #include "../memory/xsimd_alignment.hpp"
 #include "./xsimd_utils.hpp"
 
