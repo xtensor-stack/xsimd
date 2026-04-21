@@ -52,7 +52,7 @@ namespace detail
  */
 TEST_CASE("[cpu_features] x86 implication chains")
 {
-    xsimd::x86_cpu_features cpu;
+    xsimd::cpu_features cpu;
 
     // SSE implication chain
     CHECK_IMPLICATION(cpu.sse4_2(), cpu.sse4_1());
@@ -118,7 +118,7 @@ TEST_CASE("[cpu_features] x86 manufacturer from environment")
 
 TEST_CASE("[cpu_features] x86 features from environment")
 {
-    xsimd::x86_cpu_features cpu;
+    xsimd::cpu_features cpu;
 
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_SSE2", cpu.sse2());
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_SSE3", cpu.sse3());
@@ -148,7 +148,7 @@ TEST_CASE("[cpu_features] arm implication chains")
 
 TEST_CASE("[cpu_features] arm features from environment")
 {
-    xsimd::arm_cpu_features cpu;
+    xsimd::cpu_features cpu;
 
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_NEON", cpu.neon());
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_NEON64", cpu.neon64());
@@ -158,21 +158,21 @@ TEST_CASE("[cpu_features] arm features from environment")
 
 TEST_CASE("[cpu_features] risc-v implication chains")
 {
-    xsimd::riscv_cpu_features cpu;
+    xsimd::cpu_features cpu;
 
     CHECK_IMPLICATION(cpu.rvv(), cpu.rvv_size_bytes() >= (128 / 8));
 }
 
 TEST_CASE("[cpu_features] risc-v features from environment")
 {
-    xsimd::riscv_cpu_features cpu;
+    xsimd::cpu_features cpu;
 
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_RVV", cpu.rvv());
 }
 
 TEST_CASE("[cpu_features] ppc features from environment")
 {
-    xsimd::ppc_cpu_features cpu;
+    xsimd::cpu_features cpu;
 
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_VSX", cpu.vsx());
 }
