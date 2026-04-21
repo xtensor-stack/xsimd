@@ -369,12 +369,12 @@ namespace xsimd
             using as_float_relaxed_t = typename as_float_relaxed<sizeof(T)>::type;
 
             template <class T, class U>
-            rvv_reg_t<T, U::width> rvvreinterpret(U const& arg) noexcept
+            XSIMD_INLINE rvv_reg_t<T, U::width> rvvreinterpret(U const& arg) noexcept
             {
                 return rvv_reg_t<T, U::width>(arg, types::detail::XSIMD_RVV_BITCAST);
             }
             template <class T, class A, class U>
-            rvv_reg_t<T, A::width> rvvreinterpret(batch<U, A> const& arg) noexcept
+            XSIMD_INLINE rvv_reg_t<T, A::width> rvvreinterpret(batch<U, A> const& arg) noexcept
             {
                 typename batch<U, A>::register_type r = arg;
                 return rvvreinterpret<T>(r);
@@ -519,23 +519,23 @@ namespace xsimd
             XSIMD_RVV_OVERLOAD(rvvget_hi_, (__riscv_vget_ XSIMD_RVV_TSM), _DROP_1ST_CUSTOM_ARGS_NOVL, vec(T, wide_vec), args..., 1)
 
             template <class T, size_t W, std::enable_if_t<W >= types::detail::rvv_width_m1, int> = 0>
-            rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
+            XSIMD_INLINE rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 typename rvv_reg_t<T, W>::register_type tmp = rvvget_lo_(T {}, vv);
                 return tmp;
             }
             template <class T, size_t W, std::enable_if_t<W >= types::detail::rvv_width_m1, int> = 0>
-            rvv_reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
+            XSIMD_INLINE rvv_reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 typename rvv_reg_t<T, W>::register_type tmp = rvvget_hi_(T {}, vv);
                 return tmp;
             }
-            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int> = 0> rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
+            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int> = 0> XSIMD_INLINE rvv_reg_t<T, W> rvvget_lo(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 typename rvv_reg_t<T, W>::register_type tmp = vv;
                 return tmp;
             }
-            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int> = 0> rvv_reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
+            template <class T, size_t W, std::enable_if_t<W<types::detail::rvv_width_m1, int> = 0> XSIMD_INLINE rvv_reg_t<T, W> rvvget_hi(rvv_reg_t<T, W * 2> const& vv) noexcept
             {
                 return __riscv_vslidedown(vv, vv.vl / 2, vv.vl);
             }

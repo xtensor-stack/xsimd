@@ -15,7 +15,6 @@
 #include "xsimd/arch/xsimd_scalar.hpp"
 #include "xsimd/xsimd.hpp"
 #include <chrono>
-#include <iostream>
 #include <string>
 #include <vector>
 

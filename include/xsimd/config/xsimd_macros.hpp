@@ -9,8 +9,8 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_INLINE_HPP
-#define XSIMD_INLINE_HPP
+#ifndef XSIMD_MACROS_HPP
+#define XSIMD_MACROS_HPP
 
 #if defined(__VEC__)
 #define XSIMD_INLINE inline
@@ -25,5 +25,8 @@
 #else
 #define XSIMD_INLINE inline
 #endif
+
+#define XSIMD_CONCAT_INNER(a, b) a##b
+#define XSIMD_CONCAT(a, b) XSIMD_CONCAT_INNER(a, b)
 
 #endif

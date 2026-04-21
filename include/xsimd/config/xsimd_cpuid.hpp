@@ -14,7 +14,7 @@
 
 #include "../types/xsimd_all_registers.hpp"
 #include "./xsimd_cpu_features.hpp"
-#include "./xsimd_inline.hpp"
+#include "./xsimd_macros.hpp"
 
 namespace xsimd
 {

@@ -13,7 +13,7 @@
 #ifndef XSIMD_UTILS_SHIFTS_HPP
 #define XSIMD_UTILS_SHIFTS_HPP
 
-#include "../../config/xsimd_inline.hpp"
+#include "../../config/xsimd_macros.hpp"
 #include "../../types/xsimd_batch.hpp"
 #include "../../types/xsimd_batch_constant.hpp"
 #include "../../types/xsimd_traits.hpp"

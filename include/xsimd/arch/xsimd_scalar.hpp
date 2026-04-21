@@ -20,7 +20,7 @@
 #include <limits>
 #include <type_traits>
 
-#include "xsimd/config/xsimd_inline.hpp"
+#include "xsimd/config/xsimd_macros.hpp"
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
 #include "xtl/xcomplex.hpp"

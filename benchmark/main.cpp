@@ -9,8 +9,11 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#include "xsimd_benchmark.hpp"
+#include <iostream>
 #include <map>
+#include <string>
+
+#include "xsimd_benchmark.hpp"
 
 void benchmark_operation()
 {

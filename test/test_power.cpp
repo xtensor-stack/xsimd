@@ -13,7 +13,6 @@
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #include "test_utils.hpp"
-#include <iostream>
 
 template <class B>
 struct power_test
