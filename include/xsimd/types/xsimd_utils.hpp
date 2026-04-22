@@ -23,15 +23,10 @@
 #include "xtl/xcomplex.hpp"
 #endif
 
+#include "./xsimd_batch_fwd.hpp"
+
 namespace xsimd
 {
-
-    template <class T, class A>
-    class batch;
-
-    template <class T, class A>
-    class batch_bool;
-
     /**************
      * index      *
      **************/

@@ -21,6 +21,7 @@
 
 #include "../types/xsimd_neon_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "../utils/xsimd_type_traits.hpp"
 #include "./common/xsimd_common_bit.hpp"
 #include "./common/xsimd_common_cast.hpp"
 

@@ -18,15 +18,11 @@
 #include "../config/xsimd_arch.hpp"
 #include "../config/xsimd_macros.hpp"
 #include "../memory/xsimd_alignment.hpp"
+#include "./xsimd_batch_fwd.hpp"
 #include "./xsimd_utils.hpp"
 
 namespace xsimd
 {
-    template <typename T, class A, bool... Values>
-    struct batch_bool_constant;
-    template <class T, class A = default_arch>
-    class batch;
-
     namespace types
     {
         template <class T, class A>
@@ -301,7 +297,7 @@ namespace xsimd
      * @tparam T the type of the predicated values.
      * @tparam A the architecture this batch is tied too.
      **/
-    template <class T, class A = default_arch>
+    template <class T, class A>
     class batch_bool : public types::get_bool_simd_register_t<T, A>
     {
         using base_type = types::get_bool_simd_register_t<T, A>;

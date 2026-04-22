@@ -12,10 +12,16 @@
 #ifndef XSIMD_TRAITS_HPP
 #define XSIMD_TRAITS_HPP
 
+#include <complex>
 #include <cstdint>
 #include <type_traits>
 
-#include "xsimd_batch.hpp"
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+#include <xtl/xcomplex.hpp>
+#endif
+
+#include "./xsimd_batch_fwd.hpp"
+#include "./xsimd_utils.hpp"
 
 /**
  * high level type traits
@@ -397,53 +403,6 @@ namespace xsimd
 
     template <class T>
     using mask_type_t = typename mask_type<T>::type;
-
-    namespace detail
-    {
-        template <typename T>
-        struct widen
-        {
-            using type = std::make_signed_t<typename widen<std::make_unsigned_t<T>>::type>;
-        };
-
-        template <>
-        struct widen<uint32_t>
-        {
-            using type = uint64_t;
-        };
-        template <>
-        struct widen<uint16_t>
-        {
-            using type = uint32_t;
-        };
-        template <>
-        struct widen<uint8_t>
-        {
-            using type = uint16_t;
-        };
-        template <>
-        struct widen<int32_t>
-        {
-            using type = int64_t;
-        };
-        template <>
-        struct widen<int16_t>
-        {
-            using type = int32_t;
-        };
-        template <>
-        struct widen<int8_t>
-        {
-            using type = int16_t;
-        };
-        template <>
-        struct widen<float>
-        {
-            using type = double;
-        };
-    }
-    template <typename T>
-    using widen_t = typename detail::widen<T>::type;
 }
 
 #endif

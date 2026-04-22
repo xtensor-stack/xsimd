@@ -20,6 +20,7 @@
 #include "../arch/xsimd_isa.hpp"
 #include "../types/xsimd_batch.hpp"
 #include "../types/xsimd_traits.hpp"
+#include "../utils/xsimd_type_traits.hpp"
 
 namespace xsimd
 {

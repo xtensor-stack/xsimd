@@ -12,8 +12,9 @@
 #ifndef XSIMD_NEON_REGISTER_HPP
 #define XSIMD_NEON_REGISTER_HPP
 
-#include "xsimd_common_arch.hpp"
-#include "xsimd_register.hpp"
+#include "../utils/xsimd_type_traits.hpp"
+#include "./xsimd_common_arch.hpp"
+#include "./xsimd_register.hpp"
 
 #if XSIMD_WITH_NEON
 #include <arm_neon.h>
@@ -103,40 +104,10 @@ namespace xsimd
 
         namespace detail
         {
-            template <size_t S>
-            struct get_unsigned_type;
-
-            template <>
-            struct get_unsigned_type<1>
-            {
-                using type = uint8_t;
-            };
-
-            template <>
-            struct get_unsigned_type<2>
-            {
-                using type = uint16_t;
-            };
-
-            template <>
-            struct get_unsigned_type<4>
-            {
-                using type = uint32_t;
-            };
-
-            template <>
-            struct get_unsigned_type<8>
-            {
-                using type = uint64_t;
-            };
-
-            template <size_t S>
-            using get_unsigned_type_t = typename get_unsigned_type<S>::type;
-
             template <class T, class A>
             struct neon_bool_simd_register
             {
-                using type = simd_register<get_unsigned_type_t<sizeof(T)>, A>;
+                using type = simd_register<xsimd::sized_uint_t<sizeof(T)>, A>;
             };
         }
 
