@@ -57,7 +57,7 @@ namespace xsimd
     }
 
     /**
-     * @ingroup batch_traits
+     * @ingroup type_traits
      *
      * Signed integer type with exactly @c S bytes (1, 2, 4, or 8).
      *
@@ -67,7 +67,7 @@ namespace xsimd
     using sized_int_t = typename detail::sized_num_types<S>::signed_type;
 
     /**
-     * @ingroup batch_traits
+     * @ingroup type_traits
      *
      * Unsigned integer type with exactly @c S bytes (1, 2, 4, or 8).
      *
@@ -77,7 +77,7 @@ namespace xsimd
     using sized_uint_t = typename detail::sized_num_types<S>::unsigned_type;
 
     /**
-     * @ingroup batch_traits
+     * @ingroup type_traits
      *
      * Floating-point type with exactly @c S bytes (4 for @c float, 8 for @c double).
      * Yields @c void for sizes without a standard floating-point type (1, 2).
@@ -89,30 +89,48 @@ namespace xsimd
 
     namespace detail
     {
-        template <typename T, typename = void>
-        struct widen;
-
-        template <typename T>
-        struct widen<T, std::enable_if_t<std::is_floating_point<T>::value>>
+        template <typename T, std::size_t factor, typename = void>
+        struct remap_num
         {
-            using type = xsimd::sized_fp_t<sizeof(T) * 2>;
+            using type = T;
         };
 
-        template <typename T>
-        struct widen<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_signed<T>::value>>
+        template <typename T, std::size_t factor>
+        struct remap_num<T, factor, std::enable_if_t<std::is_floating_point<T>::value>>
         {
-            using type = xsimd::sized_int_t<sizeof(T) * 2>;
+            using type = xsimd::sized_fp_t<sizeof(T) * factor>;
         };
 
-        template <typename T>
-        struct widen<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_unsigned<T>::value>>
+        template <typename T, std::size_t factor>
+        struct remap_num<T, factor, std::enable_if_t<!std::is_floating_point<T>::value && std::is_signed<T>::value>>
         {
-            using type = xsimd::sized_uint_t<sizeof(T) * 2>;
+            using type = xsimd::sized_int_t<sizeof(T) * factor>;
+        };
+
+        template <typename T, std::size_t factor>
+        struct remap_num<T, factor, std::enable_if_t<!std::is_floating_point<T>::value && std::is_unsigned<T>::value>>
+        {
+            using type = xsimd::sized_uint_t<sizeof(T) * factor>;
         };
     }
 
     /**
-     * @ingroup batch_traits
+     * @ingroup type_traits
+     *
+     * Remap numeral types to their fixed sized variant (``[u]int{8,16,32}_t``
+     * and pass through other types).
+     * Certain platforms have different types (*i.e.* not aliases) between
+     * ``char`` and ``int8_t``, or ``long long`` and ``int{32,64}_t``, with SIMD
+     * intrinsicts only defined for some of them.
+     * Handling them requires to cast to a known predictable type.
+     *
+     * @tparam T arithmetic type to project from.
+     */
+    template <typename T>
+    using project_num_t = typename detail::remap_num<T, /* factor= */ 1>::type;
+
+    /**
+     * @ingroup type_traits
      *
      * The next-wider arithmetic type for @c T: doubles the size while preserving
      * signedness for integers and yielding @c double for @c float.
@@ -121,7 +139,7 @@ namespace xsimd
      * @tparam T arithmetic type to widen.
      */
     template <typename T>
-    using widen_t = typename detail::widen<T>::type;
+    using widen_t = typename detail::remap_num<T, /* factor= */ 2>::type;
 }
 
 #endif

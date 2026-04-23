@@ -88,28 +88,6 @@ namespace xsimd
             // 1-vector candidate.
             template <class T>
             using sve_sizeless_t = xsimd::types::detail::sizeless_sve_vector_type<T>;
-
-            // Remap integer Ts to their matching fixed-width counterpart
-            // so svld1/svst1 see the pointer type their overload set expects;
-            // pass non-integer Ts through unchanged.
-            template <class T, bool IsInt = std::is_integral<std::decay_t<T>>::value>
-            struct sve_fix_integer_impl
-            {
-                using type = T;
-            };
-            template <class T>
-            struct sve_fix_integer_impl<T, true>
-            {
-                using type = std::conditional_t<std::is_signed<T>::value,
-                                                sized_int_t<sizeof(T)>, sized_uint_t<sizeof(T)>>;
-            };
-
-            // SVE load/store intrinsics are overloaded on these pointer for integer
-            // types, but some platform have explicit different types between
-            // `long` vs `long long` or `char` vs `int8_t`.
-            // We remap the type to avoid these.
-            template <class T>
-            using sve_fix_char_t = typename sve_fix_integer_impl<T>::type;
         } // namespace detail
 
         /*********
@@ -119,7 +97,7 @@ namespace xsimd
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<sve>) noexcept
         {
-            return svld1(detail::sve_ptrue<T>(), reinterpret_cast<detail::sve_fix_char_t<T> const*>(src));
+            return svld1(detail::sve_ptrue<T>(), reinterpret_cast<project_num_t<T> const*>(src));
         }
 
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
@@ -132,7 +110,7 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode, detail::sve_enable_all_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<float, A, Values...>, Mode, requires_arch<sve>) noexcept
         {
-            return svld1(detail::sve_pmask<Values...>(), reinterpret_cast<detail::sve_fix_char_t<T> const*>(mem));
+            return svld1(detail::sve_pmask<Values...>(), reinterpret_cast<project_num_t<T> const*>(mem));
         }
 
         // load_complex
@@ -159,7 +137,7 @@ namespace xsimd
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
         XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<sve>) noexcept
         {
-            svst1(detail::sve_ptrue<T>(), reinterpret_cast<detail::sve_fix_char_t<T>*>(dst), src);
+            svst1(detail::sve_ptrue<T>(), reinterpret_cast<project_num_t<T>*>(dst), src);
         }
 
         template <class A, class T, detail::sve_enable_all_t<T> = 0>
