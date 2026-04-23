@@ -383,14 +383,14 @@ namespace xsimd
         namespace detail_rvv
         {
             template <class T, size_t Width>
-            XSIMD_INLINE detail_rvv::rvv_reg_t<T, Width> broadcast(T arg) noexcept
+            XSIMD_INLINE rvv_reg_t<T, Width> broadcast(T arg) noexcept
             {
                 // A bit of a dance, here, because rvvmv_splat has no other
                 // argument from which to deduce type, and T=char is not
                 // supported.
                 project_num_t<T> arg_not_char(arg);
-                const auto splat = detail_rvv::rvvmv_splat(arg_not_char);
-                return detail_rvv::rvv_reg_t<T, Width>(splat.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
+                const auto splat = rvvmv_splat(arg_not_char);
+                return rvv_reg_t<T, Width>(splat.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
             }
         }
 
@@ -464,16 +464,23 @@ namespace xsimd
                 return __riscv_vslidedown(vv, vv.vl / 2, vv.vl);
             }
 
+        }
+
+        // Must be in detail::load_complex for use by common memory.
+        // ODR violation are prevented because the size of the register is encoded
+        // in batch.
+        namespace detail
+        {
             template <class A, class T, detail::enable_floating_point_t<T> = 0>
             XSIMD_INLINE batch<std::complex<T>, A> load_complex(batch<T, A> const& lo, batch<T, A> const& hi, requires_arch<rvv>) noexcept
             {
-                const auto real_index = vindex<A, as_unsigned_integer_t<T>, 0, 1>();
-                const auto imag_index = vindex<A, as_unsigned_integer_t<T>, 1, 1>();
-                const auto index = rvvabut<as_unsigned_integer_t<T>, A::width>(real_index, imag_index);
-                const auto input = rvvabut<T, A::width>(lo.data, hi.data);
-                const rvv_reg_t<T, A::width * 2> result = __riscv_vrgather(input, index, index.vl);
+                const auto real_index = detail_rvv::vindex<A, as_unsigned_integer_t<T>, 0, 1>();
+                const auto imag_index = detail_rvv::vindex<A, as_unsigned_integer_t<T>, 1, 1>();
+                const auto index = detail_rvv::rvvabut<as_unsigned_integer_t<T>, A::width>(real_index, imag_index);
+                const auto input = detail_rvv::rvvabut<T, A::width>(lo.data, hi.data);
+                const detail_rvv::rvv_reg_t<T, A::width * 2> result = __riscv_vrgather(input, index, index.vl);
 
-                return { rvvget_lo<T, A::width>(result), rvvget_hi<T, A::width>(result) };
+                return { detail_rvv::rvvget_lo<T, A::width>(result), detail_rvv::rvvget_hi<T, A::width>(result) };
             }
         }
 
