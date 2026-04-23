@@ -287,7 +287,7 @@ namespace xsimd
 
     namespace kernel
     {
-        namespace detail
+        namespace detail_rvv
         {
             template <class T, size_t Width = XSIMD_RVV_BITS>
             using rvv_reg_t = types::detail::rvv_reg_t<T, Width>;
@@ -380,17 +380,17 @@ namespace xsimd
          * Scalar to vector *
          ********************/
 
-        namespace detail
+        namespace detail_rvv
         {
             template <class T, size_t Width>
-            XSIMD_INLINE detail::rvv_reg_t<T, Width> broadcast(T arg) noexcept
+            XSIMD_INLINE detail_rvv::rvv_reg_t<T, Width> broadcast(T arg) noexcept
             {
                 // A bit of a dance, here, because rvvmv_splat has no other
                 // argument from which to deduce type, and T=char is not
                 // supported.
                 project_num_t<T> arg_not_char(arg);
-                const auto splat = detail::rvvmv_splat(arg_not_char);
-                return detail::rvv_reg_t<T, Width>(splat.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
+                const auto splat = detail_rvv::rvvmv_splat(arg_not_char);
+                return detail_rvv::rvv_reg_t<T, Width>(splat.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
             }
         }
 
@@ -398,14 +398,14 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch<T, A> broadcast(T arg, requires_arch<rvv>) noexcept
         {
-            return detail::broadcast<T, A::width>(arg);
+            return detail_rvv::broadcast<T, A::width>(arg);
         }
 
         /*********
          * Load *
          *********/
 
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD(rvvle, (__riscv_vle XSIMD_RVV_S _v_ XSIMD_RVV_TSM), , vec(T const*))
             XSIMD_RVV_OVERLOAD(rvvse, (__riscv_vse XSIMD_RVV_S _v_ XSIMD_RVV_TSM), , void(T*, vec))
@@ -414,7 +414,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<rvv>) noexcept
         {
-            return detail::rvvle(reinterpret_cast<project_num_t<T> const*>(src));
+            return detail_rvv::rvvle(reinterpret_cast<project_num_t<T> const*>(src));
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -424,7 +424,7 @@ namespace xsimd
         }
 
         // load_complex
-        namespace detail
+        namespace detail_rvv
         {
             template <class T, size_t W, std::enable_if_t<W >= types::detail::rvv_width_m1, int> = 0>
             XSIMD_INLINE rvv_reg_t<T, W * 2> rvvabut(rvv_reg_t<T, W> const& lo, rvv_reg_t<T, W> const& hi) noexcept
@@ -484,7 +484,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<rvv>) noexcept
         {
-            detail::rvvse(reinterpret_cast<project_num_t<T>*>(dst), src);
+            detail_rvv::rvvse(reinterpret_cast<project_num_t<T>*>(dst), src);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -497,7 +497,7 @@ namespace xsimd
          * scatter/gather *
          ******************/
 
-        namespace detail
+        namespace detail_rvv
         {
             template <class T, class U>
             using rvv_enable_sg_t = std::enable_if_t<(sizeof(T) == sizeof(U) && (sizeof(T) == 4 || sizeof(T) == 8)), int>;
@@ -510,34 +510,34 @@ namespace xsimd
         }
 
         // scatter
-        template <class A, class T, class U, detail::rvv_enable_sg_t<T, U> = 0>
+        template <class A, class T, class U, detail_rvv::rvv_enable_sg_t<T, U> = 0>
         XSIMD_INLINE void scatter(batch<T, A> const& vals, T* dst, batch<U, A> const& index, kernel::requires_arch<rvv>) noexcept
         {
             using UU = as_unsigned_integer_t<U>;
-            const auto uindex = detail::rvv_to_unsigned_batch(index);
+            const auto uindex = detail_rvv::rvv_to_unsigned_batch(index);
             auto* base = reinterpret_cast<project_num_t<T>*>(dst);
             // or rvvsuxei
-            const auto bi = detail::rvvmul_splat(uindex, sizeof(T));
-            detail::rvvsoxei(base, bi, vals);
+            const auto bi = detail_rvv::rvvmul_splat(uindex, sizeof(T));
+            detail_rvv::rvvsoxei(base, bi, vals);
         }
 
         // gather
-        template <class A, class T, class U, detail::rvv_enable_sg_t<T, U> = 0>
+        template <class A, class T, class U, detail_rvv::rvv_enable_sg_t<T, U> = 0>
         XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index, kernel::requires_arch<rvv>) noexcept
         {
             using UU = as_unsigned_integer_t<U>;
-            const auto uindex = detail::rvv_to_unsigned_batch(index);
+            const auto uindex = detail_rvv::rvv_to_unsigned_batch(index);
             auto const* base = reinterpret_cast<project_num_t<T> const*>(src);
             // or rvvluxei
-            const auto bi = detail::rvvmul_splat(uindex, sizeof(T));
-            return detail::rvvloxei(base, bi);
+            const auto bi = detail_rvv::rvvmul_splat(uindex, sizeof(T));
+            return detail_rvv::rvvloxei(base, bi);
         }
 
         /**************
          * Arithmetic *
          **************/
 
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD3(rvvadd,
                                 (__riscv_vadd),
@@ -621,56 +621,56 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvadd(lhs, rhs);
+            return detail_rvv::rvvadd(lhs, rhs);
         }
 
         // sadd
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvsadd(lhs, rhs);
+            return detail_rvv::rvvsadd(lhs, rhs);
         }
 
         // sub
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvsub(lhs, rhs);
+            return detail_rvv::rvvsub(lhs, rhs);
         }
 
         // ssub
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvssub(lhs, rhs);
+            return detail_rvv::rvvssub(lhs, rhs);
         }
 
         // mul
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmul(lhs, rhs);
+            return detail_rvv::rvvmul(lhs, rhs);
         }
 
         // div
         template <class A, class T, typename detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvdiv(lhs, rhs);
+            return detail_rvv::rvvdiv(lhs, rhs);
         }
 
         // max
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmax(lhs, rhs);
+            return detail_rvv::rvvmax(lhs, rhs);
         }
 
         // min
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmin(lhs, rhs);
+            return detail_rvv::rvvmin(lhs, rhs);
         }
 
         // neg
@@ -678,15 +678,15 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
             using S = as_signed_integer_t<T>;
-            const auto as_signed = detail::rvvreinterpret<S>(arg);
-            const auto result = detail::rvvneg(as_signed);
-            return detail::rvvreinterpret<T>(result);
+            const auto as_signed = detail_rvv::rvvreinterpret<S>(arg);
+            const auto result = detail_rvv::rvvneg(as_signed);
+            return detail_rvv::rvvreinterpret<T>(result);
         }
 
         template <class A, class T, detail::enable_signed_numeral_t<T> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvneg(arg);
+            return detail_rvv::rvvneg(arg);
         }
 
         // abs
@@ -699,23 +699,23 @@ namespace xsimd
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvabs(arg);
+            return detail_rvv::rvvabs(arg);
         }
 
         // fma: x * y + z
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<rvv>) noexcept
         {
-            // also detail::rvvmadd(x, y, z);
-            return detail::rvvmacc(z, x, y);
+            // also detail_rvv::rvvmadd(x, y, z);
+            return detail_rvv::rvvmacc(z, x, y);
         }
 
         // fnma: z - x * y
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> fnma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<rvv>) noexcept
         {
-            // also detail::rvvnmsub(x, y, z);
-            return detail::rvvnmsac(z, x, y);
+            // also detail_rvv::rvvnmsub(x, y, z);
+            return detail_rvv::rvvnmsac(z, x, y);
         }
 
         // fms: x * y - z
@@ -740,7 +740,7 @@ namespace xsimd
          * Logical operations *
          **********************/
 
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD_INTS(rvvand, (__riscv_vand), , vec(vec, vec))
             XSIMD_RVV_OVERLOAD_INTS(rvvor, (__riscv_vor), , vec(vec, vec))
@@ -758,118 +758,118 @@ namespace xsimd
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvand(lhs, rhs);
+            return detail_rvv::rvvand(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto lhs_bits = detail::rvv_to_unsigned_batch(lhs);
-            const auto rhs_bits = detail::rvv_to_unsigned_batch(rhs);
-            const auto result_bits = detail::rvvand(lhs_bits, rhs_bits);
-            return detail::rvvreinterpret<T>(result_bits);
+            const auto lhs_bits = detail_rvv::rvv_to_unsigned_batch(lhs);
+            const auto rhs_bits = detail_rvv::rvv_to_unsigned_batch(rhs);
+            const auto result_bits = detail_rvv::rvvand(lhs_bits, rhs_bits);
+            return detail_rvv::rvvreinterpret<T>(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmand(lhs, rhs);
+            return detail_rvv::rvvmand(lhs, rhs);
         }
 
         // bitwise_andnot
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto not_rhs = detail::rvvnot(rhs);
-            return detail::rvvand(lhs, not_rhs);
+            const auto not_rhs = detail_rvv::rvvnot(rhs);
+            return detail_rvv::rvvand(lhs, not_rhs);
         }
 
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto lhs_bits = detail::rvv_to_unsigned_batch(lhs);
-            const auto rhs_bits = detail::rvv_to_unsigned_batch(rhs);
-            const auto not_rhs = detail::rvvnot(rhs_bits);
-            const auto result_bits = detail::rvvand(lhs_bits, not_rhs);
-            return detail::rvvreinterpret<T>(result_bits);
+            const auto lhs_bits = detail_rvv::rvv_to_unsigned_batch(lhs);
+            const auto rhs_bits = detail_rvv::rvv_to_unsigned_batch(rhs);
+            const auto not_rhs = detail_rvv::rvvnot(rhs_bits);
+            const auto result_bits = detail_rvv::rvvand(lhs_bits, not_rhs);
+            return detail_rvv::rvvreinterpret<T>(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmandn(lhs, rhs);
+            return detail_rvv::rvvmandn(lhs, rhs);
         }
 
         // bitwise_or
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvor(lhs, rhs);
+            return detail_rvv::rvvor(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto lhs_bits = detail::rvv_to_unsigned_batch(lhs);
-            const auto rhs_bits = detail::rvv_to_unsigned_batch(rhs);
-            const auto result_bits = detail::rvvor(lhs_bits, rhs_bits);
-            return detail::rvvreinterpret<T>(result_bits);
+            const auto lhs_bits = detail_rvv::rvv_to_unsigned_batch(lhs);
+            const auto rhs_bits = detail_rvv::rvv_to_unsigned_batch(rhs);
+            const auto result_bits = detail_rvv::rvvor(lhs_bits, rhs_bits);
+            return detail_rvv::rvvreinterpret<T>(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmor(lhs, rhs);
+            return detail_rvv::rvvmor(lhs, rhs);
         }
 
         // bitwise_xor
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvxor(lhs, rhs);
+            return detail_rvv::rvvxor(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto lhs_bits = detail::rvv_to_unsigned_batch(lhs);
-            const auto rhs_bits = detail::rvv_to_unsigned_batch(rhs);
-            const auto result_bits = detail::rvvxor(lhs_bits, rhs_bits);
-            return detail::rvvreinterpret<T>(result_bits);
+            const auto lhs_bits = detail_rvv::rvv_to_unsigned_batch(lhs);
+            const auto rhs_bits = detail_rvv::rvv_to_unsigned_batch(rhs);
+            const auto result_bits = detail_rvv::rvvxor(lhs_bits, rhs_bits);
+            return detail_rvv::rvvreinterpret<T>(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmxor(lhs, rhs);
+            return detail_rvv::rvvmxor(lhs, rhs);
         }
 
         // bitwise_not
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvnot(arg);
+            return detail_rvv::rvvnot(arg);
         }
 
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            const auto arg_bits = detail::rvv_to_unsigned_batch(arg);
-            const auto result_bits = detail::rvvnot(arg_bits);
-            return detail::rvvreinterpret<T>(result_bits);
+            const auto arg_bits = detail_rvv::rvv_to_unsigned_batch(arg);
+            const auto result_bits = detail_rvv::rvvnot(arg_bits);
+            return detail_rvv::rvvreinterpret<T>(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_not(batch_bool<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmnot(arg);
+            return detail_rvv::rvvmnot(arg);
         }
 
         /**********
          * Shifts *
          **********/
 
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD_INTS(rvvsll_splat, (__riscv_vsll), , vec(vec, size_t))
             XSIMD_RVV_OVERLOAD_INTS(rvvsll, (__riscv_vsll), , vec(vec, uvec))
@@ -887,13 +887,13 @@ namespace xsimd
         {
             constexpr size_t size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0 <= n && static_cast<size_t>(n) < size && "index in bounds");
-            return detail::rvvsll_splat(arg, n);
+            return detail_rvv::rvvsll_splat(arg, n);
         }
 
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvsll(lhs, detail::rvv_to_unsigned_batch<A, T>(rhs));
+            return detail_rvv::rvvsll(lhs, detail_rvv::rvv_to_unsigned_batch<A, T>(rhs));
         }
 
         // bitwise_rshift
@@ -902,20 +902,20 @@ namespace xsimd
         {
             constexpr size_t size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0 <= n && static_cast<size_t>(n) < size && "index in bounds");
-            return detail::rvvsr_splat(arg, n);
+            return detail_rvv::rvvsr_splat(arg, n);
         }
 
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvsr(lhs, detail::rvv_to_unsigned_batch<A, T>(rhs));
+            return detail_rvv::rvvsr(lhs, detail_rvv::rvv_to_unsigned_batch<A, T>(rhs));
         }
 
         /**************
          * Reductions *
          **************/
 
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD3(rvvredsum,
                                 (__riscv_vredsum),
@@ -942,34 +942,34 @@ namespace xsimd
             template <class A, class T>
             XSIMD_INLINE T reduce_scalar(rvv_reg_t<T, types::detail::rvv_width_m1> const& arg)
             {
-                return detail::rvvmv_lane0(rvv_reg_t<T, A::width>(arg.get_bytes(), types::detail::XSIMD_RVV_BITCAST));
+                return detail_rvv::rvvmv_lane0(rvv_reg_t<T, A::width>(arg.get_bytes(), types::detail::XSIMD_RVV_BITCAST));
             }
         }
         // reduce_add
         template <class A, class T, class V = typename batch<T, A>::value_type, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE V reduce_add(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            const auto zero = detail::broadcast<T, types::detail::rvv_width_m1>(T(0));
-            const auto r = detail::rvvredsum(arg, zero);
-            return detail::reduce_scalar<A, T>(r);
+            const auto zero = detail_rvv::broadcast<T, types::detail::rvv_width_m1>(T(0));
+            const auto r = detail_rvv::rvvredsum(arg, zero);
+            return detail_rvv::reduce_scalar<A, T>(r);
         }
 
         // reduce_max
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE T reduce_max(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            const auto lowest = detail::broadcast<T, types::detail::rvv_width_m1>(std::numeric_limits<T>::lowest());
-            const auto r = detail::rvvredmax(arg, lowest);
-            return detail::reduce_scalar<A, T>(r);
+            const auto lowest = detail_rvv::broadcast<T, types::detail::rvv_width_m1>(std::numeric_limits<T>::lowest());
+            const auto r = detail_rvv::rvvredmax(arg, lowest);
+            return detail_rvv::reduce_scalar<A, T>(r);
         }
 
         // reduce_min
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE T reduce_min(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            const auto max = detail::broadcast<T, types::detail::rvv_width_m1>(std::numeric_limits<T>::max());
-            const auto r = detail::rvvredmin(arg, max);
-            return detail::reduce_scalar<A, T>(r);
+            const auto max = detail_rvv::broadcast<T, types::detail::rvv_width_m1>(std::numeric_limits<T>::max());
+            const auto r = detail_rvv::rvvredmin(arg, max);
+            return detail_rvv::reduce_scalar<A, T>(r);
         }
 
         // haddp
@@ -994,61 +994,61 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmseq(lhs, rhs);
+            return detail_rvv::rvvmseq(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto neq_result = detail::rvvmxor(lhs, rhs);
-            return detail::rvvmnot(neq_result);
+            const auto neq_result = detail_rvv::rvvmxor(lhs, rhs);
+            return detail_rvv::rvvmnot(neq_result);
         }
 
         // neq
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> neq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmsne(lhs, rhs);
+            return detail_rvv::rvvmsne(lhs, rhs);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> neq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmxor(lhs, rhs);
+            return detail_rvv::rvvmxor(lhs, rhs);
         }
 
         // lt
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmslt(lhs, rhs);
+            return detail_rvv::rvvmslt(lhs, rhs);
         }
 
         // le
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmsle(lhs, rhs);
+            return detail_rvv::rvvmsle(lhs, rhs);
         }
 
         // gt
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmsgt(lhs, rhs);
+            return detail_rvv::rvvmsgt(lhs, rhs);
         }
 
         // ge
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmsge(lhs, rhs);
+            return detail_rvv::rvvmsge(lhs, rhs);
         }
 
         /*************
          * Selection *
          *************/
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD(rvvcompress, (__riscv_vcompress_tu), , vec(vec, vec, bvec))
         }
@@ -1057,13 +1057,13 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> compress(batch<T, A> const& x, batch_bool<T, A> const& mask, requires_arch<rvv>) noexcept
         {
             auto zero = broadcast<A>(T(0), rvv {});
-            return detail::rvvcompress(zero, x, mask);
+            return detail_rvv::rvvcompress(zero, x, mask);
         }
 
         /***************
          * Permutation *
          ***************/
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD(rvvrgather, (__riscv_vrgather), , vec(vec, uvec))
             XSIMD_RVV_OVERLOAD(rvvslideup, (__riscv_vslideup), , vec(vec, vec, size_t))
@@ -1076,7 +1076,7 @@ namespace xsimd
         {
             static_assert(batch<T, A>::size == sizeof...(idx), "invalid swizzle indices");
             const batch<I, A> indices { idx... };
-            return detail::rvvrgather(arg, indices);
+            return detail_rvv::rvvrgather(arg, indices);
         }
 
         template <class A, class T, class I, I... idx>
@@ -1098,15 +1098,15 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> extract_pair(batch<T, A> const& lhs, batch<T, A> const& rhs, size_t n, requires_arch<rvv>) noexcept
         {
-            const auto tmp = detail::rvvslidedown(rhs, n);
-            return detail::rvvslideup(tmp, lhs, lhs.size - n);
+            const auto tmp = detail_rvv::rvvslidedown(rhs, n);
+            return detail_rvv::rvvslideup(tmp, lhs, lhs.size - n);
         }
 
         // select
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& a, batch<T, A> const& b, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmerge(b, a, cond);
+            return detail_rvv::rvvmerge(b, a, cond);
         }
 
         template <class A, class T, bool... b>
@@ -1119,22 +1119,22 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> zip_lo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto index = detail::vindex<A, as_unsigned_integer_t<T>, 0, -1>();
-            const auto mask = detail::pmask8<T, A::width>(0xaa);
-            return detail::rvvmerge(detail::rvvrgather(lhs, index),
-                                    detail::rvvrgather(rhs, index),
-                                    mask);
+            const auto index = detail_rvv::vindex<A, as_unsigned_integer_t<T>, 0, -1>();
+            const auto mask = detail_rvv::pmask8<T, A::width>(0xaa);
+            return detail_rvv::rvvmerge(detail_rvv::rvvrgather(lhs, index),
+                                        detail_rvv::rvvrgather(rhs, index),
+                                        mask);
         }
 
         // zip_hi
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> zip_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
-            const auto index = detail::vindex<A, as_unsigned_integer_t<T>, batch<T, A>::size / 2, -1>();
-            const auto mask = detail::pmask8<T, A::width>(0xaa);
-            return detail::rvvmerge(detail::rvvrgather(lhs, index),
-                                    detail::rvvrgather(rhs, index),
-                                    mask);
+            const auto index = detail_rvv::vindex<A, as_unsigned_integer_t<T>, batch<T, A>::size / 2, -1>();
+            const auto mask = detail_rvv::pmask8<T, A::width>(0xaa);
+            return detail_rvv::rvvmerge(detail_rvv::rvvrgather(lhs, index),
+                                        detail_rvv::rvvrgather(rhs, index),
+                                        mask);
         }
 
         // store_complex
@@ -1158,7 +1158,7 @@ namespace xsimd
          * Floating-point arithmetic *
          *****************************/
 
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD_FLOATS(rvvfsqrt, (__riscv_vfsqrt), , vec(vec))
             XSIMD_RVV_OVERLOAD_FLOATS(rvvfrec7, (__riscv_vfrec7), , vec(vec))
@@ -1169,7 +1169,7 @@ namespace xsimd
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> rsqrt(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            auto approx = detail::rvvfrsqrt7(arg);
+            auto approx = detail_rvv::rvvfrsqrt7(arg);
             approx = approx * (1.5 - (0.5 * arg * approx * approx));
             return approx;
         }
@@ -1178,14 +1178,14 @@ namespace xsimd
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> sqrt(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvfsqrt(arg);
+            return detail_rvv::rvvfsqrt(arg);
         }
 
         // reciprocal
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> reciprocal(const batch<T, A>& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvfrec7(arg);
+            return detail_rvv::rvvfrec7(arg);
         }
 
         /******************************
@@ -1193,7 +1193,7 @@ namespace xsimd
          ******************************/
 
         // fast_cast
-        namespace detail
+        namespace detail_rvv
         {
             XSIMD_RVV_OVERLOAD2(rvvfcvt_rtz, // truncating conversion, like C.
                                 (__riscv_vfcvt_rtz_x),
@@ -1252,7 +1252,7 @@ namespace xsimd
             using U = as_unsigned_integer_t<T>;
             const auto values = set(batch<U, rvv> {}, rvv {}, static_cast<U>(args)...);
             const auto zero = broadcast<A>(U(0), rvv {});
-            detail::rvv_bool_t<T> result = detail::rvvmsne(values, zero);
+            detail_rvv::rvv_bool_t<T> result = detail_rvv::rvvmsne(values, zero);
             return result;
         }
 
@@ -1260,65 +1260,65 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE T first(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvmv_lane0(arg);
+            return detail_rvv::rvvmv_lane0(arg);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE std::complex<T> first(batch<std::complex<T>, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return std::complex<T> { detail::rvvmv_lane0(arg.real()), detail::rvvmv_lane0(arg.imag()) };
+            return std::complex<T> { detail_rvv::rvvmv_lane0(arg.real()), detail_rvv::rvvmv_lane0(arg.imag()) };
         }
 
         // insert
         template <class A, class T, size_t I, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& arg, T val, index<I>, requires_arch<rvv>) noexcept
         {
-            const auto mask = detail::pmask<T, A::width>(uint64_t(1) << I);
-            return detail::rvvmerge_splat(arg, val, mask);
+            const auto mask = detail_rvv::pmask<T, A::width>(uint64_t(1) << I);
+            return detail_rvv::rvvmerge_splat(arg, val, mask);
         }
 
         // get
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE T get(batch<T, A> const& arg, size_t i, requires_arch<rvv>) noexcept
         {
-            const auto tmp = detail::rvvslidedown(arg, i);
-            return detail::rvvmv_lane0(tmp);
+            const auto tmp = detail_rvv::rvvslidedown(arg, i);
+            return detail_rvv::rvvmv_lane0(tmp);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE std::complex<T> get(batch<std::complex<T>, A> const& arg, size_t i, requires_arch<rvv>) noexcept
         {
-            const auto tmpr = detail::rvvslidedown(arg.real(), i);
-            const auto tmpi = detail::rvvslidedown(arg.imag(), i);
-            return std::complex<T> { detail::rvvmv_lane0(tmpr), detail::rvvmv_lane0(tmpi) };
+            const auto tmpr = detail_rvv::rvvslidedown(arg.real(), i);
+            const auto tmpi = detail_rvv::rvvslidedown(arg.imag(), i);
+            return std::complex<T> { detail_rvv::rvvmv_lane0(tmpr), detail_rvv::rvvmv_lane0(tmpi) };
         }
 
         // all
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE bool all(batch_bool<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvcpop(arg) == batch_bool<T, A>::size;
+            return detail_rvv::rvvcpop(arg) == batch_bool<T, A>::size;
         }
 
         // any
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE bool any(batch_bool<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            return detail::rvvcpop(arg) > 0;
+            return detail_rvv::rvvcpop(arg) > 0;
         }
 
         // bitwise_cast
         template <class A, class T, class R, detail::enable_arithmetic_t<T> = 0, detail::enable_arithmetic_t<R> = 0>
         XSIMD_INLINE batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<rvv>) noexcept
         {
-            return detail::rvv_reg_t<R, A::width>(arg.data.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
+            return detail_rvv::rvv_reg_t<R, A::width>(arg.data.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
         }
 
         // batch_bool_cast
         template <class A, class T_out, class T_in, detail::enable_arithmetic_t<T_in> = 0>
         XSIMD_INLINE batch_bool<T_out, A> batch_bool_cast(batch_bool<T_in, A> const& arg, batch_bool<T_out, A> const&, requires_arch<rvv>) noexcept
         {
-            using intermediate_t = typename detail::rvv_bool_t<T_out>;
+            using intermediate_t = typename detail_rvv::rvv_bool_t<T_out>;
             return intermediate_t(arg.data);
         }
 
@@ -1327,10 +1327,10 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<rvv>) noexcept
         {
             const auto zero = broadcast<A>(T(0), rvv {});
-            return detail::rvvmerge_splat(zero, T(1), arg);
+            return detail_rvv::rvvmerge_splat(zero, T(1), arg);
         }
 
-        namespace detail
+        namespace detail_rvv
         {
             template <size_t Width>
             XSIMD_INLINE vuint8m1_t rvvslidedownbytes(vuint8m1_t arg, size_t i)
@@ -1366,16 +1366,16 @@ namespace xsimd
         {
             const auto zero = broadcast<A>(uint8_t(0), rvv {});
             const auto bytes = arg.data.get_bytes();
-            return detail::rvvreinterpret<T>(detail::rvvslideup(zero, bytes, N));
+            return detail_rvv::rvvreinterpret<T>(detail_rvv::rvvslideup(zero, bytes, N));
         }
 
         // slide_right
         template <size_t N, class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
-            using reg_t = detail::rvv_reg_t<T, A::width>;
+            using reg_t = detail_rvv::rvv_reg_t<T, A::width>;
             const auto bytes = arg.data.get_bytes();
-            return reg_t(detail::rvvslidedownbytes<A::width>(bytes, N), types::detail::XSIMD_RVV_BITCAST);
+            return reg_t(detail_rvv::rvvslidedownbytes<A::width>(bytes, N), types::detail::XSIMD_RVV_BITCAST);
         }
 
         // isnan
@@ -1385,7 +1385,7 @@ namespace xsimd
             return !(arg == arg);
         }
 
-        namespace detail
+        namespace detail_rvv
         {
             template <class T>
             using rvv_as_signed_integer_t = as_signed_integer_t<as_unsigned_integer_t<T>>;
@@ -1404,11 +1404,11 @@ namespace xsimd
         }
 
         // nearbyint_as_int
-        template <class A, class T, class U = detail::rvv_as_signed_integer_t<T>>
+        template <class A, class T, class U = detail_rvv::rvv_as_signed_integer_t<T>>
         XSIMD_INLINE batch<U, A> nearbyint_as_int(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
             // Reference rounds ties to nearest even
-            return detail::rvvfcvt_default(arg);
+            return detail_rvv::rvvfcvt_default(arg);
         }
 
         // round
@@ -1417,7 +1417,7 @@ namespace xsimd
         {
             // Round ties away from zero.
             const auto mask = abs(arg) < constants::maxflint<batch<T, A>>();
-            return select(mask, to_float(detail::rvvfcvt_afz(arg)), arg, rvv {});
+            return select(mask, to_float(detail_rvv::rvvfcvt_afz(arg)), arg, rvv {});
         }
 
         // nearbyint
@@ -1426,7 +1426,7 @@ namespace xsimd
         {
             // Round according to current rounding mode.
             const auto mask = abs(arg) < constants::maxflint<batch<T, A>>();
-            return select(mask, to_float(detail::rvvfcvt_default(arg)), arg, rvv {});
+            return select(mask, to_float(detail_rvv::rvvfcvt_default(arg)), arg, rvv {});
         }
 
         // mask
@@ -1439,12 +1439,12 @@ namespace xsimd
             XSIMD_IF_CONSTEXPR((8 * sizeof(T)) >= batch_bool<T, A>::size)
             {
                 // (A) Easy case: the number of slots fits in T.
-                const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
-                auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
-                auto iota = detail::rvvid(as_unsigned_integer_t<T> {});
-                auto upowers = detail::rvvsll(ones, iota);
+                const auto zero = detail_rvv::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+                auto ones = detail_rvv::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+                auto iota = detail_rvv::rvvid(as_unsigned_integer_t<T> {});
+                auto upowers = detail_rvv::rvvsll(ones, iota);
                 auto r = __riscv_vredor(self.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
-                return detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r);
+                return detail_rvv::reduce_scalar<A, as_unsigned_integer_t<T>>(r);
             }
             else XSIMD_IF_CONSTEXPR((2 * 8 * sizeof(T)) == batch_bool<T, A>::size)
             {
@@ -1460,20 +1460,20 @@ namespace xsimd
                 };
 
                 // The low part is similar to the approach in (A).
-                const auto zero = detail::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
-                auto ones = detail::broadcast<as_unsigned_integer_t<T>, A::width>(1);
-                auto iota = detail::rvvid(as_unsigned_integer_t<T> {});
-                auto upowers = detail::rvvsll(ones, iota);
+                const auto zero = detail_rvv::broadcast<as_unsigned_integer_t<T>, types::detail::rvv_width_m1>(T(0));
+                auto ones = detail_rvv::broadcast<as_unsigned_integer_t<T>, A::width>(1);
+                auto iota = detail_rvv::rvvid(as_unsigned_integer_t<T> {});
+                auto upowers = detail_rvv::rvvsll(ones, iota);
                 auto low_mask = self & make_batch_bool_constant<T, LowerHalf, A>();
                 auto r_low = __riscv_vredor(low_mask.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
 
                 // The high part requires to slide the upower filter to match the high mask.
-                upowers = detail::rvvslideup(upowers, upowers, 8 * sizeof(T));
+                upowers = detail_rvv::rvvslideup(upowers, upowers, 8 * sizeof(T));
                 auto high_mask = self & make_batch_bool_constant<T, UpperHalf, A>();
                 auto r_high = __riscv_vredor(high_mask.data.as_mask(), upowers, (typename decltype(zero)::register_type)zero, batch_bool<T, A>::size);
 
                 // Concatenate the two parts.
-                return (uint64_t)detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r_low) | ((uint64_t)detail::reduce_scalar<A, as_unsigned_integer_t<T>>(r_high) << (8 * sizeof(T)));
+                return (uint64_t)detail_rvv::reduce_scalar<A, as_unsigned_integer_t<T>>(r_low) | ((uint64_t)detail_rvv::reduce_scalar<A, as_unsigned_integer_t<T>>(r_high) << (8 * sizeof(T)));
             }
             else
             {
