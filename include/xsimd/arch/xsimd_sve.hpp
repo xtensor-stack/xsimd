@@ -328,7 +328,7 @@ namespace xsimd
             return svreinterpret_u64(svneg_x(detail::sve_ptrue<T>(), svreinterpret_s64(static_cast<detail::sve_sizeless_t<T>>(arg))));
         }
 
-        template <class A, class T, detail::sve_enable_signed_int_or_floating_point_t<T> = 0>
+        template <class A, class T, detail::enable_signed_numeral_t<T> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
             return svneg_x(detail::sve_ptrue<T>(), arg);
@@ -341,7 +341,7 @@ namespace xsimd
             return arg;
         }
 
-        template <class A, class T, detail::sve_enable_signed_int_or_floating_point_t<T> = 0>
+        template <class A, class T, detail::enable_signed_numeral_t<T> = 0>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
             return svabs_x(detail::sve_ptrue<T>(), arg);

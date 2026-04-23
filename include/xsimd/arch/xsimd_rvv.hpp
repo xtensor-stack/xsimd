@@ -374,10 +374,6 @@ namespace xsimd
                     index = __riscv_vsll(index, shift, batch<T, A>::size);
                 return __riscv_vadd(index, T(offset), batch<T, A>::size);
             }
-
-            // enable for signed integers or floating points
-            template <class T>
-            using rvv_enable_signed_int_or_floating_point_t = std::enable_if_t<std::is_signed<T>::value, int>;
         } // namespace detail
 
         /********************
@@ -687,7 +683,7 @@ namespace xsimd
             return detail::rvvreinterpret<T>(result);
         }
 
-        template <class A, class T, detail::rvv_enable_signed_int_or_floating_point_t<T> = 0>
+        template <class A, class T, enable_signed_numeral_t<T> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<rvv>) noexcept
         {
             return detail::rvvneg(arg);
