@@ -224,60 +224,26 @@ namespace xsimd
              **************************/
 
             template <class T>
-            struct comp_return_type_impl;
-
-            template <>
-            struct comp_return_type_impl<uint8x16_t>
+            struct comp_return_type_impl
             {
-                using type = uint8x16_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<int8x16_t>
-            {
-                using type = uint8x16_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint16x8_t>
-            {
-                using type = uint16x8_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<int16x8_t>
-            {
-                using type = uint16x8_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<int32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint64x2_t>
-            {
-                using type = uint64x2_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<int64x2_t>
-            {
-                using type = uint64x2_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<float32x4_t>
-            {
-                using type = uint32x4_t;
+                // Annoyingly long chain of std::conditional.
+                // On MSVC, all integer vector type point to the same type, making
+                // hard to work with template specialization.
+                // TODO(C++17): the type could be deduced as the return type of a
+                // function with multiple `if constexpr` (more readable).
+                using type = typename std::conditional<
+                    std::is_same<T, uint8x16_t>::value || std::is_same<T, int8x16_t>::value,
+                    uint8x16_t,
+                    typename std::conditional<
+                        std::is_same<T, uint16x8_t>::value || std::is_same<T, int16x8_t>::value,
+                        uint16x8_t,
+                        typename std::conditional<
+                            std::is_same<T, uint32x4_t>::value || std::is_same<T, int32x4_t>::value || std::is_same<T, float32x4_t>::value,
+                            uint32x4_t,
+                            typename std::conditional<
+                                std::is_same<T, uint64x2_t>::value || std::is_same<T, int64x2_t>::value,
+                                uint64x2_t,
+                                T>::type>::type>::type>::type;
             };
 
             template <class T>
