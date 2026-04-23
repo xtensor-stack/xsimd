@@ -207,7 +207,23 @@ namespace xsimd
              **************************************/
 
             template <class T>
+            using enable_arithmetic_t = std::enable_if_t<std::is_arithmetic<T>::value, int>;
+
+            /// Enable signed integral or floating point
+            template <class T>
+            using enable_signed_numeral_t = std::enable_if_t<std::is_signed<T>::value, int>;
+
+            template <class T>
+            using enable_floating_point_t = std::enable_if_t<std::is_floating_point<T>::value, int>;
+
+            template <class T>
             using enable_integral_t = std::enable_if_t<std::is_integral<T>::value, int>;
+
+            template <class T>
+            using enable_signed_integral_t = std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, int>;
+
+            template <class T>
+            using enable_unsigned_integral_t = std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value, int>;
 
             template <class T, size_t S>
             using enable_sized_signed_t = std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value && sizeof(T) == S, int>;
