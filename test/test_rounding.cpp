@@ -56,12 +56,12 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::ceil(v); });
-            for (size_t i = 0; i < nb_batches; i += size)
+            for (size_t i = 0; i < nb_batches; i++)
             {
                 batch_type in, out, ref;
-                detail::load_batch(in, input, i);
+                detail::load_batch(in, input, i * size);
                 out = ceil(in);
-                detail::load_batch(ref, expected, i);
+                detail::load_batch(ref, expected, i * size);
                 INFO("ceil");
                 CHECK_BATCH_EQ(ref, out);
             }
@@ -71,12 +71,12 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::floor(v); });
-            for (size_t i = 0; i < nb_batches; i += size)
+            for (size_t i = 0; i < nb_batches; i++)
             {
                 batch_type in, out, ref;
-                detail::load_batch(in, input, i);
+                detail::load_batch(in, input, i * size);
                 out = floor(in);
-                detail::load_batch(ref, expected, i);
+                detail::load_batch(ref, expected, i * size);
                 INFO("floor");
                 CHECK_BATCH_EQ(ref, out);
             }
@@ -86,12 +86,12 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::trunc(v); });
-            for (size_t i = 0; i < nb_batches; i += size)
+            for (size_t i = 0; i < nb_batches; i++)
             {
                 batch_type in, out, ref;
-                detail::load_batch(in, input, i);
+                detail::load_batch(in, input, i * size);
                 out = trunc(in);
-                detail::load_batch(ref, expected, i);
+                detail::load_batch(ref, expected, i * size);
                 INFO("trunc");
                 CHECK_BATCH_EQ(ref, out);
             }
@@ -101,12 +101,12 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::round(v); });
-            for (size_t i = 0; i < nb_batches; i += size)
+            for (size_t i = 0; i < nb_batches; i++)
             {
                 batch_type in, out, ref;
-                detail::load_batch(in, input, i);
+                detail::load_batch(in, input, i * size);
                 out = round(in);
-                detail::load_batch(ref, expected, i);
+                detail::load_batch(ref, expected, i * size);
                 INFO("round");
                 CHECK_BATCH_EQ(ref, out);
             }
@@ -116,12 +116,12 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::nearbyint(v); });
-            for (size_t i = 0; i < nb_batches; i += size)
+            for (size_t i = 0; i < nb_batches; i++)
             {
                 batch_type in, out, ref;
-                detail::load_batch(in, input, i);
+                detail::load_batch(in, input, i * size);
                 out = nearbyint(in);
-                detail::load_batch(ref, expected, i);
+                detail::load_batch(ref, expected, i * size);
                 INFO("nearbyint");
                 CHECK_BATCH_EQ(ref, out);
             }
@@ -132,13 +132,13 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return xsimd::nearbyint_as_int(v); });
-            for (size_t i = 0; i < nb_batches; i += size)
+            for (size_t i = 0; i < nb_batches; i++)
             {
                 batch_type in;
                 int_batch_type out, ref;
-                detail::load_batch(in, input, i);
+                detail::load_batch(in, input, i * size);
                 out = nearbyint_as_int(in);
-                detail::load_batch(ref, expected, i);
+                detail::load_batch(ref, expected, i * size);
                 INFO("nearbyint_as_int");
                 CHECK_BATCH_EQ(ref, out);
             }
@@ -148,12 +148,12 @@ struct rounding_test
             std::transform(input.cbegin(), input.cend(), expected.begin(),
                            [](const value_type& v)
                            { return std::rint(v); });
-            for (size_t i = 0; i < nb_batches; i += size)
+            for (size_t i = 0; i < nb_batches; i++)
             {
                 batch_type in, out, ref;
-                detail::load_batch(in, input, i);
+                detail::load_batch(in, input, i * size);
                 out = rint(in);
-                detail::load_batch(ref, expected, i);
+                detail::load_batch(ref, expected, i * size);
                 INFO("rint");
                 CHECK_BATCH_EQ(ref, out);
             }
