@@ -538,7 +538,7 @@
 + * Set to 1 if s390x VXE is available at compile-time, to 0 otherwise.
 + * Float vectors have been introduced with VXE included with IBM z14.
 + */
-#if defined(__VEC__) && __VEC__ == 10305 && __ARCH__ >= 12
+#if defined(__VEC__) && __VEC__ >= 10304 && __ARCH__ >= 12
 #define XSIMD_WITH_VXE 1
 #else
 #define XSIMD_WITH_VXE 0

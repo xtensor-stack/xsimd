@@ -37,7 +37,8 @@ namespace xsimd
      * @see xsimd::dispatch
      * @see xsimd::available_architectures
      */
-    class cpu_features : public ppc_cpu_features,
+    class cpu_features : public s390x_cpu_features,
+                         public ppc_cpu_features,
                          public riscv_cpu_features,
                          public arm_cpu_features,
                          public x86_cpu_features

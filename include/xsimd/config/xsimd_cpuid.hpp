@@ -81,6 +81,8 @@ namespace xsimd
 
                 const auto cpu = xsimd::cpu_features();
 
+                vxe = cpu.vxe();
+
                 vsx = cpu.vsx();
 
                 rvv128 = cpu.rvv() && (cpu.rvv_size_bytes() >= (128 / 8));

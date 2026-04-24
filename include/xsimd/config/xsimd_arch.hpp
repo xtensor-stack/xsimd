@@ -181,6 +181,7 @@ namespace xsimd
     using arm_arch = typename detail::supported<all_arm_architectures>::type::best;
     using power_arch = typename detail::supported<all_power_architectures>::type::best;
     using riscv_arch = typename detail::supported<all_riscv_architectures>::type::best;
+    using s390x_arch = typename detail::supported<all_s390x_architectures>::type::best;
     using best_arch = typename supported_architectures::best;
 
 #ifdef XSIMD_DEFAULT_ARCH
