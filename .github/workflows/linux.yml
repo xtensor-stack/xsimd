@@ -124,6 +124,7 @@ jobs:
         export XSIMD_TEST_CPU_ASSUME_NEON64="0"
         export XSIMD_TEST_CPU_ASSUME_RVV="0"
         export XSIMD_TEST_CPU_ASSUME_VSX="0"
+        export XSIMD_TEST_CPU_ASSUME_VXE="0"
         cd _build/test
         if echo '${{ matrix.sys.flags }}' | grep -q 'avx512' ; then
           # Running with emulation, must have AVX512, lower tier are checked by implications in tests
