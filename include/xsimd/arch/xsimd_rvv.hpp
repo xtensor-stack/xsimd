@@ -1306,7 +1306,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(I == 0)
             {
-                return detail::rvvmv_lane0(arg);
+                return detail_rvv::rvvmv_lane0(arg);
             }
             return get(arg, I, rvv {});
         }
@@ -1316,7 +1316,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(I == 0)
             {
-                return std::complex<T> { detail::rvvmv_lane0(arg.real()), detail::rvvmv_lane0(arg.imag()) };
+                return std::complex<T> { detail_rvv::rvvmv_lane0(arg.real()), detail_rvv::rvvmv_lane0(arg.imag()) };
             }
             return get(arg, I, rvv {});
         }
