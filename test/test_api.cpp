@@ -138,7 +138,7 @@ private:
         batch_type b = batch_type::load(v.data(), xsimd::aligned_mode());
         V res(size);
 
-        bool* b_data = new bool[size];
+        alignas(arch_type::alignment()) bool b_data[size];
 
         xsimd::store_as(res.data(), b, xsimd::unaligned_mode());
         INFO(name, " unaligned");
@@ -159,8 +159,6 @@ private:
         xsimd::store_as(b_data, bb, xsimd::aligned_mode());
         INFO(name, " batch_bool aligned");
         CHECK_UNARY(std::accumulate(b_data, b_data + size, true, std::logical_and<bool>()));
-
-        delete[] b_data;
     }
 
     template <class T>
