@@ -5,6 +5,8 @@
 #ifndef XSIMD_BIT_HPP
 #define XSIMD_BIT_HPP
 
+#if __cplusplus > 202002L
+
 #include <version>
 
 #if __cpp_lib_bitops >= 201907L
@@ -22,6 +24,8 @@ namespace xsimd
         using std::popcount;
     }
 }
+
+#endif
 
 #else
 
