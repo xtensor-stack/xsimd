@@ -1301,22 +1301,22 @@ namespace xsimd
         }
 
         // get (compile-time index): skip the slidedown when I == 0; lane 0 maps straight to the scalar move.
-        template <class A, size_t I, class T, detail::rvv_enable_all_t<T> = 0>
+        template <class A, size_t I, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE T get(batch<T, A> const& arg, index<I>, requires_arch<rvv>) noexcept
         {
             XSIMD_IF_CONSTEXPR(I == 0)
             {
-                return detail::rvvmv_lane0(arg);
+                return detail_rvv::rvvmv_lane0(arg);
             }
             return get(arg, I, rvv {});
         }
 
-        template <class A, size_t I, class T, detail::rvv_enable_all_t<T> = 0>
+        template <class A, size_t I, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE std::complex<T> get(batch<std::complex<T>, A> const& arg, index<I>, requires_arch<rvv>) noexcept
         {
             XSIMD_IF_CONSTEXPR(I == 0)
             {
-                return std::complex<T> { detail::rvvmv_lane0(arg.real()), detail::rvvmv_lane0(arg.imag()) };
+                return std::complex<T> { detail_rvv::rvvmv_lane0(arg.real()), detail_rvv::rvvmv_lane0(arg.imag()) };
             }
             return get(arg, I, rvv {});
         }
