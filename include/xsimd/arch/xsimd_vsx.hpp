@@ -605,8 +605,18 @@ namespace xsimd
         }
 
         // round
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
-        XSIMD_INLINE batch<T, A> round(batch<T, A> const& self, requires_arch<vsx>) noexcept
+
+        // vec_round exists also for float vectors but is mapped to vrfin instruction which uses the wrong rounding mode
+#if defined __has_builtin && __has_builtin(__builtin_vsx_xvrspi)
+        template <class A>
+        XSIMD_INLINE batch<float, A> round(batch<float, A> const& self, requires_arch<vsx>) noexcept
+        {
+            return __builtin_vsx_xvrspi(self.data);
+        }
+#endif
+        // For double vectors vec_round uses xvrdpi which does the right thing
+        template <class A>
+        XSIMD_INLINE batch<double, A> round(batch<double, A> const& self, requires_arch<vsx>) noexcept
         {
             return vec_round(self.data);
         }
