@@ -20,6 +20,8 @@
 #include "types/xsimd_batch_fwd.hpp"
 
 #if defined(XSIMD_NO_SUPPORTED_ARCHITECTURE)
+static_assert(false, "We should be testing with an Arch");
+
 namespace xsimd
 {
     // no type definition or anything apart from scalar definition and aligned allocator
