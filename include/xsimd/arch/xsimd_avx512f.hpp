@@ -2506,7 +2506,7 @@ namespace xsimd
             return _mm512_permutexvar_epi32(static_cast<batch<uint32_t, A>>(mask32), self);
         }
 
-        template <class A>
+        template <class A, class = std::enable_if_t<batch<uint16_t, A>::size == 32>>
         XSIMD_INLINE batch<uint16_t, A>
         swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, (uint16_t)1, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1, (uint16_t)0, (uint16_t)1>, requires_arch<avx512f>) noexcept
         {
