@@ -26,13 +26,13 @@
 #include "./common/xsimd_common_cast.hpp"
 #include "./xsimd_common_fwd.hpp"
 
-#define WRAP_BINARY_IMPL(OP, VEC, RT)                           \
-    namespace wrap                                              \
-    {                                                           \
-        XSIMD_INLINE auto(OP)(VEC a, VEC b) noexcept -> RT<VEC> \
-        {                                                       \
-            return (::OP)(a, b);                                \
-        }                                                       \
+#define WRAP_BINARY_IMPL(OP, VEC, RT)                               \
+    namespace wrap                                                  \
+    {                                                               \
+        XSIMD_INLINE auto(x_##OP)(VEC a, VEC b) noexcept -> RT<VEC> \
+        {                                                           \
+            return ::OP(a, b);                                      \
+        }                                                           \
     }
 
 #define WRAP_BINARY_UINT_EXCLUDING_64(OP_U8, OP_U16, OP_U32, RT) \
@@ -54,13 +54,13 @@
 #define WRAP_BINARY_FLOAT(OP_F32, RT) \
     WRAP_BINARY_IMPL(OP_F32, float32x4_t, RT)
 
-#define WRAP_UNARY_IMPL(OP, VEC)                     \
-    namespace wrap                                   \
-    {                                                \
-        XSIMD_INLINE auto(OP)(VEC a) noexcept -> VEC \
-        {                                            \
-            return (::OP)(a);                        \
-        }                                            \
+#define WRAP_UNARY_IMPL(OP, VEC)                         \
+    namespace wrap                                       \
+    {                                                    \
+        XSIMD_INLINE auto(x_##OP)(VEC a) noexcept -> VEC \
+        {                                                \
+            return ::OP(a);                              \
+        }                                                \
     }
 
 #define WRAP_UNARY_INT_EXCLUDING_64(OP_U8, OP_I8, OP_U16, OP_I16, OP_U32, OP_I32) \
@@ -775,9 +775,9 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vaddq_u8, wrap::vaddq_s8, wrap::vaddq_u16, wrap::vaddq_s16,
-                                wrap::vaddq_u32, wrap::vaddq_s32, wrap::vaddq_u64, wrap::vaddq_s64,
-                                wrap::vaddq_f32)
+                std::make_tuple(wrap::x_vaddq_u8, wrap::x_vaddq_s8, wrap::x_vaddq_u16, wrap::x_vaddq_s16,
+                                wrap::x_vaddq_u32, wrap::x_vaddq_s32, wrap::x_vaddq_u64, wrap::x_vaddq_s64,
+                                wrap::x_vaddq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -793,7 +793,7 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary dispatcher = {
-                std::make_tuple(wrap::vhaddq_u8, wrap::vhaddq_u16, wrap::vhaddq_u32)
+                std::make_tuple(wrap::x_vhaddq_u8, wrap::x_vhaddq_u16, wrap::x_vhaddq_u32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -809,7 +809,7 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary dispatcher = {
-                std::make_tuple(wrap::vrhaddq_u8, wrap::vrhaddq_u16, wrap::vrhaddq_u32)
+                std::make_tuple(wrap::x_vrhaddq_u8, wrap::x_vrhaddq_u16, wrap::x_vrhaddq_u32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -825,9 +825,9 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vqaddq_u8, wrap::vqaddq_s8, wrap::vqaddq_u16, wrap::vqaddq_s16,
-                                wrap::vqaddq_u32, wrap::vqaddq_s32, wrap::vqaddq_u64, wrap::vqaddq_s64,
-                                wrap::vaddq_f32)
+                std::make_tuple(wrap::x_vqaddq_u8, wrap::x_vqaddq_s8, wrap::x_vqaddq_u16, wrap::x_vqaddq_s16,
+                                wrap::x_vqaddq_u32, wrap::x_vqaddq_s32, wrap::x_vqaddq_u64, wrap::x_vqaddq_s64,
+                                wrap::x_vaddq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -844,9 +844,9 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vsubq_u8, wrap::vsubq_s8, wrap::vsubq_u16, wrap::vsubq_s16,
-                                wrap::vsubq_u32, wrap::vsubq_s32, wrap::vsubq_u64, wrap::vsubq_s64,
-                                wrap::vsubq_f32)
+                std::make_tuple(wrap::x_vsubq_u8, wrap::x_vsubq_s8, wrap::x_vsubq_u16, wrap::x_vsubq_s16,
+                                wrap::x_vsubq_u32, wrap::x_vsubq_s32, wrap::x_vsubq_u64, wrap::x_vsubq_s64,
+                                wrap::x_vsubq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -862,9 +862,9 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vqsubq_u8, wrap::vqsubq_s8, wrap::vqsubq_u16, wrap::vqsubq_s16,
-                                wrap::vqsubq_u32, wrap::vqsubq_s32, wrap::vqsubq_u64, wrap::vqsubq_s64,
-                                wrap::vsubq_f32)
+                std::make_tuple(wrap::x_vqsubq_u8, wrap::x_vqsubq_s8, wrap::x_vqsubq_u16, wrap::x_vqsubq_s16,
+                                wrap::x_vqsubq_u32, wrap::x_vqsubq_s32, wrap::x_vqsubq_u64, wrap::x_vqsubq_s64,
+                                wrap::x_vsubq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -881,8 +881,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vmulq_u8, wrap::vmulq_s8, wrap::vmulq_u16, wrap::vmulq_s16,
-                                wrap::vmulq_u32, wrap::vmulq_s32, wrap::vmulq_f32)
+                std::make_tuple(wrap::x_vmulq_u8, wrap::x_vmulq_s8, wrap::x_vmulq_u16, wrap::x_vmulq_s16,
+                                wrap::x_vmulq_u32, wrap::x_vmulq_s32, wrap::x_vmulq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -934,8 +934,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vceqq_u8, wrap::vceqq_s8, wrap::vceqq_u16, wrap::vceqq_s16,
-                                wrap::vceqq_u32, wrap::vceqq_s32, wrap::vceqq_f32)
+                std::make_tuple(wrap::x_vceqq_u8, wrap::x_vceqq_s8, wrap::x_vceqq_u16, wrap::x_vceqq_s16,
+                                wrap::x_vceqq_u32, wrap::x_vceqq_s32, wrap::x_vceqq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -946,7 +946,7 @@ namespace xsimd
             using register_type = typename batch_bool<T, A>::register_type;
             using dispatcher_type = detail::neon_comp_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary;
             const dispatcher_type dispatcher = {
-                std::make_tuple(wrap::vceqq_u8, wrap::vceqq_u16, wrap::vceqq_u32)
+                std::make_tuple(wrap::x_vceqq_u8, wrap::x_vceqq_u16, wrap::x_vceqq_u32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -1019,8 +1019,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vcltq_u8, wrap::vcltq_s8, wrap::vcltq_u16, wrap::vcltq_s16,
-                                wrap::vcltq_u32, wrap::vcltq_s32, wrap::vcltq_f32)
+                std::make_tuple(wrap::x_vcltq_u8, wrap::x_vcltq_s8, wrap::x_vcltq_u16, wrap::x_vcltq_s16,
+                                wrap::x_vcltq_u32, wrap::x_vcltq_s32, wrap::x_vcltq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -1052,8 +1052,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vcleq_u8, wrap::vcleq_s8, wrap::vcleq_u16, wrap::vcleq_s16,
-                                wrap::vcleq_u32, wrap::vcleq_s32, wrap::vcleq_f32)
+                std::make_tuple(wrap::x_vcleq_u8, wrap::x_vcleq_s8, wrap::x_vcleq_u16, wrap::x_vcleq_s16,
+                                wrap::x_vcleq_u32, wrap::x_vcleq_s32, wrap::x_vcleq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -1088,8 +1088,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vcgtq_u8, wrap::vcgtq_s8, wrap::vcgtq_u16, wrap::vcgtq_s16,
-                                wrap::vcgtq_u32, wrap::vcgtq_s32, wrap::vcgtq_f32)
+                std::make_tuple(wrap::x_vcgtq_u8, wrap::x_vcgtq_s8, wrap::x_vcgtq_u16, wrap::x_vcgtq_s16,
+                                wrap::x_vcgtq_u32, wrap::x_vcgtq_s32, wrap::x_vcgtq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -1121,8 +1121,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vcgeq_u8, wrap::vcgeq_s8, wrap::vcgeq_u16, wrap::vcgeq_s16,
-                                wrap::vcgeq_u32, wrap::vcgeq_s32, wrap::vcgeq_f32)
+                std::make_tuple(wrap::x_vcgeq_u8, wrap::x_vcgeq_s8, wrap::x_vcgeq_u16, wrap::x_vcgeq_s16,
+                                wrap::x_vcgeq_u32, wrap::x_vcgeq_s32, wrap::x_vcgeq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -1162,8 +1162,8 @@ namespace xsimd
             V bitwise_and_neon(V const& lhs, V const& rhs)
             {
                 const neon_dispatcher::binary dispatcher = {
-                    std::make_tuple(wrap::vandq_u8, wrap::vandq_s8, wrap::vandq_u16, wrap::vandq_s16,
-                                    wrap::vandq_u32, wrap::vandq_s32, wrap::vandq_u64, wrap::vandq_s64,
+                    std::make_tuple(wrap::x_vandq_u8, wrap::x_vandq_s8, wrap::x_vandq_u16, wrap::x_vandq_s16,
+                                    wrap::x_vandq_u32, wrap::x_vandq_s32, wrap::x_vandq_u64, wrap::x_vandq_s64,
                                     bitwise_and_f32)
                 };
                 return dispatcher.apply(lhs, rhs);
@@ -1202,8 +1202,8 @@ namespace xsimd
             XSIMD_INLINE V bitwise_or_neon(V const& lhs, V const& rhs) noexcept
             {
                 const neon_dispatcher::binary dispatcher = {
-                    std::make_tuple(wrap::vorrq_u8, wrap::vorrq_s8, wrap::vorrq_u16, wrap::vorrq_s16,
-                                    wrap::vorrq_u32, wrap::vorrq_s32, wrap::vorrq_u64, wrap::vorrq_s64,
+                    std::make_tuple(wrap::x_vorrq_u8, wrap::x_vorrq_s8, wrap::x_vorrq_u16, wrap::x_vorrq_s16,
+                                    wrap::x_vorrq_u32, wrap::x_vorrq_s32, wrap::x_vorrq_u64, wrap::x_vorrq_s64,
                                     bitwise_or_f32)
                 };
                 return dispatcher.apply(lhs, rhs);
@@ -1242,8 +1242,8 @@ namespace xsimd
             XSIMD_INLINE V bitwise_xor_neon(V const& lhs, V const& rhs) noexcept
             {
                 const neon_dispatcher::binary dispatcher = {
-                    std::make_tuple(wrap::veorq_u8, wrap::veorq_s8, wrap::veorq_u16, wrap::veorq_s16,
-                                    wrap::veorq_u32, wrap::veorq_s32, wrap::veorq_u64, wrap::veorq_s64,
+                    std::make_tuple(wrap::x_veorq_u8, wrap::x_veorq_s8, wrap::x_veorq_u16, wrap::x_veorq_s16,
+                                    wrap::x_veorq_u32, wrap::x_veorq_s32, wrap::x_veorq_u64, wrap::x_veorq_s64,
                                     bitwise_xor_f32)
                 };
                 return dispatcher.apply(lhs, rhs);
@@ -1291,8 +1291,8 @@ namespace xsimd
             XSIMD_INLINE V bitwise_not_neon(V const& arg) noexcept
             {
                 const neon_dispatcher::unary dispatcher = {
-                    std::make_tuple(wrap::vmvnq_u8, wrap::vmvnq_s8, wrap::vmvnq_u16, wrap::vmvnq_s16,
-                                    wrap::vmvnq_u32, wrap::vmvnq_s32,
+                    std::make_tuple(wrap::x_vmvnq_u8, wrap::x_vmvnq_s8, wrap::x_vmvnq_u16, wrap::x_vmvnq_s16,
+                                    wrap::x_vmvnq_u32, wrap::x_vmvnq_s32,
                                     bitwise_not_u64, bitwise_not_s64,
                                     bitwise_not_f32)
                 };
@@ -1331,8 +1331,8 @@ namespace xsimd
             XSIMD_INLINE V bitwise_andnot_neon(V const& lhs, V const& rhs) noexcept
             {
                 const detail::neon_dispatcher::binary dispatcher = {
-                    std::make_tuple(wrap::vbicq_u8, wrap::vbicq_s8, wrap::vbicq_u16, wrap::vbicq_s16,
-                                    wrap::vbicq_u32, wrap::vbicq_s32, wrap::vbicq_u64, wrap::vbicq_s64,
+                    std::make_tuple(wrap::x_vbicq_u8, wrap::x_vbicq_s8, wrap::x_vbicq_u16, wrap::x_vbicq_s16,
+                                    wrap::x_vbicq_u32, wrap::x_vbicq_s32, wrap::x_vbicq_u64, wrap::x_vbicq_s64,
                                     bitwise_andnot_f32)
                 };
                 return dispatcher.apply(lhs, rhs);
@@ -1365,8 +1365,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vminq_u8, wrap::vminq_s8, wrap::vminq_u16, wrap::vminq_s16,
-                                wrap::vminq_u32, wrap::vminq_s32, wrap::vminq_f32)
+                std::make_tuple(wrap::x_vminq_u8, wrap::x_vminq_s8, wrap::x_vminq_u16, wrap::x_vminq_s16,
+                                wrap::x_vminq_u32, wrap::x_vminq_s32, wrap::x_vminq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -1389,8 +1389,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::vmaxq_u8, wrap::vmaxq_s8, wrap::vmaxq_u16, wrap::vmaxq_s16,
-                                wrap::vmaxq_u32, wrap::vmaxq_s32, wrap::vmaxq_f32)
+                std::make_tuple(wrap::x_vmaxq_u8, wrap::x_vmaxq_s8, wrap::x_vmaxq_u16, wrap::x_vmaxq_s16,
+                                wrap::x_vmaxq_u32, wrap::x_vmaxq_s32, wrap::x_vmaxq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
         }
@@ -1407,9 +1407,9 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE int8x16_t vabsq_s8(int8x16_t a) noexcept { return ::vabsq_s8(a); }
-            XSIMD_INLINE int16x8_t vabsq_s16(int16x8_t a) noexcept { return ::vabsq_s16(a); }
-            XSIMD_INLINE int32x4_t vabsq_s32(int32x4_t a) noexcept { return ::vabsq_s32(a); }
+            XSIMD_INLINE int8x16_t x_vabsq_s8(int8x16_t a) noexcept { return ::vabsq_s8(a); }
+            XSIMD_INLINE int16x8_t x_vabsq_s16(int16x8_t a) noexcept { return ::vabsq_s16(a); }
+            XSIMD_INLINE int32x4_t x_vabsq_s32(int32x4_t a) noexcept { return ::vabsq_s32(a); }
         }
         WRAP_UNARY_FLOAT(vabsq_f32)
 
@@ -1436,8 +1436,8 @@ namespace xsimd
         {
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::unary dispatcher = {
-                std::make_tuple(detail::abs_u8, wrap::vabsq_s8, detail::abs_u16, wrap::vabsq_s16,
-                                detail::abs_u32, wrap::vabsq_s32, wrap::vabsq_f32)
+                std::make_tuple(detail::abs_u8, wrap::x_vabsq_s8, detail::abs_u16, wrap::x_vabsq_s16,
+                                detail::abs_u32, wrap::x_vabsq_s32, wrap::x_vabsq_f32)
             };
             return dispatcher.apply(register_type(arg));
         }
@@ -1761,15 +1761,15 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t vbslq_u8(uint8x16_t a, uint8x16_t b, uint8x16_t c) noexcept { return ::vbslq_u8(a, b, c); }
-            XSIMD_INLINE int8x16_t vbslq_s8(uint8x16_t a, int8x16_t b, int8x16_t c) noexcept { return ::vbslq_s8(a, b, c); }
-            XSIMD_INLINE uint16x8_t vbslq_u16(uint16x8_t a, uint16x8_t b, uint16x8_t c) noexcept { return ::vbslq_u16(a, b, c); }
-            XSIMD_INLINE int16x8_t vbslq_s16(uint16x8_t a, int16x8_t b, int16x8_t c) noexcept { return ::vbslq_s16(a, b, c); }
-            XSIMD_INLINE uint32x4_t vbslq_u32(uint32x4_t a, uint32x4_t b, uint32x4_t c) noexcept { return ::vbslq_u32(a, b, c); }
-            XSIMD_INLINE int32x4_t vbslq_s32(uint32x4_t a, int32x4_t b, int32x4_t c) noexcept { return ::vbslq_s32(a, b, c); }
-            XSIMD_INLINE uint64x2_t vbslq_u64(uint64x2_t a, uint64x2_t b, uint64x2_t c) noexcept { return ::vbslq_u64(a, b, c); }
-            XSIMD_INLINE int64x2_t vbslq_s64(uint64x2_t a, int64x2_t b, int64x2_t c) noexcept { return ::vbslq_s64(a, b, c); }
-            XSIMD_INLINE float32x4_t vbslq_f32(uint32x4_t a, float32x4_t b, float32x4_t c) noexcept { return ::vbslq_f32(a, b, c); }
+            XSIMD_INLINE uint8x16_t x_vbslq_u8(uint8x16_t a, uint8x16_t b, uint8x16_t c) noexcept { return ::vbslq_u8(a, b, c); }
+            XSIMD_INLINE int8x16_t x_vbslq_s8(uint8x16_t a, int8x16_t b, int8x16_t c) noexcept { return ::vbslq_s8(a, b, c); }
+            XSIMD_INLINE uint16x8_t x_vbslq_u16(uint16x8_t a, uint16x8_t b, uint16x8_t c) noexcept { return ::vbslq_u16(a, b, c); }
+            XSIMD_INLINE int16x8_t x_vbslq_s16(uint16x8_t a, int16x8_t b, int16x8_t c) noexcept { return ::vbslq_s16(a, b, c); }
+            XSIMD_INLINE uint32x4_t x_vbslq_u32(uint32x4_t a, uint32x4_t b, uint32x4_t c) noexcept { return ::vbslq_u32(a, b, c); }
+            XSIMD_INLINE int32x4_t x_vbslq_s32(uint32x4_t a, int32x4_t b, int32x4_t c) noexcept { return ::vbslq_s32(a, b, c); }
+            XSIMD_INLINE uint64x2_t x_vbslq_u64(uint64x2_t a, uint64x2_t b, uint64x2_t c) noexcept { return ::vbslq_u64(a, b, c); }
+            XSIMD_INLINE int64x2_t x_vbslq_s64(uint64x2_t a, int64x2_t b, int64x2_t c) noexcept { return ::vbslq_s64(a, b, c); }
+            XSIMD_INLINE float32x4_t x_vbslq_f32(uint32x4_t a, float32x4_t b, float32x4_t c) noexcept { return ::vbslq_f32(a, b, c); }
         }
 
         namespace detail
@@ -1802,9 +1802,9 @@ namespace xsimd
             using bool_register_type = typename batch_bool<T, A>::register_type;
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_select_dispatcher dispatcher = {
-                std::make_tuple(wrap::vbslq_u8, wrap::vbslq_s8, wrap::vbslq_u16, wrap::vbslq_s16,
-                                wrap::vbslq_u32, wrap::vbslq_s32, wrap::vbslq_u64, wrap::vbslq_s64,
-                                wrap::vbslq_f32)
+                std::make_tuple(wrap::x_vbslq_u8, wrap::x_vbslq_s8, wrap::x_vbslq_u16, wrap::x_vbslq_s16,
+                                wrap::x_vbslq_u32, wrap::x_vbslq_s32, wrap::x_vbslq_u64, wrap::x_vbslq_s64,
+                                wrap::x_vbslq_f32)
             };
             return dispatcher.apply(bool_register_type(cond), register_type(a), register_type(b));
         }
@@ -2832,45 +2832,45 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
-#define WRAP_CAST(SUFFIX, TYPE)                                                \
-    namespace wrap                                                             \
-    {                                                                          \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_u8(uint8x16_t a) noexcept   \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_u8(a);                           \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_s8(int8x16_t a) noexcept    \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_s8(a);                           \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_u16(uint16x8_t a) noexcept  \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_u16(a);                          \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_s16(int16x8_t a) noexcept   \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_s16(a);                          \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_u32(uint32x4_t a) noexcept  \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_u32(a);                          \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_s32(int32x4_t a) noexcept   \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_s32(a);                          \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_u64(uint64x2_t a) noexcept  \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_u64(a);                          \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_s64(int64x2_t a) noexcept   \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_s64(a);                          \
-        }                                                                      \
-        XSIMD_INLINE TYPE vreinterpretq_##SUFFIX##_f32(float32x4_t a) noexcept \
-        {                                                                      \
-            return ::vreinterpretq_##SUFFIX##_f32(a);                          \
-        }                                                                      \
+#define WRAP_CAST(SUFFIX, TYPE)                                                  \
+    namespace wrap                                                               \
+    {                                                                            \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_u8(uint8x16_t a) noexcept   \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_u8(a);                             \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_s8(int8x16_t a) noexcept    \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_s8(a);                             \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_u16(uint16x8_t a) noexcept  \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_u16(a);                            \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_s16(int16x8_t a) noexcept   \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_s16(a);                            \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_u32(uint32x4_t a) noexcept  \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_u32(a);                            \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_s32(int32x4_t a) noexcept   \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_s32(a);                            \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_u64(uint64x2_t a) noexcept  \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_u64(a);                            \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_s64(int64x2_t a) noexcept   \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_s64(a);                            \
+        }                                                                        \
+        XSIMD_INLINE TYPE x_vreinterpretq_##SUFFIX##_f32(float32x4_t a) noexcept \
+        {                                                                        \
+            return ::vreinterpretq_##SUFFIX##_f32(a);                            \
+        }                                                                        \
     }
 
         WRAP_CAST(u8, uint8x16_t)
@@ -2946,33 +2946,33 @@ namespace xsimd
         {
             const detail::neon_bitwise_caster caster = {
                 std::make_tuple(
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_u8_u8, wrap::vreinterpretq_u8_s8, wrap::vreinterpretq_u8_u16, wrap::vreinterpretq_u8_s16,
-                                                     wrap::vreinterpretq_u8_u32, wrap::vreinterpretq_u8_s32, wrap::vreinterpretq_u8_u64, wrap::vreinterpretq_u8_s64,
-                                                     wrap::vreinterpretq_u8_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_s8_u8, wrap::vreinterpretq_s8_s8, wrap::vreinterpretq_s8_u16, wrap::vreinterpretq_s8_s16,
-                                                     wrap::vreinterpretq_s8_u32, wrap::vreinterpretq_s8_s32, wrap::vreinterpretq_s8_u64, wrap::vreinterpretq_s8_s64,
-                                                     wrap::vreinterpretq_s8_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_u16_u8, wrap::vreinterpretq_u16_s8, wrap::vreinterpretq_u16_u16, wrap::vreinterpretq_u16_s16,
-                                                     wrap::vreinterpretq_u16_u32, wrap::vreinterpretq_u16_s32, wrap::vreinterpretq_u16_u64, wrap::vreinterpretq_u16_s64,
-                                                     wrap::vreinterpretq_u16_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_s16_u8, wrap::vreinterpretq_s16_s8, wrap::vreinterpretq_s16_u16, wrap::vreinterpretq_s16_s16,
-                                                     wrap::vreinterpretq_s16_u32, wrap::vreinterpretq_s16_s32, wrap::vreinterpretq_s16_u64, wrap::vreinterpretq_s16_s64,
-                                                     wrap::vreinterpretq_s16_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_u32_u8, wrap::vreinterpretq_u32_s8, wrap::vreinterpretq_u32_u16, wrap::vreinterpretq_u32_s16,
-                                                     wrap::vreinterpretq_u32_u32, wrap::vreinterpretq_u32_s32, wrap::vreinterpretq_u32_u64, wrap::vreinterpretq_u32_s64,
-                                                     wrap::vreinterpretq_u32_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_s32_u8, wrap::vreinterpretq_s32_s8, wrap::vreinterpretq_s32_u16, wrap::vreinterpretq_s32_s16,
-                                                     wrap::vreinterpretq_s32_u32, wrap::vreinterpretq_s32_s32, wrap::vreinterpretq_s32_u64, wrap::vreinterpretq_s32_s64,
-                                                     wrap::vreinterpretq_s32_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_u64_u8, wrap::vreinterpretq_u64_s8, wrap::vreinterpretq_u64_u16, wrap::vreinterpretq_u64_s16,
-                                                     wrap::vreinterpretq_u64_u32, wrap::vreinterpretq_u64_s32, wrap::vreinterpretq_u64_u64, wrap::vreinterpretq_u64_s64,
-                                                     wrap::vreinterpretq_u64_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_s64_u8, wrap::vreinterpretq_s64_s8, wrap::vreinterpretq_s64_u16, wrap::vreinterpretq_s64_s16,
-                                                     wrap::vreinterpretq_s64_u32, wrap::vreinterpretq_s64_s32, wrap::vreinterpretq_s64_u64, wrap::vreinterpretq_s64_s64,
-                                                     wrap::vreinterpretq_s64_f32),
-                    detail::make_bitwise_caster_impl(wrap::vreinterpretq_f32_u8, wrap::vreinterpretq_f32_s8, wrap::vreinterpretq_f32_u16, wrap::vreinterpretq_f32_s16,
-                                                     wrap::vreinterpretq_f32_u32, wrap::vreinterpretq_f32_s32, wrap::vreinterpretq_f32_u64, wrap::vreinterpretq_f32_s64,
-                                                     wrap::vreinterpretq_f32_f32))
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_u8_u8, wrap::x_vreinterpretq_u8_s8, wrap::x_vreinterpretq_u8_u16, wrap::x_vreinterpretq_u8_s16,
+                                                     wrap::x_vreinterpretq_u8_u32, wrap::x_vreinterpretq_u8_s32, wrap::x_vreinterpretq_u8_u64, wrap::x_vreinterpretq_u8_s64,
+                                                     wrap::x_vreinterpretq_u8_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_s8_u8, wrap::x_vreinterpretq_s8_s8, wrap::x_vreinterpretq_s8_u16, wrap::x_vreinterpretq_s8_s16,
+                                                     wrap::x_vreinterpretq_s8_u32, wrap::x_vreinterpretq_s8_s32, wrap::x_vreinterpretq_s8_u64, wrap::x_vreinterpretq_s8_s64,
+                                                     wrap::x_vreinterpretq_s8_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_u16_u8, wrap::x_vreinterpretq_u16_s8, wrap::x_vreinterpretq_u16_u16, wrap::x_vreinterpretq_u16_s16,
+                                                     wrap::x_vreinterpretq_u16_u32, wrap::x_vreinterpretq_u16_s32, wrap::x_vreinterpretq_u16_u64, wrap::x_vreinterpretq_u16_s64,
+                                                     wrap::x_vreinterpretq_u16_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_s16_u8, wrap::x_vreinterpretq_s16_s8, wrap::x_vreinterpretq_s16_u16, wrap::x_vreinterpretq_s16_s16,
+                                                     wrap::x_vreinterpretq_s16_u32, wrap::x_vreinterpretq_s16_s32, wrap::x_vreinterpretq_s16_u64, wrap::x_vreinterpretq_s16_s64,
+                                                     wrap::x_vreinterpretq_s16_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_u32_u8, wrap::x_vreinterpretq_u32_s8, wrap::x_vreinterpretq_u32_u16, wrap::x_vreinterpretq_u32_s16,
+                                                     wrap::x_vreinterpretq_u32_u32, wrap::x_vreinterpretq_u32_s32, wrap::x_vreinterpretq_u32_u64, wrap::x_vreinterpretq_u32_s64,
+                                                     wrap::x_vreinterpretq_u32_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_s32_u8, wrap::x_vreinterpretq_s32_s8, wrap::x_vreinterpretq_s32_u16, wrap::x_vreinterpretq_s32_s16,
+                                                     wrap::x_vreinterpretq_s32_u32, wrap::x_vreinterpretq_s32_s32, wrap::x_vreinterpretq_s32_u64, wrap::x_vreinterpretq_s32_s64,
+                                                     wrap::x_vreinterpretq_s32_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_u64_u8, wrap::x_vreinterpretq_u64_s8, wrap::x_vreinterpretq_u64_u16, wrap::x_vreinterpretq_u64_s16,
+                                                     wrap::x_vreinterpretq_u64_u32, wrap::x_vreinterpretq_u64_s32, wrap::x_vreinterpretq_u64_u64, wrap::x_vreinterpretq_u64_s64,
+                                                     wrap::x_vreinterpretq_u64_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_s64_u8, wrap::x_vreinterpretq_s64_s8, wrap::x_vreinterpretq_s64_u16, wrap::x_vreinterpretq_s64_s16,
+                                                     wrap::x_vreinterpretq_s64_u32, wrap::x_vreinterpretq_s64_s32, wrap::x_vreinterpretq_s64_u64, wrap::x_vreinterpretq_s64_s64,
+                                                     wrap::x_vreinterpretq_s64_f32),
+                    detail::make_bitwise_caster_impl(wrap::x_vreinterpretq_f32_u8, wrap::x_vreinterpretq_f32_s8, wrap::x_vreinterpretq_f32_u16, wrap::x_vreinterpretq_f32_s16,
+                                                     wrap::x_vreinterpretq_f32_u32, wrap::x_vreinterpretq_f32_s32, wrap::x_vreinterpretq_f32_u64, wrap::x_vreinterpretq_f32_s64,
+                                                     wrap::x_vreinterpretq_f32_f32))
             };
             using src_register_type = typename batch<T, A>::register_type;
             using dst_register_type = typename batch<R, A>::register_type;
@@ -3061,23 +3061,23 @@ namespace xsimd
         namespace wrap
         {
             template <size_t N>
-            XSIMD_INLINE uint8x16_t rotate_left_u8(uint8x16_t a, uint8x16_t b) noexcept { return vextq_u8(a, b, N); }
+            XSIMD_INLINE uint8x16_t x_rotate_left_u8(uint8x16_t a, uint8x16_t b) noexcept { return vextq_u8(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE int8x16_t rotate_left_s8(int8x16_t a, int8x16_t b) noexcept { return vextq_s8(a, b, N); }
+            XSIMD_INLINE int8x16_t x_rotate_left_s8(int8x16_t a, int8x16_t b) noexcept { return vextq_s8(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE uint16x8_t rotate_left_u16(uint16x8_t a, uint16x8_t b) noexcept { return vextq_u16(a, b, N); }
+            XSIMD_INLINE uint16x8_t x_rotate_left_u16(uint16x8_t a, uint16x8_t b) noexcept { return vextq_u16(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE int16x8_t rotate_left_s16(int16x8_t a, int16x8_t b) noexcept { return vextq_s16(a, b, N); }
+            XSIMD_INLINE int16x8_t x_rotate_left_s16(int16x8_t a, int16x8_t b) noexcept { return vextq_s16(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE uint32x4_t rotate_left_u32(uint32x4_t a, uint32x4_t b) noexcept { return vextq_u32(a, b, N); }
+            XSIMD_INLINE uint32x4_t x_rotate_left_u32(uint32x4_t a, uint32x4_t b) noexcept { return vextq_u32(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE int32x4_t rotate_left_s32(int32x4_t a, int32x4_t b) noexcept { return vextq_s32(a, b, N); }
+            XSIMD_INLINE int32x4_t x_rotate_left_s32(int32x4_t a, int32x4_t b) noexcept { return vextq_s32(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE uint64x2_t rotate_left_u64(uint64x2_t a, uint64x2_t b) noexcept { return vextq_u64(a, b, N); }
+            XSIMD_INLINE uint64x2_t x_rotate_left_u64(uint64x2_t a, uint64x2_t b) noexcept { return vextq_u64(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE int64x2_t rotate_left_s64(int64x2_t a, int64x2_t b) noexcept { return vextq_s64(a, b, N); }
+            XSIMD_INLINE int64x2_t x_rotate_left_s64(int64x2_t a, int64x2_t b) noexcept { return vextq_s64(a, b, N); }
             template <size_t N>
-            XSIMD_INLINE float32x4_t rotate_left_f32(float32x4_t a, float32x4_t b) noexcept { return vextq_f32(a, b, N); }
+            XSIMD_INLINE float32x4_t x_rotate_left_f32(float32x4_t a, float32x4_t b) noexcept { return vextq_f32(a, b, N); }
         }
 
         template <size_t N, class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -3086,9 +3086,9 @@ namespace xsimd
             using register_type = typename batch<T, A>::register_type;
             // Adding modulo to avoid warning.
             const detail::neon_dispatcher::binary dispatcher = {
-                std::make_tuple(wrap::rotate_left_u8<N>, wrap::rotate_left_s8<N>, wrap::rotate_left_u16<N % 8>, wrap::rotate_left_s16<N % 8>,
-                                wrap::rotate_left_u32<N % 4>, wrap::rotate_left_s32<N % 4>, wrap::rotate_left_u64<N % 2>, wrap::rotate_left_s64<N % 2>,
-                                wrap::rotate_left_f32<N % 4>)
+                std::make_tuple(wrap::x_rotate_left_u8<N>, wrap::x_rotate_left_s8<N>, wrap::x_rotate_left_u16<N % 8>, wrap::x_rotate_left_s16<N % 8>,
+                                wrap::x_rotate_left_u32<N % 4>, wrap::x_rotate_left_s32<N % 4>, wrap::x_rotate_left_u64<N % 2>, wrap::x_rotate_left_s64<N % 2>,
+                                wrap::x_rotate_left_f32<N % 4>)
             };
             return dispatcher.apply(register_type(a), register_type(a));
         }
