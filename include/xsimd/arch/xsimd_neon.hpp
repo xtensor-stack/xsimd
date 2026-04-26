@@ -27,13 +27,14 @@
 #include "./xsimd_common_fwd.hpp"
 
 #define APPLY_TEMPLATE(T, X) T<X>
+#define APPLY_GLOBAL(OP) ::OP
 
 #define WRAP_BINARY_IMPL(OP, VEC, RT)                                               \
     namespace wrap                                                                  \
     {                                                                               \
         XSIMD_INLINE auto(x_##OP)(VEC a, VEC b) noexcept -> APPLY_TEMPLATE(RT, VEC) \
         {                                                                           \
-            return ::OP((a), (b));                                                  \
+            return APPLY_GLOBAL(OP)(a, b);                                          \
         }                                                                           \
     }
 
@@ -61,7 +62,7 @@
     {                                                    \
         XSIMD_INLINE auto(x_##OP)(VEC a) noexcept -> VEC \
         {                                                \
-            return ::OP(a);                              \
+            return APPLY_GLOBAL(OP)(a);                  \
         }                                                \
     }
 
