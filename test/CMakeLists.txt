@@ -43,6 +43,13 @@ OPTION(CROSS_COMPILE_ARM "cross compile for ARM targets" OFF)
 # Note: to compile on ARM (or cross compile), you may need to add the following:
 # -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
 set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
+string(REGEX MATCH "emulated\\<[0-9]+\\>" TARGET_EMULATED ${TARGET_ARCH})
+
+if (TARGET_EMULATED)
+    message(STATUS "Using emulated target: ${TARGET_EMULATED}")
+    set(EMULATED_COMPILE_FLAGS -DXSIMD_DEFAULT_ARCH=${TARGET_ARCH};-DXSIMD_WITH_EMULATED=1)
+    unset(TARGET_ARCH CACHE)
+endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     if (NOT WIN32 AND NOT ANDROID)
@@ -111,7 +118,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "s390x")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=z14 -mzvector")
     elseif(NOT WIN32 AND NOT EMSCRIPTEN)
-        if(NOT CMAKE_CXX_FLAGS MATCHES "-march" AND NOT CMAKE_CXX_FLAGS MATCHES "-arch" AND NOT CMAKE_OSX_ARCHITECTURES)
+        if(TARGET_ARCH AND NOT CMAKE_CXX_FLAGS MATCHES "-march" AND NOT CMAKE_CXX_FLAGS MATCHES "-arch" AND NOT CMAKE_OSX_ARCHITECTURES)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH}")
         endif()
     endif()
@@ -226,6 +233,11 @@ endif()
 
 add_subdirectory(doc)
 add_subdirectory(architectures)
+
+if(EMULATED_COMPILE_FLAGS)
+    message(STATUS ${EMULATED_COMPILE_FLAGS})
+    target_compile_options(test_xsimd PRIVATE ${EMULATED_COMPILE_FLAGS})
+endif()
 
 if(EMSCRIPTEN)
     set_target_properties(test_xsimd PROPERTIES LINK_FLAGS "-s MODULARIZE=1 -s EXPORT_NAME=test_xsimd_wasm -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -lembind")
