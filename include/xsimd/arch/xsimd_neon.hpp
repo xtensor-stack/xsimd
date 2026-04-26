@@ -26,13 +26,15 @@
 #include "./common/xsimd_common_cast.hpp"
 #include "./xsimd_common_fwd.hpp"
 
-#define WRAP_BINARY_IMPL(OP, VEC, RT)                               \
-    namespace wrap                                                  \
-    {                                                               \
-        XSIMD_INLINE auto(x_##OP)(VEC a, VEC b) noexcept -> RT<VEC> \
-        {                                                           \
-            return ::OP(a, b);                                      \
-        }                                                           \
+#define APPLY_TEMPLATE(T, X) T<X>
+
+#define WRAP_BINARY_IMPL(OP, VEC, RT)                                               \
+    namespace wrap                                                                  \
+    {                                                                               \
+        XSIMD_INLINE auto(x_##OP)(VEC a, VEC b) noexcept -> APPLY_TEMPLATE(RT, VEC) \
+        {                                                                           \
+            return ::OP(a, b);                                                      \
+        }                                                                           \
     }
 
 #define WRAP_BINARY_UINT_EXCLUDING_64(OP_U8, OP_U16, OP_U32, RT) \
@@ -3491,5 +3493,6 @@ namespace xsimd
 #undef WRAP_UNARY_INT_EXCLUDING_64
 #undef WRAP_UNARY_INT
 #undef WRAP_UNARY_FLOAT
+#undef APPLY_TEMPLATE
 
 #endif
