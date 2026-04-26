@@ -708,15 +708,15 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vaddq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vaddq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vaddq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vaddq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vaddq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vaddq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vaddq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vaddq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vaddq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_vaddq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::vaddq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_vaddq_s64(int64x2_t a, int64x2_t b) noexcept { return ::vaddq_s64(a, b); }
-            XSIMD_INLINE float32x4_t x_vaddq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vaddq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vaddq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vaddq_s8(int8x16_t a, int8x16_t b) noexcept { return vaddq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vaddq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vaddq_s16(int16x8_t a, int16x8_t b) noexcept { return vaddq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vaddq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vaddq_s32(int32x4_t a, int32x4_t b) noexcept { return vaddq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_vaddq_u64(uint64x2_t a, uint64x2_t b) noexcept { return vaddq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_vaddq_s64(int64x2_t a, int64x2_t b) noexcept { return vaddq_s64(a, b); }
+            XSIMD_INLINE float32x4_t x_vaddq_f32(float32x4_t a, float32x4_t b) noexcept { return vaddq_f32(a, b); }
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -737,9 +737,9 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vhaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vhaddq_u8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vhaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vhaddq_u16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vhaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vhaddq_u32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vhaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vhaddq_u8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vhaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vhaddq_u16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vhaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vhaddq_u32(a, b); }
         }
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
@@ -758,9 +758,9 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vrhaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vrhaddq_u8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vrhaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vrhaddq_u16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vrhaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vrhaddq_u32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vrhaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vrhaddq_u8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vrhaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vrhaddq_u16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vrhaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vrhaddq_u32(a, b); }
         }
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
@@ -779,14 +779,14 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vqaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vqaddq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vqaddq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vqaddq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vqaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vqaddq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vqaddq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vqaddq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vqaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vqaddq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vqaddq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vqaddq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_vqaddq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::vqaddq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_vqaddq_s64(int64x2_t a, int64x2_t b) noexcept { return ::vqaddq_s64(a, b); }
+            XSIMD_INLINE uint8x16_t x_vqaddq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vqaddq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vqaddq_s8(int8x16_t a, int8x16_t b) noexcept { return vqaddq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vqaddq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vqaddq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vqaddq_s16(int16x8_t a, int16x8_t b) noexcept { return vqaddq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vqaddq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vqaddq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vqaddq_s32(int32x4_t a, int32x4_t b) noexcept { return vqaddq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_vqaddq_u64(uint64x2_t a, uint64x2_t b) noexcept { return vqaddq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_vqaddq_s64(int64x2_t a, int64x2_t b) noexcept { return vqaddq_s64(a, b); }
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -807,15 +807,15 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vsubq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vsubq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vsubq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vsubq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vsubq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vsubq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vsubq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vsubq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vsubq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vsubq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vsubq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vsubq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_vsubq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::vsubq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_vsubq_s64(int64x2_t a, int64x2_t b) noexcept { return ::vsubq_s64(a, b); }
-            XSIMD_INLINE float32x4_t x_vsubq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vsubq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vsubq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vsubq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vsubq_s8(int8x16_t a, int8x16_t b) noexcept { return vsubq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vsubq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vsubq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vsubq_s16(int16x8_t a, int16x8_t b) noexcept { return vsubq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vsubq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vsubq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vsubq_s32(int32x4_t a, int32x4_t b) noexcept { return vsubq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_vsubq_u64(uint64x2_t a, uint64x2_t b) noexcept { return vsubq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_vsubq_s64(int64x2_t a, int64x2_t b) noexcept { return vsubq_s64(a, b); }
+            XSIMD_INLINE float32x4_t x_vsubq_f32(float32x4_t a, float32x4_t b) noexcept { return vsubq_f32(a, b); }
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -836,14 +836,14 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vqsubq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vqsubq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vqsubq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vqsubq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vqsubq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vqsubq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vqsubq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vqsubq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vqsubq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vqsubq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vqsubq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vqsubq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_vqsubq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::vqsubq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_vqsubq_s64(int64x2_t a, int64x2_t b) noexcept { return ::vqsubq_s64(a, b); }
+            XSIMD_INLINE uint8x16_t x_vqsubq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vqsubq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vqsubq_s8(int8x16_t a, int8x16_t b) noexcept { return vqsubq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vqsubq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vqsubq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vqsubq_s16(int16x8_t a, int16x8_t b) noexcept { return vqsubq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vqsubq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vqsubq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vqsubq_s32(int32x4_t a, int32x4_t b) noexcept { return vqsubq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_vqsubq_u64(uint64x2_t a, uint64x2_t b) noexcept { return vqsubq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_vqsubq_s64(int64x2_t a, int64x2_t b) noexcept { return vqsubq_s64(a, b); }
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -864,13 +864,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vmulq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vmulq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vmulq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vmulq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vmulq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vmulq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vmulq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vmulq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vmulq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vmulq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vmulq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vmulq_s32(a, b); }
-            XSIMD_INLINE float32x4_t x_vmulq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vmulq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vmulq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vmulq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vmulq_s8(int8x16_t a, int8x16_t b) noexcept { return vmulq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vmulq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vmulq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vmulq_s16(int16x8_t a, int16x8_t b) noexcept { return vmulq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vmulq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vmulq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vmulq_s32(int32x4_t a, int32x4_t b) noexcept { return vmulq_s32(a, b); }
+            XSIMD_INLINE float32x4_t x_vmulq_f32(float32x4_t a, float32x4_t b) noexcept { return vmulq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -925,13 +925,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vceqq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vceqq_u8(a, b); }
-            XSIMD_INLINE uint8x16_t x_vceqq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vceqq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vceqq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vceqq_u16(a, b); }
-            XSIMD_INLINE uint16x8_t x_vceqq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vceqq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vceqq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vceqq_u32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vceqq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vceqq_s32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vceqq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vceqq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vceqq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vceqq_u8(a, b); }
+            XSIMD_INLINE uint8x16_t x_vceqq_s8(int8x16_t a, int8x16_t b) noexcept { return vceqq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vceqq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vceqq_u16(a, b); }
+            XSIMD_INLINE uint16x8_t x_vceqq_s16(int16x8_t a, int16x8_t b) noexcept { return vceqq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vceqq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vceqq_u32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vceqq_s32(int32x4_t a, int32x4_t b) noexcept { return vceqq_s32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vceqq_f32(float32x4_t a, float32x4_t b) noexcept { return vceqq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1018,13 +1018,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vcltq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vcltq_u8(a, b); }
-            XSIMD_INLINE uint8x16_t x_vcltq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vcltq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcltq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vcltq_u16(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcltq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vcltq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcltq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vcltq_u32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcltq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vcltq_s32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcltq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vcltq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcltq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vcltq_u8(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcltq_s8(int8x16_t a, int8x16_t b) noexcept { return vcltq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcltq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vcltq_u16(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcltq_s16(int16x8_t a, int16x8_t b) noexcept { return vcltq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcltq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vcltq_u32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcltq_s32(int32x4_t a, int32x4_t b) noexcept { return vcltq_s32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcltq_f32(float32x4_t a, float32x4_t b) noexcept { return vcltq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1059,13 +1059,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vcleq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vcleq_u8(a, b); }
-            XSIMD_INLINE uint8x16_t x_vcleq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vcleq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcleq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vcleq_u16(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcleq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vcleq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcleq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vcleq_u32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcleq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vcleq_s32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcleq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vcleq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcleq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vcleq_u8(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcleq_s8(int8x16_t a, int8x16_t b) noexcept { return vcleq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcleq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vcleq_u16(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcleq_s16(int16x8_t a, int16x8_t b) noexcept { return vcleq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcleq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vcleq_u32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcleq_s32(int32x4_t a, int32x4_t b) noexcept { return vcleq_s32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcleq_f32(float32x4_t a, float32x4_t b) noexcept { return vcleq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1103,13 +1103,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vcgtq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vcgtq_u8(a, b); }
-            XSIMD_INLINE uint8x16_t x_vcgtq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vcgtq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcgtq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vcgtq_u16(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcgtq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vcgtq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcgtq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vcgtq_u32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcgtq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vcgtq_s32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcgtq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vcgtq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcgtq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vcgtq_u8(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcgtq_s8(int8x16_t a, int8x16_t b) noexcept { return vcgtq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcgtq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vcgtq_u16(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcgtq_s16(int16x8_t a, int16x8_t b) noexcept { return vcgtq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcgtq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vcgtq_u32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcgtq_s32(int32x4_t a, int32x4_t b) noexcept { return vcgtq_s32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcgtq_f32(float32x4_t a, float32x4_t b) noexcept { return vcgtq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1144,13 +1144,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vcgeq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vcgeq_u8(a, b); }
-            XSIMD_INLINE uint8x16_t x_vcgeq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vcgeq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcgeq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vcgeq_u16(a, b); }
-            XSIMD_INLINE uint16x8_t x_vcgeq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vcgeq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcgeq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vcgeq_u32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcgeq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vcgeq_s32(a, b); }
-            XSIMD_INLINE uint32x4_t x_vcgeq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vcgeq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcgeq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vcgeq_u8(a, b); }
+            XSIMD_INLINE uint8x16_t x_vcgeq_s8(int8x16_t a, int8x16_t b) noexcept { return vcgeq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcgeq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vcgeq_u16(a, b); }
+            XSIMD_INLINE uint16x8_t x_vcgeq_s16(int16x8_t a, int16x8_t b) noexcept { return vcgeq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcgeq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vcgeq_u32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcgeq_s32(int32x4_t a, int32x4_t b) noexcept { return vcgeq_s32(a, b); }
+            XSIMD_INLINE uint32x4_t x_vcgeq_f32(float32x4_t a, float32x4_t b) noexcept { return vcgeq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1187,14 +1187,14 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vandq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vandq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vandq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vandq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vandq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vandq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vandq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vandq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vandq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vandq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vandq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vandq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_vandq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::vandq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_vandq_s64(int64x2_t a, int64x2_t b) noexcept { return ::vandq_s64(a, b); }
+            XSIMD_INLINE uint8x16_t x_vandq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vandq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vandq_s8(int8x16_t a, int8x16_t b) noexcept { return vandq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vandq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vandq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vandq_s16(int16x8_t a, int16x8_t b) noexcept { return vandq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vandq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vandq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vandq_s32(int32x4_t a, int32x4_t b) noexcept { return vandq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_vandq_u64(uint64x2_t a, uint64x2_t b) noexcept { return vandq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_vandq_s64(int64x2_t a, int64x2_t b) noexcept { return vandq_s64(a, b); }
         }
 
         namespace detail
@@ -1237,14 +1237,14 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vorrq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vorrq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vorrq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vorrq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vorrq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vorrq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vorrq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vorrq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vorrq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vorrq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vorrq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vorrq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_vorrq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::vorrq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_vorrq_s64(int64x2_t a, int64x2_t b) noexcept { return ::vorrq_s64(a, b); }
+            XSIMD_INLINE uint8x16_t x_vorrq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vorrq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vorrq_s8(int8x16_t a, int8x16_t b) noexcept { return vorrq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vorrq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vorrq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vorrq_s16(int16x8_t a, int16x8_t b) noexcept { return vorrq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vorrq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vorrq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vorrq_s32(int32x4_t a, int32x4_t b) noexcept { return vorrq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_vorrq_u64(uint64x2_t a, uint64x2_t b) noexcept { return vorrq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_vorrq_s64(int64x2_t a, int64x2_t b) noexcept { return vorrq_s64(a, b); }
         }
 
         namespace detail
@@ -1287,14 +1287,14 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_veorq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::veorq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_veorq_s8(int8x16_t a, int8x16_t b) noexcept { return ::veorq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_veorq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::veorq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_veorq_s16(int16x8_t a, int16x8_t b) noexcept { return ::veorq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_veorq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::veorq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_veorq_s32(int32x4_t a, int32x4_t b) noexcept { return ::veorq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_veorq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::veorq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_veorq_s64(int64x2_t a, int64x2_t b) noexcept { return ::veorq_s64(a, b); }
+            XSIMD_INLINE uint8x16_t x_veorq_u8(uint8x16_t a, uint8x16_t b) noexcept { return veorq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_veorq_s8(int8x16_t a, int8x16_t b) noexcept { return veorq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_veorq_u16(uint16x8_t a, uint16x8_t b) noexcept { return veorq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_veorq_s16(int16x8_t a, int16x8_t b) noexcept { return veorq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_veorq_u32(uint32x4_t a, uint32x4_t b) noexcept { return veorq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_veorq_s32(int32x4_t a, int32x4_t b) noexcept { return veorq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_veorq_u64(uint64x2_t a, uint64x2_t b) noexcept { return veorq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_veorq_s64(int64x2_t a, int64x2_t b) noexcept { return veorq_s64(a, b); }
         }
 
         namespace detail
@@ -1347,12 +1347,12 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vmvnq_u8(uint8x16_t a) noexcept { return ::vmvnq_u8(a); }
-            XSIMD_INLINE int8x16_t x_vmvnq_s8(int8x16_t a) noexcept { return ::vmvnq_s8(a); }
-            XSIMD_INLINE uint16x8_t x_vmvnq_u16(uint16x8_t a) noexcept { return ::vmvnq_u16(a); }
-            XSIMD_INLINE int16x8_t x_vmvnq_s16(int16x8_t a) noexcept { return ::vmvnq_s16(a); }
-            XSIMD_INLINE uint32x4_t x_vmvnq_u32(uint32x4_t a) noexcept { return ::vmvnq_u32(a); }
-            XSIMD_INLINE int32x4_t x_vmvnq_s32(int32x4_t a) noexcept { return ::vmvnq_s32(a); }
+            XSIMD_INLINE uint8x16_t x_vmvnq_u8(uint8x16_t a) noexcept { return vmvnq_u8(a); }
+            XSIMD_INLINE int8x16_t x_vmvnq_s8(int8x16_t a) noexcept { return vmvnq_s8(a); }
+            XSIMD_INLINE uint16x8_t x_vmvnq_u16(uint16x8_t a) noexcept { return vmvnq_u16(a); }
+            XSIMD_INLINE int16x8_t x_vmvnq_s16(int16x8_t a) noexcept { return vmvnq_s16(a); }
+            XSIMD_INLINE uint32x4_t x_vmvnq_u32(uint32x4_t a) noexcept { return vmvnq_u32(a); }
+            XSIMD_INLINE int32x4_t x_vmvnq_s32(int32x4_t a) noexcept { return vmvnq_s32(a); }
         }
 
         namespace detail
@@ -1395,14 +1395,14 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vbicq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vbicq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vbicq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vbicq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vbicq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vbicq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vbicq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vbicq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vbicq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vbicq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vbicq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vbicq_s32(a, b); }
-            XSIMD_INLINE uint64x2_t x_vbicq_u64(uint64x2_t a, uint64x2_t b) noexcept { return ::vbicq_u64(a, b); }
-            XSIMD_INLINE int64x2_t x_vbicq_s64(int64x2_t a, int64x2_t b) noexcept { return ::vbicq_s64(a, b); }
+            XSIMD_INLINE uint8x16_t x_vbicq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vbicq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vbicq_s8(int8x16_t a, int8x16_t b) noexcept { return vbicq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vbicq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vbicq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vbicq_s16(int16x8_t a, int16x8_t b) noexcept { return vbicq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vbicq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vbicq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vbicq_s32(int32x4_t a, int32x4_t b) noexcept { return vbicq_s32(a, b); }
+            XSIMD_INLINE uint64x2_t x_vbicq_u64(uint64x2_t a, uint64x2_t b) noexcept { return vbicq_u64(a, b); }
+            XSIMD_INLINE int64x2_t x_vbicq_s64(int64x2_t a, int64x2_t b) noexcept { return vbicq_s64(a, b); }
         }
 
         namespace detail
@@ -1444,13 +1444,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vminq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vminq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vminq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vminq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vminq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vminq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vminq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vminq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vminq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vminq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vminq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vminq_s32(a, b); }
-            XSIMD_INLINE float32x4_t x_vminq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vminq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vminq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vminq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vminq_s8(int8x16_t a, int8x16_t b) noexcept { return vminq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vminq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vminq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vminq_s16(int16x8_t a, int16x8_t b) noexcept { return vminq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vminq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vminq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vminq_s32(int32x4_t a, int32x4_t b) noexcept { return vminq_s32(a, b); }
+            XSIMD_INLINE float32x4_t x_vminq_f32(float32x4_t a, float32x4_t b) noexcept { return vminq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1476,13 +1476,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vmaxq_u8(uint8x16_t a, uint8x16_t b) noexcept { return ::vmaxq_u8(a, b); }
-            XSIMD_INLINE int8x16_t x_vmaxq_s8(int8x16_t a, int8x16_t b) noexcept { return ::vmaxq_s8(a, b); }
-            XSIMD_INLINE uint16x8_t x_vmaxq_u16(uint16x8_t a, uint16x8_t b) noexcept { return ::vmaxq_u16(a, b); }
-            XSIMD_INLINE int16x8_t x_vmaxq_s16(int16x8_t a, int16x8_t b) noexcept { return ::vmaxq_s16(a, b); }
-            XSIMD_INLINE uint32x4_t x_vmaxq_u32(uint32x4_t a, uint32x4_t b) noexcept { return ::vmaxq_u32(a, b); }
-            XSIMD_INLINE int32x4_t x_vmaxq_s32(int32x4_t a, int32x4_t b) noexcept { return ::vmaxq_s32(a, b); }
-            XSIMD_INLINE float32x4_t x_vmaxq_f32(float32x4_t a, float32x4_t b) noexcept { return ::vmaxq_f32(a, b); }
+            XSIMD_INLINE uint8x16_t x_vmaxq_u8(uint8x16_t a, uint8x16_t b) noexcept { return vmaxq_u8(a, b); }
+            XSIMD_INLINE int8x16_t x_vmaxq_s8(int8x16_t a, int8x16_t b) noexcept { return vmaxq_s8(a, b); }
+            XSIMD_INLINE uint16x8_t x_vmaxq_u16(uint16x8_t a, uint16x8_t b) noexcept { return vmaxq_u16(a, b); }
+            XSIMD_INLINE int16x8_t x_vmaxq_s16(int16x8_t a, int16x8_t b) noexcept { return vmaxq_s16(a, b); }
+            XSIMD_INLINE uint32x4_t x_vmaxq_u32(uint32x4_t a, uint32x4_t b) noexcept { return vmaxq_u32(a, b); }
+            XSIMD_INLINE int32x4_t x_vmaxq_s32(int32x4_t a, int32x4_t b) noexcept { return vmaxq_s32(a, b); }
+            XSIMD_INLINE float32x4_t x_vmaxq_f32(float32x4_t a, float32x4_t b) noexcept { return vmaxq_f32(a, b); }
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1508,13 +1508,13 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE int8x16_t x_vabsq_s8(int8x16_t a) noexcept { return ::vabsq_s8(a); }
-            XSIMD_INLINE int16x8_t x_vabsq_s16(int16x8_t a) noexcept { return ::vabsq_s16(a); }
-            XSIMD_INLINE int32x4_t x_vabsq_s32(int32x4_t a) noexcept { return ::vabsq_s32(a); }
+            XSIMD_INLINE int8x16_t x_vabsq_s8(int8x16_t a) noexcept { return vabsq_s8(a); }
+            XSIMD_INLINE int16x8_t x_vabsq_s16(int16x8_t a) noexcept { return vabsq_s16(a); }
+            XSIMD_INLINE int32x4_t x_vabsq_s32(int32x4_t a) noexcept { return vabsq_s32(a); }
         }
         namespace wrap
         {
-            XSIMD_INLINE float32x4_t x_vabsq_f32(float32x4_t a) noexcept { return ::vabsq_f32(a); }
+            XSIMD_INLINE float32x4_t x_vabsq_f32(float32x4_t a) noexcept { return vabsq_f32(a); }
         }
 
         namespace detail
@@ -1865,15 +1865,15 @@ namespace xsimd
 
         namespace wrap
         {
-            XSIMD_INLINE uint8x16_t x_vbslq_u8(uint8x16_t a, uint8x16_t b, uint8x16_t c) noexcept { return ::vbslq_u8(a, b, c); }
-            XSIMD_INLINE int8x16_t x_vbslq_s8(uint8x16_t a, int8x16_t b, int8x16_t c) noexcept { return ::vbslq_s8(a, b, c); }
-            XSIMD_INLINE uint16x8_t x_vbslq_u16(uint16x8_t a, uint16x8_t b, uint16x8_t c) noexcept { return ::vbslq_u16(a, b, c); }
-            XSIMD_INLINE int16x8_t x_vbslq_s16(uint16x8_t a, int16x8_t b, int16x8_t c) noexcept { return ::vbslq_s16(a, b, c); }
-            XSIMD_INLINE uint32x4_t x_vbslq_u32(uint32x4_t a, uint32x4_t b, uint32x4_t c) noexcept { return ::vbslq_u32(a, b, c); }
-            XSIMD_INLINE int32x4_t x_vbslq_s32(uint32x4_t a, int32x4_t b, int32x4_t c) noexcept { return ::vbslq_s32(a, b, c); }
-            XSIMD_INLINE uint64x2_t x_vbslq_u64(uint64x2_t a, uint64x2_t b, uint64x2_t c) noexcept { return ::vbslq_u64(a, b, c); }
-            XSIMD_INLINE int64x2_t x_vbslq_s64(uint64x2_t a, int64x2_t b, int64x2_t c) noexcept { return ::vbslq_s64(a, b, c); }
-            XSIMD_INLINE float32x4_t x_vbslq_f32(uint32x4_t a, float32x4_t b, float32x4_t c) noexcept { return ::vbslq_f32(a, b, c); }
+            XSIMD_INLINE uint8x16_t x_vbslq_u8(uint8x16_t a, uint8x16_t b, uint8x16_t c) noexcept { return vbslq_u8(a, b, c); }
+            XSIMD_INLINE int8x16_t x_vbslq_s8(uint8x16_t a, int8x16_t b, int8x16_t c) noexcept { return vbslq_s8(a, b, c); }
+            XSIMD_INLINE uint16x8_t x_vbslq_u16(uint16x8_t a, uint16x8_t b, uint16x8_t c) noexcept { return vbslq_u16(a, b, c); }
+            XSIMD_INLINE int16x8_t x_vbslq_s16(uint16x8_t a, int16x8_t b, int16x8_t c) noexcept { return vbslq_s16(a, b, c); }
+            XSIMD_INLINE uint32x4_t x_vbslq_u32(uint32x4_t a, uint32x4_t b, uint32x4_t c) noexcept { return vbslq_u32(a, b, c); }
+            XSIMD_INLINE int32x4_t x_vbslq_s32(uint32x4_t a, int32x4_t b, int32x4_t c) noexcept { return vbslq_s32(a, b, c); }
+            XSIMD_INLINE uint64x2_t x_vbslq_u64(uint64x2_t a, uint64x2_t b, uint64x2_t c) noexcept { return vbslq_u64(a, b, c); }
+            XSIMD_INLINE int64x2_t x_vbslq_s64(uint64x2_t a, int64x2_t b, int64x2_t c) noexcept { return vbslq_s64(a, b, c); }
+            XSIMD_INLINE float32x4_t x_vbslq_f32(uint32x4_t a, float32x4_t b, float32x4_t c) noexcept { return vbslq_f32(a, b, c); }
         }
 
         namespace detail
@@ -2939,93 +2939,93 @@ namespace xsimd
         namespace wrap
         {
             XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_u8(uint8x16_t a) noexcept { return a; }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s8(int8x16_t a) noexcept { return ::vreinterpretq_u8_s8(a); }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_u16(uint16x8_t a) noexcept { return ::vreinterpretq_u8_u16(a); }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s16(int16x8_t a) noexcept { return ::vreinterpretq_u8_s16(a); }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_u32(uint32x4_t a) noexcept { return ::vreinterpretq_u8_u32(a); }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s32(int32x4_t a) noexcept { return ::vreinterpretq_u8_s32(a); }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_u64(uint64x2_t a) noexcept { return ::vreinterpretq_u8_u64(a); }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s64(int64x2_t a) noexcept { return ::vreinterpretq_u8_s64(a); }
-            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_f32(float32x4_t a) noexcept { return ::vreinterpretq_u8_f32(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s8(int8x16_t a) noexcept { return vreinterpretq_u8_s8(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_u16(uint16x8_t a) noexcept { return vreinterpretq_u8_u16(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s16(int16x8_t a) noexcept { return vreinterpretq_u8_s16(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_u32(uint32x4_t a) noexcept { return vreinterpretq_u8_u32(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s32(int32x4_t a) noexcept { return vreinterpretq_u8_s32(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_u64(uint64x2_t a) noexcept { return vreinterpretq_u8_u64(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_s64(int64x2_t a) noexcept { return vreinterpretq_u8_s64(a); }
+            XSIMD_INLINE uint8x16_t x_vreinterpretq_u8_f32(float32x4_t a) noexcept { return vreinterpretq_u8_f32(a); }
 
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u8(uint8x16_t a) noexcept { return ::vreinterpretq_s8_u8(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u8(uint8x16_t a) noexcept { return vreinterpretq_s8_u8(a); }
             XSIMD_INLINE int8x16_t x_vreinterpretq_s8_s8(int8x16_t a) noexcept { return a; }
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u16(uint16x8_t a) noexcept { return ::vreinterpretq_s8_u16(a); }
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_s16(int16x8_t a) noexcept { return ::vreinterpretq_s8_s16(a); }
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u32(uint32x4_t a) noexcept { return ::vreinterpretq_s8_u32(a); }
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_s32(int32x4_t a) noexcept { return ::vreinterpretq_s8_s32(a); }
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u64(uint64x2_t a) noexcept { return ::vreinterpretq_s8_u64(a); }
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_s64(int64x2_t a) noexcept { return ::vreinterpretq_s8_s64(a); }
-            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_f32(float32x4_t a) noexcept { return ::vreinterpretq_s8_f32(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u16(uint16x8_t a) noexcept { return vreinterpretq_s8_u16(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_s16(int16x8_t a) noexcept { return vreinterpretq_s8_s16(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u32(uint32x4_t a) noexcept { return vreinterpretq_s8_u32(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_s32(int32x4_t a) noexcept { return vreinterpretq_s8_s32(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_u64(uint64x2_t a) noexcept { return vreinterpretq_s8_u64(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_s64(int64x2_t a) noexcept { return vreinterpretq_s8_s64(a); }
+            XSIMD_INLINE int8x16_t x_vreinterpretq_s8_f32(float32x4_t a) noexcept { return vreinterpretq_s8_f32(a); }
 
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_u8(uint8x16_t a) noexcept { return ::vreinterpretq_u16_u8(a); }
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s8(int8x16_t a) noexcept { return ::vreinterpretq_u16_s8(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_u8(uint8x16_t a) noexcept { return vreinterpretq_u16_u8(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s8(int8x16_t a) noexcept { return vreinterpretq_u16_s8(a); }
             XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_u16(uint16x8_t a) noexcept { return a; }
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s16(int16x8_t a) noexcept { return ::vreinterpretq_u16_s16(a); }
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_u32(uint32x4_t a) noexcept { return ::vreinterpretq_u16_u32(a); }
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s32(int32x4_t a) noexcept { return ::vreinterpretq_u16_s32(a); }
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_u64(uint64x2_t a) noexcept { return ::vreinterpretq_u16_u64(a); }
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s64(int64x2_t a) noexcept { return ::vreinterpretq_u16_s64(a); }
-            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_f32(float32x4_t a) noexcept { return ::vreinterpretq_u16_f32(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s16(int16x8_t a) noexcept { return vreinterpretq_u16_s16(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_u32(uint32x4_t a) noexcept { return vreinterpretq_u16_u32(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s32(int32x4_t a) noexcept { return vreinterpretq_u16_s32(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_u64(uint64x2_t a) noexcept { return vreinterpretq_u16_u64(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_s64(int64x2_t a) noexcept { return vreinterpretq_u16_s64(a); }
+            XSIMD_INLINE uint16x8_t x_vreinterpretq_u16_f32(float32x4_t a) noexcept { return vreinterpretq_u16_f32(a); }
 
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u8(uint8x16_t a) noexcept { return ::vreinterpretq_s16_u8(a); }
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_s8(int8x16_t a) noexcept { return ::vreinterpretq_s16_s8(a); }
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u16(uint16x8_t a) noexcept { return ::vreinterpretq_s16_u16(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u8(uint8x16_t a) noexcept { return vreinterpretq_s16_u8(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_s8(int8x16_t a) noexcept { return vreinterpretq_s16_s8(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u16(uint16x8_t a) noexcept { return vreinterpretq_s16_u16(a); }
             XSIMD_INLINE int16x8_t x_vreinterpretq_s16_s16(int16x8_t a) noexcept { return a; }
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u32(uint32x4_t a) noexcept { return ::vreinterpretq_s16_u32(a); }
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_s32(int32x4_t a) noexcept { return ::vreinterpretq_s16_s32(a); }
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u64(uint64x2_t a) noexcept { return ::vreinterpretq_s16_u64(a); }
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_s64(int64x2_t a) noexcept { return ::vreinterpretq_s16_s64(a); }
-            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_f32(float32x4_t a) noexcept { return ::vreinterpretq_s16_f32(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u32(uint32x4_t a) noexcept { return vreinterpretq_s16_u32(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_s32(int32x4_t a) noexcept { return vreinterpretq_s16_s32(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_u64(uint64x2_t a) noexcept { return vreinterpretq_s16_u64(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_s64(int64x2_t a) noexcept { return vreinterpretq_s16_s64(a); }
+            XSIMD_INLINE int16x8_t x_vreinterpretq_s16_f32(float32x4_t a) noexcept { return vreinterpretq_s16_f32(a); }
 
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_u8(uint8x16_t a) noexcept { return ::vreinterpretq_u32_u8(a); }
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s8(int8x16_t a) noexcept { return ::vreinterpretq_u32_s8(a); }
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_u16(uint16x8_t a) noexcept { return ::vreinterpretq_u32_u16(a); }
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s16(int16x8_t a) noexcept { return ::vreinterpretq_u32_s16(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_u8(uint8x16_t a) noexcept { return vreinterpretq_u32_u8(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s8(int8x16_t a) noexcept { return vreinterpretq_u32_s8(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_u16(uint16x8_t a) noexcept { return vreinterpretq_u32_u16(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s16(int16x8_t a) noexcept { return vreinterpretq_u32_s16(a); }
             XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_u32(uint32x4_t a) noexcept { return a; }
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s32(int32x4_t a) noexcept { return ::vreinterpretq_u32_s32(a); }
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_u64(uint64x2_t a) noexcept { return ::vreinterpretq_u32_u64(a); }
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s64(int64x2_t a) noexcept { return ::vreinterpretq_u32_s64(a); }
-            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_f32(float32x4_t a) noexcept { return ::vreinterpretq_u32_f32(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s32(int32x4_t a) noexcept { return vreinterpretq_u32_s32(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_u64(uint64x2_t a) noexcept { return vreinterpretq_u32_u64(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_s64(int64x2_t a) noexcept { return vreinterpretq_u32_s64(a); }
+            XSIMD_INLINE uint32x4_t x_vreinterpretq_u32_f32(float32x4_t a) noexcept { return vreinterpretq_u32_f32(a); }
 
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u8(uint8x16_t a) noexcept { return ::vreinterpretq_s32_u8(a); }
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_s8(int8x16_t a) noexcept { return ::vreinterpretq_s32_s8(a); }
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u16(uint16x8_t a) noexcept { return ::vreinterpretq_s32_u16(a); }
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_s16(int16x8_t a) noexcept { return ::vreinterpretq_s32_s16(a); }
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u32(uint32x4_t a) noexcept { return ::vreinterpretq_s32_u32(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u8(uint8x16_t a) noexcept { return vreinterpretq_s32_u8(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_s8(int8x16_t a) noexcept { return vreinterpretq_s32_s8(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u16(uint16x8_t a) noexcept { return vreinterpretq_s32_u16(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_s16(int16x8_t a) noexcept { return vreinterpretq_s32_s16(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u32(uint32x4_t a) noexcept { return vreinterpretq_s32_u32(a); }
             XSIMD_INLINE int32x4_t x_vreinterpretq_s32_s32(int32x4_t a) noexcept { return a; }
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u64(uint64x2_t a) noexcept { return ::vreinterpretq_s32_u64(a); }
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_s64(int64x2_t a) noexcept { return ::vreinterpretq_s32_s64(a); }
-            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_f32(float32x4_t a) noexcept { return ::vreinterpretq_s32_f32(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_u64(uint64x2_t a) noexcept { return vreinterpretq_s32_u64(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_s64(int64x2_t a) noexcept { return vreinterpretq_s32_s64(a); }
+            XSIMD_INLINE int32x4_t x_vreinterpretq_s32_f32(float32x4_t a) noexcept { return vreinterpretq_s32_f32(a); }
 
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_u8(uint8x16_t a) noexcept { return ::vreinterpretq_u64_u8(a); }
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s8(int8x16_t a) noexcept { return ::vreinterpretq_u64_s8(a); }
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_u16(uint16x8_t a) noexcept { return ::vreinterpretq_u64_u16(a); }
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s16(int16x8_t a) noexcept { return ::vreinterpretq_u64_s16(a); }
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_u32(uint32x4_t a) noexcept { return ::vreinterpretq_u64_u32(a); }
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s32(int32x4_t a) noexcept { return ::vreinterpretq_u64_s32(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_u8(uint8x16_t a) noexcept { return vreinterpretq_u64_u8(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s8(int8x16_t a) noexcept { return vreinterpretq_u64_s8(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_u16(uint16x8_t a) noexcept { return vreinterpretq_u64_u16(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s16(int16x8_t a) noexcept { return vreinterpretq_u64_s16(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_u32(uint32x4_t a) noexcept { return vreinterpretq_u64_u32(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s32(int32x4_t a) noexcept { return vreinterpretq_u64_s32(a); }
             XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_u64(uint64x2_t a) noexcept { return a; }
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s64(int64x2_t a) noexcept { return ::vreinterpretq_u64_s64(a); }
-            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_f32(float32x4_t a) noexcept { return ::vreinterpretq_u64_f32(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_s64(int64x2_t a) noexcept { return vreinterpretq_u64_s64(a); }
+            XSIMD_INLINE uint64x2_t x_vreinterpretq_u64_f32(float32x4_t a) noexcept { return vreinterpretq_u64_f32(a); }
 
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u8(uint8x16_t a) noexcept { return ::vreinterpretq_s64_u8(a); }
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_s8(int8x16_t a) noexcept { return ::vreinterpretq_s64_s8(a); }
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u16(uint16x8_t a) noexcept { return ::vreinterpretq_s64_u16(a); }
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_s16(int16x8_t a) noexcept { return ::vreinterpretq_s64_s16(a); }
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u32(uint32x4_t a) noexcept { return ::vreinterpretq_s64_u32(a); }
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_s32(int32x4_t a) noexcept { return ::vreinterpretq_s64_s32(a); }
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u64(uint64x2_t a) noexcept { return ::vreinterpretq_s64_u64(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u8(uint8x16_t a) noexcept { return vreinterpretq_s64_u8(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_s8(int8x16_t a) noexcept { return vreinterpretq_s64_s8(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u16(uint16x8_t a) noexcept { return vreinterpretq_s64_u16(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_s16(int16x8_t a) noexcept { return vreinterpretq_s64_s16(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u32(uint32x4_t a) noexcept { return vreinterpretq_s64_u32(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_s32(int32x4_t a) noexcept { return vreinterpretq_s64_s32(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_u64(uint64x2_t a) noexcept { return vreinterpretq_s64_u64(a); }
             XSIMD_INLINE int64x2_t x_vreinterpretq_s64_s64(int64x2_t a) noexcept { return a; }
-            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_f32(float32x4_t a) noexcept { return ::vreinterpretq_s64_f32(a); }
+            XSIMD_INLINE int64x2_t x_vreinterpretq_s64_f32(float32x4_t a) noexcept { return vreinterpretq_s64_f32(a); }
 
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u8(uint8x16_t a) noexcept { return ::vreinterpretq_f32_u8(a); }
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s8(int8x16_t a) noexcept { return ::vreinterpretq_f32_s8(a); }
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u16(uint16x8_t a) noexcept { return ::vreinterpretq_f32_u16(a); }
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s16(int16x8_t a) noexcept { return ::vreinterpretq_f32_s16(a); }
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u32(uint32x4_t a) noexcept { return ::vreinterpretq_f32_u32(a); }
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s32(int32x4_t a) noexcept { return ::vreinterpretq_f32_s32(a); }
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u64(uint64x2_t a) noexcept { return ::vreinterpretq_f32_u64(a); }
-            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s64(int64x2_t a) noexcept { return ::vreinterpretq_f32_s64(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u8(uint8x16_t a) noexcept { return vreinterpretq_f32_u8(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s8(int8x16_t a) noexcept { return vreinterpretq_f32_s8(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u16(uint16x8_t a) noexcept { return vreinterpretq_f32_u16(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s16(int16x8_t a) noexcept { return vreinterpretq_f32_s16(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u32(uint32x4_t a) noexcept { return vreinterpretq_f32_u32(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s32(int32x4_t a) noexcept { return vreinterpretq_f32_s32(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_u64(uint64x2_t a) noexcept { return vreinterpretq_f32_u64(a); }
+            XSIMD_INLINE float32x4_t x_vreinterpretq_f32_s64(int64x2_t a) noexcept { return vreinterpretq_f32_s64(a); }
             XSIMD_INLINE float32x4_t x_vreinterpretq_f32_f32(float32x4_t a) noexcept { return a; }
         }
 
