@@ -33,7 +33,7 @@
     {                                                                               \
         XSIMD_INLINE auto(x_##OP)(VEC a, VEC b) noexcept -> APPLY_TEMPLATE(RT, VEC) \
         {                                                                           \
-            return ::OP(a, b);                                                      \
+            return ::OP((a), (b));                                                  \
         }                                                                           \
     }
 
@@ -214,6 +214,9 @@ namespace xsimd
             using exclude_int64_neon_t
                 = std::enable_if_t<(std::is_integral<T>::value && sizeof(T) != 8) || std::is_same<T, float>::value, int>;
         }
+
+        template <typename T>
+        using detail_identity_return_type = detail::identity_return_type<T>;
 
         /*************
          * broadcast *
@@ -769,8 +772,8 @@ namespace xsimd
          * add *
          *******/
 
-        WRAP_BINARY_INT(vaddq_u8, vaddq_s8, vaddq_u16, vaddq_s16, vaddq_u32, vaddq_s32, vaddq_u64, vaddq_s64, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vaddq_f32, detail::identity_return_type)
+        WRAP_BINARY_INT(vaddq_u8, vaddq_s8, vaddq_u16, vaddq_s16, vaddq_u32, vaddq_s32, vaddq_u64, vaddq_s64, detail_identity_return_type)
+        WRAP_BINARY_FLOAT(vaddq_f32, detail_identity_return_type)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -788,7 +791,7 @@ namespace xsimd
          * avg *
          *******/
 
-        WRAP_BINARY_UINT_EXCLUDING_64(vhaddq_u8, vhaddq_u16, vhaddq_u32, detail::identity_return_type)
+        WRAP_BINARY_UINT_EXCLUDING_64(vhaddq_u8, vhaddq_u16, vhaddq_u32, detail_identity_return_type)
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -804,7 +807,7 @@ namespace xsimd
          * avgr *
          ********/
 
-        WRAP_BINARY_UINT_EXCLUDING_64(vrhaddq_u8, vrhaddq_u16, vrhaddq_u32, detail::identity_return_type)
+        WRAP_BINARY_UINT_EXCLUDING_64(vrhaddq_u8, vrhaddq_u16, vrhaddq_u32, detail_identity_return_type)
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -820,7 +823,7 @@ namespace xsimd
          * sadd *
          ********/
 
-        WRAP_BINARY_INT(vqaddq_u8, vqaddq_s8, vqaddq_u16, vqaddq_s16, vqaddq_u32, vqaddq_s32, vqaddq_u64, vqaddq_s64, detail::identity_return_type)
+        WRAP_BINARY_INT(vqaddq_u8, vqaddq_s8, vqaddq_u16, vqaddq_s16, vqaddq_u32, vqaddq_s32, vqaddq_u64, vqaddq_s64, detail_identity_return_type)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -838,8 +841,8 @@ namespace xsimd
          * sub *
          *******/
 
-        WRAP_BINARY_INT(vsubq_u8, vsubq_s8, vsubq_u16, vsubq_s16, vsubq_u32, vsubq_s32, vsubq_u64, vsubq_s64, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vsubq_f32, detail::identity_return_type)
+        WRAP_BINARY_INT(vsubq_u8, vsubq_s8, vsubq_u16, vsubq_s16, vsubq_u32, vsubq_s32, vsubq_u64, vsubq_s64, detail_identity_return_type)
+        WRAP_BINARY_FLOAT(vsubq_f32, detail_identity_return_type)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -857,7 +860,7 @@ namespace xsimd
          * ssub *
          ********/
 
-        WRAP_BINARY_INT(vqsubq_u8, vqsubq_s8, vqsubq_u16, vqsubq_s16, vqsubq_u32, vqsubq_s32, vqsubq_u64, vqsubq_s64, detail::identity_return_type)
+        WRAP_BINARY_INT(vqsubq_u8, vqsubq_s8, vqsubq_u16, vqsubq_s16, vqsubq_u32, vqsubq_s32, vqsubq_u64, vqsubq_s64, detail_identity_return_type)
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -875,8 +878,8 @@ namespace xsimd
          * mul *
          *******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vmulq_u8, vmulq_s8, vmulq_u16, vmulq_s16, vmulq_u32, vmulq_s32, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vmulq_f32, detail::identity_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vmulq_u8, vmulq_s8, vmulq_u16, vmulq_s16, vmulq_u32, vmulq_s32, detail_identity_return_type)
+        WRAP_BINARY_FLOAT(vmulq_f32, detail_identity_return_type)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -1150,7 +1153,7 @@ namespace xsimd
          * bitwise_and *
          ***************/
 
-        WRAP_BINARY_INT(vandq_u8, vandq_s8, vandq_u16, vandq_s16, vandq_u32, vandq_s32, vandq_u64, vandq_s64, detail::identity_return_type)
+        WRAP_BINARY_INT(vandq_u8, vandq_s8, vandq_u16, vandq_s16, vandq_u32, vandq_s32, vandq_u64, vandq_s64, detail_identity_return_type)
 
         namespace detail
         {
@@ -1190,7 +1193,7 @@ namespace xsimd
          * bitwise_or *
          **************/
 
-        WRAP_BINARY_INT(vorrq_u8, vorrq_s8, vorrq_u16, vorrq_s16, vorrq_u32, vorrq_s32, vorrq_u64, vorrq_s64, detail::identity_return_type)
+        WRAP_BINARY_INT(vorrq_u8, vorrq_s8, vorrq_u16, vorrq_s16, vorrq_u32, vorrq_s32, vorrq_u64, vorrq_s64, detail_identity_return_type)
 
         namespace detail
         {
@@ -1230,7 +1233,7 @@ namespace xsimd
          * bitwise_xor *
          ***************/
 
-        WRAP_BINARY_INT(veorq_u8, veorq_s8, veorq_u16, veorq_s16, veorq_u32, veorq_s32, veorq_u64, veorq_s64, detail::identity_return_type)
+        WRAP_BINARY_INT(veorq_u8, veorq_s8, veorq_u16, veorq_s16, veorq_u32, veorq_s32, veorq_u64, veorq_s64, detail_identity_return_type)
 
         namespace detail
         {
@@ -1320,7 +1323,7 @@ namespace xsimd
          * bitwise_andnot *
          ******************/
 
-        WRAP_BINARY_INT(vbicq_u8, vbicq_s8, vbicq_u16, vbicq_s16, vbicq_u32, vbicq_s32, vbicq_u64, vbicq_s64, detail::identity_return_type)
+        WRAP_BINARY_INT(vbicq_u8, vbicq_s8, vbicq_u16, vbicq_s16, vbicq_u32, vbicq_s32, vbicq_u64, vbicq_s64, detail_identity_return_type)
 
         namespace detail
         {
@@ -1359,8 +1362,8 @@ namespace xsimd
          * min *
          *******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vminq_u8, vminq_s8, vminq_u16, vminq_s16, vminq_u32, vminq_s32, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vminq_f32, detail::identity_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vminq_u8, vminq_s8, vminq_u16, vminq_s16, vminq_u32, vminq_s32, detail_identity_return_type)
+        WRAP_BINARY_FLOAT(vminq_f32, detail_identity_return_type)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
@@ -1383,8 +1386,8 @@ namespace xsimd
          * max *
          *******/
 
-        WRAP_BINARY_INT_EXCLUDING_64(vmaxq_u8, vmaxq_s8, vmaxq_u16, vmaxq_s16, vmaxq_u32, vmaxq_s32, detail::identity_return_type)
-        WRAP_BINARY_FLOAT(vmaxq_f32, detail::identity_return_type)
+        WRAP_BINARY_INT_EXCLUDING_64(vmaxq_u8, vmaxq_s8, vmaxq_u16, vmaxq_s16, vmaxq_u32, vmaxq_s32, detail_identity_return_type)
+        WRAP_BINARY_FLOAT(vmaxq_f32, detail_identity_return_type)
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
