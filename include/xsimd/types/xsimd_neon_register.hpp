@@ -12,12 +12,17 @@
 #ifndef XSIMD_NEON_REGISTER_HPP
 #define XSIMD_NEON_REGISTER_HPP
 
+#include "../config/xsimd_config.hpp"
 #include "../utils/xsimd_type_traits.hpp"
 #include "./xsimd_common_arch.hpp"
 #include "./xsimd_register.hpp"
 
 #if XSIMD_WITH_NEON
+#if defined(_WIN32) && XSIMD_WITH_NEON64
+#include <arm64_neon.h>
+#else
 #include <arm_neon.h>
+#endif
 #endif
 
 namespace xsimd
