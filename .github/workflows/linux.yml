@@ -1,0 +1,139 @@
+name: Linux x86 build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash -l {0}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - ${{ matrix.sys.flags }}'
+    strategy:
+      matrix:
+        sys:
+          - { compiler: 'gcc',   version: '12', flags: 'force_no_instr_set' }
+          - { compiler: 'gcc',   version: '13', flags: 'enable_xtl_complex' }
+          - { compiler: 'gcc',   version: '14', flags: 'avx' }
+          - { compiler: 'gcc',   version: '13', flags: 'avx512' }
+          - { compiler: 'gcc',   version: '10', flags: 'avx512' }
+          - { compiler: 'gcc',   version: '12', flags: 'i386' }
+          - { compiler: 'gcc',   version: '13', flags: 'avx512pf' }
+          - { compiler: 'gcc',   version: '13', flags: 'avx512vbmi' }
+          - { compiler: 'gcc',   version: '14', flags: 'avx512vbmi2' }
+          - { compiler: 'gcc',   version: '13', flags: 'avx512vnni' }
+          - { compiler: 'clang', version: '16', flags: 'force_no_instr_set' }
+          - { compiler: 'clang', version: '16', flags: 'enable_xtl_complex' }
+          - { compiler: 'clang', version: '17', flags: 'avx' }
+          - { compiler: 'clang', version: '17', flags: 'sse3' }
+          - { compiler: 'clang', version: '18', flags: 'avx512' }
+    steps:
+    - name: Setup compiler
+      if: ${{ matrix.sys.compiler == 'gcc' }}
+      run: |
+        GCC_VERSION=${{ matrix.sys.version }}
+        sudo apt-get update
+        sudo apt-get --no-install-suggests --no-install-recommends install g++-$GCC_VERSION
+        sudo dpkg --add-architecture i386
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get --no-install-suggests --no-install-recommends install gcc-$GCC_VERSION-multilib g++-$GCC_VERSION-multilib linux-libc-dev:i386
+        CC=gcc-$GCC_VERSION
+        echo "CC=$CC" >> $GITHUB_ENV
+        CXX=g++-$GCC_VERSION
+        echo "CXX=$CXX" >> $GITHUB_ENV
+    - name: Setup compiler
+      if: ${{ matrix.sys.compiler == 'clang' }}
+      run: |
+        LLVM_VERSION=${{ matrix.sys.version }}
+        sudo apt-get update || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install g++ g++-multilib || exit 1
+        sudo ln -s /usr/include/asm-generic /usr/include/asm
+        CC=clang-$LLVM_VERSION
+        echo "CC=$CC" >> $GITHUB_ENV
+        CXX=clang++-$LLVM_VERSION
+        echo "CXX=$CXX" >> $GITHUB_ENV
+    - name: Checkout xsimd
+      uses: actions/checkout@v6
+    - name: Install mamba
+      uses: mamba-org/setup-micromamba@v2
+      with:
+        environment-file: environment.yml
+    - name: Setup SDE
+      if: startswith(matrix.sys.flags, 'avx512')
+      run: sh install_sde.sh
+    - name: Configure build
+      env:
+        CC: ${{ env.CC }}
+        CXX: ${{ env.CXX }}
+      run: |
+        if [[ '${{ matrix.sys.flags }}' == 'enable_xtl_complex' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_XTL_COMPLEX=ON"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'sse3' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=nocona"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512pf' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knl"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=cannonlake"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi2' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=icelake-server"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vnni' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
+          CXX_FLAGS="$CXX_FLAGS -m32"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'force_no_instr_set' ]]; then
+          :
+        else
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXSIMD_ENABLE_WERROR=ON"
+        fi
+
+        # Cheap way of spotting uninitialized read
+        CXX_FLAGS="$CXX_FLAGS -ftrivial-auto-var-init=pattern"
+
+        cmake -B _build \
+              -DBUILD_TESTS=ON \
+              -DBUILD_BENCHMARK=ON \
+              -DBUILD_EXAMPLES=ON \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_C_COMPILER=$CC \
+              -DCMAKE_CXX_COMPILER=$CXX \
+              $CMAKE_EXTRA_ARGS \
+              -DCMAKE_CXX_FLAGS='$CXX_FLAGS' \
+              -G Ninja
+    - name: Build
+      run: cmake --build _build
+    - name: Test
+      run: |
+        # Set CPU feature test expectations, 0 is explicit absence of the feature
+        export XSIMD_TEST_CPU_ASSUME_NEON64="0"
+        export XSIMD_TEST_CPU_ASSUME_RVV="0"
+        export XSIMD_TEST_CPU_ASSUME_VSX="0"
+        export XSIMD_TEST_CPU_ASSUME_VXE="0"
+        cd _build/test
+        if echo '${{ matrix.sys.flags }}' | grep -q 'avx512' ; then
+          # Running with emulation, must have AVX512, lower tier are checked by implications in tests
+          export XSIMD_TEST_CPU_ASSUME_AVX512F="1"
+          ../../sde-external-9.48.0-2024-11-25-lin/sde64 -tgl -- ./test_xsimd
+        else
+          export XSIMD_TEST_CPU_ASSUME_SSE4_2=$(grep -q 'sse4_2' /proc/cpuinfo && echo "1" || echo "0")
+          export XSIMD_TEST_CPU_ASSUME_AVX=$(grep -q 'avx' /proc/cpuinfo && echo "1" || echo "0")
+          export XSIMD_TEST_CPU_ASSUME_AVX512F=$(grep -q 'avx512f' /proc/cpuinfo && echo "1" || echo "0")
+          export XSIMD_TEST_CPU_ASSUME_MANUFACTURER="intel,amd"
+          ./test_xsimd
+        fi

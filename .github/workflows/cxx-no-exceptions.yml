@@ -1,0 +1,12 @@
+name: C++ -fno-except compatibility
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Setup
+      run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-fno-exceptions
+    - name: Build
+      run: cmake --build _build
+

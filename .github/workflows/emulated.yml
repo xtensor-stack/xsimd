@@ -1,0 +1,44 @@
+name: Linux emulated build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash -l {0}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: '${{ matrix.sys.compiler }} - emulated<${{ matrix.sys.size }}>'
+    strategy:
+      matrix:
+        sys:
+          - { compiler: 'g++',   size: '128'}
+          - { compiler: 'g++',   size: '256'}
+          - { compiler: 'g++',   size: '512'}
+    steps:
+    - name: Checkout xsimd
+      uses: actions/checkout@v6
+    - name: Install mamba
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: environment.yml
+    - name: Setup GCC compiler
+      if: ${{ matrix.sys.compiler == 'g++' }}
+      run: echo "CXXFLAGS=-Wno-noexcept-type -Wno-stringop-overflow -Wno-maybe-uninitialized" >> $GITHUB_ENV
+    - name: Configure build
+      run: |
+        cmake -B _build \
+          -DBUILD_TESTS=ON \
+          -DBUILD_BENCHMARK=ON \
+          -DBUILD_EXAMPLES=ON \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_COMPILER=${{ matrix.sys.compiler }} \
+          -DXSIMD_ENABLE_WERROR=ON \
+          -DTARGET_ARCH="emulated<${{ matrix.sys.size }}>" \
+          -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
+          -GNinja
+    - name: Build
+      run: ninja -C _build
+    - name: Test
+      run: ninja -C _build xtest

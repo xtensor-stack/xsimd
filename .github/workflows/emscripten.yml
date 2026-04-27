@@ -1,0 +1,27 @@
+name: Emscripten build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+            environment-name: xsimd
+            create-args: >-
+                microsoft::playwright=1.50.0
+                python
+            init-shell: bash
+
+      - name: Build script
+        shell: bash -el {0}
+        run: |
+            echo "Build script for wasm"
+            playwright install
+            ./test/test_wasm/test_wasm.sh 4.0.21
