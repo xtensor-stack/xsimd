@@ -1490,7 +1490,7 @@ namespace xsimd
                                                batch_constant<uint8_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
                                                requires_arch<neon64>) noexcept
         {
-            return vqtbl1q_u8(self, batch<uint8_t, A>(idx));
+            return vqtbl1q_u8(self, idx.as_batch());
         }
 
         template <class A, uint8_t V0, uint8_t V1, uint8_t V2, uint8_t V3, uint8_t V4, uint8_t V5, uint8_t V6, uint8_t V7,
@@ -1499,7 +1499,7 @@ namespace xsimd
                                               batch_constant<uint8_t, A, V0, V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> idx,
                                               requires_arch<neon64>) noexcept
         {
-            return vqtbl1q_s8(self, batch<uint8_t, A>(idx));
+            return vqtbl1q_s8(self, idx.as_batch());
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
