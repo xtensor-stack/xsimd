@@ -106,47 +106,6 @@ namespace xsimd
             return vdupq_n_f32(val);
         }
 
-        /*******
-         * set *
-         *******/
-
-        template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
-        XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<neon>, Args... args) noexcept
-        {
-            return xsimd::types::detail::neon_vector_type<T> { args... };
-        }
-
-        template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
-        XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<neon>, Args... args) noexcept
-        {
-            using unsigned_type = as_unsigned_integer_t<T>;
-            auto const out = batch<unsigned_type, A> { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
-            return { out.data };
-        }
-
-        template <class A>
-        XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<neon>, float f0, float f1, float f2, float f3) noexcept
-        {
-            return float32x4_t { f0, f1, f2, f3 };
-        }
-
-        template <class A>
-        XSIMD_INLINE batch<std::complex<float>, A> set(batch<std::complex<float>, A> const&, requires_arch<neon>,
-                                                       std::complex<float> c0, std::complex<float> c1,
-                                                       std::complex<float> c2, std::complex<float> c3) noexcept
-        {
-            return batch<std::complex<float>, A>(float32x4_t { c0.real(), c1.real(), c2.real(), c3.real() },
-                                                 float32x4_t { c0.imag(), c1.imag(), c2.imag(), c3.imag() });
-        }
-
-        template <class A, class... Args>
-        XSIMD_INLINE batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<neon>, Args... args) noexcept
-        {
-            using register_type = typename batch_bool<float, A>::register_type;
-            using unsigned_type = as_unsigned_integer_t<float>;
-            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
-        }
-
         /*************
          * from_bool *
          *************/
@@ -545,6 +504,48 @@ namespace xsimd
         XSIMD_INLINE void store(batch_bool<float, A> b, bool* mem, requires_arch<neon>) noexcept
         {
             store(batch_bool<uint32_t, A>(b.data), mem, A {});
+        }
+
+        /*******
+         * set *
+         *******/
+
+        template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
+        XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<neon> req, Args... args) noexcept
+        {
+            alignas(A::alignment()) T data[] = { static_cast<T>(args)... };
+            return load_aligned<A, T>(data, {}, req);
+        }
+
+        template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
+        XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<neon>, Args... args) noexcept
+        {
+            using unsigned_type = as_unsigned_integer_t<T>;
+            auto const out = batch<unsigned_type, A> { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            return { out.data };
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<neon>, float f0, float f1, float f2, float f3) noexcept
+        {
+            return float32x4_t { f0, f1, f2, f3 };
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<std::complex<float>, A> set(batch<std::complex<float>, A> const&, requires_arch<neon>,
+                                                       std::complex<float> c0, std::complex<float> c1,
+                                                       std::complex<float> c2, std::complex<float> c3) noexcept
+        {
+            return batch<std::complex<float>, A>(float32x4_t { c0.real(), c1.real(), c2.real(), c3.real() },
+                                                 float32x4_t { c0.imag(), c1.imag(), c2.imag(), c3.imag() });
+        }
+
+        template <class A, class... Args>
+        XSIMD_INLINE batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<neon>, Args... args) noexcept
+        {
+            using register_type = typename batch_bool<float, A>::register_type;
+            using unsigned_type = as_unsigned_integer_t<float>;
+            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
         }
 
         /*******
