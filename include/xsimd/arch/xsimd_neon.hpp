@@ -53,6 +53,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vreinterpretq(uint8x16_t a) noexcept { return a; }
             template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -72,6 +73,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u8_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE int8x16_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s8_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -91,6 +93,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE int8x16_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s8_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint16x8_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u16_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -110,6 +113,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE uint16x8_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u16_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE int16x8_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s16_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -129,6 +133,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE int16x8_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s16_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u32_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -148,6 +153,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE uint32x4_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u32_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE int32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s32_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -167,6 +173,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE int32x4_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s32_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u64_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -186,6 +193,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE uint64x2_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u64_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE int64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s64_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -205,6 +213,7 @@ namespace xsimd
             template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, float>::value, int> = 0>
             XSIMD_INLINE int64x2_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s64_f32(a); }
 
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE float32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_f32_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -792,6 +801,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vaddq(uint8x16_t a, uint8x16_t b) noexcept { return vaddq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -825,6 +835,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vhaddq(uint8x16_t a, uint8x16_t b) noexcept { return vhaddq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, uint16_t>::value, int> = 0>
@@ -846,6 +857,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vrhaddq(uint8x16_t a, uint8x16_t b) noexcept { return vrhaddq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, uint16_t>::value, int> = 0>
@@ -867,6 +879,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vqaddq(uint8x16_t a, uint8x16_t b) noexcept { return vqaddq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -900,6 +913,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vsubq(uint8x16_t a, uint8x16_t b) noexcept { return vsubq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -933,6 +947,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vqsubq(uint8x16_t a, uint8x16_t b) noexcept { return vqsubq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -966,6 +981,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vmulq(uint8x16_t a, uint8x16_t b) noexcept { return vmulq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1030,6 +1046,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vceqq(uint8x16_t a, uint8x16_t b) noexcept { return vceqq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1122,6 +1139,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vcltq(uint8x16_t a, uint8x16_t b) noexcept { return vcltq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1166,6 +1184,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vcleq(uint8x16_t a, uint8x16_t b) noexcept { return vcleq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1201,6 +1220,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vcgtq(uint8x16_t a, uint8x16_t b) noexcept { return vcgtq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1245,6 +1265,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vcgeq(uint8x16_t a, uint8x16_t b) noexcept { return vcgeq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1291,6 +1312,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vandq(uint8x16_t a, uint8x16_t b) noexcept { return vandq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1335,6 +1357,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vorrq(uint8x16_t a, uint8x16_t b) noexcept { return vorrq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1379,6 +1402,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_veorq(uint8x16_t a, uint8x16_t b) noexcept { return veorq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1433,6 +1457,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vmvnq(uint8x16_t a) noexcept { return vmvnq_u8(a); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1482,6 +1507,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vbicq(uint8x16_t a, uint8x16_t b) noexcept { return vbicq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1525,6 +1551,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vminq(uint8x16_t a, uint8x16_t b) noexcept { return vminq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1560,6 +1587,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vmaxq(uint8x16_t a, uint8x16_t b) noexcept { return vmaxq_u8(a, b); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1595,6 +1623,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vabsq(uint8x16_t a) noexcept { return a; }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1937,6 +1966,7 @@ namespace xsimd
 
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vbslq(uint8x16_t a, uint8x16_t b, uint8x16_t c) noexcept { return vbslq_u8(a, b, c); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -3065,6 +3095,7 @@ namespace xsimd
          ****************/
         namespace wrap
         {
+            // TODO(c++17): Make a single function with if constexpr switch
             template <size_t N, class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_rotate_left(uint8x16_t a, uint8x16_t b) noexcept { return vextq_u8(a, b, N); }
             template <size_t N, class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
