@@ -119,9 +119,9 @@ namespace xsimd
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-            using register_type = typename batch_bool<T, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<T>;
-            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            auto const out = batch<unsigned_type, A> { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            return { out.data };
         }
 
         template <class A>
@@ -324,7 +324,8 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<neon>) noexcept
         {
             auto vmem = load_unaligned<A>((unsigned char const*)mem, convert<unsigned char> {}, A {});
-            return { 0 - vmem.data };
+            auto const zero = batch<T, A> { 0 };
+            return { zero.data - vmem.data };
         }
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
         XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon> r) noexcept
