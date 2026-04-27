@@ -13,6 +13,7 @@
 #define XSIMD_AVX_REGISTER_HPP
 
 #include "./xsimd_common_arch.hpp"
+#include "./xsimd_sse4_2_register.hpp"
 
 namespace xsimd
 {
@@ -29,6 +30,18 @@ namespace xsimd
         static constexpr std::size_t alignment() noexcept { return 32; }
         static constexpr bool requires_alignment() noexcept { return true; }
         static constexpr char const* name() noexcept { return "avx"; }
+    };
+
+    /**
+     * @ingroup architectures
+     *
+     * AVX instructions extension for 128 bits registers
+     */
+    struct avx_128 : sse4_2
+    {
+        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr char const* name() noexcept { return "avx/128"; }
     };
 }
 
@@ -58,6 +71,8 @@ namespace xsimd
         XSIMD_DECLARE_SIMD_REGISTER(long long int, avx, __m256i);
         XSIMD_DECLARE_SIMD_REGISTER(float, avx, __m256);
         XSIMD_DECLARE_SIMD_REGISTER(double, avx, __m256d);
+
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx_128, sse4_2);
     }
 }
 #endif

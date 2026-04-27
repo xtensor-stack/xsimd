@@ -29,6 +29,7 @@ jobs:
           - { compiler: 'clang', version: '17', flags: 'avx' }
           - { compiler: 'clang', version: '17', flags: 'sse3' }
           - { compiler: 'clang', version: '18', flags: 'avx512' }
+          - { compiler: 'clang', version: '18', flags: 'avx_128' }
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
@@ -75,6 +76,9 @@ jobs:
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge -DXSIMD_DEFAULT_ARCH=avx_128"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'sse3' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=nocona"

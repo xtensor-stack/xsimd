@@ -994,18 +994,18 @@ namespace xsimd
             using int_t = as_integer_t<T>;
             constexpr size_t half_size = batch<T, A>::size / 2;
 
-            // confined to lower 128-bit half → forward to SSE2
+            // confined to lower 128-bit half → forward to 128 bit
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(batch_bool_constant<int_t, A, Values...> {});
-                const auto lo = load_masked(reinterpret_cast<int_t const*>(mem), mlo, convert<int_t> {}, Mode {}, sse4_2 {});
+                const auto lo = load_masked(reinterpret_cast<int_t const*>(mem), mlo, convert<int_t> {}, Mode {}, avx_128 {});
                 return bitwise_cast<T>(batch<int_t, A>(_mm256_zextsi128_si256(lo)));
             }
-            // confined to upper 128-bit half → forward to SSE2
+            // confined to upper 128-bit half → forward to 128 bit
             else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half_size)
             {
                 constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
-                const auto hi = load_masked(mem + half_size, mhi, convert<T> {}, Mode {}, sse4_2 {});
+                const auto hi = load_masked(mem + half_size, mhi, convert<T> {}, Mode {}, avx_128 {});
                 return detail::zero_extend<A>(hi);
             }
             else
@@ -1036,19 +1036,19 @@ namespace xsimd
         {
             constexpr size_t half_size = batch<T, A>::size / 2;
 
-            // confined to lower 128-bit half → forward to SSE2
+            // confined to lower 128-bit half → forward to 128 bit
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
                 const auto lo = detail::lower_half(src);
-                store_masked<sse4_2>(mem, lo, mlo, Mode {}, sse4_2 {});
+                store_masked<avx_128>(mem, lo, mlo, Mode {}, sse4_2 {});
             }
-            // confined to upper 128-bit half → forward to SSE2
+            // confined to upper 128-bit half → forward to 128 bit
             else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half_size)
             {
                 constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
                 const auto hi = detail::upper_half(src);
-                store_masked<sse4_2>(mem + half_size, hi, mhi, Mode {}, sse4_2 {});
+                store_masked<avx_128>(mem + half_size, hi, mhi, Mode {}, sse4_2 {});
             }
             else
             {

@@ -50,6 +50,7 @@
 
 #if XSIMD_WITH_AVX
 #include "./xsimd_avx.hpp"
+#include "./xsimd_avx_128.hpp"
 #endif
 
 #if XSIMD_WITH_FMA3_AVX
