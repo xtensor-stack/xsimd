@@ -21,6 +21,7 @@
 
 #include "../types/xsimd_neon64_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "./xsimd_neon.hpp"
 
 namespace xsimd
 {
@@ -30,6 +31,67 @@ namespace xsimd
     namespace kernel
     {
         using namespace types;
+
+        namespace detail
+        {
+            template <template <class> class return_type, class... T>
+            struct neon_dispatcher_base
+            {
+                struct unary
+                {
+                    using container_type = std::tuple<return_type<T> (*)(T)...>;
+                    const container_type m_func;
+
+                    template <class U>
+                    return_type<U> apply(U rhs) const noexcept
+                    {
+                        using func_type = return_type<U> (*)(U);
+                        auto func = std::get<func_type>(m_func);
+                        return func(rhs);
+                    }
+                };
+
+                struct binary
+                {
+                    using container_type = std::tuple<return_type<T> (*)(T, T)...>;
+                    const container_type m_func;
+
+                    template <class U>
+                    return_type<U> apply(U lhs, U rhs) const noexcept
+                    {
+                        using func_type = return_type<U> (*)(U, U);
+                        auto func = std::get<func_type>(m_func);
+                        return func(lhs, rhs);
+                    }
+                };
+            };
+
+            /********************
+             *  bitwise_caster  *
+             ********************/
+
+            template <class R, class... T>
+            struct bitwise_caster_impl
+            {
+                using container_type = std::tuple<R (*)(T)...>;
+                container_type m_func;
+
+                template <class U>
+                R apply(U rhs) const noexcept
+                {
+                    using func_type = R (*)(U);
+                    auto func = std::get<func_type>(m_func);
+                    return func(rhs);
+                }
+            };
+
+            template <class R, class... T>
+            XSIMD_INLINE const bitwise_caster_impl<R, T...> make_bitwise_caster_impl(R (*... arg)(T)) noexcept
+            {
+                return { std::make_tuple(arg...) };
+            }
+
+        }
 
         // get
         template <class A, size_t I>
@@ -660,7 +722,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch_bool<double, A> bitwise_not(batch_bool<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
-            return detail::bitwise_not_u64(rhs);
+            return vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(rhs)));
         }
 
         /******************
