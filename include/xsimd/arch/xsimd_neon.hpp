@@ -304,7 +304,8 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s8(wrap::x_vreinterpretq<int8_t, project_num_t<T>>(arg.data), vdupq_n_s8(1));
+            auto const arg_int = wrap::x_vreinterpretq<int8_t, project_num_t<T>>(arg.data);
+            return vandq_s8(arg_int, vdupq_n_s8(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
@@ -316,7 +317,8 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s16(wrap::x_vreinterpretq<int16_t, project_num_t<T>>(arg.data), vdupq_n_s16(1));
+            auto const arg_int = wrap::x_vreinterpretq<int16_t, project_num_t<T>>(arg.data);
+            return vandq_s16(arg_int, vdupq_n_s16(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
@@ -328,7 +330,8 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s32(wrap::x_vreinterpretq<int32_t, project_num_t<T>>(arg.data), vdupq_n_s32(1));
+            auto const arg_int = wrap::x_vreinterpretq<int32_t, project_num_t<T>>(arg.data);
+            return vandq_s32(arg_int, vdupq_n_s32(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
@@ -340,7 +343,8 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s64(wrap::x_vreinterpretq<int64_t, project_num_t<T>>(arg.data), vdupq_n_s64(1));
+            auto const arg_int = wrap::x_vreinterpretq<int64_t, project_num_t<T>>(arg.data);
+            return vandq_s64(arg_int, vdupq_n_s64(1));
         }
 
         template <class A>
