@@ -716,9 +716,10 @@ namespace xsimd
         }
 
         template <class A>
-        XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<neon>, float f0, float f1, float f2, float f3) noexcept
+        XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<neon> req, float f0, float f1, float f2, float f3) noexcept
         {
-            return float32x4_t { f0, f1, f2, f3 };
+            alignas(A::alignment()) float data[] = { f0, f1, f2, f3 };
+            return load_aligned<A>(data, {}, req);
         }
 
         template <class A>
