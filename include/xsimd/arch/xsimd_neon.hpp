@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  * Copyright (c) Johan Mabille, Sylvain Corlay, Wolf Vollprecht and         *
  * Martin Renou                                                             *
  * Copyright (c) QuantStack                                                 *
@@ -223,25 +223,19 @@ namespace xsimd
              * comparison dispatchers *
              **************************/
 
+            // On MSVC ARM64, all NEON types are the same __n128 type, so we can't specialize
+            // We use a function-based approach instead
             template <class T>
-            struct comp_return_type_impl;
-
-            template <>
-            struct comp_return_type_impl<uint8x16_t>
+            struct comp_return_type_impl
             {
-                using type = uint8x16_t;
+                using type = T;
             };
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <>
             struct comp_return_type_impl<int8x16_t>
             {
                 using type = uint8x16_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint16x8_t>
-            {
-                using type = uint16x8_t;
             };
 
             template <>
@@ -251,21 +245,9 @@ namespace xsimd
             };
 
             template <>
-            struct comp_return_type_impl<uint32x4_t>
-            {
-                using type = uint32x4_t;
-            };
-
-            template <>
             struct comp_return_type_impl<int32x4_t>
             {
                 using type = uint32x4_t;
-            };
-
-            template <>
-            struct comp_return_type_impl<uint64x2_t>
-            {
-                using type = uint64x2_t;
             };
 
             template <>
@@ -275,10 +257,17 @@ namespace xsimd
             };
 
             template <>
+            struct comp_return_type_impl<uint64x2_t>
+            {
+                using type = uint64x2_t;
+            };
+
+            template <>
             struct comp_return_type_impl<float32x4_t>
             {
                 using type = uint32x4_t;
             };
+#endif
 
             template <class T>
             using comp_return_type = typename comp_return_type_impl<T>::type;
@@ -304,6 +293,294 @@ namespace xsimd
             template <class T>
             using exclude_int64_neon_t
                 = std::enable_if_t<(std::is_integral<T>::value && sizeof(T) != 8) || std::is_same<T, float>::value, int>;
+        }
+
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+        namespace detail {
+            // msvc_arm64_load / msvc_arm64_load_u have been superseded by the
+            // cross-platform detail::neon_load<T> / detail::neon_load_u<T> helpers
+            // defined below (outside this block).  They are no longer used here.
+
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T)==1, __n128>::type
+            msvc_arm64_eq_bool(__n128 a, __n128 b) noexcept { return vceqq_u8(a,b); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T)==2, __n128>::type
+            msvc_arm64_eq_bool(__n128 a, __n128 b) noexcept { return vceqq_u16(a,b); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T)==4, __n128>::type
+            msvc_arm64_eq_bool(__n128 a, __n128 b) noexcept { return vceqq_u32(a,b); }
+
+        }
+
+#define XSIMD_MSVC_ARM64_BINARY_FULL(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, u64fn, s64fn, f32fn) \
+    namespace detail { \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u8fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return s8fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u16fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return s16fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u32fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return s32fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return f32fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==8 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u64fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==8 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return s64fn(a,b); } \
+    }
+
+#define XSIMD_MSVC_ARM64_BINARY_EX64(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, f32fn) \
+    namespace detail { \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u8fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return s8fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u16fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return s16fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u32fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return s32fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return f32fn(a,b); } \
+    }
+
+#define XSIMD_MSVC_ARM64_BINARY_UINT_EX64(fname, u8fn, u16fn, u32fn) \
+    namespace detail { \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u8fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u16fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a, __n128 b) noexcept { return u32fn(a,b); } \
+    }
+
+#define XSIMD_MSVC_ARM64_UNARY_EX64(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, f32fn) \
+    namespace detail { \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a) noexcept { return u8fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 a) noexcept { return s8fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a) noexcept { return u16fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 a) noexcept { return s16fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 a) noexcept { return u32fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 a) noexcept { return s32fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 a) noexcept { return f32fn(a); } \
+    }
+
+#define XSIMD_MSVC_ARM64_SELECT_FULL(fname, u8fn, s8fn, u16fn, s16fn, u32fn, s32fn, u64fn, s64fn, f32fn) \
+    namespace detail { \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return u8fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return s8fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return u16fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return s16fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return u32fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return s32fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_floating_point<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return f32fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==8 && std::is_unsigned<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return u64fn(c,a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==8 && std::is_signed<T>::value, __n128>::type \
+        fname(__n128 c, __n128 a, __n128 b) noexcept { return s64fn(c,a,b); } \
+    }
+
+#define XSIMD_MSVC_ARM64_BINARY_UINT_ALL(fname, u8fn, u16fn, u32fn, u64fn) \
+    namespace detail { \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1, __n128>::type \
+        fname##_bool(__n128 a, __n128 b) noexcept { return u8fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2, __n128>::type \
+        fname##_bool(__n128 a, __n128 b) noexcept { return u16fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4, __n128>::type \
+        fname##_bool(__n128 a, __n128 b) noexcept { return u32fn(a,b); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==8, __n128>::type \
+        fname##_bool(__n128 a, __n128 b) noexcept { return u64fn(a,b); } \
+    }
+
+#define XSIMD_MSVC_ARM64_UNARY_UINT_ALL(fname, u8fn, u16fn, u32fn, u64fn) \
+    namespace detail { \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==1, __n128>::type \
+        fname##_bool(__n128 a) noexcept { return u8fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==2, __n128>::type \
+        fname##_bool(__n128 a) noexcept { return u16fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==4, __n128>::type \
+        fname##_bool(__n128 a) noexcept { return u32fn(a); } \
+        template <class T> \
+        XSIMD_INLINE typename std::enable_if<sizeof(T)==8, __n128>::type \
+        fname##_bool(__n128 a) noexcept { return u64fn(a); } \
+    }
+
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_add, vaddq_u8, vaddq_s8, vaddq_u16, vaddq_s16, vaddq_u32, vaddq_s32, vaddq_u64, vaddq_s64, vaddq_f32)
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_sadd, vqaddq_u8, vqaddq_s8, vqaddq_u16, vqaddq_s16, vqaddq_u32, vqaddq_s32, vqaddq_u64, vqaddq_s64, vaddq_f32)
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_sub, vsubq_u8, vsubq_s8, vsubq_u16, vsubq_s16, vsubq_u32, vsubq_s32, vsubq_u64, vsubq_s64, vsubq_f32)
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_ssub, vqsubq_u8, vqsubq_s8, vqsubq_u16, vqsubq_s16, vqsubq_u32, vqsubq_s32, vqsubq_u64, vqsubq_s64, vsubq_f32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_mul, vmulq_u8, vmulq_s8, vmulq_u16, vmulq_s16, vmulq_u32, vmulq_s32, vmulq_f32)
+XSIMD_MSVC_ARM64_BINARY_UINT_EX64(msvc_arm64_avg, vhaddq_u8, vhaddq_u16, vhaddq_u32)
+XSIMD_MSVC_ARM64_BINARY_UINT_EX64(msvc_arm64_avgr, vrhaddq_u8, vrhaddq_u16, vrhaddq_u32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_eq, vceqq_u8, vceqq_s8, vceqq_u16, vceqq_s16, vceqq_u32, vceqq_s32, vceqq_f32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_lt, vcltq_u8, vcltq_s8, vcltq_u16, vcltq_s16, vcltq_u32, vcltq_s32, vcltq_f32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_le, vcleq_u8, vcleq_s8, vcleq_u16, vcleq_s16, vcleq_u32, vcleq_s32, vcleq_f32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_gt, vcgtq_u8, vcgtq_s8, vcgtq_u16, vcgtq_s16, vcgtq_u32, vcgtq_s32, vcgtq_f32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_ge, vcgeq_u8, vcgeq_s8, vcgeq_u16, vcgeq_s16, vcgeq_u32, vcgeq_s32, vcgeq_f32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_min, vminq_u8, vminq_s8, vminq_u16, vminq_s16, vminq_u32, vminq_s32, vminq_f32)
+XSIMD_MSVC_ARM64_BINARY_EX64(msvc_arm64_max, vmaxq_u8, vmaxq_s8, vmaxq_u16, vmaxq_s16, vmaxq_u32, vmaxq_s32, vmaxq_f32)
+namespace detail {
+    XSIMD_INLINE __n128 msvc_arm64_abs_u8(__n128 a) noexcept { return a; }
+    XSIMD_INLINE __n128 msvc_arm64_abs_u16(__n128 a) noexcept { return a; }
+    XSIMD_INLINE __n128 msvc_arm64_abs_u32(__n128 a) noexcept { return a; }
+}
+XSIMD_MSVC_ARM64_UNARY_EX64(msvc_arm64_abs, msvc_arm64_abs_u8, vabsq_s8, msvc_arm64_abs_u16, vabsq_s16, msvc_arm64_abs_u32, vabsq_s32, vabsq_f32)
+
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_and, vandq_u8, vandq_u8, vandq_u16, vandq_u16, vandq_u32, vandq_u32, vandq_u64, vandq_u64, vandq_u8)
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_or,  vorrq_u8, vorrq_u8, vorrq_u16, vorrq_u16, vorrq_u32, vorrq_u32, vorrq_u64, vorrq_u64, vorrq_u8)
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_xor, veorq_u8, veorq_u8, veorq_u16, veorq_u16, veorq_u32, veorq_u32, veorq_u64, veorq_u64, veorq_u8)
+XSIMD_MSVC_ARM64_BINARY_FULL(msvc_arm64_andn, vbicq_u8, vbicq_u8, vbicq_u16, vbicq_u16, vbicq_u32, vbicq_u32, vbicq_u64, vbicq_u64, vbicq_u8)
+
+XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_and, vandq_u8, vandq_u16, vandq_u32, vandq_u64)
+XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_or,  vorrq_u8, vorrq_u16, vorrq_u32, vorrq_u64)
+XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_xor, veorq_u8, veorq_u16, veorq_u32, veorq_u64)
+XSIMD_MSVC_ARM64_BINARY_UINT_ALL(msvc_arm64_andn, vbicq_u8, vbicq_u16, vbicq_u32, vbicq_u64)
+namespace detail {
+    XSIMD_INLINE __n128 msvc_arm64_not_u64_impl(__n128 a) noexcept { return vmvnq_u32(a); }
+}
+XSIMD_MSVC_ARM64_UNARY_UINT_ALL(msvc_arm64_not, vmvnq_u8, vmvnq_u16, vmvnq_u32, msvc_arm64_not_u64_impl)
+
+XSIMD_MSVC_ARM64_SELECT_FULL(msvc_arm64_select, vbslq_u8, vbslq_s8, vbslq_u16, vbslq_s16, vbslq_u32, vbslq_s32, vbslq_u64, vbslq_s64, vbslq_f32)
+
+namespace detail {
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_unsigned<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_u8(a, a, N); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==1 && std::is_signed<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_s8(a, a, N); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_unsigned<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_u16(a, a, N % 8); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==2 && std::is_signed<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_s16(a, a, N % 8); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_unsigned<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_u32(a, a, N % 4); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_s32(a, a, N % 4); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==4 && std::is_floating_point<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_f32(a, a, N % 4); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==8 && std::is_unsigned<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_u64(a, a, N % 2); }
+    template <size_t N, class T>
+    XSIMD_INLINE typename std::enable_if<sizeof(T)==8 && std::is_signed<T>::value, __n128>::type
+    msvc_arm64_rotate_left(__n128 a) noexcept { return vextq_s64(a, a, N % 2); }
+}
+#endif
+
+        namespace detail
+        {
+            // Cross-platform helpers: load a NEON register from an aligned array.
+            // On GCC/Clang the return type is the specific NEON vector type;
+            // on MSVC ARM64 all NEON types are __n128, so the same code works.
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_unsigned<T>::value, uint8x16_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1 && std::is_signed<T>::value, int8x16_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s8(reinterpret_cast<const int8_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2 && std::is_unsigned<T>::value, uint16x8_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u16(reinterpret_cast<const uint16_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2 && std::is_signed<T>::value, int16x8_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s16(reinterpret_cast<const int16_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4 && std::is_unsigned<T>::value, uint32x4_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u32(reinterpret_cast<const uint32_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4 && std::is_signed<T>::value && !std::is_floating_point<T>::value, int32x4_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s32(reinterpret_cast<const int32_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8 && std::is_unsigned<T>::value, uint64x2_t>::type
+            neon_load(const T* d) noexcept { return vld1q_u64(reinterpret_cast<const uint64_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8 && std::is_signed<T>::value, int64x2_t>::type
+            neon_load(const T* d) noexcept { return vld1q_s64(reinterpret_cast<const int64_t*>(d)); }
+
+            // Load the unsigned-integer representation of T from an aligned array.
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 1, uint8x16_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u8(reinterpret_cast<const uint8_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 2, uint16x8_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u16(reinterpret_cast<const uint16_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 4, uint32x4_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u32(reinterpret_cast<const uint32_t*>(d)); }
+            template <class T>
+            XSIMD_INLINE typename std::enable_if<sizeof(T) == 8, uint64x2_t>::type
+            neon_load_u(const as_unsigned_integer_t<T>* d) noexcept { return vld1q_u64(reinterpret_cast<const uint64_t*>(d)); }
         }
 
         /*************
@@ -371,21 +648,25 @@ namespace xsimd
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> set(batch<T, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-            return xsimd::types::detail::neon_vector_type<T> { args... };
+            // Use load-from-array on all platforms: avoids brace-init of NEON types
+            // (which MSVC ARM64 does not support) while remaining portable.
+            alignas(16) T data[] = { static_cast<T>(args)... };
+            return detail::neon_load<T>(data);
         }
 
         template <class A, class T, class... Args, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-            using register_type = typename batch_bool<T, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<T>;
-            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            alignas(16) unsigned_type data[] = { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            return detail::neon_load_u<T>(data);
         }
 
         template <class A>
         XSIMD_INLINE batch<float, A> set(batch<float, A> const&, requires_arch<neon>, float f0, float f1, float f2, float f3) noexcept
         {
-            return float32x4_t { f0, f1, f2, f3 };
+            alignas(16) float data[] = { f0, f1, f2, f3 };
+            return vld1q_f32(data);
         }
 
         template <class A>
@@ -393,16 +674,17 @@ namespace xsimd
                                                        std::complex<float> c0, std::complex<float> c1,
                                                        std::complex<float> c2, std::complex<float> c3) noexcept
         {
-            return batch<std::complex<float>, A>(float32x4_t { c0.real(), c1.real(), c2.real(), c3.real() },
-                                                 float32x4_t { c0.imag(), c1.imag(), c2.imag(), c3.imag() });
+            alignas(16) float real_data[] = { c0.real(), c1.real(), c2.real(), c3.real() };
+            alignas(16) float imag_data[] = { c0.imag(), c1.imag(), c2.imag(), c3.imag() };
+            return batch<std::complex<float>, A>(vld1q_f32(real_data), vld1q_f32(imag_data));
         }
 
         template <class A, class... Args>
         XSIMD_INLINE batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-            using register_type = typename batch_bool<float, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<float>;
-            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            alignas(16) unsigned_type data[] = { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            return vld1q_u32(data);
         }
 
         /*************
@@ -418,7 +700,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s8(reinterpret_cast<int8x16_t>(arg.data), vdupq_n_s8(1));
+            return vandq_s8(vreinterpretq_s8_u8(arg.data), vdupq_n_s8(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
@@ -430,7 +712,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s16(reinterpret_cast<int16x8_t>(arg.data), vdupq_n_s16(1));
+            return vandq_s16(vreinterpretq_s16_u16(arg.data), vdupq_n_s16(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
@@ -442,7 +724,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s32(reinterpret_cast<int32x4_t>(arg.data), vdupq_n_s32(1));
+            return vandq_s32(vreinterpretq_s32_u32(arg.data), vdupq_n_s32(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
@@ -454,7 +736,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s64(reinterpret_cast<int64x2_t>(arg.data), vdupq_n_s64(1));
+            return vandq_s64(vreinterpretq_s64_u64(arg.data), vdupq_n_s64(1));
         }
 
         template <class A>
@@ -582,7 +864,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<neon>) noexcept
         {
             auto vmem = load_unaligned<A>((unsigned char const*)mem, convert<unsigned char> {}, A {});
-            return { 0 - vmem.data };
+            return { vsubq_u8(vdupq_n_u8(0), vmem.data) };
         }
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
         XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon> r) noexcept
@@ -594,7 +876,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<neon>) noexcept
         {
             uint16x8_t vmem = vmovl_u8(vld1_u8((unsigned char const*)mem));
-            return { 0 - vmem };
+            return { vsubq_u16(vdupq_n_u16(0), vmem) };
         }
 
         template <class A, class T, detail::enable_sized_t<T, 2> = 0>
@@ -607,7 +889,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<neon>) noexcept
         {
             uint8x8_t tmp = vreinterpret_u8_u32(vset_lane_u32(*(unsigned int*)mem, vdup_n_u32(0), 0));
-            return { 0 - vmovl_u16(vget_low_u16(vmovl_u8(tmp))) };
+            return { vsubq_u32(vdupq_n_u32(0), vmovl_u16(vget_low_u16(vmovl_u8(tmp)))) };
         }
 
         template <class A, class T, detail::enable_sized_t<T, 4> = 0>
@@ -860,12 +1142,17 @@ namespace xsimd
          * add *
          *******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vaddq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vaddq, detail::identity_return_type)
+#endif
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_add<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vaddq_u8, wrap::vaddq_s8, wrap::vaddq_u16, wrap::vaddq_s16,
@@ -873,49 +1160,67 @@ namespace xsimd
                                 wrap::vaddq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /*******
          * avg *
          *******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_UINT_EXCLUDING_64(vhaddq, detail::identity_return_type)
+#endif
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_avg<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary dispatcher = {
                 std::make_tuple(wrap::vhaddq_u8, wrap::vhaddq_u16, wrap::vhaddq_u32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /********
          * avgr *
          ********/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_UINT_EXCLUDING_64(vrhaddq, detail::identity_return_type)
+#endif
 
         template <class A, class T, class = std::enable_if_t<(std::is_unsigned<T>::value && sizeof(T) != 8)>>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_avgr<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary dispatcher = {
                 std::make_tuple(wrap::vrhaddq_u8, wrap::vrhaddq_u16, wrap::vrhaddq_u32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /********
          * sadd *
          ********/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vqaddq, detail::identity_return_type)
+#endif
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_sadd<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vqaddq_u8, wrap::vqaddq_s8, wrap::vqaddq_u16, wrap::vqaddq_s16,
@@ -923,18 +1228,24 @@ namespace xsimd
                                 wrap::vaddq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /*******
          * sub *
          *******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vsubq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vsubq, detail::identity_return_type)
+#endif
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_sub<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vsubq_u8, wrap::vsubq_s8, wrap::vsubq_u16, wrap::vsubq_s16,
@@ -942,17 +1253,23 @@ namespace xsimd
                                 wrap::vsubq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /********
          * ssub *
          ********/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vqsubq, detail::identity_return_type)
+#endif
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_ssub<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vqsubq_u8, wrap::vqsubq_s8, wrap::vqsubq_u16, wrap::vqsubq_s16,
@@ -960,24 +1277,31 @@ namespace xsimd
                                 wrap::vsubq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /*******
          * mul *
          *******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vmulq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vmulq, detail::identity_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_mul<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vmulq_u8, wrap::vmulq_s8, wrap::vmulq_u16, wrap::vmulq_s16,
                                 wrap::vmulq_u32, wrap::vmulq_s32, wrap::vmulq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /*******
@@ -1019,29 +1343,39 @@ namespace xsimd
          * eq *
          ******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vceqq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vceqq, detail::comp_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_eq<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vceqq_u8, wrap::vceqq_s8, wrap::vceqq_u16, wrap::vceqq_s16,
                                 wrap::vceqq_u32, wrap::vceqq_s32, wrap::vceqq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_eq_bool<T>(lhs, rhs);
+#else
             using register_type = typename batch_bool<T, A>::register_type;
             using dispatcher_type = detail::neon_comp_dispatcher_impl<uint8x16_t, uint16x8_t, uint32x4_t>::binary;
             const dispatcher_type dispatcher = {
                 std::make_tuple(wrap::vceqq_u8, wrap::vceqq_u16, wrap::vceqq_u32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
@@ -1104,18 +1438,24 @@ namespace xsimd
          * lt *
          ******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcltq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcltq, detail::comp_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_lt<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vcltq_u8, wrap::vcltq_s8, wrap::vcltq_u16, wrap::vcltq_s16,
                                 wrap::vcltq_u32, wrap::vcltq_s32, wrap::vcltq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
@@ -1137,18 +1477,24 @@ namespace xsimd
          * le *
          ******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcleq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcleq, detail::comp_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_le<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vcleq_u8, wrap::vcleq_s8, wrap::vcleq_u16, wrap::vcleq_s16,
                                 wrap::vcleq_u32, wrap::vcleq_s32, wrap::vcleq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1173,18 +1519,24 @@ namespace xsimd
             }
         }
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcgtq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcgtq, detail::comp_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_gt<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vcgtq_u8, wrap::vcgtq_s8, wrap::vcgtq_u16, wrap::vcgtq_s16,
                                 wrap::vcgtq_u32, wrap::vcgtq_s32, wrap::vcgtq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
@@ -1206,18 +1558,24 @@ namespace xsimd
          * ge *
          ******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vcgeq, detail::comp_return_type)
         WRAP_BINARY_FLOAT(vcgeq, detail::comp_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_ge<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_comp_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vcgeq_u8, wrap::vcgeq_s8, wrap::vcgeq_u16, wrap::vcgeq_s16,
                                 wrap::vcgeq_u32, wrap::vcgeq_s32, wrap::vcgeq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1241,7 +1599,9 @@ namespace xsimd
          * bitwise_and *
          ***************/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vandq, detail::identity_return_type)
+#endif
 
         namespace detail
         {
@@ -1251,6 +1611,7 @@ namespace xsimd
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             V bitwise_and_neon(V const& lhs, V const& rhs)
             {
@@ -1261,27 +1622,39 @@ namespace xsimd
                 };
                 return dispatcher.apply(lhs, rhs);
             }
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            // On MSVC ARM64 all NEON types are __n128; vandq_u32 works for all.
+            return vandq_u32(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return vandq_u32(lhs, rhs);
+#else
             using register_type = typename batch_bool<T, A>::register_type;
             return detail::bitwise_and_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /**************
          * bitwise_or *
          **************/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vorrq, detail::identity_return_type)
+#endif
 
         namespace detail
         {
@@ -1291,6 +1664,7 @@ namespace xsimd
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_or_neon(V const& lhs, V const& rhs) noexcept
             {
@@ -1301,27 +1675,38 @@ namespace xsimd
                 };
                 return dispatcher.apply(lhs, rhs);
             }
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return vorrq_u32(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             return detail::bitwise_or_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return vorrq_u32(lhs, rhs);
+#else
             using register_type = typename batch_bool<T, A>::register_type;
             return detail::bitwise_or_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /***************
          * bitwise_xor *
          ***************/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(veorq, detail::identity_return_type)
+#endif
 
         namespace detail
         {
@@ -1331,6 +1716,7 @@ namespace xsimd
                                                        vreinterpretq_u32_f32(rhs)));
             }
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_xor_neon(V const& lhs, V const& rhs) noexcept
             {
@@ -1341,20 +1727,29 @@ namespace xsimd
                 };
                 return dispatcher.apply(lhs, rhs);
             }
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return veorq_u32(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             return detail::bitwise_xor_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return veorq_u32(lhs, rhs);
+#else
             using register_type = typename batch_bool<T, A>::register_type;
             return detail::bitwise_xor_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /*******
@@ -1371,7 +1766,9 @@ namespace xsimd
          * bitwise_not *
          ***************/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_UNARY_INT_EXCLUDING_64(vmvnq)
+#endif
 
         namespace detail
         {
@@ -1380,6 +1777,7 @@ namespace xsimd
                 return vreinterpretq_f32_u32(vmvnq_u32(vreinterpretq_u32_f32(arg)));
             }
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_not_neon(V const& arg) noexcept
             {
@@ -1391,27 +1789,39 @@ namespace xsimd
                 };
                 return dispatcher.apply(arg);
             }
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            // On MSVC ARM64 all NEON types are __n128; vmvnq_u32 works for all.
+            return vmvnq_u32(arg);
+#else
             using register_type = typename batch<T, A>::register_type;
             return detail::bitwise_not_neon(register_type(arg));
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_not(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return vmvnq_u32(arg);
+#else
             using register_type = typename batch_bool<T, A>::register_type;
             return detail::bitwise_not_neon(register_type(arg));
+#endif
         }
 
         /******************
          * bitwise_andnot *
          ******************/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT(vbicq, detail::identity_return_type)
+#endif
 
         namespace detail
         {
@@ -1420,6 +1830,7 @@ namespace xsimd
                 return vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(lhs), vreinterpretq_u32_f32(rhs)));
             }
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
             template <class V>
             XSIMD_INLINE V bitwise_andnot_neon(V const& lhs, V const& rhs) noexcept
             {
@@ -1430,38 +1841,54 @@ namespace xsimd
                 };
                 return dispatcher.apply(lhs, rhs);
             }
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            // On MSVC ARM64 all NEON types are __n128; vbicq_u32 works for all.
+            return vbicq_u32(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return vbicq_u32(lhs, rhs);
+#else
             using register_type = typename batch_bool<T, A>::register_type;
             return detail::bitwise_andnot_neon(register_type(lhs), register_type(rhs));
+#endif
         }
 
         /*******
          * min *
          *******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vminq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vminq, detail::identity_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_min<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vminq_u8, wrap::vminq_s8, wrap::vminq_u16, wrap::vminq_s16,
                                 wrap::vminq_u32, wrap::vminq_s32, wrap::vminq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1474,18 +1901,24 @@ namespace xsimd
          * max *
          *******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         WRAP_BINARY_INT_EXCLUDING_64(vmaxq, detail::identity_return_type)
         WRAP_BINARY_FLOAT(vmaxq, detail::identity_return_type)
+#endif
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_max<T>(lhs, rhs);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::binary dispatcher = {
                 std::make_tuple(wrap::vmaxq_u8, wrap::vmaxq_s8, wrap::vmaxq_u16, wrap::vmaxq_s16,
                                 wrap::vmaxq_u32, wrap::vmaxq_s32, wrap::vmaxq_f32)
             };
             return dispatcher.apply(register_type(lhs), register_type(rhs));
+#endif
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1498,6 +1931,7 @@ namespace xsimd
          * abs *
          *******/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             XSIMD_INLINE int8x16_t vabsq_s8(int8x16_t a) noexcept { return ::vabsq_s8(a); }
@@ -1505,6 +1939,7 @@ namespace xsimd
             XSIMD_INLINE int32x4_t vabsq_s32(int32x4_t a) noexcept { return ::vabsq_s32(a); }
         }
         WRAP_UNARY_FLOAT(vabsq)
+#endif
 
         namespace detail
         {
@@ -1527,12 +1962,16 @@ namespace xsimd
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_abs<T>(arg);
+#else
             using register_type = typename batch<T, A>::register_type;
             const detail::excluding_int64_dispatcher::unary dispatcher = {
                 std::make_tuple(detail::abs_u8, wrap::vabsq_s8, detail::abs_u16, wrap::vabsq_s16,
                                 detail::abs_u32, wrap::vabsq_s32, wrap::vabsq_f32)
             };
             return dispatcher.apply(register_type(arg));
+#endif
         }
 
         /********
@@ -1852,6 +2291,7 @@ namespace xsimd
          * select *
          **********/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             XSIMD_INLINE uint8x16_t vbslq_u8(uint8x16_t a, uint8x16_t b, uint8x16_t c) noexcept { return ::vbslq_u8(a, b, c); }
@@ -1864,6 +2304,7 @@ namespace xsimd
             XSIMD_INLINE int64x2_t vbslq_s64(uint64x2_t a, int64x2_t b, int64x2_t c) noexcept { return ::vbslq_s64(a, b, c); }
             XSIMD_INLINE float32x4_t vbslq_f32(uint32x4_t a, float32x4_t b, float32x4_t c) noexcept { return ::vbslq_f32(a, b, c); }
         }
+#endif
 
         namespace detail
         {
@@ -1892,6 +2333,9 @@ namespace xsimd
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& a, batch<T, A> const& b, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_select<T>(cond, a, b);
+#else
             using bool_register_type = typename batch_bool<T, A>::register_type;
             using register_type = typename batch<T, A>::register_type;
             const detail::neon_select_dispatcher dispatcher = {
@@ -1900,6 +2344,7 @@ namespace xsimd
                                 wrap::vbslq_f32)
             };
             return dispatcher.apply(bool_register_type(cond), register_type(a), register_type(b));
+#endif
         }
 
         template <class A, class T, bool... b, detail::enable_neon_type_t<T> = 0>
@@ -2925,6 +3370,7 @@ namespace xsimd
          * bitwise_cast *
          ****************/
 
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
 #define WRAP_CAST(SUFFIX, TYPE)                                                \
     namespace wrap                                                             \
     {                                                                          \
@@ -2977,6 +3423,7 @@ namespace xsimd
         WRAP_CAST(f32, float32x4_t)
 
 #undef WRAP_CAST
+#endif
 
         namespace detail
         {
@@ -3037,6 +3484,10 @@ namespace xsimd
         template <class A, class T, class R>
         XSIMD_INLINE batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            // On MSVC ARM64, all NEON types are __n128, so just return the argument
+            return arg.data;
+#else
             const detail::neon_bitwise_caster caster = {
                 std::make_tuple(
                     detail::make_bitwise_caster_impl(wrap::vreinterpretq_u8_u8, wrap::vreinterpretq_u8_s8, wrap::vreinterpretq_u8_u16, wrap::vreinterpretq_u8_s16,
@@ -3070,6 +3521,7 @@ namespace xsimd
             using src_register_type = typename batch<T, A>::register_type;
             using dst_register_type = typename batch<R, A>::register_type;
             return caster.apply<dst_register_type>(src_register_type(arg));
+#endif
         }
 
         /*********
@@ -3151,6 +3603,7 @@ namespace xsimd
         /****************
          * rotate_left *
          ****************/
+#if !defined(_MSC_VER) || !defined(_M_ARM64) || defined(__clang__)
         namespace wrap
         {
             template <size_t N>
@@ -3172,10 +3625,14 @@ namespace xsimd
             template <size_t N>
             XSIMD_INLINE float32x4_t rotate_left_f32(float32x4_t a, float32x4_t b) noexcept { return vextq_f32(a, b, N); }
         }
+#endif
 
         template <size_t N, class A, class T, detail::enable_neon_type_t<T> = 0>
         XSIMD_INLINE batch<T, A> rotate_left(batch<T, A> const& a, requires_arch<neon>) noexcept
         {
+#if defined(_MSC_VER) && defined(_M_ARM64) && !defined(__clang__)
+            return detail::msvc_arm64_rotate_left<N, T>(a);
+#else
             using register_type = typename batch<T, A>::register_type;
             // Adding modulo to avoid warning.
             const detail::neon_dispatcher::binary dispatcher = {
@@ -3184,6 +3641,7 @@ namespace xsimd
                                 wrap::rotate_left_f32<N % 4>)
             };
             return dispatcher.apply(register_type(a), register_type(a));
+#endif
         }
     }
 
