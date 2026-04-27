@@ -735,9 +735,9 @@ namespace xsimd
         template <class A, class... Args>
         XSIMD_INLINE batch_bool<float, A> set(batch_bool<float, A> const&, requires_arch<neon>, Args... args) noexcept
         {
-            using register_type = typename batch_bool<float, A>::register_type;
             using unsigned_type = as_unsigned_integer_t<float>;
-            return register_type { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            auto const out = batch<unsigned_type, A> { static_cast<unsigned_type>(args ? -1LL : 0LL)... };
+            return { out.data };
         }
 
         /*******
