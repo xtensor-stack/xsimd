@@ -468,8 +468,8 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<neon>) noexcept
         {
             auto vmem = load_unaligned<A>((unsigned char const*)mem, convert<unsigned char> {}, A {});
-            auto const zero = batch<T, A> { 0 };
-            return { zero.data - vmem.data };
+            auto const zero = batch<unsigned char, A> { 0 };
+            return { (zero - vmem).data };
         }
         template <class A, class T, detail::enable_sized_t<T, 1> = 0>
         XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon> r) noexcept
