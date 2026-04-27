@@ -161,8 +161,6 @@ namespace xsimd
          ********/
 #if defined(__clang__) || defined(__GNUC__)
 #define xsimd_aligned_load(inst, type, expr) inst((type)__builtin_assume_aligned(expr, 16))
-#elif defined(_MSC_VER)
-#define xsimd_aligned_load(inst, type, expr) inst##_ex((type)expr, 128)
 #else
 #define xsimd_aligned_load(inst, type, expr) inst((type)expr)
 #endif
