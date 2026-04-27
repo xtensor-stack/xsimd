@@ -48,6 +48,191 @@ namespace xsimd
                 = std::enable_if_t<(std::is_integral<T>::value && sizeof(T) != 8) || std::is_same<T, float>::value, int>;
         }
 
+        /****************
+         * bitwise_cast *
+         ****************/
+
+        namespace wrap
+        {
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint8x16_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u8_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_u8_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u8_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_u8_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u8_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_u8_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u8_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE uint8x16_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u8_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s8_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(int8x16_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s8_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_s8_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s8_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_s8_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s8_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_s8_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE int8x16_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s8_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u16_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u16_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint16x8_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u16_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_u16_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u16_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_u16_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u16_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE uint16x8_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u16_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s16_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_s16_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s16_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(int16x8_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s16_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_s16_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s16_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_s16_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE int16x8_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s16_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u32_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u32_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_u32_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u32_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint32x4_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u32_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_u32_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u32_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE uint32x4_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u32_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s32_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_s32_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s32_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_s32_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s32_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(int32x4_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s32_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_s32_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE int32x4_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s32_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u64_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u64_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_u64_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u64_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_u64_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u64_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint64x2_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u64_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE uint64x2_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u64_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s64_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_s64_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s64_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_s64_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s64_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_s64_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s64_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(int64x2_t a) noexcept { return a; }
+            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE int64x2_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s64_f32(a); }
+
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_f32_u8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int8_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_f32_s8(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_f32_u16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int16_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_f32_s16(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_f32_u32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int32_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_f32_s32(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_f32_u64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int64_t>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_f32_s64(a); }
+            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, float>::value, int> = 0>
+            XSIMD_INLINE float32x4_t x_vreinterpretq(float32x4_t a) noexcept { return a; }
+        }
+
+        template <class A, class T, class R>
+        XSIMD_INLINE batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<neon>) noexcept
+        {
+            using src_register_type = typename batch<T, A>::register_type;
+            return wrap::x_vreinterpretq<project_num_t<R>, project_num_t<T>>(src_register_type(arg));
+        }
+
         /*************
          * broadcast *
          *************/
@@ -119,7 +304,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s8(reinterpret_cast<int8x16_t>(arg.data), vdupq_n_s8(1));
+            return vandq_s8(wrap::x_vreinterpretq<int8_t, project_num_t<T>>(arg.data), vdupq_n_s8(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
@@ -131,7 +316,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s16(reinterpret_cast<int16x8_t>(arg.data), vdupq_n_s16(1));
+            return vandq_s16(wrap::x_vreinterpretq<int16_t, project_num_t<T>>(arg.data), vdupq_n_s16(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
@@ -143,7 +328,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s32(reinterpret_cast<int32x4_t>(arg.data), vdupq_n_s32(1));
+            return vandq_s32(wrap::x_vreinterpretq<int32_t, project_num_t<T>>(arg.data), vdupq_n_s32(1));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
@@ -155,7 +340,7 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> from_bool(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
-            return vandq_s64(reinterpret_cast<int64x2_t>(arg.data), vdupq_n_s64(1));
+            return vandq_s64(wrap::x_vreinterpretq<int64_t, project_num_t<T>>(arg.data), vdupq_n_s64(1));
         }
 
         template <class A>
@@ -2796,191 +2981,6 @@ namespace xsimd
         XSIMD_INLINE bool any(batch_bool<T, A> const& arg, requires_arch<neon>) noexcept
         {
             return any(batch_bool<uint64_t, A>(vreinterpretq_u64_u32(arg)), neon {});
-        }
-
-        /****************
-         * bitwise_cast *
-         ****************/
-
-        namespace wrap
-        {
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint8x16_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u8_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_u8_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u8_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_u8_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u8_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_u8_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u8_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u8_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s8_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(int8x16_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s8_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_s8_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s8_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_s8_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s8_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_s8_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE int8x16_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s8_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u16_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u16_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint16x8_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u16_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_u16_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u16_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_u16_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u16_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u16_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s16_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_s16_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s16_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(int16x8_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s16_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_s16_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s16_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_s16_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE int16x8_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s16_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u32_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u32_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_u32_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u32_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint32x4_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u32_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_u32_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u32_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u32_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s32_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_s32_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s32_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_s32_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s32_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(int32x4_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s32_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_s32_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE int32x4_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s32_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_u64_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_u64_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_u64_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_u64_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_u64_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_u64_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(uint64x2_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_u64_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_u64_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_s64_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_s64_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_s64_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_s64_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_s64_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_s64_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_s64_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(int64x2_t a) noexcept { return a; }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE int64x2_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_s64_f32(a); }
-
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint8_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_f32_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int8_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_f32_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint16_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_f32_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int16_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_f32_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint32_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_f32_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int32_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_f32_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, uint64_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_f32_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, int64_t>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_f32_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, float>::value, int> = 0>
-            XSIMD_INLINE float32x4_t x_vreinterpretq(float32x4_t a) noexcept { return a; }
-        }
-
-        template <class A, class T, class R>
-        XSIMD_INLINE batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<neon>) noexcept
-        {
-            using src_register_type = typename batch<T, A>::register_type;
-            return wrap::x_vreinterpretq<project_num_t<R>, project_num_t<T>>(src_register_type(arg));
         }
 
         /*********
