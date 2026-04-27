@@ -16,7 +16,6 @@
 #include <complex>
 #include <cstddef>
 #include <cstring>
-#include <tuple>
 #include <utility>
 
 #include "../types/xsimd_neon64_register.hpp"

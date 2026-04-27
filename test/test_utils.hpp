@@ -12,11 +12,9 @@
 #include "xsimd/xsimd.hpp"
 
 #include <array>
-#include <climits>
 #include <cmath>
 #include <complex>
 #include <limits>
-#include <sstream>
 #include <string>
 #include <type_traits>
 #include <vector>

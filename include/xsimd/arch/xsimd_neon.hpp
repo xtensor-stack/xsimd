@@ -16,7 +16,6 @@
 #include <array>
 #include <cassert>
 #include <complex>
-#include <tuple>
 #include <type_traits>
 
 #include "../types/xsimd_batch_fwd.hpp"
