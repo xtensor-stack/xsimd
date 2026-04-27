@@ -374,6 +374,24 @@ namespace xsimd
             return batch<T_out, A>::load(buffer.data(), aligned_mode {});
         }
 
+        // Same-type, aligned compile-time mask: lower to ``select`` against
+        // the constant mask. Aligned mode guarantees the whole vector lives
+        // inside one alignment unit, so an unconditional load cannot fault on
+        // inactive lanes. Collapses to one ``pand mem, const_mask`` (or one
+        // masked-blend) per call site, instead of the per-lane stack-buffer
+        // round-trip the cross-type generic overload above emits — which the
+        // compiler folds for wide types (f32/f64 → 4 inst) but NOT for narrow
+        // types like uint8_t (~50 inst of stack ``mov``/``shl``/``and``/``or``
+        // round-trips on SSE4.2 -O3 -DNDEBUG).
+        template <class A, class T, bool... Values>
+        XSIMD_INLINE batch<T, A>
+        load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, aligned_mode, requires_arch<common>) noexcept
+        {
+            return select(mask.as_batch_bool(),
+                          batch<T, A>::load_aligned(mem),
+                          batch<T, A>(T(0)));
+        }
+
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE void
         store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment, requires_arch<common>) noexcept
