@@ -127,25 +127,6 @@ namespace xsimd
             return vdupq_n_f64(val);
         }
 
-        /*******
-         * set *
-         *******/
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> set(batch<double, A> const&, requires_arch<neon64>, double d0, double d1) noexcept
-        {
-            return float64x2_t { d0, d1 };
-        }
-
-        template <class A>
-        XSIMD_INLINE batch_bool<double, A> set(batch_bool<double, A> const&, requires_arch<neon64>, bool b0, bool b1) noexcept
-        {
-            using register_type = typename batch_bool<double, A>::register_type;
-            using unsigned_type = as_unsigned_integer_t<double>;
-            return register_type { static_cast<unsigned_type>(b0 ? -1LL : 0LL),
-                                   static_cast<unsigned_type>(b1 ? -1LL : 0LL) };
-        }
-
         /*************
          * from_bool *
          *************/
@@ -326,6 +307,28 @@ namespace xsimd
         XSIMD_INLINE void store_complex_unaligned(std::complex<double>* dst, batch<std::complex<double>, A> const& src, requires_arch<neon64>) noexcept
         {
             store_complex_aligned(dst, src, A {});
+        }
+
+        /*******
+         * set *
+         *******/
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> set(batch<double, A> const&, requires_arch<neon64> req, double d0, double d1) noexcept
+        {
+            alignas(A::alignment()) double data[] = { d0, d1 };
+            return load_aligned<A>(data, {}, req);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch_bool<double, A> set(batch_bool<double, A> const&, requires_arch<neon64>, bool b0, bool b1) noexcept
+        {
+            using unsigned_type = as_unsigned_integer_t<double>;
+            auto const out = batch<unsigned_type, A> {
+                static_cast<unsigned_type>(b0 ? -1LL : 0LL),
+                static_cast<unsigned_type>(b1 ? -1LL : 0LL)
+            };
+            return { out.data };
         }
 
         /*******
