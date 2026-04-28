@@ -14,7 +14,9 @@
 #include <array>
 #include <cmath>
 #include <complex>
+#include <iomanip>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -399,20 +401,16 @@ namespace detail
         void stringify(std::ostream* os) const override { *os << msg_; }
     };
 
-    template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
     std::string to_string_full_precision(T value)
     {
         // TODO(C++17): use std::to_chars
-        char buf[64];
-        std::snprintf(
-            buf, sizeof(buf),
-            "%.*g",
-            std::numeric_limits<T>::max_digits10,
-            static_cast<double>(value));
-        return std::string(buf);
+        std::ostringstream ss;
+        ss << std::setprecision(std::numeric_limits<T>::max_digits10) << value;
+        return ss.str();
     }
 
-    template <typename T, typename std::enable_if<!std::is_arithmetic<T>::value, int>::type = 0>
+    template <typename T, typename std::enable_if<!std::is_floating_point<T>::value, int>::type = 0>
     std::string to_string_full_precision(T value)
     {
         return doctest::toString(value).c_str();
