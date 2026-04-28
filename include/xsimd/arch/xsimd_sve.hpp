@@ -92,7 +92,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<sve>) noexcept
         {
-            return svld1(detail_sve::ptrue<T>(), reinterpret_cast<project_num_t<T> const*>(src));
+            return svld1(detail_sve::ptrue<T>(), reinterpret_cast<map_to_sized_type_t<T> const*>(src));
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -105,7 +105,7 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<float, A, Values...>, Mode, requires_arch<sve>) noexcept
         {
-            return svld1(detail_sve::pmask<Values...>(), reinterpret_cast<project_num_t<T> const*>(mem));
+            return svld1(detail_sve::pmask<Values...>(), reinterpret_cast<map_to_sized_type_t<T> const*>(mem));
         }
 
         // load_complex
@@ -132,7 +132,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<sve>) noexcept
         {
-            svst1(detail_sve::ptrue<T>(), reinterpret_cast<project_num_t<T>*>(dst), src);
+            svst1(detail_sve::ptrue<T>(), reinterpret_cast<map_to_sized_type_t<T>*>(dst), src);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>

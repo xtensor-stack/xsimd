@@ -127,7 +127,7 @@ namespace xsimd
      * @tparam T arithmetic type to project from.
      */
     template <typename T>
-    using project_num_t = typename detail::remap_num<T, /* factor= */ 1>::type;
+    using map_to_sized_type_t = typename detail::remap_num<T, /* factor= */ 1>::type;
 
     /**
      * @ingroup type_traits
