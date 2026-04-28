@@ -895,6 +895,8 @@ namespace xsimd
         namespace wrap
         {
             // TODO(c++17): Make a single function with if constexpr switch
+            // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
+            // the vector types are all aliases of the same type.
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8_t x_vaddvq(uint8x16_t a) noexcept { return vaddvq_u8(a); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -931,6 +933,8 @@ namespace xsimd
         namespace wrap
         {
             // TODO(c++17): Make a single function with if constexpr switch
+            // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
+            // the vector types are all aliases of the same type.
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8_t x_vmaxvq(uint8x16_t a) noexcept { return vmaxvq_u8(a); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -974,6 +978,8 @@ namespace xsimd
         namespace wrap
         {
             // TODO(c++17): Make a single function with if constexpr switch
+            // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
+            // the vector types are all aliases of the same type.
             template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE uint8_t x_vminvq(uint8x16_t a) noexcept { return vminvq_u8(a); }
             template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
@@ -1252,6 +1258,8 @@ namespace xsimd
         namespace wrap
         {
             // TODO(c++17): Make a single function with if constexpr switch
+            // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
+            // the vector types are all aliases of the same type.
             template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, uint8_t>::value, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_f64_u8(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, int8_t>::value, int> = 0>
@@ -1274,6 +1282,8 @@ namespace xsimd
             XSIMD_INLINE float64x2_t x_vreinterpretq(float64x2_t a) noexcept { return a; }
 
             // TODO(c++17): Make a single function with if constexpr switch
+            // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
+            // the vector types are all aliases of the same type.
             template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, double>::value, int> = 0>
             XSIMD_INLINE uint8x16_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_u8_f64(a); }
             template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, double>::value, int> = 0>
