@@ -1309,14 +1309,14 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> bitwise_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<neon64>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vreinterpretq<double, project_num_t<T>>(register_type(arg));
+            return wrap::x_vreinterpretq<double, map_to_sized_type_t<T>>(register_type(arg));
         }
 
         template <class A, class R>
         XSIMD_INLINE batch<R, A> bitwise_cast(batch<double, A> const& arg, batch<R, A> const&, requires_arch<neon64>) noexcept
         {
             using src_register_type = typename batch<double, A>::register_type;
-            return wrap::x_vreinterpretq<project_num_t<R>, double>(src_register_type(arg));
+            return wrap::x_vreinterpretq<map_to_sized_type_t<R>, double>(src_register_type(arg));
         }
 
         template <class A>

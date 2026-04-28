@@ -256,7 +256,7 @@ namespace xsimd
         XSIMD_INLINE batch<R, A> bitwise_cast(batch<T, A> const& arg, batch<R, A> const&, requires_arch<neon>) noexcept
         {
             using src_register_type = typename batch<T, A>::register_type;
-            return wrap::x_vreinterpretq<project_num_t<R>, project_num_t<T>>(src_register_type(arg));
+            return wrap::x_vreinterpretq<map_to_sized_type_t<R>, map_to_sized_type_t<T>>(src_register_type(arg));
         }
 
         /*************
@@ -846,7 +846,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vaddq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vaddq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -870,7 +870,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vhaddq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vhaddq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         /********
@@ -894,7 +894,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vrhaddq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vrhaddq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         /********
@@ -930,7 +930,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vqaddq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vqaddq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -966,7 +966,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vsubq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vsubq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         /********
@@ -1002,7 +1002,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vqsubq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vqsubq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -1034,7 +1034,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vmulq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vmulq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         /*******
@@ -1101,7 +1101,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vceqq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vceqq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::exclude_int64_neon_t<T> = 0>
@@ -1196,7 +1196,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vcltq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vcltq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
@@ -1243,7 +1243,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vcleq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vcleq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1281,7 +1281,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vcgtq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vcgtq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
@@ -1328,7 +1328,7 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vcgeq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vcgeq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1385,7 +1385,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vandq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vandq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -1432,7 +1432,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vorrq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vorrq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -1479,7 +1479,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_veorq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_veorq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -1541,7 +1541,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vmvnq<project_num_t<T>>(register_type(arg));
+            return wrap::x_vmvnq<map_to_sized_type_t<T>>(register_type(arg));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -1587,7 +1587,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vbicq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vbicq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_neon_type_t<T> = 0>
@@ -1626,7 +1626,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vminq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vminq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1664,7 +1664,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vmaxq<project_num_t<T>>(register_type(lhs), register_type(rhs));
+            return wrap::x_vmaxq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
         template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
@@ -1702,7 +1702,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& arg, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vabsq<project_num_t<T>>(register_type(arg));
+            return wrap::x_vabsq<map_to_sized_type_t<T>>(register_type(arg));
         }
 
         /********
@@ -2052,7 +2052,7 @@ namespace xsimd
         {
             using bool_register_type = typename batch_bool<T, A>::register_type;
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vbslq<project_num_t<T>>(bool_register_type(cond), register_type(a), register_type(b));
+            return wrap::x_vbslq<map_to_sized_type_t<T>>(bool_register_type(cond), register_type(a), register_type(b));
         }
 
         template <class A, class T, bool... b, detail::enable_neon_type_t<T> = 0>
@@ -3182,7 +3182,7 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> rotate_left(batch<T, A> const& a, requires_arch<neon>) noexcept
         {
             using register_type = typename batch<T, A>::register_type;
-            return wrap::x_rotate_left<N, project_num_t<T>>(register_type(a), register_type(a));
+            return wrap::x_rotate_left<N, map_to_sized_type_t<T>>(register_type(a), register_type(a));
         }
     }
 

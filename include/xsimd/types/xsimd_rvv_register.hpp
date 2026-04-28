@@ -326,7 +326,7 @@ namespace xsimd
                 operator register_type() const noexcept { return value.get(); }
             };
             template <class T, size_t Width = XSIMD_RVV_BITS>
-            using rvv_reg_t = std::conditional_t<!std::is_void<T>::value, rvv_reg<project_num_t<T>, Width>, void>;
+            using rvv_reg_t = std::conditional_t<!std::is_void<T>::value, rvv_reg<map_to_sized_type_t<T>, Width>, void>;
 
             // And some more of the same stuff for bool types, which have
             // similar problems and similar workarounds.
@@ -388,7 +388,7 @@ namespace xsimd
 
             template <class T, size_t Width = XSIMD_RVV_BITS>
             using rvv_bool_t = std::enable_if_t < !std::is_void<T>::value,
-                  rvv_bool<project_num_t<T>, Width<rvv_width_m1 ? rvv_width_m1 : Width>>;
+                  rvv_bool<map_to_sized_type_t<T>, Width<rvv_width_m1 ? rvv_width_m1 : Width>>;
 
             template <size_t S>
             struct rvv_vector_type_impl;

@@ -388,7 +388,7 @@ namespace xsimd
                 // A bit of a dance, here, because rvvmv_splat has no other
                 // argument from which to deduce type, and T=char is not
                 // supported.
-                project_num_t<T> arg_not_char(arg);
+                map_to_sized_type_t<T> arg_not_char(arg);
                 const auto splat = rvvmv_splat(arg_not_char);
                 return rvv_reg_t<T, Width>(splat.get_bytes(), types::detail::XSIMD_RVV_BITCAST);
             }
@@ -414,7 +414,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<rvv>) noexcept
         {
-            return detail_rvv::rvvle(reinterpret_cast<project_num_t<T> const*>(src));
+            return detail_rvv::rvvle(reinterpret_cast<map_to_sized_type_t<T> const*>(src));
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -491,7 +491,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<rvv>) noexcept
         {
-            detail_rvv::rvvse(reinterpret_cast<project_num_t<T>*>(dst), src);
+            detail_rvv::rvvse(reinterpret_cast<map_to_sized_type_t<T>*>(dst), src);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -522,7 +522,7 @@ namespace xsimd
         {
             using UU = as_unsigned_integer_t<U>;
             const auto uindex = detail_rvv::rvv_to_unsigned_batch(index);
-            auto* base = reinterpret_cast<project_num_t<T>*>(dst);
+            auto* base = reinterpret_cast<map_to_sized_type_t<T>*>(dst);
             // or rvvsuxei
             const auto bi = detail_rvv::rvvmul_splat(uindex, sizeof(T));
             detail_rvv::rvvsoxei(base, bi, vals);
@@ -534,7 +534,7 @@ namespace xsimd
         {
             using UU = as_unsigned_integer_t<U>;
             const auto uindex = detail_rvv::rvv_to_unsigned_batch(index);
-            auto const* base = reinterpret_cast<project_num_t<T> const*>(src);
+            auto const* base = reinterpret_cast<map_to_sized_type_t<T> const*>(src);
             // or rvvluxei
             const auto bi = detail_rvv::rvvmul_splat(uindex, sizeof(T));
             return detail_rvv::rvvloxei(base, bi);
