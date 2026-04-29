@@ -28,6 +28,18 @@ namespace xsimd
         static constexpr char const* name() noexcept { return "avx2"; }
     };
 
+    /**
+     * @ingroup architectures
+     *
+     * AVX2 instructions extension for 128 bits registers
+     */
+    struct avx2_128 : avx_128
+    {
+        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX2; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr char const* name() noexcept { return "avx2/128"; }
+    };
+
 #if XSIMD_WITH_AVX2
 
 #if !XSIMD_WITH_AVX
@@ -37,6 +49,7 @@ namespace xsimd
     namespace types
     {
         XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx2, avx);
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx2_128, avx_128);
     }
 #endif
 }
