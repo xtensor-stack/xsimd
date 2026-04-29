@@ -43,7 +43,11 @@ struct complex_trigonometric_test
                                   real_value_type(0.1) + i * real_value_type(56.) / nb_input);
             ainput[i] = value_type(real_value_type(-1.) + real_value_type(2.) * i / nb_input,
                                    real_value_type(-1.1) + real_value_type(2.1) * i / nb_input);
-            atan_input[i] = value_type(real_value_type(-10.) + i * real_value_type(20.) / nb_input,
+            // Avoid sampling the branch cut of complex atan at (Re=0, |Im|>=1):
+            // the sign of Re(catan(+/-0 + i*y)) for |y|>1 is implementation-defined
+            // (C99 7.3.4.1), and glibc and musl disagree there. Starting Re at -9.5
+            // makes Re=0 occur at i=19/40 of the range, where |Im|<1 (analytic).
+            atan_input[i] = value_type(real_value_type(-9.5) + i * real_value_type(20.) / nb_input,
                                        real_value_type(-9.) + i * real_value_type(21.) / nb_input);
         }
         expected.resize(nb_input);
