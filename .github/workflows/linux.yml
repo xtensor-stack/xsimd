@@ -17,6 +17,7 @@ jobs:
           - { compiler: 'gcc',   version: '12', flags: 'force_no_instr_set' }
           - { compiler: 'gcc',   version: '13', flags: 'enable_xtl_complex' }
           - { compiler: 'gcc',   version: '14', flags: 'avx' }
+          - { compiler: 'gcc',   version: '14', flags: 'avx2' }
           - { compiler: 'gcc',   version: '13', flags: 'avx512' }
           - { compiler: 'gcc',   version: '10', flags: 'avx512' }
           - { compiler: 'gcc',   version: '12', flags: 'i386' }
@@ -30,6 +31,7 @@ jobs:
           - { compiler: 'clang', version: '17', flags: 'sse3' }
           - { compiler: 'clang', version: '18', flags: 'avx512' }
           - { compiler: 'clang', version: '18', flags: 'avx_128' }
+          - { compiler: 'clang', version: '18', flags: 'avx2_128' }
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
@@ -79,6 +81,12 @@ jobs:
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx_128' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge -DXSIMD_DEFAULT_ARCH=avx_128"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx2' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx2_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell -DXSIMD_DEFAULT_ARCH=avx2_128"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'sse3' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=nocona"

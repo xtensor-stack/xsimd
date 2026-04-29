@@ -63,6 +63,7 @@
 
 #if XSIMD_WITH_AVX2
 #include "./xsimd_avx2.hpp"
+#include "./xsimd_avx2_128.hpp"
 #endif
 
 #if XSIMD_WITH_FMA3_AVX2
