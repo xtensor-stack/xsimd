@@ -9,6 +9,47 @@
 Changelog
 =========
 
+14.2.0
+------
+
+    * **New architecture**: IBM Z (s390x) support
+
+    * [API] New cross-platform ``cpu_features`` API for querying CPU features available at runtime
+
+    * [API] Add ``xsimd::get<I>()`` for compile-time lane extraction
+
+    * [API] Add ``xsimd::stream_load``, ``xsimd::stream_store``, and ``xsimd::fence`` for non-temporal memory transfers
+
+    * [VSX] Fix dynamic dispatch support with runtime cpu feature inspection
+
+    * [VSX] Fix rounding
+
+    * [SVE/RVV] Fix dynamic dispatch by inspecting available vector length
+
+    * [AVX2] Add native ``uint64``/``int64`` multiplication kernel
+
+    * [NEON] Add support for Windows ARM
+
+    * [NEON] Simplify static dispatch of intrinsicts
+
+    * [NEON] Fix ``batch_bool`` store on ARM by replacing ``vst1_lane_u32`` with a full
+      lane store followed by a memcpy
+
+    * [SVE] Fix dynamic dispatch ODR violation
+
+    * [ci] Fix emulated architecture interaction with AVX512 leading to CI failures.
+      Provide a cmake-level configuration switch for emulated build
+
+    * Fix build with compilers that do not support C++20 (even though we only require C++14)
+
+    * Fix ``xsimd::signbit`` scalar overload leaking into non-scalar overload resolution
+
+    * Fix complex batch load
+
+    * Harden fast-math reassociation barriers
+
+    * Publish the C++14 requirement through the CMake interface
+
 14.1.0
 ------
 

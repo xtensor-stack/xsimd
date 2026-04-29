@@ -13,7 +13,7 @@
 #define XSIMD_CONFIG_HPP
 
 #define XSIMD_VERSION_MAJOR 14
-#define XSIMD_VERSION_MINOR 1
+#define XSIMD_VERSION_MINOR 2
 #define XSIMD_VERSION_PATCH 0
 
 #if defined(__GNUC__) && defined(__BYTE_ORDER__)
