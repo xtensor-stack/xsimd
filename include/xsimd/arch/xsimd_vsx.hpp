@@ -33,6 +33,37 @@ namespace xsimd
 
     namespace kernel
     {
+        // builtin_t<T> - the scalar type as it would be used for a vector intrinsic
+        // VSX vector intrinsics do not support long, unsigned long, and char
+        // The builtin<T> definition can be used to map the incoming
+        // type to the right one to be used with the intrinsics.
+        template <typename T>
+        struct builtin_scalar
+        {
+            using type = T;
+        };
+
+        template <>
+        struct builtin_scalar<unsigned long>
+        {
+            using type = unsigned long long;
+        };
+
+        template <>
+        struct builtin_scalar<long>
+        {
+            using type = long long;
+        };
+
+        template <>
+        struct builtin_scalar<char>
+        {
+            using type = typename std::conditional<std::is_signed<char>::value, signed char, unsigned char>::type;
+        };
+
+        template <typename T>
+        using builtin_t = typename builtin_scalar<T>::type;
+
         template <class A, class T>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const&, batch<T, A> const&, requires_arch<common>) noexcept;
         template <class A, class T>
@@ -218,7 +249,7 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<vsx>) noexcept
         {
-            return vec_splats(val);
+            return vec_splats(static_cast<builtin_t<T>>(val));
         }
 
         // ceil
@@ -421,18 +452,18 @@ namespace xsimd
             return ~vec_cmpeq(self.data, self.data);
         }
 
-        // load_aligned
-        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
-        XSIMD_INLINE batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<vsx>) noexcept
-        {
-            return vec_ld(0, reinterpret_cast<const typename batch<T, A>::register_type*>(mem));
-        }
-
         // load_unaligned
         template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<vsx>) noexcept
         {
-            return vec_vsx_ld(0, (typename batch<T, A>::register_type const*)mem);
+            return (typename batch<T, A>::register_type)vec_xl(0, (builtin_t<T>*)mem);
+        }
+
+        // load_aligned
+        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+        XSIMD_INLINE batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<vsx>) noexcept
+        {
+            return load_unaligned<A>(mem, kernel::convert<T> {}, vsx {});
         }
 
         // load_complex
@@ -758,14 +789,14 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE void store_aligned(T* mem, batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
-            return vec_st(self.data, 0, reinterpret_cast<typename batch<T, A>::register_type*>(mem));
+            vec_xst((typename batch<T, A>::register_type)self.data, 0, (builtin_t<T>*)mem);
         }
 
         // store_unaligned
         template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
         XSIMD_INLINE void store_unaligned(T* mem, batch<T, A> const& self, requires_arch<vsx>) noexcept
         {
-            return vec_vsx_st(self.data, 0, reinterpret_cast<typename batch<T, A>::register_type*>(mem));
+            store_aligned<A>(mem, self, vsx {});
         }
 
         // sub
