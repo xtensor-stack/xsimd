@@ -1,0 +1,81 @@
+# RISC-V RVV cross-compilation build using qemu 11 + gcc 15 (Arch Linux).
+#
+# Why this workflow exists alongside cross-rvv.yml:
+#
+# QEMU's RISC-V Vector emulation is dramatically slower than scalar in
+# qemu < 11 (see QEMU issue #2137 for documented 100x+ slowdowns of
+# auto-vectorised RVV loops under TCG). At vlen=128 the slowdown is large
+# enough that gcc's RVV codegen for our test suite causes the qemu-user
+# emulator to make no observable progress within the 6h GHA timeout —
+# i.e. the apt-shipped qemu-user-static (8.2.x in noble, 9.x in plucky)
+# can't run xsimd's full test_xsimd at vlen=128.
+#
+# Empirically:
+#   qemu 8.2.2 (Ubuntu 24.04 apt)    : test_xsimd at vlen=128 times out
+#   qemu 9.2.1 (Ubuntu 25.04 plucky) : ditto
+#   qemu 10.0.8 (Debian trixie)      : ditto
+#   qemu 11.0.0 (Arch) + gcc 15.1    : 367 cases / 5664 asserts in <10 min
+#
+# So vlen=128 RVV coverage lives in this workflow, which runs the build
+# and test inside an `archlinux:latest` container (qemu 11 + gcc 15.1).
+# The matching ubuntu-runner workflow `cross-rvv.yml` keeps multi-compiler
+# matrix coverage (gcc-14, clang-17/18) for vlens >= 256, where the apt
+# qemu is fast enough.
+#
+# References:
+#   QEMU 11.0.0 release notes:  https://www.qemu.org/2026/04/22/qemu-11-0-0/
+#   QEMU RVV slowdowns issue:   https://gitlab.com/qemu-project/qemu/-/issues/2137
+#   Ubuntu RVV vstart bug:      https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/2095169
+name: RISC-V RVV cross-compilation build (qemu 11)
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    name: 'RISC-V RVV${{ matrix.vector_bits }} (qemu 11)'
+    strategy:
+      fail-fast: false
+      matrix:
+        vector_bits:
+          - 128
+          - 256
+          - 512
+    steps:
+    - name: Setup toolchain and qemu
+      run: |
+        pacman -Sy --noconfirm
+        pacman -S --noconfirm --needed \
+          qemu-user-static riscv64-linux-gnu-gcc riscv64-linux-gnu-glibc \
+          cmake ninja git ca-certificates
+        qemu-riscv64-static --version
+        riscv64-linux-gnu-gcc --version | head -1
+    - name: Checkout xsimd
+      uses: actions/checkout@v6
+    - name: Setup
+      run: >
+        cmake -S . -B _build
+        -GNinja
+        -DBUILD_TESTS=ON
+        -DDOWNLOAD_DOCTEST=ON
+        -DCMAKE_BUILD_TYPE=Release
+        -DTARGET_ARCH=generic
+        -DCMAKE_C_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+        -DCMAKE_CXX_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+        -DCMAKE_TOOLCHAIN_FILE=.github/toolchains/gcc-riscv64-linux-gnu.cmake
+    - name: Build
+      run: cmake --build _build
+    - name: Set CPU feature test expectations
+      run: |
+        echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_SVE=0"    >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_RVV=1" >> "$GITHUB_ENV"
+    - name: Testing xsimd
+      timeout-minutes: 15
+      run: >
+        QEMU_CPU="rv64,zba=true,zbb=true,zbs=true,v=true,vlen=${{ matrix.vector_bits }},elen=64,vext_spec=v1.0"
+        QEMU_LD_PREFIX="/usr/riscv64-linux-gnu"
+        ./test/test_xsimd
+      working-directory: _build
