@@ -12,7 +12,7 @@ Data Transfers
 From memory:
 
 +---------------------------------------+----------------------------------------------------+
-| :cpp:func:`load`                      | load values from memory (optionally masked)        |
+| :cpp:func:`load`                      | load values from memory (optionally masked) [#m]_  |
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`load_aligned`              | load values from aligned memory                    |
 +---------------------------------------+----------------------------------------------------+
@@ -32,7 +32,7 @@ From a scalar:
 To memory:
 
 +---------------------------------------+----------------------------------------------------+
-| :cpp:func:`store`                     | store values to memory (optionally masked)         |
+| :cpp:func:`store`                     | store values to memory (optionally masked) [#m]_   |
 +---------------------------------------+----------------------------------------------------+
 | :cpp:func:`store_aligned`             | store values to aligned memory                     |
 +---------------------------------------+----------------------------------------------------+
@@ -84,3 +84,11 @@ The following empty types are used for tag dispatching:
 
 .. doxygenstruct:: xsimd::unaligned_mode
    :project: xsimd
+
+.. rubric:: Footnotes
+
+.. [#m] Masked ``load`` / ``store`` come in two flavours. The
+   :cpp:class:`batch_bool_constant` overload encodes the mask in the type and
+   is resolved at compile time. The runtime :cpp:class:`batch_bool` overload
+   accepts a mask computed at runtime. Prefer the compile-time mask whenever
+   the selection is known at compile time.
