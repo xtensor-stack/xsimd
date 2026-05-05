@@ -74,14 +74,23 @@
 #include "./xsimd_fma3_avx2.hpp"
 #endif
 
+#if XSIMD_WITH_AVX512VL
+// The 128/256-bit AVX512VL sub-arches derive from the AVX2 lineage (not AVX512F)
+// and carry the k-register masked load/store overloads. avx512f.hpp's masked
+// load/store forwards to the 256-bit sized-batch arch (avx512vl_256) via an
+// unqualified dependent call, which clang only resolves through ordinary lookup
+// at the point of definition (ADL cannot reach xsimd::kernel from xsimd-namespace
+// arguments). The sub-arch overloads must therefore be declared beforehand.
+#include "./xsimd_avx512vl_128.hpp"
+#include "./xsimd_avx512vl_256.hpp"
+#endif
+
 #if XSIMD_WITH_AVX512F
 #include "./xsimd_avx512f.hpp"
 #endif
 
 #if XSIMD_WITH_AVX512VL
 #include "./xsimd_avx512vl.hpp"
-#include "./xsimd_avx512vl_128.hpp"
-#include "./xsimd_avx512vl_256.hpp"
 #endif
 
 #if XSIMD_WITH_AVX512DQ

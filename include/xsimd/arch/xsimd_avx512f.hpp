@@ -354,6 +354,23 @@ namespace xsimd
             }
         }
 
+        // Runtime-mask load/store: same native k-register path as the constant
+        // overloads above, minus the compile-time half-forwarding. 8/16-bit
+        // elements fall back to the common scalar path.
+        template <class A, class T, class Mode,
+                  typename = std::enable_if_t<(sizeof(T) >= 4)>>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx512f>) noexcept
+        {
+            return detail::load_masked(mem, mask.mask(), Mode {});
+        }
+
+        template <class A, class T, class Mode,
+                  typename = std::enable_if_t<(sizeof(T) >= 4)>>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx512f>) noexcept
+        {
+            detail::store_masked(mem, src, mask.mask(), Mode {});
+        }
+
         // abs
         template <class A>
         XSIMD_INLINE batch<float, A> abs(batch<float, A> const& self, requires_arch<avx512f>) noexcept
