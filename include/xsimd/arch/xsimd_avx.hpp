@@ -1015,9 +1015,7 @@ namespace xsimd
             }
         }
 
-        // Runtime-mask load for float/double on AVX. Both aligned_mode and
-        // unaligned_mode map to _mm256_maskload_* — the intrinsic does not fault
-        // on masked-off lanes, so partial loads across page boundaries are safe.
+        // Runtime-mask load (float/double).
         template <class A, class Mode>
         XSIMD_INLINE batch<float, A>
         load_masked(float const* mem, batch_bool<float, A> mask, convert<float>, Mode, requires_arch<avx>) noexcept
@@ -1048,8 +1046,7 @@ namespace xsimd
             }
         }
 
-        // Runtime-mask store for float/double on AVX. Same fault-suppression
-        // semantics as the masked loads above; alignment mode is irrelevant.
+        // Runtime-mask store (float/double).
         template <class A, class Mode>
         XSIMD_INLINE void
         store_masked(float* mem, batch<float, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<avx>) noexcept

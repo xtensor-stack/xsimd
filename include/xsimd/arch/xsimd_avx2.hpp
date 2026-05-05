@@ -118,23 +118,18 @@ namespace xsimd
             }
         }
 
-        // load_masked. AVX2 mask{load,store}_epi{32,64} take int*/long long*;
-        // these helpers exist so the dispatch picks the right intrinsic by
-        // pointer width. Static_asserts pin sizeof(int)/(long long) to the
-        // values the intrinsics expect — the dispatcher relies on it.
+        // load_masked: AVX2 has _mm256_maskload_epi{32,64} for 32/64-bit
+        // integers; 8/16-bit fall back to the common scalar path.
         namespace detail
         {
-            static_assert(sizeof(int) == 4, "AVX2 maskload/maskstore expects sizeof(int) == 4");
-            static_assert(sizeof(long long) == 8, "AVX2 maskload/maskstore expects sizeof(long long) == 8");
-
             XSIMD_INLINE __m256i maskload(const int32_t* mem, __m256i mask) noexcept
             {
-                return _mm256_maskload_epi32(mem, mask);
+                return _mm256_maskload_epi32(reinterpret_cast<const int*>(mem), mask);
             }
 
-            XSIMD_INLINE __m256i maskload(const long long* mem, __m256i mask) noexcept
+            XSIMD_INLINE __m256i maskload(const int64_t* mem, __m256i mask) noexcept
             {
-                return _mm256_maskload_epi64(mem, mask);
+                return _mm256_maskload_epi64(reinterpret_cast<const long long*>(mem), mask);
             }
 
             XSIMD_INLINE __m256i zero_extend(__m128i hi) noexcept
@@ -148,7 +143,7 @@ namespace xsimd
         load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx2>) noexcept
         {
             static_assert(sizeof(T) == 4 || sizeof(T) == 8, "load_masked supports only 32/64-bit integers on AVX2");
-            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, int64_t>;
             return detail::maskload(reinterpret_cast<const int_t*>(mem), mask.as_batch());
         }
 
@@ -178,17 +173,12 @@ namespace xsimd
             return bitwise_cast<uint64_t>(r);
         }
 
-        // Runtime-mask load for 32/64-bit integers on AVX2. 8/16-bit integers
-        // fall back to the scalar common path: AVX2 has no native maskload for
-        // those widths, and a load-then-blend would break fault-suppression at
-        // page boundaries (the main reason callers ask for a masked load).
-        // Both aligned_mode and unaligned_mode route to the same intrinsic —
-        // masked-off lanes do not fault regardless of alignment.
+        // Runtime-mask load (32/64-bit integers); 8/16-bit fall back to common.
         template <class A, class T, class Mode>
         XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
         load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx2>) noexcept
         {
-            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, int64_t>;
             return detail::maskload(reinterpret_cast<const int_t*>(mem), __m256i(mask));
         }
 
@@ -200,9 +190,9 @@ namespace xsimd
                 _mm256_maskstore_epi32(reinterpret_cast<int*>(mem), mask, src);
             }
 
-            XSIMD_INLINE void maskstore(long long* mem, __m256i mask, __m256i src) noexcept
+            XSIMD_INLINE void maskstore(int64_t* mem, __m256i mask, __m256i src) noexcept
             {
-                _mm256_maskstore_epi64(mem, mask, src);
+                _mm256_maskstore_epi64(reinterpret_cast<long long*>(mem), mask, src);
             }
         }
 
@@ -210,7 +200,7 @@ namespace xsimd
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
         {
             constexpr size_t lanes_per_half = batch<T, A>::size / 2;
-            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, int64_t>;
 
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= lanes_per_half)
             {
@@ -248,7 +238,7 @@ namespace xsimd
         XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), void>
         store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx2>) noexcept
         {
-            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, int64_t>;
             detail::maskstore(reinterpret_cast<int_t*>(mem), __m256i(mask), __m256i(src));
         }
 
