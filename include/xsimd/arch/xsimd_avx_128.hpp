@@ -115,6 +115,22 @@ namespace xsimd
             return _mm_maskload_pd(mem, mask.as_batch());
         }
 
+        // Runtime-mask load for float/double on AVX-128. Both aligned_mode and
+        // unaligned_mode map to _mm_maskload_* — the intrinsic does not fault
+        // on masked-off lanes, so partial loads across page boundaries are safe.
+        template <class A, class Mode>
+        XSIMD_INLINE batch<float, A>
+        load_masked(float const* mem, batch_bool<float, A> mask, convert<float>, Mode, requires_arch<avx_128>) noexcept
+        {
+            return _mm_maskload_ps(mem, _mm_castps_si128(mask));
+        }
+        template <class A, class Mode>
+        XSIMD_INLINE batch<double, A>
+        load_masked(double const* mem, batch_bool<double, A> mask, convert<double>, Mode, requires_arch<avx_128>) noexcept
+        {
+            return _mm_maskload_pd(mem, _mm_castpd_si128(mask));
+        }
+
         // store_masked
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
@@ -126,6 +142,21 @@ namespace xsimd
         XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
         {
             return _mm_maskstore_pd(mem, mask.as_batch(), src);
+        }
+
+        // Runtime-mask store for float/double on AVX-128. Same fault-suppression
+        // semantics as the masked loads above; alignment mode is irrelevant.
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(float* mem, batch<float, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<avx_128>) noexcept
+        {
+            _mm_maskstore_ps(mem, _mm_castps_si128(mask), src);
+        }
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(double* mem, batch<double, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<avx_128>) noexcept
+        {
+            _mm_maskstore_pd(mem, _mm_castpd_si128(mask), src);
         }
 
         // swizzle (dynamic mask)

@@ -137,6 +137,45 @@ namespace xsimd
             return _mm_maskstore_epi64(reinterpret_cast<long long*>(mem), mask.as_batch(), src);
         }
 
+        // Runtime-mask path for 32/64-bit integers; narrower widths fall back to
+        // the common scalar path. Aligned and unaligned share the same intrinsic
+        // — masked-off lanes do not fault regardless of alignment.
+        namespace detail
+        {
+            XSIMD_INLINE __m128i maskload_128(int32_t const* mem, __m128i mask) noexcept
+            {
+                return _mm_maskload_epi32(mem, mask);
+            }
+            XSIMD_INLINE __m128i maskload_128(long long const* mem, __m128i mask) noexcept
+            {
+                return _mm_maskload_epi64(mem, mask);
+            }
+            XSIMD_INLINE void maskstore_128(int32_t* mem, __m128i mask, __m128i src) noexcept
+            {
+                _mm_maskstore_epi32(mem, mask, src);
+            }
+            XSIMD_INLINE void maskstore_128(long long* mem, __m128i mask, __m128i src) noexcept
+            {
+                _mm_maskstore_epi64(mem, mask, src);
+            }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
+        load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx2_128>) noexcept
+        {
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
+            return detail::maskload_128(reinterpret_cast<int_t const*>(mem), __m128i(mask));
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), void>
+        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx2_128>) noexcept
+        {
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
+            detail::maskstore_128(reinterpret_cast<int_t*>(mem), __m128i(mask), __m128i(src));
+        }
+
         // gather
         template <class T, class A, class U, detail::enable_sized_integral_t<T, 4> = 0, detail::enable_sized_integral_t<U, 4> = 0>
         XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,

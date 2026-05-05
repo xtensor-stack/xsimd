@@ -174,6 +174,17 @@ namespace xsimd
             return bitwise_cast<uint64_t>(r);
         }
 
+        // Runtime-mask load for 32/64-bit integers on AVX2; narrower widths fall
+        // back to the scalar common path. Aligned and unaligned share the same
+        // intrinsic — masked-off lanes do not fault regardless of alignment.
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
+        load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx2>) noexcept
+        {
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, long long>;
+            return detail::maskload(reinterpret_cast<const int_t*>(mem), __m256i(mask));
+        }
+
         // store_masked
         namespace detail
         {
@@ -230,6 +241,17 @@ namespace xsimd
         {
             const auto s64 = bitwise_cast<int64_t>(src);
             store_masked<A>(reinterpret_cast<int64_t*>(mem), s64, batch_bool_constant<int64_t, A, Values...> {}, Mode {}, avx2 {});
+        }
+
+        // Runtime-mask store for 32/64-bit integers on AVX2; narrower widths fall
+        // back to the scalar common path. Same fault-suppression semantics as the
+        // masked loads above; alignment mode is irrelevant.
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), void>
+        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx2>) noexcept
+        {
+            using int_t = std::conditional_t<sizeof(T) == 4, int32_t, int64_t>;
+            detail::maskstore<int_t, A>(reinterpret_cast<int_t*>(mem), __m256i(mask), __m256i(src));
         }
 
         // load_stream

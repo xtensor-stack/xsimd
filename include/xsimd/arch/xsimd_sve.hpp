@@ -101,11 +101,28 @@ namespace xsimd
             return load_aligned<A>(src, convert<T>(), sve {});
         }
 
-        // load_masked
-        template <class A, class T, bool... Values, class Mode, detail::enable_arithmetic_t<T> = 0>
-        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<float, A, Values...>, Mode, requires_arch<sve>) noexcept
+        // load_masked (compile-time mask): build a runtime predicate from
+        // the constant mask and reuse the runtime-mask path. ``pmask`` only
+        // constructs a 128-bit chunk predicate (svdupq_b{8,16,32,64}), which
+        // is replication-based and does not correctly express a per-lane
+        // mask on SVE wider than 128 bits — going through ``as_batch_bool``
+        // gives the right predicate for every vector width. ``int32``/
+        // ``int64``/``uint32``/``uint64`` are excluded so the common-arch
+        // dispatchers that reinterpret to ``float``/``double`` win partial
+        // ordering (otherwise we'd be ambiguous with ``requires_arch<A>``).
+        template <class A, class T, bool... Values, class Mode,
+                  detail::enable_arithmetic_t<T> = 0,
+                  std::enable_if_t<!(std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)), int> = 0>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode m, requires_arch<sve>) noexcept
         {
-            return svld1(detail_sve::pmask<Values...>(), reinterpret_cast<map_to_sized_type_t<T> const*>(mem));
+            return load_masked<A>(mem, mask.as_batch_bool(), convert<T> {}, m, sve {});
+        }
+
+        // load_masked (runtime mask)
+        template <class A, class T, class Mode, detail::enable_arithmetic_t<T> = 0>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<sve>) noexcept
+        {
+            return svld1(mask, reinterpret_cast<map_to_sized_type_t<T> const*>(mem));
         }
 
         // load_complex
@@ -139,6 +156,24 @@ namespace xsimd
         XSIMD_INLINE void store_unaligned(T* dst, batch<T, A> const& src, requires_arch<sve>) noexcept
         {
             store_aligned<A>(dst, src, sve {});
+        }
+
+        // store_masked (compile-time mask): forward to the runtime-mask
+        // path for the same reason as load_masked above; same exclusion of
+        // 32/64-bit integers to defer to the common dispatchers.
+        template <class A, class T, bool... Values, class Mode,
+                  detail::enable_arithmetic_t<T> = 0,
+                  std::enable_if_t<!(std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)), int> = 0>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode m, requires_arch<sve>) noexcept
+        {
+            store_masked<A>(mem, src, mask.as_batch_bool(), m, sve {});
+        }
+
+        // store_masked (runtime mask)
+        template <class A, class T, class Mode, detail::enable_arithmetic_t<T> = 0>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<sve>) noexcept
+        {
+            svst1(mask, reinterpret_cast<map_to_sized_type_t<T>*>(mem), src);
         }
 
         // store_complex
