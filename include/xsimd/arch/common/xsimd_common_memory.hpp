@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <array>
 #include <complex>
+#include <cstdint>
 
 #include "../../types/xsimd_batch_constant.hpp"
 #include "./xsimd_common_details.hpp"
@@ -374,6 +375,23 @@ namespace xsimd
             return batch<T_out, A>::load(buffer.data(), aligned_mode {});
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<T, A>
+        load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<common>) noexcept
+        {
+            // Per-lane validity contract: only active lanes of ``mem`` are
+            // required to be addressable. An unconditional whole-vector load
+            // would touch inactive lanes and trip ASan/Valgrind on partial
+            // buffers, so stay scalar. Arches with hardware predicated loads
+            // (AVX2 32/64-bit, AVX-512, SVE, RVV) override this with a single
+            // intrinsic that suppresses inactive-lane reads in hardware.
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<T, size> buffer;
+            for (std::size_t i = 0; i < size; ++i)
+                buffer[i] = mask.get(i) ? mem[i] : T(0);
+            return batch<T, A>::load_aligned(buffer.data());
+        }
+
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE void
         store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment, requires_arch<common>) noexcept
@@ -386,6 +404,24 @@ namespace xsimd
                 {
                     mem[i] = static_cast<T_out>(src.get(i));
                 }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
+        {
+            // Per-lane validity contract (matches native masked-store APIs):
+            // only active lanes of ``mem`` are touched. A load+select+store
+            // RMW would both read and write inactive bytes, breaking that
+            // contract — stay scalar. Arches with hardware predicated stores
+            // override this with a single intrinsic that suppresses inactive
+            // lanes in hardware.
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<T, size> src_buf;
+            src.store_aligned(src_buf.data());
+            for (std::size_t i = 0; i < size; ++i)
+                if (mask.get(i))
+                    mem[i] = src_buf[i];
         }
 
         template <class A, bool... Values, class Mode>

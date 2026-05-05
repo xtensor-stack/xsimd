@@ -457,6 +457,16 @@ namespace xsimd
 
     template <class B>
     using complex_batch_type_t = typename complex_batch_type<B>::type;
+
+    namespace details
+    {
+        // Returns a bitmask with the lowest \c size bits set. Used by masked
+        // load/store fast paths to detect "all lanes active".
+        inline constexpr uint64_t full_mask(std::size_t size) noexcept
+        {
+            return size >= 64 ? ~uint64_t(0) : ((uint64_t(1) << size) - 1);
+        }
+    }
 }
 
 #endif

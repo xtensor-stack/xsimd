@@ -1015,6 +1015,23 @@ namespace xsimd
             }
         }
 
+        // Runtime-mask load for float/double on AVX. Both aligned_mode and
+        // unaligned_mode map to _mm256_maskload_* — the intrinsic does not fault
+        // on masked-off lanes, so partial loads across page boundaries are safe.
+        template <class A, class Mode>
+        XSIMD_INLINE batch<float, A>
+        load_masked(float const* mem, batch_bool<float, A> mask, convert<float>, Mode, requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_ps(mem, _mm256_castps_si256(mask));
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE batch<double, A>
+        load_masked(double const* mem, batch_bool<double, A> mask, convert<double>, Mode, requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_pd(mem, _mm256_castpd_si256(mask));
+        }
+
         // store_masked
         namespace detail
         {
@@ -1029,6 +1046,22 @@ namespace xsimd
             {
                 _mm256_maskstore_pd(mem, mask, src);
             }
+        }
+
+        // Runtime-mask store for float/double on AVX. Same fault-suppression
+        // semantics as the masked loads above; alignment mode is irrelevant.
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(float* mem, batch<float, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            _mm256_maskstore_ps(mem, _mm256_castps_si256(mask), src);
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(double* mem, batch<double, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            _mm256_maskstore_pd(mem, _mm256_castpd_si256(mask), src);
         }
 
         template <class A, class T, bool... Values, class Mode>
