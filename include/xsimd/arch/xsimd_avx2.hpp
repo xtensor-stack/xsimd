@@ -13,13 +13,12 @@
 #define XSIMD_AVX2_HPP
 
 #include <complex>
+#include <limits>
 #include <type_traits>
 
 #include "../types/xsimd_avx2_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
 #include "./utils/shifts.hpp"
-
-#include <limits>
 
 namespace xsimd
 {
