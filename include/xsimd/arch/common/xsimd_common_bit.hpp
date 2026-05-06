@@ -5,7 +5,9 @@
 #ifndef XSIMD_BIT_HPP
 #define XSIMD_BIT_HPP
 
-#if __cplusplus > 202002L
+#include "../../config/xsimd_config.hpp"
+
+#if XSIMD_CPP_VERSION > 202002L
 
 #include <version>
 

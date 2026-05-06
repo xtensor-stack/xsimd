@@ -16,6 +16,7 @@
 #include <functional>
 #include <utility>
 
+#include "../config/xsimd_config.hpp"
 #include "./xsimd_batch.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -408,7 +409,7 @@ namespace xsimd
             return {};
         }
 
-#if __cplusplus >= 202002L
+#if XSIMD_CPP_VERSION >= 202002L
         template <std::array Arr, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_constant<typename decltype(Arr)::value_type, A, Arr[Is]...>
         make_batch_constant(std::index_sequence<Is...>) noexcept
@@ -431,7 +432,7 @@ namespace xsimd
             return {};
         }
 
-#if __cplusplus >= 202002L
+#if XSIMD_CPP_VERSION >= 202002L
         template <typename T, std::array Arr, class A, std::size_t... Is>
         XSIMD_INLINE constexpr batch_bool_constant<T, A, Arr[Is]...>
         make_batch_bool_constant(std::index_sequence<Is...>) noexcept
@@ -497,7 +498,7 @@ namespace xsimd
         return {};
     }
 
-#if __cplusplus >= 202002L
+#if XSIMD_CPP_VERSION >= 202002L
     /**
      * @brief Build a @c batch_constant from a std::array (C++20)
      *
@@ -524,7 +525,7 @@ namespace xsimd
         return {};
     }
 
-#if __cplusplus >= 202002L
+#if XSIMD_CPP_VERSION >= 202002L
     /**
      * @brief Build a @c batch_constant from a std::array of boolean (C++20)
      *

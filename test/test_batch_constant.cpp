@@ -47,7 +47,7 @@ struct constant_batch_test
 
     void test_init_from_array() const
     {
-#if __cplusplus >= 202002L
+#if XSIMD_CPP_VERSION >= 202002L
         constexpr array_type expected = []()
         {
             array_type out = {};
@@ -285,7 +285,7 @@ struct constant_bool_batch_test
 
     void test_init_from_array() const
     {
-#if __cplusplus >= 202002L
+#if XSIMD_CPP_VERSION >= 202002L
         constexpr bool_array_type expected = []()
         {
             bool_array_type out = {};

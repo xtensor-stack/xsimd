@@ -12,6 +12,8 @@
 #ifndef XSIMD_MACROS_HPP
 #define XSIMD_MACROS_HPP
 
+#include "./xsimd_config.hpp"
+
 #if defined(__VEC__)
 #define XSIMD_INLINE inline
 #elif defined __has_attribute
@@ -43,7 +45,7 @@
 #endif
 #endif
 
-#if !defined(XSIMD_NO_DISCARD) && __cplusplus >= 201703L
+#if !defined(XSIMD_NO_DISCARD) && XSIMD_CPP_VERSION >= 201703L
 // this means that the previous tests failed, but we are using C++17 or higher
 #define XSIMD_NO_DISCARD [[nodiscard]]
 #endif
@@ -63,7 +65,7 @@
 #define XSIMD_IF_CONSTEXPR if constexpr
 #endif
 
-#if !defined(XSIMD_IF_CONSTEXPR) && __cplusplus >= 201703L
+#if !defined(XSIMD_IF_CONSTEXPR) && XSIMD_CPP_VERSION >= 201703L
 // this means that the previous test failed, but we are using C++17 or higher
 #define XSIMD_IF_CONSTEXPR if constexpr
 #endif
