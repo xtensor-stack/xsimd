@@ -15,10 +15,11 @@
 #include <complex>
 #include <type_traits>
 
+#include <endian.h>
+
+#include "../types/xsimd_batch_fwd.hpp"
 #include "../types/xsimd_vsx_register.hpp"
 #include "./common/xsimd_common_cast.hpp"
-
-#include <endian.h>
 
 namespace xsimd
 {

@@ -12,12 +12,12 @@
 #ifndef XSIMD_HPP
 #define XSIMD_HPP
 
-#include "config/xsimd_config.hpp"
-#include "config/xsimd_macros.hpp"
+#include "./config/xsimd_config.hpp"
+#include "./config/xsimd_macros.hpp"
 
-#include "arch/xsimd_scalar.hpp"
-#include "memory/xsimd_aligned_allocator.hpp"
-#include "types/xsimd_batch_fwd.hpp"
+#include "./arch/xsimd_scalar.hpp"
+#include "./memory/xsimd_aligned_allocator.hpp"
+#include "./types/xsimd_batch_fwd.hpp"
 
 #if defined(XSIMD_NO_SUPPORTED_ARCHITECTURE)
 namespace xsimd
@@ -32,12 +32,12 @@ namespace xsimd
 }
 
 #else
-#include "types/xsimd_batch.hpp"
-#include "types/xsimd_batch_constant.hpp"
-#include "types/xsimd_traits.hpp"
+#include "./types/xsimd_batch.hpp"
+#include "./types/xsimd_batch_constant.hpp"
+#include "./types/xsimd_traits.hpp"
 
 // This include must come last
-#include "types/xsimd_api.hpp"
+#include "./types/xsimd_api.hpp"
 #endif // XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #endif

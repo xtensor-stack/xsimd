@@ -12,7 +12,7 @@
 #ifndef XSIMD_NEON64_REGISTER_HPP
 #define XSIMD_NEON64_REGISTER_HPP
 
-#include "xsimd_neon_register.hpp"
+#include "./xsimd_neon_register.hpp"
 
 namespace xsimd
 {

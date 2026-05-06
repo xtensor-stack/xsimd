@@ -17,7 +17,7 @@
 #include "test_utils.hpp"
 
 #ifdef __linux__
-#include "endian.h"
+#include <endian.h>
 #if BYTE_ORDER == BIG_ENDIAN
 #define XSIMD_NO_SLIDE
 #endif

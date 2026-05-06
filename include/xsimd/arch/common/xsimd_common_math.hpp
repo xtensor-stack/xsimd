@@ -12,11 +12,11 @@
 #ifndef XSIMD_COMMON_MATH_HPP
 #define XSIMD_COMMON_MATH_HPP
 
+#include <type_traits>
+
 #include "../xsimd_scalar.hpp"
 #include "./xsimd_common_details.hpp"
 #include "./xsimd_common_trigo.hpp"
-
-#include <type_traits>
 
 namespace xsimd
 {
