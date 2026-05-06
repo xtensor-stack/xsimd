@@ -28,6 +28,19 @@
 #endif
 
 /**
+ * @ingroup xsimd_config_macro
+ *
+ * Normalized C++ version number, equivalent to __cplusplus but also works with
+ * MSVC which requires /Zc:__cplusplus to set it correctly (otherwise it's always
+ * 199711L). Use this instead of __cplusplus throughout the codebase.
+ */
+#if defined(_MSC_VER) && !defined(__clang__)
+#define XSIMD_CPP_VERSION _MSVC_LANG
+#else
+#define XSIMD_CPP_VERSION __cplusplus
+#endif
+
+/**
  * high level free functions
  *
  * @defgroup xsimd_config_macro Instruction Set Detection

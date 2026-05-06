@@ -3,8 +3,10 @@ on: [push, pull_request]
 concurrency:
   group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
-  build:
+  build-unix:
+    name: 'Unix C++${{ matrix.cxx-version }}'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,7 +14,35 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Setup
-      run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=${{matrix.cxx-version}}
+      run: cmake -B build/ -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=${{matrix.cxx-version}}
     - name: Build
-      run: cmake --build _build
+      run: cmake --build build/
+    - name: Test
+      run: ./build/test/test_xsimd
+
+  build-msvc:
+    name: 'MSVC C++${{ matrix.cxx-version }}'
+    defaults:
+      run:
+        shell: bash {0}
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        cxx-version: [14, 17, 20]
+    steps:
+    - name: Setup compiler
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+    - name: Setup Ninja
+      run: |
+        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install ninja
+    - uses: actions/checkout@v6
+    - name: Setup
+      run: cmake -B build/ -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=${{matrix.cxx-version}} -G Ninja
+    - name: Build
+      run: cmake --build build/
+    - name: Test
+      run: ./build/test/test_xsimd
 

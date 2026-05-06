@@ -16,6 +16,7 @@
 #include <complex>
 
 #include "../config/xsimd_arch.hpp"
+#include "../config/xsimd_config.hpp"
 #include "../config/xsimd_macros.hpp"
 #include "../memory/xsimd_alignment.hpp"
 #include "./xsimd_batch_fwd.hpp"
@@ -283,7 +284,7 @@ namespace xsimd
         XSIMD_INLINE batch logical_or(batch const& other) const noexcept;
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T, class A>
     constexpr std::size_t batch<T, A>::size;
 #endif
@@ -363,7 +364,7 @@ namespace xsimd
         static XSIMD_INLINE register_type make_register(std::index_sequence<>, V... v) noexcept;
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T, class A>
     constexpr std::size_t batch_bool<T, A>::size;
 #endif
@@ -509,7 +510,7 @@ namespace xsimd
         real_batch m_imag;
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T, class A>
     constexpr std::size_t batch<std::complex<T>, A>::size;
 #endif

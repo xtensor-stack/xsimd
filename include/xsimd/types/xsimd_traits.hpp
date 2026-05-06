@@ -20,6 +20,7 @@
 #include <xtl/xcomplex.hpp>
 #endif
 
+#include "../config/xsimd_config.hpp"
 #include "./xsimd_batch_fwd.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -60,7 +61,7 @@ namespace xsimd
             static constexpr size_t size = 1;
         };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
         template <class T>
         constexpr size_t simd_traits_impl<T, false>::size;
 #endif
@@ -73,7 +74,7 @@ namespace xsimd
             static constexpr size_t size = type::size;
         };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
         template <class T>
         constexpr size_t simd_traits_impl<T, true>::size;
 #endif
@@ -139,7 +140,7 @@ namespace xsimd
         static constexpr size_t size = simd_traits<type>::size;
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T>
     constexpr size_t revert_simd_traits<T>::size;
 #endif
@@ -151,7 +152,7 @@ namespace xsimd
         static constexpr size_t size = batch<T>::size;
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T>
     constexpr size_t revert_simd_traits<batch<T>>::size;
 #endif
@@ -257,7 +258,7 @@ namespace xsimd
         static constexpr bool is_complex = detail::is_complex<T>::value; ///< True if T is complex or a batch of complex values.
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T>
     constexpr bool batch_traits<T>::is_batch;
     template <class T>
@@ -280,7 +281,7 @@ namespace xsimd
         static constexpr bool is_complex = detail::is_complex<T>::value;
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T, class A>
     constexpr bool batch_traits<batch<T, A>>::is_batch;
     template <class T, class A>
@@ -303,7 +304,7 @@ namespace xsimd
         static constexpr bool is_complex = false;
     };
 
-#if __cplusplus < 201703L
+#if XSIMD_CPP_VERSION < 201703L
     template <class T, class A>
     constexpr bool batch_traits<batch_bool<T, A>>::is_batch;
     template <class T, class A>
