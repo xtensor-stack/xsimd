@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <array>
 #include <complex>
+#include <cstdint>
 
 #include "../../types/xsimd_batch_constant.hpp"
 #include "./xsimd_common_details.hpp"
@@ -374,6 +375,19 @@ namespace xsimd
             return batch<T_out, A>::load(buffer.data(), aligned_mode {});
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<T, A>
+        load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<common>) noexcept
+        {
+            // Scalar fallback: only active lanes are touched. Arches with
+            // hardware predicated loads override this.
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<T, size> buffer;
+            for (std::size_t i = 0; i < size; ++i)
+                buffer[i] = mask.get(i) ? mem[i] : T(0);
+            return batch<T, A>::load_aligned(buffer.data());
+        }
+
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE void
         store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment, requires_arch<common>) noexcept
@@ -386,6 +400,20 @@ namespace xsimd
                 {
                     mem[i] = static_cast<T_out>(src.get(i));
                 }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
+        {
+            // Scalar fallback: only active lanes are touched. Arches with
+            // hardware predicated stores override this.
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<T, size> src_buf;
+            src.store_aligned(src_buf.data());
+            for (std::size_t i = 0; i < size; ++i)
+                if (mask.get(i))
+                    mem[i] = src_buf[i];
         }
 
         template <class A, bool... Values, class Mode>

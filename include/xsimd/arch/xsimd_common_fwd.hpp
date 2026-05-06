@@ -79,8 +79,12 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> load(T const* mem, unaligned_mode, requires_arch<A>) noexcept;
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE batch<T_out, A> load_masked(T_in const* mem, batch_bool_constant<T_out, A, Values...> mask, convert<T_out>, alignment, requires_arch<common>) noexcept;
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<common>) noexcept;
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE void store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, alignment, requires_arch<common>) noexcept;
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept;
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<A>) noexcept;
         template <class A, bool... Values, class Mode>
