@@ -58,6 +58,8 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> mulhi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
@@ -120,6 +122,18 @@ namespace xsimd
             XSIMD_INLINE constexpr bool is_only_from_lo(batch_constant<T, A, Vs...>) noexcept;
             template <typename T, class A, T... Vs>
             XSIMD_INLINE constexpr bool is_only_from_hi(batch_constant<T, A, Vs...>) noexcept;
+
+            // Shared 64-bit mulhi cores, defined in xsimd_common_arithmetic.hpp.
+            // Forward-declared here so arch-specific kernels (SSE4.1, AVX2,
+            // AVX-512) can name them with an explicit template argument.
+            template <class A, class WMul>
+            XSIMD_INLINE batch<uint64_t, A> mulhi_u64_core(batch<uint64_t, A> const& x,
+                                                           batch<uint64_t, A> const& y,
+                                                           WMul mul_epu32) noexcept;
+            template <class A, class WMul>
+            XSIMD_INLINE batch<int64_t, A> mulhi_i64_core(batch<int64_t, A> const& x,
+                                                          batch<int64_t, A> const& y,
+                                                          WMul mul_epu32) noexcept;
         }
     }
 }

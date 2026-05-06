@@ -21,6 +21,49 @@
 
 using namespace std::placeholders;
 
+namespace detail_test_mulhilo
+{
+    template <class T>
+    typename std::enable_if<std::is_integral<T>::value && (sizeof(T) <= 4), T>::type
+    mulhi_reference(T x, T y) noexcept
+    {
+        using W = typename std::conditional<std::is_signed<T>::value, int64_t, uint64_t>::type;
+        return static_cast<T>((static_cast<W>(x) * static_cast<W>(y)) >> (8 * sizeof(T)));
+    }
+
+#if defined(__SIZEOF_INT128__)
+    template <class T>
+    typename std::enable_if<std::is_integral<T>::value && (sizeof(T) == 8), T>::type
+    mulhi_reference(T x, T y) noexcept
+    {
+        using W = typename std::conditional<std::is_signed<T>::value, __int128, unsigned __int128>::type;
+        return static_cast<T>((static_cast<W>(x) * static_cast<W>(y)) >> 64);
+    }
+#else
+    template <class T>
+    typename std::enable_if<std::is_integral<T>::value && (sizeof(T) == 8), T>::type
+    mulhi_reference(T x, T y) noexcept
+    {
+        uint64_t ux = static_cast<uint64_t>(x);
+        uint64_t uy = static_cast<uint64_t>(y);
+        uint64_t xl = ux & 0xffffffffULL, xh = ux >> 32;
+        uint64_t yl = uy & 0xffffffffULL, yh = uy >> 32;
+        uint64_t ll = xl * yl, lh = xl * yh, hl = xh * yl, hh = xh * yh;
+        uint64_t mid = (ll >> 32) + (lh & 0xffffffffULL) + (hl & 0xffffffffULL);
+        uint64_t hi = hh + (lh >> 32) + (hl >> 32) + (mid >> 32);
+        if (std::is_signed<T>::value)
+        {
+            if (x < 0)
+                hi -= uy;
+            if (y < 0)
+                hi -= ux;
+        }
+        return static_cast<T>(hi);
+    }
+#endif
+}
+using detail_test_mulhilo::mulhi_reference;
+
 template <class B>
 struct batch_test
 {
@@ -311,6 +354,145 @@ struct batch_test
             INFO("decr_if(batch)");
             CHECK_BATCH_EQ(res, expected);
         }
+    }
+
+    template <class U = value_type>
+    void test_mulhilo_impl(std::true_type /*integral*/) const
+    {
+        using UT = typename std::make_unsigned<value_type>::type;
+
+        auto run_case = [](array_type const& a, array_type const& b, const char* tag)
+        {
+            batch_type ba = batch_type::load_unaligned(a.data());
+            batch_type bb = batch_type::load_unaligned(b.data());
+
+            array_type lo_expected;
+            array_type hi_expected;
+            for (std::size_t i = 0; i < size; ++i)
+            {
+                lo_expected[i] = static_cast<value_type>(static_cast<UT>(a[i]) * static_cast<UT>(b[i]));
+                hi_expected[i] = mulhi_reference(a[i], b[i]);
+            }
+
+            batch_type lo_res = xsimd::mullo(ba, bb);
+            INFO("mullo(batch, batch) [" << tag << "]");
+            CHECK_BATCH_EQ(lo_res, lo_expected);
+
+            batch_type hi_res = xsimd::mulhi(ba, bb);
+            INFO("mulhi(batch, batch) [" << tag << "]");
+            CHECK_BATCH_EQ(hi_res, hi_expected);
+
+            auto p = xsimd::mulhilo(ba, bb);
+            INFO("mulhilo.first == mulhi [" << tag << "]");
+            CHECK_BATCH_EQ(p.first, hi_res);
+            INFO("mulhilo.second == mullo [" << tag << "]");
+            CHECK_BATCH_EQ(p.second, lo_res);
+        };
+
+        // baseline: small operands from init_operands
+        run_case(lhs, rhs, "small");
+
+        // edge operands that actually exercise the high half
+        constexpr value_type vmin = std::numeric_limits<value_type>::min();
+        constexpr value_type vmax = std::numeric_limits<value_type>::max();
+        constexpr bool is_signed = std::is_signed<value_type>::value;
+
+        // Pattern A: extremes paired with extremes (covers vmax*vmax, vmin*vmin,
+        // vmin*vmax, vmin*-1 — the classic signed-overflow corners).
+        {
+            array_type a, b;
+            for (std::size_t i = 0; i < size; ++i)
+            {
+                switch (i % 8)
+                {
+                case 0:
+                    a[i] = vmax;
+                    b[i] = vmax;
+                    break;
+                case 1:
+                    a[i] = vmin;
+                    b[i] = vmin;
+                    break;
+                case 2:
+                    a[i] = vmin;
+                    b[i] = vmax;
+                    break;
+                case 3:
+                    a[i] = vmax;
+                    b[i] = static_cast<value_type>(is_signed ? -1 : vmax);
+                    break;
+                case 4:
+                    a[i] = static_cast<value_type>(is_signed ? -1 : vmax);
+                    b[i] = static_cast<value_type>(is_signed ? -1 : vmax);
+                    break;
+                case 5:
+                    a[i] = vmin;
+                    b[i] = static_cast<value_type>(is_signed ? -1 : 1);
+                    break;
+                case 6:
+                    a[i] = static_cast<value_type>(vmax / 2 + 1);
+                    b[i] = static_cast<value_type>(vmax / 2 + 1);
+                    break;
+                case 7:
+                    a[i] = static_cast<value_type>(1);
+                    b[i] = vmax;
+                    break;
+                }
+            }
+            run_case(a, b, "extremes");
+        }
+
+        // Pattern B: high-half-non-zero, mixed signs (each lane unique so we
+        // catch lane-wise bugs in 32/64-bit emulated mulhi paths).
+        {
+            array_type a, b;
+            constexpr std::size_t bits = 8 * sizeof(value_type);
+            constexpr std::size_t half = bits / 2;
+            const UT half_mask = (static_cast<UT>(1) << half) - 1;
+            for (std::size_t i = 0; i < size; ++i)
+            {
+                // Spread bits across both halves so the product overflows the
+                // low half. Use deterministic but lane-varying patterns.
+                UT ua = static_cast<UT>((static_cast<UT>(0xA53C97E1ULL) ^ (static_cast<UT>(i) * 0x9E37ULL))
+                                        | (static_cast<UT>(i + 1) << half));
+                UT ub = static_cast<UT>((static_cast<UT>(0x6BD1F4A7ULL) ^ (static_cast<UT>(i) * 0xC2B5ULL))
+                                        | (static_cast<UT>((i * 3) + 1) << half));
+                // Make sure both halves are non-zero so the product spans bits.
+                if ((ua & half_mask) == 0)
+                    ua |= static_cast<UT>(1);
+                if ((ub & half_mask) == 0)
+                    ub |= static_cast<UT>(1);
+                a[i] = static_cast<value_type>(ua);
+                b[i] = static_cast<value_type>(ub);
+            }
+            run_case(a, b, "wide-bits");
+        }
+
+        // Pattern C: signed correction terms — only meaningful for signed
+        // types but harmless for unsigned (we still check correctness).
+        {
+            array_type a, b;
+            for (std::size_t i = 0; i < size; ++i)
+            {
+                // Alternate negative * positive and negative * negative for
+                // signed; for unsigned this just samples large magnitudes.
+                value_type x = static_cast<value_type>(vmax - static_cast<value_type>(i));
+                value_type y = static_cast<value_type>(is_signed
+                                                           ? (i % 2 == 0 ? -static_cast<value_type>(i + 1)
+                                                                         : static_cast<value_type>(i + 1))
+                                                           : static_cast<value_type>(vmax - (i * 7)));
+                a[i] = x;
+                b[i] = y;
+            }
+            run_case(a, b, "signed-correction");
+        }
+    }
+
+    void test_mulhilo_impl(std::false_type /*not integral*/) const { }
+
+    void test_mulhilo() const
+    {
+        test_mulhilo_impl(typename std::is_integral<value_type>::type {});
     }
 
     void test_saturated_arithmetic() const
@@ -1014,6 +1196,11 @@ TEST_CASE_TEMPLATE("[batch]", B, BATCH_TYPES)
     SUBCASE("incr decr")
     {
         Test.test_incr_decr();
+    }
+
+    SUBCASE("mulhilo")
+    {
+        Test.test_mulhilo();
     }
 
     SUBCASE("saturated_arithmetic")

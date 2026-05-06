@@ -1037,6 +1037,54 @@ namespace xsimd
             return wrap::x_vmulq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
         }
 
+        /*********
+         * mulhi *
+         *********/
+
+        template <class A>
+        XSIMD_INLINE batch<int8_t, A> mulhi(batch<int8_t, A> const& lhs, batch<int8_t, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            int16x8_t lo = vmull_s8(vget_low_s8(lhs), vget_low_s8(rhs));
+            int16x8_t hi = vmull_s8(vget_high_s8(lhs), vget_high_s8(rhs));
+            return vcombine_s8(vshrn_n_s16(lo, 8), vshrn_n_s16(hi, 8));
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint8_t, A> mulhi(batch<uint8_t, A> const& lhs, batch<uint8_t, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            uint16x8_t lo = vmull_u8(vget_low_u8(lhs), vget_low_u8(rhs));
+            uint16x8_t hi = vmull_u8(vget_high_u8(lhs), vget_high_u8(rhs));
+            return vcombine_u8(vshrn_n_u16(lo, 8), vshrn_n_u16(hi, 8));
+        }
+        template <class A>
+        XSIMD_INLINE batch<int16_t, A> mulhi(batch<int16_t, A> const& lhs, batch<int16_t, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            int32x4_t lo = vmull_s16(vget_low_s16(lhs), vget_low_s16(rhs));
+            int32x4_t hi = vmull_s16(vget_high_s16(lhs), vget_high_s16(rhs));
+            return vcombine_s16(vshrn_n_s32(lo, 16), vshrn_n_s32(hi, 16));
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint16_t, A> mulhi(batch<uint16_t, A> const& lhs, batch<uint16_t, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            uint32x4_t lo = vmull_u16(vget_low_u16(lhs), vget_low_u16(rhs));
+            uint32x4_t hi = vmull_u16(vget_high_u16(lhs), vget_high_u16(rhs));
+            return vcombine_u16(vshrn_n_u32(lo, 16), vshrn_n_u32(hi, 16));
+        }
+        template <class A>
+        XSIMD_INLINE batch<int32_t, A> mulhi(batch<int32_t, A> const& lhs, batch<int32_t, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            int64x2_t lo = vmull_s32(vget_low_s32(lhs), vget_low_s32(rhs));
+            int64x2_t hi = vmull_s32(vget_high_s32(lhs), vget_high_s32(rhs));
+            return vcombine_s32(vshrn_n_s64(lo, 32), vshrn_n_s64(hi, 32));
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint32_t, A> mulhi(batch<uint32_t, A> const& lhs, batch<uint32_t, A> const& rhs, requires_arch<neon>) noexcept
+        {
+            uint64x2_t lo = vmull_u32(vget_low_u32(lhs), vget_low_u32(rhs));
+            uint64x2_t hi = vmull_u32(vget_high_u32(lhs), vget_high_u32(rhs));
+            return vcombine_u32(vshrn_n_u64(lo, 32), vshrn_n_u64(hi, 32));
+        }
+        // 64-bit intentionally falls through to the common scalar fallback
+
         /*******
          * div *
          *******/

@@ -1,3 +1,17 @@
+# RISC-V RVV cross-compilation build (Ubuntu apt qemu, multi-compiler matrix).
+#
+# vlen=128 is intentionally NOT covered here. Ubuntu's qemu-user-static
+# (8.2.x in noble, 9.x in plucky) hangs on the xsimd test_xsimd binary at
+# vlen=128 — see QEMU issue #2137 (RVV TCG slowdowns) for the underlying
+# emulator behaviour. Until ubuntu-latest ships qemu 11+, vlen=128 coverage
+# lives in cross-rvv-arch.yml, which runs inside an archlinux:latest
+# container with qemu 11. Vlens >= 256 run fast enough under the apt qemu
+# to stay within the test step's timeout.
+#
+# References:
+#   QEMU 11.0.0 release notes:  https://www.qemu.org/2026/04/22/qemu-11-0-0/
+#   QEMU RVV slowdowns issue:   https://gitlab.com/qemu-project/qemu/-/issues/2137
+#   Ubuntu RVV vstart bug:      https://bugs.launchpad.net/ubuntu/+source/qemu/+bug/2095169
 name: RISC-V RVV cross-compilation build
 on: [push, pull_request]
 concurrency:
@@ -8,13 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     name: 'RISC-V RVV${{ matrix.vector_bits }}'
     strategy:
+      fail-fast: false
       matrix:
         sys:
           - { compiler: 'gcc', gcc_runtime: '14'}
           - { compiler: 'clang', version: '17', gcc_runtime: '14'}
           - { compiler: 'clang', version: '18', gcc_runtime: '14'}
         vector_bits:
-          - 128
           - 256
           - 512
     steps:
@@ -35,9 +49,14 @@ jobs:
         sudo ln -srf $(which clang++-${{ matrix.sys.version }}) /usr/bin/clang++
         rm llvm.sh
     - name: Setup QEMU
-      uses: docker/setup-qemu-action@v3.0.0
-      with:
-        platforms: riscv64
+      # Use the qemu-user-static package shipped by the runner image rather
+      # than docker/setup-qemu-action: tonistiigi/binfmt pins an even older
+      # qemu (~6.x/7.x) whose RVV implementation miscompiles vmulh* and is
+      # known to hang test_xsimd until the 6h GHA timeout.
+      run: |
+        sudo apt-get -y -qq update
+        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install qemu-user-static
+        qemu-riscv64-static --version
     - name: Setup Ninja
       run: |
         sudo apt-get -y -qq install ninja-build
@@ -62,6 +81,7 @@ jobs:
         echo "XSIMD_TEST_CPU_ASSUME_SVE=0"    >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_RVV=1" >> "$GITHUB_ENV"
     - name: Testing xsimd
+      timeout-minutes: 15
       run: >
         QEMU_CPU="rv64,zba=true,zbb=true,zbs=true,v=true,vlen=${{ matrix.vector_bits }},elen=64,vext_spec=v1.0"
         QEMU_LD_PREFIX="/usr/riscv64-linux-gnu"

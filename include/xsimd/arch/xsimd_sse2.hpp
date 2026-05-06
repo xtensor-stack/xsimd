@@ -1438,6 +1438,18 @@ namespace xsimd
             return _mm_mullo_epi16(self, other);
         }
 
+        // mulhi
+        template <class A>
+        XSIMD_INLINE batch<int16_t, A> mulhi(batch<int16_t, A> const& self, batch<int16_t, A> const& other, requires_arch<sse2>) noexcept
+        {
+            return _mm_mulhi_epi16(self, other);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint16_t, A> mulhi(batch<uint16_t, A> const& self, batch<uint16_t, A> const& other, requires_arch<sse2>) noexcept
+        {
+            return _mm_mulhi_epu16(self, other);
+        }
+
         // nearbyint_as_int
         template <class A>
         XSIMD_INLINE batch<int32_t, A> nearbyint_as_int(batch<float, A> const& self,

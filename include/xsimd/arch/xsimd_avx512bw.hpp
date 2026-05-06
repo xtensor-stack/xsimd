@@ -470,6 +470,18 @@ namespace xsimd
             }
         }
 
+        // mulhi
+        template <class A>
+        XSIMD_INLINE batch<int16_t, A> mulhi(batch<int16_t, A> const& self, batch<int16_t, A> const& other, requires_arch<avx512bw>) noexcept
+        {
+            return _mm512_mulhi_epi16(self, other);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint16_t, A> mulhi(batch<uint16_t, A> const& self, batch<uint16_t, A> const& other, requires_arch<avx512bw>) noexcept
+        {
+            return _mm512_mulhi_epu16(self, other);
+        }
+
         // neq
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch_bool<T, A> neq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept
