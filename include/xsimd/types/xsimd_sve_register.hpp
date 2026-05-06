@@ -13,8 +13,8 @@
 #ifndef XSIMD_SVE_REGISTER_HPP
 #define XSIMD_SVE_REGISTER_HPP
 
-#include "xsimd_common_arch.hpp"
-#include "xsimd_register.hpp"
+#include "./xsimd_common_arch.hpp"
+#include "./xsimd_register.hpp"
 
 #if XSIMD_WITH_SVE
 #include <arm_sve.h>

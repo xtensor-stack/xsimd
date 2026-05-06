@@ -12,10 +12,10 @@
 #ifndef XSIMD_COMMON_LOGICAL_HPP
 #define XSIMD_COMMON_LOGICAL_HPP
 
+#include <climits>
+
 #include "./xsimd_common_bit.hpp"
 #include "./xsimd_common_details.hpp"
-
-#include <climits>
 
 namespace xsimd
 {

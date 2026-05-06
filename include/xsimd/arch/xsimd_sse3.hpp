@@ -12,8 +12,9 @@
 #ifndef XSIMD_SSE3_HPP
 #define XSIMD_SSE3_HPP
 
-#include "../types/xsimd_sse3_register.hpp"
 #include <type_traits>
+
+#include "../types/xsimd_sse3_register.hpp"
 
 namespace xsimd
 {

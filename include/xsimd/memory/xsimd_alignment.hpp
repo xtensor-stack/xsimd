@@ -13,7 +13,7 @@
 #define XSIMD_ALIGNMENT_HPP
 
 #include "../types/xsimd_utils.hpp"
-#include "xsimd_aligned_allocator.hpp"
+#include "./xsimd_aligned_allocator.hpp"
 
 namespace xsimd
 {
