@@ -58,11 +58,29 @@ CXX = "$CONDA_PREFIX/bin/clang++"
 CXXFLAGS = "-isystem $CONDA_PREFIX/include"
 LDFLAGS = "-Wl,-rpath,$CONDA_PREFIX/lib -L$CONDA_PREFIX/lib"
 
+# clang-17 compiler environment
+[feature.clang-17.dependencies]
+clang = "17.*"
+[environments.clang-17]
+features = ["cmd", "build-tools", "lib", "clang-base", "clang-17"]
+
 # clang-18 compiler environment
 [feature.clang-18.dependencies]
 clang = "18.*"
 [environments.clang-18]
 features = ["cmd", "build-tools", "lib", "clang-base", "clang-18"]
+
+# clang-19 compiler environment
+[feature.clang-19.dependencies]
+clang = "19.*"
+[environments.clang-19]
+features = ["cmd", "build-tools", "lib", "clang-base", "clang-19"]
+
+# clang-20 compiler environment
+[feature.clang-20.dependencies]
+clang = "20.*"
+[environments.clang-20]
+features = ["cmd", "build-tools", "lib", "clang-base", "clang-20"]
 
 # clang-21 compiler environment
 [feature.clang-21.dependencies]
@@ -87,6 +105,18 @@ CFLAGS = "-isystem $CONDA_PREFIX/include"
 CXX = "$CONDA_PREFIX/bin/g++"
 CXXFLAGS = "-isystem $CONDA_PREFIX/include"
 LDFLAGS = "-Wl,-rpath,$CONDA_PREFIX/lib -L$CONDA_PREFIX/lib"
+
+# gcc-13 compiler environment
+[feature.gcc-13.target.linux.dependencies]
+gcc = "13.*"
+[environments.gcc-13]
+features = ["cmd", "build-tools", "lib", "gcc-base", "gcc-13"]
+
+# gcc-14 compiler environment
+[feature.gcc-14.target.linux.dependencies]
+gcc = "14.*"
+[environments.gcc-14]
+features = ["cmd", "build-tools", "lib", "gcc-base", "gcc-14"]
 
 # gcc-15 compiler environment
 [feature.gcc-15.target.linux.dependencies]

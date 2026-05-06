@@ -90,7 +90,7 @@
             "name": "neon-base",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -DXSIMD_WITH_NEON64=0"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv7-a -mfpu=neon -mfloat-abi=softfp"
             }
         },
         {
@@ -101,10 +101,17 @@
             }
         },
         {
-            "name": "sve-base",
+            "name": "sve128-base",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=128"
+            }
+        },
+        {
+            "name": "sve256-base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=256"
             }
         },
 
@@ -187,10 +194,17 @@
             ]
         },
         {
-            "name": "dev-sve",
+            "name": "dev-sve128",
             "inherits": [
                 "dev-base",
-                "sve-base"
+                "sve128-base"
+            ]
+        },
+        {
+            "name": "dev-sve256",
+            "inherits": [
+                "dev-base",
+                "sve256-base"
             ]
         }
     ]
