@@ -13,6 +13,7 @@
 #define XSIMD_AVX512F_REGISTER_HPP
 
 #include "./xsimd_common_arch.hpp"
+#include "./xsimd_fma3_avx2_register.hpp"
 
 namespace xsimd
 {
@@ -69,7 +70,6 @@ namespace xsimd
         XSIMD_DECLARE_SIMD_REGISTER(long long int, avx512f, __m512i);
         XSIMD_DECLARE_SIMD_REGISTER(float, avx512f, __m512);
         XSIMD_DECLARE_SIMD_REGISTER(double, avx512f, __m512d);
-
     }
 #endif
 }
