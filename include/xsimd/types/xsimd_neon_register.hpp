@@ -18,7 +18,7 @@
 #include "./xsimd_register.hpp"
 
 #if XSIMD_WITH_NEON
-#if defined(_WIN32) && XSIMD_WITH_NEON64
+#if defined(_MSC_VER) && !defined(__clang__) && XSIMD_WITH_NEON64
 #include <arm64_neon.h>
 #else
 #include <arm_neon.h>
