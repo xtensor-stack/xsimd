@@ -23,7 +23,7 @@
 #include <type_traits>
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
-#include "xtl/xcomplex.hpp"
+#include <xtl/xcomplex.hpp>
 #endif
 
 #ifdef __APPLE__

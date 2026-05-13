@@ -15,6 +15,14 @@
 #include "./xsimd_common_arch.hpp"
 #include "./xsimd_register.hpp"
 
+#ifdef XSIMD_ENABLE_XTL_COMPLEX
+#include <xtl/xcomplex.hpp>
+#endif
+
+#include <array>
+#include <complex>
+#include <cstddef>
+
 namespace xsimd
 {
     /**
@@ -70,7 +78,7 @@ namespace xsimd
         };
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
         template <typename T, bool i3ec, size_t N>
-        struct has_simd_register<xtl::complex<T, T, i3ec>, emulated<N>> : std::true_type
+        struct has_simd_register<xtl::xcomplex<T, T, i3ec>, emulated<N>> : std::true_type
         {
         };
 #endif

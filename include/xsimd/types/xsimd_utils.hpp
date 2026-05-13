@@ -20,7 +20,7 @@
 #include <utility>
 
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
-#include "xtl/xcomplex.hpp"
+#include <xtl/xcomplex.hpp>
 #endif
 
 #include "./xsimd_batch_fwd.hpp"
