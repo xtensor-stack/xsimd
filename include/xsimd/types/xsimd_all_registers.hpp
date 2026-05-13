@@ -19,6 +19,7 @@
 #include "./xsimd_avx512pf_register.hpp"
 #include "./xsimd_avx512vbmi2_register.hpp"
 #include "./xsimd_avx512vbmi_register.hpp"
+#include "./xsimd_avx512vl_register.hpp"
 #include "./xsimd_avx512vnni_avx512bw_register.hpp"
 #include "./xsimd_avx512vnni_avx512vbmi2_register.hpp"
 #include "./xsimd_avx_register.hpp"

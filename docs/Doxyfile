@@ -15,6 +15,7 @@ INPUT             = ../include/xsimd/types/xsimd_api.hpp \
                     ../include/xsimd/types/xsimd_avx512cd_register.hpp \
                     ../include/xsimd/types/xsimd_avx512dq_register.hpp \
                     ../include/xsimd/types/xsimd_avx512f_register.hpp \
+                    ../include/xsimd/types/xsimd_avx512vl_register.hpp \
                     ../include/xsimd/types/xsimd_avx_register.hpp \
                     ../include/xsimd/types/xsimd_fma3_avx_register.hpp \
                     ../include/xsimd/types/xsimd_fma3_avx2_register.hpp \

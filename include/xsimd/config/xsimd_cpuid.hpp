@@ -49,6 +49,7 @@ namespace xsimd
             ARCH_FIELD_EX(fma3<::xsimd::avx2>, fma3_avx2)
             ARCH_FIELD(avx512f)
             ARCH_FIELD(avx512cd)
+            ARCH_FIELD(avx512vl)
             ARCH_FIELD(avx512dq)
             ARCH_FIELD(avx512bw)
             ARCH_FIELD(avx512er)
@@ -121,6 +122,7 @@ namespace xsimd
 
                 avx512f = cpu.avx512f();
                 avx512cd = cpu.avx512cd();
+                avx512vl = cpu.avx512vl();
                 avx512dq = cpu.avx512dq();
                 avx512bw = cpu.avx512bw();
                 avx512er = cpu.avx512er();
