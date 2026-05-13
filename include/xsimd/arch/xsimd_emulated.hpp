@@ -12,14 +12,13 @@
 #ifndef XSIMD_EMULATED_HPP
 #define XSIMD_EMULATED_HPP
 
+#include "../arch/xsimd_scalar.hpp"
+#include "../types/xsimd_emulated_register.hpp"
+#include "../types/xsimd_utils.hpp"
+
 #include <complex>
 #include <numeric>
 #include <type_traits>
-
-#include "../arch/xsimd_scalar.hpp"
-
-#include "../types/xsimd_emulated_register.hpp"
-#include "../types/xsimd_utils.hpp"
 
 namespace xsimd
 {

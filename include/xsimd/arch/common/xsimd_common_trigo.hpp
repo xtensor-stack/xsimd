@@ -12,9 +12,9 @@
 #ifndef XSIMD_COMMON_TRIGO_HPP
 #define XSIMD_COMMON_TRIGO_HPP
 
-#include <array>
-
 #include "./xsimd_common_details.hpp"
+
+#include <array>
 
 namespace xsimd
 {

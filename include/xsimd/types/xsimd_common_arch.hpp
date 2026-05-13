@@ -12,9 +12,9 @@
 #ifndef XSIMD_COMMON_ARCH_HPP
 #define XSIMD_COMMON_ARCH_HPP
 
-#include <cstddef>
-
 #include "../config/xsimd_config.hpp"
+
+#include <cstddef>
 
 /**
  * @defgroup architectures Architecture description

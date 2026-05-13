@@ -13,10 +13,10 @@
 #ifndef XSIMD_AVX_128_HPP
 #define XSIMD_AVX_128_HPP
 
-#include <type_traits>
-
 #include "../types/xsimd_avx_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
+
+#include <type_traits>
 
 namespace xsimd
 {

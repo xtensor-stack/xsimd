@@ -14,9 +14,9 @@
 #ifndef XSIMD_VXE_HPP
 #define XSIMD_VXE_HPP
 
-#include <type_traits>
-
 #include "../types/xsimd_vxe_register.hpp"
+
+#include <type_traits>
 
 namespace xsimd
 {

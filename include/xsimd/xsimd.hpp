@@ -12,10 +12,9 @@
 #ifndef XSIMD_HPP
 #define XSIMD_HPP
 
+#include "./arch/xsimd_scalar.hpp"
 #include "./config/xsimd_config.hpp"
 #include "./config/xsimd_macros.hpp"
-
-#include "./arch/xsimd_scalar.hpp"
 #include "./memory/xsimd_aligned_allocator.hpp"
 #include "./types/xsimd_batch_fwd.hpp"
 

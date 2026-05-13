@@ -12,11 +12,11 @@
 #ifndef XSIMD_COMMON_SWIZZLE_HPP
 #define XSIMD_COMMON_SWIZZLE_HPP
 
+#include "../../config/xsimd_macros.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
-
-#include "../../config/xsimd_macros.hpp"
 
 namespace xsimd
 {

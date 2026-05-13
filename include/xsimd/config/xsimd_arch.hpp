@@ -12,13 +12,13 @@
 #ifndef XSIMD_ARCH_HPP
 #define XSIMD_ARCH_HPP
 
-#include <initializer_list>
-#include <type_traits>
-#include <utility>
-
 #include "../types/xsimd_all_registers.hpp"
 #include "./xsimd_config.hpp"
 #include "./xsimd_cpuid.hpp"
+
+#include <initializer_list>
+#include <type_traits>
+#include <utility>
 
 namespace xsimd
 {

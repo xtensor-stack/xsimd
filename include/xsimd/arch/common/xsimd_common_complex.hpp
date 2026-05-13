@@ -12,9 +12,9 @@
 #ifndef XSIMD_COMMON_COMPLEX_HPP
 #define XSIMD_COMMON_COMPLEX_HPP
 
-#include <complex>
-
 #include "./xsimd_common_details.hpp"
+
+#include <complex>
 
 namespace xsimd
 {

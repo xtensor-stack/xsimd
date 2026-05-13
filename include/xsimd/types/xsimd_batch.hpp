@@ -12,15 +12,15 @@
 #ifndef XSIMD_BATCH_HPP
 #define XSIMD_BATCH_HPP
 
-#include <cassert>
-#include <complex>
-
 #include "../config/xsimd_arch.hpp"
 #include "../config/xsimd_config.hpp"
 #include "../config/xsimd_macros.hpp"
 #include "../memory/xsimd_alignment.hpp"
 #include "./xsimd_batch_fwd.hpp"
 #include "./xsimd_utils.hpp"
+
+#include <cassert>
+#include <complex>
 
 namespace xsimd
 {

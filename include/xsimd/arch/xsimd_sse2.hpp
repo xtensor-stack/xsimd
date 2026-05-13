@@ -12,13 +12,13 @@
 #ifndef XSIMD_SSE2_HPP
 #define XSIMD_SSE2_HPP
 
-#include <complex>
-#include <limits>
-#include <type_traits>
-
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_sse2_register.hpp"
 #include "./utils/shifts.hpp"
+
+#include <complex>
+#include <limits>
+#include <type_traits>
 
 namespace xsimd
 {

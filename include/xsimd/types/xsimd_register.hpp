@@ -12,9 +12,9 @@
 #ifndef XSIMD_REGISTER_HPP
 #define XSIMD_REGISTER_HPP
 
-#include <type_traits>
-
 #include "../config/xsimd_macros.hpp"
+
+#include <type_traits>
 
 namespace xsimd
 {

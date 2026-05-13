@@ -12,12 +12,12 @@
 #ifndef XSIMD_AVX512F_HPP
 #define XSIMD_AVX512F_HPP
 
+#include "../types/xsimd_avx512f_register.hpp"
+#include "../types/xsimd_batch_constant.hpp"
+
 #include <complex>
 #include <limits>
 #include <type_traits>
-
-#include "../types/xsimd_avx512f_register.hpp"
-#include "../types/xsimd_batch_constant.hpp"
 
 namespace xsimd
 {

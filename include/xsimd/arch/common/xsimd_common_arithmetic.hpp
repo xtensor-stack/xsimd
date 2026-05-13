@@ -12,12 +12,12 @@
 #ifndef XSIMD_COMMON_ARITHMETIC_HPP
 #define XSIMD_COMMON_ARITHMETIC_HPP
 
+#include "../../types/xsimd_batch_constant.hpp"
+#include "./xsimd_common_details.hpp"
+
 #include <complex>
 #include <limits>
 #include <type_traits>
-
-#include "../../types/xsimd_batch_constant.hpp"
-#include "./xsimd_common_details.hpp"
 
 namespace xsimd
 {

@@ -12,12 +12,6 @@
 #ifndef XSIMD_NEON_HPP
 #define XSIMD_NEON_HPP
 
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <complex>
-#include <type_traits>
-
 #include "../types/xsimd_batch_fwd.hpp"
 #include "../types/xsimd_neon_register.hpp"
 #include "../types/xsimd_utils.hpp"
@@ -25,6 +19,12 @@
 #include "./common/xsimd_common_bit.hpp"
 #include "./common/xsimd_common_cast.hpp"
 #include "./xsimd_common_fwd.hpp"
+
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <complex>
+#include <type_traits>
 
 namespace xsimd
 {

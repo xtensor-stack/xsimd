@@ -13,10 +13,10 @@
 #ifndef XSIMD_WASM_HPP
 #define XSIMD_WASM_HPP
 
-#include <type_traits>
-
 #include "../types/xsimd_wasm_register.hpp"
 #include "./common/xsimd_common_cast.hpp"
+
+#include <type_traits>
 
 namespace xsimd
 {

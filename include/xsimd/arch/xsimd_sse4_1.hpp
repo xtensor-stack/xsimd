@@ -12,10 +12,10 @@
 #ifndef XSIMD_SSE4_1_HPP
 #define XSIMD_SSE4_1_HPP
 
-#include <type_traits>
-
 #include "../types/xsimd_sse4_1_register.hpp"
 #include "./common/xsimd_common_cast.hpp"
+
+#include <type_traits>
 
 namespace xsimd
 {
