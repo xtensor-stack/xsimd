@@ -13,7 +13,6 @@
 #define XSIMD_ISA_HPP
 
 #include "../config/xsimd_arch.hpp"
-
 #include "./xsimd_common_fwd.hpp"
 
 #if XSIMD_WITH_EMULATED

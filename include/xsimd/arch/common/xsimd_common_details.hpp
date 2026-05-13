@@ -12,12 +12,12 @@
 #ifndef XSIMD_COMMON_DETAILS_HPP
 #define XSIMD_COMMON_DETAILS_HPP
 
-#include <complex>
-
 #include "../../math/xsimd_rem_pio2.hpp"
 #include "../../types/xsimd_common_arch.hpp"
 #include "../../types/xsimd_utils.hpp"
 #include "../xsimd_constants.hpp"
+
+#include <complex>
 
 namespace xsimd
 {

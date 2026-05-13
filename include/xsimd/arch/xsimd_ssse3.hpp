@@ -12,11 +12,11 @@
 #ifndef XSIMD_SSSE3_HPP
 #define XSIMD_SSSE3_HPP
 
-#include <cstddef>
-#include <type_traits>
-
 #include "../types/xsimd_ssse3_register.hpp"
 #include "../types/xsimd_utils.hpp"
+
+#include <cstddef>
+#include <type_traits>
 
 namespace xsimd
 {

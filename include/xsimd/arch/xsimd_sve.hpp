@@ -13,12 +13,12 @@
 #ifndef XSIMD_SVE_HPP
 #define XSIMD_SVE_HPP
 
-#include <complex>
-#include <type_traits>
-
 #include "../config/xsimd_config.hpp"
 #include "../config/xsimd_macros.hpp"
 #include "../types/xsimd_sve_register.hpp"
+
+#include <complex>
+#include <type_traits>
 
 // Define a inline namespace with the explicit SVE vector size to avoid ODR violation
 // When dynamically dispatching between different SVE sizes.

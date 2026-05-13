@@ -12,10 +12,10 @@
 #ifndef XSIMD_AVX512BW_HPP
 #define XSIMD_AVX512BW_HPP
 
+#include "../types/xsimd_avx512bw_register.hpp"
+
 #include <array>
 #include <type_traits>
-
-#include "../types/xsimd_avx512bw_register.hpp"
 
 namespace xsimd
 {

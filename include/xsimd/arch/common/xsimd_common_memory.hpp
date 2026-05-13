@@ -12,12 +12,12 @@
 #ifndef XSIMD_COMMON_MEMORY_HPP
 #define XSIMD_COMMON_MEMORY_HPP
 
+#include "../../types/xsimd_batch_constant.hpp"
+#include "./xsimd_common_details.hpp"
+
 #include <algorithm>
 #include <array>
 #include <complex>
-
-#include "../../types/xsimd_batch_constant.hpp"
-#include "./xsimd_common_details.hpp"
 
 namespace xsimd
 {

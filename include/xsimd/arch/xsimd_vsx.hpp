@@ -12,13 +12,14 @@
 #ifndef XSIMD_VSX_HPP
 #define XSIMD_VSX_HPP
 
-#include <complex>
-#include <type_traits>
-
+#include "../types/xsimd_batch_fwd.hpp"
 #include "../types/xsimd_vsx_register.hpp"
 #include "./common/xsimd_common_cast.hpp"
 
 #include <endian.h>
+
+#include <complex>
+#include <type_traits>
 
 namespace xsimd
 {

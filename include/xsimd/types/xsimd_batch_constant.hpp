@@ -12,13 +12,13 @@
 #ifndef XSIMD_BATCH_CONSTANT_HPP
 #define XSIMD_BATCH_CONSTANT_HPP
 
-#include <cstddef>
-#include <functional>
-#include <utility>
-
 #include "../config/xsimd_config.hpp"
 #include "./xsimd_batch.hpp"
 #include "./xsimd_utils.hpp"
+
+#include <cstddef>
+#include <functional>
+#include <utility>
 
 namespace xsimd
 {

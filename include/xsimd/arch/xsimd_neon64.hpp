@@ -12,15 +12,15 @@
 #ifndef XSIMD_NEON64_HPP
 #define XSIMD_NEON64_HPP
 
+#include "../types/xsimd_neon64_register.hpp"
+#include "../types/xsimd_utils.hpp"
+#include "./xsimd_neon.hpp"
+
 #include <cassert>
 #include <complex>
 #include <cstddef>
 #include <cstring>
 #include <utility>
-
-#include "../types/xsimd_neon64_register.hpp"
-#include "../types/xsimd_utils.hpp"
-#include "./xsimd_neon.hpp"
 
 namespace xsimd
 {

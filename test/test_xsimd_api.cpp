@@ -12,7 +12,7 @@
 #include "xsimd/types/xsimd_utils.hpp"
 #include "xsimd/xsimd.hpp"
 
-#include "doctest/doctest.h"
+#include <doctest/doctest.h>
 
 template <class T>
 struct scalar_type

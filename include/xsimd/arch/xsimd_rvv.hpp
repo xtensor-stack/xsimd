@@ -10,15 +10,15 @@
 #ifndef XSIMD_RVV_HPP
 #define XSIMD_RVV_HPP
 
-#include <complex>
-#include <type_traits>
-
 #include "../config/xsimd_macros.hpp"
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_rvv_register.hpp"
 #include "../types/xsimd_utils.hpp"
 #include "../utils/xsimd_type_traits.hpp"
 #include "./xsimd_constants.hpp"
+
+#include <complex>
+#include <type_traits>
 
 // This set of macros allows the synthesis of identifiers using a template and
 // variable macro arguments.  A single template can then be used by multiple

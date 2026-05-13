@@ -12,6 +12,8 @@
 #ifndef XSIMD_SCALAR_HPP
 #define XSIMD_SCALAR_HPP
 
+#include "../config/xsimd_macros.hpp"
+
 #include <cassert>
 #include <cmath>
 #include <complex>
@@ -20,10 +22,8 @@
 #include <limits>
 #include <type_traits>
 
-#include "xsimd/config/xsimd_macros.hpp"
-
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
-#include "xtl/xcomplex.hpp"
+#include <xtl/xcomplex.hpp>
 #endif
 
 #ifdef __APPLE__

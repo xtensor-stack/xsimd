@@ -21,10 +21,10 @@
 #include <cstdlib>
 #endif
 
+#include "../config/xsimd_arch.hpp"
+
 #include <cassert>
 #include <memory>
-
-#include "../config/xsimd_arch.hpp"
 
 namespace xsimd
 {

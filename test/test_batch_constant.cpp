@@ -9,9 +9,9 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#include <numeric>
-
 #include "xsimd/xsimd.hpp"
+
+#include <numeric>
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
 #include "test_utils.hpp"

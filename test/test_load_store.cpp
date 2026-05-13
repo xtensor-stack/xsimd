@@ -12,11 +12,11 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include "test_utils.hpp"
+
 #include <algorithm>
 #include <random>
 #include <type_traits>
-
-#include "test_utils.hpp"
 
 template <class B>
 struct load_store_test

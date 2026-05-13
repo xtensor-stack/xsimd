@@ -12,13 +12,13 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
-#include <type_traits>
-#include <vector>
-
-#include "doctest/doctest.h"
-
 #include "xsimd/memory/xsimd_aligned_allocator.hpp"
 #include "xsimd/memory/xsimd_alignment.hpp"
+
+#include <doctest/doctest.h>
+
+#include <type_traits>
+#include <vector>
 
 struct mock_container
 {

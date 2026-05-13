@@ -12,15 +12,15 @@
 #ifndef XSIMD_API_HPP
 #define XSIMD_API_HPP
 
-#include <complex>
-#include <cstddef>
-#include <limits>
-#include <ostream>
-
 #include "../arch/xsimd_isa.hpp"
 #include "../types/xsimd_batch.hpp"
 #include "../types/xsimd_traits.hpp"
 #include "../utils/xsimd_type_traits.hpp"
+
+#include <complex>
+#include <cstddef>
+#include <limits>
+#include <ostream>
 
 namespace xsimd
 {

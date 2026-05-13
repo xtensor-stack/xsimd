@@ -17,7 +17,7 @@
 #endif
 #include "xsimd/xsimd.hpp"
 
-#include "doctest/doctest.h"
+#include <doctest/doctest.h>
 
 TEST_CASE("[GNU_SOURCE support]")
 {

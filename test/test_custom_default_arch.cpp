@@ -11,9 +11,10 @@
 #ifdef __STSE2__
 
 #define XSIMD_DEFAULT_ARCH xsimd::sse2
-#include "xsimd/xsimd.hpp"
 
 #include "test_utils.hpp"
+
+#include "xsimd/xsimd.hpp"
 
 // Could be different than sse2 if we compile for other architecture avx
 static_assert(std::is_same<xsimd::default_arch, xsimd::sse2>::value, "default arch correctly hooked");

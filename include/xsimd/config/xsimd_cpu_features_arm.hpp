@@ -12,11 +12,11 @@
 #ifndef XSIMD_CPU_FEATURES_ARM_HPP
 #define XSIMD_CPU_FEATURES_ARM_HPP
 
-#include <cstddef>
-#include <cstdint>
-
 #include "./xsimd_config.hpp"
 #include "./xsimd_getauxval.hpp"
+
+#include <cstddef>
+#include <cstdint>
 
 #if XSIMD_TARGET_ARM && XSIMD_HAVE_LINUX_GETAUXVAL
 // HWCAP_XXX masks to use on getauxval results.
