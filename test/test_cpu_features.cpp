@@ -66,8 +66,9 @@ TEST_CASE("[cpu_features] x86 implication chains")
     CHECK_IMPLICATION(cpu.fma4(), cpu.avx());
     CHECK_IMPLICATION(cpu.fma3(), cpu.avx());
 
-    // AVX-512 iplication chain
+    // AVX-512 implication chain
     CHECK_IMPLICATION(cpu.avx512f(), cpu.avx2());
+    CHECK_IMPLICATION(cpu.avx512vl(), cpu.avx512cd());
     CHECK_IMPLICATION(cpu.avx512dq(), cpu.avx512f());
     CHECK_IMPLICATION(cpu.avx512ifma(), cpu.avx512f());
     CHECK_IMPLICATION(cpu.avx512pf(), cpu.avx512f());
@@ -132,6 +133,7 @@ TEST_CASE("[cpu_features] x86 features from environment")
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_AVX512F", cpu.avx512f());
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_AVX512BW", cpu.avx512bw());
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_AVX512CD", cpu.avx512cd());
+    CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_AVX512VL", cpu.avx512vl());
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_AVX512DQ", cpu.avx512dq());
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_AVXVNNI", cpu.avxvnni());
 }

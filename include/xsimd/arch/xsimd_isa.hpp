@@ -73,6 +73,10 @@
 #include "./xsimd_avx512f.hpp"
 #endif
 
+#if XSIMD_WITH_AVX512VL
+#include "./xsimd_avx512vl.hpp"
+#endif
+
 #if XSIMD_WITH_AVX512DQ
 #include "./xsimd_avx512dq.hpp"
 #endif
@@ -86,6 +90,10 @@
 #endif
 
 #if XSIMD_WITH_AVX512PF
+#include "./xsimd_avx512pf.hpp"
+#endif
+
+#if XSIMD_WITH_AVX512VL
 #include "./xsimd_avx512pf.hpp"
 #endif
 
