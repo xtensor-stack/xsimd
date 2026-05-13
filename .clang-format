@@ -4,5 +4,24 @@ AlignAfterOpenBracket: Align
 AlignConsecutiveDeclarations: 'false'
 BreakBeforeBraces: Allman
 NamespaceIndentation: All
+IncludeBlocks: Regroup
+# First regex to match classifies the header into a group.
+# Group are ordered in the source code by increasing priority.
+IncludeCategories:
+  # Standard headers
+  - Regex: <[^\.]+>
+    Priority: 4
+  # Third party dependencies (prefer angle bracket over quotes)
+  - Regex: <.+\..+>
+    Priority: 3
+  # xsimd absolute headers (e.g. in tests)
+  - Regex: '["<]xsimd/.+[">]'
+    Priority: 2
+  # Relative header from project
+  - Regex: '"\.+.*"'
+    Priority: 1
+  # Not quoted header (anything else, avoid)
+  - Regex: '".*"'
+    Priority: 0
 
 ...
