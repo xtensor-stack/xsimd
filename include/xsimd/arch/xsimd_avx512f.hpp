@@ -1561,7 +1561,7 @@ namespace xsimd
 
                     const uint32_t magic = (0x80 + 0x4000 + 0x200000 + 0x10000000);
 
-                    unsigned char res = ((data * magic) >> 24) & 0xFF;
+                    unsigned char res = (data * magic) >> 28;
                     return res;
                 }
                 else if constexpr (N == 2)
@@ -1571,7 +1571,7 @@ namespace xsimd
 
                     const uint16_t magic = (0x80 + 0x4000);
 
-                    unsigned char res = ((data * magic) >> 8) & 0xFF;
+                    unsigned char res = (data * magic) >> 14;
                     return res;
                 }
             }

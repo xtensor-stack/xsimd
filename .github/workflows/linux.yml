@@ -119,7 +119,7 @@ jobs:
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
-          CXX_FLAGS="$CXX_FLAGS -m32"
+          CXXFLAGS="$CXXFLAGS -m32"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'force_no_instr_set' ]]; then
           :
@@ -128,7 +128,7 @@ jobs:
         fi
 
         # Cheap way of spotting uninitialized read
-        CXX_FLAGS="$CXX_FLAGS -ftrivial-auto-var-init=pattern"
+        CXXFLAGS="$CXXFLAGS -ftrivial-auto-var-init=pattern"
 
         cmake -B _build \
               -DBUILD_TESTS=ON \
@@ -138,7 +138,7 @@ jobs:
               -DCMAKE_C_COMPILER=$CC \
               -DCMAKE_CXX_COMPILER=$CXX \
               $CMAKE_EXTRA_ARGS \
-              -DCMAKE_CXX_FLAGS='$CXX_FLAGS' \
+              -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
               -G Ninja
     - name: Build
       run: cmake --build _build
