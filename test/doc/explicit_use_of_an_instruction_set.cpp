@@ -1,4 +1,5 @@
 #include "xsimd/xsimd.hpp"
+
 #include <iostream>
 
 namespace xs = xsimd;

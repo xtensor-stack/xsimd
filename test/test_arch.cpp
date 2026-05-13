@@ -12,11 +12,11 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
-#include <numeric>
-#include <type_traits>
-
 #include "test_sum.hpp"
 #include "test_utils.hpp"
+
+#include <numeric>
+#include <type_traits>
 
 #ifndef XSIMD_DEFAULT_ARCH
 static_assert(xsimd::default_arch::supported(), "default arch must be supported");

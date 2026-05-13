@@ -10,11 +10,11 @@
  ****************************************************************************/
 #ifndef EMSCRIPTEN
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest/doctest.h"
+#include <doctest/doctest.h>
 #else
 
 #define DOCTEST_CONFIG_IMPLEMENT
-#include "doctest/doctest.h"
+#include <doctest/doctest.h>
 #include <emscripten/bind.h>
 
 int run_tests()

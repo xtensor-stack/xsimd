@@ -12,12 +12,12 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include "test_utils.hpp"
+
 #include <array>
 #include <functional>
 #include <type_traits>
 #include <vector>
-
-#include "test_utils.hpp"
 
 namespace xsimd
 {

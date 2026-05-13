@@ -9,11 +9,11 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ***************************************************************************/
 
-#include <cstdint>
+#include "xsimd/utils/bits.hpp"
 
 #include <doctest/doctest.h>
 
-#include "xsimd/utils/bits.hpp"
+#include <cstdint>
 
 TEST_CASE("[utils::make_bit_mask] single bit")
 {

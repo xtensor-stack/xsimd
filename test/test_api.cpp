@@ -12,11 +12,11 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include "test_utils.hpp"
+
 #include <functional>
 #include <numeric>
 #include <random>
-
-#include "test_utils.hpp"
 
 template <class B>
 struct xsimd_api_test

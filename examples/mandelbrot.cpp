@@ -13,14 +13,14 @@
 // https://github.com/ospray/tsimd/blob/master/benchmarks/mandelbrot.cpp
 // Author Jefferson Amstutz / intel
 
+#include "pico_bench.hpp"
+
+#include <xsimd/xsimd.hpp>
+
 #include <cstdio>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "pico_bench.hpp"
-
-#include <xsimd/xsimd.hpp>
 
 // helper function to write the rendered image as PPM file
 inline void writePPM(const std::string& fileName,

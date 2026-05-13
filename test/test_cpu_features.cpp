@@ -9,14 +9,14 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
+#include "xsimd/xsimd.hpp"
+
+#include <doctest/doctest.h>
+
 #include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <string>
-
-#include <doctest/doctest.h>
-
-#include "xsimd/xsimd.hpp"
 
 #define CHECK_IMPLICATION(a, b) CHECK_UNARY(!(a) || (b))
 

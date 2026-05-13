@@ -11,6 +11,8 @@
 
 #include "xsimd/xsimd.hpp"
 
+#include <doctest/doctest.h>
+
 #include <array>
 #include <cmath>
 #include <complex>
@@ -20,8 +22,6 @@
 #include <string>
 #include <type_traits>
 #include <vector>
-
-#include "doctest/doctest.h"
 
 #ifndef XSIMD_TEST_UTILS_HPP
 #define XSIMD_TEST_UTILS_HPP

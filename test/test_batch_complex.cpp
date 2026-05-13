@@ -12,11 +12,11 @@
 #include "xsimd/xsimd.hpp"
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 
+#include "test_utils.hpp"
+
 #include <cmath>
 #include <functional>
 #include <numeric>
-
-#include "test_utils.hpp"
 
 using namespace std::placeholders;
 
