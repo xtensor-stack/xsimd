@@ -119,7 +119,7 @@ jobs:
         if echo '${{ matrix.sys.preset }}' | grep -q 'avx512' ; then
           # Running with emulation, must have AVX512, lower tier are checked by implications in tests
           export XSIMD_TEST_CPU_ASSUME_AVX512F="1"
-          ./sde-external-9.48.0-2024-11-25-lin/sde64 -tgl -- ./_build/test/test_xsimd
+          ./sde-external-9.48.0-2024-11-25-lin/sde64 -skx -- ./_build/test/test_xsimd
         else
           export XSIMD_TEST_CPU_ASSUME_SSE4_2=$(grep -q 'sse4_2' /proc/cpuinfo && echo "1" || echo "0")
           export XSIMD_TEST_CPU_ASSUME_AVX=$(grep -q 'avx' /proc/cpuinfo && echo "1" || echo "0")
