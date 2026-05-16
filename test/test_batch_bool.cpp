@@ -922,4 +922,49 @@ TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
 
     SUBCASE("mask utils (compile-time)") { Test.test_mask_compile_time(); }
 }
+
+TEST_CASE_TEMPLATE("batch_bool mask hygiene", B, BATCH_TYPES)
+{
+    using batch_type = B;
+    using arch_type = typename B::arch_type;
+    using value_type = typename B::value_type;
+
+    SUBCASE("any(a != a) is false")
+    {
+        batch_type a(value_type(1));
+        CHECK_FALSE(xsimd::any(a != a));
+    }
+
+    SUBCASE("all(~(a != a)) is true")
+    {
+        batch_type a(value_type(1));
+        CHECK_UNARY(xsimd::all(~(a != a)));
+    }
+
+    SUBCASE("any(~(a == a)) is false")
+    {
+        batch_type a(value_type(1));
+        CHECK_FALSE(xsimd::any(~(a == a)));
+    }
+
+    SUBCASE("eq(mask, _mask) is all-true")
+    {
+        auto m0 = (batch_type(value_type(1)) != batch_type(value_type(1)));
+        CHECK_UNARY(xsimd::all(m0 == m0));
+    }
+
+    SUBCASE("batch_bool stored to bool[] is canonical 0/1")
+    {
+        batch_type a(value_type(1)), b(value_type(2));
+        auto m = (a == b); // all false
+        alignas(arch_type::alignment()) bool buf[B::size + 1] = { true, true }; // sentinel
+        m.store_aligned(buf);
+        for (std::size_t i = 0; i < B::size; ++i)
+        {
+            // bit-level check: must be exactly 0, not just falsy
+            CHECK_EQ(*reinterpret_cast<uint8_t const*>(&buf[i]), uint8_t(0));
+        }
+    }
+}
+
 #endif
