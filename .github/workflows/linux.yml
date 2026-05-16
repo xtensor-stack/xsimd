@@ -81,13 +81,15 @@ jobs:
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx_128' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge -DXSIMD_DEFAULT_ARCH=avx_128"
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx_128"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx2' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx2_128' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell -DXSIMD_DEFAULT_ARCH=avx2_128"
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx2_128"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'sse3' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=nocona"
@@ -96,7 +98,8 @@ jobs:
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512vl_256' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512 -DXSIMD_DEFAULT_ARCH=avx512vl_256"
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_256"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512pf' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knl"
