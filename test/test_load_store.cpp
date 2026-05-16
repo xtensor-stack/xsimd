@@ -24,7 +24,6 @@ struct load_store_test
     using batch_type = B;
     using value_type = typename B::value_type;
     using index_type = typename xsimd::as_integer_t<batch_type>;
-    using batch_bool_type = typename batch_type::batch_bool_type;
     template <class T>
     using allocator = xsimd::default_allocator<T, typename B::arch_type>;
     static constexpr size_t size = B::size;
@@ -603,6 +602,36 @@ TEST_CASE_TEMPLATE("[load store]", B, BATCH_TYPES)
     SUBCASE("scatter") { Test.test_scatter(); }
 
     SUBCASE("masked") { Test.test_masked(); }
+}
+
+TEST_CASE_TEMPLATE("store_masked respects Mode", B, BATCH_TYPES)
+{
+    using T = typename B::value_type;
+    using A = typename B::arch_type;
+    constexpr std::size_t N = B::size;
+
+    // Unaligned-mode + unaligned pointer: must not fault.
+    alignas(A::alignment()) T big[2 * N + 1] = {};
+    T* unaligned_ptr = big + 1; // sizeof(T)-aligned only
+
+    struct AllTrue
+    {
+        static constexpr bool get(std::size_t, std::size_t) { return true; }
+    };
+    auto cst_mask = xsimd::make_batch_bool_constant<T, AllTrue, A>();
+
+    B v(T(7));
+    v.store(unaligned_ptr, cst_mask, xsimd::unaligned_mode {});
+    for (std::size_t i = 0; i < N; ++i)
+        CHECK_EQ(unaligned_ptr[i], T(7));
+
+    // Overload resolution: store_masked with same-typed mask must compile.
+    // If C3 regresses, this becomes a compile error.
+    auto signed_cst_mask = xsimd::make_batch_bool_constant<T, AllTrue, A>();
+    alignas(A::alignment()) T aligned_buf[N] = {};
+    v.store(aligned_buf, signed_cst_mask, xsimd::aligned_mode {});
+    for (std::size_t i = 0; i < N; ++i)
+        CHECK_EQ(aligned_buf[i], T(7));
 }
 
 #endif
