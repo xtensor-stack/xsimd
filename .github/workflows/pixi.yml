@@ -1,0 +1,27 @@
+name: Pixi
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Sample Pixi usage.
+    # It can be extended to run any configuration with major compilers/architectures.
+    name: Pixi ${{ matrix.sys.compiler }} - ${{ matrix.sys.preset }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sys:
+          - { compiler: "gcc-15", preset: "dev-avx2" }
+          - { compiler: "clang-21", preset: "dev-sse2" }
+    steps:
+      - name: Checkout xsimd
+        uses: actions/checkout@v3
+      - uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          pixi-version: v0.62.2
+          cache: true
+      - name: Run test
+        run: pixi run -e ${{ matrix.sys.compiler }} test ${{ matrix.sys.preset }}
