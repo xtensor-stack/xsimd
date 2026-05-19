@@ -1518,15 +1518,40 @@ namespace xsimd
         {
             // Adapted from https://github.com/serge-sans-paille/fast-bitset-from-bool-array
             // Generate a bitset from an array of boolean.
-            XSIMD_INLINE unsigned char tobitset(unsigned char unpacked[8])
+            template <size_t N>
+            XSIMD_INLINE unsigned char tobitset(unsigned char unpacked[N])
             {
-                uint64_t data;
-                memcpy(&data, unpacked, sizeof(uint64_t));
+                static_assert(N == 8 || N == 4 || N == 2, "valid pack size");
+                XSIMD_IF_CONSTEXPR(N == 8)
+                {
+                    uint64_t data;
+                    memcpy(&data, unpacked, sizeof(uint64_t));
 
-                const uint64_t magic = (0x80 + 0x4000 + 0x200000 + 0x10000000 + 0x0800000000 + 0x040000000000 + 0x02000000000000 + 0x0100000000000000);
+                    const uint64_t magic = (0x80 + 0x4000 + 0x200000 + 0x10000000 + 0x0800000000 + 0x040000000000 + 0x02000000000000 + 0x0100000000000000);
 
-                unsigned char res = ((data * magic) >> 56) & 0xFF;
-                return res;
+                    unsigned char res = ((data * magic) >> 56) & 0xFF;
+                    return res;
+                }
+                else XSIMD_IF_CONSTEXPR(N == 4)
+                {
+                    uint32_t data;
+                    memcpy(&data, unpacked, sizeof(uint32_t));
+
+                    const uint32_t magic = (0x80 + 0x4000 + 0x200000 + 0x10000000);
+
+                    unsigned char res = ((data * magic) >> 24) & 0xFF;
+                    return res;
+                }
+                else XSIMD_IF_CONSTEXPR(N == 2)
+                {
+                    uint16_t data;
+                    memcpy(&data, unpacked, sizeof(uint16_t));
+
+                    const uint16_t magic = (0x80 + 0x4000);
+
+                    unsigned char res = ((data * magic) >> 8) & 0xFF;
+                    return res;
+                }
             }
         }
 
@@ -1541,7 +1566,7 @@ namespace xsimd
             register_type mask = 0;
             for (std::size_t i = 0; i < iter; ++i)
             {
-                unsigned char block = detail::tobitset((unsigned char*)mem + i * 8);
+                unsigned char block = detail::tobitset<8>((unsigned char*)mem + i * 8);
                 mask |= (register_type(block) << (i * 8));
             }
             return mask;

@@ -32,6 +32,7 @@ jobs:
           - { compiler: 'clang', version: '18', flags: 'avx512' }
           - { compiler: 'clang', version: '18', flags: 'avx_128' }
           - { compiler: 'clang', version: '18', flags: 'avx2_128' }
+          - { compiler: 'clang', version: '18', flags: 'avx512vl_128' }
           - { compiler: 'clang', version: '18', flags: 'avx512vl_256' }
     steps:
     - name: Setup compiler
@@ -96,6 +97,10 @@ jobs:
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vl_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_128"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512vl_256' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"

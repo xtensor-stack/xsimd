@@ -32,6 +32,18 @@ namespace xsimd
     /**
      * @ingroup architectures
      *
+     * AVX512VL instructions extension for 128 bits registers
+     */
+    struct avx512vl_128 : avx2_128
+    {
+        static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512VL; }
+        static constexpr bool available() noexcept { return true; }
+        static constexpr char const* name() noexcept { return "avx512vl/128"; }
+    };
+
+    /**
+     * @ingroup architectures
+     *
      * AVX512VL instructions extension for 256 bits registers
      */
     struct avx512vl_256 : fma3<avx2>
@@ -56,6 +68,13 @@ namespace xsimd
         };
 
         XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx512vl, avx512cd);
+
+        template <class T>
+        struct get_bool_simd_register<T, avx512vl_128>
+        {
+            using type = simd_avx512_bool_register<T>;
+        };
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avx512vl_128, avx2_128);
 
         template <class T>
         struct get_bool_simd_register<T, avx512vl_256>

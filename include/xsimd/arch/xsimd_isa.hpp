@@ -75,6 +75,7 @@
 
 #if XSIMD_WITH_AVX512VL
 #include "./xsimd_avx512vl.hpp"
+#include "./xsimd_avx512vl_128.hpp"
 #include "./xsimd_avx512vl_256.hpp"
 #endif
 
