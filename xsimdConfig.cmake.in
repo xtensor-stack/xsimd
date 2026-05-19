@@ -18,12 +18,37 @@
 @PACKAGE_INIT@
 
 if(NOT TARGET @PROJECT_NAME@)
-    set(@PROJECT_NAME@_ENABLE_XTL_COMPLEX @ENABLE_XTL_COMPLEX@)
-    if(@PROJECT_NAME@_ENABLE_XTL_COMPLEX)
-        include(CMakeFindDependencyMacro)
-        find_dependency(xtl REQUIRED)
+    include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+    get_target_property(
+        @PROJECT_NAME@_INCLUDE_DIRS
+        @PROJECT_NAME@ INTERFACE_INCLUDE_DIRECTORIES
+    )
+
+    # xsimd <= 14 behaviour.
+    # Packagers that configured xsimd for their users with ENABLE_XTL_COMPLEX
+    # have it automatically enabled.
+    # Can be removed in xsimd 15. Keeping it with a version check so we do not
+    # miss the opportunity to remove it in the next major release.
+    # Compared to legacy version, users can now override the check
+    # with XSIMD_ENABLE_XTL_COMPLEX.
+    if(
+        @ENABLE_XTL_COMPLEX@
+        AND @XSIMD_VERSION_MAJOR@ LESS_EQUAL 14
+        AND NOT DEFINED XSIMD_ENABLE_XTL_COMPLEX
+    )
+        # The next check will handle adding it to the target
+        set(XSIMD_ENABLE_XTL_COMPLEX @ENABLE_XTL_COMPLEX@)
     endif()
 
-    include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
-    get_target_property(@PROJECT_NAME@_INCLUDE_DIRS @PROJECT_NAME@ INTERFACE_INCLUDE_DIRECTORIES)
+    # Final users of xsimd in a package manager control whether or not to
+    # enable xtl with this variable.
+    if(XSIMD_ENABLE_XTL_COMPLEX)
+        include(CMakeFindDependencyMacro)
+        find_dependency(xtl 0.8.0 REQUIRED)
+        target_link_libraries(@PROJECT_NAME@ INTERFACE xtl)
+        target_compile_definitions(
+            @PROJECT_NAME@
+            INTERFACE XSIMD_ENABLE_XTL_COMPLEX=1
+        )
+    endif()
 endif()
