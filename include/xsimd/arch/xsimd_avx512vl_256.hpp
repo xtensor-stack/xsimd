@@ -119,13 +119,14 @@ namespace xsimd
         {
             using register_type = typename batch_bool<T, A>::register_type;
             constexpr auto size = batch_bool<T, A>::size;
-            constexpr auto iter = size / 4;
-            static_assert((size % 4) == 0, "incorrect size of bool batch");
+            constexpr auto chunk_size = size >= 8 ? 8 : 4;
+            constexpr auto iter = size / chunk_size;
+            static_assert((size % chunk_size) == 0, "incorrect size of bool batch");
             register_type mask = 0;
             for (std::size_t i = 0; i < iter; ++i)
             {
-                unsigned char block = detail::tobitset((unsigned char*)mem + i * 4);
-                mask |= (register_type(block) << (i * 4));
+                unsigned char block = detail::tobitset<chunk_size>((unsigned char*)mem + i * chunk_size);
+                mask |= (register_type(block) << (i * chunk_size));
             }
             return mask;
         }
