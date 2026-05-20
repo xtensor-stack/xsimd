@@ -32,7 +32,7 @@ jobs:
           - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx512f' }
           - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx_128' }
           - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx2_128' }
-          # - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx512vl_256' }
+          - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx512vl_256' }
     steps:
     - name: Setup GCC compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
