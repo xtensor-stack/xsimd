@@ -96,14 +96,15 @@ jobs:
 
         cmake -B _build \
               --preset ${{ matrix.sys.preset }} \
-              -DBUILD_TESTS=ON \
-              -DBUILD_BENCHMARK=ON \
-              -DBUILD_EXAMPLES=ON \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_COMPILER=$CC \
-              -DCMAKE_CXX_COMPILER=$CXX \
-              $CMAKE_EXTRA_ARGS \
-              -DCMAKE_CXX_FLAGS='$CXX_FLAGS' \
+              -D BUILD_TESTS=ON \
+              -D BUILD_BENCHMARK=ON \
+              -D BUILD_EXAMPLES=ON \
+              -D CMAKE_BUILD_TYPE=Release \
+              -D CMAKE_C_COMPILER=$CC \
+              -D CMAKE_CXX_COMPILER=$CXX \
+              -D CMAKE_CXX_FLAGS='$CXX_FLAGS' \
+              -D TARGET_ARCH="x86-64" \
+              "${CMAKE_EXTRA_ARGS}" \
               -G Ninja
 
     - name: Build
