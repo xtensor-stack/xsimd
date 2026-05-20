@@ -298,11 +298,25 @@ namespace xsimd
 
         } // namespace detail
 
-        template <class A, class T, bool... Values, class Mode,
-                  typename = std::enable_if_t<(sizeof(T) >= 4)>>
-        XSIMD_INLINE batch<T, A> load_masked(T const* mem,
-                                             batch_bool_constant<T, A, Values...> mask,
-                                             convert<T>, Mode, requires_arch<avx512f>) noexcept
+        // The AVX512F masked-load logic lives in this plain `*_avx512f` helper
+        // (no `requires_arch` tag) and is exposed through the concrete
+        // element-type overloads below.
+        //
+        // Why not a single generic `load_masked(T const*, ..., requires_arch<avx512f>)`?
+        // It is ambiguous against the concrete-type / generic-arch overloads in
+        // xsimd_common_memory.hpp (e.g. `load_masked(int32_t const*, ...,
+        // requires_arch<A>)`): the avx512f overload is more specialized on the
+        // architecture while the common one is more specialized on the pointer
+        // type, so partial ordering cannot pick a winner. When AVX512DQ/BW is
+        // available a fully concrete `requires_arch<avx512dq>` overload is the
+        // unique best match and hides this, but a pure-AVX512F target (the
+        // `avx512f` preset) has no such tie-breaker and the call fails to
+        // compile. Concrete element-type `requires_arch<avx512f>` overloads make
+        // the avx512f candidate the unique best match for every integer type.
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE batch<T, A> load_masked_avx512f(T const* mem,
+                                                     batch_bool_constant<T, A, Values...> mask,
+                                                     Mode) noexcept
         {
             constexpr auto half = batch<T, A>::size / 2;
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
@@ -324,12 +338,59 @@ namespace xsimd
             }
         }
 
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem,
+                                                   batch_bool_constant<int32_t, A, Values...> mask,
+                                                   convert<int32_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            return load_masked_avx512f(mem, mask, Mode {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem,
+                                                    batch_bool_constant<uint32_t, A, Values...> mask,
+                                                    convert<uint32_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            return load_masked_avx512f(mem, mask, Mode {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<int64_t, A> load_masked(int64_t const* mem,
+                                                   batch_bool_constant<int64_t, A, Values...> mask,
+                                                   convert<int64_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            return load_masked_avx512f(mem, mask, Mode {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE batch<uint64_t, A> load_masked(uint64_t const* mem,
+                                                    batch_bool_constant<uint64_t, A, Values...> mask,
+                                                    convert<uint64_t>, Mode, requires_arch<avx512f>) noexcept
+        {
+            return load_masked_avx512f(mem, mask, Mode {});
+        }
+
+        // float/double (and any other >=4-byte type) have no concrete-type
+        // generic-arch competitor in xsimd_common_memory.hpp, so a single
+        // generic avx512f overload stays unambiguous for them.
         template <class A, class T, bool... Values, class Mode,
                   typename = std::enable_if_t<(sizeof(T) >= 4)>>
-        XSIMD_INLINE void store_masked(T* mem,
-                                       batch<T, A> const& src,
-                                       batch_bool_constant<T, A, Values...> mask,
-                                       Mode, requires_arch<avx512f>) noexcept
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem,
+                                             batch_bool_constant<T, A, Values...> mask,
+                                             convert<T>, Mode, requires_arch<avx512f>) noexcept
+        {
+            return load_masked_avx512f(mem, mask, Mode {});
+        }
+
+        // Same ambiguity as load_masked above (see comment there): factor the
+        // AVX512F store logic into a plain helper and expose it via concrete
+        // element-type `requires_arch<avx512f>` overloads so a pure-AVX512F
+        // target has a unique best match.
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked_avx512f(T* mem,
+                                               batch<T, A> const& src,
+                                               batch_bool_constant<T, A, Values...> mask,
+                                               Mode) noexcept
         {
             constexpr auto half = batch<T, A>::size / 2;
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
@@ -349,6 +410,50 @@ namespace xsimd
                 // fallback to centralized pointer-level helper
                 detail::store_masked(mem, src, mask.mask(), Mode {});
             }
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src,
+                                       batch_bool_constant<int32_t, A, Values...> mask,
+                                       Mode, requires_arch<avx512f>) noexcept
+        {
+            store_masked_avx512f(mem, src, mask, Mode {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src,
+                                       batch_bool_constant<uint32_t, A, Values...> mask,
+                                       Mode, requires_arch<avx512f>) noexcept
+        {
+            store_masked_avx512f(mem, src, mask, Mode {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(int64_t* mem, batch<int64_t, A> const& src,
+                                       batch_bool_constant<int64_t, A, Values...> mask,
+                                       Mode, requires_arch<avx512f>) noexcept
+        {
+            store_masked_avx512f(mem, src, mask, Mode {});
+        }
+
+        template <class A, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(uint64_t* mem, batch<uint64_t, A> const& src,
+                                       batch_bool_constant<uint64_t, A, Values...> mask,
+                                       Mode, requires_arch<avx512f>) noexcept
+        {
+            store_masked_avx512f(mem, src, mask, Mode {});
+        }
+
+        // float/double (and any other >=4-byte type) have no concrete-type
+        // generic-arch competitor, so a single generic overload is unambiguous.
+        template <class A, class T, bool... Values, class Mode,
+                  typename = std::enable_if_t<(sizeof(T) >= 4)>>
+        XSIMD_INLINE void store_masked(T* mem,
+                                       batch<T, A> const& src,
+                                       batch_bool_constant<T, A, Values...> mask,
+                                       Mode, requires_arch<avx512f>) noexcept
+        {
+            store_masked_avx512f(mem, src, mask, Mode {});
         }
 
         // abs
