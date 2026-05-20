@@ -20,7 +20,7 @@ namespace xsimd
     /**
      * @ingroup architectures
      *
-     * AVX512DQ instructions
+     * AVX512VL instructions
      */
     struct avx512vl : avx512cd
     {

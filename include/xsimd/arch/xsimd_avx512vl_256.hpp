@@ -188,53 +188,125 @@ namespace xsimd
             return _mm256_abs_epi64(self);
         }
 
-        // load masked
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<avx512vl_256>) noexcept
+        // Per-type masked load/store — partial ordering picks these over the
+        // avx2 bridges this arch inherits. Unsigned overloads reinterpret to
+        // the signed EVEX intrinsic.
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, V...> mask, convert<int32_t>, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            constexpr auto imm_mask = mask.mask();
-            return _mm256_mask_loadu_epi32(_mm256_setzero_si256(), imm_mask, mem);
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                return _mm256_maskz_load_epi32(mask.mask(), mem);
+            }
+            else
+            {
+                return _mm256_maskz_loadu_epi32(mask.mask(), mem);
+            }
         }
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, Values...> mask, convert<uint32_t>, Mode, requires_arch<avx512vl_256>) noexcept
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, V...>, convert<uint32_t>, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            constexpr auto imm_mask = mask.mask();
-            return _mm256_mask_loadu_epi32(_mm256_setzero_si256(), imm_mask, mem);
+            return bitwise_cast<uint32_t>(load_masked(reinterpret_cast<int32_t const*>(mem), batch_bool_constant<int32_t, A, V...> {}, convert<int32_t> {}, Mode {}, avx512vl_256 {}));
+        }
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE batch<int64_t, A> load_masked(int64_t const* mem, batch_bool_constant<int64_t, A, V...> mask, convert<int64_t>, Mode, requires_arch<avx512vl_256>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                return _mm256_maskz_load_epi64(mask.mask(), mem);
+            }
+            else
+            {
+                return _mm256_maskz_loadu_epi64(mask.mask(), mem);
+            }
+        }
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE batch<uint64_t, A> load_masked(uint64_t const* mem, batch_bool_constant<uint64_t, A, V...>, convert<uint64_t>, Mode, requires_arch<avx512vl_256>) noexcept
+        {
+            return bitwise_cast<uint64_t>(load_masked(reinterpret_cast<int64_t const*>(mem), batch_bool_constant<int64_t, A, V...> {}, convert<int64_t> {}, Mode {}, avx512vl_256 {}));
+        }
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, V...> mask, convert<float>, Mode, requires_arch<avx512vl_256>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                return _mm256_maskz_load_ps(mask.mask(), mem);
+            }
+            else
+            {
+                return _mm256_maskz_loadu_ps(mask.mask(), mem);
+            }
+        }
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE batch<double, A> load_masked(double const* mem, batch_bool_constant<double, A, V...> mask, convert<double>, Mode, requires_arch<avx512vl_256>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                return _mm256_maskz_load_pd(mask.mask(), mem);
+            }
+            else
+            {
+                return _mm256_maskz_loadu_pd(mask.mask(), mem);
+            }
         }
 
-        // store masked
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...> mask, Mode, requires_arch<avx512vl_256>) noexcept
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src, batch_bool_constant<int32_t, A, V...> mask, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            _mm256_mask_storeu_epi32(mem, mask.mask(), src);
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                _mm256_mask_store_epi32(mem, mask.mask(), src);
+            }
+            else
+            {
+                _mm256_mask_storeu_epi32(mem, mask.mask(), src);
+            }
         }
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...> mask, Mode, requires_arch<avx512vl_256>) noexcept
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, V...>, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            _mm256_mask_storeu_epi32(mem, mask.mask(), src);
+            store_masked(reinterpret_cast<int32_t*>(mem), bitwise_cast<int32_t>(src), batch_bool_constant<int32_t, A, V...> {}, Mode {}, avx512vl_256 {});
         }
-
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(uint64_t* mem, batch<uint64_t, A> const& src, batch_bool_constant<uint64_t, A, Values...> mask, Mode, requires_arch<avx512vl_256>) noexcept
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE void store_masked(int64_t* mem, batch<int64_t, A> const& src, batch_bool_constant<int64_t, A, V...> mask, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            _mm256_mask_storeu_epi64(mem, mask.mask(), src);
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                _mm256_mask_store_epi64(mem, mask.mask(), src);
+            }
+            else
+            {
+                _mm256_mask_storeu_epi64(mem, mask.mask(), src);
+            }
         }
-
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(int64_t* mem, batch<int64_t, A> const& src, batch_bool_constant<uint64_t, A, Values...> mask, Mode, requires_arch<avx512vl_256>) noexcept
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE void store_masked(uint64_t* mem, batch<uint64_t, A> const& src, batch_bool_constant<uint64_t, A, V...>, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            _mm256_mask_storeu_epi64(mem, mask.mask(), src);
+            store_masked(reinterpret_cast<int64_t*>(mem), bitwise_cast<int64_t>(src), batch_bool_constant<int64_t, A, V...> {}, Mode {}, avx512vl_256 {});
         }
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<uint32_t, A, Values...> mask, Mode, requires_arch<avx512vl_256>) noexcept
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<float, A, V...> mask, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            _mm256_mask_storeu_ps(mem, mask.mask(), src);
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                _mm256_mask_store_ps(mem, mask.mask(), src);
+            }
+            else
+            {
+                _mm256_mask_storeu_ps(mem, mask.mask(), src);
+            }
         }
-
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<uint64_t, A, Values...> mask, Mode, requires_arch<avx512vl_256>) noexcept
+        template <class A, bool... V, class Mode>
+        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, V...> mask, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            _mm256_mask_storeu_pd(mem, mask.mask(), src);
+            XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+            {
+                _mm256_mask_store_pd(mem, mask.mask(), src);
+            }
+            else
+            {
+                _mm256_mask_storeu_pd(mem, mask.mask(), src);
+            }
         }
 
         // max

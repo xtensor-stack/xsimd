@@ -994,17 +994,17 @@ namespace xsimd
             using int_t = as_integer_t<T>;
             constexpr size_t half_size = batch<T, A>::size / 2;
 
-            // confined to lower 128-bit half → forward to 128 bit
+            // lower 128-bit half
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
             {
-                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(batch_bool_constant<int_t, A, Values...> {});
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx_128>(batch_bool_constant<int_t, A, Values...> {});
                 const auto lo = load_masked(reinterpret_cast<int_t const*>(mem), mlo, convert<int_t> {}, Mode {}, avx_128 {});
                 return bitwise_cast<T>(batch<int_t, A>(_mm256_zextsi128_si256(lo)));
             }
-            // confined to upper 128-bit half → forward to 128 bit
+            // upper 128-bit half
             else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half_size)
             {
-                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx_128>(mask);
                 const auto hi = load_masked(mem + half_size, mhi, convert<T> {}, Mode {}, avx_128 {});
                 return detail::zero_extend<A>(hi);
             }
@@ -1019,36 +1019,37 @@ namespace xsimd
         namespace detail
         {
             template <class A>
-            XSIMD_INLINE void maskstore(float* mem, batch_bool<float, A> const& mask, batch<float, A> const& src) noexcept
+            XSIMD_INLINE void maskstore(float* mem, batch<as_integer_t<float>, A> const& mask, batch<float, A> const& src) noexcept
             {
                 _mm256_maskstore_ps(mem, mask, src);
             }
 
             template <class A>
-            XSIMD_INLINE void maskstore(double* mem, batch_bool<double, A> const& mask, batch<double, A> const& src) noexcept
+            XSIMD_INLINE void maskstore(double* mem, batch<as_integer_t<double>, A> const& mask, batch<double, A> const& src) noexcept
             {
                 _mm256_maskstore_pd(mem, mask, src);
             }
         }
 
-        template <class A, class T, bool... Values, class Mode>
+        template <class A, class T, bool... Values, class Mode,
+                  typename = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx>) noexcept
         {
             constexpr size_t half_size = batch<T, A>::size / 2;
 
-            // confined to lower 128-bit half → forward to 128 bit
+            // lower 128-bit half
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
             {
-                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
-                const auto lo = detail::lower_half(src);
-                store_masked<avx_128>(mem, lo, mlo, Mode {}, sse4_2 {});
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx_128>(mask);
+                const batch<T, avx_128> lo = detail::lower_half(src);
+                store_masked<avx_128>(mem, lo, mlo, Mode {}, avx_128 {});
             }
-            // confined to upper 128-bit half → forward to 128 bit
+            // upper 128-bit half
             else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half_size)
             {
-                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
-                const auto hi = detail::upper_half(src);
-                store_masked<avx_128>(mem + half_size, hi, mhi, Mode {}, sse4_2 {});
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx_128>(mask);
+                const batch<T, avx_128> hi = detail::upper_half(src);
+                store_masked<avx_128>(mem + half_size, hi, mhi, Mode {}, avx_128 {});
             }
             else
             {

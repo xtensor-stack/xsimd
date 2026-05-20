@@ -218,8 +218,8 @@ namespace xsimd
         {
             using register_type = typename batch_bool<T, A>::register_type;
             // Do not cast, but rather reinterpret the masks as batches.
-            const auto true_v = batch<T, A> { static_cast<register_type>(true_br) };
-            const auto false_v = batch<T, A> { static_cast<register_type>(false_br) };
+            const batch<T, A> true_v = static_cast<register_type>(true_br);
+            const batch<T, A> false_v = static_cast<register_type>(false_br);
             return batch_bool<T, A> { select(cond, true_v, false_v) };
         }
 

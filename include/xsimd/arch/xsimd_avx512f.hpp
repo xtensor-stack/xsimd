@@ -305,13 +305,13 @@ namespace xsimd
                                              convert<T>, Mode, requires_arch<avx512f>) noexcept
         {
             constexpr auto half = batch<T, A>::size / 2;
-            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
+            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower 256-bit half
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
                 const auto lo = load_masked<avx2>(mem, mlo, convert<T> {}, Mode {}, avx2 {});
                 return detail::load_masked(lo); // zero-extend low half
             }
-            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper-half AVX2 forwarding
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper 256-bit half
             {
                 constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
                 const auto hi = load_masked<avx2>(mem + half, mhi, convert<T> {}, Mode {}, avx2 {});
@@ -332,16 +332,16 @@ namespace xsimd
                                        Mode, requires_arch<avx512f>) noexcept
         {
             constexpr auto half = batch<T, A>::size / 2;
-            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
+            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower 256-bit half
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
-                const auto lo = detail::lower_half(src);
+                const batch<T, avx2> lo = detail::lower_half(src);
                 store_masked<avx2>(mem, lo, mlo, Mode {}, avx2 {});
             }
-            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper-half AVX2 forwarding
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper 256-bit half
             {
                 constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
-                const auto hi = detail::upper_half(src);
+                const batch<T, avx2> hi = detail::upper_half(src);
                 store_masked<avx2>(mem + half, hi, mhi, Mode {}, avx2 {});
             }
             else
