@@ -13,6 +13,9 @@ cmake_minimum_required(VERSION 3.13)
 
 project(xsimd)
 
+OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
+OPTION(BUILD_TESTS "xsimd test suite" OFF)
+
 # Versioning
 # ==========
 
@@ -37,14 +40,18 @@ target_include_directories(xsimd INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
-OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
-OPTION(BUILD_TESTS "xsimd test suite" OFF)
-
 target_compile_features(xsimd INTERFACE cxx_std_14)
+
+# Only add xtl build option to the build tree, that is, if xsimd being locally
+# developed or is vendored.
+# Otherwise (if an install is performed), this will be handled in the user
+# cmake script (xsimdConfig.cmake).
 if(ENABLE_XTL_COMPLEX)
     find_package(xtl 0.8.0 REQUIRED)
-    target_compile_definitions(xsimd INTERFACE XSIMD_ENABLE_XTL_COMPLEX=1)
-    target_link_libraries(xsimd INTERFACE xtl)
+    target_link_libraries(xsimd INTERFACE $<BUILD_INTERFACE:xtl>)
+    target_compile_definitions(xsimd INTERFACE
+        $<BUILD_INTERFACE:XSIMD_ENABLE_XTL_COMPLEX=1>
+    )
 endif()
 
 if(BUILD_TESTS)
