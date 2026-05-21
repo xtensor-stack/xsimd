@@ -857,7 +857,12 @@ namespace xsimd
 
         inline bool avx() const noexcept { return avx_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::avx>(); }
 
-        inline bool avx_128() const noexcept { return sse_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::avx>(); }
+        inline bool avx_128() const noexcept
+        {
+            // Avx 128 bit instructions use the same xmm registers from SSE so checking if those
+            // are enabled is sufficient.
+            return sse_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::avx>();
+        }
 
         inline bool aes_ni() const noexcept { return sse_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::aes_ni>(); }
 
@@ -869,7 +874,12 @@ namespace xsimd
 
         inline bool avx2() const noexcept { return avx_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx2>(); }
 
-        inline bool avx2_128() const noexcept { return sse_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx2>(); }
+        inline bool avx2_128() const noexcept
+        {
+            // Avx 128 bit instructions use the same xmm registers from SSE so checking if those
+            // are enabled is sufficient.
+            return sse_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx2>();
+        }
 
         inline bool bmi2() const noexcept { return leaf7().all_bits_set<x86_cpuid_leaf7::ebx::bmi2>(); }
 
@@ -893,11 +903,25 @@ namespace xsimd
 
         inline bool avx512bw() const noexcept { return avx512_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx512bw>(); }
 
-        inline bool avx512vl() const noexcept { return avx512_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx512vl>(); }
+        inline bool avx512vl() const noexcept
+        {
+            return xcr0().all_bits_set<x86_xcr0::xcr0::opmask>()
+                && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx512f, x86_cpuid_leaf7::ebx::avx512vl>();
+        }
 
-        inline bool avx512vl_128() const noexcept { return avx512vl() && osxsave(); }
+        inline bool avx512vl_128() const noexcept
+        {
+            // AVX512 128 bit instructions use the same xmm registers from SSE so checking if those
+            // are enabled is sufficient.
+            return sse_enabled() && avx512vl();
+        }
 
-        inline bool avx512vl_256() const noexcept { return avx512vl_128(); }
+        inline bool avx512vl_256() const noexcept
+        {
+            // AVX512 256 bit instructions use the same ymm registers from AVX so checking if those
+            // are enabled is sufficient.
+            return avx_enabled() && avx512vl();
+        }
 
         inline bool avx512vbmi() const noexcept { return avx512_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ecx::avx512vbmi>(); }
 
