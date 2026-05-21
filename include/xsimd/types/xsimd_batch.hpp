@@ -763,7 +763,7 @@ namespace xsimd
         }
         else
         {
-            kernel::store_masked<A, T, U, Values...>(mem, *this, mask, mode, A {});
+            kernel::store_masked<A>(mem, *this, mask, mode, A {});
         }
     }
 

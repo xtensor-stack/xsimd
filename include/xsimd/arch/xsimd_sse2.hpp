@@ -2331,7 +2331,7 @@ namespace xsimd
             }
             else
             {
-                store_masked<A>(mem, src, mask, requires_arch<common> {});
+                store_masked<A>(mem, src, mask, aligned_mode {}, common {});
             }
         }
 

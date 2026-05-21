@@ -897,7 +897,7 @@ namespace xsimd
 
         inline bool avx512vl_128() const noexcept { return avx512vl() && osxsave(); }
 
-        inline bool avx512vl_256() const noexcept { return avx512vl_128(); }
+        inline bool avx512vl_256() const noexcept { return avx512vl() && osxsave(); }
 
         inline bool avx512vbmi() const noexcept { return avx512_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ecx::avx512vbmi>(); }
 

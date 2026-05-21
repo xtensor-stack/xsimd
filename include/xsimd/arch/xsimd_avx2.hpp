@@ -190,24 +190,25 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, bool... Values, class Mode>
+        template <class A, class T, bool... Values, class Mode,
+                  typename = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) >= 4)>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
         {
             constexpr size_t lanes_per_half = batch<T, A>::size / 2;
 
-            // confined to lower 128-bit half → forward to SSE
+            // lower 128-bit half
             XSIMD_IF_CONSTEXPR(mask.countl_zero() >= lanes_per_half)
             {
-                constexpr auto mlo = ::xsimd::detail::lower_half<sse4_2>(mask);
-                const auto lo = detail::lower_half(src);
-                store_masked<sse4_2>(mem, lo, mlo, Mode {}, sse4_2 {});
+                constexpr auto mlo = ::xsimd::detail::lower_half<avx2_128>(mask);
+                const batch<T, avx2_128> lo = detail::lower_half(src);
+                store_masked<avx2_128>(mem, lo, mlo, Mode {}, avx2_128 {});
             }
-            // confined to upper 128-bit half → forward to SSE
+            // upper 128-bit half
             else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= lanes_per_half)
             {
-                constexpr auto mhi = ::xsimd::detail::upper_half<sse4_2>(mask);
-                const auto hi = detail::upper_half(src);
-                store_masked<sse4_2>(mem + lanes_per_half, hi, mhi, Mode {}, sse4_2 {});
+                constexpr auto mhi = ::xsimd::detail::upper_half<avx2_128>(mask);
+                const batch<T, avx2_128> hi = detail::upper_half(src);
+                store_masked<avx2_128>(mem + lanes_per_half, hi, mhi, Mode {}, avx2_128 {});
             }
             else
             {
@@ -216,10 +217,10 @@ namespace xsimd
         }
 
         template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
+        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...>, Mode, requires_arch<avx2>) noexcept
         {
             const auto s32 = bitwise_cast<int32_t>(src);
-            store_masked<A>(reinterpret_cast<int32_t*>(mem), s32, mask, Mode {}, avx2 {});
+            store_masked<A>(reinterpret_cast<int32_t*>(mem), s32, batch_bool_constant<int32_t, A, Values...> {}, Mode {}, avx2 {});
         }
 
         template <class A, bool... Values, class Mode>
