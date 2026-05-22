@@ -383,6 +383,24 @@ namespace xsimd
         static constexpr detail::x86_reg32_t leaf = 1;
         static constexpr detail::x86_reg32_t subleaf = 0;
 
+        enum class eax
+        {
+            /* Stepping ID bit range. */
+            stepping_start = 0,
+            stepping_end = 4,
+            /* Model bit range. */
+            model_start = 4,
+            model_end = 8,
+            /* Family ID bit range. */
+            family_id_start = 8,
+            family_id_end = 12,
+            /* Extended Model ID bit range. */
+            ext_model_start = 16,
+            ext_model_end = 20,
+            /* Extended Family ID bit range. */
+            ext_family_start = 20,
+            ext_family_end = 28,
+        };
         enum class ecx
         {
             /* Streaming SIMD Extensions 3. */
@@ -415,6 +433,7 @@ namespace xsimd
         };
 
         using regs_t = detail::x86_cpuid_regs<leaf, subleaf,
+                                              detail::x86_reg_id<eax, 0>,
                                               detail::x86_reg_id<ecx, 2>,
                                               detail::x86_reg_id<edx, 3>>;
     };
@@ -841,6 +860,45 @@ namespace xsimd
          */
         inline bool osxsave() const noexcept { return leaf1().all_bits_set<x86_cpuid_leaf1::ecx::osxsave>(); }
 
+        /**
+         * Effective processor family.
+         *
+         * Per wikipedia CPUID page:
+         * > The actual processor family is derived from the Family ID and Extended Family ID fields.
+         * > If the Family ID field is equal to 15, the family is equal to the sum of the Extended
+         * > Family ID and the Family ID fields. Otherwise, the family is equal to the value of the
+         * > Family ID field.
+         *
+         * @see https://en.wikipedia.org/wiki/CPUID#EAX=1:_Processor_Info_and_Feature_Bits
+         */
+        inline detail::x86_reg32_t cpu_family() const noexcept
+        {
+            using eax = x86_cpuid_leaf1::eax;
+            auto family_id = leaf1().get_range<eax::family_id_start, eax::family_id_end>();
+            auto ext_family_id = leaf1().get_range<eax::ext_family_start, eax::ext_family_end>();
+            return family_id + (family_id == 15 ? ext_family_id : 0);
+        }
+
+        /**
+         * Effective processor model.
+         *
+         * Per wikipedia CPUID page:
+         * > The actual processor model is derived from the Model, Extended Model ID and Family ID
+         * > fields. If the Family ID field is either 6 or 15, the model is equal to the sum of the
+         * > Extended Model ID field shifted left by 4 bits and the Model field.
+         * > Otherwise, the model is equal to the value of the Model field.
+         *
+         * @see https://en.wikipedia.org/wiki/CPUID#EAX=1:_Processor_Info_and_Feature_Bits
+         */
+        inline detail::x86_reg32_t cpu_model() const noexcept
+        {
+            using eax = x86_cpuid_leaf1::eax;
+            auto model = leaf1().get_range<eax::model_start, eax::model_end>();
+            auto ext_model = leaf1().get_range<eax::ext_model_start, eax::ext_model_end>();
+            auto family_id = leaf1().get_range<eax::family_id_start, eax::family_id_end>();
+            return (family_id == 15 || family_id == 6) ? ((ext_model << 4) + model) : model;
+        }
+
         inline bool sse2() const noexcept { return sse_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::edx::sse2>(); }
 
         inline bool sse3() const noexcept { return sse_enabled() && leaf1().all_bits_set<x86_cpuid_leaf1::ecx::sse3>(); }
@@ -882,6 +940,26 @@ namespace xsimd
         }
 
         inline bool bmi2() const noexcept { return leaf7().all_bits_set<x86_cpuid_leaf7::ebx::bmi2>(); }
+
+        /**
+         * BMI2 support with efficient PEXT and PDEP instructions.
+         *
+         * > AMD processors before Zen 3 that implement PDEP and PEXT do so in microcode, with a
+         * > latency of 18 cycles rather than (Zen 3) 3 cycles. As a result it is often faster
+         * > to use other instructions on these processors.
+         *
+         * @see https://en.wikipedia.org/wiki/X86_Bit_manipulation_instruction_set
+         */
+        inline bool efficient_bmi2() const noexcept
+        {
+            if (known_manufacturer() == x86_manufacturer::amd)
+            {
+                // Zen 3 and Zen 4 report family 0x19; Zen 5 reports family 0x1A.
+                // Earlier AMD microarchitectures (Zen / Zen+ / Zen 2) report family 0x17.
+                return bmi2() && (cpu_family() >= 0x19);
+            }
+            return bmi2();
+        }
 
         inline bool avx512f() const noexcept { return avx512_enabled() && leaf7().all_bits_set<x86_cpuid_leaf7::ebx::avx512f>(); }
 
