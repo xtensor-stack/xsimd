@@ -100,7 +100,7 @@ jobs:
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512vl_128' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
-          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_128"
+          CXXFLAGS="$CXXFLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_128"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512vl_256' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
