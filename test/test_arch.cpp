@@ -23,6 +23,12 @@ static_assert(xsimd::default_arch::supported(), "default arch must be supported"
 static_assert(std::is_same<xsimd::default_arch, xsimd::best_arch>::value, "default arch is the best available");
 static_assert(xsimd::supported_architectures::contains<xsimd::default_arch>(), "default arch is supported");
 static_assert(xsimd::all_architectures::contains<xsimd::default_arch>(), "default arch is a valid arch");
+#else
+namespace xsimd
+{
+    static_assert(std::is_same<default_arch, XSIMD_DEFAULT_ARCH>::value,
+                  "default_arch does not match XSIMD_DEFAULT_ARCH");
+}
 #endif
 
 #if !XSIMD_WITH_SVE
