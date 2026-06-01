@@ -129,20 +129,20 @@ namespace xsimd
         }
 
         // swizzle (dynamic mask)
-        template <class A, class T, class ITy, class = std::enable_if_t<std::is_floating_point<T>::value && sizeof(T) == sizeof(ITy)>>
-        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<ITy, A> mask, requires_arch<avx_128>) noexcept
+        template <class A, class ITy>
+        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<ITy, A> mask, requires_arch<avx_128>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(std::is_same<T, float>::value)
-            {
-                return _mm_permutevar_ps(self, mask);
-            }
-            else
-            {
-                // VPERMILPD's variable control reads bit 1 of each 64-bit selector
-                // (bit 0 is ignored), so a {0,1} index needs to become {0,2}.
-                // Negation is a cheap alternative to a left shift by 1.
-                return _mm_permutevar_pd(self, -mask);
-            }
+            static_assert(sizeof(float) == sizeof(ITy), "index type must match value width");
+            return _mm_permutevar_ps(self, mask);
+        }
+        template <class A, class ITy>
+        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch<ITy, A> mask, requires_arch<avx_128>) noexcept
+        {
+            static_assert(sizeof(double) == sizeof(ITy), "index type must match value width");
+            // VPERMILPD's variable control reads bit 1 of each 64-bit selector
+            // (bit 0 is ignored), so a {0,1} index needs to become {0,2}.
+            // Negation is a cheap alternative to a left shift by 1.
+            return _mm_permutevar_pd(self, -mask);
         }
 
         // swizzle (constant mask)
