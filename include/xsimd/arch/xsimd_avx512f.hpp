@@ -305,16 +305,17 @@ namespace xsimd
                                              convert<T>, Mode, requires_arch<avx512f>) noexcept
         {
             constexpr auto half = batch<T, A>::size / 2;
-            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
+            using half_arch = typename ::xsimd::make_sized_batch_t<T, half>::arch_type;
+            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower 256-bit half
             {
-                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
-                const auto lo = load_masked<avx2>(mem, mlo, convert<T> {}, Mode {}, avx2 {});
+                constexpr auto mlo = ::xsimd::detail::lower_half<half_arch>(mask);
+                const auto lo = load_masked<half_arch>(mem, mlo, convert<T> {}, Mode {}, half_arch {});
                 return detail::load_masked(lo); // zero-extend low half
             }
-            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper-half AVX2 forwarding
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper 256-bit half
             {
-                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
-                const auto hi = load_masked<avx2>(mem + half, mhi, convert<T> {}, Mode {}, avx2 {});
+                constexpr auto mhi = ::xsimd::detail::upper_half<half_arch>(mask);
+                const auto hi = load_masked<half_arch>(mem + half, mhi, convert<T> {}, Mode {}, half_arch {});
                 return detail::load_masked(hi, detail::high_tag {});
             }
             else
@@ -332,17 +333,19 @@ namespace xsimd
                                        Mode, requires_arch<avx512f>) noexcept
         {
             constexpr auto half = batch<T, A>::size / 2;
-            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower-half AVX2 forwarding
+            using half_batch = ::xsimd::make_sized_batch_t<T, half>;
+            using half_arch = typename half_batch::arch_type;
+            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half) // lower 256-bit half
             {
-                constexpr auto mlo = ::xsimd::detail::lower_half<avx2>(mask);
-                const auto lo = detail::lower_half(src);
-                store_masked<avx2>(mem, lo, mlo, Mode {}, avx2 {});
+                constexpr auto mlo = ::xsimd::detail::lower_half<half_arch>(mask);
+                const half_batch lo = detail::lower_half(src);
+                store_masked<half_arch>(mem, lo, mlo, Mode {}, half_arch {});
             }
-            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper-half AVX2 forwarding
+            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half) // upper 256-bit half
             {
-                constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
-                const auto hi = detail::upper_half(src);
-                store_masked<avx2>(mem + half, hi, mhi, Mode {}, avx2 {});
+                constexpr auto mhi = ::xsimd::detail::upper_half<half_arch>(mask);
+                const half_batch hi = detail::upper_half(src);
+                store_masked<half_arch>(mem + half, hi, mhi, Mode {}, half_arch {});
             }
             else
             {
