@@ -13,6 +13,9 @@
 #ifndef XSIMD_COMMON_FWD_HPP
 #define XSIMD_COMMON_FWD_HPP
 
+#include "../config/xsimd_macros.hpp"
+#include "../types/xsimd_common_arch.hpp"
+
 #include <cstdint>
 #include <type_traits>
 #include <utility>
@@ -87,22 +90,6 @@ namespace xsimd
         XSIMD_INLINE batch<T_out, A> load_masked(T_in const* mem, batch_bool_constant<T_out, A, Values...> mask, convert<T_out>, alignment, requires_arch<common>) noexcept;
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE void store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, alignment, requires_arch<common>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<A>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<uint32_t, A> load_masked(uint32_t const* mem, batch_bool_constant<uint32_t, A, Values...> mask, convert<uint32_t>, Mode, requires_arch<A>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, batch<int64_t, A>> load_masked(int64_t const*, batch_bool_constant<int64_t, A, Values...>, convert<int64_t>, Mode, requires_arch<A>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value, batch<uint64_t, A>> load_masked(uint64_t const*, batch_bool_constant<uint64_t, A, Values...>, convert<uint64_t>, Mode, requires_arch<A>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(int32_t* mem, batch<int32_t, A> const& src, batch_bool_constant<int32_t, A, Values...> mask, Mode, requires_arch<A>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(uint32_t* mem, batch<uint32_t, A> const& src, batch_bool_constant<uint32_t, A, Values...> mask, Mode, requires_arch<A>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value> store_masked(int64_t*, batch<int64_t, A> const&, batch_bool_constant<int64_t, A, Values...>, Mode, requires_arch<A>) noexcept;
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE std::enable_if_t<types::has_simd_register<double, A>::value> store_masked(uint64_t*, batch<uint64_t, A> const&, batch_bool_constant<uint64_t, A, Values...>, Mode, requires_arch<A>) noexcept;
 
         // Forward declarations for pack-level helpers
         namespace detail

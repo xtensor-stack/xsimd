@@ -544,6 +544,14 @@ namespace xsimd
                       "Please use batch<std::complex<T>, A> initialized from xtl::xcomplex instead");
     };
 #endif
+
+    // Forward declarations: the AVX/AVX2 masked load/store kernels (pulled in
+    // by xsimd_isa.hpp below) reference make_sized_batch_t<T, N>::arch_type
+    // before xsimd_traits.hpp — which carries the full definition — is included.
+    template <typename T, std::size_t N>
+    struct make_sized_batch;
+    template <typename T, std::size_t N>
+    using make_sized_batch_t = typename make_sized_batch<T, N>::type;
 }
 
 #include "../arch/xsimd_isa.hpp"
@@ -763,7 +771,7 @@ namespace xsimd
         }
         else
         {
-            kernel::store_masked<A, T, U, Values...>(mem, *this, mask, mode, A {});
+            kernel::store_masked<A>(mem, *this, mask, mode, A {});
         }
     }
 
