@@ -494,6 +494,48 @@ namespace xsimd
             return (typename batch_bool<double, A>::register_type)_mm256_cmp_pd_mask(self, self, _CMP_UNORD_Q);
         }
 
+        // bitwise_rshift — signed int64 uses the native EVEX arithmetic shift
+        // (VPSRAQ / VPSRAVQ, lat 1 / CPI 0.5). Every other width/sign keeps the
+        // inherited avx2 codegen (srai/srav for 32-bit, srli for unsigned 64).
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<avx512vl_256>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(std::is_signed<T>::value && sizeof(T) == 8)
+            {
+                return _mm256_srai_epi64(self, other);
+            }
+            else
+            {
+                return bitwise_rshift(self, other, avx2 {});
+            }
+        }
+        template <size_t shift, class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, requires_arch<avx512vl_256>) noexcept
+        {
+            constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+            static_assert(shift < bits, "Shift amount must be less than the number of bits in T");
+            XSIMD_IF_CONSTEXPR(std::is_signed<T>::value && sizeof(T) == 8)
+            {
+                return _mm256_srai_epi64(self, shift);
+            }
+            else
+            {
+                return bitwise_rshift<shift>(self, avx2 {});
+            }
+        }
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512vl_256>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(std::is_signed<T>::value && sizeof(T) == 8)
+            {
+                return _mm256_srav_epi64(self, other);
+            }
+            else
+            {
+                return bitwise_rshift(self, other, avx2 {});
+            }
+        }
+
         // rotl
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512vl_256>) noexcept
@@ -539,18 +581,18 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512vl_256>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(std::is_unsigned<T>::value)
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-                {
-                    return _mm256_rorv_epi32(self, other);
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-                {
-                    return _mm256_rorv_epi64(self, other);
-                }
+                return _mm256_rorv_epi32(self, other);
             }
-            return rotr(self, other, avx2 {});
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm256_rorv_epi64(self, other);
+            }
+            else
+            {
+                return rotr(self, other, avx2 {});
+            }
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, int32_t other, requires_arch<avx512vl_256>) noexcept
@@ -563,18 +605,83 @@ namespace xsimd
         {
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
             static_assert(count < bits, "Count must be less than the number of bits in T");
-            XSIMD_IF_CONSTEXPR(std::is_unsigned<T>::value)
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
             {
-                XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
-                {
-                    return _mm256_ror_epi32(self, count);
-                }
-                else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
-                {
-                    return _mm256_ror_epi64(self, count);
-                }
+                return _mm256_ror_epi32(self, count);
             }
-            return rotr<count>(self, avx2 {});
+            else XSIMD_IF_CONSTEXPR(sizeof(T) == 8)
+            {
+                return _mm256_ror_epi64(self, count);
+            }
+            else
+            {
+                return rotr<count>(self, avx2 {});
+            }
+        }
+
+        // compress — native EVEX VPCOMPRESS{PS,PD,Q,D} for the widths with VL
+        // forms. 8/16-bit need AVX512_VBMI2, so they fall through to common{}.
+        template <class A>
+        XSIMD_INLINE batch<float, A> compress(batch<float, A> const& self, batch_bool<float, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_compress_ps(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> compress(batch<double, A> const& self, batch_bool<double, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_compress_pd(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<int32_t, A> compress(batch<int32_t, A> const& self, batch_bool<int32_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_compress_epi32(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint32_t, A> compress(batch<uint32_t, A> const& self, batch_bool<uint32_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_compress_epi32(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<int64_t, A> compress(batch<int64_t, A> const& self, batch_bool<int64_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_compress_epi64(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint64_t, A> compress(batch<uint64_t, A> const& self, batch_bool<uint64_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_compress_epi64(mask.mask(), self);
+        }
+
+        // expand
+        template <class A>
+        XSIMD_INLINE batch<float, A> expand(batch<float, A> const& self, batch_bool<float, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_expand_ps(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> expand(batch<double, A> const& self, batch_bool<double, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_expand_pd(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<int32_t, A> expand(batch<int32_t, A> const& self, batch_bool<int32_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_expand_epi32(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint32_t, A> expand(batch<uint32_t, A> const& self, batch_bool<uint32_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_expand_epi32(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<int64_t, A> expand(batch<int64_t, A> const& self, batch_bool<int64_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_expand_epi64(mask.mask(), self);
+        }
+        template <class A>
+        XSIMD_INLINE batch<uint64_t, A> expand(batch<uint64_t, A> const& self, batch_bool<uint64_t, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return _mm256_maskz_expand_epi64(mask.mask(), self);
         }
 
         // all
