@@ -135,13 +135,13 @@
         {
             "name": "avx512vl_128",
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_128"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mno-avx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_128"
             }
         },
         {
             "name": "avx512vl_256",
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_256"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mno-avx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_256"
             }
         },
         {

@@ -82,6 +82,90 @@ jobs:
         if [[ '${{ matrix.sys.flags }}' == 'enable_xtl_complex' ]]; then
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_XTL_COMPLEX=ON"
         fi
+<<<<<<< HEAD
+        if [[ '${{ matrix.sys.flags }}' == 'avx' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx_128"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx2' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx2_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx2_128"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'sse3' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=nocona"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vl_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+          CXXFLAGS="$CXXFLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_128"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vl_256' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_256"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512pf' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knl"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=cannonlake"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi2' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=icelake-server"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vnni' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
+        fi
+||||||| parent of d4ec80a (Add CMakePresets.txt)
+        if [[ '${{ matrix.sys.flags }}' == 'avx' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx_128"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx2' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx2_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx2_128"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'sse3' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=nocona"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vl_128' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_128"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vl_256' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
+          CXXFLAGS="$CXX_FLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_256"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512pf' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knl"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=cannonlake"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi2' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=icelake-server"
+        fi
+        if [[ '${{ matrix.sys.flags }}' == 'avx512vnni' ]]; then
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
+        fi
+=======
+>>>>>>> d4ec80a (Add CMakePresets.txt)
         if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
           export CXXFLAGS="$CXXFLAGS -m32"
         fi
@@ -115,7 +199,7 @@ jobs:
         if echo '${{ matrix.sys.preset }}' | grep -q 'avx512' ; then
           # Running with emulation, must have AVX512, lower tier are checked by implications in tests
           export XSIMD_TEST_CPU_ASSUME_AVX512F="1"
-          ./sde-external-9.48.0-2024-11-25-lin/sde64 -tgl -- ./_build/test/test_xsimd
+          ./sde-external-9.48.0-2024-11-25-lin/sde64 -spr -- ./_build/test/test_xsimd
         else
           export XSIMD_TEST_CPU_ASSUME_SSE4_2=$(grep -q 'sse4_2' /proc/cpuinfo && echo "1" || echo "0")
           export XSIMD_TEST_CPU_ASSUME_AVX=$(grep -q 'avx' /proc/cpuinfo && echo "1" || echo "0")
