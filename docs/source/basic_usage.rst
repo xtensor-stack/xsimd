@@ -11,7 +11,7 @@ Manipulating Abstract Batches
 -----------------------------
 
 Here is an example that computes the mean of two batches, using the best
-architecture available, based on compile time informations:
+architecture available, based on compile time information:
 
 .. literalinclude:: ../../test/doc/manipulating_abstract_batches.cpp
 
@@ -45,7 +45,7 @@ computes their mean, explicitly using the AVX extension:
 
 .. literalinclude:: ../../test/doc/explicit_use_of_an_instruction_set.cpp
 
-Note that in that case, the instruction set is explicilty specified in the batch
+Note that in that case, the instruction set is explicitly specified in the batch
 type. The flag passed down to the compiler need to make it possible for this
 architecture to be used.
 
