@@ -100,6 +100,19 @@ struct batch_test
         CHECK_EQ(res_dump.str(), b_dump.str());
     }
 
+    void test_register_conversion() const
+    {
+        batch_type b1 = batch_type::load_unaligned(lhs.data());
+
+        auto b_converted = static_cast<typename batch_type::register_type>(b1);
+        auto b_native = b1.to_native();
+        // Check via decltype as register_type raises warning for ignored attributes
+        CHECK(std::is_same<decltype(b_native), decltype(b_converted)>::value);
+
+        batch_type b2 = b_native; // Converting ctor
+        CHECK_BATCH_EQ(b1, b2);
+    }
+
     void test_load_store() const
     {
         array_type res;
@@ -1159,6 +1172,11 @@ TEST_CASE_TEMPLATE("[batch]", B, BATCH_TYPES)
     SUBCASE("stream_dump")
     {
         Test.test_stream_dump();
+    }
+
+    SUBCASE("register_conversion")
+    {
+        Test.test_register_conversion();
     }
 
     SUBCASE("load_store")
