@@ -1,9 +1,9 @@
 version: 2
 
 build:
-  os: "ubuntu-22.04"
+  os: "ubuntu-26.04"
   tools:
-    python: "mambaforge-22.9"
+    python: "miniforge3-25.11"
 
 sphinx:
   # Path to Sphinx configuration file
