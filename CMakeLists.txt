@@ -46,7 +46,7 @@ target_compile_features(xsimd INTERFACE cxx_std_14)
 # developed or is vendored.
 # Otherwise (if an install is performed), this will be handled in the user
 # cmake script (xsimdConfig.cmake).
-if(ENABLE_XTL_COMPLEX)
+if(ENABLE_XTL_COMPLEX OR XSIMD_ENABLE_XTL_COMPLEX)
     find_package(xtl 0.8.0 REQUIRED)
     target_link_libraries(xsimd INTERFACE $<BUILD_INTERFACE:xtl>)
     target_compile_definitions(xsimd INTERFACE

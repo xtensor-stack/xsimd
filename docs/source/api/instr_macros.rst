@@ -26,6 +26,7 @@
    }
    </style>
 
+.. _instr-set-macros:
 Instruction Set Macros
 ======================
 
@@ -35,11 +36,3 @@ can be used to filter arch-specific code.
 .. doxygengroup:: xsimd_config_macro
    :project: xsimd
    :content-only:
-
-Changing Default Architecture
-*****************************
-
-You can change the default instruction set used by xsimd (when none is provided
-explicitly) by setting the ``XSIMD_DEFAULT_ARCH`` macro to, say, ``xsimd::avx2``.
-A common usage is to set it to ``xsimd::unsupported`` as a way to detect
-instantiation of batches with the default architecture.
