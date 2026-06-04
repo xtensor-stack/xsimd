@@ -4,6 +4,7 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
+.. _arch-manipulation:
 Architecture Manipulation
 =========================
 
@@ -12,13 +13,15 @@ The mentioned types are primarily used as template parameters for :ref:`batch
 <xsimd-batch-ref>`, and when interacting with :cpp:func:`xsimd::dispatch()`.
 
 The best available architecture is available at compile time through
-``xsimd::best_arch`` which also happens to be ``xsimd::default_arch``.
+``xsimd::best_arch`` which is what ``xsimd::default_arch`` defaults to unless otherwise
+configured.
 
 .. doxygengroup:: architectures
    :project: xsimd
    :members:
 
 
+.. _emulated-mode:
 Emulated Mode
 -------------
 

@@ -7,7 +7,7 @@
 .. image:: xsimd.svg
    :alt: xsimd
 
-C++ wrappers for SIMD intrinsics.
+C++14 wrappers for SIMD intrinsics.
 
 Introduction
 ------------
@@ -95,6 +95,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    :maxdepth: 2
 
    installation
+   build_options
 
 .. toctree::
    :caption: USAGE
