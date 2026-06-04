@@ -20,7 +20,7 @@ vendors and compilers.
 
 The core of the library consist in a parametrized vector type, :ref:`Batch Types`,
 and a set of operations to perform :ref:`Arithmetic Operations`,
-:ref:`Data Transfer`, and many common mathemtical functions, as for single
+:ref:`Data Transfer`, and many common mathematical functions, as for single
 values.
 
 

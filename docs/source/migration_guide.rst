@@ -85,6 +85,6 @@ Many macros have been replaced by more elaborated constructs.
 ``XSIMD_INSTR_SET_AVAILABLE`` has been replaced by the type alias ``xsimd::default_arch``.
 
 Likewise architecture-specific macros like ``XSIMD_X86_INSTR_SET_AVAILABLE`` has
-been replaced by ``xsimd::upported_architectures::contains<xsimd::sse3>()``. Macro like ``XSIMD_WITH_SSE3`` are still
+been replaced by ``xsimd::supported_architectures::contains<xsimd::sse3>()``. Macro like ``XSIMD_WITH_SSE3`` are still
 defined to ``0`` or ``1`` to guard architecture-specific code.
 

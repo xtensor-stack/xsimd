@@ -40,6 +40,6 @@ Changing Default Architecture
 *****************************
 
 You can change the default instruction set used by xsimd (when none is provided
-explicitely) by setting the ``XSIMD_DEFAULT_ARCH`` macro to, say, ``xsimd::avx2``.
+explicitly) by setting the ``XSIMD_DEFAULT_ARCH`` macro to, say, ``xsimd::avx2``.
 A common usage is to set it to ``xsimd::unsupported`` as a way to detect
 instantiation of batches with the default architecture.

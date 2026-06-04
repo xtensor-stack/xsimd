@@ -18,6 +18,6 @@ Conditional Expression
    :content-only:
 
 
-In the specific case when one needs to conditionnaly increment or decrement a
+In the specific case when one needs to conditionally increment or decrement a
 batch based on a mask, :cpp:func:`incr_if` and
 :cpp:func:`decr_if` provide specialized version.

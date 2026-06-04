@@ -38,7 +38,7 @@ uniform manner.
 Combined traits:
 
 +---------------------------------------+----------------------------------------------------+
-| :cpp:class:`batch_traits`             | batch types and proprties                          |
+| :cpp:class:`batch_traits`             | batch types and properties                         |
 +---------------------------------------+----------------------------------------------------+
 
 Type check:

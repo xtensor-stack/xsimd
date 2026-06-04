@@ -14,8 +14,8 @@ Aligned Memory Allocator
    :project: xsimd
    :members:
 
-Alignement Checker
-------------------
+Alignment Checker
+-----------------
 
 .. doxygenfunction:: xsimd::is_aligned
    :project: xsimd
