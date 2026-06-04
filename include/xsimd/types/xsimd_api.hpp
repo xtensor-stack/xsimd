@@ -1382,7 +1382,7 @@ namespace xsimd
     /**
      * @ingroup batch_data_transfer
      *
-     * Creates a batch from the buffer \c ptr and the specifed
+     * Creates a batch from the buffer \c ptr and the specified
      * batch value type \c To. The memory needs to be aligned.
      * @param ptr the memory buffer to read
      * @return a new batch instance
@@ -1456,7 +1456,7 @@ namespace xsimd
     /**
      * @ingroup batch_data_transfer
      *
-     * Creates a batch from the buffer \c ptr and the specifed
+     * Creates a batch from the buffer \c ptr and the specified
      * batch value type \c To. The memory does not need to be aligned.
      * @param ptr the memory buffer to read
      * @return a new batch instance
@@ -2236,7 +2236,7 @@ namespace xsimd
      * Computes the batch of nearest integer values to scalars in \c x (in
      * floating point format), rounding halfway cases away from zero, regardless
      * of the current rounding mode.
-     * @param x batch of flaoting point values.
+     * @param x batch of floating point values.
      * @return the batch of nearest integer values.
      */
     template <class T, class A>
