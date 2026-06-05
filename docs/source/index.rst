@@ -104,6 +104,7 @@ This software is licensed under the BSD-3-Clause license. See the LICENSE file f
    basic_usage
    vectorized_code
    integration
+   Try it online <https://xtensor-stack.github.io/xsimd/lab?path=simple.ipynb>
 
 .. toctree::
    :caption: API REFERENCE
