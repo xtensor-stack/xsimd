@@ -1,0 +1,64 @@
+name: Jupyterlite deployment
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      # Since we do not deploy in PRs and that this is only copying file from the repo
+      # the CI file is the only relevant change to watch for in CI on PRs
+      - .github/workflows/deploy-jupyterlite.yml
+  push:
+    branches:
+    - master
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+    - uses: mamba-org/setup-micromamba@v3
+      with:
+        cache-environment: true
+        post-cleanup: 'all'
+        environment-name: jupyterlite-builder
+        create-args: jupyter jupyterlite-core jupyterlite-xeus
+    - name: Build WASM environment
+      run: |
+        micromamba create -p ./wasm-env \
+          --platform=emscripten-wasm32 \
+          --channel https://prefix.dev/emscripten-forge-4x \
+          --channel https://prefix.dev/conda-forge \
+          xeus-cpp=0.10
+    - name: Build Jupyterlite distribution
+      run: |
+        micromamba run -n jupyterlite-builder \
+          jupyter lite build \
+            --XeusAddon.prefix=./wasm-env \
+            --contents include/ \
+            --contents notebooks/ \
+            --output-dir ./dist
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./dist
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
