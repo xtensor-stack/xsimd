@@ -1,17 +1,8 @@
 # ![xsimd](docs/source/xsimd.svg)
 
-[![GHA android](https://github.com/xtensor-stack/xsimd/actions/workflows/android.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/android.yml)
-[![GHA cross-rvv](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-rvv.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-rvv.yml)
-[![GHA cross-sve](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-sve.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-sve.yml)
-[![GHA cross](https://github.com/xtensor-stack/xsimd/actions/workflows/cross.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross.yml)
-[![GHA cxx-no-exceptions](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-no-exceptions.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-no-exceptions.yml)
-[![GHA cxx-versions](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-versions.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-versions.yml)
-[![GHA emscripten](https://github.com/xtensor-stack/xsimd/actions/workflows/emscripten.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/emscripten.yml)
-[![GHA linux](https://github.com/xtensor-stack/xsimd/actions/workflows/linux.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/linux.yml)
-[![GHA macos](https://github.com/xtensor-stack/xsimd/actions/workflows/macos.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/macos.yml)
-[![GHA windows](https://github.com/xtensor-stack/xsimd/actions/workflows/windows.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/windows.yml)
-[![Documentation Status](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
-[![Zulip](https://img.shields.io/badge/social_chat-zulip-blue.svg)](https://xtensor.zulipchat.com/#narrow/channel/539553-Ask-anything)
+[![Read the Docs](https://img.shields.io/readthedocs/xsimd?logo=readthedocs)](https://xsimd.readthedocs.io/en/latest/)
+[![Jupyterlite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://xtensor-stack.github.io/xsimd/lab?path=simple.ipynb)
+[![Zulip](https://img.shields.io/badge/social_chat-zulip-blue.svg?logo=zulip)](https://xtensor.zulipchat.com/#narrow/channel/539553-Ask-anything)
 
 C++ wrappers for SIMD intrinsics
 
@@ -22,6 +13,21 @@ on a batch of values at once, and thus provide a way to significantly accelerate
 vendors and compilers.
 
 `xsimd` provides a unified means for using these features for library authors. Namely, it enables manipulation of batches of numbers with the same arithmetic operators as for single values. It also provides accelerated implementation of common mathematical functions operating on batches.
+
+## CI status
+
+| Workflow | Status |
+|----------------|--------|
+| android | [![GHA android](https://github.com/xtensor-stack/xsimd/actions/workflows/android.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/android.yml) |
+| cross-rvv | [![GHA cross-rvv](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-rvv.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-rvv.yml) |
+| cross-sve | [![GHA cross-sve](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-sve.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross-sve.yml) |
+| cross | [![GHA cross](https://github.com/xtensor-stack/xsimd/actions/workflows/cross.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cross.yml) |
+| cxx-no-exceptions | [![GHA cxx-no-exceptions](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-no-exceptions.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-no-exceptions.yml) |
+| cxx-versions | [![GHA cxx-versions](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-versions.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/cxx-versions.yml) |
+| emscripten | [![GHA emscripten](https://github.com/xtensor-stack/xsimd/actions/workflows/emscripten.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/emscripten.yml) |
+| linux | [![GHA linux](https://github.com/xtensor-stack/xsimd/actions/workflows/linux.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/linux.yml) |
+| macos | [![GHA macos](https://github.com/xtensor-stack/xsimd/actions/workflows/macos.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/macos.yml) |
+| windows | [![GHA windows](https://github.com/xtensor-stack/xsimd/actions/workflows/windows.yml/badge.svg)](https://github.com/xtensor-stack/xsimd/actions/workflows/windows.yml) |
 
 ## Adoption
 
