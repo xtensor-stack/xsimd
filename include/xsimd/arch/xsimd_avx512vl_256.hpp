@@ -374,6 +374,15 @@ namespace xsimd
         {
             return swizzle(batch<uint8_t, avx2> { self.data }, batch<uint8_t, avx2> { mask.data }, avx2 {}).data;
         }
+        // No EVEX byte/word permute without AVX512_VBMI, so 16-bit dynamic
+        // swizzle forwards to avx2 — mirrors the uint8_t base above. Without
+        // this base the sized-2 bridge below re-selects itself for uint16_t
+        // and recurses forever (always_inline build failure).
+        template <class A>
+        XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch<uint16_t, A> mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return swizzle(batch<uint16_t, avx2> { self.data }, batch<uint16_t, avx2> { mask.data }, avx2 {}).data;
+        }
         template <class A, typename T, detail::enable_sized_t<T, 1> = 0>
         XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint8_t, A> const& mask, requires_arch<avx512vl_256> req) noexcept
         {
@@ -589,12 +598,12 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch_bool<float, A> neq(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512vl_256>) noexcept
         {
-            return (typename batch_bool<float, A>::register_type)_mm256_cmp_ps_mask(self, other, _CMP_NEQ_OQ);
+            return (typename batch_bool<float, A>::register_type)_mm256_cmp_ps_mask(self, other, _CMP_NEQ_UQ);
         }
         template <class A>
         XSIMD_INLINE batch_bool<double, A> neq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512vl_256>) noexcept
         {
-            return (typename batch_bool<double, A>::register_type)_mm256_cmp_pd_mask(self, other, _CMP_NEQ_OQ);
+            return (typename batch_bool<double, A>::register_type)_mm256_cmp_pd_mask(self, other, _CMP_NEQ_UQ);
         }
 
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
@@ -717,6 +726,22 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx512vl_256>) noexcept
         {
             return select(batch_bool<T, A> { Values... }, true_br, false_br, avx512vl_256 {});
+        }
+
+        // decr_if / incr_if — the inherited avx kernels compute
+        // `self ± batch<T>(mask.data)`, which assumes a vector batch_bool whose
+        // true lanes are all-ones. Here batch_bool::data is a k-mask bitfield,
+        // so that broadcast yields garbage. Delegate to the select-based common
+        // implementation instead.
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return decr_if(self, mask, common {});
+        }
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512vl_256>) noexcept
+        {
+            return incr_if(self, mask, common {});
         }
 
         // reciprocal
