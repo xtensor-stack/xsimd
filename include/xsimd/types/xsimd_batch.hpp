@@ -151,6 +151,8 @@ namespace xsimd
             return this->data;
         }
 
+        XSIMD_INLINE register_type to_native() const noexcept;
+
         template <class U>
         XSIMD_NO_DISCARD static XSIMD_INLINE batch broadcast(U val) noexcept;
 
@@ -342,6 +344,8 @@ namespace xsimd
 
         template <class Tp>
         XSIMD_INLINE batch_bool(Tp const*) = delete;
+
+        XSIMD_INLINE register_type to_native() const noexcept;
 
         // memory operators
         XSIMD_INLINE void store_aligned(bool* mem) const noexcept;
@@ -836,6 +840,15 @@ namespace xsimd
         return kernel::first(*this, A {});
     }
 
+    /**
+     * Cast to the underlying native intrinsic register type.
+     */
+    template <class T, class A>
+    XSIMD_INLINE auto batch<T, A>::to_native() const noexcept -> register_type
+    {
+        return static_cast<register_type>(*this);
+    }
+
     /******************************
      * batch comparison operators *
      ******************************/
@@ -1165,6 +1178,15 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return kernel::first(*this, A {});
+    }
+
+    /**
+     * Cast to the underlying native intrinsic register type.
+     */
+    template <class T, class A>
+    XSIMD_INLINE auto batch_bool<T, A>::to_native() const noexcept -> register_type
+    {
+        return static_cast<register_type>(*this);
     }
 
     /***********************************

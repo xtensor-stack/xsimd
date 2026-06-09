@@ -81,3 +81,40 @@ architecture and pass the appropriate flag to the compiler. For instance:
 
 This can be useful to implement runtime dispatching, based on the instruction set detected at runtime. `xsimd` provides a generic machinery :cpp:func:`xsimd::dispatch()` to implement
 this pattern. Based on the above example, instead of calling ``mean{}(arch, a, b, res, tag)``, one can use ``xsimd::dispatch(mean{})(a, b, res, tag)``. More about this can be found in the :ref:`Arch Dispatching` section.
+
+Breaking out of xsimd
+---------------------
+
+Sometimes ``xsimd`` may not give you the whole availability of the instruction set you
+are targeting. This is not specific to this library but to all libraries that
+abstract something.
+
+``xsimd`` give you the possibility to break out of its :cpp:class:`~xsimd::batch` class
+and getting the underlying intrinsic register type.
+This is useful when an instruction set expose some intrinsicts for applications (*e.g.* video
+processing, cryptography...) that are too specific to include in ``xsimd``, or when some
+instructions are currently missing.
+
+There are many ways a user could add a special cases in their arch-independent SIMD code.
+One that is simple and compiles on all platforms is using C++17 ``if constexpr``.
+
+.. code:: cpp
+
+    template<typename Arch>
+    auto sign_i8(
+        xsimd::batch<int8_t, Arch> const& x,
+        xsimd::batch<int8_t, Arch> const& y
+    ) -> xsimd::batch<uint8_t, Arch> {
+         // Dedicated instruction dispatch at compile time
+         if constexpr(std::is_same_v<Arch, xsimd::avx2>){
+             // Automatic conversion back and forth between xsimd::batch and native types
+             return _mm256_sign_epi8(x, y);
+             // When compiler complains we can be more explicit
+             return xsimd::batch<int8_t, Arch>(_mm256_sign_epi8(x.to_native(), y.to_native()));
+         }
+
+         // General xsimd implementation
+         auto const zero = xsimd::batch<uint8_t, Arch>(0);
+         auto const c = xsimd::select(b < 0, -a, a);
+         return xsimd::select(b == zero, zero, c);
+    }
