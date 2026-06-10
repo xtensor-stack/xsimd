@@ -212,66 +212,98 @@ namespace xsimd
             XSIMD_INLINE __m128i maskload128(T const* mem, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     return _mm_maskz_load_epi32((__mmask8)m, mem);
+                }
                 else
+                {
                     return _mm_maskz_loadu_epi32((__mmask8)m, mem);
+                }
             }
             template <class T, class Mode, enable_sized_integral_t<T, 8> = 0>
             XSIMD_INLINE __m128i maskload128(T const* mem, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     return _mm_maskz_load_epi64((__mmask8)m, mem);
+                }
                 else
+                {
                     return _mm_maskz_loadu_epi64((__mmask8)m, mem);
+                }
             }
             template <class Mode>
             XSIMD_INLINE __m128 maskload128(float const* mem, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     return _mm_maskz_load_ps((__mmask8)m, mem);
+                }
                 else
+                {
                     return _mm_maskz_loadu_ps((__mmask8)m, mem);
+                }
             }
             template <class Mode>
             XSIMD_INLINE __m128d maskload128(double const* mem, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     return _mm_maskz_load_pd((__mmask8)m, mem);
+                }
                 else
+                {
                     return _mm_maskz_loadu_pd((__mmask8)m, mem);
+                }
             }
 
             template <class T, class Mode, enable_sized_integral_t<T, 4> = 0>
             XSIMD_INLINE void maskstore128(T* mem, __m128i src, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     _mm_mask_store_epi32(mem, (__mmask8)m, src);
+                }
                 else
+                {
                     _mm_mask_storeu_epi32(mem, (__mmask8)m, src);
+                }
             }
             template <class T, class Mode, enable_sized_integral_t<T, 8> = 0>
             XSIMD_INLINE void maskstore128(T* mem, __m128i src, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     _mm_mask_store_epi64(mem, (__mmask8)m, src);
+                }
                 else
+                {
                     _mm_mask_storeu_epi64(mem, (__mmask8)m, src);
+                }
             }
             template <class Mode>
             XSIMD_INLINE void maskstore128(float* mem, __m128 src, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     _mm_mask_store_ps(mem, (__mmask8)m, src);
+                }
                 else
+                {
                     _mm_mask_storeu_ps(mem, (__mmask8)m, src);
+                }
             }
             template <class Mode>
             XSIMD_INLINE void maskstore128(double* mem, __m128d src, uint64_t m, Mode) noexcept
             {
                 XSIMD_IF_CONSTEXPR(std::is_same<Mode, aligned_mode>::value)
+                {
                     _mm_mask_store_pd(mem, (__mmask8)m, src);
+                }
                 else
+                {
                     _mm_mask_storeu_pd(mem, (__mmask8)m, src);
+                }
             }
         }
 

@@ -126,10 +126,12 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
+                    static_assert(sizeof(int) == 4, "_mm256_maskload_epi32 requires a 4-byte int");
                     return _mm256_maskload_epi32(reinterpret_cast<int const*>(mem), mask);
                 }
                 else
                 {
+                    static_assert(sizeof(long long) == 8, "_mm256_maskload_epi64 requires an 8-byte long long");
                     return _mm256_maskload_epi64(reinterpret_cast<long long const*>(mem), mask);
                 }
             }
@@ -139,10 +141,12 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
+                    static_assert(sizeof(int) == 4, "_mm256_maskstore_epi32 requires a 4-byte int");
                     _mm256_maskstore_epi32(reinterpret_cast<int*>(mem), mask, src);
                 }
                 else
                 {
+                    static_assert(sizeof(long long) == 8, "_mm256_maskstore_epi64 requires an 8-byte long long");
                     _mm256_maskstore_epi64(reinterpret_cast<long long*>(mem), mask, src);
                 }
             }

@@ -442,7 +442,7 @@ namespace xsimd
         load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<common>) noexcept
         {
             // Scalar fallback: only active lanes are touched. Arches with
-            // hardware predicated loads override this.
+            // hardware predicated loads should override this.
             constexpr std::size_t size = batch<T, A>::size;
             alignas(A::alignment()) std::array<T, size> buffer;
             for (std::size_t i = 0; i < size; ++i)
@@ -462,7 +462,7 @@ namespace xsimd
         store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
         {
             // Scalar fallback: only active lanes are touched. Arches with
-            // hardware predicated stores override this.
+            // hardware predicated stores should override this.
             constexpr std::size_t size = batch<T, A>::size;
             alignas(A::alignment()) std::array<T, size> src_buf;
             src.store_aligned(src_buf.data());

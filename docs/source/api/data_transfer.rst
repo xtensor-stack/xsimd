@@ -90,5 +90,5 @@ The following empty types are used for tag dispatching:
 .. [#m] Masked ``load`` / ``store`` come in two flavours. The
    :cpp:class:`batch_bool_constant` overload encodes the mask in the type and
    is resolved at compile time. The runtime :cpp:class:`batch_bool` overload
-   accepts a mask computed at runtime. Prefer the compile-time mask whenever
-   the selection is known at compile time.
+   accepts a mask computed at runtime. For performance reasons, prefer the
+   compile-time mask whenever possible.

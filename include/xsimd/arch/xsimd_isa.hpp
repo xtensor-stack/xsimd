@@ -81,16 +81,15 @@
 // unqualified dependent call, which clang only resolves through ordinary lookup
 // at the point of definition (ADL cannot reach xsimd::kernel from xsimd-namespace
 // arguments). The sub-arch overloads must therefore be declared beforehand.
+// clang-format off
 #include "./xsimd_avx512vl_128.hpp"
 #include "./xsimd_avx512vl_256.hpp"
+#include "./xsimd_avx512vl.hpp"
+// clang-format on
 #endif
 
 #if XSIMD_WITH_AVX512F
 #include "./xsimd_avx512f.hpp"
-#endif
-
-#if XSIMD_WITH_AVX512VL
-#include "./xsimd_avx512vl.hpp"
 #endif
 
 #if XSIMD_WITH_AVX512DQ
