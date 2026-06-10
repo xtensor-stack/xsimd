@@ -24,6 +24,25 @@ namespace xsimd
     {
         using namespace types;
 
+        // Defined in xsimd_avx512vl_128.hpp (included after this header). The
+        // masked load/store half-fold below forwards to the 128-bit sized-batch
+        // arch, which is avx512vl_128 when the 256-bit one stays in the AVX2
+        // lineage (e.g. avxvnni). That unqualified dependent call resolves by
+        // ordinary lookup here, so the avx512vl_128 overloads must be visible at
+        // this point; declarations only, never instantiated unless AVX512VL is on.
+        template <class A, class T, bool... V, class Mode,
+                  typename = std::enable_if_t<std::is_arithmetic<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, V...> mask, convert<T>, Mode, requires_arch<avx512vl_128>) noexcept;
+        template <class A, class T, class Mode,
+                  typename = std::enable_if_t<std::is_arithmetic<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx512vl_128>) noexcept;
+        template <class A, class T, bool... V, class Mode,
+                  typename = std::enable_if_t<std::is_arithmetic<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, V...> mask, Mode, requires_arch<avx512vl_128>) noexcept;
+        template <class A, class T, class Mode,
+                  typename = std::enable_if_t<std::is_arithmetic<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx512vl_128>) noexcept;
+
         // select
         template <class A, class T, bool... Values, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx2_128>) noexcept
@@ -122,18 +141,19 @@ namespace xsimd
             }
         }
 
+        // constant masks gain nothing on a single register; forward to runtime
         template <class A, class T, bool... Values, class Mode,
                   typename = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx2_128>) noexcept
         {
-            return detail::maskload_avx2_128(mem, mask.as_batch());
+            return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx2_128 {});
         }
 
         template <class A, class T, bool... Values, class Mode,
                   typename = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx2_128>) noexcept
         {
-            detail::maskstore_avx2_128(mem, mask.as_batch(), __m128i(src));
+            store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx2_128 {});
         }
 
         template <class A, class T, class Mode>

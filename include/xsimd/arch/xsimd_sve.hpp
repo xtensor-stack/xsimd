@@ -49,17 +49,6 @@ namespace xsimd
                 template <class T>
                 XSIMD_INLINE svbool_t ptrue() noexcept { return ptrue_impl(index<sizeof(T)> {}); }
 
-                // predicate loading
-                template <bool M0, bool M1>
-                XSIMD_INLINE svbool_t pmask() noexcept { return svdupq_b64(M0, M1); }
-                template <bool M0, bool M1, bool M2, bool M3>
-                XSIMD_INLINE svbool_t pmask() noexcept { return svdupq_b32(M0, M1, M2, M3); }
-                template <bool M0, bool M1, bool M2, bool M3, bool M4, bool M5, bool M6, bool M7>
-                XSIMD_INLINE svbool_t pmask() noexcept { return svdupq_b16(M0, M1, M2, M3, M4, M5, M6, M7); }
-                template <bool M0, bool M1, bool M2, bool M3, bool M4, bool M5, bool M6, bool M7,
-                          bool M8, bool M9, bool M10, bool M11, bool M12, bool M13, bool M14, bool M15>
-                XSIMD_INLINE svbool_t pmask() noexcept { return svdupq_b8(M0, M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12, M13, M14, M15); }
-
                 // count active lanes in a predicate
                 XSIMD_INLINE uint64_t pcount_impl(svbool_t p, index<1>) noexcept { return svcntp_b8(p, p); }
                 XSIMD_INLINE uint64_t pcount_impl(svbool_t p, index<2>) noexcept { return svcntp_b16(p, p); }
@@ -101,15 +90,10 @@ namespace xsimd
             return load_aligned<A>(src, convert<T>(), sve {});
         }
 
-        // load_masked (compile-time mask): build a runtime predicate from
-        // the constant mask and reuse the runtime-mask path. ``pmask`` only
-        // constructs a 128-bit chunk predicate (svdupq_b{8,16,32,64}), which
-        // is replication-based and does not correctly express a per-lane
-        // mask on SVE wider than 128 bits — going through ``as_batch_bool``
-        // gives the right predicate for every vector width. ``int32``/
-        // ``int64``/``uint32``/``uint64`` are excluded so the common-arch
-        // dispatchers that reinterpret to ``float``/``double`` win partial
-        // ordering (otherwise we'd be ambiguous with ``requires_arch<A>``).
+        // load_masked (compile-time mask): forward to the runtime path; the
+        // as_batch_bool predicate is correct at every SVE width. 32/64-bit ints
+        // are excluded so the common float/double-reinterpreting dispatchers win
+        // partial ordering (else ambiguous with requires_arch<A>).
         template <class A, class T, bool... Values, class Mode,
                   detail::enable_arithmetic_t<T> = 0,
                   std::enable_if_t<!(std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)), int> = 0>
