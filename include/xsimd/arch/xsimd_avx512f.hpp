@@ -356,7 +356,8 @@ namespace xsimd
 
         // Runtime-mask load/store: same native k-register path as the constant
         // overloads above, minus the compile-time half-forwarding. 8/16-bit
-        // elements fall back to the common scalar path.
+        // elements are handled natively by avx512bw (vmovdqu8 / vmovdqu16);
+        // without AVX512BW they fall back to the common scalar path.
         template <class A, class T, class Mode,
                   typename = std::enable_if_t<(sizeof(T) >= 4)>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx512f>) noexcept

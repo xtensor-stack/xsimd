@@ -24,6 +24,108 @@
 
 namespace xsimd
 {
+    namespace detail
+    {
+        // Does batch<T, A> have a real predicated masked load/store, vs. the
+        // emulated scalar `requires_arch<common>` fallback? Compile-time signal to
+        // pick a masked single-loop over a vector+trailer loop. Size-keyed.
+        // Internal/undocumented for now; promote once the dispatch API settles.
+        template <class B>
+        struct has_mask_load : std::false_type
+        {
+        };
+        template <class B>
+        struct has_mask_store : std::false_type
+        {
+        };
+
+        template <class B>
+        constexpr bool has_mask_load_v = has_mask_load<B>::value;
+        template <class B>
+        constexpr bool has_mask_store_v = has_mask_store<B>::value;
+
+#define XSIMD_DECLARE_MASK_MEMORY(ARCH, SIZE_PREDICATE)                                  \
+    template <class T>                                                                   \
+    struct has_mask_load<batch<T, ARCH>>                                                 \
+        : std::integral_constant<bool, std::is_arithmetic<T>::value && (SIZE_PREDICATE)> \
+    {                                                                                    \
+    };                                                                                   \
+    template <class T>                                                                   \
+    struct has_mask_store<batch<T, ARCH>>                                                \
+        : std::integral_constant<bool, std::is_arithmetic<T>::value && (SIZE_PREDICATE)> \
+    {                                                                                    \
+    }
+
+#define XSIMD_DECLARE_MASK_MEMORY_ALIAS(ARCH, BASE)                        \
+    template <class T>                                                     \
+    struct has_mask_load<batch<T, ARCH>> : has_mask_load<batch<T, BASE>>   \
+    {                                                                      \
+    };                                                                     \
+    template <class T>                                                     \
+    struct has_mask_store<batch<T, ARCH>> : has_mask_store<batch<T, BASE>> \
+    {                                                                      \
+    }
+
+        XSIMD_DECLARE_MASK_MEMORY(avx, sizeof(T) == 4 || sizeof(T) == 8);
+        XSIMD_DECLARE_MASK_MEMORY(avx_128, sizeof(T) == 4 || sizeof(T) == 8);
+        XSIMD_DECLARE_MASK_MEMORY(avx512f, sizeof(T) == 4 || sizeof(T) == 8);
+        XSIMD_DECLARE_MASK_MEMORY(avx512bw, sizeof(T) >= 1 && sizeof(T) <= 8);
+        XSIMD_DECLARE_MASK_MEMORY(avx512vl_128, sizeof(T) == 4 || sizeof(T) == 8);
+        XSIMD_DECLARE_MASK_MEMORY(avx512vl_256, sizeof(T) == 4 || sizeof(T) == 8);
+
+        // sve / rvv: width-templated, predicate-native at every lane size
+        template <class T, size_t W>
+        struct has_mask_load<batch<T, sve<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        {
+        };
+        template <class T, size_t W>
+        struct has_mask_store<batch<T, sve<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        {
+        };
+        template <class T, size_t W>
+        struct has_mask_load<batch<T, rvv<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        {
+        };
+        template <class T, size_t W>
+        struct has_mask_store<batch<T, rvv<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        {
+        };
+
+        // descendants inherit their base
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx2, avx);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avxvnni, avx2);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx2_128, avx_128);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512cd, avx512f);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512dq, avx512cd);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512er, avx512cd);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512pf, avx512er);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512vl, avx512cd);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512ifma, avx512bw);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512vbmi, avx512ifma);
+        XSIMD_DECLARE_MASK_MEMORY_ALIAS(avx512vbmi2, avx512vbmi);
+
+        // wrapper arches follow their parameter
+        template <class T, class A>
+        struct has_mask_load<batch<T, fma3<A>>> : has_mask_load<batch<T, A>>
+        {
+        };
+        template <class T, class A>
+        struct has_mask_store<batch<T, fma3<A>>> : has_mask_store<batch<T, A>>
+        {
+        };
+        template <class T, class A>
+        struct has_mask_load<batch<T, avx512vnni<A>>> : has_mask_load<batch<T, A>>
+        {
+        };
+        template <class T, class A>
+        struct has_mask_store<batch<T, avx512vnni<A>>> : has_mask_store<batch<T, A>>
+        {
+        };
+
+#undef XSIMD_DECLARE_MASK_MEMORY
+#undef XSIMD_DECLARE_MASK_MEMORY_ALIAS
+    }
+
     namespace types
     {
         template <class T, class A>

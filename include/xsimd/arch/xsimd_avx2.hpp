@@ -126,10 +126,12 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
+                    static_assert(sizeof(int) == 4, "_mm256_maskload_epi32 requires a 4-byte int");
                     return _mm256_maskload_epi32(reinterpret_cast<int const*>(mem), mask);
                 }
                 else
                 {
+                    static_assert(sizeof(long long) == 8, "_mm256_maskload_epi64 requires an 8-byte long long");
                     return _mm256_maskload_epi64(reinterpret_cast<long long const*>(mem), mask);
                 }
             }
@@ -139,10 +141,12 @@ namespace xsimd
             {
                 XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
                 {
+                    static_assert(sizeof(int) == 4, "_mm256_maskstore_epi32 requires a 4-byte int");
                     _mm256_maskstore_epi32(reinterpret_cast<int*>(mem), mask, src);
                 }
                 else
                 {
+                    static_assert(sizeof(long long) == 8, "_mm256_maskstore_epi64 requires an 8-byte long long");
                     _mm256_maskstore_epi64(reinterpret_cast<long long*>(mem), mask, src);
                 }
             }
@@ -153,11 +157,12 @@ namespace xsimd
             }
         }
 
+        // no half-split shortcut for load; forward to runtime
         template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
         load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx2>) noexcept
         {
-            return detail::maskload(mem, mask.as_batch());
+            return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx2 {});
         }
 
         template <class A, class T, class Mode>

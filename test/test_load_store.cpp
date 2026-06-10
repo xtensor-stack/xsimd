@@ -18,6 +18,42 @@
 #include <random>
 #include <type_traits>
 
+// Anti-rot guard for the internal has_mask_load_v / has_mask_store_v trait. It is
+// a pure type-level computation (no batch instantiation), and every arch tag is
+// always declared, so the value is build-independent -- the whole (size x arch)
+// matrix is asserted unconditionally, no XSIMD_WITH_* guards. Capability is per
+// size and load == store, so one helper checks both ops at all four sizes
+// (float/double track int32/int64). Each line mirrors a row of the matrix.
+namespace test_has_mask_trait
+{
+    using xsimd::batch;
+    using xsimd::detail::has_mask_load_v;
+    using xsimd::detail::has_mask_store_v;
+
+    template <class A>
+    constexpr bool caps(bool b1, bool b2, bool b4, bool b8)
+    {
+        return has_mask_load_v<batch<int8_t, A>> == b1 && has_mask_store_v<batch<int8_t, A>> == b1
+            && has_mask_load_v<batch<int16_t, A>> == b2 && has_mask_store_v<batch<int16_t, A>> == b2
+            && has_mask_load_v<batch<int32_t, A>> == b4 && has_mask_store_v<batch<int32_t, A>> == b4
+            && has_mask_load_v<batch<int64_t, A>> == b8 && has_mask_store_v<batch<int64_t, A>> == b8;
+    }
+
+    //                                            i8     i16    i32    i64
+    static_assert(caps<xsimd::sse2>(false, false, false, false), "sse2: scalar fallback");
+    static_assert(caps<xsimd::sse4_2>(false, false, false, false), "sse4.2: scalar fallback");
+    static_assert(caps<xsimd::avx>(false, false, true, true), "avx: 4/8 via vmaskmov");
+    static_assert(caps<xsimd::avx_128>(false, false, true, true), "avx_128: 4/8 via vmaskmov");
+    static_assert(caps<xsimd::avx2>(false, false, true, true), "avx2: 4/8 native");
+    static_assert(caps<xsimd::fma3<xsimd::avx2>>(false, false, true, true), "fma3<avx2> follows avx2");
+    static_assert(caps<xsimd::avx512f>(false, false, true, true), "avx512f: 4/8");
+    static_assert(caps<xsimd::avx512bw>(true, true, true, true), "avx512bw: all sizes");
+    static_assert(caps<xsimd::neon>(false, false, false, false), "neon: scalar fallback");
+    static_assert(caps<xsimd::neon64>(false, false, false, false), "neon64: scalar fallback");
+    static_assert(caps<xsimd::sve>(true, true, true, true), "sve: predicate-native");
+    static_assert(caps<xsimd::rvv>(true, true, true, true), "rvv: predicate-native");
+}
+
 template <class B>
 struct load_store_test
 {
