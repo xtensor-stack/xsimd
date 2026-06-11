@@ -122,6 +122,11 @@ namespace xsimd
             XSIMD_INLINE batch<int64_t, A> mulhi_i64_core(batch<int64_t, A> const& x,
                                                           batch<int64_t, A> const& y,
                                                           WMul mul_epu32) noexcept;
+            template <class A, class WMul>
+            XSIMD_INLINE std::pair<batch<uint64_t, A>, batch<uint64_t, A>>
+            mulhilo_u64_core(batch<uint64_t, A> const& x,
+                             batch<uint64_t, A> const& y,
+                             WMul mul_epu32) noexcept;
         }
     }
 }
