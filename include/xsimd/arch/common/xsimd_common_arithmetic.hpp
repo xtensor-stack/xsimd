@@ -251,13 +251,12 @@ namespace xsimd
             {
                 using B = batch<uint64_t, A>;
                 const B mask(uint64_t(0xffffffffULL));
-                B xl = x & mask;
+                // mul_epu32 uses only the low 32 bits, so low operands need no mask.
                 B xh = x >> 32;
-                B yl = y & mask;
                 B yh = y >> 32;
-                B ll = mul_epu32(xl, yl);
-                B lh = mul_epu32(xl, yh);
-                B hl = mul_epu32(xh, yl);
+                B ll = mul_epu32(x, y);
+                B lh = mul_epu32(x, yh);
+                B hl = mul_epu32(xh, y);
                 B hh = mul_epu32(xh, yh);
                 B mid = (ll >> 32) + (lh & mask) + (hl & mask);
                 return hh + (lh >> 32) + (hl >> 32) + (mid >> 32);
@@ -276,6 +275,27 @@ namespace xsimd
                 auto sb = ::xsimd::bitwise_cast<uint64_t>(y >> 63);
                 return ::xsimd::bitwise_cast<int64_t>(uhi - (uy & sa) - (ux & sb));
             }
+
+            // Fused mul_hilo: both halves from one set of partials. Returns { hi, lo }.
+            template <class A, class WMul>
+            XSIMD_INLINE std::pair<batch<uint64_t, A>, batch<uint64_t, A>>
+            mulhilo_u64_core(batch<uint64_t, A> const& x,
+                             batch<uint64_t, A> const& y,
+                             WMul mul_epu32) noexcept
+            {
+                using B = batch<uint64_t, A>;
+                const B mask(uint64_t(0xffffffffULL));
+                B xh = x >> 32;
+                B yh = y >> 32;
+                B ll = mul_epu32(x, y);
+                B lh = mul_epu32(x, yh);
+                B hl = mul_epu32(xh, y);
+                B hh = mul_epu32(xh, yh);
+                B mid = (ll >> 32) + (lh & mask) + (hl & mask);
+                B hi = hh + (lh >> 32) + (hl >> 32) + (mid >> 32);
+                B lo = (ll & mask) | (mid << 32);
+                return { hi, lo };
+            }
         }
 
         template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
@@ -292,6 +312,21 @@ namespace xsimd
         mul_hilo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return std::pair<batch<T, A>, batch<T, A>> { mul_hi<A>(self, other, A {}), self * other };
+        }
+
+        // Signed 64-bit mul_hilo: unsigned path + sign fixup on hi (lo is sign-invariant).
+        template <class A>
+        XSIMD_INLINE std::pair<batch<int64_t, A>, batch<int64_t, A>>
+        mul_hilo(batch<int64_t, A> const& self, batch<int64_t, A> const& other, requires_arch<common>) noexcept
+        {
+            auto ux = ::xsimd::bitwise_cast<uint64_t>(self);
+            auto uy = ::xsimd::bitwise_cast<uint64_t>(other);
+            auto hilo = mul_hilo<A>(ux, uy, A {});
+            auto sa = ::xsimd::bitwise_cast<uint64_t>(self >> 63);
+            auto sb = ::xsimd::bitwise_cast<uint64_t>(other >> 63);
+            auto hi = hilo.first - (uy & sa) - (ux & sb);
+            return { ::xsimd::bitwise_cast<int64_t>(hi),
+                     ::xsimd::bitwise_cast<int64_t>(hilo.second) };
         }
 
         // rotl
