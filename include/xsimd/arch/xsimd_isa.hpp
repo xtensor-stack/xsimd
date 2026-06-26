@@ -3,6 +3,7 @@
  * Martin Renou                                                             *
  * Copyright (c) QuantStack                                                 *
  * Copyright (c) Serge Guelton                                              *
+ * Copyright (c) Marco Barbone                                              *
  *                                                                          *
  * Distributed under the terms of the BSD 3-Clause License.                 *
  *                                                                          *
@@ -72,6 +73,7 @@
 
 #if XSIMD_WITH_FMA3_AVX2
 #include "./xsimd_fma3_avx2.hpp"
+#include "./xsimd_fma3_avx2_128.hpp"
 #endif
 
 #if XSIMD_WITH_AVX512VL
