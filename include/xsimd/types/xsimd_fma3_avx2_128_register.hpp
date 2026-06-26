@@ -10,42 +10,42 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#ifndef XSIMD_AVXVNNI_REGISTER_HPP
-#define XSIMD_AVXVNNI_REGISTER_HPP
+#ifndef XSIMD_FMA3_AVX2_128_REGISTER_HPP
+#define XSIMD_FMA3_AVX2_128_REGISTER_HPP
 
 #include "./xsimd_avx2_register.hpp"
-#include "./xsimd_fma3_avx2_register.hpp"
 
 namespace xsimd
 {
+    template <typename arch>
+    struct fma3;
+
     /**
      * @ingroup architectures
      *
-     * AVXVNNI instructions
+     * AVX2 + FMA instructions, for 128 bits registers
      */
-    // Derive from fma3<avx2> rather than avx2 so the FMA3 kernels (fnma/fnms ->
-    // vfnmadd) are in avxvnni's dispatch chain instead of the generic neg(x*y)+z
-    // fallback. fma3<avx2> always derives from avx2 and its kernels are only
-    // registered when XSIMD_WITH_FMA3_AVX2, so when FMA is disabled this base is
-    // transparent (dispatch falls straight through to avx2).
-    struct avxvnni : fma3<avx2>
+    template <>
+    struct fma3<avx2_128> : avx2_128
     {
-        static constexpr bool supported() noexcept { return XSIMD_WITH_AVXVNNI; }
+        static constexpr bool supported() noexcept { return XSIMD_WITH_FMA3_AVX2; }
         static constexpr bool available() noexcept { return true; }
-        static constexpr char const* name() noexcept { return "avxvnni"; }
+        static constexpr char const* name() noexcept { return "fma3+avx2/128"; }
     };
 
-#if XSIMD_WITH_AVXVNNI
+#if XSIMD_WITH_FMA3_AVX2
 
 #if !XSIMD_WITH_AVX2
-#error "architecture inconsistency: avxvnni requires avx2"
+#error "architecture inconsistency: fma3+avx2/128 requires avx2"
 #endif
 
     namespace types
     {
-        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(avxvnni, avx2);
+
+        XSIMD_DECLARE_SIMD_REGISTER_ALIAS(fma3<avx2_128>, avx2_128);
+
     }
 #endif
-}
 
+}
 #endif

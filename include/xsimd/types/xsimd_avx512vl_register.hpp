@@ -3,6 +3,7 @@
  * Martin Renou                                                             *
  * Copyright (c) QuantStack                                                 *
  * Copyright (c) Serge Guelton                                              *
+ * Copyright (c) Marco Barbone                                              *
  *                                                                          *
  * Distributed under the terms of the BSD 3-Clause License.                 *
  *                                                                          *
@@ -13,6 +14,7 @@
 #define XSIMD_AVX512VL_REGISTER_HPP
 
 #include "./xsimd_avx512cd_register.hpp"
+#include "./xsimd_fma3_avx2_128_register.hpp"
 
 namespace xsimd
 {
@@ -34,7 +36,7 @@ namespace xsimd
      *
      * AVX512VL instructions extension for 128 bits registers
      */
-    struct avx512vl_128 : avx2_128
+    struct avx512vl_128 : fma3<avx2_128>
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_AVX512VL; }
         static constexpr bool available() noexcept { return true; }
