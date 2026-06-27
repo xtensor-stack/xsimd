@@ -507,12 +507,12 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch_bool<float, A> neq(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512vl_128>) noexcept
         {
-            return (typename batch_bool<float, A>::register_type)_mm_cmp_ps_mask(self, other, _CMP_NEQ_OQ);
+            return (typename batch_bool<float, A>::register_type)_mm_cmp_ps_mask(self, other, _CMP_NEQ_UQ);
         }
         template <class A>
         XSIMD_INLINE batch_bool<double, A> neq(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512vl_128>) noexcept
         {
-            return (typename batch_bool<double, A>::register_type)_mm_cmp_pd_mask(self, other, _CMP_NEQ_OQ);
+            return (typename batch_bool<double, A>::register_type)_mm_cmp_pd_mask(self, other, _CMP_NEQ_UQ);
         }
 
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
@@ -635,6 +635,22 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx512vl_128>) noexcept
         {
             return select(batch_bool<T, A> { Values... }, true_br, false_br, avx512vl_128 {});
+        }
+
+        // decr_if / incr_if — the inherited avx kernels compute
+        // `self ± batch<T>(mask.data)`, which assumes a vector batch_bool whose
+        // true lanes are all-ones. Here batch_bool::data is a k-mask bitfield,
+        // so that broadcast yields garbage. Delegate to the select-based common
+        // implementation instead.
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512vl_128>) noexcept
+        {
+            return decr_if(self, mask, common {});
+        }
+        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512vl_128>) noexcept
+        {
+            return incr_if(self, mask, common {});
         }
 
         // reciprocal
