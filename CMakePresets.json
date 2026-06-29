@@ -1,0 +1,214 @@
+{
+    "version": 5,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "native",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=native"
+            }
+        },
+        {
+            "name": "sse2",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse2 -mno-sse3"
+            }
+        },
+        {
+            "name": "sse3",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse3 -mno-ssse3"
+            }
+        },
+        {
+            "name": "ssse3",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -mssse3 -mno-sse4.1"
+            }
+        },
+        {
+            "name": "sse4.1",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse4.1 -mno-sse4.2"
+            }
+        },
+        {
+            "name": "sse4.2",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse4.2 -mno-avx"
+            }
+        },
+        {
+            "name": "avx",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mno-avx2"
+            }
+        },
+        {
+            "name": "avx_128",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mno-avx2 -DXSIMD_DEFAULT_ARCH=avx_128"
+            }
+        },
+        {
+            "name": "avx2",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx2 -mno-avx512f"
+            }
+        },
+        {
+            "name": "avx2_128",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx2 -mno-avx512f -DXSIMD_DEFAULT_ARCH=avx2_128"
+            }
+        },
+        {
+            "name": "avx512f",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mno-avx512cd -mno-avx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512cd",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mno-avx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512dq",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512bw",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512er",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mno-avx512bw -mavx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512pf",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mno-avx512bw -mavx512er -mavx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512ifma",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512vbmi",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mavx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512vbmi2",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mavx512vbmi -mavx512vbmi2 -mno-avx512vnni"
+            }
+        },
+        {
+            "name": "avx512vnni_avx512bw",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mavx512vnni"
+            }
+        },
+        {
+            "name": "avx512vnni_avx512vbmi2",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mavx512vbmi -mavx512vbmi2 -mavx512vnni"
+            }
+        },
+        {
+            "name": "avx512vl_128",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_128"
+            }
+        },
+        {
+            "name": "avx512vl_256",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_256"
+            }
+        },
+        {
+            "name": "neon",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv7-a -mfpu=neon -mfloat-abi=softfp"
+            }
+        },
+        {
+            "name": "neon64",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8-a"
+            }
+        },
+        {
+            "name": "sve128",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=128"
+            }
+        },
+        {
+            "name": "sve256",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=256"
+            }
+        },
+        {
+            "name": "sve512",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=512"
+            }
+        },
+        {
+            "name": "rvv128",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=rv64gcv_zvl128b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+            }
+        },
+        {
+            "name": "rvv256",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=rv64gcv_zvl256b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+            }
+        },
+        {
+            "name": "rvv512",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=rv64gcv_zvl512b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+            }
+        },
+        {
+            "name": "vsx2",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -mcpu=power8 -maltivec -mvsx"
+            }
+        },
+        {
+            "name": "vsx3",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -mcpu=power9 -maltivec -mvsx"
+            }
+        },
+        {
+            "name": "vsx4",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -mcpu=power10 -maltivec -mvsx"
+            }
+        }
+    ]
+}

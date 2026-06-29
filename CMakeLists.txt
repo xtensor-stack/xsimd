@@ -54,6 +54,21 @@ if(ENABLE_XTL_COMPLEX OR XSIMD_ENABLE_XTL_COMPLEX)
     )
 endif()
 
+# Dev options
+# ===========
+
+include (cmake/Hardening.cmake)
+
+option(
+    XSIMD_HARDEN_TRIVIAL_AUTO_VAR_INIT
+    "Enable -ftrivial-auto-var-init hardening flag if supported"
+    OFF
+)
+
+if(XSIMD_HARDEN_TRIVIAL_AUTO_VAR_INIT)
+    xsimd_harden_trivial_auto_var_init(xsimd INTERFACE)
+endif()
+
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
