@@ -409,6 +409,11 @@ namespace xsimd
         {
             XSIMD_RVV_OVERLOAD(rvvle, (__riscv_vle XSIMD_RVV_S _v_ XSIMD_RVV_TSM), , vec(T const*))
             XSIMD_RVV_OVERLOAD(rvvse, (__riscv_vse XSIMD_RVV_S _v_ XSIMD_RVV_TSM), , void(T*, vec))
+            // Masked load (mask-undisturbed with zero passthrough): inactive lanes read as 0,
+            // no memory access is performed for inactive lanes (page-fault safe).
+            XSIMD_RVV_OVERLOAD(rvvle_mu, (__riscv_vle XSIMD_RVV_S _v_ XSIMD_RVV_TSM _mu), , vec(bvec, vec, T const*))
+            // Masked store: inactive lanes are not written.
+            XSIMD_RVV_OVERLOAD(rvvse_m, (__riscv_vse XSIMD_RVV_S _v_ XSIMD_RVV_TSM _m), , void(bvec, T*, vec))
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -421,6 +426,16 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> load_unaligned(T const* src, convert<T>, requires_arch<rvv>) noexcept
         {
             return load_aligned<A>(src, convert<T>(), rvv {});
+        }
+
+        // load_masked (runtime mask): native vle*.v vd, (rs1), v0.t with zero-init
+        // passthrough so inactive lanes read as 0, matching xsimd's contract.
+        template <class A, class T, class Mode, detail::enable_arithmetic_t<T> = 0>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<rvv>) noexcept
+        {
+            using proj_t = map_to_sized_type_t<T>;
+            const auto zero = detail_rvv::rvvmv_splat(proj_t {});
+            return detail_rvv::rvvle_mu(mask, zero, reinterpret_cast<proj_t const*>(mem));
         }
 
         // load_complex
@@ -498,6 +513,15 @@ namespace xsimd
         XSIMD_INLINE void store_unaligned(T* dst, batch<T, A> const& src, requires_arch<rvv>) noexcept
         {
             store_aligned<A>(dst, src, rvv {});
+        }
+
+        // store_masked (runtime mask): native vse*.v vd, (rs1), v0.t — inactive lanes
+        // are not written (page-fault safe).
+        template <class A, class T, class Mode, detail::enable_arithmetic_t<T> = 0>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<rvv>) noexcept
+        {
+            using proj_t = map_to_sized_type_t<T>;
+            detail_rvv::rvvse_m(mask, reinterpret_cast<proj_t*>(mem), src);
         }
 
         /******************

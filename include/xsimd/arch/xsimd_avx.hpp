@@ -987,6 +987,36 @@ namespace xsimd
             }
         }
 
+        // Runtime-mask load (float/double).
+        template <class A, class Mode>
+        XSIMD_INLINE batch<float, A>
+        load_masked(float const* mem, batch_bool<float, A> mask, convert<float>, Mode, requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_ps(mem, _mm256_castps_si256(mask));
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE batch<double, A>
+        load_masked(double const* mem, batch_bool<double, A> mask, convert<double>, Mode, requires_arch<avx>) noexcept
+        {
+            return _mm256_maskload_pd(mem, _mm256_castpd_si256(mask));
+        }
+
+        // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
+        load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return bitwise_cast<T>(batch<float, A>(_mm256_maskload_ps(reinterpret_cast<float const*>(mem), __m256i(mask))));
+            }
+            else
+            {
+                return bitwise_cast<T>(batch<double, A>(_mm256_maskload_pd(reinterpret_cast<double const*>(mem), __m256i(mask))));
+            }
+        }
+
         // load_masked (single overload for float/double)
         template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx>) noexcept
@@ -1019,12 +1049,8 @@ namespace xsimd
         // store_masked
         namespace detail
         {
-            // True when batch_bool<T, A> is the legacy VEX vector mask, i.e. it is stored
-            // in the same register as the data (__m256 / __m256d) rather than in an EVEX
-            // k-register (__mmask8) as on the avx512vl architectures. The _mm256_cast*_si256
-            // path below is only well-formed for the vector-mask representation. This names
-            // no architecture — it tests the mask's representation, in the spirit of
-            // detail::masked_memory_uses_fp_bitcast.
+            // True when batch_bool<T, A> shares the data register (__m256/__m256d) rather
+            // than an EVEX k-register; the _mm256_cast*_si256 path below needs the former.
             template <class T, class A>
             using uses_vector_mask = std::is_same<typename batch_bool<T, A>::register_type,
                                                   typename batch<T, A>::register_type>;
@@ -1067,6 +1093,36 @@ namespace xsimd
             else
             {
                 detail::maskstore(mem, mask.as_batch_bool(), src);
+            }
+        }
+
+        // Runtime-mask store (float/double).
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(float* mem, batch<float, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            detail::maskstore(mem, mask, src);
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(double* mem, batch<double, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            detail::maskstore(mem, mask, src);
+        }
+
+        // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), void>
+        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                _mm256_maskstore_ps(reinterpret_cast<float*>(mem), __m256i(mask), bitwise_cast<float>(src));
+            }
+            else
+            {
+                _mm256_maskstore_pd(reinterpret_cast<double*>(mem), __m256i(mask), bitwise_cast<double>(src));
             }
         }
 

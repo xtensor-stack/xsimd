@@ -103,29 +103,75 @@ namespace xsimd
             return _mm_cmp_pd(self, other, _CMP_NEQ_UQ);
         }
 
-        // load_masked
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, Values...> mask, convert<float>, Mode, requires_arch<avx_128>) noexcept
+        // constant masks gain nothing on a single register; forward to runtime
+        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
-            return _mm_maskload_ps(mem, mask.as_batch());
-        }
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<double, A> load_masked(double const* mem, batch_bool_constant<double, A, Values...> mask, convert<double>, Mode, requires_arch<avx_128>) noexcept
-        {
-            return _mm_maskload_pd(mem, mask.as_batch());
+            return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx_128 {});
         }
 
-        // store_masked
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
+        // Runtime-mask load (float/double).
+        template <class A, class Mode>
+        XSIMD_INLINE batch<float, A>
+        load_masked(float const* mem, batch_bool<float, A> mask, convert<float>, Mode, requires_arch<avx_128>) noexcept
         {
-            return _mm_maskstore_ps(mem, mask.as_batch(), src);
+            return _mm_maskload_ps(mem, _mm_castps_si128(mask));
+        }
+        template <class A, class Mode>
+        XSIMD_INLINE batch<double, A>
+        load_masked(double const* mem, batch_bool<double, A> mask, convert<double>, Mode, requires_arch<avx_128>) noexcept
+        {
+            return _mm_maskload_pd(mem, _mm_castpd_si128(mask));
         }
 
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
+        // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
+        load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
-            return _mm_maskstore_pd(mem, mask.as_batch(), src);
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                return bitwise_cast<T>(batch<float, A>(_mm_maskload_ps(reinterpret_cast<float const*>(mem), __m128i(mask))));
+            }
+            else
+            {
+                return bitwise_cast<T>(batch<double, A>(_mm_maskload_pd(reinterpret_cast<double const*>(mem), __m128i(mask))));
+            }
+        }
+
+        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
+        {
+            store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx_128 {});
+        }
+
+        // Runtime-mask store (float/double).
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(float* mem, batch<float, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<avx_128>) noexcept
+        {
+            _mm_maskstore_ps(mem, _mm_castps_si128(mask), src);
+        }
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(double* mem, batch<double, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<avx_128>) noexcept
+        {
+            _mm_maskstore_pd(mem, _mm_castpd_si128(mask), src);
+        }
+
+        // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), void>
+        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx_128>) noexcept
+        {
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            {
+                _mm_maskstore_ps(reinterpret_cast<float*>(mem), __m128i(mask), bitwise_cast<float>(src));
+            }
+            else
+            {
+                _mm_maskstore_pd(reinterpret_cast<double*>(mem), __m128i(mask), bitwise_cast<double>(src));
+            }
         }
 
         // swizzle (dynamic mask)
