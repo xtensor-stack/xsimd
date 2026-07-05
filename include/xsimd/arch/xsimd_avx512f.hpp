@@ -2787,6 +2787,83 @@ namespace xsimd
             return transpose(reinterpret_cast<batch<uint8_t, A>*>(matrix_begin), reinterpret_cast<batch<uint8_t, A>*>(matrix_end), A {});
         }
 
+        template <class A>
+        XSIMD_INLINE void transpose(batch<float, A>* matrix_begin, batch<float, A>* matrix_end, requires_arch<avx512f>) noexcept
+        {
+            assert((matrix_end - matrix_begin == batch<float, A>::size) && "correctly sized matrix");
+            (void)matrix_end;
+            __m512 t[16], u[16];
+            for (int k = 0; k < 8; ++k)
+            {
+                t[2 * k + 0] = _mm512_unpacklo_ps(matrix_begin[2 * k], matrix_begin[2 * k + 1]);
+                t[2 * k + 1] = _mm512_unpackhi_ps(matrix_begin[2 * k], matrix_begin[2 * k + 1]);
+            }
+            for (int k = 0; k < 4; ++k)
+            {
+                u[4 * k + 0] = _mm512_shuffle_ps(t[4 * k + 0], t[4 * k + 2], 0x44);
+                u[4 * k + 1] = _mm512_shuffle_ps(t[4 * k + 0], t[4 * k + 2], 0xEE);
+                u[4 * k + 2] = _mm512_shuffle_ps(t[4 * k + 1], t[4 * k + 3], 0x44);
+                u[4 * k + 3] = _mm512_shuffle_ps(t[4 * k + 1], t[4 * k + 3], 0xEE);
+            }
+            for (int k = 0; k < 4; ++k)
+            {
+                t[k + 0] = _mm512_shuffle_f32x4(u[k + 0], u[k + 4], 0x88);
+                t[k + 4] = _mm512_shuffle_f32x4(u[k + 0], u[k + 4], 0xdd);
+                t[k + 8] = _mm512_shuffle_f32x4(u[k + 8], u[k + 12], 0x88);
+                t[k + 12] = _mm512_shuffle_f32x4(u[k + 8], u[k + 12], 0xdd);
+            }
+            for (int k = 0; k < 8; ++k)
+            {
+                matrix_begin[k + 0] = _mm512_shuffle_f32x4(t[k], t[k + 8], 0x88);
+                matrix_begin[k + 8] = _mm512_shuffle_f32x4(t[k], t[k + 8], 0xdd);
+            }
+        }
+        template <class A>
+        XSIMD_INLINE void transpose(batch<uint32_t, A>* matrix_begin, batch<uint32_t, A>* matrix_end, requires_arch<avx512f>) noexcept
+        {
+            return transpose(reinterpret_cast<batch<float, A>*>(matrix_begin), reinterpret_cast<batch<float, A>*>(matrix_end), A {});
+        }
+        template <class A>
+        XSIMD_INLINE void transpose(batch<int32_t, A>* matrix_begin, batch<int32_t, A>* matrix_end, requires_arch<avx512f>) noexcept
+        {
+            return transpose(reinterpret_cast<batch<float, A>*>(matrix_begin), reinterpret_cast<batch<float, A>*>(matrix_end), A {});
+        }
+
+        template <class A>
+        XSIMD_INLINE void transpose(batch<double, A>* matrix_begin, batch<double, A>* matrix_end, requires_arch<avx512f>) noexcept
+        {
+            assert((matrix_end - matrix_begin == batch<double, A>::size) && "correctly sized matrix");
+            (void)matrix_end;
+            __m512d t[8], u[8];
+            for (int k = 0; k < 4; ++k)
+            {
+                t[2 * k + 0] = _mm512_unpacklo_pd(matrix_begin[2 * k], matrix_begin[2 * k + 1]);
+                t[2 * k + 1] = _mm512_unpackhi_pd(matrix_begin[2 * k], matrix_begin[2 * k + 1]);
+            }
+            for (int k = 0; k < 2; ++k)
+            {
+                u[4 * k + 0] = _mm512_shuffle_f64x2(t[4 * k + 0], t[4 * k + 2], 0x88);
+                u[4 * k + 1] = _mm512_shuffle_f64x2(t[4 * k + 1], t[4 * k + 3], 0x88);
+                u[4 * k + 2] = _mm512_shuffle_f64x2(t[4 * k + 0], t[4 * k + 2], 0xdd);
+                u[4 * k + 3] = _mm512_shuffle_f64x2(t[4 * k + 1], t[4 * k + 3], 0xdd);
+            }
+            for (int k = 0; k < 4; ++k)
+            {
+                matrix_begin[k + 0] = _mm512_shuffle_f64x2(u[k], u[k + 4], 0x88);
+                matrix_begin[k + 4] = _mm512_shuffle_f64x2(u[k], u[k + 4], 0xdd);
+            }
+        }
+        template <class A>
+        XSIMD_INLINE void transpose(batch<uint64_t, A>* matrix_begin, batch<uint64_t, A>* matrix_end, requires_arch<avx512f>) noexcept
+        {
+            return transpose(reinterpret_cast<batch<double, A>*>(matrix_begin), reinterpret_cast<batch<double, A>*>(matrix_end), A {});
+        }
+        template <class A>
+        XSIMD_INLINE void transpose(batch<int64_t, A>* matrix_begin, batch<int64_t, A>* matrix_end, requires_arch<avx512f>) noexcept
+        {
+            return transpose(reinterpret_cast<batch<double, A>*>(matrix_begin), reinterpret_cast<batch<double, A>*>(matrix_end), A {});
+        }
+
         // trunc
         template <class A>
         XSIMD_INLINE batch<float, A>
