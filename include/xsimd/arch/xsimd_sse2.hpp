@@ -1147,6 +1147,11 @@ namespace xsimd
             {
                 return _mm_loadh_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem + 2));
             }
+            else XSIMD_IF_CONSTEXPR(mask.countr_one() == 3)
+            {
+                __m128 const lo2 = _mm_castsi128_ps(_mm_loadl_epi64(reinterpret_cast<__m128i const*>(mem)));
+                return _mm_shuffle_ps(lo2, _mm_load_ss(mem + 2), _MM_SHUFFLE(3, 0, 1, 0));
+            }
             else
             {
                 return load_masked<A>(mem, mask, convert<float> {}, Mode {}, common {});
@@ -1184,6 +1189,11 @@ namespace xsimd
             else XSIMD_IF_CONSTEXPR(mask.countl_one() == 2)
             {
                 _mm_storeh_pi(reinterpret_cast<__m64*>(mem + 2), src);
+            }
+            else XSIMD_IF_CONSTEXPR(mask.countr_one() == 3)
+            {
+                _mm_storel_pi(reinterpret_cast<__m64*>(mem), src);
+                _mm_store_ss(mem + 2, _mm_movehl_ps(src, src));
             }
             else
             {
