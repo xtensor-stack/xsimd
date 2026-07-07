@@ -335,6 +335,72 @@ namespace xsimd
             detail::maskstore128(mem, src, mask.mask(), Mode {});
         }
 
+        // gather
+        template <class T, class A, class U, detail::enable_sized_integral_t<T, 4> = 0, detail::enable_sized_integral_t<U, 4> = 0>
+        XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
+                                        kernel::requires_arch<avx512vl_128>) noexcept
+        {
+            return _mm_mmask_i32gather_epi32(_mm_setzero_si128(), (__mmask8)0xF, index, static_cast<const void*>(src), sizeof(T));
+        }
+
+        template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_sized_integral_t<U, 8> = 0>
+        XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
+                                        kernel::requires_arch<avx512vl_128>) noexcept
+        {
+            return _mm_mmask_i64gather_epi64(_mm_setzero_si128(), (__mmask8)0x3, index, static_cast<const void*>(src), sizeof(T));
+        }
+
+        template <class A, class U, detail::enable_sized_integral_t<U, 4> = 0>
+        XSIMD_INLINE batch<float, A> gather(batch<float, A> const&, float const* src,
+                                            batch<U, A> const& index,
+                                            kernel::requires_arch<avx512vl_128>) noexcept
+        {
+            return _mm_mmask_i32gather_ps(_mm_setzero_ps(), (__mmask8)0xF, index, src, sizeof(float));
+        }
+
+        template <class A, class U, detail::enable_sized_integral_t<U, 8> = 0>
+        XSIMD_INLINE batch<double, A> gather(batch<double, A> const&, double const* src,
+                                             batch<U, A> const& index,
+                                             requires_arch<avx512vl_128>) noexcept
+        {
+            return _mm_mmask_i64gather_pd(_mm_setzero_pd(), (__mmask8)0x3, index, src, sizeof(double));
+        }
+
+        // scatter
+        template <class A, class T,
+                  class = std::enable_if_t<std::is_same<uint32_t, T>::value || std::is_same<int32_t, T>::value>>
+        XSIMD_INLINE void scatter(batch<T, A> const& src, T* dst,
+                                  batch<int32_t, A> const& index,
+                                  kernel::requires_arch<avx512vl_128>) noexcept
+        {
+            _mm_i32scatter_epi32(dst, index, src, sizeof(T));
+        }
+
+        template <class A, class T,
+                  class = std::enable_if_t<std::is_same<uint64_t, T>::value || std::is_same<int64_t, T>::value>>
+        XSIMD_INLINE void scatter(batch<T, A> const& src, T* dst,
+                                  batch<int64_t, A> const& index,
+                                  kernel::requires_arch<avx512vl_128>) noexcept
+        {
+            _mm_i64scatter_epi64(dst, index, src, sizeof(T));
+        }
+
+        template <class A>
+        XSIMD_INLINE void scatter(batch<float, A> const& src, float* dst,
+                                  batch<int32_t, A> const& index,
+                                  kernel::requires_arch<avx512vl_128>) noexcept
+        {
+            _mm_i32scatter_ps(dst, index, src, sizeof(float));
+        }
+
+        template <class A>
+        XSIMD_INLINE void scatter(batch<double, A> const& src, double* dst,
+                                  batch<int64_t, A> const& index,
+                                  kernel::requires_arch<avx512vl_128>) noexcept
+        {
+            _mm_i64scatter_pd(dst, index, src, sizeof(double));
+        }
+
         // max
         template <class A>
         XSIMD_INLINE batch<int64_t, A> max(batch<int64_t, A> const& self, batch<int64_t, A> const& other, requires_arch<avx512vl_128>) noexcept
