@@ -3308,7 +3308,9 @@ namespace xsimd
                                          requires_arch<neon>) noexcept
         {
             static_assert(batch<T, A>::size == sizeof...(idx), "valid swizzle indices");
-            std::array<T, batch<T, A>::size> data;
+            // std::array is only aligned to alignof(T), while store_aligned requires
+            // the full batch alignment
+            alignas(A::alignment()) std::array<T, batch<T, A>::size> data;
             self.store_aligned(data.data());
             return set(batch<T, A>(), A(), data[idx]...);
         }
