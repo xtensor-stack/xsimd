@@ -330,23 +330,43 @@ TEST_CASE_TEMPLATE("[swizzle]", B, BATCH_SWIZZLE_TYPES)
     SUBCASE("rotate_right") { swizzle_test<B>().rotate_right(); }
 }
 
-#if XSIMD_WITH_NEON
 // Regression test for https://github.com/xtensor-stack/xsimd/issues/1260: the generic
-// neon swizzle kernel stored to an std::array aligned only to alignof(T), tripping the
-// alignment assertion in store_aligned for the 8- and 16-bit batches that use it
-TEST_CASE_TEMPLATE("[swizzle generic neon kernel]", B, xsimd::batch<uint8_t, xsimd::neon>, xsimd::batch<int8_t, xsimd::neon>, xsimd::batch<uint16_t, xsimd::neon>, xsimd::batch<int16_t, xsimd::neon>)
+// swizzle kernel stored to an std::array aligned only to alignof(T), tripping the
+// alignment assertion in store_aligned for the 8- and 16-bit batches that use it.
+// Run on every supported architecture, not just the default one, so the generic
+// kernels of the narrower archs are exercised too
+struct check_narrow_swizzle_and_reduce
 {
-    XSIMD_SWIZZLE_PATTERN_CASE(Reversor);
-    XSIMD_SWIZZLE_PATTERN_CASE(EvenThenOdd);
-    XSIMD_SWIZZLE_PATTERN_CASE(RotateRight1);
-    SUBCASE("reduce_max")
+    template <class Arch>
+    void operator()(Arch) const
     {
+        if (!Arch::available())
+        {
+            return;
+        }
+        check_for<uint8_t, Arch>();
+        check_for<int8_t, Arch>();
+        check_for<uint16_t, Arch>();
+        check_for<int16_t, Arch>();
+    }
+
+    template <class T, class Arch>
+    void check_for() const
+    {
+        using B = xsimd::batch<T, Arch>;
+        swizzle_test<B>().template run<xsimd::Reversor>();
+        swizzle_test<B>().template run<xsimd::EvenThenOdd>();
+        swizzle_test<B>().template run<xsimd::RotateRight1>();
         auto lhs = swizzle_test<B>::make_lhs();
         auto b = B::load_unaligned(lhs.data());
         CHECK_EQ(xsimd::reduce_max(b), lhs[B::size - 1]);
     }
+};
+
+TEST_CASE("[narrow swizzle and reduce_max on every supported architecture]")
+{
+    xsimd::supported_architectures::for_each(check_narrow_swizzle_and_reduce {});
 }
-#endif
 
 #undef XSIMD_SWIZZLE_PATTERN_CASE
 
