@@ -596,9 +596,9 @@ namespace xsimd
                     {
                         static constexpr std::size_t size = B::size;
                         using value_type = typename B::value_type;
-                        alignas(B) std::array<value_type, size> tmp;
-                        alignas(B) std::array<value_type, size> txr;
-                        alignas(B) std::array<value_type, size> args;
+                        alignas(B::arch_type::alignment()) std::array<value_type, size> tmp;
+                        alignas(B::arch_type::alignment()) std::array<value_type, size> txr;
+                        alignas(B::arch_type::alignment()) std::array<value_type, size> args;
                         x.store_aligned(args.data());
 
                         for (std::size_t i = 0; i < size; ++i)
