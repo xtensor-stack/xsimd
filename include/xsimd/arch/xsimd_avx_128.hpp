@@ -103,11 +103,19 @@ namespace xsimd
             return _mm_cmp_pd(self, other, _CMP_NEQ_UQ);
         }
 
-        // constant masks gain nothing on a single register; forward to runtime
+        // Masks that lower to plain moves go to sse2; the rest gain nothing on a
+        // single register, so take the runtime path.
         template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
-            return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx_128 {});
+            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                return load_masked(mem, mask, convert<T> {}, Mode {}, sse2 {});
+            }
+            else
+            {
+                return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx_128 {});
+            }
         }
 
         // Runtime-mask load (float/double).
@@ -142,7 +150,14 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
         {
-            store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx_128 {});
+            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                store_masked(mem, src, mask, Mode {}, sse2 {});
+            }
+            else
+            {
+                store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx_128 {});
+            }
         }
 
         // Runtime-mask store (float/double).

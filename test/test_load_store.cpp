@@ -125,6 +125,21 @@ struct load_store_test
         static constexpr bool get(std::size_t, std::size_t) noexcept { return true; }
     };
 
+    struct mask_all_but_last
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index + 1 < size; }
+    };
+
+    struct mask_all_but_first
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return index != 0; }
+    };
+
+    struct mask_last
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index + 1 == size; }
+    };
+
     template <class Generator>
     static batch_bool_type make_runtime_mask() noexcept
     {
@@ -436,6 +451,9 @@ private:
         run_load_mask_pattern<MaskKind, mask_last_half>(v, name, b, expected, p + " last half");
         run_load_mask_pattern<MaskKind, mask_even>(v, name, b, expected, p + " even elements");
         run_load_mask_pattern<MaskKind, mask_odd>(v, name, b, expected, p + " odd elements");
+        run_load_mask_pattern<MaskKind, mask_last>(v, name, b, expected, p + " last element");
+        run_load_mask_pattern<MaskKind, mask_all_but_last>(v, name, b, expected, p + " all but last");
+        run_load_mask_pattern<MaskKind, mask_all_but_first>(v, name, b, expected, p + " all but first");
         run_load_mask_pattern<MaskKind, mask_pseudo_random>(v, name, b, expected, p + " pseudo random");
         run_load_mask_pattern<MaskKind, mask_all>(v, name, b, expected, p + " all elements");
     }
@@ -499,6 +517,9 @@ private:
         run_store_mask_pattern<MaskKind, mask_last_half>(v, name, b, res, expected_masked, p + " last half");
         run_store_mask_pattern<MaskKind, mask_even>(v, name, b, res, expected_masked, p + " even elements");
         run_store_mask_pattern<MaskKind, mask_odd>(v, name, b, res, expected_masked, p + " odd elements");
+        run_store_mask_pattern<MaskKind, mask_last>(v, name, b, res, expected_masked, p + " last element");
+        run_store_mask_pattern<MaskKind, mask_all_but_last>(v, name, b, res, expected_masked, p + " all but last");
+        run_store_mask_pattern<MaskKind, mask_all_but_first>(v, name, b, res, expected_masked, p + " all but first");
         run_store_mask_pattern<MaskKind, mask_pseudo_random>(v, name, b, res, expected_masked, p + " pseudo random");
         run_store_mask_pattern<MaskKind, mask_all>(v, name, b, res, expected_masked, p + " all elements");
     }

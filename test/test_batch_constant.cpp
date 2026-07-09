@@ -389,6 +389,76 @@ struct constant_bool_batch_test
         constexpr auto inv_x = ~x;
         static_assert(std::is_same<decltype(inv_x), decltype(y)>::value, "~x == y");
     }
+
+    struct first_half
+    {
+        static constexpr bool get(size_t index, size_t size) { return index < size / 2; }
+    };
+    struct second_half
+    {
+        static constexpr bool get(size_t index, size_t size) { return index >= size / 2; }
+    };
+    struct ends
+    {
+        static constexpr bool get(size_t index, size_t size) { return index == 0 || index + 1 == size; }
+    };
+    struct all_but_last
+    {
+        static constexpr bool get(size_t index, size_t size) { return index + 1 < size; }
+    };
+    struct all_but_first
+    {
+        static constexpr bool get(size_t index, size_t) { return index != 0; }
+    };
+    struct first_only
+    {
+        static constexpr bool get(size_t index, size_t) { return index == 0; }
+    };
+    struct last_only
+    {
+        static constexpr bool get(size_t index, size_t size) { return index + 1 == size; }
+    };
+
+    void test_shape() const
+    {
+        constexpr auto all_true = xsimd::make_batch_bool_constant<value_type, constant<true>, arch_type>();
+        constexpr auto all_false = xsimd::make_batch_bool_constant<value_type, constant<false>, arch_type>();
+        constexpr auto lo = xsimd::make_batch_bool_constant<value_type, first_half, arch_type>();
+        constexpr auto hi = xsimd::make_batch_bool_constant<value_type, second_half, arch_type>();
+        constexpr auto edges = xsimd::make_batch_bool_constant<value_type, ends, arch_type>();
+        constexpr auto size = decltype(all_true)::size;
+
+        static_assert(all_true.is_prefix() && all_true.is_suffix(), "full mask is prefix and suffix");
+        static_assert(all_false.is_prefix() && all_false.is_suffix(), "empty mask is prefix and suffix");
+        static_assert(lo.is_prefix() && !lo.is_suffix(), "first half is a prefix only");
+        static_assert(hi.is_suffix() && !hi.is_prefix(), "second half is a suffix only");
+        // {first, last} lanes: contiguous only when that covers the whole batch
+        static_assert(edges.is_prefix() == (size <= 2), "non-contiguous mask is not a prefix");
+        static_assert(edges.is_suffix() == (size <= 2), "non-contiguous mask is not a suffix");
+
+        // prefix()/suffix() return the set-run length, or size+1 when not that shape
+        static_assert(lo.prefix() == size / 2 && lo.suffix() == size + 1, "lo is the size/2 prefix, no suffix");
+        static_assert(hi.suffix() == size / 2 && hi.prefix() == size + 1, "hi is the size/2 suffix, no prefix");
+        static_assert(all_true.prefix() == size && all_true.suffix() == size, "full mask runs the whole width");
+        static_assert(all_false.prefix() == 0 && all_false.suffix() == 0, "empty mask has zero-length runs");
+        static_assert(edges.prefix() == (size <= 2 ? size : size + 1), "non-contiguous mask has no prefix length");
+
+        // off-by-one boundary: the length adjacent to the sentinel (size-1) must
+        // count exactly, and the sentinel must be exactly size+1 (never size, size+2)
+        constexpr auto pre1 = xsimd::make_batch_bool_constant<value_type, all_but_last, arch_type>();
+        constexpr auto suf1 = xsimd::make_batch_bool_constant<value_type, all_but_first, arch_type>();
+        constexpr auto f1 = xsimd::make_batch_bool_constant<value_type, first_only, arch_type>();
+        constexpr auto l1 = xsimd::make_batch_bool_constant<value_type, last_only, arch_type>();
+        static_assert(size < 2 || pre1.prefix() == size - 1, "size-1 prefix counts exactly");
+        static_assert(size < 2 || pre1.suffix() == size + 1, "a size-1 prefix is not a suffix");
+        static_assert(size < 2 || suf1.suffix() == size - 1, "size-1 suffix counts exactly");
+        static_assert(size < 2 || suf1.prefix() == size + 1, "a size-1 suffix is not a prefix");
+        static_assert(size < 2 || (pre1.suffix() != size && pre1.suffix() != size + 2), "sentinel is exactly size+1");
+        static_assert(f1.prefix() == 1, "single first lane is the 1-prefix");
+        static_assert(size < 2 || f1.suffix() == size + 1, "single first lane is not a suffix");
+        static_assert(l1.suffix() == 1, "single last lane is the 1-suffix");
+        static_assert(size < 2 || l1.prefix() == size + 1, "single last lane is not a prefix");
+    }
 };
 
 TEST_CASE_TEMPLATE("[constant bool batch]", B, BATCH_INT_TYPES)
@@ -409,6 +479,10 @@ TEST_CASE_TEMPLATE("[constant bool batch]", B, BATCH_INT_TYPES)
     SUBCASE("operators")
     {
         Test.test_ops();
+    }
+    SUBCASE("shape")
+    {
+        Test.test_shape();
     }
 }
 #endif
