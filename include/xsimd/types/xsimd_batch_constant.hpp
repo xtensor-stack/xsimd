@@ -99,6 +99,34 @@ namespace xsimd
             return countl_one_impl(truncated_mask(), size);
         }
 
+        // true when the set lanes form one contiguous run starting at lane 0
+        // (the empty and full masks are prefixes)
+        static constexpr bool is_prefix() noexcept
+        {
+            return (truncated_mask() & (truncated_mask() + 1u)) == 0u;
+        }
+
+        // true when the set lanes form one contiguous run ending at the last
+        // lane (the empty and full masks are suffixes)
+        static constexpr bool is_suffix() noexcept
+        {
+            return ((truncated_mask() ^ low_mask(size)) & ((truncated_mask() ^ low_mask(size)) + 1u)) == 0u;
+        }
+
+        // length of the set run when the mask is a pure prefix (first k lanes
+        // set, rest clear), else size + 1 so `prefix() == k` stays exact
+        static constexpr std::size_t prefix() noexcept
+        {
+            return is_prefix() ? countr_one() : size + 1;
+        }
+
+        // length of the set run when the mask is a pure suffix (last k lanes
+        // set, rest clear), else size + 1 so `suffix() == k` stays exact
+        static constexpr std::size_t suffix() noexcept
+        {
+            return is_suffix() ? countl_one() : size + 1;
+        }
+
     private:
         static constexpr int mask_helper(int acc) noexcept { return acc; }
 
