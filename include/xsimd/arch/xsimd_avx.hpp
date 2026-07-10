@@ -985,6 +985,19 @@ namespace xsimd
             {
                 return _mm256_insertf128_pd(_mm256_setzero_pd(), hi, 1);
             }
+
+            // 128-bit batch into the lower half, upper half zero (no instruction)
+            template <class A, class SrcA>
+            XSIMD_INLINE batch<float, A> zero_extend_lo(batch<float, SrcA> const& lo) noexcept
+            {
+                return _mm256_zextps128_ps256(lo);
+            }
+
+            template <class A, class SrcA>
+            XSIMD_INLINE batch<double, A> zero_extend_lo(batch<double, SrcA> const& lo) noexcept
+            {
+                return _mm256_zextpd128_pd256(lo);
+            }
         }
 
         // Runtime-mask load (float/double).
@@ -1021,16 +1034,27 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx>) noexcept
         {
-            using int_t = as_integer_t<T>;
             constexpr size_t half_size = batch<T, A>::size / 2;
-            using half_arch = typename ::xsimd::make_sized_batch_t<T, half_size>::arch_type;
+            using half_batch = make_sized_batch_t<T, half_size>;
+            using half_arch = typename half_batch::arch_type;
 
-            // lower 128-bit half
-            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
+            // exactly the lower 128-bit half: one plain load, upper lanes zero
+            XSIMD_IF_CONSTEXPR(mask.prefix() == half_size)
             {
-                constexpr auto mlo = ::xsimd::detail::lower_half<half_arch>(batch_bool_constant<int_t, A, Values...> {});
-                const auto lo = load_masked(reinterpret_cast<int_t const*>(mem), mlo, convert<int_t> {}, Mode {}, half_arch {});
-                return bitwise_cast<T>(batch<int_t, A>(_mm256_zextsi128_si256(lo)));
+                return detail::zero_extend_lo<A>(half_batch::load(mem, Mode {}));
+            }
+            // lower 128-bit half: stay in the value domain so the half kernel can
+            // lower pure-prefix shapes to plain narrow moves (movss/movlps/movsd)
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
+            {
+                constexpr auto mlo = ::xsimd::detail::lower_half<half_arch>(mask);
+                const auto lo = load_masked(mem, mlo, convert<T> {}, Mode {}, half_arch {});
+                return detail::zero_extend_lo<A>(lo);
+            }
+            // exactly the upper 128-bit half: one plain load into the upper lanes
+            else XSIMD_IF_CONSTEXPR(mask.suffix() == half_size)
+            {
+                return detail::zero_extend<A>(half_batch::load(mem + half_size, Mode {}));
             }
             // upper 128-bit half
             else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= half_size)
@@ -1076,8 +1100,30 @@ namespace xsimd
             using half_batch = ::xsimd::make_sized_batch_t<T, half_size>;
             using half_arch = typename half_batch::arch_type;
 
+            // exactly the lower 128-bit half: one plain store
+            XSIMD_IF_CONSTEXPR(mask.prefix() == half_size)
+            {
+                const half_batch lo = detail::lower_half(src);
+                lo.store(mem, Mode {});
+            }
+            // prefix crossing the 128-bit boundary: plain lower half + prefix-masked
+            // upper half. Never emits vmaskmov, which does not store-forward.
+            else XSIMD_IF_CONSTEXPR(mask.prefix() > half_size && mask.prefix() < batch<T, A>::size)
+            {
+                const half_batch lo = detail::lower_half(src);
+                lo.store(mem, Mode {});
+                constexpr auto mhi = ::xsimd::detail::upper_half<half_arch>(mask);
+                const half_batch hi = detail::upper_half(src);
+                store_masked<half_arch>(mem + half_size, hi, mhi, Mode {}, half_arch {});
+            }
+            // exactly the upper 128-bit half: one plain store
+            else XSIMD_IF_CONSTEXPR(mask.suffix() == half_size)
+            {
+                const half_batch hi = detail::upper_half(src);
+                hi.store(mem + half_size, Mode {});
+            }
             // lower 128-bit half
-            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
+            else XSIMD_IF_CONSTEXPR(mask.countl_zero() >= half_size)
             {
                 constexpr auto mlo = ::xsimd::detail::lower_half<half_arch>(mask);
                 const half_batch lo = detail::lower_half(src);
