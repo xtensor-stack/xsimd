@@ -149,8 +149,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
             {
-                using F = std::conditional_t<sizeof(T) == 4, float, double>;
-                return bitwise_cast<T>(batch<F, A>(load_masked(reinterpret_cast<F const*>(mem), batch_bool_constant<F, A, Values...> {}, convert<F> {}, Mode {}, sse2 {})));
+                return detail::plain_move_load<sse2>(mem, mask, convert<T> {}, Mode {});
             }
             else
             {
@@ -164,8 +163,7 @@ namespace xsimd
         {
             XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
             {
-                using F = std::conditional_t<sizeof(T) == 4, float, double>;
-                store_masked(reinterpret_cast<F*>(mem), bitwise_cast<F>(src), batch_bool_constant<F, A, Values...> {}, Mode {}, sse2 {});
+                detail::plain_move_store<sse2>(mem, src, mask, Mode {});
             }
             else
             {

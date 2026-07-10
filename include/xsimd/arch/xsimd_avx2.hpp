@@ -150,19 +150,14 @@ namespace xsimd
                     _mm256_maskstore_epi64(reinterpret_cast<long long*>(mem), mask, src);
                 }
             }
-
-            XSIMD_INLINE __m256i zero_extend(__m128i hi) noexcept
-            {
-                return _mm256_insertf128_si256(_mm256_setzero_si256(), hi, 1);
-            }
         }
 
-        // no half-split shortcut for load; forward to runtime
+        // Constant masks: prefix/suffix shapes lower to plain moves.
         template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
         load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx2>) noexcept
         {
-            return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx2 {});
+            return detail::plain_move_load<avx>(mem, mask, convert<T> {}, Mode {});
         }
 
         template <class A, class T, class Mode>
@@ -176,28 +171,7 @@ namespace xsimd
                   typename = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx2>) noexcept
         {
-            constexpr size_t lanes_per_half = batch<T, A>::size / 2;
-            using half_batch = ::xsimd::make_sized_batch_t<T, lanes_per_half>;
-            using half_arch = typename half_batch::arch_type;
-
-            // lower 128-bit half
-            XSIMD_IF_CONSTEXPR(mask.countl_zero() >= lanes_per_half)
-            {
-                constexpr auto mlo = ::xsimd::detail::lower_half<half_arch>(mask);
-                const half_batch lo = detail::lower_half(src);
-                store_masked<half_arch>(mem, lo, mlo, Mode {}, half_arch {});
-            }
-            // upper 128-bit half
-            else XSIMD_IF_CONSTEXPR(mask.countr_zero() >= lanes_per_half)
-            {
-                constexpr auto mhi = ::xsimd::detail::upper_half<half_arch>(mask);
-                const half_batch hi = detail::upper_half(src);
-                store_masked<half_arch>(mem + lanes_per_half, hi, mhi, Mode {}, half_arch {});
-            }
-            else
-            {
-                detail::maskstore(mem, mask.as_batch(), src);
-            }
+            detail::plain_move_store<avx>(mem, src, mask, Mode {});
         }
 
         template <class A, class T, class Mode>

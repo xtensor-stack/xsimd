@@ -16,6 +16,7 @@
 #include "../types/xsimd_avx_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
 
+#include <cassert>
 #include <complex>
 #include <limits>
 #include <type_traits>
@@ -1041,6 +1042,8 @@ namespace xsimd
             // exactly the lower 128-bit half: one plain load, upper lanes zero
             XSIMD_IF_CONSTEXPR(mask.prefix() == half_size)
             {
+                // cross-check the plain move via countr_one/countl_zero (independent of prefix())
+                assert(mask.countr_one() >= half_size && mask.countl_zero() >= half_size && "lower half fully active, upper empty");
                 return detail::zero_extend_lo<A>(half_batch::load(mem, Mode {}));
             }
             // lower 128-bit half: stay in the value domain so the half kernel can
@@ -1051,9 +1054,21 @@ namespace xsimd
                 const auto lo = load_masked(mem, mlo, convert<T> {}, Mode {}, half_arch {});
                 return detail::zero_extend_lo<A>(lo);
             }
+            // prefix crossing the 128-bit boundary: plain lower half +
+            // prefix-masked upper half (mirrors the store side)
+            else XSIMD_IF_CONSTEXPR(mask.prefix() > half_size && mask.prefix() < batch<T, A>::size)
+            {
+                // the plain lower-half load reads every lower lane, so they must all be active
+                assert(mask.countr_one() >= half_size && "plain lower-half load needs the lower half fully active");
+                const half_batch lo = half_batch::load(mem, Mode {});
+                constexpr auto mhi = ::xsimd::detail::upper_half<half_arch>(mask);
+                const half_batch hi = load_masked(mem + half_size, mhi, convert<T> {}, Mode {}, half_arch {});
+                return detail::merge_sse(lo.data, hi.data);
+            }
             // exactly the upper 128-bit half: one plain load into the upper lanes
             else XSIMD_IF_CONSTEXPR(mask.suffix() == half_size)
             {
+                assert(mask.countl_one() >= half_size && mask.countr_zero() >= half_size && "upper half fully active, lower empty");
                 return detail::zero_extend<A>(half_batch::load(mem + half_size, Mode {}));
             }
             // upper 128-bit half
@@ -1103,6 +1118,9 @@ namespace xsimd
             // exactly the lower 128-bit half: one plain store
             XSIMD_IF_CONSTEXPR(mask.prefix() == half_size)
             {
+                // a plain store writes every lower lane and no upper lane, so the mask
+                // must have the lower half fully active and the upper half empty
+                assert(mask.countr_one() >= half_size && mask.countl_zero() >= half_size && "lower half fully active, upper empty");
                 const half_batch lo = detail::lower_half(src);
                 lo.store(mem, Mode {});
             }
@@ -1110,6 +1128,7 @@ namespace xsimd
             // upper half. Never emits vmaskmov, which does not store-forward.
             else XSIMD_IF_CONSTEXPR(mask.prefix() > half_size && mask.prefix() < batch<T, A>::size)
             {
+                assert(mask.countr_one() >= half_size && "plain lower-half store needs the lower half fully active");
                 const half_batch lo = detail::lower_half(src);
                 lo.store(mem, Mode {});
                 constexpr auto mhi = ::xsimd::detail::upper_half<half_arch>(mask);
@@ -1119,6 +1138,7 @@ namespace xsimd
             // exactly the upper 128-bit half: one plain store
             else XSIMD_IF_CONSTEXPR(mask.suffix() == half_size)
             {
+                assert(mask.countl_one() >= half_size && mask.countr_zero() >= half_size && "upper half fully active, lower empty");
                 const half_batch hi = detail::upper_half(src);
                 hi.store(mem + half_size, Mode {});
             }
@@ -1169,6 +1189,45 @@ namespace xsimd
             else
             {
                 _mm256_maskstore_pd(reinterpret_cast<double*>(mem), __m256i(mask), bitwise_cast<double>(src));
+            }
+        }
+
+        namespace detail
+        {
+            // Reinterpret a constant-mask 4/8-byte load/store as same-width float
+            // and run DstArch's kernel, which lowers prefix/suffix shapes to plain
+            // moves. Shared by the int/EVEX 128- and 256-bit archs.
+            template <class DstArch, class A, class T, bool... V, class Mode>
+            XSIMD_INLINE batch<T, A> plain_move_load(T const* mem, batch_bool_constant<T, A, V...>, convert<T>, Mode) noexcept
+            {
+                static_assert(sizeof(T) == 4 || sizeof(T) == 8, "plain-move delegation only supports 4/8-byte lanes");
+                using F = std::conditional_t<sizeof(T) == 4, float, double>;
+                // same-width float has the same lane count, so the V... mask pack and the
+                // memory reinterpret line up one-to-one; wrong here would load the wrong lanes
+                static_assert(batch<F, A>::size == batch<T, A>::size, "same-width float must preserve lane count");
+                static_assert(sizeof...(V) == batch<T, A>::size, "mask pack width must match the batch");
+                // the plain-move path emits aligned moves in aligned/stream mode, which fault
+                // on a misaligned pointer (the old vmaskmov tolerated it)
+                assert((std::is_same<Mode, unaligned_mode>::value || ::xsimd::is_aligned<A>(mem)) && "aligned/stream masked load needs an aligned pointer");
+                // qualify: an unqualified call resolves to detail::load_masked (a different
+                // helper) under MSVC's two-phase lookup; we want the kernel-level overload
+                return bitwise_cast<T>(batch<F, A>(::xsimd::kernel::load_masked(reinterpret_cast<F const*>(mem), batch_bool_constant<F, A, V...> {}, convert<F> {}, Mode {}, DstArch {})));
+            }
+
+            // Re-tag to DstArch so the vector-mask store kernel is used (the AVX
+            // store is gated off EVEX k-register archs).
+            template <class DstArch, class A, class T, bool... V, class Mode>
+            XSIMD_INLINE void plain_move_store(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, V...>, Mode) noexcept
+            {
+                static_assert(sizeof(T) == 4 || sizeof(T) == 8, "plain-move delegation only supports 4/8-byte lanes");
+                using F = std::conditional_t<sizeof(T) == 4, float, double>;
+                static_assert(batch<F, A>::size == batch<T, A>::size, "same-width float must preserve lane count");
+                static_assert(sizeof...(V) == batch<T, A>::size, "mask pack width must match the batch");
+                assert((std::is_same<Mode, unaligned_mode>::value || ::xsimd::is_aligned<A>(mem)) && "aligned/stream masked store needs an aligned pointer");
+                const auto fsrc = bitwise_cast<F>(src);
+                // qualify: an unqualified call resolves to detail::store_masked (a different
+                // helper) under MSVC's two-phase lookup; we want the kernel-level overload
+                ::xsimd::kernel::store_masked(reinterpret_cast<F*>(mem), batch<F, DstArch>(fsrc.data), batch_bool_constant<F, DstArch, V...> {}, Mode {}, DstArch {});
             }
         }
 
