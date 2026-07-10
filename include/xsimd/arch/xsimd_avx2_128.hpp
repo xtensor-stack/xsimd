@@ -141,19 +141,36 @@ namespace xsimd
             }
         }
 
-        // constant masks gain nothing on a single register; forward to runtime
+        // Masks that lower to plain moves go to the sse2 float/double kernels
+        // (int bitcast to same-width float); the rest keep the native vpmaskmov.
         template <class A, class T, bool... Values, class Mode,
                   typename = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx2_128>) noexcept
         {
-            return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx2_128 {});
+            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                using F = std::conditional_t<sizeof(T) == 4, float, double>;
+                return bitwise_cast<T>(batch<F, A>(load_masked(reinterpret_cast<F const*>(mem), batch_bool_constant<F, A, Values...> {}, convert<F> {}, Mode {}, sse2 {})));
+            }
+            else
+            {
+                return load_masked(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx2_128 {});
+            }
         }
 
         template <class A, class T, bool... Values, class Mode,
                   typename = std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx2_128>) noexcept
         {
-            store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx2_128 {});
+            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                using F = std::conditional_t<sizeof(T) == 4, float, double>;
+                store_masked(reinterpret_cast<F*>(mem), bitwise_cast<F>(src), batch_bool_constant<F, A, Values...> {}, Mode {}, sse2 {});
+            }
+            else
+            {
+                store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx2_128 {});
+            }
         }
 
         template <class A, class T, class Mode>
