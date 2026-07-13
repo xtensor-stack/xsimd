@@ -307,11 +307,20 @@ namespace xsimd
             }
         }
 
+        // Constant masks: prefix/suffix shapes lower to plain moves; interior
+        // masks keep the EVEX path.
         template <class A, class T, bool... V, class Mode,
                   typename>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, V...> mask, convert<T>, Mode, requires_arch<avx512vl_128>) noexcept
         {
-            return detail::maskload128(mem, mask.mask(), Mode {});
+            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                return detail::plain_move_load<sse2>(mem, mask, convert<T> {}, Mode {});
+            }
+            else
+            {
+                return detail::maskload128(mem, mask.mask(), Mode {});
+            }
         }
 
         template <class A, class T, class Mode,
@@ -325,7 +334,14 @@ namespace xsimd
                   typename>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, V...> mask, Mode, requires_arch<avx512vl_128>) noexcept
         {
-            detail::maskstore128(mem, src, mask.mask(), Mode {});
+            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                detail::plain_move_store<sse2>(mem, src, mask, Mode {});
+            }
+            else
+            {
+                detail::maskstore128(mem, src, mask.mask(), Mode {});
+            }
         }
 
         template <class A, class T, class Mode,

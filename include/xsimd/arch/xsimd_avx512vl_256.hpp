@@ -306,11 +306,25 @@ namespace xsimd
             }
         }
 
+        // Constant masks: prefix/suffix shapes lower to plain moves; interior
+        // masks keep the EVEX path.
         template <class A, class T, bool... V, class Mode,
                   typename = std::enable_if_t<std::is_arithmetic<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, V...> mask, convert<T>, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            return detail::maskload256(mem, mask.mask(), Mode {});
+            // all() reaches here only via the avx512f half-split cascade.
+            XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                return batch<T, A>::load(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                return detail::plain_move_load<avx>(mem, mask, convert<T> {}, Mode {});
+            }
+            else
+            {
+                return detail::maskload256(mem, mask.mask(), Mode {});
+            }
         }
 
         template <class A, class T, class Mode,
@@ -324,7 +338,18 @@ namespace xsimd
                   typename = std::enable_if_t<std::is_arithmetic<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, V...> mask, Mode, requires_arch<avx512vl_256>) noexcept
         {
-            detail::maskstore256(mem, src, mask.mask(), Mode {});
+            XSIMD_IF_CONSTEXPR(mask.all())
+            {
+                src.store(mem, Mode {});
+            }
+            else XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            {
+                detail::plain_move_store<avx2>(mem, src, mask, Mode {});
+            }
+            else
+            {
+                detail::maskstore256(mem, src, mask.mask(), Mode {});
+            }
         }
 
         template <class A, class T, class Mode,
