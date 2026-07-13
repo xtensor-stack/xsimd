@@ -500,6 +500,25 @@ TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
     }
 }
 
+// Subtracting the type minimum must saturate, not wrap. Previously this was
+// computed as sadd(x, -min), and -min is not representable.
+TEST_CASE_TEMPLATE("[xsimd api | ssub at type minimum]", B, INTEGRAL_TYPES)
+{
+    using value_type = typename scalar_type<B>::type;
+    value_type lo = std::numeric_limits<value_type>::min();
+    value_type hi = std::numeric_limits<value_type>::max();
+    if (std::numeric_limits<value_type>::is_signed)
+    {
+        CHECK_EQ(extract(xsimd::ssub(B(value_type(0)), B(lo))), hi);
+        CHECK_EQ(extract(xsimd::ssub(B(value_type(1)), B(lo))), hi);
+    }
+    else
+    {
+        // lo == 0 for unsigned types.
+        CHECK_EQ(extract(xsimd::ssub(B(value_type(5)), B(lo))), value_type(5));
+    }
+}
+
 /*
  * Functions that apply on floating points types only
  */
