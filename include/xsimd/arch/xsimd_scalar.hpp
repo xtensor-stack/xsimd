@@ -720,7 +720,21 @@ namespace xsimd
     {
         if (std::numeric_limits<T>::is_signed)
         {
-            return sadd(lhs, (T)-rhs);
+            // Compute the saturating difference directly. Using sadd(lhs, -rhs)
+            // is wrong when rhs == numeric_limits<T>::min(), because -rhs is not
+            // representable.
+            if ((rhs < 0) && (lhs > std::numeric_limits<T>::max() + rhs))
+            {
+                return std::numeric_limits<T>::max();
+            }
+            else if ((rhs > 0) && (lhs < std::numeric_limits<T>::lowest() + rhs))
+            {
+                return std::numeric_limits<T>::lowest();
+            }
+            else
+            {
+                return lhs - rhs;
+            }
         }
         else
         {
