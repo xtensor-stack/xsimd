@@ -2419,9 +2419,20 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512f>) noexcept
         {
-            if (std::is_signed<T>::value)
+            // Saturating sub for 8/16-bit integers needs AVX512BW; on AVX512F
+            // fall back to the AVX2 implementation on each 256-bit half.
+            XSIMD_IF_CONSTEXPR(sizeof(T) == 1 || sizeof(T) == 2)
             {
-                return sadd(self, -other);
+                return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
+                                          { return ssub(batch<T, avx2>(s), batch<T, avx2>(o), avx2 {}); },
+                                          self, other);
+            }
+            else if (std::is_signed<T>::value)
+            {
+                auto mask = other < 0;
+                auto self_overflow_branch = min(std::numeric_limits<T>::max() + other, self);
+                auto self_underflow_branch = max(std::numeric_limits<T>::min() + other, self);
+                return select(mask, self_overflow_branch, self_underflow_branch) - other;
             }
             else
             {

@@ -1711,7 +1711,10 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                return sadd(self, -other);
+                auto mask = (other >> (8 * sizeof(T) - 1));
+                auto self_overflow_branch = min(std::numeric_limits<T>::max() + other, self);
+                auto self_underflow_branch = max(std::numeric_limits<T>::min() + other, self);
+                return select(batch_bool<T, A>(mask.data), self_overflow_branch, self_underflow_branch) - other;
             }
             else
             {
