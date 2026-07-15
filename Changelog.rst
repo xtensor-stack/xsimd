@@ -9,6 +9,79 @@
 Changelog
 =========
 
+14.3.0
+------
+
+    * [API] Feat/mulhilo
+
+    * [API] Add batch::to_native
+
+    * [API] fused mul_hilo for 64-bit batches (shared 32x32->64 partials)
+
+    * [API] add runtime batch_bool mask overloads for load_masked/store_masked
+
+    * [AVX512VL] Tentative support for avx512vl extensions to 256 bit registers
+
+    * [AVX512VL] Minimal support for avx512vl
+
+    * [AVX512VL] Tentative support for avx512vl extensions to 128 bit registers
+
+    * [AVX512VL] fix: avx512vl masked load/store#1354Add efficient_bmi2 cpu feature
+
+    * [AVX512VL] Fix avx512vl_{128,256} correctness bugs + CI default-arch typo
+
+    * [AVX512VL] perf: native EVEX int64 shift, signed rotr, compress/expand
+
+    * [AVX512VL] Add gather scatter kernels
+
+    * [AVX512VL_128] route avx512vl_128 FMA ops through fma3<avx2_128>
+
+    * [AVX512VP] Fix avx512vp cpuid
+
+    * [AVX512F] single vpermt2 for zip_lo/zip_hi
+
+    * [AVX512F] vectorize 16x16 float / 8x8 double transpose#1372Add an explicit SSE2 path for batch_bool_constant masks where the three low lanes are active and lane 3 is zero
+
+    * [AVX512, AVX2] plain-move lowering for int & EVEX constant-mask load/store#1381Prefer avx512vl_256 over avxvnni for 256-bit sized batches
+
+    * [AVX2] AVX256 constant mask plain moves
+
+    * [AVXVNNI] route avxvnni FMA ops through fma3<avx2> kernels
+
+    * [AVX] Tentative support for avx extensions to 128 bit registers
+
+    * [VSX] clang build
+
+    * [NEON] Fix incorrect guard for system headers on Windows
+
+    * [NEON] under-aligned store in generic swizzle kernel
+
+    * [NEON, SSE2] Fix unreachable constant-mask load_masked kernels
+
+    * [ci] Add clang workflow for PPC
+
+    * [doc] Fix doc logo
+
+    * [doc] Consolidate build options in one place
+
+    * [doc] Fix typos
+
+    * [doc] Update RTD deps
+
+    * [doc] Add jupyterlite notebook
+
+    * [doc] Add link to deployed jupyterlite
+
+    * Add more x86 cpu feature
+
+    * Fix C++ version detection for MSVC
+
+    * Uniform header inclusion
+
+    * Resolve xtl in user cmake
+
+    * fix (#1375): under-aligned buffers in large-arg range reduction
+
 14.2.0
 ------
 
