@@ -29,19 +29,19 @@ namespace xsimd
         template <class A, class T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
-            if constexpr(sizeof(T) == 1)
+            if constexpr (sizeof(T) == 1)
             {
                 return _mm_abs_epi8(self);
             }
-            else if constexpr(sizeof(T) == 2)
+            else if constexpr (sizeof(T) == 2)
             {
                 return _mm_abs_epi16(self);
             }
-            else if constexpr(sizeof(T) == 4)
+            else if constexpr (sizeof(T) == 4)
             {
                 return _mm_abs_epi32(self);
             }
-            else if constexpr(sizeof(T) == 8)
+            else if constexpr (sizeof(T) == 8)
             {
                 return _mm_abs_epi64(self);
             }
@@ -86,14 +86,14 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<ssse3>) noexcept
         {
-            if constexpr(sizeof(T) == 2)
+            if constexpr (sizeof(T) == 2)
             {
                 __m128i tmp1 = _mm_hadd_epi16(self, self);
                 __m128i tmp2 = _mm_hadd_epi16(tmp1, tmp1);
                 __m128i tmp3 = _mm_hadd_epi16(tmp2, tmp2);
                 return _mm_cvtsi128_si32(tmp3) & 0xFFFF;
             }
-            else if constexpr(sizeof(T) == 4)
+            else if constexpr (sizeof(T) == 4)
             {
                 __m128i tmp1 = _mm_hadd_epi32(self, self);
                 __m128i tmp2 = _mm_hadd_epi32(tmp1, tmp1);

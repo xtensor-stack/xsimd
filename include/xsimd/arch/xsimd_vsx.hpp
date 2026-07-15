@@ -125,7 +125,7 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
         XSIMD_INLINE batch<T, A> avg(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vsx>) noexcept
         {
-            if constexpr(sizeof(T) < 8)
+            if constexpr (sizeof(T) < 8)
             {
                 constexpr auto nbit = 8 * sizeof(T) - 1;
                 auto adj = bitwise_cast<T>(bitwise_cast<as_unsigned_integer_t<T>>((self ^ other) << nbit) >> nbit);
@@ -217,7 +217,7 @@ namespace xsimd
         {
             using shift_type = as_unsigned_integer_t<T>;
             batch<shift_type, A> shift(static_cast<shift_type>(other));
-            if constexpr(std::is_signed<T>::value)
+            if constexpr (std::is_signed<T>::value)
             {
                 return vec_sra(self.data, shift.data);
             }
@@ -730,7 +730,7 @@ namespace xsimd
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<vsx>) noexcept
         {
-            if constexpr(N == batch<T, A>::size * sizeof(T))
+            if constexpr (N == batch<T, A>::size * sizeof(T))
             {
                 return batch<T, A>(0);
             }
@@ -745,7 +745,7 @@ namespace xsimd
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<vsx>) noexcept
         {
-            if constexpr(N == batch<T, A>::size * sizeof(T))
+            if constexpr (N == batch<T, A>::size * sizeof(T))
             {
                 return batch<T, A>(0);
             }

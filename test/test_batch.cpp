@@ -1135,7 +1135,7 @@ private:
 
     void init_operands()
     {
-        if constexpr(std::is_integral<value_type>::value)
+        if constexpr (std::is_integral<value_type>::value)
         {
             for (size_t i = 0; i < size; ++i)
             {

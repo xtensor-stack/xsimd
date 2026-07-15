@@ -441,7 +441,7 @@ namespace xsimd
         template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
-            if constexpr(sizeof(T) == 4)
+            if constexpr (sizeof(T) == 4)
             {
                 using t = typename batch<T, A>::register_type;
                 t shifted_64 = vec_sld(self.data, self.data, 8);
@@ -449,7 +449,7 @@ namespace xsimd
                 t shifted_32 = vec_sld(added_1, added_1, 4);
                 return (added_1 + shifted_32)[0];
             }
-            else if constexpr(sizeof(T) == 2)
+            else if constexpr (sizeof(T) == 2)
             {
                 using t = typename batch<T, A>::register_type;
                 t shifted_64 = vec_sld(self.data, self.data, 8);
@@ -489,7 +489,7 @@ namespace xsimd
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x, requires_arch<vxe>) noexcept
         {
-            if constexpr(N == batch<T, A>::size * sizeof(T))
+            if constexpr (N == batch<T, A>::size * sizeof(T))
             {
                 return batch<T, A>(0);
             }
@@ -504,7 +504,7 @@ namespace xsimd
         template <size_t N, class A, class T>
         XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x, requires_arch<vxe>) noexcept
         {
-            if constexpr(N == batch<T, A>::size * sizeof(T))
+            if constexpr (N == batch<T, A>::size * sizeof(T))
             {
                 return batch<T, A>(0);
             }
