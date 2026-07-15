@@ -850,11 +850,11 @@ namespace xsimd
         detail::static_check_supported_config<T, A>();
         static_assert(std::is_same<Mode, aligned_mode>::value || std::is_same<Mode, unaligned_mode>::value,
                       "supported load mode");
-        XSIMD_IF_CONSTEXPR(mask.all())
+        if constexpr(mask.all())
         {
             return load(mem, mode);
         }
-        else XSIMD_IF_CONSTEXPR(mask.none())
+        else if constexpr(mask.none())
         {
             return broadcast<T>(0);
         }
@@ -881,11 +881,11 @@ namespace xsimd
         detail::static_check_supported_config<T, A>();
         static_assert(std::is_same<Mode, aligned_mode>::value || std::is_same<Mode, unaligned_mode>::value,
                       "supported store mode");
-        XSIMD_IF_CONSTEXPR(mask.none())
+        if constexpr(mask.none())
         {
             return;
         }
-        else XSIMD_IF_CONSTEXPR(mask.all())
+        else if constexpr(mask.all())
         {
             store(mem, mode);
         }

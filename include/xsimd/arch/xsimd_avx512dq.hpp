@@ -25,7 +25,7 @@ namespace xsimd
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<int32_t, A> load_masked(int32_t const* mem, batch_bool_constant<int32_t, A, Values...> mask, convert<int32_t>, Mode, requires_arch<avx512dq>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 8)
+            if constexpr(mask.countr_zero() >= 8)
             {
                 constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
                 const auto hi = load_masked<avx2>(mem + 8, mhi, convert<int32_t> {}, Mode {}, avx2 {});
@@ -37,7 +37,7 @@ namespace xsimd
         template <class A, bool... Values, class Mode>
         XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, Values...> mask, convert<float>, Mode, requires_arch<avx512dq>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(mask.countr_zero() >= 8)
+            if constexpr(mask.countr_zero() >= 8)
             {
                 constexpr auto mhi = ::xsimd::detail::upper_half<avx2>(mask);
                 const auto hi = load_masked<avx2>(mem + 8, mhi, convert<float> {}, Mode {}, avx2 {});
@@ -233,7 +233,7 @@ namespace xsimd
             constexpr bool dup_lo = detail::is_dup_lo(mask);
             constexpr bool dup_hi = detail::is_dup_hi(mask);
 
-            XSIMD_IF_CONSTEXPR(dup_lo || dup_hi)
+            if constexpr(dup_lo || dup_hi)
             {
                 const batch<float, avx2> half = _mm512_extractf32x8_ps(self, dup_lo ? 0 : 1);
                 constexpr std::conditional_t<dup_lo, batch_constant<uint32_t, avx2, V0 % 8, V1 % 8, V2 % 8, V3 % 8, V4 % 8, V5 % 8, V6 % 8, V7 % 8>,
