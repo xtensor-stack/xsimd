@@ -7,7 +7,7 @@
 .. image:: xsimd.svg
    :alt: xsimd
 
-C++14 wrappers for SIMD intrinsics.
+C++17 wrappers for SIMD intrinsics.
 
 Introduction
 ------------
@@ -69,7 +69,7 @@ The following SIMD instruction set extensions are supported:
 +--------------+---------------------------------------------------------+
 
 
-`xsimd` requires a C++14 compliant compiler. The following C++ compilers are supported:
+`xsimd` requires a C++17 compliant compiler. The following C++ compilers are supported:
 
 +-------------------------+-------------------------------+
 | Compiler                | Version                       |

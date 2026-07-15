@@ -40,7 +40,7 @@ target_include_directories(xsimd INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
-target_compile_features(xsimd INTERFACE cxx_std_14)
+target_compile_features(xsimd INTERFACE cxx_std_17)
 
 # Only add xtl build option to the build tree, that is, if xsimd being locally
 # developed or is vendored.
