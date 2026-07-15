@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cxx-version: [14, 17, 20]
+        cxx-version: [17, 20]
     steps:
     - uses: actions/checkout@v6
     - name: Setup
@@ -28,7 +28,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        cxx-version: [14, 17, 20]
+        cxx-version: [17, 20]
     steps:
     - name: Setup compiler
       uses: ilammy/msvc-dev-cmd@v1
