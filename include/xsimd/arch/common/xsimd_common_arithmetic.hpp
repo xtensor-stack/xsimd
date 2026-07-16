@@ -398,7 +398,12 @@ namespace xsimd
         {
             if (std::is_signed<T>::value)
             {
-                return sadd(self, -other);
+                // Saturating self - other, mirroring the signed sadd above.
+                // sadd(self, -other) is wrong when other == numeric_limits<T>::min(),
+                // since -other is not representable.
+                auto self_underflow_branch = max(std::numeric_limits<T>::min() + other, self);
+                auto self_overflow_branch = min(std::numeric_limits<T>::max() + other, self);
+                return select(other >= 0, self_underflow_branch, self_overflow_branch) - other;
             }
             else
             {
