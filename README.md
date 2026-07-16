@@ -1,6 +1,6 @@
 # ![xsimd](docs/source/xsimd.svg)
 
-[![Read the Docs](https://img.shields.io/readthedocs/xsimd?logo=readthedocs)](https://xsimd.readthedocs.io/en/latest/)
+[![Documentation](http://readthedocs.org/projects/xsimd/badge/?version=latest)](https://xsimd.readthedocs.io/en/latest/?badge=latest)
 [![Jupyterlite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://xtensor-stack.github.io/xsimd/lab?path=simple.ipynb)
 [![Zulip](https://img.shields.io/badge/social_chat-zulip-blue.svg?logo=zulip)](https://xtensor.zulipchat.com/#narrow/channel/539553-Ask-anything)
 
