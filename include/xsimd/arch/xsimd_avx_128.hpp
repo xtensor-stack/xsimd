@@ -108,7 +108,7 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            if constexpr (detail::lowers_to_plain_moves(mask))
             {
                 return load_masked(mem, mask, convert<T> {}, Mode {}, sse2 {});
             }
@@ -137,7 +137,7 @@ namespace xsimd
         XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
         load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            if constexpr (sizeof(T) == 4)
             {
                 return bitwise_cast<T>(batch<float, A>(_mm_maskload_ps(reinterpret_cast<float const*>(mem), __m128i(mask))));
             }
@@ -150,7 +150,7 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(detail::lowers_to_plain_moves(mask))
+            if constexpr (detail::lowers_to_plain_moves(mask))
             {
                 store_masked(mem, src, mask, Mode {}, sse2 {});
             }
@@ -179,7 +179,7 @@ namespace xsimd
         XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), void>
         store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx_128>) noexcept
         {
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            if constexpr (sizeof(T) == 4)
             {
                 _mm_maskstore_ps(reinterpret_cast<float*>(mem), __m128i(mask), bitwise_cast<float>(src));
             }

@@ -57,7 +57,7 @@ namespace xsimd
 #if XSIMD_HAS_BUILTIN(__builtin_popcountg)
             return __builtin_popcountg(x);
 #else
-            XSIMD_IF_CONSTEXPR(sizeof(T) == 1)
+            if constexpr (sizeof(T) == 1)
             {
 #if XSIMD_HAS_BUILTIN(__builtin_popcount)
                 return __builtin_popcount(x);
@@ -68,7 +68,7 @@ namespace xsimd
                 return ((uint64_t)x * 0x200040008001ULL & 0x111111111111111ULL) % 0xf;
 #endif
             }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 2)
+            else if constexpr (sizeof(T) == 2)
             {
 #if XSIMD_HAS_BUILTIN(__builtin_popcount)
                 return __builtin_popcount(x);
@@ -85,7 +85,7 @@ namespace xsimd
                     + (((v & 0xfff000) >> 12) * msb12 & mask5) % 0x1f;
 #endif
             }
-            else XSIMD_IF_CONSTEXPR(sizeof(T) == 4)
+            else if constexpr (sizeof(T) == 4)
             {
 #if XSIMD_HAS_BUILTIN(__builtin_popcount)
                 return __builtin_popcount(x);
@@ -132,7 +132,7 @@ namespace xsimd
             if (x == 0)
                 return sizeof(T) * CHAR_BIT;
 
-            XSIMD_IF_CONSTEXPR(sizeof(T) <= 4)
+            if constexpr (sizeof(T) <= 4)
             {
 #if XSIMD_HAS_BUILTIN(__builtin_clz)
                 return __builtin_clz((unsigned int)x) - (4 - sizeof(T)) * CHAR_BIT;
@@ -144,11 +144,11 @@ namespace xsimd
                 x |= x >> 1;
                 x |= x >> 2;
                 x |= x >> 4;
-                XSIMD_IF_CONSTEXPR(sizeof(T) >= 2)
+                if constexpr (sizeof(T) >= 2)
                 {
                     x |= x >> 8;
                 }
-                XSIMD_IF_CONSTEXPR(sizeof(T) >= 4)
+                if constexpr (sizeof(T) >= 4)
                 {
                     x |= x >> 16;
                 }
@@ -192,7 +192,7 @@ namespace xsimd
             if (x == 0)
                 return sizeof(T) * CHAR_BIT;
 
-            XSIMD_IF_CONSTEXPR(sizeof(T) <= 4)
+            if constexpr (sizeof(T) <= 4)
             {
 #if XSIMD_HAS_BUILTIN(__builtin_ctz)
                 return __builtin_ctz((unsigned int)x);

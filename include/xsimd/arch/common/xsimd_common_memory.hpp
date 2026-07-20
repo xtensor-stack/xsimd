@@ -655,27 +655,27 @@ namespace xsimd
             static_assert(bsize == batch<T, A>::size, "valid shuffle");
 
             // Detect common patterns
-            XSIMD_IF_CONSTEXPR(detail::is_swizzle_fst(bsize, Indices...))
+            if constexpr (detail::is_swizzle_fst(bsize, Indices...))
             {
                 return swizzle(x, batch_constant<ITy, A, ((Indices >= bsize) ? 0 /* never happens */ : Indices)...>());
             }
 
-            XSIMD_IF_CONSTEXPR(detail::is_swizzle_snd(bsize, Indices...))
+            if constexpr (detail::is_swizzle_snd(bsize, Indices...))
             {
                 return swizzle(y, batch_constant<ITy, A, ((Indices >= bsize) ? (Indices - bsize) : 0 /* never happens */)...>());
             }
 
-            XSIMD_IF_CONSTEXPR(detail::is_zip_lo(bsize, Indices...))
+            if constexpr (detail::is_zip_lo(bsize, Indices...))
             {
                 return zip_lo(x, y);
             }
 
-            XSIMD_IF_CONSTEXPR(detail::is_zip_hi(bsize, Indices...))
+            if constexpr (detail::is_zip_hi(bsize, Indices...))
             {
                 return zip_hi(x, y);
             }
 
-            XSIMD_IF_CONSTEXPR(detail::is_select(bsize, Indices...))
+            if constexpr (detail::is_select(bsize, Indices...))
             {
                 return select(batch_bool_constant<T, A, (Indices < bsize)...>(), x, y);
             }

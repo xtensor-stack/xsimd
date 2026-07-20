@@ -106,7 +106,7 @@ One that is simple and compiles on all platforms is using C++17 ``if constexpr``
         xsimd::batch<int8_t, Arch> const& y
     ) -> xsimd::batch<uint8_t, Arch> {
          // Dedicated instruction dispatch at compile time
-         if constexpr(std::is_same_v<Arch, xsimd::avx2>){
+         if constexpr (std::is_same_v<Arch, xsimd::avx2>){
              // Automatic conversion back and forth between xsimd::batch and native types
              return _mm256_sign_epi8(x, y);
              // When compiler complains we can be more explicit
