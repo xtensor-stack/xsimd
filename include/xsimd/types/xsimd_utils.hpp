@@ -190,9 +190,8 @@ namespace xsimd
     inline To bit_cast(From val) noexcept
     {
         static_assert(sizeof(From) == sizeof(To), "casting between compatible layout");
-        // FIXME: Some old version of GCC don't support that trait
-        // static_assert(std::is_trivially_copyable<From>::value, "input type is trivially copyable");
-        // static_assert(std::is_trivially_copyable<To>::value, "output type is trivially copyable");
+        static_assert(std::is_trivially_copyable<From>::value, "input type is trivially copyable");
+        static_assert(std::is_trivially_copyable<To>::value, "output type is trivially copyable");
         To res;
         std::memcpy(&res, &val, sizeof(val));
         return res;
@@ -255,19 +254,13 @@ namespace xsimd
         } // namespace detail
     } // namespace kernel
 
-    /*****************************************
-     * Backport of index_sequence from c++14 *
-     *****************************************/
+    /*******************************************
+     * int_sequence and make_sequence_as_batch *
+     *******************************************/
 
     // TODO: Remove this once we drop C++11 support
     namespace detail
     {
-        template <typename T>
-        struct identity
-        {
-            using type = T;
-        };
-
         template <int... Is>
         using int_sequence = std::integer_sequence<int, Is...>;
 
@@ -289,22 +282,6 @@ namespace xsimd
         {
             return indexes_from<P>(std::make_index_sequence<P::size>());
         }
-    }
-
-    /**************************************************
-     * Equivalent of void_t but with size_t parameter *
-     **************************************************/
-
-    namespace detail
-    {
-        template <std::size_t>
-        struct check_size
-        {
-            using type = void;
-        };
-
-        template <std::size_t S>
-        using check_size_t = typename check_size<S>::type;
     }
 
     /*****************************************
