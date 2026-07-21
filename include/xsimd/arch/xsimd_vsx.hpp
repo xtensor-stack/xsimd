@@ -16,7 +16,9 @@
 #include "../types/xsimd_vsx_register.hpp"
 #include "./common/xsimd_common_cast.hpp"
 
+#if !defined(_AIX)
 #include <endian.h>
+#endif
 
 #include <complex>
 #include <type_traits>
