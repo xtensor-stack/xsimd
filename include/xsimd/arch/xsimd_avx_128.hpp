@@ -210,13 +210,15 @@ namespace xsimd
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
         XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch_constant<uint32_t, A, V0, V1, V2, V3>, requires_arch<avx_128>) noexcept
         {
-            return _mm_permute_ps(self, detail::mod_shuffle(V0, V1, V2, V3));
+            constexpr auto mask = detail::mod_shuffle(V0, V1, V2, V3);
+            return _mm_permute_ps(self, mask);
         }
 
         template <class A, uint32_t V0, uint32_t V1>
         XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch_constant<uint64_t, A, V0, V1>, requires_arch<avx_128>) noexcept
         {
-            return _mm_permute_pd(self, detail::mod_shuffle(V0, V1));
+            constexpr auto mask = detail::mod_shuffle(V0, V1);
+            return _mm_permute_pd(self, mask);
         }
 
     }
