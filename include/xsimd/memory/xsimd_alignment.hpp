@@ -74,7 +74,7 @@ namespace xsimd
     };
 
     template <class C>
-    struct container_alignment<C, detail::void_t<typename C::allocator_type>>
+    struct container_alignment<C, std::void_t<typename C::allocator_type>>
     {
         using type = allocator_alignment_t<typename C::allocator_type>;
     };
