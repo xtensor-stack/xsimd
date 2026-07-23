@@ -75,7 +75,7 @@ namespace xsimd
         }
 
         // div
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> div(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept -> T
@@ -185,7 +185,7 @@ namespace xsimd
             struct mulhi_helper
             {
                 using wider = std::conditional_t<
-                    std::is_signed<T>::value,
+                    std::is_signed_v<T>,
                     std::conditional_t<sizeof(T) == 1, int16_t,
                                        std::conditional_t<sizeof(T) == 2, int32_t, int64_t>>,
                     std::conditional_t<sizeof(T) == 1, uint16_t,
@@ -368,7 +368,7 @@ namespace xsimd
         template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
-            if (std::is_signed<T>::value)
+            if (std::is_signed_v<T>)
             {
                 auto self_pos_branch = min(std::numeric_limits<T>::max() - other, self);
                 auto self_neg_branch = max(std::numeric_limits<T>::min() - other, self);
@@ -396,7 +396,7 @@ namespace xsimd
         template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
-            if (std::is_signed<T>::value)
+            if (std::is_signed_v<T>)
             {
                 return sadd(self, -other);
             }

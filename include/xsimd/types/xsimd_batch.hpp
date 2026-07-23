@@ -44,16 +44,16 @@ namespace xsimd
         template <class B>
         constexpr bool has_mask_store_v = has_mask_store<B>::value;
 
-#define XSIMD_DECLARE_MASK_MEMORY(ARCH, SIZE_PREDICATE)                                  \
-    template <class T>                                                                   \
-    struct has_mask_load<batch<T, ARCH>>                                                 \
-        : std::integral_constant<bool, std::is_arithmetic<T>::value && (SIZE_PREDICATE)> \
-    {                                                                                    \
-    };                                                                                   \
-    template <class T>                                                                   \
-    struct has_mask_store<batch<T, ARCH>>                                                \
-        : std::integral_constant<bool, std::is_arithmetic<T>::value && (SIZE_PREDICATE)> \
-    {                                                                                    \
+#define XSIMD_DECLARE_MASK_MEMORY(ARCH, SIZE_PREDICATE)                             \
+    template <class T>                                                              \
+    struct has_mask_load<batch<T, ARCH>>                                            \
+        : std::integral_constant<bool, std::is_arithmetic_v<T> && (SIZE_PREDICATE)> \
+    {                                                                               \
+    };                                                                              \
+    template <class T>                                                              \
+    struct has_mask_store<batch<T, ARCH>>                                           \
+        : std::integral_constant<bool, std::is_arithmetic_v<T> && (SIZE_PREDICATE)> \
+    {                                                                               \
     }
 
 #define XSIMD_DECLARE_MASK_MEMORY_ALIAS(ARCH, BASE)                        \
@@ -75,19 +75,19 @@ namespace xsimd
 
         // sve / rvv: width-templated, predicate-native at every lane size
         template <class T, size_t W>
-        struct has_mask_load<batch<T, sve<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        struct has_mask_load<batch<T, sve<W>>> : std::integral_constant<bool, std::is_arithmetic_v<T>>
         {
         };
         template <class T, size_t W>
-        struct has_mask_store<batch<T, sve<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        struct has_mask_store<batch<T, sve<W>>> : std::integral_constant<bool, std::is_arithmetic_v<T>>
         {
         };
         template <class T, size_t W>
-        struct has_mask_load<batch<T, rvv<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        struct has_mask_load<batch<T, rvv<W>>> : std::integral_constant<bool, std::is_arithmetic_v<T>>
         {
         };
         template <class T, size_t W>
-        struct has_mask_store<batch<T, rvv<W>>> : std::integral_constant<bool, std::is_arithmetic<T>::value>
+        struct has_mask_store<batch<T, rvv<W>>> : std::integral_constant<bool, std::is_arithmetic_v<T>>
         {
         };
 
@@ -214,7 +214,7 @@ namespace xsimd
     template <class T, class A>
     class batch : public types::simd_register<T, A>, public types::integral_only_operators<T, A>
     {
-        static_assert(!std::is_same<T, bool>::value, "use xsimd::batch_bool<T, A> instead of xsimd::batch<bool, A>");
+        static_assert(!std::is_same_v<T, bool>, "use xsimd::batch_bool<T, A> instead of xsimd::batch<bool, A>");
 
     public:
         static constexpr std::size_t size = sizeof(types::simd_register<T, A>) / sizeof(T); ///< Number of scalar elements in this batch.
@@ -848,7 +848,7 @@ namespace xsimd
                                                Mode mode) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        static_assert(std::is_same<Mode, aligned_mode>::value || std::is_same<Mode, unaligned_mode>::value,
+        static_assert(std::is_same_v<Mode, aligned_mode> || std::is_same_v<Mode, unaligned_mode>,
                       "supported load mode");
         if constexpr (mask.all())
         {
@@ -879,7 +879,7 @@ namespace xsimd
                                          Mode mode) const noexcept
     {
         detail::static_check_supported_config<T, A>();
-        static_assert(std::is_same<Mode, aligned_mode>::value || std::is_same<Mode, unaligned_mode>::value,
+        static_assert(std::is_same_v<Mode, aligned_mode> || std::is_same_v<Mode, unaligned_mode>,
                       "supported store mode");
         if constexpr (mask.none())
         {
@@ -926,7 +926,7 @@ namespace xsimd
     XSIMD_INLINE batch<T, A> batch<T, A>::gather(U const* src, batch<V, A> const& index) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        static_assert(std::is_convertible<T, U>::value, "Can't convert from src to this batch's type!");
+        static_assert(std::is_convertible_v<T, U>, "Can't convert from src to this batch's type!");
         return kernel::gather(batch {}, src, index, A {});
     }
 
@@ -941,7 +941,7 @@ namespace xsimd
     XSIMD_INLINE void batch<T, A>::scatter(U* dst, batch<V, A> const& index) const noexcept
     {
         detail::static_check_supported_config<T, A>();
-        static_assert(std::is_convertible<T, U>::value, "Can't convert from this batch's type to dst!");
+        static_assert(std::is_convertible_v<T, U>, "Can't convert from this batch's type to dst!");
         kernel::scatter<A>(*this, dst, index, A {});
     }
 

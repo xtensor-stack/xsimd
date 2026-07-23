@@ -150,7 +150,7 @@ namespace xsimd
 
         namespace detail
         {
-            template <class T, bool = std::is_integral<T>::value>
+            template <class T, bool = std::is_integral_v<T>>
             struct allbits_impl
             {
                 static constexpr T get_value() noexcept

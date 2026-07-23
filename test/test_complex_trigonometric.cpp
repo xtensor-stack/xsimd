@@ -172,13 +172,13 @@ private:
         }
     }
 
-    template <class T, std::enable_if_t<!std::is_same<T, float>::value, int> = 0>
+    template <class T, std::enable_if_t<!std::is_same_v<T, float>, int> = 0>
     void test_conditional_tan()
     {
         test_tan_impl();
     }
 
-    template <class T, std::enable_if_t<std::is_same<T, float>::value, int> = 0>
+    template <class T, std::enable_if_t<std::is_same_v<T, float>, int> = 0>
     void test_conditional_tan()
     {
 #if (XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION)

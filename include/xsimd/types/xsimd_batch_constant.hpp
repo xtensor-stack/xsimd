@@ -150,7 +150,7 @@ namespace xsimd
         };
 
         template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
-        static constexpr batch_bool_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
+        static constexpr batch_bool_constant<T, A, F()(std::tuple_element_t<Indices, SelfPack>::value, std::tuple_element_t<Indices, OtherPack>::value)...>
         apply(std::index_sequence<Indices...>)
         {
             return {};
@@ -242,8 +242,8 @@ namespace xsimd
         template <class A2, std::size_t BeginIdx, typename T, class A, bool... Values, std::size_t... Is>
         XSIMD_INLINE constexpr batch_bool_constant<
             T, A2,
-            std::tuple_element<BeginIdx + Is,
-                               std::tuple<std::integral_constant<bool, Values>...>>::type::value...>
+            std::tuple_element_t<BeginIdx + Is,
+                                 std::tuple<std::integral_constant<bool, Values>...>>::value...>
         splice_impl(std::index_sequence<Is...>) noexcept
         {
             return {};
@@ -331,7 +331,7 @@ namespace xsimd
         };
 
         template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
-        static constexpr batch_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
+        static constexpr batch_constant<T, A, F()(std::tuple_element_t<Indices, SelfPack>::value, std::tuple_element_t<Indices, OtherPack>::value)...>
         apply(std::index_sequence<Indices...>)
         {
             return {};
@@ -371,7 +371,7 @@ namespace xsimd
 #undef MAKE_BINARY_OP
 
         template <class F, class SelfPack, class OtherPack, std::size_t... Indices>
-        static constexpr batch_bool_constant<T, A, F()(std::tuple_element<Indices, SelfPack>::type::value, std::tuple_element<Indices, OtherPack>::type::value)...>
+        static constexpr batch_bool_constant<T, A, F()(std::tuple_element_t<Indices, SelfPack>::value, std::tuple_element_t<Indices, OtherPack>::value)...>
         apply_bool(std::index_sequence<Indices...>)
         {
             return {};

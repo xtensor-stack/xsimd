@@ -184,7 +184,7 @@ namespace xsimd
             template <std::size_t LaneSizeBytes, typename ElemT, typename U, U... Vs>
             XSIMD_INLINE constexpr bool is_cross_lane_with_lane_size() noexcept
             {
-                static_assert(std::is_integral<U>::value, "swizzle mask values must be integral");
+                static_assert(std::is_integral_v<U>, "swizzle mask values must be integral");
                 static_assert(sizeof...(Vs) >= 1, "need at least one value");
                 static_assert(LaneSizeBytes > 0, "lane size must be positive");
 

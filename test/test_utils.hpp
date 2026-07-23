@@ -87,25 +87,25 @@ namespace detail
     {
         // define some overloads here as integer versions do not exist for msvc
         template <class T>
-        inline std::enable_if_t<!std::is_integral<T>::value, bool> isinf(const T& c)
+        inline std::enable_if_t<!std::is_integral_v<T>, bool> isinf(const T& c)
         {
             return std::isinf(c);
         }
 
         template <class T>
-        inline std::enable_if_t<std::is_integral<T>::value, bool> isinf(const T&)
+        inline std::enable_if_t<std::is_integral_v<T>, bool> isinf(const T&)
         {
             return false;
         }
 
         template <class T>
-        inline std::enable_if_t<!std::is_integral<T>::value, bool> isnan(const T& c)
+        inline std::enable_if_t<!std::is_integral_v<T>, bool> isnan(const T& c)
         {
             return std::isnan(c);
         }
 
         template <class T>
-        inline std::enable_if_t<std::is_integral<T>::value, bool> isnan(const T&)
+        inline std::enable_if_t<std::is_integral_v<T>, bool> isnan(const T&)
         {
             return false;
         }
@@ -187,7 +187,7 @@ namespace detail
             using std::max;
 
             // direct compare integers -- but need tolerance for inexact double conversion
-            if (std::is_integral<T>::value && lhs < 10e6 && rhs < 10e6)
+            if (std::is_integral_v<T> && lhs < 10e6 && rhs < 10e6)
             {
                 return lhs == rhs;
             }
@@ -401,7 +401,7 @@ namespace detail
         void stringify(std::ostream* os) const override { *os << msg_; }
     };
 
-    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+    template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
     std::string to_string_full_precision(T value)
     {
         // TODO(C++17): use std::to_chars
@@ -410,7 +410,7 @@ namespace detail
         return ss.str();
     }
 
-    template <typename T, typename std::enable_if<!std::is_floating_point<T>::value, int>::type = 0>
+    template <typename T, std::enable_if_t<!std::is_floating_point_v<T>, int> = 0>
     std::string to_string_full_precision(T value)
     {
         return doctest::toString(value).c_str();

@@ -131,7 +131,7 @@ namespace xsimd
 
     template <class T>
     struct flipped_sign_type
-        : detail::flipped_sign_type_impl<T, std::is_signed<T>::value>
+        : detail::flipped_sign_type_impl<T, std::is_signed_v<T>>
     {
     };
 
@@ -207,38 +207,38 @@ namespace xsimd
              **************************************/
 
             template <class T>
-            using enable_arithmetic_t = std::enable_if_t<std::is_arithmetic<T>::value, int>;
+            using enable_arithmetic_t = std::enable_if_t<std::is_arithmetic_v<T>, int>;
 
             /// Enable signed integral or floating point
             template <class T>
-            using enable_signed_numeral_t = std::enable_if_t<std::is_signed<T>::value, int>;
+            using enable_signed_numeral_t = std::enable_if_t<std::is_signed_v<T>, int>;
 
             template <class T>
-            using enable_floating_point_t = std::enable_if_t<std::is_floating_point<T>::value, int>;
+            using enable_floating_point_t = std::enable_if_t<std::is_floating_point_v<T>, int>;
 
             template <class T>
-            using enable_integral_t = std::enable_if_t<std::is_integral<T>::value, int>;
+            using enable_integral_t = std::enable_if_t<std::is_integral_v<T>, int>;
 
             template <class T>
-            using enable_signed_integral_t = std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, int>;
+            using enable_signed_integral_t = std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T>, int>;
 
             template <class T>
-            using enable_unsigned_integral_t = std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value, int>;
+            using enable_unsigned_integral_t = std::enable_if_t<std::is_integral_v<T> && std::is_unsigned_v<T>, int>;
 
             template <class T, size_t S>
-            using enable_sized_signed_t = std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value && sizeof(T) == S, int>;
+            using enable_sized_signed_t = std::enable_if_t<std::is_integral_v<T> && std::is_signed_v<T> && sizeof(T) == S, int>;
 
             template <class T, size_t S>
-            using enable_sized_unsigned_t = std::enable_if_t<std::is_integral<T>::value && !std::is_signed<T>::value && sizeof(T) == S, int>;
+            using enable_sized_unsigned_t = std::enable_if_t<std::is_integral_v<T> && !std::is_signed_v<T> && sizeof(T) == S, int>;
 
             template <class T, size_t S>
-            using enable_sized_integral_t = std::enable_if_t<std::is_integral<T>::value && sizeof(T) == S, int>;
+            using enable_sized_integral_t = std::enable_if_t<std::is_integral_v<T> && sizeof(T) == S, int>;
 
             template <class T, size_t S>
             using enable_sized_t = std::enable_if_t<sizeof(T) == S, int>;
 
             template <class T, size_t S>
-            using enable_max_sized_integral_t = std::enable_if_t<std::is_integral<T>::value && sizeof(T) <= S, int>;
+            using enable_max_sized_integral_t = std::enable_if_t<std::is_integral_v<T> && sizeof(T) <= S, int>;
 
             /********************************
              * Matching & mismatching sizes *
@@ -251,7 +251,7 @@ namespace xsimd
             using sizes_mismatch_t = std::enable_if_t<sizeof(T) != sizeof(U), B>;
 
             template <class T, class U, class B = int>
-            using stride_match_t = std::enable_if_t<!std::is_same<T, U>::value && sizeof(T) == sizeof(U), B>;
+            using stride_match_t = std::enable_if_t<!std::is_same_v<T, U> && sizeof(T) == sizeof(U), B>;
         } // namespace detail
     } // namespace kernel
 
@@ -376,7 +376,7 @@ namespace xsimd
             bool_pack<bs..., true>, bool_pack<true, bs...>>;
 
         template <typename T, typename... Args>
-        using is_all_convertible = all_true<std::is_convertible<Args, T>::value...>;
+        using is_all_convertible = all_true<std::is_convertible_v<Args, T>...>;
 
         template <typename T, std::size_t N, typename... Args>
         using is_array_initializer = std::enable_if<
