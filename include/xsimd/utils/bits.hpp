@@ -22,7 +22,7 @@ namespace xsimd
         template <typename I>
         constexpr I make_bit_mask(I bit)
         {
-            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
+            static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
             assert(bit < static_cast<I>(8 * sizeof(I)));
             return static_cast<I>(I { 1 } << bit);
         }
@@ -31,14 +31,14 @@ namespace xsimd
         constexpr I make_bit_mask(I bit, Args... bits)
         {
             // TODO(C++17): Use fold expression
-            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
+            static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
             return make_bit_mask<I>(bit) | make_bit_mask<I>(static_cast<I>(bits)...);
         }
 
         template <int... Bits, typename I>
         constexpr bool all_bits_set(I value)
         {
-            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
+            static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
             constexpr I mask = make_bit_mask<I>(static_cast<I>(Bits)...);
             return (value & mask) == mask;
         }
@@ -46,7 +46,7 @@ namespace xsimd
         template <int Bit, typename I>
         constexpr I set_bit(I value)
         {
-            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
+            static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
             constexpr I mask = make_bit_mask<I>(static_cast<I>(Bit));
             return value | mask;
         }
@@ -57,7 +57,7 @@ namespace xsimd
         template <typename I>
         constexpr I make_low_mask(I width) noexcept
         {
-            static_assert(std::is_unsigned<I>::value, "Bit operations must be done on unsigned integers");
+            static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
             assert(width <= static_cast<I>(8 * sizeof(I)));
             if (width == static_cast<I>(8 * sizeof(I)))
             {

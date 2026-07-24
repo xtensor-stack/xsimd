@@ -206,7 +206,7 @@ struct batch_int_test
         using signed_value_type = std::make_signed_t<value_type>;
         for (size_t i = 0; i < size; ++i)
         {
-            bool negative_lhs = std::is_signed<value_type>::value && (i % 2 == 1);
+            bool negative_lhs = std::is_signed_v<value_type> && (i % 2 == 1);
             lhs[i] = value_type(i) * (negative_lhs ? -10 : 10);
             if (lhs[i] == value_type(0))
             {
@@ -306,7 +306,7 @@ struct batch_int_test
     void test_less_than_underflow() const
     {
         batch_type test_negative_compare = batch_type(5) - 6;
-        if (std::is_unsigned<value_type>::value)
+        if (std::is_unsigned_v<value_type>)
         {
             CHECK_FALSE(xsimd::any(test_negative_compare < 1));
         }

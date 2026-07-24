@@ -96,19 +96,19 @@ namespace xsimd
         };
 
         template <typename T, std::size_t factor>
-        struct remap_num<T, factor, std::enable_if_t<std::is_floating_point<T>::value>>
+        struct remap_num<T, factor, std::enable_if_t<std::is_floating_point_v<T>>>
         {
             using type = xsimd::sized_fp_t<sizeof(T) * factor>;
         };
 
         template <typename T, std::size_t factor>
-        struct remap_num<T, factor, std::enable_if_t<!std::is_floating_point<T>::value && std::is_signed<T>::value>>
+        struct remap_num<T, factor, std::enable_if_t<!std::is_floating_point_v<T> && std::is_signed_v<T>>>
         {
             using type = xsimd::sized_int_t<sizeof(T) * factor>;
         };
 
         template <typename T, std::size_t factor>
-        struct remap_num<T, factor, std::enable_if_t<!std::is_floating_point<T>::value && std::is_unsigned<T>::value>>
+        struct remap_num<T, factor, std::enable_if_t<!std::is_floating_point_v<T> && std::is_unsigned_v<T>>>
         {
             using type = xsimd::sized_uint_t<sizeof(T) * factor>;
         };

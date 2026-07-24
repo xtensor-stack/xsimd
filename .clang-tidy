@@ -1,4 +1,4 @@
 ---
 Checks:          '-*,modernize-type-traits'
-WarningsAsErrors: true
+WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'

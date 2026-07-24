@@ -24,19 +24,19 @@ using namespace std::placeholders;
 namespace detail_test_mulhilo
 {
     template <class T>
-    std::enable_if_t<std::is_integral<T>::value && (sizeof(T) <= 4), T>
+    std::enable_if_t<std::is_integral_v<T> && (sizeof(T) <= 4), T>
     mulhi_reference(T x, T y) noexcept
     {
-        using W = std::conditional_t<std::is_signed<T>::value, int64_t, uint64_t>;
+        using W = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
         return static_cast<T>((static_cast<W>(x) * static_cast<W>(y)) >> (8 * sizeof(T)));
     }
 
 #if defined(__SIZEOF_INT128__)
     template <class T>
-    std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 8), T>
+    std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 8), T>
     mulhi_reference(T x, T y) noexcept
     {
-        using W = std::conditional_t<std::is_signed<T>::value, __int128, unsigned __int128>;
+        using W = std::conditional_t<std::is_signed_v<T>, __int128, unsigned __int128>;
         return static_cast<T>((static_cast<W>(x) * static_cast<W>(y)) >> 64);
     }
 #else
@@ -107,7 +107,7 @@ struct batch_test
         auto b_converted = static_cast<typename batch_type::register_type>(b1);
         auto b_native = b1.to_native();
         // Check via decltype as register_type raises warning for ignored attributes
-        CHECK(std::is_same<decltype(b_native), decltype(b_converted)>::value);
+        CHECK(std::is_same_v<decltype(b_native), decltype(b_converted)>);
 
         batch_type b2 = b_native; // Converting ctor
         CHECK_BATCH_EQ(b1, b2);
@@ -411,7 +411,7 @@ struct batch_test
         // edge operands that actually exercise the high half
         constexpr value_type vmin = std::numeric_limits<value_type>::min();
         constexpr value_type vmax = std::numeric_limits<value_type>::max();
-        constexpr bool is_signed = std::is_signed<value_type>::value;
+        constexpr bool is_signed = std::is_signed_v<value_type>;
 
         // Pattern A: extremes paired with extremes (covers vmax*vmax, vmin*vmin,
         // vmin*vmax, vmin*-1 — the classic signed-overflow corners).
@@ -997,7 +997,7 @@ struct batch_test
             std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
                            [](const value_type& l, const value_type& r) -> value_type
                            {
-                               if (std::is_integral<value_type>::value)
+                               if (std::is_integral_v<value_type>)
                                {
                                    return static_cast<value_type>(((long long)l + r) / 2);
                                }
@@ -1015,7 +1015,7 @@ struct batch_test
             std::transform(lhs.cbegin(), lhs.cend(), rhs.cbegin(), expected.begin(),
                            [](const value_type& l, const value_type& r) -> value_type
                            {
-                               if (std::is_integral<value_type>::value)
+                               if (std::is_integral_v<value_type>)
                                {
                                    return static_cast<value_type>(((long long)l + r) / 2 + ((long long)(l + r) & 1));
                                }
@@ -1135,11 +1135,11 @@ private:
 
     void init_operands()
     {
-        if constexpr (std::is_integral<value_type>::value)
+        if constexpr (std::is_integral_v<value_type>)
         {
             for (size_t i = 0; i < size; ++i)
             {
-                bool negative_lhs = std::is_signed<value_type>::value && (i % 2 == 1);
+                bool negative_lhs = std::is_signed_v<value_type> && (i % 2 == 1);
                 lhs[i] = value_type(i) * (negative_lhs ? -3 : 3);
                 if (lhs[i] == value_type(0))
                 {

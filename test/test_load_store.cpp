@@ -368,7 +368,7 @@ private:
         using lower_arch = xsimd::sse2;
         using expected_batch_type = xsimd::batch<float, lower_arch>;
         using load_as_return_type = decltype(xsimd::load_as<float, lower_arch>(std::declval<float*>(), xsimd::aligned_mode()));
-        static_assert(std::is_same<load_as_return_type, expected_batch_type>::value, "honoring arch parameter");
+        static_assert(std::is_same_v<load_as_return_type, expected_batch_type>, "honoring arch parameter");
     };
 #endif
 
@@ -429,7 +429,7 @@ private:
         CHECK_BATCH_EQ(b, expected);
 
         stream_load_if_same(v.data(), b, expected, name,
-                            std::integral_constant<bool, std::is_same<typename V::value_type, value_type>::value> {});
+                            std::integral_constant<bool, std::is_same_v<typename V::value_type, value_type>> {});
 
         run_mask_tests(v, name, b, expected, std::is_same<typename V::value_type, value_type> {});
     }
@@ -583,11 +583,11 @@ private:
     struct test_load_char
     {
         /* Make sure xsimd doesn't try to be smart with char types */
-        static_assert(std::is_same<xsimd::batch<char>, decltype(xsimd::load_as<char>(std::declval<char*>(), xsimd::aligned_mode()))>::value,
+        static_assert(std::is_same_v<xsimd::batch<char>, decltype(xsimd::load_as<char>(std::declval<char*>(), xsimd::aligned_mode()))>,
                       "honor explicit type request");
-        static_assert(std::is_same<xsimd::batch<unsigned char>, decltype(xsimd::load_as<unsigned char>(std::declval<unsigned char*>(), xsimd::aligned_mode()))>::value,
+        static_assert(std::is_same_v<xsimd::batch<unsigned char>, decltype(xsimd::load_as<unsigned char>(std::declval<unsigned char*>(), xsimd::aligned_mode()))>,
                       "honor explicit type request");
-        static_assert(std::is_same<xsimd::batch<signed char>, decltype(xsimd::load_as<signed char>(std::declval<signed char*>(), xsimd::aligned_mode()))>::value,
+        static_assert(std::is_same_v<xsimd::batch<signed char>, decltype(xsimd::load_as<signed char>(std::declval<signed char*>(), xsimd::aligned_mode()))>,
                       "honor explicit type request");
     };
 
@@ -622,7 +622,7 @@ private:
         CHECK_VECTOR_EQ(res, v);
 
         stream_store_if_same(res, b, v, name,
-                             std::integral_constant<bool, std::is_same<typename V::value_type, value_type>::value> {});
+                             std::integral_constant<bool, std::is_same_v<typename V::value_type, value_type>> {});
 
         V expected_masked(size);
 

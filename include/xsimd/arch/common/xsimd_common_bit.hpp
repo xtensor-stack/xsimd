@@ -51,7 +51,7 @@ namespace xsimd
         // FIXME: We could do better by dispatching to the appropriate popcount instruction
         // depending on the arch.
 
-        template <class T, class = std::enable_if_t<std::is_unsigned<T>::value>>
+        template <class T, class = std::enable_if_t<std::is_unsigned_v<T>>>
         XSIMD_INLINE int popcount(T x) noexcept
         {
 #if XSIMD_HAS_BUILTIN(__builtin_popcountg)
@@ -123,7 +123,7 @@ namespace xsimd
 #endif
         }
 
-        template <class T, class = std::enable_if_t<std::is_unsigned<T>::value>>
+        template <class T, class = std::enable_if_t<std::is_unsigned_v<T>>>
         XSIMD_INLINE int countl_zero(T x) noexcept
         {
 #if XSIMD_HAS_BUILTIN(__builtin_clzg)
@@ -177,13 +177,13 @@ namespace xsimd
 #endif
         }
 
-        template <class T, class = std::enable_if_t<std::is_unsigned<T>::value>>
+        template <class T, class = std::enable_if_t<std::is_unsigned_v<T>>>
         XSIMD_INLINE int countl_one(T x) noexcept
         {
             return countl_zero(T(~x));
         }
 
-        template <class T, class = std::enable_if_t<std::is_unsigned<T>::value>>
+        template <class T, class = std::enable_if_t<std::is_unsigned_v<T>>>
         XSIMD_INLINE int countr_zero(T x) noexcept
         {
 #if XSIMD_HAS_BUILTIN(__builtin_ctzg)
@@ -219,7 +219,7 @@ namespace xsimd
 #endif
         }
 
-        template <class T, class = std::enable_if_t<std::is_unsigned<T>::value>>
+        template <class T, class = std::enable_if_t<std::is_unsigned_v<T>>>
         XSIMD_INLINE int countr_one(T x) noexcept
         {
             return countr_zero(T(~x));

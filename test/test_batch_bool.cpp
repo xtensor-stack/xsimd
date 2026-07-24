@@ -375,9 +375,9 @@ struct batch_bool_test
             static_assert((B::size == 0) || (((ends_bits_mask >> (B::size - 1)) & 1u) != 0u), "ends last element set");
             static_assert((B::size <= 2) || (((ends_bits_mask >> 1) & 1u) == 0u), "ends interior element cleared");
 
-            static_assert(std::is_same<decltype(m_prefix.as_batch_bool()), typename B::batch_bool_type>::value,
+            static_assert(std::is_same_v<decltype(m_prefix.as_batch_bool()), typename B::batch_bool_type>,
                           "as_batch_bool type");
-            static_assert(std::is_same<decltype(static_cast<typename B::batch_bool_type>(m_prefix)), typename B::batch_bool_type>::value,
+            static_assert(std::is_same_v<decltype(static_cast<typename B::batch_bool_type>(m_prefix)), typename B::batch_bool_type>,
                           "conversion operator type");
 
             // splice API is validated indirectly via arch-specific masked implementations.

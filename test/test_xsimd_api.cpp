@@ -366,7 +366,7 @@ struct xsimd_api_integral_types_functions
 
     /* Test when T is a batch_constant only, not a scalar. */
     template <typename U = T>
-    void test_bitwise_lshift_multiple(T const& vals, std::enable_if_t<!std::is_integral<U>::value, int> = 0)
+    void test_bitwise_lshift_multiple(T const& vals, std::enable_if_t<!std::is_integral_v<U>, int> = 0)
     {
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
         constexpr auto Max = static_cast<value_type>(std::numeric_limits<value_type>::digits);
@@ -389,7 +389,7 @@ struct xsimd_api_integral_types_functions
 
     /* Test multiple does not make sense when T is scalar. */
     template <typename U = T>
-    void test_bitwise_lshift_multiple(T const&, std::enable_if_t<std::is_integral<U>::value, int> = 0)
+    void test_bitwise_lshift_multiple(T const&, std::enable_if_t<std::is_integral_v<U>, int> = 0)
     {
     }
 
@@ -668,7 +668,7 @@ struct xsimd_api_float_types_functions
     {
         value_type val(3.3);
         int res;
-        std::conditional_t<std::is_floating_point<T>::value, int, xsimd::as_integer_t<T>> vres;
+        std::conditional_t<std::is_floating_point_v<T>, int, xsimd::as_integer_t<T>> vres;
         CHECK_EQ(extract(xsimd::frexp(T(val), vres)), std::frexp(val, &res));
         CHECK_EQ(extract(vres), res);
     }
@@ -697,7 +697,7 @@ struct xsimd_api_float_types_functions
     {
         value_type val0(4);
         xsimd::as_integer_t<value_type> val1(2);
-        using exponent_type = std::conditional_t<std::is_scalar<T>::value, int, xsimd::as_integer_t<T>>;
+        using exponent_type = std::conditional_t<std::is_scalar_v<T>, int, xsimd::as_integer_t<T>>;
         CHECK_EQ(extract(xsimd::ldexp(T(val0), exponent_type(val1))), std::ldexp(val0, static_cast<int>(val1)));
     }
     void test_lgamma()
@@ -1289,7 +1289,7 @@ struct xsimd_api_all_types_functions
 
         value_type val2(2);
         value_type val3(3);
-        if (std::is_integral<value_type>::value)
+        if (std::is_integral_v<value_type>)
             CHECK_EQ(extract(xsimd::avgr(T(val2), T(val3))), (val2 + val3 + 1) / value_type(2));
         else
             CHECK_EQ(extract(xsimd::avgr(T(val2), T(val3))), (val2 + val3) / value_type(2));

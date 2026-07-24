@@ -25,7 +25,7 @@ namespace xsimd
         using namespace types;
 
         // broadcast
-        template <class A, class T, class = std::enable_if_t<std::is_same<T, float>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_same_v<T, float>>>
         XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<avx_128>) noexcept
         {
             return _mm_broadcast_ss(&val);
@@ -105,7 +105,7 @@ namespace xsimd
 
         // Masks that lower to plain moves go to sse2; the rest gain nothing on a
         // single register, so take the runtime path.
-        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
             if constexpr (detail::lowers_to_plain_moves(mask))
@@ -134,7 +134,7 @@ namespace xsimd
 
         // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
         template <class A, class T, class Mode>
-        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
+        XSIMD_INLINE std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
         load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
             if constexpr (sizeof(T) == 4)
@@ -147,7 +147,7 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
         {
             if constexpr (detail::lowers_to_plain_moves(mask))
@@ -176,7 +176,7 @@ namespace xsimd
 
         // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
         template <class A, class T, class Mode>
-        XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8), void>
+        XSIMD_INLINE std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8), void>
         store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx_128>) noexcept
         {
             if constexpr (sizeof(T) == 4)

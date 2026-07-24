@@ -132,101 +132,101 @@ struct constant_batch_test
 
         constexpr auto n12_add_n3 = n12 + n3;
         constexpr auto n15 = xsimd::make_batch_constant<value_type, constant<15>, arch_type>();
-        static_assert(std::is_same<decltype(n12_add_n3), decltype(n15)>::value, "n12 + n3 == n15");
+        static_assert(std::is_same_v<decltype(n12_add_n3), decltype(n15)>, "n12 + n3 == n15");
         constexpr auto n12_add_c3 = n12 + c3;
-        static_assert(std::is_same<decltype(n12_add_c3), decltype(n15)>::value, "n12 + c3 == n15");
+        static_assert(std::is_same_v<decltype(n12_add_c3), decltype(n15)>, "n12 + c3 == n15");
 
         constexpr auto n12_sub_n3 = n12 - n3;
         constexpr auto n9 = xsimd::make_batch_constant<value_type, constant<9>, arch_type>();
-        static_assert(std::is_same<decltype(n12_sub_n3), decltype(n9)>::value, "n12 - n3 == n9");
+        static_assert(std::is_same_v<decltype(n12_sub_n3), decltype(n9)>, "n12 - n3 == n9");
         constexpr auto n12_sub_c3 = n12 - c3;
-        static_assert(std::is_same<decltype(n12_sub_c3), decltype(n9)>::value, "n12 - c3 == n9");
+        static_assert(std::is_same_v<decltype(n12_sub_c3), decltype(n9)>, "n12 - c3 == n9");
 
         constexpr auto n12_mul_n3 = n12 * n3;
         constexpr auto n36 = xsimd::make_batch_constant<value_type, constant<36>, arch_type>();
-        static_assert(std::is_same<decltype(n12_mul_n3), decltype(n36)>::value, "n12 * n3 == n36");
+        static_assert(std::is_same_v<decltype(n12_mul_n3), decltype(n36)>, "n12 * n3 == n36");
         constexpr auto n12_mul_c3 = n12 * c3;
-        static_assert(std::is_same<decltype(n12_mul_c3), decltype(n36)>::value, "n12 - c3 == n36");
+        static_assert(std::is_same_v<decltype(n12_mul_c3), decltype(n36)>, "n12 - c3 == n36");
 
         constexpr auto n12_div_n3 = n12 / n3;
         constexpr auto n4 = xsimd::make_batch_constant<value_type, constant<4>, arch_type>();
-        static_assert(std::is_same<decltype(n12_div_n3), decltype(n4)>::value, "n12 / n3 == n4");
+        static_assert(std::is_same_v<decltype(n12_div_n3), decltype(n4)>, "n12 / n3 == n4");
         constexpr auto n12_div_c3 = n12 / c3;
-        static_assert(std::is_same<decltype(n12_div_c3), decltype(n4)>::value, "n12 / c3 == n4");
+        static_assert(std::is_same_v<decltype(n12_div_c3), decltype(n4)>, "n12 / c3 == n4");
 
         constexpr auto n12_mod_n3 = n12 % n3;
         constexpr auto n0 = xsimd::make_batch_constant<value_type, constant<0>, arch_type>();
-        static_assert(std::is_same<decltype(n12_mod_n3), decltype(n0)>::value, "n12 % n3 == n0");
+        static_assert(std::is_same_v<decltype(n12_mod_n3), decltype(n0)>, "n12 % n3 == n0");
         constexpr auto n12_mod_c3 = n12 % c3;
-        static_assert(std::is_same<decltype(n12_mod_c3), decltype(n0)>::value, "n12 % c3 == n0");
+        static_assert(std::is_same_v<decltype(n12_mod_c3), decltype(n0)>, "n12 % c3 == n0");
 
         constexpr auto n12_land_n3 = n12 & n3;
-        static_assert(std::is_same<decltype(n12_land_n3), decltype(n0)>::value, "n12 & n3 == n0");
+        static_assert(std::is_same_v<decltype(n12_land_n3), decltype(n0)>, "n12 & n3 == n0");
         constexpr auto n12_land_c3 = n12 & c3;
-        static_assert(std::is_same<decltype(n12_land_c3), decltype(n0)>::value, "n12 & c3 == n0");
+        static_assert(std::is_same_v<decltype(n12_land_c3), decltype(n0)>, "n12 & c3 == n0");
 
         constexpr auto n12_lor_n3 = n12 | n3;
-        static_assert(std::is_same<decltype(n12_lor_n3), decltype(n15)>::value, "n12 | n3 == n15");
+        static_assert(std::is_same_v<decltype(n12_lor_n3), decltype(n15)>, "n12 | n3 == n15");
         constexpr auto n12_lor_c3 = n12 | c3;
-        static_assert(std::is_same<decltype(n12_lor_c3), decltype(n15)>::value, "n12 | c3 == n15");
+        static_assert(std::is_same_v<decltype(n12_lor_c3), decltype(n15)>, "n12 | c3 == n15");
 
         constexpr auto n12_lxor_n3 = n12 ^ n3;
-        static_assert(std::is_same<decltype(n12_lxor_n3), decltype(n15)>::value, "n12 ^ n3 == n15");
+        static_assert(std::is_same_v<decltype(n12_lxor_n3), decltype(n15)>, "n12 ^ n3 == n15");
         constexpr auto n12_lxor_c3 = n12 ^ c3;
-        static_assert(std::is_same<decltype(n12_lxor_c3), decltype(n15)>::value, "n12 ^ c3 == n15");
+        static_assert(std::is_same_v<decltype(n12_lxor_c3), decltype(n15)>, "n12 ^ c3 == n15");
 
         constexpr auto n96 = xsimd::make_batch_constant<value_type, constant<96>, arch_type>();
         constexpr auto n12_lshift_n3 = n12 << n3;
-        static_assert(std::is_same<decltype(n12_lshift_n3), decltype(n96)>::value, "n12 << n3 == n96");
+        static_assert(std::is_same_v<decltype(n12_lshift_n3), decltype(n96)>, "n12 << n3 == n96");
         constexpr auto n12_lshift_c3 = n12 << c3;
-        static_assert(std::is_same<decltype(n12_lshift_c3), decltype(n96)>::value, "n12 << c3 == n96");
+        static_assert(std::is_same_v<decltype(n12_lshift_c3), decltype(n96)>, "n12 << c3 == n96");
 
         constexpr auto n1 = xsimd::make_batch_constant<value_type, constant<1>, arch_type>();
         constexpr auto n12_rshift_n3 = n12 >> n3;
-        static_assert(std::is_same<decltype(n12_rshift_n3), decltype(n1)>::value, "n12 >> n3 == n1");
+        static_assert(std::is_same_v<decltype(n12_rshift_n3), decltype(n1)>, "n12 >> n3 == n1");
         constexpr auto n12_rshift_c3 = n12 >> c3;
-        static_assert(std::is_same<decltype(n12_rshift_c3), decltype(n1)>::value, "n12 >> c3 == n1");
+        static_assert(std::is_same_v<decltype(n12_rshift_c3), decltype(n1)>, "n12 >> c3 == n1");
 
         constexpr auto n12_uadd = +n12;
-        static_assert(std::is_same<decltype(n12_uadd), decltype(n12)>::value, "+n12 == n12");
+        static_assert(std::is_same_v<decltype(n12_uadd), decltype(n12)>, "+n12 == n12");
 
         constexpr auto n12_inv = ~n12;
         constexpr auto n12_inv_ = xsimd::make_batch_constant<value_type, constant<(value_type)~12>, arch_type>();
-        static_assert(std::is_same<decltype(n12_inv), decltype(n12_inv_)>::value, "~n12 == n12_inv");
+        static_assert(std::is_same_v<decltype(n12_inv), decltype(n12_inv_)>, "~n12 == n12_inv");
 
         constexpr auto n12_usub = -n12;
         constexpr auto n12_usub_ = xsimd::make_batch_constant<value_type, constant<(value_type)-12>, arch_type>();
-        static_assert(std::is_same<decltype(n12_usub), decltype(n12_usub_)>::value, "-n12 == n12_usub");
+        static_assert(std::is_same_v<decltype(n12_usub), decltype(n12_usub_)>, "-n12 == n12_usub");
 
         // comparison operators
         using true_batch_type = decltype(xsimd::make_batch_bool_constant<value_type, true, arch_type>());
         using false_batch_type = decltype(xsimd::make_batch_bool_constant<value_type, false, arch_type>());
 
-        static_assert(std::is_same<typename decltype(n12 == n12)::operand_type, typename decltype(n12)::value_type>::value, "same type");
+        static_assert(std::is_same_v<typename decltype(n12 == n12)::operand_type, typename decltype(n12)::value_type>, "same type");
 
-        static_assert(std::is_same<decltype(n12 == n12), true_batch_type>::value, "n12 == n12");
-        static_assert(std::is_same<decltype(n12 == n3), false_batch_type>::value, "n12 == n3");
-        static_assert(std::is_same<decltype(n12 == c3), false_batch_type>::value, "n12 == c3");
+        static_assert(std::is_same_v<decltype(n12 == n12), true_batch_type>, "n12 == n12");
+        static_assert(std::is_same_v<decltype(n12 == n3), false_batch_type>, "n12 == n3");
+        static_assert(std::is_same_v<decltype(n12 == c3), false_batch_type>, "n12 == c3");
 
-        static_assert(std::is_same<decltype(n12 != n12), false_batch_type>::value, "n12 != n12");
-        static_assert(std::is_same<decltype(n12 != n3), true_batch_type>::value, "n12 != n3");
-        static_assert(std::is_same<decltype(n12 != c3), true_batch_type>::value, "n12 != c3");
+        static_assert(std::is_same_v<decltype(n12 != n12), false_batch_type>, "n12 != n12");
+        static_assert(std::is_same_v<decltype(n12 != n3), true_batch_type>, "n12 != n3");
+        static_assert(std::is_same_v<decltype(n12 != c3), true_batch_type>, "n12 != c3");
 
-        static_assert(std::is_same<decltype(n12 < n12), false_batch_type>::value, "n12 < n12");
-        static_assert(std::is_same<decltype(n12 < n3), false_batch_type>::value, "n12 < n3");
-        static_assert(std::is_same<decltype(n12 < c3), false_batch_type>::value, "n12 < c3");
+        static_assert(std::is_same_v<decltype(n12 < n12), false_batch_type>, "n12 < n12");
+        static_assert(std::is_same_v<decltype(n12 < n3), false_batch_type>, "n12 < n3");
+        static_assert(std::is_same_v<decltype(n12 < c3), false_batch_type>, "n12 < c3");
 
-        static_assert(std::is_same<decltype(n12 > n12), false_batch_type>::value, "n12 > n12");
-        static_assert(std::is_same<decltype(n12 > n3), true_batch_type>::value, "n12 > n3");
-        static_assert(std::is_same<decltype(n12 > c3), true_batch_type>::value, "n12 > c3");
+        static_assert(std::is_same_v<decltype(n12 > n12), false_batch_type>, "n12 > n12");
+        static_assert(std::is_same_v<decltype(n12 > n3), true_batch_type>, "n12 > n3");
+        static_assert(std::is_same_v<decltype(n12 > c3), true_batch_type>, "n12 > c3");
 
-        static_assert(std::is_same<decltype(n12 <= n12), true_batch_type>::value, "n12 <= n12");
-        static_assert(std::is_same<decltype(n12 <= n3), false_batch_type>::value, "n12 <= n3");
-        static_assert(std::is_same<decltype(n12 <= c3), false_batch_type>::value, "n12 <= c3");
+        static_assert(std::is_same_v<decltype(n12 <= n12), true_batch_type>, "n12 <= n12");
+        static_assert(std::is_same_v<decltype(n12 <= n3), false_batch_type>, "n12 <= n3");
+        static_assert(std::is_same_v<decltype(n12 <= c3), false_batch_type>, "n12 <= c3");
 
-        static_assert(std::is_same<decltype(n12 >= n12), true_batch_type>::value, "n12 >= n12");
-        static_assert(std::is_same<decltype(n12 >= n3), true_batch_type>::value, "n12 >= n3");
-        static_assert(std::is_same<decltype(n12 >= c3), true_batch_type>::value, "n12 >= c3");
+        static_assert(std::is_same_v<decltype(n12 >= n12), true_batch_type>, "n12 >= n12");
+        static_assert(std::is_same_v<decltype(n12 >= n3), true_batch_type>, "n12 >= n3");
+        static_assert(std::is_same_v<decltype(n12 >= c3), true_batch_type>, "n12 >= c3");
     }
 };
 
@@ -369,25 +369,25 @@ struct constant_bool_batch_test
         constexpr auto y = xsimd::make_batch_bool_constant<value_type, inv_split, arch_type>();
 
         constexpr auto x_or_y = x | y;
-        static_assert(std::is_same<decltype(x_or_y), decltype(all_true)>::value, "x | y == true");
+        static_assert(std::is_same_v<decltype(x_or_y), decltype(all_true)>, "x | y == true");
 
         constexpr auto x_lor_y = x || y;
-        static_assert(std::is_same<decltype(x_lor_y), decltype(all_true)>::value, "x || y == true");
+        static_assert(std::is_same_v<decltype(x_lor_y), decltype(all_true)>, "x || y == true");
 
         constexpr auto x_and_y = x & y;
-        static_assert(std::is_same<decltype(x_and_y), decltype(all_false)>::value, "x & y == false");
+        static_assert(std::is_same_v<decltype(x_and_y), decltype(all_false)>, "x & y == false");
 
         constexpr auto x_land_y = x && y;
-        static_assert(std::is_same<decltype(x_land_y), decltype(all_false)>::value, "x && y == false");
+        static_assert(std::is_same_v<decltype(x_land_y), decltype(all_false)>, "x && y == false");
 
         constexpr auto x_xor_y = x ^ y;
-        static_assert(std::is_same<decltype(x_xor_y), decltype(all_true)>::value, "x ^ y == true");
+        static_assert(std::is_same_v<decltype(x_xor_y), decltype(all_true)>, "x ^ y == true");
 
         constexpr auto not_x = !x;
-        static_assert(std::is_same<decltype(not_x), decltype(y)>::value, "!x == y");
+        static_assert(std::is_same_v<decltype(not_x), decltype(y)>, "!x == y");
 
         constexpr auto inv_x = ~x;
-        static_assert(std::is_same<decltype(inv_x), decltype(y)>::value, "~x == y");
+        static_assert(std::is_same_v<decltype(inv_x), decltype(y)>, "~x == y");
     }
 
     struct first_half

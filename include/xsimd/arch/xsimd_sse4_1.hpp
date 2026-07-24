@@ -24,7 +24,7 @@ namespace xsimd
     {
         using namespace types;
         // any
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE bool any(batch<T, A> const& self, requires_arch<sse4_1>) noexcept
         {
             return !_mm_testz_si128(self, self);
@@ -80,7 +80,7 @@ namespace xsimd
         }
 
         // eq
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             if constexpr (sizeof(T) == 8)
@@ -106,7 +106,7 @@ namespace xsimd
         }
 
         // get
-        template <class A, size_t I, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, size_t I, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE T get(batch<T, A> const& self, ::xsimd::index<I>, requires_arch<sse4_1>) noexcept
         {
             if constexpr (I == 0)
@@ -141,7 +141,7 @@ namespace xsimd
         }
 
         // insert
-        template <class A, class T, size_t I, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, size_t I, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I> pos, requires_arch<sse4_1>) noexcept
         {
             if constexpr (sizeof(T) == 1)
@@ -171,7 +171,7 @@ namespace xsimd
 
         // load_unaligned<batch_bool>
 
-        template <class A, class T, class = std::enable_if_t<(std::is_integral<T>::value && sizeof(T) > 1)>>
+        template <class A, class T, class = std::enable_if_t<(std::is_integral_v<T> && sizeof(T) > 1)>>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<sse4_1>) noexcept
         {
             // GCC <12 have missing or buggy unaligned load intrinsics; use memcpy to work around this.
@@ -220,10 +220,10 @@ namespace xsimd
         }
 
         // max
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
-            if (std::is_signed<T>::value)
+            if (std::is_signed_v<T>)
             {
                 if constexpr (sizeof(T) == 1)
                 {
@@ -264,7 +264,7 @@ namespace xsimd
         }
 
         // load_stream
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value, void>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>, void>>
         XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<sse4_1>) noexcept
         {
             return _mm_stream_load_si128((__m128i*)mem);
@@ -281,10 +281,10 @@ namespace xsimd
         }
 
         // min
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
-            if (std::is_signed<T>::value)
+            if (std::is_signed_v<T>)
             {
                 if constexpr (sizeof(T) == 1)
                 {
@@ -325,7 +325,7 @@ namespace xsimd
         }
 
         // mul
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse4_1>) noexcept
         {
             if constexpr (sizeof(T) == 1)
@@ -426,7 +426,7 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             return _mm_blendv_epi8(false_br, true_br, cond);
@@ -442,7 +442,7 @@ namespace xsimd
             return _mm_blendv_pd(false_br, true_br, cond);
         }
 
-        template <class A, class T, bool... Values, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, bool... Values, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<sse4_1>) noexcept
         {
             constexpr int mask = batch_bool_constant<T, A, Values...>::mask();
@@ -500,7 +500,7 @@ namespace xsimd
             __m128i lo, hi;
             if constexpr (sizeof(T) == 4)
             {
-                if constexpr (std::is_signed<T>::value)
+                if constexpr (std::is_signed_v<T>)
                 {
                     lo = _mm_cvtepi32_epi64(x_lo);
                     hi = _mm_cvtepi32_epi64(x_hi);
@@ -513,7 +513,7 @@ namespace xsimd
             }
             else if constexpr (sizeof(T) == 2)
             {
-                if constexpr (std::is_signed<T>::value)
+                if constexpr (std::is_signed_v<T>)
                 {
                     lo = _mm_cvtepi16_epi32(x_lo);
                     hi = _mm_cvtepi16_epi32(x_hi);
@@ -526,7 +526,7 @@ namespace xsimd
             }
             else if constexpr (sizeof(T) == 1)
             {
-                if constexpr (std::is_signed<T>::value)
+                if constexpr (std::is_signed_v<T>)
                 {
                     lo = _mm_cvtepi8_epi16(x_lo);
                     hi = _mm_cvtepi8_epi16(x_hi);

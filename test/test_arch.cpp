@@ -20,19 +20,19 @@
 
 #ifndef XSIMD_DEFAULT_ARCH
 static_assert(xsimd::default_arch::supported(), "default arch must be supported");
-static_assert(std::is_same<xsimd::default_arch, xsimd::best_arch>::value, "default arch is the best available");
+static_assert(std::is_same_v<xsimd::default_arch, xsimd::best_arch>, "default arch is the best available");
 static_assert(xsimd::supported_architectures::contains<xsimd::default_arch>(), "default arch is supported");
 static_assert(xsimd::all_architectures::contains<xsimd::default_arch>(), "default arch is a valid arch");
 #else
 namespace xsimd
 {
-    static_assert(std::is_same<default_arch, XSIMD_DEFAULT_ARCH>::value,
+    static_assert(std::is_same_v<default_arch, XSIMD_DEFAULT_ARCH>,
                   "default_arch does not match XSIMD_DEFAULT_ARCH");
 }
 #endif
 
 #if !XSIMD_WITH_SVE
-static_assert((std::is_base_of<xsimd::neon64, xsimd::default_arch>::value || !xsimd::neon64::supported()), "on arm, without sve, the best we can do is neon64");
+static_assert((std::is_base_of_v<xsimd::neon64, xsimd::default_arch> || !xsimd::neon64::supported()), "on arm, without sve, the best we can do is neon64");
 #endif
 
 struct check_supported
@@ -49,7 +49,7 @@ struct check_cpu_has_intruction_set
     template <class Arch>
     void operator()(Arch arch) const
     {
-        static_assert(std::is_same<decltype(xsimd::available_architectures().has(arch)), bool>::value,
+        static_assert(std::is_same_v<decltype(xsimd::available_architectures().has(arch)), bool>,
                       "cannot test instruction set availability on CPU");
     }
 };
@@ -66,9 +66,9 @@ struct check_available
 template <class T>
 static bool try_load()
 {
-    static_assert(std::is_same<xsimd::batch<T>, decltype(xsimd::load_aligned(std::declval<T*>()))>::value,
+    static_assert(std::is_same_v<xsimd::batch<T>, decltype(xsimd::load_aligned(std::declval<T*>()))>,
                   "loading the expected type");
-    static_assert(std::is_same<xsimd::batch<T>, decltype(xsimd::load_unaligned(std::declval<T*>()))>::value,
+    static_assert(std::is_same_v<xsimd::batch<T>, decltype(xsimd::load_unaligned(std::declval<T*>()))>,
                   "loading the expected type");
     return true;
 }
@@ -166,28 +166,28 @@ TEST_CASE("[multi arch support]")
         CHECK_EQ(4, size_t(batch4i32::size));
         CHECK_EQ(4, size_t(batch4u32::size));
 
-        CHECK_UNARY(bool(std::is_same<float, batch4f::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<std::complex<float>, batch4c::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<int32_t, batch4i32::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<uint32_t, batch4u32::value_type>::value));
+        CHECK_UNARY(bool(std::is_same_v<float, batch4f::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<std::complex<float>, batch4c::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<int32_t, batch4i32::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<uint32_t, batch4u32::value_type>));
 
 #if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON64 || XSIMD_WITH_SVE || XSIMD_WITH_RVV
         CHECK_EQ(2, size_t(batch2d::size));
         CHECK_EQ(2, size_t(batch2z::size));
-        CHECK_UNARY(bool(std::is_same<double, batch2d::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<std::complex<double>, batch2z::value_type>::value));
+        CHECK_UNARY(bool(std::is_same_v<double, batch2d::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<std::complex<double>, batch2z::value_type>));
 #else
-        CHECK_UNARY(bool(std::is_same<void, batch2d>::value));
+        CHECK_UNARY(bool(std::is_same_v<void, batch2d>));
 #endif
 
 #endif
 #if !XSIMD_WITH_AVX && !XSIMD_WITH_FMA3 && !(XSIMD_WITH_SVE && XSIMD_SVE_BITS == 256) && !(XSIMD_WITH_RVV && XSIMD_RVV_BITS == 256)
-        CHECK_UNARY(bool(std::is_same<void, batch8f>::value));
-        CHECK_UNARY(bool(std::is_same<void, batch4d>::value));
-        CHECK_UNARY(bool(std::is_same<void, batch8c>::value));
-        CHECK_UNARY(bool(std::is_same<void, batch4z>::value));
-        CHECK_UNARY(bool(std::is_same<void, batch8i32>::value));
-        CHECK_UNARY(bool(std::is_same<void, batch8u32>::value));
+        CHECK_UNARY(bool(std::is_same_v<void, batch8f>));
+        CHECK_UNARY(bool(std::is_same_v<void, batch4d>));
+        CHECK_UNARY(bool(std::is_same_v<void, batch8c>));
+        CHECK_UNARY(bool(std::is_same_v<void, batch4z>));
+        CHECK_UNARY(bool(std::is_same_v<void, batch8i32>));
+        CHECK_UNARY(bool(std::is_same_v<void, batch8u32>));
 #else
         CHECK_EQ(8, size_t(batch8f::size));
         CHECK_EQ(8, size_t(batch8i32::size));
@@ -197,12 +197,12 @@ TEST_CASE("[multi arch support]")
         CHECK_EQ(8, size_t(batch8c::size));
         CHECK_EQ(4, size_t(batch4z::size));
 
-        CHECK_UNARY(bool(std::is_same<float, batch8f::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<double, batch4d::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<int32_t, batch8i32::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<uint32_t, batch8u32::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<std::complex<float>, batch8c::value_type>::value));
-        CHECK_UNARY(bool(std::is_same<std::complex<double>, batch4z::value_type>::value));
+        CHECK_UNARY(bool(std::is_same_v<float, batch8f::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<double, batch4d::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<int32_t, batch8i32::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<uint32_t, batch8u32::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<std::complex<float>, batch8c::value_type>));
+        CHECK_UNARY(bool(std::is_same_v<std::complex<double>, batch4z::value_type>));
 #endif
     }
 

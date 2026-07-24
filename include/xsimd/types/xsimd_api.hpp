@@ -570,7 +570,7 @@ namespace xsimd
     {
         detail::static_check_supported_config<From, A>();
         using batch_value_type = typename simd_return_type<From, To, A>::value_type;
-        using value_type = std::conditional_t<std::is_same<From, bool>::value,
+        using value_type = std::conditional_t<std::is_same_v<From, bool>,
                                               bool,
                                               batch_value_type>;
         return simd_return_type<From, To, A>(value_type(v));
@@ -1785,7 +1785,7 @@ namespace xsimd
      * @param y batch involved in the product.
      * @return the low N bits of the product, lane-wise.
      */
-    template <class T, class A, class = std::enable_if_t<std::is_integral<T>::value>>
+    template <class T, class A, class = std::enable_if_t<std::is_integral_v<T>>>
     XSIMD_INLINE batch<T, A> mul_lo(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
@@ -1801,7 +1801,7 @@ namespace xsimd
      * @param y batch involved in the product.
      * @return the high N bits of the product, lane-wise.
      */
-    template <class T, class A, class = std::enable_if_t<std::is_integral<T>::value>>
+    template <class T, class A, class = std::enable_if_t<std::is_integral_v<T>>>
     XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
         detail::static_check_supported_config<T, A>();
@@ -1816,7 +1816,7 @@ namespace xsimd
      * @param y batch involved in the product.
      * @return pair of batches ``{hi, lo}``.
      */
-    template <class T, class A, class = std::enable_if_t<std::is_integral<T>::value>>
+    template <class T, class A, class = std::enable_if_t<std::is_integral_v<T>>>
     XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>>
     mul_hilo(batch<T, A> const& x, batch<T, A> const& y) noexcept
     {
@@ -2017,7 +2017,7 @@ namespace xsimd
      * @param y batch of integral values.
      * @return \c x raised to the power \c y.
      */
-    template <class T, class ITy, class A, class = std::enable_if_t<std::is_integral<ITy>::value>>
+    template <class T, class ITy, class A, class = std::enable_if_t<std::is_integral_v<ITy>>>
     XSIMD_INLINE batch<T, A> pow(batch<T, A> const& x, ITy y) noexcept
     {
         detail::static_check_supported_config<T, A>();
@@ -2061,7 +2061,7 @@ namespace xsimd
      * @param x batch of floating point numbers.
      * @return the reciprocal.
      */
-    template <class T, class A, class = std::enable_if_t<std::is_floating_point<T>::value>>
+    template <class T, class A, class = std::enable_if_t<std::is_floating_point_v<T>>>
     XSIMD_INLINE batch<T, A> reciprocal(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
@@ -2434,11 +2434,11 @@ namespace xsimd
      * @return combined batch
      */
     template <class T, class A, class Vt, Vt... Values>
-    XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
+    XSIMD_INLINE std::enable_if_t<std::is_arithmetic_v<T>, batch<T, A>>
     shuffle(batch<T, A> const& x, batch<T, A> const& y, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
-        static_assert(std::is_unsigned<Vt>::value, "mask must hold unsigned indices");
+        static_assert(std::is_unsigned_v<Vt>, "mask must hold unsigned indices");
         detail::static_check_supported_config<T, A>();
         return kernel::shuffle<A>(x, y, mask, A {});
     }
@@ -2530,7 +2530,7 @@ namespace xsimd
     template <size_t N, class T, class A>
     XSIMD_INLINE batch<T, A> slide_left(batch<T, A> const& x) noexcept
     {
-        static_assert(std::is_integral<T>::value, "can only slide batch of integers");
+        static_assert(std::is_integral_v<T>, "can only slide batch of integers");
         detail::static_check_supported_config<T, A>();
         return kernel::slide_left<N, A>(x, A {});
     }
@@ -2551,7 +2551,7 @@ namespace xsimd
     template <size_t N, class T, class A>
     XSIMD_INLINE batch<T, A> slide_right(batch<T, A> const& x) noexcept
     {
-        static_assert(std::is_integral<T>::value, "can only slide batch of integers");
+        static_assert(std::is_integral_v<T>, "can only slide batch of integers");
         detail::static_check_supported_config<T, A>();
         return kernel::slide_right<N, A>(x, A {});
     }
@@ -2850,7 +2850,7 @@ namespace xsimd
      * @return swizzled batch
      */
     template <class T, class A, class Vt, Vt... Values>
-    XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
+    XSIMD_INLINE std::enable_if_t<std::is_arithmetic_v<T>, batch<T, A>>
     swizzle(batch<T, A> const& x, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
@@ -2861,7 +2861,7 @@ namespace xsimd
     XSIMD_INLINE batch<std::complex<T>, A> swizzle(batch<std::complex<T>, A> const& x, batch_constant<Vt, A, Values...> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
-        static_assert(std::is_unsigned<Vt>::value, "mask must hold unsigned indices");
+        static_assert(std::is_unsigned_v<Vt>, "mask must hold unsigned indices");
         detail::static_check_supported_config<T, A>();
         return kernel::swizzle<A>(x, mask, A {});
     }
@@ -2876,7 +2876,7 @@ namespace xsimd
      * @return swizzled batch
      */
     template <class T, class A, class Vt>
-    XSIMD_INLINE std::enable_if_t<std::is_arithmetic<T>::value, batch<T, A>>
+    XSIMD_INLINE std::enable_if_t<std::is_arithmetic_v<T>, batch<T, A>>
     swizzle(batch<T, A> const& x, batch<Vt, A> mask) noexcept
     {
         static_assert(sizeof(T) == sizeof(Vt), "consistent mask");
@@ -3038,7 +3038,7 @@ namespace xsimd
      * @param self batch_bool of \c T
      * @return \c self cast to a \c batch of \c T
      */
-    template <class T, class A, std::enable_if_t<std::is_integral<T>::value, int> = 3>
+    template <class T, class A, std::enable_if_t<std::is_integral_v<T>, int> = 3>
     XSIMD_INLINE batch<T, A> bitwise_cast(batch_bool<T, A> const& self) noexcept
     {
         T z(0);
@@ -3046,7 +3046,7 @@ namespace xsimd
         return select(self, batch<T, A>(T(~z)), batch<T, A>(z));
     }
 
-    template <class T, class A, std::enable_if_t<std::is_floating_point<T>::value, int> = 3>
+    template <class T, class A, std::enable_if_t<std::is_floating_point_v<T>, int> = 3>
     XSIMD_INLINE batch<T, A> bitwise_cast(batch_bool<T, A> const& self) noexcept
     {
         T z0(0), z1(0);

@@ -17,7 +17,7 @@
 #ifndef __FAST_MATH__
 namespace detail
 {
-    template <class T, bool is_int = std::is_integral<typename T::value_type>::value>
+    template <class T, bool is_int = std::is_integral_v<typename T::value_type>>
     struct infinity_tester
     {
         static void test_isfinite()

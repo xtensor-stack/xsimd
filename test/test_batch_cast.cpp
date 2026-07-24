@@ -18,14 +18,14 @@
 namespace detail
 {
     template <class T_out, class T_in>
-    inline std::enable_if_t<std::is_unsigned<T_in>::value && std::is_integral<T_out>::value, bool>
+    inline std::enable_if_t<std::is_unsigned_v<T_in> && std::is_integral_v<T_out>, bool>
     is_convertible(T_in value)
     {
         return static_cast<uint64_t>(value) <= static_cast<uint64_t>(std::numeric_limits<T_out>::max());
     }
 
     template <class T_out, class T_in>
-    inline std::enable_if_t<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_integral<T_out>::value && std::is_signed<T_out>::value, bool>
+    inline std::enable_if_t<std::is_integral_v<T_in> && std::is_signed_v<T_in> && std::is_integral_v<T_out> && std::is_signed_v<T_out>, bool>
     is_convertible(T_in value)
     {
         int64_t signed_value = static_cast<int64_t>(value);
@@ -33,29 +33,29 @@ namespace detail
     }
 
     template <class T_out, class T_in>
-    inline std::enable_if_t<std::is_integral<T_in>::value && std::is_signed<T_in>::value && std::is_unsigned<T_out>::value, bool>
+    inline std::enable_if_t<std::is_integral_v<T_in> && std::is_signed_v<T_in> && std::is_unsigned_v<T_out>, bool>
     is_convertible(T_in value)
     {
         return value >= 0 && is_convertible<T_out>(static_cast<uint64_t>(value));
     }
 
     template <class T_out, class T_in>
-    inline std::enable_if_t<std::is_floating_point<T_in>::value && std::is_integral<T_out>::value, bool>
+    inline std::enable_if_t<std::is_floating_point_v<T_in> && std::is_integral_v<T_out>, bool>
     is_convertible(T_in value)
     {
         return value < static_cast<T_in>(std::numeric_limits<T_out>::max()) && value >= static_cast<T_in>(std::numeric_limits<T_out>::lowest());
     }
 
     template <class T_out, class T_in>
-    inline std::enable_if_t<std::is_floating_point<T_out>::value, bool>
+    inline std::enable_if_t<std::is_floating_point_v<T_out>, bool>
     is_convertible(T_in)
     {
         return true;
     }
 
     template <typename Arch, typename From, typename To>
-    using uses_fast_cast = std::is_same<xsimd::kernel::detail::conversion_type<Arch, From, To>,
-                                        xsimd::kernel::detail::with_fast_conversion>;
+    constexpr bool uses_fast_cast_v = std::is_same_v<xsimd::kernel::detail::conversion_type<Arch, From, To>,
+                                                     xsimd::kernel::detail::with_fast_conversion>;
 }
 
 template <class CP>
@@ -402,9 +402,9 @@ TEST_CASE_TEMPLATE("[xsimd cast tests]", B, CONVERSION_TYPES)
     SUBCASE("use fastcast")
     {
         using A = xsimd::default_arch;
-        static_assert(detail::uses_fast_cast<A, int32_t, float>::value,
+        static_assert(detail::uses_fast_cast_v<A, int32_t, float>,
                       "expected int32 to float conversion to use fast_cast");
-        static_assert(detail::uses_fast_cast<A, float, int32_t>::value,
+        static_assert(detail::uses_fast_cast_v<A, float, int32_t>,
                       "expected float to int32 conversion to use fast_cast");
     }
 }
