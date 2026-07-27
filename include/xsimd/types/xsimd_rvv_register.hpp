@@ -100,7 +100,7 @@ namespace xsimd
         template <class U>                                                                                   \
         static XSIMD_INLINE byte_type as_bytes(U x) noexcept                                                 \
         {                                                                                                    \
-            static_assert(std::is_same<U, type>::value, "inconsistent conversion types");                    \
+            static_assert(std::is_same_v<U, type>, "inconsistent conversion types");                         \
             const auto words = XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, s, m, vmul)(x);                    \
             return XSIMD_RVV_JOINT5(__riscv_vreinterpret_, u, 8, m, vmul)(words);                            \
         }                                                                                                    \
@@ -326,7 +326,7 @@ namespace xsimd
                 operator register_type() const noexcept { return value.get(); }
             };
             template <class T, size_t Width = XSIMD_RVV_BITS>
-            using rvv_reg_t = std::conditional_t<!std::is_void<T>::value, rvv_reg<map_to_sized_type_t<T>, Width>, void>;
+            using rvv_reg_t = std::conditional_t<!std::is_void_v<T>, rvv_reg<map_to_sized_type_t<T>, Width>, void>;
 
             // And some more of the same stuff for bool types, which have
             // similar problems and similar workarounds.
@@ -387,7 +387,7 @@ namespace xsimd
             };
 
             template <class T, size_t Width = XSIMD_RVV_BITS>
-            using rvv_bool_t = std::enable_if_t < !std::is_void<T>::value,
+            using rvv_bool_t = std::enable_if_t < !std::is_void_v<T>,
                   rvv_bool<map_to_sized_type_t<T>, Width<rvv_width_m1 ? rvv_width_m1 : Width>>;
 
             template <size_t S>
@@ -435,12 +435,12 @@ namespace xsimd
             using floating_point_rvv_vector_type = typename rvv_vector_type_impl<8 * sizeof(T)>::floating_point_type;
 
             template <class T>
-            using signed_int_or_floating_point_rvv_vector_type = std::conditional_t<std::is_floating_point<T>::value,
+            using signed_int_or_floating_point_rvv_vector_type = std::conditional_t<std::is_floating_point_v<T>,
                                                                                     floating_point_rvv_vector_type<T>,
                                                                                     signed_int_rvv_vector_type<T>>;
 
             template <class T>
-            using rvv_vector_type = std::conditional_t<std::is_signed<T>::value,
+            using rvv_vector_type = std::conditional_t<std::is_signed_v<T>,
                                                        signed_int_or_floating_point_rvv_vector_type<T>,
                                                        unsigned_int_rvv_vector_type<T>>;
         } // namespace detail

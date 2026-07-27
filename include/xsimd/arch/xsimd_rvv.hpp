@@ -687,7 +687,7 @@ namespace xsimd
         }
 
         // mul_hi
-        template <class A, class T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+        template <class A, class T, typename std::enable_if<std::is_integral_v<T>, int>::type = 0>
         XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<rvv>) noexcept
         {
             return detail_rvv::rvvmulh(lhs, rhs);
@@ -1251,9 +1251,9 @@ namespace xsimd
             XSIMD_RVV_OVERLOAD_INTS(rvvfcvt_f, (__riscv_vfcvt_f), , fvec(vec))
 
             template <class T, class U>
-            using rvv_enable_ftoi_t = std::enable_if_t<(sizeof(T) == sizeof(U) && std::is_floating_point<T>::value && !std::is_floating_point<U>::value), int>;
+            using rvv_enable_ftoi_t = std::enable_if_t<(sizeof(T) == sizeof(U) && std::is_floating_point_v<T> && !std::is_floating_point_v<U>), int>;
             template <class T, class U>
-            using rvv_enable_itof_t = std::enable_if_t<(sizeof(T) == sizeof(U) && !std::is_floating_point<T>::value && std::is_floating_point<U>::value), int>;
+            using rvv_enable_itof_t = std::enable_if_t<(sizeof(T) == sizeof(U) && !std::is_floating_point_v<T> && std::is_floating_point_v<U>), int>;
 
             template <class A, class T, class U, rvv_enable_ftoi_t<T, U> = 0>
             XSIMD_INLINE batch<U, A> fast_cast(batch<T, A> const& arg, batch<U, A> const&, requires_arch<rvv>) noexcept

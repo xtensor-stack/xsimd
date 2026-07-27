@@ -105,42 +105,42 @@ namespace xsimd
 
     // Windows defines catch all templates
     template <class T>
-    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, bool>
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point_v<T>, bool>
     isfinite(T var) noexcept
     {
         return std::isfinite(var);
     }
 
     template <class T>
-    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, bool>
+    XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, bool>
     isfinite(T var) noexcept
     {
         return isfinite(double(var));
     }
 
     template <class T>
-    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, bool>
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point_v<T>, bool>
     isinf(T var) noexcept
     {
         return std::isinf(var);
     }
 
     template <class T>
-    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, bool>
+    XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, bool>
     isinf(T var) noexcept
     {
         return isinf(double(var));
     }
 
     template <class T>
-    XSIMD_INLINE std::enable_if_t<std::is_floating_point<T>::value, bool>
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point_v<T>, bool>
     isnan(T var) noexcept
     {
         return std::isnan(var);
     }
 
     template <class T>
-    XSIMD_INLINE std::enable_if_t<std::is_integral<T>::value, bool>
+    XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, bool>
     isnan(T var) noexcept
     {
         return isnan(double(var));
@@ -606,7 +606,7 @@ namespace xsimd
         return __builtin_exp10(x);
     }
 #elif defined(_WIN32)
-    template <class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+    template <class T, class = std::enable_if_t<std::is_scalar_v<T>>>
     XSIMD_INLINE T exp10(const T& x) noexcept
     {
         // Very inefficient but other implementations give incorrect results

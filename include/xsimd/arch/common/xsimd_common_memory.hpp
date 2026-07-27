@@ -379,7 +379,7 @@ namespace xsimd
                                                                          std::is_same_v<T_in, T_out>
                                                                              && std::is_integral_v<T_out>
                                                                              && !std::is_void_v<sized_fp_t<sizeof(T_out)>>
-                                                                             && types::has_simd_register<sized_fp_t<sizeof(T_out)>, A>::value>;
+                                                                             && types::has_simd_register_v<sized_fp_t<sizeof(T_out)>, A>>;
 
             // Scalar-buffer fallback: materialize masked-off lanes as zero, then load.
             template <class A, class T_in, class T_out, bool... Values, class alignment>

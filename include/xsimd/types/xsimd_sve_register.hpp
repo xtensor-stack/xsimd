@@ -132,19 +132,19 @@ namespace xsimd
             struct sve_vector_impl;
 
             template <typename T>
-            struct sve_vector_impl<T, std::enable_if_t<std::is_floating_point<T>::value>>
+            struct sve_vector_impl<T, std::enable_if_t<std::is_floating_point_v<T>>>
             {
                 using type = floating_point_sve_vector_type<T>;
             };
 
             template <typename T>
-            struct sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_signed<T>::value>>
+            struct sve_vector_impl<T, std::enable_if_t<!std::is_floating_point_v<T> && std::is_signed_v<T>>>
             {
                 using type = signed_int_sve_vector_type<T>;
             };
 
             template <typename T>
-            struct sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_unsigned<T>::value>>
+            struct sve_vector_impl<T, std::enable_if_t<!std::is_floating_point_v<T> && std::is_unsigned_v<T>>>
             {
                 using type = unsigned_int_sve_vector_type<T>;
             };
@@ -153,19 +153,19 @@ namespace xsimd
             struct sizeless_sve_vector_impl;
 
             template <typename T>
-            struct sizeless_sve_vector_impl<T, std::enable_if_t<std::is_floating_point<T>::value>>
+            struct sizeless_sve_vector_impl<T, std::enable_if_t<std::is_floating_point_v<T>>>
             {
                 using type = sizeless_floating_point_sve_vector_type<T>;
             };
 
             template <typename T>
-            struct sizeless_sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_signed<T>::value>>
+            struct sizeless_sve_vector_impl<T, std::enable_if_t<!std::is_floating_point_v<T> && std::is_signed_v<T>>>
             {
                 using type = sizeless_signed_int_sve_vector_type<T>;
             };
 
             template <typename T>
-            struct sizeless_sve_vector_impl<T, std::enable_if_t<!std::is_floating_point<T>::value && std::is_unsigned<T>::value>>
+            struct sizeless_sve_vector_impl<T, std::enable_if_t<!std::is_floating_point_v<T> && std::is_unsigned_v<T>>>
             {
                 using type = sizeless_unsigned_int_sve_vector_type<T>;
             };

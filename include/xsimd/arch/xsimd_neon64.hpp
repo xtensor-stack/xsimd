@@ -35,7 +35,7 @@ namespace xsimd
         {
 
             template <class T>
-            using enable_neon64_type_t = std::enable_if_t<std::is_integral<T>::value || std::is_same<T, float>::value || std::is_same<T, double>::value,
+            using enable_neon64_type_t = std::enable_if_t<std::is_integral_v<T> || std::is_same_v<T, float> || std::is_same_v<T, double>,
                                                           int>;
         }
 
@@ -201,7 +201,7 @@ namespace xsimd
                                  : "memory");
         }
 
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>, void>>
         XSIMD_INLINE void store_stream(T* mem, batch<T, A> const& val, requires_arch<neon64>) noexcept
         {
             uint64x2_t u64;
@@ -242,7 +242,7 @@ namespace xsimd
             return vcombine_f64(lo, hi);
         }
 
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>, void>>
         XSIMD_INLINE batch<T, A> load_stream(T const* mem, convert<T>, requires_arch<neon64>) noexcept
         {
             uint64x1_t lo, hi;
@@ -897,25 +897,25 @@ namespace xsimd
             // TODO(c++17): Make a single function with if constexpr  switch
             // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
             // the vector types are all aliases of the same type.
-            template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint8_t>, int> = 0>
             XSIMD_INLINE uint8_t x_vaddvq(uint8x16_t a) noexcept { return vaddvq_u8(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int8_t>, int> = 0>
             XSIMD_INLINE int8_t x_vaddvq(int8x16_t a) noexcept { return vaddvq_s8(a); }
-            template <class T, std::enable_if_t<std::is_same<T, uint16_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint16_t>, int> = 0>
             XSIMD_INLINE uint16_t x_vaddvq(uint16x8_t a) noexcept { return vaddvq_u16(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int16_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int16_t>, int> = 0>
             XSIMD_INLINE int16_t x_vaddvq(int16x8_t a) noexcept { return vaddvq_s16(a); }
-            template <class T, std::enable_if_t<std::is_same<T, uint32_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint32_t>, int> = 0>
             XSIMD_INLINE uint32_t x_vaddvq(uint32x4_t a) noexcept { return vaddvq_u32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int32_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int32_t>, int> = 0>
             XSIMD_INLINE int32_t x_vaddvq(int32x4_t a) noexcept { return vaddvq_s32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, uint64_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint64_t>, int> = 0>
             XSIMD_INLINE uint64_t x_vaddvq(uint64x2_t a) noexcept { return vaddvq_u64(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int64_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int64_t>, int> = 0>
             XSIMD_INLINE int64_t x_vaddvq(int64x2_t a) noexcept { return vaddvq_s64(a); }
-            template <class T, std::enable_if_t<std::is_same<T, float>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, float>, int> = 0>
             XSIMD_INLINE float x_vaddvq(float32x4_t a) noexcept { return vaddvq_f32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, double>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE double x_vaddvq(float64x2_t a) noexcept { return vaddvq_f64(a); }
         }
 
@@ -935,29 +935,29 @@ namespace xsimd
             // TODO(c++17): Make a single function with if constexpr  switch
             // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
             // the vector types are all aliases of the same type.
-            template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint8_t>, int> = 0>
             XSIMD_INLINE uint8_t x_vmaxvq(uint8x16_t a) noexcept { return vmaxvq_u8(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int8_t>, int> = 0>
             XSIMD_INLINE int8_t x_vmaxvq(int8x16_t a) noexcept { return vmaxvq_s8(a); }
-            template <class T, std::enable_if_t<std::is_same<T, uint16_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint16_t>, int> = 0>
             XSIMD_INLINE uint16_t x_vmaxvq(uint16x8_t a) noexcept { return vmaxvq_u16(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int16_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int16_t>, int> = 0>
             XSIMD_INLINE int16_t x_vmaxvq(int16x8_t a) noexcept { return vmaxvq_s16(a); }
-            template <class T, std::enable_if_t<std::is_same<T, uint32_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint32_t>, int> = 0>
             XSIMD_INLINE uint32_t x_vmaxvq(uint32x4_t a) noexcept { return vmaxvq_u32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int32_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int32_t>, int> = 0>
             XSIMD_INLINE int32_t x_vmaxvq(int32x4_t a) noexcept { return vmaxvq_s32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, float>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, float>, int> = 0>
             XSIMD_INLINE float x_vmaxvq(float32x4_t a) noexcept { return vmaxvq_f32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, double>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE double x_vmaxvq(float64x2_t a) noexcept { return vmaxvq_f64(a); }
 
-            template <class T, std::enable_if_t<std::is_same<T, uint64_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint64_t>, int> = 0>
             XSIMD_INLINE uint64_t x_vmaxvq(uint64x2_t a) noexcept
             {
                 return std::max(vdupd_laneq_u64(a, 0), vdupd_laneq_u64(a, 1));
             }
-            template <class T, std::enable_if_t<std::is_same<T, int64_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int64_t>, int> = 0>
             XSIMD_INLINE int64_t x_vmaxvq(int64x2_t a) noexcept
             {
                 return std::max(vdupd_laneq_s64(a, 0), vdupd_laneq_s64(a, 1));
@@ -980,29 +980,29 @@ namespace xsimd
             // TODO(c++17): Make a single function with if constexpr  switch
             // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
             // the vector types are all aliases of the same type.
-            template <class T, std::enable_if_t<std::is_same<T, uint8_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint8_t>, int> = 0>
             XSIMD_INLINE uint8_t x_vminvq(uint8x16_t a) noexcept { return vminvq_u8(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int8_t>, int> = 0>
             XSIMD_INLINE int8_t x_vminvq(int8x16_t a) noexcept { return vminvq_s8(a); }
-            template <class T, std::enable_if_t<std::is_same<T, uint16_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint16_t>, int> = 0>
             XSIMD_INLINE uint16_t x_vminvq(uint16x8_t a) noexcept { return vminvq_u16(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int16_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int16_t>, int> = 0>
             XSIMD_INLINE int16_t x_vminvq(int16x8_t a) noexcept { return vminvq_s16(a); }
-            template <class T, std::enable_if_t<std::is_same<T, uint32_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint32_t>, int> = 0>
             XSIMD_INLINE uint32_t x_vminvq(uint32x4_t a) noexcept { return vminvq_u32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, int32_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int32_t>, int> = 0>
             XSIMD_INLINE int32_t x_vminvq(int32x4_t a) noexcept { return vminvq_s32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, float>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, float>, int> = 0>
             XSIMD_INLINE float x_vminvq(float32x4_t a) noexcept { return vminvq_f32(a); }
-            template <class T, std::enable_if_t<std::is_same<T, double>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE double x_vminvq(float64x2_t a) noexcept { return vminvq_f64(a); }
 
-            template <class T, std::enable_if_t<std::is_same<T, uint64_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, uint64_t>, int> = 0>
             XSIMD_INLINE uint64_t x_vminvq(uint64x2_t a) noexcept
             {
                 return std::min(vdupd_laneq_u64(a, 0), vdupd_laneq_u64(a, 1));
             }
-            template <class T, std::enable_if_t<std::is_same<T, int64_t>::value, int> = 0>
+            template <class T, std::enable_if_t<std::is_same_v<T, int64_t>, int> = 0>
             XSIMD_INLINE int64_t x_vminvq(int64x2_t a) noexcept
             {
                 return std::min(vdupd_laneq_s64(a, 0), vdupd_laneq_s64(a, 1));
@@ -1260,49 +1260,48 @@ namespace xsimd
             // TODO(c++17): Make a single function with if constexpr  switch
             // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
             // the vector types are all aliases of the same type.
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, uint8_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, uint8_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(uint8x16_t a) noexcept { return vreinterpretq_f64_u8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, int8_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, int8_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(int8x16_t a) noexcept { return vreinterpretq_f64_s8(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, uint16_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, uint16_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(uint16x8_t a) noexcept { return vreinterpretq_f64_u16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, int16_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, int16_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(int16x8_t a) noexcept { return vreinterpretq_f64_s16(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, uint32_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, uint32_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(uint32x4_t a) noexcept { return vreinterpretq_f64_u32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, int32_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, int32_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(int32x4_t a) noexcept { return vreinterpretq_f64_s32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, uint64_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, uint64_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(uint64x2_t a) noexcept { return vreinterpretq_f64_u64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, int64_t>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, int64_t>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(int64x2_t a) noexcept { return vreinterpretq_f64_s64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, float>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, float>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(float32x4_t a) noexcept { return vreinterpretq_f64_f32(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, double>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, double> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE float64x2_t x_vreinterpretq(float64x2_t a) noexcept { return a; }
 
             // TODO(c++17): Make a single function with if constexpr  switch
             // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
             // the vector types are all aliases of the same type.
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint8_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, uint8_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE uint8x16_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_u8_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int8_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, int8_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE int8x16_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_s8_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint16_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, uint16_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE uint16x8_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_u16_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int16_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, int16_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE int16x8_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_s16_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint32_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, uint32_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE uint32x4_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_u32_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int32_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, int32_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE int32x4_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_s32_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, uint64_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, uint64_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE uint64x2_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_u64_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, int64_t>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, int64_t> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE int64x2_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_s64_f64(a); }
-            template <class R, class T, std::enable_if_t<std::is_same<R, float>::value && std::is_same<T, double>::value, int> = 0>
+            template <class R, class T, std::enable_if_t<std::is_same_v<R, float> && std::is_same_v<T, double>, int> = 0>
             XSIMD_INLINE float32x4_t x_vreinterpretq(float64x2_t a) noexcept { return vreinterpretq_f32_f64(a); }
-
         }
 
         template <class A, class T>

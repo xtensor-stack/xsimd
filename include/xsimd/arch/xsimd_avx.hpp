@@ -1100,16 +1100,16 @@ namespace xsimd
             // True when batch_bool<T, A> shares the data register (__m256/__m256d) rather
             // than an EVEX k-register; the _mm256_cast*_si256 path below needs the former.
             template <class T, class A>
-            using uses_vector_mask = std::is_same<typename batch_bool<T, A>::register_type,
-                                                  typename batch<T, A>::register_type>;
+            inline constexpr bool uses_vector_mask_v = std::is_same_v<typename batch_bool<T, A>::register_type,
+                                                                      typename batch<T, A>::register_type>;
 
-            template <class A, class = std::enable_if_t<uses_vector_mask<float, A>::value>>
+            template <class A, class = std::enable_if_t<uses_vector_mask_v<float, A>>>
             XSIMD_INLINE void maskstore(float* mem, batch_bool<float, A> const& mask, batch<float, A> const& src) noexcept
             {
                 _mm256_maskstore_ps(mem, _mm256_castps_si256(mask), src);
             }
 
-            template <class A, class = std::enable_if_t<uses_vector_mask<double, A>::value>>
+            template <class A, class = std::enable_if_t<uses_vector_mask_v<double, A>>>
             XSIMD_INLINE void maskstore(double* mem, batch_bool<double, A> const& mask, batch<double, A> const& src) noexcept
             {
                 _mm256_maskstore_pd(mem, _mm256_castpd_si256(mask), src);
@@ -1117,7 +1117,7 @@ namespace xsimd
         }
 
         template <class A, class T, bool... Values, class Mode,
-                  typename = std::enable_if_t<std::is_floating_point_v<T> && detail::uses_vector_mask<T, A>::value>>
+                  typename = std::enable_if_t<std::is_floating_point_v<T> && detail::uses_vector_mask_v<T, A>>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx>) noexcept
         {
             constexpr size_t half_size = batch<T, A>::size / 2;
