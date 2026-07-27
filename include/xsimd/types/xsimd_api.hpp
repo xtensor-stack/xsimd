@@ -371,7 +371,7 @@ namespace xsimd
         template <class Arch, class Batch, class BatchConstant>
         struct has_bitwise_lshift_batch_const<
             Arch, Batch, BatchConstant,
-            void_t<decltype(kernel::bitwise_lshift<Arch>(
+            std::void_t<decltype(kernel::bitwise_lshift<Arch>(
                 std::declval<Batch>(), std::declval<BatchConstant>(), Arch {}))>>
             : std::true_type
         {
