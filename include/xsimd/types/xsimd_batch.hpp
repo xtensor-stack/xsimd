@@ -652,7 +652,7 @@ namespace xsimd
     template <typename T, bool i3ec, typename A>
     struct batch<xtl::xcomplex<T, T, i3ec>, A>
     {
-        static_assert(std::is_same<T, void>::value,
+        static_assert(std::is_same_v<T, void>,
                       "Please use batch<std::complex<T>, A> initialized from xtl::xcomplex instead");
     };
 #endif
@@ -1793,7 +1793,7 @@ namespace xsimd
             using type = void;
         };
 
-        template <typename T, class Arch, bool BatchExists = xsimd::has_simd_register<T, Arch>::value>
+        template <typename T, class Arch, bool BatchExists = xsimd::has_simd_register_v<T, Arch>>
         struct batch_trait;
 
         template <typename T, class Arch>

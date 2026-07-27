@@ -60,7 +60,7 @@ namespace xsimd
 
                 // enable for signed integers or floating points
                 template <class T>
-                using enable_signed_int_or_floating_point_t = std::enable_if_t<std::is_signed<T>::value, int>;
+                using enable_signed_int_or_floating_point_t = std::enable_if_t<std::is_signed_v<T>, int>;
 
                 // `sizeless` is the matching sizeless SVE type. xsimd stores SVE
                 // vectors as fixed-size attributed types (arm_sve_vector_bits),
@@ -96,7 +96,7 @@ namespace xsimd
         // partial ordering (else ambiguous with requires_arch<A>).
         template <class A, class T, bool... Values, class Mode,
                   detail::enable_arithmetic_t<T> = 0,
-                  std::enable_if_t<!(std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)), int> = 0>
+                  std::enable_if_t<!(std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)), int> = 0>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode m, requires_arch<sve>) noexcept
         {
             return load_masked<A>(mem, mask.as_batch_bool(), convert<T> {}, m, sve {});
@@ -147,7 +147,7 @@ namespace xsimd
         // 32/64-bit integers to defer to the common dispatchers.
         template <class A, class T, bool... Values, class Mode,
                   detail::enable_arithmetic_t<T> = 0,
-                  std::enable_if_t<!(std::is_integral<T>::value && (sizeof(T) == 4 || sizeof(T) == 8)), int> = 0>
+                  std::enable_if_t<!(std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)), int> = 0>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode m, requires_arch<sve>) noexcept
         {
             store_masked<A>(mem, src, mask.as_batch_bool(), m, sve {});
@@ -313,7 +313,7 @@ namespace xsimd
         }
 
         // mul_hi
-        template <class A, class T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+        template <class A, class T, typename std::enable_if<std::is_integral_v<T>, int>::type = 0>
         XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
             return svmulh_x(detail_sve::ptrue<T>(), lhs, rhs);

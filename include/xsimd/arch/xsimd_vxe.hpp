@@ -60,7 +60,7 @@ namespace xsimd
         template <>
         struct builtin_scalar<char>
         {
-            using type = typename std::conditional<std::is_signed<char>::value, signed char, unsigned char>::type;
+            using type = typename std::conditional<std::is_signed_v<char>, signed char, unsigned char>::type;
         };
 
         template <typename T>
@@ -83,14 +83,14 @@ namespace xsimd
         // load
 
         // load_unaligned
-        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<vxe>) noexcept
         {
             return (typename batch<T, A>::register_type)vec_xl(0, (builtin_t<T>*)mem);
         }
 
         // load_aligned
-        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch<T, A> load_aligned(T const* mem, convert<T>, requires_arch<vxe>) noexcept
         {
             return load_unaligned<A>(mem, kernel::convert<T> {}, vxe {});
@@ -176,20 +176,20 @@ namespace xsimd
             return typename batch<T, A>::register_type { values... };
         }
 
-        template <class A, class T, class... Values, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, class... Values, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<vxe>, Values... values) noexcept
         {
             static_assert(sizeof...(Values) == batch_bool<T, A>::size, "consistent init");
             return typename batch_bool<T, A>::register_type { static_cast<decltype(std::declval<typename batch_bool<T, A>::register_type>()[0])>(values ? -1LL : 0LL)... };
         }
         // first
-        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE T first(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return self.data[0];
         }
         // insert
-        template <class A, class T, size_t I, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, size_t I, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch<T, A> insert(batch<T, A> const& self, T val, index<I>, requires_arch<vxe>) noexcept
         {
             // vec_insert on float is broken with clang
@@ -242,14 +242,14 @@ namespace xsimd
         }
 
         // broadcast
-        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<vxe>) noexcept
         {
             return vec_splats(static_cast<builtin_t<T>>(val));
         }
 
         // abs
-        template <class A, class T, class = typename std::enable_if<std::is_signed<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_signed_v<T>, void>::type>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return vec_abs(self.data);
@@ -316,7 +316,7 @@ namespace xsimd
         }
 
         // div
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> div(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vxe>) noexcept
         {
             return self.data / other.data;
@@ -350,7 +350,7 @@ namespace xsimd
             return ((v1ti)self.data)[0] != 0;
         }
         // avgr
-        template <class A, class T, class = std::enable_if_t<std::is_integral<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vxe>) noexcept
         {
             return vec_avg(self.data, other.data);
@@ -369,20 +369,20 @@ namespace xsimd
             return vec_min(self.data, other.data);
         }
         // fma
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<vxe>) noexcept
         {
             return vec_madd(x.data, y.data, z.data);
         }
         // fms
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> fms(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<vxe>) noexcept
         {
             return vec_msub(x.data, y.data, z.data);
         }
 
         // mul
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vxe>) noexcept
         {
             return self.data * other.data;
@@ -438,7 +438,7 @@ namespace xsimd
             v2di sum = (v2di)self.data + shifted;
             return (int64_t)sum[0];
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral_v<T>, void>::type>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             if constexpr (sizeof(T) == 4)
@@ -479,7 +479,7 @@ namespace xsimd
         {
             return vec_sel(false_br.data, true_br.data, cond.data);
         }
-        template <class A, class T, bool... Values, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, bool... Values, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<vxe>) noexcept
         {
             return select(batch_bool<T, A> { Values... }, true_br, false_br, vxe {});
@@ -516,14 +516,14 @@ namespace xsimd
         }
 
         // sqrt
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> sqrt(batch<T, A> const& val, requires_arch<vxe>) noexcept
         {
             return vec_sqrt(val.data);
         }
 
         // rsqrt
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> rsqrt(batch<T, A> const& val, requires_arch<vxe>) noexcept
         {
             return batch<T, A>(T(1)) / sqrt(val, vxe {});
@@ -722,47 +722,47 @@ namespace xsimd
             return vec_perm(self.data, self.data, perm);
         }
         // zip_hi
-        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch<T, A> zip_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vxe>) noexcept
         {
             return vec_mergel(self.data, other.data);
         }
 
         // zip_lo
-        template <class A, class T, class = std::enable_if_t<std::is_scalar<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_scalar_v<T>>>
         XSIMD_INLINE batch<T, A> zip_lo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<vxe>) noexcept
         {
             return vec_mergeh(self.data, other.data);
         }
         // bitwise_rshift
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral_v<T>, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<vxe>) noexcept
         {
             return self.data >> other;
         }
         // bitwise_lshift
-        template <class A, class T, class = typename std::enable_if<std::is_integral<T>::value, void>::type>
+        template <class A, class T, class = typename std::enable_if<std::is_integral_v<T>, void>::type>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<vxe>) noexcept
         {
             return self.data << other;
         }
 
         // isnan
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch_bool<T, A> isnan(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return ~vec_cmpeq(self.data, self.data);
         }
 
         // ceil
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> ceil(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return vec_ceil(self.data);
         }
 
         // floor
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> floor(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return vec_floor(self.data);
@@ -770,14 +770,14 @@ namespace xsimd
         // round
         // vec_round rounds ties to even instead of zero
 #if defined __has_builtin && __has_builtin(__builtin_s390_vfi)
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> round(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return __builtin_s390_vfi(self.data, 4, 1);
         }
 #endif
         // trunc
-        template <class A, class T, class = std::enable_if_t<std::is_floating_point<T>::value>>
+        template <class A, class T, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> trunc(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return vec_trunc(self.data);

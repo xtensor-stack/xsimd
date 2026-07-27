@@ -42,6 +42,9 @@ namespace xsimd
     {
         template <typename T, class A>
         struct has_simd_register;
+
+        template <typename T, class A>
+        inline constexpr bool has_simd_register_v = has_simd_register<T, A>::value;
     }
 
     namespace kernel

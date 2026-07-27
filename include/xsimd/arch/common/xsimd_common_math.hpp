@@ -2117,7 +2117,7 @@ namespace xsimd
             return { reduce_add(self.real()), reduce_add(self.imag()) };
         }
 
-        template <class A, class T, class /*=std::enable_if_t<std::is_scalar<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_scalar_v<T>>*/>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) T buffer[batch<T, A>::size];
@@ -2189,7 +2189,7 @@ namespace xsimd
             return res;
         }
 
-        template <class A, class T, class /*=std::enable_if_t<std::is_scalar<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_scalar_v<T>>*/>
         XSIMD_INLINE T reduce_mul(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             alignas(A::alignment()) T buffer[batch<T, A>::size];

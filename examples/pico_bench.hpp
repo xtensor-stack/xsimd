@@ -202,14 +202,14 @@ namespace pico_bench
         }
 
         template <typename Fn>
-        std::enable_if_t<std::is_void<decltype(std::declval<Fn>()())>::value, stats_type>
+        std::enable_if_t<std::is_void_v<decltype(std::declval<Fn>()())>, stats_type>
         operator()(Fn fn) const
         {
             return (*this)(BenchWrapper<Fn> { fn });
         }
 
         template <typename Fn>
-        std::enable_if_t<std::is_same<decltype(std::declval<Fn>()()), T>::value, stats_type>
+        std::enable_if_t<std::is_same_v<decltype(std::declval<Fn>()()), T>, stats_type>
         operator()(Fn fn) const
         {
             // Do a single un-timed warm up run

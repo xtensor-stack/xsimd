@@ -17,7 +17,7 @@
 #include "xsimd/xsimd.hpp"
 
 // Could be different than sse2 if we compile for other architecture avx
-static_assert(std::is_same<xsimd::default_arch, xsimd::sse2>::value, "default arch correctly hooked");
+static_assert(std::is_same_v<xsimd::default_arch, xsimd::sse2>, "default arch correctly hooked");
 
 #else
 

@@ -41,7 +41,7 @@ namespace detail_test_mulhilo
     }
 #else
     template <class T>
-    std::enable_if_t<std::is_integral<T>::value && (sizeof(T) == 8), T>
+    std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 8), T>
     mulhi_reference(T x, T y) noexcept
     {
         uint64_t ux = static_cast<uint64_t>(x);
@@ -51,7 +51,7 @@ namespace detail_test_mulhilo
         uint64_t ll = xl * yl, lh = xl * yh, hl = xh * yl, hh = xh * yh;
         uint64_t mid = (ll >> 32) + (lh & 0xffffffffULL) + (hl & 0xffffffffULL);
         uint64_t hi = hh + (lh >> 32) + (hl >> 32) + (mid >> 32);
-        if (std::is_signed<T>::value)
+        if (std::is_signed_v<T>)
         {
             if (x < 0)
                 hi -= uy;

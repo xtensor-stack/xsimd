@@ -29,14 +29,14 @@ namespace xsimd
         using namespace types;
 
         // bitwise_lshift
-        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept
                                  { return x << y; },
                                  self, other);
         }
-        template <size_t shift, class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <size_t shift, class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
@@ -45,14 +45,14 @@ namespace xsimd
         }
 
         // bitwise_rshift
-        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept
                                  { return x >> y; },
                                  self, other);
         }
-        template <size_t shift, class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <size_t shift, class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, requires_arch<common>) noexcept
         {
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
@@ -170,7 +170,7 @@ namespace xsimd
         }
 
         // mul
-        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept -> T
@@ -298,7 +298,7 @@ namespace xsimd
             }
         }
 
-        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             return detail::apply([](T x, T y) noexcept -> T
@@ -307,7 +307,7 @@ namespace xsimd
         }
 
         // mul_hilo
-        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>>
         mul_hilo(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
@@ -365,7 +365,7 @@ namespace xsimd
         {
             return add(self, other); // no saturated arithmetic on floating point numbers
         }
-        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             if (std::is_signed_v<T>)
@@ -393,7 +393,7 @@ namespace xsimd
         {
             return sub(self, other); // no saturated arithmetic on floating point numbers
         }
-        template <class A, class T, class /*=std::enable_if_t<std::is_integral<T>::value>*/>
+        template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             if (std::is_signed_v<T>)
