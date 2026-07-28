@@ -114,6 +114,40 @@ struct batch_complex_test
             CHECK_EQ(ares_real, areal);
             CHECK_EQ(ares_imag, aimag);
         }
+        {
+            // Runtime-masked load / store
+            alignas(arch_type::alignment()) array_type amem;
+            for (size_t i = 0; i < size; ++i)
+                amem[i] = lhs[i];
+
+            uint64_t bits = 0;
+            for (size_t i = 0; i < size; ++i)
+                if (i % 2 == 0)
+                    bits |= uint64_t(1) << i;
+            using mask_type = typename batch_type::batch_bool_type;
+            auto mask = mask_type::from_mask(bits);
+
+            batch_type loaded = batch_type::load(amem.data(), mask, xsimd::aligned_mode());
+            for (size_t i = 0; i < size; ++i)
+            {
+                if (i % 2 == 0)
+                    CHECK_EQ(loaded.get(i), amem[i]);
+                else
+                    CHECK_EQ(loaded.get(i), value_type(0, 0));
+            }
+
+            batch_type to_store = batch_type::load_unaligned(rhs.data());
+            alignas(arch_type::alignment()) array_type adest;
+            std::fill(adest.begin(), adest.end(), value_type(0, 0));
+            to_store.store(adest.data(), mask, xsimd::aligned_mode());
+            for (size_t i = 0; i < size; ++i)
+            {
+                if (i % 2 == 0)
+                    CHECK_EQ(adest[i], rhs[i]);
+                else
+                    CHECK_EQ(adest[i], value_type(0, 0));
+            }
+        }
     }
 #ifdef XSIMD_ENABLE_XTL_COMPLEX
     void test_load_store_xtl() const

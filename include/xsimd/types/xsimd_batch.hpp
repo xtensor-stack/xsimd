@@ -553,6 +553,8 @@ namespace xsimd
         // Compile-time mask overloads
         template <class U, bool... Values, class Mode = aligned_mode>
         [[nodiscard]] static XSIMD_INLINE batch load(U const* mem, batch_bool_constant<value_type, A, Values...> mask, Mode = {}) noexcept;
+        template <class Mode = aligned_mode>
+        [[nodiscard]] static XSIMD_INLINE batch load(value_type const* mem, batch_bool<T, A> mask, Mode = {}) noexcept;
         template <class U>
         [[nodiscard]] static XSIMD_INLINE batch load(U const* mem, stream_mode) noexcept;
         template <class U>
@@ -562,6 +564,8 @@ namespace xsimd
         // Compile-time mask overloads
         template <class U, bool... Values, class Mode = aligned_mode>
         XSIMD_INLINE void store(U* mem, batch_bool_constant<value_type, A, Values...> mask, Mode = {}) const noexcept;
+        template <class Mode = aligned_mode>
+        XSIMD_INLINE void store(value_type* mem, batch_bool<T, A> mask, Mode = {}) const noexcept;
         template <class U>
         XSIMD_INLINE void store(U* mem, stream_mode) const noexcept;
 
@@ -1507,6 +1511,17 @@ namespace xsimd
     }
 
     template <class T, class A>
+    template <class Mode>
+    XSIMD_INLINE void batch<std::complex<T>, A>::store(value_type* mem, batch_bool<T, A> mask, Mode) const noexcept
+    {
+        alignas(A::alignment()) std::array<value_type, size> buffer;
+        store_aligned(buffer.data());
+        for (std::size_t i = 0; i < size; ++i)
+            if (mask.get(i))
+                mem[i] = buffer[i];
+    }
+
+    template <class T, class A>
     XSIMD_INLINE void batch<std::complex<T>, A>::store_aligned(T* real_dst, T* imag_dst) const noexcept
     {
         m_real.store_aligned(real_dst);
@@ -1542,6 +1557,16 @@ namespace xsimd
                                                                            Mode mode) noexcept
     {
         return kernel::load_masked<A>(mem, mask, kernel::convert<value_type> {}, mode, A {});
+    }
+
+    template <class T, class A>
+    template <class Mode>
+    XSIMD_INLINE batch<std::complex<T>, A> batch<std::complex<T>, A>::load(value_type const* mem, batch_bool<T, A> mask, Mode) noexcept
+    {
+        alignas(A::alignment()) std::array<value_type, size> buffer {};
+        for (std::size_t i = 0; i < size; ++i)
+            buffer[i] = mask.get(i) ? mem[i] : value_type(0);
+        return load_aligned(buffer.data());
     }
 
     template <class T, class A>
