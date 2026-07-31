@@ -954,9 +954,15 @@ namespace xsimd
     }
 
     template <class T>
-    XSIMD_INLINE std::enable_if_t<std::is_scalar_v<T>, T> fms(const T& a, const T& b, const T& c) noexcept
+    XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, T> fms(const T& a, const T& b, const T& c) noexcept
     {
         return a * b - c;
+    }
+
+    template <class T>
+    XSIMD_INLINE std::enable_if_t<std::is_floating_point_v<T>, T> fms(const T& a, const T& b, const T& c) noexcept
+    {
+        return std::fma(a, b, -c);
     }
 
     namespace detail
