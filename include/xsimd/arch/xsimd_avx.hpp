@@ -1718,7 +1718,15 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> ssub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            if (std::is_signed_v<T>)
+            // 8 and 16 bit saturating subtraction has dedicated SSE2 instructions,
+            // wider types have none, so only those take the generic sequence below.
+            if constexpr (sizeof(T) <= 2)
+            {
+                return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
+                                          { return ssub(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
+                                          self, other);
+            }
+            else if (std::is_signed_v<T>)
             {
                 auto mask = (other >> (8 * sizeof(T) - 1));
                 auto self_overflow_branch = min(std::numeric_limits<T>::max() + other, self);
