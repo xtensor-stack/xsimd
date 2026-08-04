@@ -51,6 +51,22 @@ namespace xsimd
             // 4-lane dup-hi (repeat 2..3 twice)
             static_assert(is_dup_hi<std::uint32_t, 2, 3, 2, 3>(), "4-lane dup_hi failed");
             static_assert(!is_dup_lo<std::uint32_t, 2, 3, 2, 3>(), "4-lane dup_lo on dup_hi");
+            // ────────────────────────────────────────────────────────────────────────
+            //  narrow and signed index types, as used by the sse2 / avx / avx512bw kernels
+            static_assert(is_identity<std::uint16_t, 0, 1, 2, 3, 4, 5, 6, 7>(), "uint16_t identity failed");
+            static_assert(is_dup_lo<std::uint16_t, 0, 3, 1, 2, 0, 3, 1, 2>(), "uint16_t dup_lo failed");
+            static_assert(is_dup_hi<std::uint16_t, 7, 4, 4, 5, 7, 4, 4, 5>(), "uint16_t dup_hi failed");
+            static_assert(is_identity<std::uint8_t, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15>(), "uint8_t identity failed");
+            static_assert(is_dup_hi<std::int8_t, 4, 7, 5, 5, 4, 7, 5, 5>(), "int8_t dup_hi failed");
+            static_assert(!is_dup_hi<std::int8_t, 4, 7, 5, 5, 4, 7, 5, 4>(), "int8_t dup_hi on non-dup");
+            static_assert(!is_dup_hi<std::int8_t, 4, 7, 5, 8, 4, 7, 5, 8>(), "int8_t dup_hi with out-of-range index");
+            static_assert(is_only_from_lo<std::int64_t, 0, 1, 1, 0>(), "int64_t only_from_lo failed");
+            static_assert(is_only_from_hi<std::int64_t, 2, 3, 3, 2>(), "int64_t only_from_hi failed");
+            //  degenerate pack sizes
+            static_assert(is_identity<std::uint32_t, 0>(), "1-lane identity failed");
+            static_assert(!is_identity<std::uint32_t, 1>(), "1-lane identity on non-zero");
+            static_assert(is_dup_lo<std::uint32_t, 0, 0>(), "2-lane dup_lo failed");
+            static_assert(is_dup_hi<std::uint32_t, 1, 1>(), "2-lane dup_hi failed");
 
             static_assert(is_cross_lane<double, 0, 1, 0, 1>(), "dup-lo only → crossing");
             static_assert(is_cross_lane<double, 2, 3, 2, 3>(), "dup-hi only → crossing");
