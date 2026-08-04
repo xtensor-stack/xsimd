@@ -812,42 +812,6 @@ namespace xsimd
         }
 
         /*******
-         * add *
-         *******/
-
-        namespace wrap
-        {
-            // TODO(c++17): Make a single function with if constexpr  switch
-            // Templating on the scalar type `T` is required because in some compilers (e.g. MSVC)
-            // the vector types are all aliases of the same type.
-            template <class T, std::enable_if_t<std::is_same_v<T, uint8_t>, int> = 0>
-            XSIMD_INLINE uint8x16_t x_vaddq(uint8x16_t a, uint8x16_t b) noexcept { return vaddq_u8(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, int8_t>, int> = 0>
-            XSIMD_INLINE int8x16_t x_vaddq(int8x16_t a, int8x16_t b) noexcept { return vaddq_s8(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, uint16_t>, int> = 0>
-            XSIMD_INLINE uint16x8_t x_vaddq(uint16x8_t a, uint16x8_t b) noexcept { return vaddq_u16(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, int16_t>, int> = 0>
-            XSIMD_INLINE int16x8_t x_vaddq(int16x8_t a, int16x8_t b) noexcept { return vaddq_s16(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, uint32_t>, int> = 0>
-            XSIMD_INLINE uint32x4_t x_vaddq(uint32x4_t a, uint32x4_t b) noexcept { return vaddq_u32(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, int32_t>, int> = 0>
-            XSIMD_INLINE int32x4_t x_vaddq(int32x4_t a, int32x4_t b) noexcept { return vaddq_s32(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, uint64_t>, int> = 0>
-            XSIMD_INLINE uint64x2_t x_vaddq(uint64x2_t a, uint64x2_t b) noexcept { return vaddq_u64(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, int64_t>, int> = 0>
-            XSIMD_INLINE int64x2_t x_vaddq(int64x2_t a, int64x2_t b) noexcept { return vaddq_s64(a, b); }
-            template <class T, std::enable_if_t<std::is_same_v<T, float>, int> = 0>
-            XSIMD_INLINE float32x4_t x_vaddq(float32x4_t a, float32x4_t b) noexcept { return vaddq_f32(a, b); }
-        }
-
-        template <class A, class T, detail::enable_neon_type_t<T> = 0>
-        XSIMD_INLINE batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            using register_type = typename batch<T, A>::register_type;
-            return wrap::x_vaddq<map_to_sized_type_t<T>>(register_type(lhs), register_type(rhs));
-        }
-
-        /*******
          * avg *
          *******/
 

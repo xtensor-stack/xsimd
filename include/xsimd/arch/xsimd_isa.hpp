@@ -16,6 +16,11 @@
 #include "../config/xsimd_arch.hpp"
 #include "./xsimd_common_fwd.hpp"
 
+// v15 API under migration
+#if XSIMD_WITH_NEON || XSIMD_WITH_SVE
+#include "../v15/arithmetic/arm.hpp"
+#endif
+
 #if XSIMD_WITH_EMULATED
 #include "./xsimd_emulated.hpp"
 #endif
