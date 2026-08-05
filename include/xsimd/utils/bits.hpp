@@ -19,20 +19,13 @@ namespace xsimd
 {
     namespace utils
     {
-        template <typename I>
-        constexpr I make_bit_mask(I bit)
-        {
-            static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
-            assert(bit < static_cast<I>(8 * sizeof(I)));
-            return static_cast<I>(I { 1 } << bit);
-        }
-
         template <typename I, typename... Args>
         constexpr I make_bit_mask(I bit, Args... bits)
         {
-            // TODO(C++17): Use fold expression
             static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
-            return make_bit_mask<I>(bit) | make_bit_mask<I>(static_cast<I>(bits)...);
+            [[maybe_unused]] constexpr I bit_count = static_cast<I>(8 * sizeof(I));
+            assert(((bit < bit_count) && ... && (static_cast<I>(bits) < bit_count)));
+            return static_cast<I>(((I { 1 } << bit) | ... | (I { 1 } << static_cast<I>(bits))));
         }
 
         template <int... Bits, typename I>
