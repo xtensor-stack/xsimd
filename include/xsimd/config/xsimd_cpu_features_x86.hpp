@@ -17,9 +17,7 @@
 #include <cstdint>
 #include <cstring>
 #include <type_traits>
-#if XSIMD_CPP_VERSION >= 201703L
 #include <string_view>
-#endif
 
 #include "../utils/bits.hpp"
 #include "./xsimd_config.hpp"
@@ -249,12 +247,10 @@ namespace xsimd
                 return m_manufacturer_id;
             }
 
-#if XSIMD_CPP_VERSION >= 201703L
             constexpr std::string_view manufacturer_id() const noexcept
             {
                 return { m_manufacturer_id.data(), m_manufacturer_id.size() };
             }
-#endif
 
         private:
             manufacturer_str m_manufacturer_id {};
@@ -835,12 +831,10 @@ namespace xsimd
             return leaf0().manufacturer_id_raw();
         }
 
-#if XSIMD_CPP_VERSION >= 201703L
         inline std::string_view manufacturer_id() const noexcept
         {
             return leaf0().manufacturer_id();
         }
-#endif
 
         /** The manufacturer ID string parsed into known common vendors. */
         inline x86_manufacturer known_manufacturer() const noexcept
