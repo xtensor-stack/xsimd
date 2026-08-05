@@ -372,6 +372,37 @@ namespace xsimd
             detail::store_masked(mem, src, mask.mask(), Mode {});
         }
 
+        namespace detail
+        {
+            template <class A, class T>
+            std::array<batch_bool<T, A>, 2> zip_complex_mask(batch_bool<T, A> mask)
+            {
+                using mask_register_type = typename batch_bool<T, A>::register_type;
+                mask_register_type nmask = mask.to_native();
+
+                constexpr mask_register_type lo_bitmask = xsimd::utils::make_low_mask<mask_register_type>(mask.size / 2);
+                mask_register_type lo_mask = nmask & lo_bitmask;
+                lo_mask |= lo_mask << (mask.size / 2);
+
+                constexpr mask_register_type hi_bitmask = lo_bitmask << (mask.size / 2);
+                mask_register_type hi_mask = nmask & hi_bitmask;
+                hi_mask |= hi_mask >> (mask.size / 2);
+
+                return { batch_bool<T, A>{ lo_mask }, batch_bool<T, A>{ hi_mask } };
+            }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            auto [lo_mask, hi_mask] = detail::zip_complex_mask(mask);
+            batch<T, A> src_lo = zip_lo(src.real(), src.imag());
+            batch<T, A> src_hi = zip_hi(src.real(), src.imag());
+            detail::store_masked(reinterpret_cast<T*>(mem), src_lo, lo_mask, mode);
+            detail::store_masked(reinterpret_cast<T*>(mem) + src.size, src_hi, hi_mask, mode);
+        }
+
         // abs
         template <class A>
         XSIMD_INLINE batch<float, A> abs(batch<float, A> const& self, requires_arch<avx512f>) noexcept
@@ -1631,6 +1662,16 @@ namespace xsimd
                 auto imag = _mm512_permutex2var_pd(hi, imag_idx, lo);
                 return { real, imag };
             }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            auto [lo_mask, hi_mask] = detail::zip_complex_mask(mask);
+            batch<T, A> res_lo = batch<T, A>::load(reinterpret_cast<T const*>(mem), lo_mask, mode);
+            batch<T, A> res_hi = batch<T, A>::load(reinterpret_cast<T const*>(mem) + mask.size, hi_mask, mode);
+            return detail::load_complex(res_lo, res_hi, A{});
         }
 
         // load_unaligned
