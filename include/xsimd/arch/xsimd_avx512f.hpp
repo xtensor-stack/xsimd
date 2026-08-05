@@ -2258,7 +2258,7 @@ namespace xsimd
             using register_type = typename batch_bool<T, A>::register_type;
             register_type r = 0;
             unsigned shift = 0;
-            (void)std::initializer_list<register_type> { (r |= register_type(values ? 1 : 0) << (shift++))... };
+            ((r |= register_type(values ? 1 : 0) << (shift++)), ...);
             return r;
         }
 
@@ -2656,21 +2656,19 @@ namespace xsimd
 
         namespace detail
         {
-            template <class T, class A, T... Idx>
-            struct is_pair_of_contiguous_indices;
-
-            template <class T, class A>
-            struct is_pair_of_contiguous_indices<T, A> : std::true_type
+            template <class T, T... Idx, std::size_t... Is>
+            constexpr bool is_pair_of_contiguous_indices_impl(std::index_sequence<Is...>) noexcept
             {
-            };
+                constexpr T idx[] = { Idx... };
+                return (... && (idx[2 * Is] % 2 == 0 && idx[2 * Is] + 1 == idx[2 * Is + 1]));
+            }
 
-            template <class T, class A, T Idx0, T Idx1, T... Idx>
-            struct is_pair_of_contiguous_indices<T, A, Idx0, Idx1, Idx...> : std::conditional_t<(Idx0 % 2 == 0) && (Idx0 + 1 == Idx1), is_pair_of_contiguous_indices<T, A, Idx...>, std::false_type>
+            template <class T, T... Idx>
+            constexpr bool is_pair_of_contiguous_indices() noexcept
             {
-            };
-
-            template <class T, class A, T... Idx>
-            inline constexpr bool is_pair_of_contiguous_indices_v = is_pair_of_contiguous_indices<T, A, Idx...>::value;
+                static_assert(sizeof...(Idx) % 2 == 0, "indices come in pairs");
+                return is_pair_of_contiguous_indices_impl<T, Idx...>(std::make_index_sequence<sizeof...(Idx) / 2>());
+            }
 
             template <class A, uint16_t I0, uint16_t I1, uint16_t I2, uint16_t I3, uint16_t I4, uint16_t I5, uint16_t I6, uint16_t I7,
                       uint16_t I8, uint16_t I9, uint16_t I10, uint16_t I11, uint16_t I12, uint16_t I13, uint16_t I14, uint16_t I15,
@@ -2703,7 +2701,7 @@ namespace xsimd
         template <class A, uint16_t... Idx>
         XSIMD_INLINE batch<uint16_t, A> swizzle(batch<uint16_t, A> const& self, batch_constant<uint16_t, A, Idx...> mask, requires_arch<avx512f>) noexcept
         {
-            if constexpr (detail::is_pair_of_contiguous_indices_v<uint16_t, A, Idx...>)
+            if constexpr (detail::is_pair_of_contiguous_indices<uint16_t, Idx...>())
             {
                 constexpr typename detail::fold_batch_constant<A, Idx...>::type mask32;
                 return _mm512_permutexvar_epi32(static_cast<batch<uint32_t, A>>(mask32), self);

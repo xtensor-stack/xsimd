@@ -176,7 +176,7 @@ namespace xsimd
             using register_type = typename batch_bool<T, A>::register_type;
             register_type r = 0;
             unsigned shift = 0;
-            (void)std::initializer_list<register_type> { (r |= register_type(values ? 1 : 0) << (shift++))... };
+            ((r |= register_type(values ? 1 : 0) << (shift++)), ...);
             return r;
         }
 

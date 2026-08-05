@@ -16,7 +16,6 @@
 #include "./xsimd_config.hpp"
 #include "./xsimd_cpuid.hpp"
 
-#include <initializer_list>
 #include <type_traits>
 #include <utility>
 
@@ -40,22 +39,6 @@ namespace xsimd
 
     namespace detail
     {
-        // Checks whether T appears in Tys.
-        template <class T, class... Tys>
-        struct contains;
-
-        template <class T>
-        struct contains<T> : std::false_type
-        {
-        };
-
-        template <class T, class Ty, class... Tys>
-        struct contains<T, Ty, Tys...>
-            : std::conditional_t<std::is_same_v<Ty, T>, std::true_type,
-                                 contains<T, Tys...>>
-        {
-        };
-
         template <typename T>
         XSIMD_INLINE constexpr T max_of(T value) noexcept
         {
@@ -100,13 +83,13 @@ namespace xsimd
         template <class Arch>
         static constexpr bool contains() noexcept
         {
-            return detail::contains<Arch, Archs...>::value;
+            return (std::is_same_v<Arch, Archs> || ...);
         }
 
         template <class F>
         static XSIMD_INLINE void for_each(F&& f) noexcept
         {
-            (void)std::initializer_list<bool> { (f(Archs {}), true)... };
+            (f(Archs {}), ...);
         }
 
         static constexpr std::size_t alignment() noexcept

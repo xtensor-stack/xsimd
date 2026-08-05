@@ -191,25 +191,15 @@ namespace xsimd
 
     private:
         // Build a 64-bit mask from Values... (LSB = index 0)
-        template <std::size_t I, bool... Remaining>
-        struct build_bits_helper;
-
-        template <std::size_t I>
-        struct build_bits_helper<I>
+        template <std::size_t... Is>
+        static constexpr uint64_t build_bits(std::index_sequence<Is...>) noexcept
         {
-            static constexpr uint64_t value = 0u;
-        };
-
-        template <std::size_t I, bool Current, bool... Remaining>
-        struct build_bits_helper<I, Current, Remaining...>
-        {
-            static constexpr uint64_t value = (Current ? (uint64_t(1) << I) : 0u)
-                | build_bits_helper<I + 1, Remaining...>::value;
-        };
+            return (uint64_t(0) | ... | (Values ? (uint64_t(1) << Is) : uint64_t(0)));
+        }
 
         static constexpr uint64_t bits() noexcept
         {
-            return build_bits_helper<0, Values...>::value;
+            return build_bits(std::make_index_sequence<sizeof...(Values)>());
         }
         static constexpr uint64_t low_mask(std::size_t k) noexcept
         {
