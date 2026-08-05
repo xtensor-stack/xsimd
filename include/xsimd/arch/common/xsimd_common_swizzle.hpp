@@ -47,24 +47,36 @@ namespace xsimd
                 return ((Vs >= static_cast<T>(sizeof...(Vs) / 2)) && ...);
             }
 
-            // both halves read the same indices, all taken from the Hi ? high : low half
-            template <typename T, bool Hi, T... Vs>
-            XSIMD_INLINE constexpr bool is_dup_from_half() noexcept
+            // 0 <= v[i] < N for every i (negative values wrap to a huge size_t)
+            template <typename T, T... Vs>
+            XSIMD_INLINE constexpr bool is_in_range() noexcept
+            {
+                return ((static_cast<std::size_t>(Vs) < sizeof...(Vs)) && ...);
+            }
+
+            // v[i] == v[i + N / 2] for every i in the low half
+            template <typename T, T... Vs>
+            XSIMD_INLINE constexpr bool has_equal_halves() noexcept
             {
                 constexpr std::size_t half = sizeof...(Vs) / 2;
-                constexpr T lo = Hi ? static_cast<T>(half) : T(0);
-                constexpr T hi = Hi ? static_cast<T>(sizeof...(Vs)) : static_cast<T>(half);
                 constexpr T v[] = { Vs... };
                 for (std::size_t i = 0; i < half; ++i)
-                    if (v[i] < lo || v[i] >= hi || v[i + half] != v[i])
+                    if (v[i] != v[i + half])
                         return false;
                 return true;
             }
 
+            // both halves read the same indices, all taken from the low / high half
             template <typename T, T... Vs>
-            XSIMD_INLINE constexpr bool is_dup_lo() noexcept { return is_dup_from_half<T, false, Vs...>(); }
+            XSIMD_INLINE constexpr bool is_dup_lo() noexcept
+            {
+                return is_in_range<T, Vs...>() && is_only_from_lo<T, Vs...>() && has_equal_halves<T, Vs...>();
+            }
             template <typename T, T... Vs>
-            XSIMD_INLINE constexpr bool is_dup_hi() noexcept { return is_dup_from_half<T, true, Vs...>(); }
+            XSIMD_INLINE constexpr bool is_dup_hi() noexcept
+            {
+                return is_in_range<T, Vs...>() && is_only_from_hi<T, Vs...>() && has_equal_halves<T, Vs...>();
+            }
 
             /**
              * @brief Internal: Check if a swizzle pattern crosses lane boundaries
