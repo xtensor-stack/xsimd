@@ -60,7 +60,7 @@ namespace xsimd
         template <>
         struct builtin_scalar<char>
         {
-            using type = typename std::conditional<std::is_signed_v<char>, signed char, unsigned char>::type;
+            using type = std::conditional_t<std::is_signed_v<char>, signed char, unsigned char>;
         };
 
         template <typename T>
@@ -249,7 +249,7 @@ namespace xsimd
         }
 
         // abs
-        template <class A, class T, class = typename std::enable_if<std::is_signed_v<T>, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_signed_v<T>, void>>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             return vec_abs(self.data);
@@ -438,7 +438,7 @@ namespace xsimd
             v2di sum = (v2di)self.data + shifted;
             return (int64_t)sum[0];
         }
-        template <class A, class T, class = typename std::enable_if<std::is_integral_v<T>, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>, void>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
             if constexpr (sizeof(T) == 4)
@@ -735,13 +735,13 @@ namespace xsimd
             return vec_mergeh(self.data, other.data);
         }
         // bitwise_rshift
-        template <class A, class T, class = typename std::enable_if<std::is_integral_v<T>, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>, void>>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<vxe>) noexcept
         {
             return self.data >> other;
         }
         // bitwise_lshift
-        template <class A, class T, class = typename std::enable_if<std::is_integral_v<T>, void>::type>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>, void>>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<vxe>) noexcept
         {
             return self.data << other;
