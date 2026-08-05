@@ -60,6 +60,7 @@ namespace xsimd
             static_assert(is_dup_hi<std::int8_t, 4, 7, 5, 5, 4, 7, 5, 5>(), "int8_t dup_hi failed");
             static_assert(!is_dup_hi<std::int8_t, 4, 7, 5, 5, 4, 7, 5, 4>(), "int8_t dup_hi on non-dup");
             static_assert(!is_dup_hi<std::int8_t, 4, 7, 5, 8, 4, 7, 5, 8>(), "int8_t dup_hi with out-of-range index");
+            static_assert(!is_dup_lo<std::int8_t, -1, 1, -1, 1>(), "int8_t dup_lo with negative index");
             static_assert(is_only_from_lo<std::int64_t, 0, 1, 1, 0>(), "int64_t only_from_lo failed");
             static_assert(is_only_from_hi<std::int64_t, 2, 3, 3, 2>(), "int64_t only_from_hi failed");
             //  degenerate pack sizes
