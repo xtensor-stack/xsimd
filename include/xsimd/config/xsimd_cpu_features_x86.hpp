@@ -12,15 +12,15 @@
 #ifndef XSIMD_CPU_FEATURES_X86_HPP
 #define XSIMD_CPU_FEATURES_X86_HPP
 
+#include "../utils/bits.hpp"
+#include "./xsimd_config.hpp"
+
 #include <array>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
-#include <type_traits>
 #include <string_view>
-
-#include "../utils/bits.hpp"
-#include "./xsimd_config.hpp"
+#include <type_traits>
 
 #if XSIMD_TARGET_X86 && defined(_MSC_VER)
 #include <intrin.h> // Contains the definition of __cpuidex
@@ -122,75 +122,8 @@ namespace xsimd
 
             constexpr x86_cpuid_regs() noexcept = default;
 
-            // TODO(C++17) compact version for which this was designed.
-            // The else clause contains a very verbose port.
-#if 0
             using x86_reg32_bitset<typename reg_ids::bits>::all_bits_set...;
             using x86_reg32_bitset<typename reg_ids::bits>::get_range...;
-#else
-
-        private:
-            template <int N>
-            struct m_empty_reg
-            {
-                enum class type {};
-            };
-
-            using eax_or_empty = std::conditional_t<std::is_void_v<eax>, typename m_empty_reg<0>::type, eax>;
-            using ebx_or_empty = std::conditional_t<std::is_void_v<ebx>, typename m_empty_reg<1>::type, ebx>;
-            using ecx_or_empty = std::conditional_t<std::is_void_v<ecx>, typename m_empty_reg<2>::type, ecx>;
-            using edx_or_empty = std::conditional_t<std::is_void_v<edx>, typename m_empty_reg<3>::type, edx>;
-
-        public:
-            template <eax_or_empty... bits, typename T = eax, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr bool all_bits_set() const noexcept
-            {
-                return x86_reg32_bitset<eax>::template all_bits_set<bits...>();
-            }
-
-            template <eax_or_empty start, eax_or_empty end, typename T = eax, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr x86_reg32_t get_range() const noexcept
-            {
-                return x86_reg32_bitset<eax>::template get_range<start, end>();
-            }
-
-            template <ebx_or_empty... bits, typename T = ebx, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr bool all_bits_set() const noexcept
-            {
-                return x86_reg32_bitset<ebx>::template all_bits_set<bits...>();
-            }
-
-            template <ebx_or_empty start, ebx_or_empty end, typename T = ebx, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr x86_reg32_t get_range() const noexcept
-            {
-                return x86_reg32_bitset<ebx>::template get_range<start, end>();
-            }
-
-            template <ecx_or_empty... bits, typename T = ecx, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr bool all_bits_set() const noexcept
-            {
-                return x86_reg32_bitset<ecx>::template all_bits_set<bits...>();
-            }
-
-            template <ecx_or_empty start, ecx_or_empty end, typename T = ecx, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr x86_reg32_t get_range() const noexcept
-            {
-                return x86_reg32_bitset<ecx>::template get_range<start, end>();
-            }
-
-            template <edx_or_empty... bits, typename T = edx, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr bool all_bits_set() const noexcept
-            {
-                return x86_reg32_bitset<edx>::template all_bits_set<bits...>();
-            }
-
-            template <edx_or_empty start, edx_or_empty end, typename T = edx, std::enable_if_t<!std::is_void_v<T>, int> = 0>
-            constexpr x86_reg32_t get_range() const noexcept
-            {
-                return x86_reg32_bitset<edx>::template get_range<start, end>();
-            }
-
-#endif // C++17
         };
 
         template <bool extended>
@@ -1044,8 +977,7 @@ namespace xsimd
 
         // Check if it is safe to call CPUID with this value.
         // First we identify if the leaf is in the regular or extended range.
-        // TODO(C++17): if constexpr
-        if (L::leaf < extended_threshold)
+        if constexpr (L::leaf < extended_threshold)
         {
             // Check leaf0 in regular range
             if (L::leaf <= leaf0().highest_leaf())
