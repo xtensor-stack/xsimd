@@ -1081,14 +1081,16 @@ namespace xsimd
 
     namespace detail
     {
-#define XSIMD_HASSINCOS_TRAIT(func)                                                                                                           \
-    template <class S>                                                                                                                        \
-    struct has##func                                                                                                                          \
-    {                                                                                                                                         \
-        template <class T>                                                                                                                    \
-        static XSIMD_INLINE auto get(T* ptr) -> decltype(func(std::declval<T>(), std::declval<T*>(), std::declval<T*>()), std::true_type {}); \
-        static XSIMD_INLINE std::false_type get(...);                                                                                         \
-        static constexpr bool value = decltype(get((S*)nullptr))::value;                                                                      \
+#define XSIMD_HASSINCOS_TRAIT(func)                                                                             \
+    template <class T, class = void>                                                                            \
+    struct has##func : std::false_type                                                                          \
+    {                                                                                                           \
+    };                                                                                                          \
+                                                                                                                \
+    template <class T>                                                                                          \
+    struct has##func<T, std::void_t<decltype(func(std::declval<T>(), std::declval<T*>(), std::declval<T*>()))>> \
+        : std::true_type                                                                                        \
+    {                                                                                                           \
     }
 
 #define XSIMD_HASSINCOS(func, T) has##func<T>::value

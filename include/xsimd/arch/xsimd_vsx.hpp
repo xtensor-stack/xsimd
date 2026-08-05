@@ -57,7 +57,7 @@ namespace xsimd
         template <>
         struct builtin_scalar<char>
         {
-            using type = typename std::conditional<std::is_signed_v<char>, signed char, unsigned char>::type;
+            using type = std::conditional_t<std::is_signed_v<char>, signed char, unsigned char>;
         };
 
         template <typename T>
