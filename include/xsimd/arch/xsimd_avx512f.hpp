@@ -372,6 +372,69 @@ namespace xsimd
             detail::store_masked(mem, src, mask.mask(), Mode {});
         }
 
+        namespace detail
+        {
+            // complex_low
+            template <class A>
+            XSIMD_INLINE batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires_arch<avx512f>) noexcept
+            {
+                __m512i idx = _mm512_setr_epi32(0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23);
+                return _mm512_permutex2var_ps(self.real(), idx, self.imag());
+            }
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<avx512f>) noexcept
+            {
+                __m512i idx = _mm512_setr_epi64(0, 8, 1, 9, 2, 10, 3, 11);
+                return _mm512_permutex2var_pd(self.real(), idx, self.imag());
+            }
+
+            // complex_high
+            template <class A>
+            XSIMD_INLINE batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires_arch<avx512f>) noexcept
+            {
+                __m512i idx = _mm512_setr_epi32(8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31);
+                return _mm512_permutex2var_ps(self.real(), idx, self.imag());
+            }
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<avx512f>) noexcept
+            {
+                __m512i idx = _mm512_setr_epi64(4, 12, 5, 13, 6, 14, 7, 15);
+                return _mm512_permutex2var_pd(self.real(), idx, self.imag());
+            }
+        }
+
+        namespace detail
+        {
+            template <class A, class T>
+            std::array<batch_bool<T, A>, 2> zip_complex_mask(batch_bool<T, A> mask)
+            {
+                using mask_register_type = typename batch_bool<T, A>::register_type;
+                mask_register_type nmask = mask.to_native();
+
+                constexpr mask_register_type lo_bitmask = xsimd::utils::make_low_mask<mask_register_type>(mask.size / 2);
+                mask_register_type lo_mask = nmask & lo_bitmask;
+                lo_mask = detail::interleave(lo_mask);
+
+                constexpr mask_register_type hi_bitmask = lo_bitmask << (mask.size / 2);
+                mask_register_type hi_mask = (nmask & hi_bitmask) >> (mask.size / 2);
+                hi_mask = detail::interleave(hi_mask);
+
+                return { batch_bool<T, A> { lo_mask }, batch_bool<T, A> { hi_mask } };
+            }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            auto [lo_mask, hi_mask] = detail::zip_complex_mask(mask);
+
+            auto src_lo = detail::complex_low(src, A {});
+            auto src_hi = detail::complex_high(src, A {});
+            store_masked(reinterpret_cast<T*>(mem), src_lo, lo_mask, mode, A {});
+            store_masked(reinterpret_cast<T*>(mem) + src.size, src_hi, hi_mask, mode, A {});
+        }
+
         // abs
         template <class A>
         XSIMD_INLINE batch<float, A> abs(batch<float, A> const& self, requires_arch<avx512f>) noexcept
@@ -972,36 +1035,6 @@ namespace xsimd
             }
         }
 
-        namespace detail
-        {
-            // complex_low
-            template <class A>
-            XSIMD_INLINE batch<float, A> complex_low(batch<std::complex<float>, A> const& self, requires_arch<avx512f>) noexcept
-            {
-                __m512i idx = _mm512_setr_epi32(0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23);
-                return _mm512_permutex2var_ps(self.real(), idx, self.imag());
-            }
-            template <class A>
-            XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<avx512f>) noexcept
-            {
-                __m512i idx = _mm512_setr_epi64(0, 8, 1, 9, 2, 10, 3, 11);
-                return _mm512_permutex2var_pd(self.real(), idx, self.imag());
-            }
-
-            // complex_high
-            template <class A>
-            XSIMD_INLINE batch<float, A> complex_high(batch<std::complex<float>, A> const& self, requires_arch<avx512f>) noexcept
-            {
-                __m512i idx = _mm512_setr_epi32(8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31);
-                return _mm512_permutex2var_ps(self.real(), idx, self.imag());
-            }
-            template <class A>
-            XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<avx512f>) noexcept
-            {
-                __m512i idx = _mm512_setr_epi64(4, 12, 5, 13, 6, 14, 7, 15);
-                return _mm512_permutex2var_pd(self.real(), idx, self.imag());
-            }
-        }
         // incr_if
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512f>) noexcept
@@ -1631,6 +1664,16 @@ namespace xsimd
                 auto imag = _mm512_permutex2var_pd(hi, imag_idx, lo);
                 return { real, imag };
             }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            auto [lo_mask, hi_mask] = detail::zip_complex_mask(mask);
+            batch<T, A> res_lo = batch<T, A>::load(reinterpret_cast<T const*>(mem), lo_mask, mode);
+            batch<T, A> res_hi = batch<T, A>::load(reinterpret_cast<T const*>(mem) + mask.size, hi_mask, mode);
+            return detail::load_complex(res_lo, res_hi, A {});
         }
 
         // load_unaligned
