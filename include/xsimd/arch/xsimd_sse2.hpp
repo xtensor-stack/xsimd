@@ -14,6 +14,7 @@
 
 #include "../types/xsimd_batch_constant.hpp"
 #include "../types/xsimd_sse2_register.hpp"
+#include "../v15/kernel_fwd.hpp"
 #include "./utils/shifts.hpp"
 
 #include <complex>
@@ -79,33 +80,6 @@ namespace xsimd
         {
             __m128 sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
             return _mm_andnot_ps(sign_mask, self);
-        }
-
-        // add
-        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
-        XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<sse2>) noexcept
-        {
-            if constexpr (sizeof(T) == 1)
-            {
-                return _mm_add_epi8(self, other);
-            }
-            else if constexpr (sizeof(T) == 2)
-            {
-                return _mm_add_epi16(self, other);
-            }
-            else if constexpr (sizeof(T) == 4)
-            {
-                return _mm_add_epi32(self, other);
-            }
-            else if constexpr (sizeof(T) == 8)
-            {
-                return _mm_add_epi64(self, other);
-            }
-            else
-            {
-                assert(false && "unsupported arch/op combination");
-                return {};
-            }
         }
 
         template <class A>

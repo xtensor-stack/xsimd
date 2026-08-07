@@ -13,6 +13,7 @@
 #ifndef XSIMD_AVX_HPP
 #define XSIMD_AVX_HPP
 
+#include "../arch/utils/x86.hpp"
 #include "../types/xsimd_avx_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
 
@@ -38,66 +39,31 @@ namespace xsimd
 
         namespace detail
         {
-            XSIMD_INLINE __m128i lower_half(__m256i self) noexcept
+            // Half arch cannot be deduced for bools, since on AVX512 archs a batch_bool is a mask.
+            using half_bool_arch = sse4_2;
+
+            template <class T, class A>
+            XSIMD_INLINE batch_bool<T, half_bool_arch> lower_bool_half(batch_bool<T, A> self) noexcept
             {
-                return _mm256_castsi256_si128(self);
+                return lower_half<T, A, half_bool_arch>(batch<T, A>(self.data)).data;
             }
-            XSIMD_INLINE __m128 lower_half(__m256 self) noexcept
+
+            template <class T, class A>
+            XSIMD_INLINE batch_bool<T, half_bool_arch> upper_bool_half(batch_bool<T, A> self) noexcept
             {
-                return _mm256_castps256_ps128(self);
+                return upper_half<T, A, half_bool_arch>(batch<T, A>(self.data)).data;
             }
-            XSIMD_INLINE __m128d lower_half(__m256d self) noexcept
+
+            template <class F, class T, class A>
+            XSIMD_INLINE batch_bool<T, A> apply_on_bool_halves(F&& f, batch_bool<T, A> self) noexcept
             {
-                return _mm256_castpd256_pd128(self);
+                return apply_on_halves_with_arch<half_bool_arch>(std::forward<F>(f), batch<T, A>(self.data)).data;
             }
-            XSIMD_INLINE __m128i upper_half(__m256i self) noexcept
+
+            template <class F, class T, class A>
+            XSIMD_INLINE batch_bool<T, A> apply_on_bool_halves(F&& f, batch_bool<T, A> lhs, batch_bool<T, A> rhs) noexcept
             {
-                return _mm256_extractf128_si256(self, 1);
-            }
-            XSIMD_INLINE __m128 upper_half(__m256 self) noexcept
-            {
-                return _mm256_extractf128_ps(self, 1);
-            }
-            XSIMD_INLINE __m128d upper_half(__m256d self) noexcept
-            {
-                return _mm256_extractf128_pd(self, 1);
-            }
-            XSIMD_INLINE __m256i merge_sse(__m128i low, __m128i high) noexcept
-            {
-                return _mm256_insertf128_si256(_mm256_castsi128_si256(low), high, 1);
-            }
-            XSIMD_INLINE __m256 merge_sse(__m128 low, __m128 high) noexcept
-            {
-                return _mm256_insertf128_ps(_mm256_castps128_ps256(low), high, 1);
-            }
-            XSIMD_INLINE __m256d merge_sse(__m128d low, __m128d high) noexcept
-            {
-                return _mm256_insertf128_pd(_mm256_castpd128_pd256(low), high, 1);
-            }
-            template <class F>
-            XSIMD_INLINE __m256i fwd_to_sse(F f, __m256i self) noexcept
-            {
-                __m128i self_low = lower_half(self), self_high = upper_half(self);
-                __m128i res_low = f(self_low);
-                __m128i res_high = f(self_high);
-                return merge_sse(res_low, res_high);
-            }
-            template <class F>
-            XSIMD_INLINE __m256i fwd_to_sse(F f, __m256i self, __m256i other) noexcept
-            {
-                __m128i self_low = lower_half(self), self_high = upper_half(self),
-                        other_low = lower_half(other), other_high = upper_half(other);
-                __m128i res_low = f(self_low, other_low);
-                __m128i res_high = f(self_high, other_high);
-                return merge_sse(res_low, res_high);
-            }
-            template <class F>
-            XSIMD_INLINE __m256i fwd_to_sse(F f, __m256i self, int32_t other) noexcept
-            {
-                __m128i self_low = lower_half(self), self_high = upper_half(self);
-                __m128i res_low = f(self_low, other);
-                __m128i res_high = f(self_high, other);
-                return merge_sse(res_low, res_high);
+                return apply_on_halves_with_arch<half_bool_arch>(std::forward<F>(f), batch<T, A>(lhs.data), batch<T, A>(rhs.data)).data;
             }
         }
 
@@ -113,25 +79,6 @@ namespace xsimd
         {
             __m256d sign_mask = _mm256_set1_pd(-0.f); // -0.f = 1 << 31
             return _mm256_andnot_pd(sign_mask, self);
-        }
-
-        // add
-        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
-        XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
-        {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return add(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
-        }
-        template <class A>
-        XSIMD_INLINE batch<float, A> add(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept
-        {
-            return _mm256_add_ps(self, other);
-        }
-        template <class A>
-        XSIMD_INLINE batch<double, A> add(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx>) noexcept
-        {
-            return _mm256_add_pd(self, other);
         }
 
         // all
@@ -201,16 +148,16 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_halves([](auto s, auto o) noexcept
+                                           { return bitwise_and(s, o); },
+                                           self, other);
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_bool_halves([](auto s, auto o) noexcept
+                                                { return bitwise_and(s, o); },
+                                                self, other);
         }
 
         // bitwise_andnot
@@ -239,41 +186,41 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_andnot(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_halves([](auto s, auto o) noexcept
+                                           { return bitwise_andnot(s, o); },
+                                           self, other);
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_andnot(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_bool_halves([](auto s, auto o) noexcept
+                                                { return bitwise_andnot(s, o); },
+                                                self, other);
         }
 
         // bitwise_lshift
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& self, int32_t other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, int32_t o) noexcept
-                                      { return bitwise_lshift(batch<T, sse4_2>(s), o, sse4_2 {}); },
-                                      self, other);
+            return detail::apply_on_halves([other](auto s) noexcept
+                                           { return bitwise_lshift(s, other); },
+                                           self);
         }
 
         // bitwise_not
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& self, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s) noexcept
-                                      { return bitwise_not(batch<T, sse4_2>(s), sse4_2 {}); },
-                                      self);
+            return detail::apply_on_halves([](auto s) noexcept
+                                           { return bitwise_not(s); },
+                                           self);
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> bitwise_not(batch_bool<T, A> const& self, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s) noexcept
-                                      { return bitwise_not(batch_bool<T, sse4_2>(s), sse4_2 {}); },
-                                      self);
+            return detail::apply_on_bool_halves([](auto s) noexcept
+                                                { return bitwise_not(s); },
+                                                self);
         }
 
         // bitwise_or
@@ -300,25 +247,25 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_or(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_halves([](auto s, auto o) noexcept
+                                           { return bitwise_or(s, o); },
+                                           self, other);
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_or(batch_bool<T, sse4_2>(s), batch_bool<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_bool_halves([](auto s, auto o) noexcept
+                                                { return bitwise_or(s, o); },
+                                                self, other);
         }
 
         // bitwise_rshift
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, int32_t other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, int32_t o) noexcept
-                                      { return bitwise_rshift(batch<T, sse4_2>(s), o, sse4_2 {}); },
-                                      self, other);
+            return detail::apply_on_halves([other](auto s) noexcept
+                                           { return bitwise_rshift(s, other); },
+                                           self);
         }
 
         // bitwise_xor
@@ -345,16 +292,16 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_xor(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2 {}); },
-                                      self, other);
+            return detail::apply_on_halves([](auto s, auto o) noexcept
+                                           { return bitwise_xor(s, o); },
+                                           self, other);
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
-        XSIMD_INLINE batch<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) noexcept
+        XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& self, batch_bool<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return bitwise_xor(batch_bool<T, sse4_2>(s), batch_bool<T, sse4_2>(o), sse4_2 {}); },
-                                      self, other);
+            return detail::apply_on_bool_halves([](auto s, auto o) noexcept
+                                                { return bitwise_xor(s, o); },
+                                                self, other);
         }
 
         // bitwise_cast
@@ -578,9 +525,10 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return eq(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2 {}); },
-                                      self, other);
+            return detail::apply_on_halves_with_arch<detail::half_bool_arch>([](auto s, auto o) noexcept
+                                                                             { return decltype(s)(eq(s, o).data); },
+                                                                             self, other)
+                .data;
         }
 
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
@@ -1044,8 +992,8 @@ namespace xsimd
         template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point_v<T>>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx>) noexcept
         {
-            constexpr size_t half_size = batch<T, A>::size / 2;
-            using half_batch = make_sized_batch_t<T, half_size>;
+            using half_batch = detail::half_batch_t<T, A>;
+            constexpr auto half_size = half_batch::size;
             using half_arch = typename half_batch::arch_type;
 
             // exactly the lower 128-bit half: one plain load, upper lanes zero
@@ -1072,7 +1020,7 @@ namespace xsimd
                 const half_batch lo = half_batch::load(mem, Mode {});
                 constexpr auto mhi = ::xsimd::detail::upper_half<half_arch>(mask);
                 const half_batch hi = load_masked(mem + half_size, mhi, convert<T> {}, Mode {}, half_arch {});
-                return detail::merge_sse(lo.data, hi.data);
+                return detail::merge_halves<T, A>(lo, hi);
             }
             // exactly the upper 128-bit half: one plain load into the upper lanes
             else if constexpr (mask.suffix() == half_size)
@@ -1121,7 +1069,7 @@ namespace xsimd
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx>) noexcept
         {
             constexpr size_t half_size = batch<T, A>::size / 2;
-            using half_batch = ::xsimd::make_sized_batch_t<T, half_size>;
+            using half_batch = make_sized_batch_t<T, half_size>;
             using half_arch = typename half_batch::arch_type;
 
             // exactly the lower 128-bit half: one plain store
@@ -1255,9 +1203,10 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return lt(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_halves_with_arch<detail::half_bool_arch>([](auto s, auto o) noexcept
+                                                                             { return decltype(s)(lt(s, o).data); },
+                                                                             self, other)
+                .data;
         }
 
         // mask
@@ -1266,8 +1215,8 @@ namespace xsimd
         {
             if constexpr (sizeof(T) == 1 || sizeof(T) == 2)
             {
-                __m128i self_low = detail::lower_half(self), self_high = detail::upper_half(self);
-                return mask(batch_bool<T, sse4_2>(self_low), sse4_2 {}) | (mask(batch_bool<T, sse4_2>(self_high), sse4_2 {}) << (128 / (8 * sizeof(T))));
+                using half_arch = detail::half_bool_arch;
+                return mask(detail::lower_bool_half(self), half_arch {}) | (mask(detail::upper_bool_half(self), half_arch {}) << (128 / (8 * sizeof(T))));
             }
             else if constexpr (sizeof(T) == 4)
             {
@@ -1504,15 +1453,17 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx>) noexcept
         {
-            __m128i cond_low = detail::lower_half(cond), cond_hi = detail::upper_half(cond);
+            using half_arch = detail::half_bool_arch;
 
-            __m128i true_low = detail::lower_half(true_br), true_hi = detail::upper_half(true_br);
-
-            __m128i false_low = detail::lower_half(false_br), false_hi = detail::upper_half(false_br);
-
-            __m128i res_low = select(batch_bool<T, sse4_2>(cond_low), batch<T, sse4_2>(true_low), batch<T, sse4_2>(false_low), sse4_2 {});
-            __m128i res_hi = select(batch_bool<T, sse4_2>(cond_hi), batch<T, sse4_2>(true_hi), batch<T, sse4_2>(false_hi), sse4_2 {});
-            return detail::merge_sse(res_low, res_hi);
+            const auto res_low = select(detail::lower_bool_half(cond),
+                                        detail::lower_half<T, A, half_arch>(true_br),
+                                        detail::lower_half<T, A, half_arch>(false_br),
+                                        half_arch {});
+            const auto res_hi = select(detail::upper_bool_half(cond),
+                                       detail::upper_half<T, A, half_arch>(true_br),
+                                       detail::upper_half<T, A, half_arch>(false_br),
+                                       half_arch {});
+            return detail::merge_halves<T, A, half_arch>(res_low, res_hi);
         }
         template <class A, class T, bool... Values, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> select(batch_bool_constant<T, A, Values...> const&, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<avx>) noexcept
@@ -1794,9 +1745,9 @@ namespace xsimd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx>) noexcept
         {
-            return detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                      { return sub(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
-                                      self, other);
+            return detail::apply_on_halves([](auto s, auto o) noexcept
+                                           { return sub(s, o); },
+                                           self, other);
         }
         template <class A>
         XSIMD_INLINE batch<float, A> sub(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx>) noexcept
@@ -2088,9 +2039,9 @@ namespace xsimd
             transpose(tmp_hi1 + 0, tmp_hi1 + 8, sse4_2 {});
 
             for (int i = 0; i < 8; ++i)
-                matrix_begin[i] = detail::merge_sse(tmp_lo0[i], tmp_hi0[i]);
+                matrix_begin[i] = detail::merge_halves<uint16_t, A, sse4_2>(tmp_lo0[i], tmp_hi0[i]);
             for (int i = 0; i < 8; ++i)
-                matrix_begin[i + 8] = detail::merge_sse(tmp_lo1[i], tmp_hi1[i]);
+                matrix_begin[i + 8] = detail::merge_halves<uint16_t, A, sse4_2>(tmp_lo1[i], tmp_hi1[i]);
         }
         template <class A>
         XSIMD_INLINE void transpose(batch<int16_t, A>* matrix_begin, batch<int16_t, A>* matrix_end, requires_arch<avx>) noexcept
@@ -2124,9 +2075,9 @@ namespace xsimd
             transpose(tmp_hi1 + 0, tmp_hi1 + 16, sse4_2 {});
 
             for (int i = 0; i < 16; ++i)
-                matrix_begin[i] = detail::merge_sse(tmp_lo0[i], tmp_hi0[i]);
+                matrix_begin[i] = detail::merge_halves<uint8_t, A, sse4_2>(tmp_lo0[i], tmp_hi0[i]);
             for (int i = 0; i < 16; ++i)
-                matrix_begin[i + 16] = detail::merge_sse(tmp_lo1[i], tmp_hi1[i]);
+                matrix_begin[i + 16] = detail::merge_halves<uint8_t, A, sse4_2>(tmp_lo1[i], tmp_hi1[i]);
         }
         template <class A>
         XSIMD_INLINE void transpose(batch<int8_t, A>* matrix_begin, batch<int8_t, A>* matrix_end, requires_arch<avx>) noexcept
@@ -2277,9 +2228,10 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE std::array<batch<widen_t<T>, A>, 2> widen(batch<T, A> const& x, requires_arch<avx>) noexcept
         {
-            auto pair_lo = widen(batch<T, sse4_2>(detail::lower_half(x)), sse4_2 {});
-            auto pair_hi = widen(batch<T, sse4_2>(detail::upper_half(x)), sse4_2 {});
-            return { detail::merge_sse(pair_lo[0], pair_lo[1]), detail::merge_sse(pair_hi[0], pair_hi[1]) };
+            auto pair_lo = widen(detail::lower_half<T, A, sse4_2>(x), sse4_2 {});
+            auto pair_hi = widen(detail::upper_half<T, A, sse4_2>(x), sse4_2 {});
+            return { detail::merge_halves<widen_t<T>, A, sse4_2>(pair_lo[0], pair_lo[1]),
+                     detail::merge_halves<widen_t<T>, A, sse4_2>(pair_hi[0], pair_hi[1]) };
         }
         template <class A>
         XSIMD_INLINE std::array<batch<double, A>, 2> widen(batch<float, A> const& x, requires_arch<avx>) noexcept

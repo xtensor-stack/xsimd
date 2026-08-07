@@ -16,6 +16,7 @@
 #include "../config/xsimd_config.hpp"
 #include "../config/xsimd_macros.hpp"
 #include "../memory/xsimd_alignment.hpp"
+#include "../v15/kernel_fwd.hpp"
 #include "./xsimd_batch_fwd.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -1053,7 +1054,7 @@ namespace xsimd
     XSIMD_INLINE batch<T, A>& batch<T, A>::operator+=(batch<T, A> const& other) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return *this = kernel::add<A>(*this, other, A {});
+        return *this = kernel::add(*this, other);
     }
 
     template <class T, class A>
