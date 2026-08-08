@@ -1025,6 +1025,19 @@ namespace xsimd
             return _mm256_maskload_pd(mem, _mm256_castpd_si256(mask));
         }
 
+        //template <class A, class T, class Mode>
+        //XSIMD_INLINE batch<std::complex<T>, A>
+        //load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx>) noexcept
+        //{
+        //    using mask_register_type = typename batch_bool<T, A>::register_type;
+        //    mask_register_type nmask = mask.to_native();
+        //    batch_bool<T, A> lo_mask = zip_lo(batch<T, A>(nmask), batch<T, A>(nmask)).to_native();
+        //    batch_bool<T, A> hi_mask = zip_hi(batch<T, A>(nmask), batch<T, A>(nmask)).to_native();
+        //    batch<T, A> res_lo = batch<T, A>::load(reinterpret_cast<T const*>(mem), lo_mask, mode);
+        //    batch<T, A> res_hi = batch<T, A>::load(reinterpret_cast<T const*>(mem) + mask.size, hi_mask, mode);
+        //    return detail::load_complex(res_lo, res_hi, A{});
+        //}
+
         // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
         template <class A, class T, class Mode>
         XSIMD_INLINE std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
@@ -1200,6 +1213,16 @@ namespace xsimd
                 _mm256_maskstore_pd(reinterpret_cast<double*>(mem), __m256i(mask), bitwise_cast<double>(src));
             }
         }
+
+        //template <class A, class T, class Mode>
+        //XSIMD_INLINE void
+        //store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx>) noexcept
+        //{
+        //    auto src_lo = detail::complex_low(src, A{});
+        //    auto src_hi = detail::complex_high(src, A{});
+        //    store_masked(reinterpret_cast<T*>(mem), src_lo, mask, mode, A{});
+        //    store_masked(reinterpret_cast<T*>(mem) + src.size, src_hi, mask, mode, A{});
+        //}
 
         namespace detail
         {
