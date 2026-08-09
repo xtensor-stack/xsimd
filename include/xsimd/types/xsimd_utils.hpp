@@ -329,24 +329,14 @@ namespace xsimd
 
     namespace detail
     {
-        template <bool...>
-        struct bool_pack;
-
-        template <bool... bs>
-        using all_true = std::is_same<
-            bool_pack<bs..., true>, bool_pack<true, bs...>>;
-
         template <typename T, typename... Args>
-        using is_all_convertible = all_true<std::is_convertible_v<Args, T>...>;
-
-        template <typename T, std::size_t N, typename... Args>
-        using is_array_initializer = std::enable_if<
-            (sizeof...(Args) == N) && is_all_convertible<T, Args...>::value>;
+        inline constexpr bool is_all_convertible_v = std::conjunction_v<std::is_convertible<Args, T>...>;
 
         // Check that a variadic argument pack is a list of N values of type T,
         // as usable for instantiating a value of type std::array<T, N>.
         template <typename T, std::size_t N, typename... Args>
-        using is_array_initializer_t = typename is_array_initializer<T, N, Args...>::type;
+        using is_array_initializer_t = std::enable_if_t<
+            (sizeof...(Args) == N) && is_all_convertible_v<T, Args...>>;
     }
 
     /**************
