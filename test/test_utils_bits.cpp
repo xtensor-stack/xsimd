@@ -17,6 +17,8 @@
 
 TEST_CASE("[utils::make_bit_mask] single bit")
 {
+    CHECK_EQ(xsimd::utils::make_bit_mask(), 0x0);
+    CHECK_EQ(xsimd::utils::make_bit_mask(1), 0b0010);
     CHECK_EQ(xsimd::utils::make_bit_mask<std::uint8_t>(0), 0x01);
     CHECK_EQ(xsimd::utils::make_bit_mask<std::uint8_t>(7), 0x80);
     CHECK_EQ(xsimd::utils::make_bit_mask<std::uint32_t>(0), 0x01u);
@@ -27,6 +29,25 @@ TEST_CASE("[utils::make_bit_mask] multiple bits")
 {
     CHECK_EQ(xsimd::utils::make_bit_mask(0u, 1u), 0b11);
     CHECK_EQ(xsimd::utils::make_bit_mask<std::uint8_t>(0, 2, 4), 0b00010101);
+}
+
+TEST_CASE("[utils::make_bit_mask_from_bools]")
+{
+    CHECK_EQ(xsimd::utils::make_bit_mask_from_bools<std::uint8_t>(), 0x00);
+    CHECK_EQ(xsimd::utils::make_bit_mask_from_bools<std::uint8_t>(true), 0x01);
+    CHECK_EQ(xsimd::utils::make_bit_mask_from_bools<std::uint8_t>(false), 0x00);
+    // First argument goes in the lowest bit
+    CHECK_EQ(xsimd::utils::make_bit_mask_from_bools<std::uint8_t>(true, false, false), 0b001);
+    CHECK_EQ(xsimd::utils::make_bit_mask_from_bools<std::uint8_t>(false, false, true), 0b100);
+    // Full width
+    CHECK_EQ(
+        xsimd::utils::make_bit_mask_from_bools<std::uint8_t>(true, true, true, true, true, true, true, true),
+        0xFF);
+    CHECK_EQ(
+        xsimd::utils::make_bit_mask_from_bools<std::uint16_t>(
+            true, false, true, false, true, false, true, false,
+            true, false, true, false, true, false, true, false),
+        0x5555);
 }
 
 TEST_CASE("[utils::all_bits_set] basic")
