@@ -13,6 +13,7 @@
 #define XSIMD_BATCH_CONSTANT_HPP
 
 #include "../config/xsimd_config.hpp"
+#include "../utils/bits.hpp"
 #include "./xsimd_batch.hpp"
 #include "./xsimd_utils.hpp"
 
@@ -61,7 +62,7 @@ namespace xsimd
 
         static constexpr int mask() noexcept
         {
-            return mask_helper(0, static_cast<int>(Values)...);
+            return static_cast<int>(bits());
         }
 
         static constexpr bool none() noexcept
@@ -128,14 +129,6 @@ namespace xsimd
         }
 
     private:
-        static constexpr int mask_helper(int acc) noexcept { return acc; }
-
-        template <class... Tys>
-        static constexpr int mask_helper(int acc, int mask, Tys... masks) noexcept
-        {
-            return mask_helper(acc | mask, (masks << 1)...);
-        }
-
         struct logical_or
         {
             constexpr bool operator()(bool x, bool y) const { return x || y; }
@@ -191,15 +184,9 @@ namespace xsimd
 
     private:
         // Build a 64-bit mask from Values... (LSB = index 0)
-        template <std::size_t... Is>
-        static constexpr uint64_t build_bits(std::index_sequence<Is...>) noexcept
-        {
-            return (uint64_t(0) | ... | (Values ? (uint64_t(1) << Is) : uint64_t(0)));
-        }
-
         static constexpr uint64_t bits() noexcept
         {
-            return build_bits(std::make_index_sequence<sizeof...(Values)>());
+            return utils::make_bit_mask_from_bools<uint64_t>(Values...);
         }
         static constexpr uint64_t low_mask(std::size_t k) noexcept
         {
