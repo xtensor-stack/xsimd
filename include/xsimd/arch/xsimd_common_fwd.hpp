@@ -60,8 +60,12 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <size_t shift, class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& self, requires_arch<common>) noexcept;
+        template <class A, class T, class Mask>
+        XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, Mask const& mask, requires_arch<common>) noexcept;
         template <class A, class T>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
+        template <class A, class T, class Mask>
+        XSIMD_INLINE batch<T, A> incr_if(batch<T, A> const& self, Mask const& mask, requires_arch<common>) noexcept;
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept;
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
