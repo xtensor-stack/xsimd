@@ -15,6 +15,7 @@
 
 #include "../types/xsimd_avx512vl_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
+#include "../utils/bits.hpp"
 
 #include <type_traits>
 
@@ -173,11 +174,8 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> set(batch_bool<T, A> const&, requires_arch<avx512vl_128>, Values... values) noexcept
         {
             static_assert(sizeof...(Values) == batch_bool<T, A>::size, "consistent init");
-            using register_type = typename batch_bool<T, A>::register_type;
-            register_type r = 0;
-            unsigned shift = 0;
-            (void)std::initializer_list<register_type> { (r |= register_type(values ? 1 : 0) << (shift++))... };
-            return r;
+            using reg_t = typename batch_bool<T, A>::register_type;
+            return ::xsimd::utils::make_bit_mask_from_bools<reg_t>(values...);
         }
 
         // store

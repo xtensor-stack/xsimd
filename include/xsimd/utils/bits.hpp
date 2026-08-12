@@ -19,23 +19,32 @@ namespace xsimd
 {
     namespace utils
     {
-        template <typename I>
-        constexpr I make_bit_mask(I bit)
+        template <typename... Args>
+        constexpr auto make_bit_mask(Args... bits)
         {
-            static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
-            assert(bit < static_cast<I>(8 * sizeof(I)));
-            return static_cast<I>(I { 1 } << bit);
+            using out_type = std::common_type_t<unsigned short, std::make_unsigned_t<Args>...>;
+            [[maybe_unused]] constexpr auto bit_count = static_cast<out_type>(8 * sizeof(out_type));
+            assert((((static_cast<out_type>(bits) < bit_count) && ...)));
+            return static_cast<out_type>((0u | ... | (1u << bits)));
         }
 
-        template <typename I, typename... Args>
-        constexpr I make_bit_mask(I bit, Args... bits)
+        /**
+         * Return a mask whose bit `i` holds the truth value of the `i`th argument.
+         */
+        template <typename I, typename... Bools>
+        constexpr I make_bit_mask_from_bools(Bools... bools) noexcept
         {
-            // TODO(C++17): Use fold expression
             static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
-            return make_bit_mask<I>(bit) | make_bit_mask<I>(static_cast<I>(bits)...);
+            static_assert(sizeof...(Bools) <= 8 * sizeof(I), "Not enough bits to hold all the values");
+            // GCC's -Wsequence-point does not model fold sequencing and rejects `shift++` inside
+            // the fold operand, hence the comma to separate read from increment.
+            I mask = 0;
+            unsigned shift = 0;
+            ((mask |= static_cast<I>(static_cast<I>(bools ? 1 : 0) << shift), ++shift), ...);
+            return mask;
         }
 
-        template <int... Bits, typename I>
+        template <auto... Bits, typename I>
         constexpr bool all_bits_set(I value)
         {
             static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
@@ -43,7 +52,7 @@ namespace xsimd
             return (value & mask) == mask;
         }
 
-        template <int Bit, typename I>
+        template <auto Bit, typename I>
         constexpr I set_bit(I value)
         {
             static_assert(std::is_unsigned_v<I>, "Bit operations must be done on unsigned integers");
