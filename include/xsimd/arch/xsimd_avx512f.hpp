@@ -1544,6 +1544,8 @@ namespace xsimd
             XSIMD_INLINE unsigned char tobitset(unsigned char unpacked[N])
             {
                 static_assert(N == 8 || N == 4 || N == 2, "valid pack size");
+                // The multiply gathers the N selected bits into the top N bits
+                // of the 8 * N bit product, so the shift is 8 * N - N.
                 if constexpr (N == 8)
                 {
                     uint64_t data;
@@ -1561,7 +1563,7 @@ namespace xsimd
 
                     const uint32_t magic = (0x80 + 0x4000 + 0x200000 + 0x10000000);
 
-                    unsigned char res = ((data * magic) >> 24) & 0xFF;
+                    unsigned char res = ((data * magic) >> 28) & 0xFF;
                     return res;
                 }
                 else if constexpr (N == 2)
@@ -1571,7 +1573,7 @@ namespace xsimd
 
                     const uint16_t magic = (0x80 + 0x4000);
 
-                    unsigned char res = ((data * magic) >> 8) & 0xFF;
+                    unsigned char res = ((data * magic) >> 14) & 0xFF;
                     return res;
                 }
             }
