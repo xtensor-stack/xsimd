@@ -1206,6 +1206,14 @@ namespace xsimd
             return svscale_x(detail_sve::ptrue<T>(), x, exp);
         }
 
+        // popcount
+        template <class A, class T, detail::enable_integral_t<T> = 0>
+        XSIMD_INLINE batch<T, A> popcount(const batch<T, A>& self, requires_arch<sve>) noexcept
+        {
+            using U = as_unsigned_integer_t<T>;
+            return bitwise_cast<T>(batch<U, A>(svcnt_x(detail_sve::ptrue<T>(), self)));
+        }
+
     } // namespace kernel
 } // namespace xsimd
 

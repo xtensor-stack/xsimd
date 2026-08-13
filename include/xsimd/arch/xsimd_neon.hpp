@@ -3680,6 +3680,26 @@ namespace xsimd
         WRAP_MASK_OP(countr_one)
 
 #undef WRAP_MASK_OP
+
+        /************
+         * popcount *
+         ************/
+
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<neon>) noexcept
+        {
+            // CNT counts bytes; wider elements fold them with pairwise widening
+            // adds, after Wojciech Muła, http://0x80.pl/articles/sse-popcount.html
+            uint8x16_t counts = vcntq_u8(bitwise_cast<uint8_t>(self).data);
+            if constexpr (sizeof(T) == 1)
+                return bitwise_cast<T>(batch<uint8_t, A>(counts));
+            else if constexpr (sizeof(T) == 2)
+                return bitwise_cast<T>(batch<uint16_t, A>(vpaddlq_u8(counts)));
+            else if constexpr (sizeof(T) == 4)
+                return bitwise_cast<T>(batch<uint32_t, A>(vpaddlq_u16(vpaddlq_u8(counts))));
+            else
+                return bitwise_cast<T>(batch<uint64_t, A>(vpaddlq_u32(vpaddlq_u16(vpaddlq_u8(counts)))));
+        }
     }
 
 }
