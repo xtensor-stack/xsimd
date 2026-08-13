@@ -536,6 +536,15 @@ namespace xsimd
             return ~vec_cmpeq(self.data, other.data);
         }
 
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<vsx>) noexcept
+        {
+            // VPOPCNTB/H/W/D count the bits of each element in one instruction
+            using U = as_unsigned_integer_t<T>;
+            return bitwise_cast<T>(batch<U, A>(vec_popcnt(bitwise_cast<U>(self).data)));
+        }
+
         // reciprocal
         template <class A>
         XSIMD_INLINE batch<float, A> reciprocal(batch<float, A> const& self,
