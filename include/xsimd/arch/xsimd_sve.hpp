@@ -40,15 +40,6 @@ namespace xsimd
                 using xsimd::index;
                 using xsimd::types::detail::sve_vector_type;
 
-                // predicate creation
-                XSIMD_INLINE svbool_t ptrue_impl(index<1>) noexcept { return svptrue_b8(); }
-                XSIMD_INLINE svbool_t ptrue_impl(index<2>) noexcept { return svptrue_b16(); }
-                XSIMD_INLINE svbool_t ptrue_impl(index<4>) noexcept { return svptrue_b32(); }
-                XSIMD_INLINE svbool_t ptrue_impl(index<8>) noexcept { return svptrue_b64(); }
-
-                template <class T>
-                XSIMD_INLINE svbool_t ptrue() noexcept { return ptrue_impl(index<sizeof(T)> {}); }
-
                 // count active lanes in a predicate
                 XSIMD_INLINE uint64_t pcount_impl(svbool_t p, index<1>) noexcept { return svcntp_b8(p, p); }
                 XSIMD_INLINE uint64_t pcount_impl(svbool_t p, index<2>) noexcept { return svcntp_b16(p, p); }
@@ -81,7 +72,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_aligned(T const* src, convert<T>, requires_arch<sve>) noexcept
         {
-            return svld1(detail_sve::ptrue<T>(), reinterpret_cast<map_to_sized_type_t<T> const*>(src));
+            return svld1(detail::svptrue<T>(), reinterpret_cast<map_to_sized_type_t<T> const*>(src));
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -114,7 +105,7 @@ namespace xsimd
         XSIMD_INLINE batch<std::complex<T>, A> load_complex_aligned(std::complex<T> const* mem, convert<std::complex<T>>, requires_arch<sve>) noexcept
         {
             const T* buf = reinterpret_cast<const T*>(mem);
-            const auto tmp = svld2(detail_sve::ptrue<T>(), buf);
+            const auto tmp = svld2(detail::svptrue<T>(), buf);
             const auto real = svget2(tmp, 0);
             const auto imag = svget2(tmp, 1);
             return batch<std::complex<T>, A> { real, imag };
@@ -133,7 +124,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<sve>) noexcept
         {
-            svst1(detail_sve::ptrue<T>(), reinterpret_cast<map_to_sized_type_t<T>*>(dst), src);
+            svst1(detail::svptrue<T>(), reinterpret_cast<map_to_sized_type_t<T>*>(dst), src);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
@@ -169,7 +160,7 @@ namespace xsimd
             tmp = svset2(tmp, 0, src.real());
             tmp = svset2(tmp, 1, src.imag());
             T* buf = reinterpret_cast<T*>(dst);
-            svst2(detail_sve::ptrue<T>(), buf, tmp);
+            svst2(detail::svptrue<T>(), buf, tmp);
         }
 
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
@@ -192,14 +183,14 @@ namespace xsimd
         template <class A, class T, class U, detail_sve::enable_sg_t<T, U> = 0>
         XSIMD_INLINE void scatter(batch<T, A> const& src, T* dst, batch<U, A> const& index, kernel::requires_arch<sve>) noexcept
         {
-            svst1_scatter_index(detail_sve::ptrue<T>(), dst, index.data, src.data);
+            svst1_scatter_index(detail::svptrue<T>(), dst, index.data, src.data);
         }
 
         // gather
         template <class A, class T, class U, detail_sve::enable_sg_t<T, U> = 0>
         XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index, kernel::requires_arch<sve>) noexcept
         {
-            return svld1_gather_index(detail_sve::ptrue<T>(), src, index.data);
+            return svld1_gather_index(detail::svptrue<T>(), src, index.data);
         }
 
         /********************
@@ -281,7 +272,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> add(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svadd_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svadd_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         // sadd
@@ -295,7 +286,7 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> sub(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svsub_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svsub_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         // ssub
@@ -309,66 +300,66 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svmul_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svmul_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         // mul_hi
         template <class A, class T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
         XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svmulh_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svmulh_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         // div
         template <class A, class T, std::enable_if_t<sizeof(T) >= 4, int> = 0>
         XSIMD_INLINE batch<T, A> div(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svdiv_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svdiv_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         // max
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> max(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svmax_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svmax_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         // min
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> min(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svmin_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svmin_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         // neg
         template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svreinterpret_u8(svneg_x(detail_sve::ptrue<T>(), svreinterpret_s8(static_cast<detail_sve::sizeless_t<T>>(arg))));
+            return svreinterpret_u8(svneg_x(detail::svptrue<T>(), svreinterpret_s8(static_cast<detail_sve::sizeless_t<T>>(arg))));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svreinterpret_u16(svneg_x(detail_sve::ptrue<T>(), svreinterpret_s16(static_cast<detail_sve::sizeless_t<T>>(arg))));
+            return svreinterpret_u16(svneg_x(detail::svptrue<T>(), svreinterpret_s16(static_cast<detail_sve::sizeless_t<T>>(arg))));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svreinterpret_u32(svneg_x(detail_sve::ptrue<T>(), svreinterpret_s32(static_cast<detail_sve::sizeless_t<T>>(arg))));
+            return svreinterpret_u32(svneg_x(detail::svptrue<T>(), svreinterpret_s32(static_cast<detail_sve::sizeless_t<T>>(arg))));
         }
 
         template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svreinterpret_u64(svneg_x(detail_sve::ptrue<T>(), svreinterpret_s64(static_cast<detail_sve::sizeless_t<T>>(arg))));
+            return svreinterpret_u64(svneg_x(detail::svptrue<T>(), svreinterpret_s64(static_cast<detail_sve::sizeless_t<T>>(arg))));
         }
 
         template <class A, class T, detail::enable_signed_numeral_t<T> = 0>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svneg_x(detail_sve::ptrue<T>(), arg);
+            return svneg_x(detail::svptrue<T>(), arg);
         }
 
         // abs
@@ -381,21 +372,21 @@ namespace xsimd
         template <class A, class T, detail::enable_signed_numeral_t<T> = 0>
         XSIMD_INLINE batch<T, A> abs(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svabs_x(detail_sve::ptrue<T>(), arg);
+            return svabs_x(detail::svptrue<T>(), arg);
         }
 
         // fma: x * y + z
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> fma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
         {
-            return svmad_x(detail_sve::ptrue<T>(), x, y, z);
+            return svmad_x(detail::svptrue<T>(), x, y, z);
         }
 
         // fnma: z - x * y
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> fnma(batch<T, A> const& x, batch<T, A> const& y, batch<T, A> const& z, requires_arch<sve>) noexcept
         {
-            return svmsb_x(detail_sve::ptrue<T>(), x, y, z);
+            return svmsb_x(detail::svptrue<T>(), x, y, z);
         }
 
         // fms: x * y - z
@@ -420,7 +411,7 @@ namespace xsimd
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_and(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svand_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svand_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         template <class A>
@@ -428,7 +419,7 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(lhs));
             const auto rhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(rhs));
-            const auto result_bits = svand_x(detail_sve::ptrue<float>(), lhs_bits, rhs_bits);
+            const auto result_bits = svand_x(detail::svptrue<float>(), lhs_bits, rhs_bits);
             return svreinterpret_f32(result_bits);
         }
 
@@ -437,21 +428,21 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(lhs));
             const auto rhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(rhs));
-            const auto result_bits = svand_x(detail_sve::ptrue<double>(), lhs_bits, rhs_bits);
+            const auto result_bits = svand_x(detail::svptrue<double>(), lhs_bits, rhs_bits);
             return svreinterpret_f64(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_and(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svand_z(detail_sve::ptrue<T>(), lhs, rhs);
+            return svand_z(detail::svptrue<T>(), lhs, rhs);
         }
 
         // bitwise_andnot
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_andnot(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svbic_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svbic_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         template <class A>
@@ -459,7 +450,7 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(lhs));
             const auto rhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(rhs));
-            const auto result_bits = svbic_x(detail_sve::ptrue<float>(), lhs_bits, rhs_bits);
+            const auto result_bits = svbic_x(detail::svptrue<float>(), lhs_bits, rhs_bits);
             return svreinterpret_f32(result_bits);
         }
 
@@ -468,21 +459,21 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(lhs));
             const auto rhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(rhs));
-            const auto result_bits = svbic_x(detail_sve::ptrue<double>(), lhs_bits, rhs_bits);
+            const auto result_bits = svbic_x(detail::svptrue<double>(), lhs_bits, rhs_bits);
             return svreinterpret_f64(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_andnot(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svbic_z(detail_sve::ptrue<T>(), lhs, rhs);
+            return svbic_z(detail::svptrue<T>(), lhs, rhs);
         }
 
         // bitwise_or
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_or(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svorr_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svorr_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         template <class A>
@@ -490,7 +481,7 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(lhs));
             const auto rhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(rhs));
-            const auto result_bits = svorr_x(detail_sve::ptrue<float>(), lhs_bits, rhs_bits);
+            const auto result_bits = svorr_x(detail::svptrue<float>(), lhs_bits, rhs_bits);
             return svreinterpret_f32(result_bits);
         }
 
@@ -499,21 +490,21 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(lhs));
             const auto rhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(rhs));
-            const auto result_bits = svorr_x(detail_sve::ptrue<double>(), lhs_bits, rhs_bits);
+            const auto result_bits = svorr_x(detail::svptrue<double>(), lhs_bits, rhs_bits);
             return svreinterpret_f64(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_or(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svorr_z(detail_sve::ptrue<T>(), lhs, rhs);
+            return svorr_z(detail::svptrue<T>(), lhs, rhs);
         }
 
         // bitwise_xor
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_xor(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return sveor_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return sveor_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         template <class A>
@@ -521,7 +512,7 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(lhs));
             const auto rhs_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(rhs));
-            const auto result_bits = sveor_x(detail_sve::ptrue<float>(), lhs_bits, rhs_bits);
+            const auto result_bits = sveor_x(detail::svptrue<float>(), lhs_bits, rhs_bits);
             return svreinterpret_f32(result_bits);
         }
 
@@ -530,28 +521,28 @@ namespace xsimd
         {
             const auto lhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(lhs));
             const auto rhs_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(rhs));
-            const auto result_bits = sveor_x(detail_sve::ptrue<double>(), lhs_bits, rhs_bits);
+            const auto result_bits = sveor_x(detail::svptrue<double>(), lhs_bits, rhs_bits);
             return svreinterpret_f64(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_xor(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return sveor_z(detail_sve::ptrue<T>(), lhs, rhs);
+            return sveor_z(detail::svptrue<T>(), lhs, rhs);
         }
 
         // bitwise_not
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_not(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svnot_x(detail_sve::ptrue<T>(), arg);
+            return svnot_x(detail::svptrue<T>(), arg);
         }
 
         template <class A>
         XSIMD_INLINE batch<float, A> bitwise_not(batch<float, A> const& arg, requires_arch<sve>) noexcept
         {
             const auto arg_bits = svreinterpret_u32(static_cast<detail_sve::sizeless_t<float>>(arg));
-            const auto result_bits = svnot_x(detail_sve::ptrue<float>(), arg_bits);
+            const auto result_bits = svnot_x(detail::svptrue<float>(), arg_bits);
             return svreinterpret_f32(result_bits);
         }
 
@@ -559,14 +550,14 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> bitwise_not(batch<double, A> const& arg, requires_arch<sve>) noexcept
         {
             const auto arg_bits = svreinterpret_u64(static_cast<detail_sve::sizeless_t<double>>(arg));
-            const auto result_bits = svnot_x(detail_sve::ptrue<double>(), arg_bits);
+            const auto result_bits = svnot_x(detail::svptrue<double>(), arg_bits);
             return svreinterpret_f64(result_bits);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> bitwise_not(batch_bool<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svnot_z(detail_sve::ptrue<T>(), arg);
+            return svnot_z(detail::svptrue<T>(), arg);
         }
 
         /**********
@@ -615,13 +606,13 @@ namespace xsimd
         {
             constexpr std::size_t size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0 <= n && static_cast<std::size_t>(n) < size && "index in bounds");
-            return svlsl_x(detail_sve::ptrue<T>(), arg, n);
+            return svlsl_x(detail::svptrue<T>(), arg, n);
         }
 
         template <class A, class T, detail::enable_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svlsl_x(detail_sve::ptrue<T>(), lhs, detail_sve::to_unsigned_batch<A, T>(rhs));
+            return svlsl_x(detail::svptrue<T>(), lhs, detail_sve::to_unsigned_batch<A, T>(rhs));
         }
 
         // bitwise_rshift
@@ -630,13 +621,13 @@ namespace xsimd
         {
             constexpr std::size_t size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0 <= n && static_cast<std::size_t>(n) < size && "index in bounds");
-            return svlsr_x(detail_sve::ptrue<T>(), arg, static_cast<T>(n));
+            return svlsr_x(detail::svptrue<T>(), arg, static_cast<T>(n));
         }
 
         template <class A, class T, detail::enable_unsigned_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svlsr_x(detail_sve::ptrue<T>(), lhs, rhs);
+            return svlsr_x(detail::svptrue<T>(), lhs, rhs);
         }
 
         template <class A, class T, detail::enable_signed_integral_t<T> = 0>
@@ -644,13 +635,13 @@ namespace xsimd
         {
             constexpr std::size_t size = sizeof(typename batch<T, A>::value_type) * 8;
             assert(0 <= n && static_cast<std::size_t>(n) < size && "index in bounds");
-            return svasr_x(detail_sve::ptrue<T>(), arg, static_cast<as_unsigned_integer_t<T>>(n));
+            return svasr_x(detail::svptrue<T>(), arg, static_cast<as_unsigned_integer_t<T>>(n));
         }
 
         template <class A, class T, detail::enable_signed_integral_t<T> = 0>
         XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svasr_x(detail_sve::ptrue<T>(), lhs, detail_sve::to_unsigned_batch<A, T>(rhs));
+            return svasr_x(detail::svptrue<T>(), lhs, detail_sve::to_unsigned_batch<A, T>(rhs));
         }
 
         /**************
@@ -662,21 +653,21 @@ namespace xsimd
         XSIMD_INLINE V reduce_add(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
             // sve integer reduction results are promoted to 64 bits
-            return static_cast<V>(svaddv(detail_sve::ptrue<T>(), arg));
+            return static_cast<V>(svaddv(detail::svptrue<T>(), arg));
         }
 
         // reduce_max
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE T reduce_max(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svmaxv(detail_sve::ptrue<T>(), arg);
+            return svmaxv(detail::svptrue<T>(), arg);
         }
 
         // reduce_min
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE T reduce_min(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svminv(detail_sve::ptrue<T>(), arg);
+            return svminv(detail::svptrue<T>(), arg);
         }
 
         // haddp
@@ -689,7 +680,7 @@ namespace xsimd
             {
                 sums[i] = reduce_add(row[i], sve {});
             }
-            return svld1(detail_sve::ptrue<T>(), sums);
+            return svld1(detail::svptrue<T>(), sums);
         }
 
         /***************
@@ -700,55 +691,55 @@ namespace xsimd
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svcmpeq(detail_sve::ptrue<T>(), lhs, rhs);
+            return svcmpeq(detail::svptrue<T>(), lhs, rhs);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            const auto neq_result = sveor_z(detail_sve::ptrue<T>(), lhs, rhs);
-            return svnot_z(detail_sve::ptrue<T>(), neq_result);
+            const auto neq_result = sveor_z(detail::svptrue<T>(), lhs, rhs);
+            return svnot_z(detail::svptrue<T>(), neq_result);
         }
 
         // neq
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> neq(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svcmpne(detail_sve::ptrue<T>(), lhs, rhs);
+            return svcmpne(detail::svptrue<T>(), lhs, rhs);
         }
 
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> neq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return sveor_z(detail_sve::ptrue<T>(), lhs, rhs);
+            return sveor_z(detail::svptrue<T>(), lhs, rhs);
         }
 
         // lt
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> lt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svcmplt(detail_sve::ptrue<T>(), lhs, rhs);
+            return svcmplt(detail::svptrue<T>(), lhs, rhs);
         }
 
         // le
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> le(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svcmple(detail_sve::ptrue<T>(), lhs, rhs);
+            return svcmple(detail::svptrue<T>(), lhs, rhs);
         }
 
         // gt
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> gt(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svcmpgt(detail_sve::ptrue<T>(), lhs, rhs);
+            return svcmpgt(detail::svptrue<T>(), lhs, rhs);
         }
 
         // ge
         template <class A, class T, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch_bool<T, A> ge(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<sve>) noexcept
         {
-            return svcmpge(detail_sve::ptrue<T>(), lhs, rhs);
+            return svcmpge(detail::svptrue<T>(), lhs, rhs);
         }
 
         /***************
@@ -890,7 +881,7 @@ namespace xsimd
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> sqrt(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svsqrt_x(detail_sve::ptrue<T>(), arg);
+            return svsqrt_x(detail::svptrue<T>(), arg);
         }
 
         // reciprocal
@@ -912,37 +903,37 @@ namespace xsimd
                 template <class A, class T, detail::enable_sized_integral_t<T, 4> = 0>
                 XSIMD_INLINE batch<float, A> fast_cast(batch<T, A> const& arg, batch<float, A> const&, requires_arch<sve>) noexcept
                 {
-                    return svcvt_f32_x(detail_sve::ptrue<T>(), arg);
+                    return svcvt_f32_x(detail::svptrue<T>(), arg);
                 }
 
                 template <class A, class T, detail::enable_sized_integral_t<T, 8> = 0>
                 XSIMD_INLINE batch<double, A> fast_cast(batch<T, A> const& arg, batch<double, A> const&, requires_arch<sve>) noexcept
                 {
-                    return svcvt_f64_x(detail_sve::ptrue<T>(), arg);
+                    return svcvt_f64_x(detail::svptrue<T>(), arg);
                 }
 
                 template <class A>
                 XSIMD_INLINE batch<int32_t, A> fast_cast(batch<float, A> const& arg, batch<int32_t, A> const&, requires_arch<sve>) noexcept
                 {
-                    return svcvt_s32_x(detail_sve::ptrue<float>(), arg);
+                    return svcvt_s32_x(detail::svptrue<float>(), arg);
                 }
 
                 template <class A>
                 XSIMD_INLINE batch<uint32_t, A> fast_cast(batch<float, A> const& arg, batch<uint32_t, A> const&, requires_arch<sve>) noexcept
                 {
-                    return svcvt_u32_x(detail_sve::ptrue<float>(), arg);
+                    return svcvt_u32_x(detail::svptrue<float>(), arg);
                 }
 
                 template <class A>
                 XSIMD_INLINE batch<int64_t, A> fast_cast(batch<double, A> const& arg, batch<int64_t, A> const&, requires_arch<sve>) noexcept
                 {
-                    return svcvt_s64_x(detail_sve::ptrue<double>(), arg);
+                    return svcvt_s64_x(detail::svptrue<double>(), arg);
                 }
 
                 template <class A>
                 XSIMD_INLINE batch<uint64_t, A> fast_cast(batch<double, A> const& arg, batch<uint64_t, A> const&, requires_arch<sve>) noexcept
                 {
-                    return svcvt_u64_x(detail_sve::ptrue<double>(), arg);
+                    return svcvt_u64_x(detail::svptrue<double>(), arg);
                 }
             } // namespace XSIMD_SVE_NAMESPACE
         } // namespace detail_sve
@@ -972,7 +963,7 @@ namespace xsimd
             using U = as_unsigned_integer_t<T>;
             const auto values = detail_sve::sve_vector_type<U> { static_cast<U>(args)... };
             const auto zero = broadcast<A, U>(static_cast<U>(0), sve {});
-            return svcmpne(detail_sve::ptrue<T>(), values, zero);
+            return svcmpne(detail::svptrue<T>(), values, zero);
         }
 
         // insert
@@ -996,7 +987,7 @@ namespace xsimd
         {
             // create a predicate with only the I-th lane activated
             const auto iota = detail_sve::iota<T>();
-            const auto index_predicate = svcmpeq(detail_sve::ptrue<T>(), iota, static_cast<as_unsigned_integer_t<T>>(I));
+            const auto index_predicate = svcmpeq(detail::svptrue<T>(), iota, static_cast<as_unsigned_integer_t<T>>(I));
             return svsel(index_predicate, static_cast<detail_sve::sizeless_t<T>>(broadcast<A, T>(val, sve {})), static_cast<detail_sve::sizeless_t<T>>(arg));
         }
 
@@ -1181,29 +1172,29 @@ namespace xsimd
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> nearbyint(batch<T, A> const& arg, requires_arch<sve>) noexcept
         {
-            return svrintx_x(detail_sve::ptrue<T>(), arg);
+            return svrintx_x(detail::svptrue<T>(), arg);
         }
 
         // nearbyint_as_int
         template <class A>
         XSIMD_INLINE batch<int32_t, A> nearbyint_as_int(batch<float, A> const& arg, requires_arch<sve>) noexcept
         {
-            const auto nearest = svrintx_x(detail_sve::ptrue<float>(), arg);
-            return svcvt_s32_x(detail_sve::ptrue<float>(), nearest);
+            const auto nearest = svrintx_x(detail::svptrue<float>(), arg);
+            return svcvt_s32_x(detail::svptrue<float>(), nearest);
         }
 
         template <class A>
         XSIMD_INLINE batch<int64_t, A> nearbyint_as_int(batch<double, A> const& arg, requires_arch<sve>) noexcept
         {
-            const auto nearest = svrintx_x(detail_sve::ptrue<double>(), arg);
-            return svcvt_s64_x(detail_sve::ptrue<double>(), nearest);
+            const auto nearest = svrintx_x(detail::svptrue<double>(), arg);
+            return svcvt_s64_x(detail::svptrue<double>(), nearest);
         }
 
         // ldexp
         template <class A, class T, detail::enable_floating_point_t<T> = 0>
         XSIMD_INLINE batch<T, A> ldexp(const batch<T, A>& x, const batch<as_integer_t<T>, A>& exp, requires_arch<sve>) noexcept
         {
-            return svscale_x(detail_sve::ptrue<T>(), x, exp);
+            return svscale_x(detail::svptrue<T>(), x, exp);
         }
 
     } // namespace kernel

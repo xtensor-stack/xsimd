@@ -12,6 +12,7 @@
 #ifndef XSIMD_AVX512F_HPP
 #define XSIMD_AVX512F_HPP
 
+#include "../arch/utils/x86.hpp"
 #include "../types/xsimd_avx512f_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
 #include "../utils/bits.hpp"
@@ -41,71 +42,6 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE void transpose(batch<uint8_t, A>* matrix_begin, batch<uint8_t, A>* matrix_end, requires_arch<common>) noexcept;
 
-        namespace detail
-        {
-            XSIMD_INLINE __m256 lower_half(__m512 self) noexcept
-            {
-                return _mm512_castps512_ps256(self);
-            }
-            XSIMD_INLINE __m256d lower_half(__m512d self) noexcept
-            {
-                return _mm512_castpd512_pd256(self);
-            }
-            XSIMD_INLINE __m256i lower_half(__m512i self) noexcept
-            {
-                return _mm512_castsi512_si256(self);
-            }
-            XSIMD_INLINE __m256 upper_half(__m512 self) noexcept
-            {
-                return _mm256_castsi256_ps(_mm512_extracti64x4_epi64(_mm512_castps_si512(self), 1));
-            }
-            XSIMD_INLINE __m256d upper_half(__m512d self) noexcept
-            {
-                return _mm512_extractf64x4_pd(self, 1);
-            }
-            XSIMD_INLINE __m256i upper_half(__m512i self) noexcept
-            {
-                return _mm512_extracti64x4_epi64(self, 1);
-            }
-            XSIMD_INLINE __m512i merge_avx(__m256i low, __m256i high) noexcept
-            {
-                return _mm512_inserti64x4(_mm512_castsi256_si512(low), high, 1);
-            }
-            XSIMD_INLINE __m512 merge_avx(__m256 low, __m256 high) noexcept
-            {
-                return _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castpd256_pd512(_mm256_castps_pd(low)), _mm256_castps_pd(high), 1));
-            }
-            XSIMD_INLINE __m512d merge_avx(__m256d low, __m256d high) noexcept
-            {
-                return _mm512_insertf64x4(_mm512_castpd256_pd512(low), high, 1);
-            }
-
-            template <class F>
-            __m512i fwd_to_avx(F f, __m512i self)
-            {
-                __m256i self_low = lower_half(self), self_high = upper_half(self);
-                __m256i res_low = f(self_low);
-                __m256i res_high = f(self_high);
-                return merge_avx(res_low, res_high);
-            }
-            template <class F>
-            __m512i fwd_to_avx(F f, __m512i self, __m512i other)
-            {
-                __m256i self_low = lower_half(self), self_high = upper_half(self),
-                        other_low = lower_half(other), other_high = upper_half(other);
-                __m256i res_low = f(self_low, other_low);
-                __m256i res_high = f(self_high, other_high);
-                return merge_avx(res_low, res_high);
-            }
-            template <class F>
-            __m512i fwd_to_avx(F f, __m512i self, int32_t other)
-            {
-                __m256i self_low = lower_half(self), self_high = upper_half(self);
-                __m256i res_low = f(self_low, other);
-                __m256i res_high = f(self_high, other);
-                return merge_avx(res_low, res_high);
-            }
-        }
         namespace detail
         {
 
@@ -401,15 +337,15 @@ namespace xsimd
 
             if constexpr (sizeof(T) == 1)
             {
-                return detail::fwd_to_avx([](__m256i s) noexcept
-                                          { return abs(batch<T, avx2>(s)); },
-                                          self);
+                return detail::apply_on_halves([](auto s) noexcept
+                                               { return abs(s); },
+                                               self);
             }
             else if constexpr (sizeof(T) == 2)
             {
-                return detail::fwd_to_avx([](__m256i s) noexcept
-                                          { return abs(batch<T, avx2>(s)); },
-                                          self);
+                return detail::apply_on_halves([](auto s) noexcept
+                                               { return abs(s); },
+                                               self);
             }
             else if constexpr (sizeof(T) == 4)
             {
@@ -424,47 +360,6 @@ namespace xsimd
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
-        }
-
-        // add
-        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
-        XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512f>) noexcept
-        {
-            if constexpr (sizeof(T) == 1)
-            {
-                return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                          { return add(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                          self, other);
-            }
-            else if constexpr (sizeof(T) == 2)
-            {
-                return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                          { return add(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                          self, other);
-            }
-            else if constexpr (sizeof(T) == 4)
-            {
-                return _mm512_add_epi32(self, other);
-            }
-            else if constexpr (sizeof(T) == 8)
-            {
-                return _mm512_add_epi64(self, other);
-            }
-            else
-            {
-                assert(false && "unsupported arch/op combination");
-                return {};
-            }
-        }
-        template <class A>
-        XSIMD_INLINE batch<float, A> add(batch<float, A> const& self, batch<float, A> const& other, requires_arch<avx512f>) noexcept
-        {
-            return _mm512_add_ps(self, other);
-        }
-        template <class A>
-        XSIMD_INLINE batch<double, A> add(batch<double, A> const& self, batch<double, A> const& other, requires_arch<avx512f>) noexcept
-        {
-            return _mm512_add_pd(self, other);
         }
 
         // all
@@ -559,9 +454,9 @@ namespace xsimd
             }
             else if constexpr (sizeof(T) == 2)
             {
-                return detail::fwd_to_avx([](__m256i s, int32_t o) noexcept
-                                          { return bitwise_lshift(batch<T, avx2>(s), o, avx2 {}); },
-                                          self, other);
+                return detail::apply_on_halves([other](auto s) noexcept
+                                               { return bitwise_lshift(s, other); },
+                                               self);
 #if defined(XSIMD_AVX512_SHIFT_INTRINSICS_IMM_ONLY)
             }
             else if constexpr (sizeof(T) == 4)
@@ -664,9 +559,9 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::fwd_to_avx([](__m256i s, int32_t o) noexcept
-                                              { return bitwise_rshift(batch<T, avx2>(s), o, avx2 {}); },
-                                              self, other);
+                    return detail::apply_on_halves([other](auto s) noexcept
+                                                   { return bitwise_rshift(s, other); },
+                                                   self);
                 }
             }
             else
@@ -701,9 +596,9 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::fwd_to_avx([](__m256i s, int32_t o) noexcept
-                                              { return bitwise_rshift(batch<T, avx2>(s), o, avx2 {}); },
-                                              self, other);
+                    return detail::apply_on_halves([other](auto s) noexcept
+                                                   { return bitwise_rshift(s, other); },
+                                                   self);
                 }
             }
         }
@@ -720,9 +615,9 @@ namespace xsimd
             {
                 return _mm512_rolv_epi64(self, other);
             }
-            return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                      { return rotl(batch<T, avx2>(s), batch<T, avx2>(o), avx2 {}); },
-                                      self, other);
+            return detail::apply_on_halves([](auto s, auto o) noexcept
+                                           { return rotl(s, o); },
+                                           self, other);
         }
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, int32_t other, requires_arch<avx512f>) noexcept
@@ -743,9 +638,9 @@ namespace xsimd
                 return _mm512_rol_epi64(self, count);
             }
 
-            return detail::fwd_to_avx([](__m256i s) noexcept
-                                      { return rotl<count>(batch<T, avx2>(s), avx2 {}); },
-                                      self);
+            return detail::apply_on_halves([](auto s) noexcept
+                                           { return rotl<count>(s); },
+                                           self);
         }
 
         // rotr
@@ -754,9 +649,9 @@ namespace xsimd
         {
             if constexpr (sizeof(T) < 4)
             {
-                return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                          { return rotr(batch<T, avx2>(s), batch<T, avx2>(o), avx2 {}); },
-                                          self, other);
+                return detail::apply_on_halves([](auto s, auto o) noexcept
+                                               { return rotr(s, o); },
+                                               self, other);
             }
             if constexpr (std::is_unsigned_v<T>)
             {
@@ -784,9 +679,9 @@ namespace xsimd
             static_assert(count < bits, "Count must be less than the number of bits in T");
             if constexpr (sizeof(T) < 4)
             {
-                return detail::fwd_to_avx([](__m256i s) noexcept
-                                          { return rotr<count>(batch<T, avx2>(s), avx2 {}); },
-                                          self);
+                return detail::apply_on_halves([](auto s) noexcept
+                                               { return rotr<count>(s); },
+                                               self);
             }
             if constexpr (std::is_unsigned_v<T>)
             {
@@ -1206,7 +1101,7 @@ namespace xsimd
         {
             const batch<double, A> low(_mm512_i32gather_pd(_mm512_castsi512_si256(index.data), src, sizeof(double)));
             const batch<double, A> high(_mm512_i32gather_pd(_mm256_castpd_si256(_mm512_extractf64x4_pd(_mm512_castsi512_pd(index.data), 1)), src, sizeof(double)));
-            return detail::merge_avx(_mm512_cvtpd_ps(low.data), _mm512_cvtpd_ps(high.data));
+            return detail::merge_halves<float, A, avx2>(_mm512_cvtpd_ps(low.data), _mm512_cvtpd_ps(high.data));
         }
 
         template <class A, class V, detail::enable_sized_integral_t<V, 4> = 0>
@@ -1216,7 +1111,7 @@ namespace xsimd
         {
             const batch<double, A> low(_mm512_i32gather_pd(_mm512_castsi512_si256(index.data), src, sizeof(double)));
             const batch<double, A> high(_mm512_i32gather_pd(_mm256_castpd_si256(_mm512_extractf64x4_pd(_mm512_castsi512_pd(index.data), 1)), src, sizeof(double)));
-            return detail::merge_avx(_mm512_cvtpd_epi32(low.data), _mm512_cvtpd_epi32(high.data));
+            return detail::merge_halves<int32_t, A, avx2>(_mm512_cvtpd_epi32(low.data), _mm512_cvtpd_epi32(high.data));
         }
 
         // ge
@@ -1719,9 +1614,9 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                              { return max(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                              self, other);
+                    return detail::apply_on_halves([](auto s, auto o) noexcept
+                                                   { return max(s, o); },
+                                                   self, other);
                 }
             }
             else
@@ -1736,9 +1631,9 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                              { return max(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                              self, other);
+                    return detail::apply_on_halves([](auto s, auto o) noexcept
+                                                   { return max(s, o); },
+                                                   self, other);
                 }
             }
         }
@@ -1769,9 +1664,9 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                              { return min(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                              self, other);
+                    return detail::apply_on_halves([](auto s, auto o) noexcept
+                                                   { return min(s, o); },
+                                                   self, other);
                 }
             }
             else
@@ -1786,9 +1681,9 @@ namespace xsimd
                 }
                 else
                 {
-                    return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                              { return min(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                              self, other);
+                    return detail::apply_on_halves([](auto s, auto o) noexcept
+                                                   { return min(s, o); },
+                                                   self, other);
                 }
             }
         }
@@ -1813,9 +1708,9 @@ namespace xsimd
             }
             else
             {
-                return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                          { return mul(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                          self, other);
+                return detail::apply_on_halves([](auto s, auto o) noexcept
+                                               { return mul(s, o); },
+                                               self, other);
             }
         }
 
@@ -2093,24 +1988,24 @@ namespace xsimd
                 __m256i cond_low = batch<uint8_t, avx2>::load_aligned(&buffer[0]);
                 __m256i cond_hi = batch<uint8_t, avx2>::load_aligned(&buffer[32]);
 
-                __m256i true_low = detail::lower_half(true_br), true_hi = detail::upper_half(true_br);
-                __m256i false_low = detail::lower_half(false_br), false_hi = detail::upper_half(false_br);
+                const auto true_low = detail::lower_half<T, A, avx2>(true_br), true_hi = detail::upper_half<T, A, avx2>(true_br);
+                const auto false_low = detail::lower_half<T, A, avx2>(false_br), false_hi = detail::upper_half<T, A, avx2>(false_br);
 
-                __m256i res_low = select(batch_bool<T, avx2>(cond_low), batch<T, avx2>(true_low), batch<T, avx2>(false_low), avx2 {});
-                __m256i res_hi = select(batch_bool<T, avx2>(cond_hi), batch<T, avx2>(true_hi), batch<T, avx2>(false_hi), avx2 {});
-                return detail::merge_avx(res_low, res_hi);
+                const auto res_low = select(batch_bool<T, avx2>(cond_low), true_low, false_low, avx2 {});
+                const auto res_hi = select(batch_bool<T, avx2>(cond_hi), true_hi, false_hi, avx2 {});
+                return detail::merge_halves<T, A, avx2>(res_low, res_hi);
             }
             else if constexpr (sizeof(T) == 2)
             {
                 __m256i cond_low = _mm512_maskz_cvtepi32_epi16((uint64_t)cond.data & 0xFFFF, _mm512_set1_epi32(~0));
                 __m256i cond_hi = _mm512_maskz_cvtepi32_epi16((uint64_t)cond.data >> 16, _mm512_set1_epi32(~0));
 
-                __m256i true_low = detail::lower_half(true_br), true_hi = detail::upper_half(true_br);
-                __m256i false_low = detail::lower_half(false_br), false_hi = detail::upper_half(false_br);
+                const auto true_low = detail::lower_half<T, A, avx2>(true_br), true_hi = detail::upper_half<T, A, avx2>(true_br);
+                const auto false_low = detail::lower_half<T, A, avx2>(false_br), false_hi = detail::upper_half<T, A, avx2>(false_br);
 
-                __m256i res_low = select(batch_bool<T, avx2>(cond_low), batch<T, avx2>(true_low), batch<T, avx2>(false_low), avx2 {});
-                __m256i res_hi = select(batch_bool<T, avx2>(cond_hi), batch<T, avx2>(true_hi), batch<T, avx2>(false_hi), avx2 {});
-                return detail::merge_avx(res_low, res_hi);
+                const auto res_low = select(batch_bool<T, avx2>(cond_low), true_low, false_low, avx2 {});
+                const auto res_hi = select(batch_bool<T, avx2>(cond_hi), true_hi, false_hi, avx2 {});
+                return detail::merge_halves<T, A, avx2>(res_low, res_hi);
             }
             else if constexpr (sizeof(T) == 4)
             {
@@ -2516,15 +2411,15 @@ namespace xsimd
         {
             if constexpr (sizeof(T) == 1)
             {
-                return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                          { return sub(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                          self, other);
+                return detail::apply_on_halves([](auto s, auto o) noexcept
+                                               { return sub(s, o); },
+                                               self, other);
             }
             else if constexpr (sizeof(T) == 2)
             {
-                return detail::fwd_to_avx([](__m256i s, __m256i o) noexcept
-                                          { return sub(batch<T, avx2>(s), batch<T, avx2>(o)); },
-                                          self, other);
+                return detail::apply_on_halves([](auto s, auto o) noexcept
+                                               { return sub(s, o); },
+                                               self, other);
             }
             else if constexpr (sizeof(T) == 4)
             {
@@ -2769,9 +2664,9 @@ namespace xsimd
             transpose(tmp_hi1 + 0, tmp_hi1 + 16, avx2 {});
 
             for (int i = 0; i < 16; ++i)
-                matrix_begin[i] = detail::merge_avx(tmp_lo0[i], tmp_hi0[i]);
+                matrix_begin[i] = detail::merge_halves<uint16_t, A, avx2>(tmp_lo0[i], tmp_hi0[i]);
             for (int i = 0; i < 16; ++i)
-                matrix_begin[i + 16] = detail::merge_avx(tmp_lo1[i], tmp_hi1[i]);
+                matrix_begin[i + 16] = detail::merge_halves<uint16_t, A, avx2>(tmp_lo1[i], tmp_hi1[i]);
         }
         template <class A>
         XSIMD_INLINE void transpose(batch<int16_t, A>* matrix_begin, batch<int16_t, A>* matrix_end, requires_arch<avx512f>) noexcept
@@ -2805,9 +2700,9 @@ namespace xsimd
             transpose(tmp_hi1 + 0, tmp_hi1 + 32, avx2 {});
 
             for (int i = 0; i < 32; ++i)
-                matrix_begin[i] = detail::merge_avx(tmp_lo0[i], tmp_hi0[i]);
+                matrix_begin[i] = detail::merge_halves<uint8_t, A, avx2>(tmp_lo0[i], tmp_hi0[i]);
             for (int i = 0; i < 32; ++i)
-                matrix_begin[i + 32] = detail::merge_avx(tmp_lo1[i], tmp_hi1[i]);
+                matrix_begin[i + 32] = detail::merge_halves<uint8_t, A, avx2>(tmp_lo1[i], tmp_hi1[i]);
         }
         template <class A>
         XSIMD_INLINE void transpose(batch<int8_t, A>* matrix_begin, batch<int8_t, A>* matrix_end, requires_arch<avx512f>) noexcept
@@ -3040,7 +2935,8 @@ namespace xsimd
             {
                 auto pair_lo = widen(batch<T, avx2>(x_lo), avx2 {});
                 auto pair_hi = widen(batch<T, avx2>(x_hi), avx2 {});
-                return { detail::merge_avx(pair_lo[0], pair_lo[1]), detail::merge_avx(pair_hi[0], pair_hi[1]) };
+                return { detail::merge_halves<widen_t<T>, A, avx2>(pair_lo[0], pair_lo[1]),
+                         detail::merge_halves<widen_t<T>, A, avx2>(pair_hi[0], pair_hi[1]) };
             }
             return { lo, hi };
         }

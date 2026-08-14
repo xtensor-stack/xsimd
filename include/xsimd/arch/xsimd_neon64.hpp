@@ -14,6 +14,7 @@
 
 #include "../types/xsimd_neon64_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "../v15/kernel_fwd.hpp"
 #include "./xsimd_neon.hpp"
 
 #include <cassert>
@@ -352,16 +353,6 @@ namespace xsimd
             return vnegq_f64(rhs);
         }
 
-        /*******
-         * add *
-         *******/
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> add(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
-        {
-            return vaddq_f64(lhs, rhs);
-        }
-
         /********
          * sadd *
          ********/
@@ -369,7 +360,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<double, A> sadd(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
-            return add(lhs, rhs, neon64 {});
+            return ::xsimd::kernel::add(lhs, rhs);
         }
 
         /*******

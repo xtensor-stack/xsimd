@@ -13,6 +13,7 @@
 #define XSIMD_COMMON_ARITHMETIC_HPP
 
 #include "../../types/xsimd_batch_constant.hpp"
+#include "../../v15/kernel_fwd.hpp"
 #include "./xsimd_common_details.hpp"
 
 #include <complex>
@@ -363,7 +364,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> sadd(batch<float, A> const& self, batch<float, A> const& other, requires_arch<common>) noexcept
         {
-            return add(self, other); // no saturated arithmetic on floating point numbers
+            return kernel::add(self, other); // no saturated arithmetic on floating point numbers
         }
         template <class A, class T, class /*=std::enable_if_t<std::is_integral_v<T>>*/>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
@@ -384,7 +385,7 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<double, A> sadd(batch<double, A> const& self, batch<double, A> const& other, requires_arch<common>) noexcept
         {
-            return add(self, other); // no saturated arithmetic on floating point numbers
+            return kernel::add(self, other); // no saturated arithmetic on floating point numbers
         }
 
         // ssub
