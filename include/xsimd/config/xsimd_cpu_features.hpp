@@ -15,6 +15,7 @@
 #include "./xsimd_cpu_features_arm.hpp"
 #include "./xsimd_cpu_features_ppc.hpp"
 #include "./xsimd_cpu_features_riscv.hpp"
+#include "./xsimd_cpu_features_loongarch.hpp"
 #include "./xsimd_cpu_features_s390x.hpp"
 #include "./xsimd_cpu_features_x86.hpp"
 
@@ -40,6 +41,7 @@ namespace xsimd
     class cpu_features : public s390x_cpu_features,
                          public ppc_cpu_features,
                          public riscv_cpu_features,
+                         public loongarch_cpu_features,
                          public arm_cpu_features,
                          public x86_cpu_features
     {

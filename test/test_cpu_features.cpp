@@ -172,6 +172,21 @@ TEST_CASE("[cpu_features] risc-v features from environment")
     CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_RVV", cpu.rvv());
 }
 
+TEST_CASE("[cpu_features] LoongArch implication chains")
+{
+    xsimd::cpu_features cpu;
+
+    CHECK_IMPLICATION(cpu.lasx(), cpu.lsx());
+}
+
+TEST_CASE("[cpu_features] LoongArch features from environment")
+{
+    xsimd::cpu_features cpu;
+
+    CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_LSX", cpu.lsx());
+    CHECK_ENV_FEATURE("XSIMD_TEST_CPU_ASSUME_LASX", cpu.lasx());
+}
+
 TEST_CASE("[cpu_features] ppc features from environment")
 {
     xsimd::cpu_features cpu;
