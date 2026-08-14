@@ -17,6 +17,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using namespace std::placeholders;
 
@@ -199,6 +200,11 @@ struct batch_complex_test
             imag[i] = lhs[i].imag();
             tmp[i] = value_type(real[i]);
         }
+
+#if XSIMD_WITH_LSX || XSIMD_WITH_LASX || XSIMD_WITH_SVE || XSIMD_WITH_RVV
+        batch_type b2 = make_batch(lhs, std::make_index_sequence<size> {});
+        CHECK_EQ(b2, lhs);
+#endif
     }
 
     void test_access_operator() const
@@ -704,6 +710,14 @@ struct batch_complex_test
 #endif
 
 private:
+#if XSIMD_WITH_LSX || XSIMD_WITH_LASX || XSIMD_WITH_SVE || XSIMD_WITH_RVV
+    template <size_t... I>
+    batch_type make_batch(array_type const& values, std::index_sequence<I...>) const
+    {
+        return batch_type(values[I]...);
+    }
+#endif
+
     batch_type batch_lhs() const
     {
         batch_type res = batch_type::load_unaligned(lhs.data());
