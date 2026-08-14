@@ -99,6 +99,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcpu=${TARGET_ARCH} -mtune=${TARGET_ARCH}")
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "riscv64")
         # Nothing specific
+    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "loongarch64")
+        # Nothing specific
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "powerpc")
         # Nothing specific
     elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "s390x")

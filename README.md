@@ -70,6 +70,7 @@ ARM          | NEON, NEON64, SVE128/256/512 (fixed vector size)
 WebAssembly  | WASM
 powerpc64    | VSX
 RISC-V       | RISC-V128/256/512 (fixed vector size)
+LoongArch64  | LSX, LASX
 IBM Z (s390x)| VXE (IBM z14)
 
 ## Installation

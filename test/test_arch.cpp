@@ -160,7 +160,7 @@ TEST_CASE("[multi arch support]")
         using batch8i32 = xsimd::make_sized_batch_t<int32_t, 8>;
         using batch8u32 = xsimd::make_sized_batch_t<uint32_t, 8>;
 
-#if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON || XSIMD_WITH_NEON64 || XSIMD_WITH_SVE || (XSIMD_WITH_RVV && XSIMD_RVV_BITS == 128)
+#if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON || XSIMD_WITH_NEON64 || XSIMD_WITH_SVE || XSIMD_WITH_LSX || (XSIMD_WITH_RVV && XSIMD_RVV_BITS == 128)
         CHECK_EQ(4, size_t(batch4f::size));
         CHECK_EQ(4, size_t(batch4c::size));
         CHECK_EQ(4, size_t(batch4i32::size));
@@ -171,7 +171,7 @@ TEST_CASE("[multi arch support]")
         CHECK_UNARY(bool(std::is_same_v<int32_t, batch4i32::value_type>));
         CHECK_UNARY(bool(std::is_same_v<uint32_t, batch4u32::value_type>));
 
-#if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON64 || XSIMD_WITH_SVE || XSIMD_WITH_RVV
+#if XSIMD_WITH_SSE2 || XSIMD_WITH_NEON64 || XSIMD_WITH_SVE || XSIMD_WITH_RVV || XSIMD_WITH_LSX
         CHECK_EQ(2, size_t(batch2d::size));
         CHECK_EQ(2, size_t(batch2z::size));
         CHECK_UNARY(bool(std::is_same_v<double, batch2d::value_type>));
@@ -181,7 +181,7 @@ TEST_CASE("[multi arch support]")
 #endif
 
 #endif
-#if !XSIMD_WITH_AVX && !XSIMD_WITH_FMA3 && !(XSIMD_WITH_SVE && XSIMD_SVE_BITS == 256) && !(XSIMD_WITH_RVV && XSIMD_RVV_BITS == 256)
+#if !XSIMD_WITH_AVX && !XSIMD_WITH_FMA3 && !XSIMD_WITH_LASX && !(XSIMD_WITH_SVE && XSIMD_SVE_BITS == 256) && !(XSIMD_WITH_RVV && XSIMD_RVV_BITS == 256)
         CHECK_UNARY(bool(std::is_same_v<void, batch8f>));
         CHECK_UNARY(bool(std::is_same_v<void, batch4d>));
         CHECK_UNARY(bool(std::is_same_v<void, batch8c>));
