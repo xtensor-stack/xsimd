@@ -122,12 +122,27 @@ namespace xsimd
      * Certain platforms have different types (*i.e.* not aliases) between
      * ``char`` and ``int8_t``, or ``long long`` and ``int{32,64}_t``, with SIMD
      * intrinsicts only defined for some of them.
+     * Similarly C++23 sized floating point type may be separate types from float/double.
      * Handling them requires to cast to a known predictable type.
      *
      * @tparam T arithmetic type to project from.
      */
     template <typename T>
     using map_to_sized_type_t = typename detail::remap_num<T, /* factor= */ 1>::type;
+
+    /**
+     * Check that two type are theoretically the same.
+     *
+     * @see map_to_sized_type_t
+     */
+    template <typename T, typename U>
+    inline constexpr bool is_like_v = std::is_same_v<map_to_sized_type_t<T>, map_to_sized_type_t<U>>;
+
+    /**
+     * Check that a type is theoretically the same as any in the set.
+     */
+    template <typename T, typename... U>
+    inline constexpr bool is_like_any_v = (... || is_like_v<T, U>);
 
     /**
      * @ingroup type_traits
