@@ -1477,10 +1477,10 @@ namespace xsimd
         {
             if (std::is_signed_v<T>)
             {
-                auto mask = (other >> (8 * sizeof(T) - 1));
+                auto negative = other < batch<T, A>(T(0));
                 auto self_pos_branch = min(std::numeric_limits<T>::max() - other, self);
                 auto self_neg_branch = max(std::numeric_limits<T>::min() - other, self);
-                return other + select(batch_bool<T, A>(mask.data), self_neg_branch, self_pos_branch);
+                return other + select(negative, self_neg_branch, self_pos_branch);
             }
             else
             {
@@ -1728,10 +1728,10 @@ namespace xsimd
             }
             else if (std::is_signed_v<T>)
             {
-                auto mask = (other >> (8 * sizeof(T) - 1));
+                auto negative = other < batch<T, A>(T(0));
                 auto self_overflow_branch = min(std::numeric_limits<T>::max() + other, self);
                 auto self_underflow_branch = max(std::numeric_limits<T>::min() + other, self);
-                return select(batch_bool<T, A>(mask.data), self_overflow_branch, self_underflow_branch) - other;
+                return select(negative, self_overflow_branch, self_underflow_branch) - other;
             }
             else
             {
