@@ -1,0 +1,65 @@
+name: LoongArch64 cross-compilation build
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: 'LoongArch64 ${{ matrix.simd.name }}'
+    strategy:
+      fail-fast: false
+      matrix:
+        simd:
+          - { name: 'LSX', flags: '-mlsx' }
+          - { name: 'LASX', flags: '-mlasx' }
+    steps:
+    - name: Setup compiler
+      run: |
+        sudo apt-get -y -qq update
+        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install \
+          gcc-14-loongarch64-linux-gnu \
+          g++-14-loongarch64-linux-gnu
+        sudo update-alternatives --install /usr/bin/loongarch64-linux-gnu-gcc \
+          loongarch64-linux-gnu-gcc /usr/bin/loongarch64-linux-gnu-gcc-14 20
+        sudo update-alternatives --install /usr/bin/loongarch64-linux-gnu-g++ \
+          loongarch64-linux-gnu-g++ /usr/bin/loongarch64-linux-gnu-g++-14 20
+        loongarch64-linux-gnu-g++ --version
+    - name: Setup QEMU
+      run: |
+        sudo apt-get -y -qq update
+        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install qemu-user-static
+        qemu-loongarch64-static --version
+    - name: Setup Ninja
+      run: |
+        sudo apt-get -y -qq install ninja-build
+    - name: Checkout xsimd
+      uses: actions/checkout@v6
+    - name: Setup
+      run: >-
+        cmake -S . -B _build
+        -GNinja
+        -DBUILD_TESTS=ON
+        -DDOWNLOAD_DOCTEST=ON
+        -DCMAKE_BUILD_TYPE=Release
+        -DTARGET_ARCH=generic
+        -DCMAKE_C_FLAGS="${{ matrix.simd.flags }}"
+        -DCMAKE_CXX_FLAGS="${{ matrix.simd.flags }}"
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/gcc-loongarch64-linux-gnu.cmake
+    - name: Build
+      run: cmake --build _build
+    - name: Set CPU feature test expectations
+      run: |
+        echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_NEON64=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_SVE=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_RVV=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_LSX=1" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_LASX=1" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_VSX=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_VXE=0" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"
+    - name: Testing xsimd
+      timeout-minutes: 15
+      run: qemu-loongarch64-static -L /usr/loongarch64-linux-gnu ./test/test_xsimd
+      working-directory: ${{ github.workspace }}/_build
