@@ -44,7 +44,7 @@ namespace xsimd
      *
      * LoongArch 256-bit advanced SIMD extension.
      */
-    struct lasx : loongarch
+    struct lasx : lsx
     {
         static constexpr bool supported() noexcept { return XSIMD_WITH_LASX; }
         static constexpr bool available() noexcept { return true; }
