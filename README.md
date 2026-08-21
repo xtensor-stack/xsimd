@@ -31,7 +31,15 @@ vendors and compilers.
 
 ## Adoption
 
-Beyond Xtensor, Xsimd has been adopted by major open-source projects, such as Mozilla Firefox, Apache Arrow, Pythran, and Krita.
+Beyond Xtensor, Xsimd has been adopted by major open-source projects, such as:
+
+- **Mozilla Firefox** - web browser,
+- **Apache Arrow** - cross-language framework for tabular data management,
+- **Pandas** - Python data analysis library,
+- **KDE Krita** - digital painting and illustration application,
+- **Meta Velox** - a composable execution engine,
+- **Milvus** - vector database for AI applications,
+- **Pythran** - Python-to-C++ compiler for numerical computing.
 
 ## History
 
