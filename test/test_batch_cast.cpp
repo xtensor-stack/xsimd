@@ -396,7 +396,7 @@ TYPED_TEST(batch_cast_test, cast_sizeshift2)
 }
 #endif
 
-#if XSIMD_WITH_SSE2
+#if XSIMD_WITH_SSE2 || XSIMD_WITH_LSX || XSIMD_WITH_LASX
 TEST_CASE_TEMPLATE("[xsimd cast tests]", B, CONVERSION_TYPES)
 {
     SUBCASE("use fastcast")
