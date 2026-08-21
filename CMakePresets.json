@@ -7,208 +7,217 @@
     },
     "configurePresets": [
         {
-            "name": "native",
+            "name": "xsimd-all",
+            "cacheVariables": {
+                "ENABLE_XTL_COMPLEX": "ON",
+                "BUILD_TESTS": "ON",
+                "BUILD_BENCHMARK": "ON"
+            }
+        },
+
+
+        {
+            "name": "base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_CXX_STANDARD": "17",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+            }
+        },
+        {
+            "name": "debug-base",
+            "hidden": true,
+            "inherits": ["base"],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release-base",
+            "hidden": true,
+            "inherits": ["base"],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+
+        {
+            "name": "native-base",
+            "hidden": true,
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=native"
             }
         },
         {
-            "name": "sse2",
+            "name": "sse2-base",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse2 -mno-sse3"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -msse2 -mno-sse3"
             }
         },
         {
-            "name": "sse3",
+            "name": "sse3-base",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse3 -mno-ssse3"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -msse3 -mno-ssse3"
             }
         },
         {
-            "name": "ssse3",
+            "name": "ssse3-base",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -mssse3 -mno-sse4.1"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mssse3 -mno-sse4.1"
             }
         },
         {
-            "name": "sse4.1",
+            "name": "sse4.1-base",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse4.1 -mno-sse4.2"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -msse4.1 -mno-sse4.2"
             }
         },
         {
-            "name": "sse4.2",
+            "name": "sse4.2-base",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mno-sse4a -msse4.2 -mno-avx"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -msse4.2 -mno-avx"
             }
         },
         {
-            "name": "avx",
+            "name": "avx-base",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mno-avx2"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mavx -mno-avx2"
             }
         },
         {
-            "name": "avx_128",
+            "name": "avx2-base",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mno-avx2 -DXSIMD_DEFAULT_ARCH=avx_128"
+                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64 -mavx2 -mno-avx512f"
             }
         },
         {
-            "name": "avx2",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx2 -mno-avx512f"
-            }
-        },
-        {
-            "name": "avx2_128",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx2 -mno-avx512f -DXSIMD_DEFAULT_ARCH=avx2_128"
-            }
-        },
-        {
-            "name": "avx512f",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mno-avx512cd -mno-avx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512cd",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mno-avx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512dq",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mno-avx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512bw",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512er",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mno-avx512bw -mavx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512pf",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mno-avx512bw -mavx512er -mavx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512ifma",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512vbmi",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mavx512vbmi -mno-avx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512vbmi2",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mavx512vbmi -mavx512vbmi2 -mno-avx512vnni"
-            }
-        },
-        {
-            "name": "avx512vnni_avx512bw",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mavx512vnni"
-            }
-        },
-        {
-            "name": "avx512vnni_avx512vbmi2",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mavx512ifma -mavx512vbmi -mavx512vbmi2 -mavx512vnni"
-            }
-        },
-        {
-            "name": "avx512vl_128",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_128"
-            }
-        },
-        {
-            "name": "avx512vl_256",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=x86-64-v2 -mno-sse4a -mavx -mavx2 -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mno-avx512er -mno-avx512pf -mno-avx512ifma -mno-avx512vbmi -mno-avx512vbmi2 -mno-avx512vnni -DXSIMD_DEFAULT_ARCH=avx512vl_256"
-            }
-        },
-        {
-            "name": "neon",
+            "name": "neon-base",
+            "hidden": true,
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv7-a -mfpu=neon -mfloat-abi=softfp"
             }
         },
         {
-            "name": "neon64",
+            "name": "neon64-base",
+            "hidden": true,
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8-a"
             }
         },
         {
-            "name": "sve128",
+            "name": "sve128-base",
+            "hidden": true,
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=128"
             }
         },
         {
-            "name": "sve256",
+            "name": "sve256-base",
+            "hidden": true,
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=256"
             }
         },
+
         {
-            "name": "sve512",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=armv8.2-a+sve -msve-vector-bits=512"
-            }
+            "name": "dev-base",
+            "hidden": true,
+            "inherits": [
+                "debug-base",
+                "xsimd-all"
+            ]
         },
         {
-            "name": "rvv128",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=rv64gcv_zvl128b_zba_zbb_zbs -mrvv-vector-bits=zvl"
-            }
+            "name": "dev-native",
+            "inherits": [
+                "dev-base",
+                "native-base"
+            ]
         },
         {
-            "name": "rvv256",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=rv64gcv_zvl256b_zba_zbb_zbs -mrvv-vector-bits=zvl"
-            }
+            "name": "dev-sse2",
+            "inherits": [
+                "dev-base",
+                "sse2-base"
+            ]
         },
         {
-            "name": "rvv512",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -march=rv64gcv_zvl512b_zba_zbb_zbs -mrvv-vector-bits=zvl"
-            }
+            "name": "dev-sse3",
+            "inherits": [
+                "dev-base",
+                "sse3-base"
+            ]
         },
         {
-            "name": "vsx2",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -mcpu=power8 -maltivec -mvsx"
-            }
+            "name": "dev-ssse3",
+            "inherits": [
+                "dev-base",
+                "ssse3-base"
+            ]
         },
         {
-            "name": "vsx3",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -mcpu=power9 -maltivec -mvsx"
-            }
+            "name": "dev-sse4.1",
+            "inherits": [
+                "dev-base",
+                "sse4.1-base"
+            ]
         },
         {
-            "name": "vsx4",
-            "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "$env{CXXFLAGS} -mcpu=power10 -maltivec -mvsx"
-            }
+            "name": "dev-sse4.2",
+            "inherits": [
+                "dev-base",
+                "sse4.2-base"
+            ]
+        },
+        {
+            "name": "dev-avx",
+            "inherits": [
+                "dev-base",
+                "avx-base"
+            ]
+        },
+        {
+            "name": "dev-avx2",
+            "inherits": [
+                "dev-base",
+                "avx2-base"
+            ]
+        },
+        {
+            "name": "dev-neon",
+            "inherits": [
+                "dev-base",
+                "neon-base"
+            ]
+        },
+        {
+            "name": "dev-neon64",
+            "inherits": [
+                "dev-base",
+                "neon64-base"
+            ]
+        },
+        {
+            "name": "dev-sve128",
+            "inherits": [
+                "dev-base",
+                "sve128-base"
+            ]
+        },
+        {
+            "name": "dev-sve256",
+            "inherits": [
+                "dev-base",
+                "sve256-base"
+            ]
         }
     ]
 }
