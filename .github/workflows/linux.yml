@@ -14,26 +14,26 @@ jobs:
     strategy:
       matrix:
         sys:
-          - { compiler: 'gcc',   version: '12', flags: 'force_no_instr_set', preset: 'native' }
-          - { compiler: 'gcc',   version: '13', flags: 'enable_xtl_complex', preset: 'native' }
-          - { compiler: 'gcc',   version: '14', flags: '',                   preset: 'avx' }
-          - { compiler: 'gcc',   version: '14', flags: '',                   preset: 'avx2' }
-          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'avx512f' }
-          - { compiler: 'gcc',   version: '10', flags: '',                   preset: 'avx512f' }
-          - { compiler: 'gcc',   version: '12', flags: 'i386',               preset: 'native' }
-          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'avx512pf' }
-          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'avx512vbmi' }
-          - { compiler: 'gcc',   version: '14', flags: '',                   preset: 'avx512vbmi2' }
-          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'avx512vnni_avx512bw' }
-          - { compiler: 'clang', version: '16', flags: 'force_no_instr_set', preset: 'native' }
-          - { compiler: 'clang', version: '16', flags: 'enable_xtl_complex', preset: 'native' }
-          - { compiler: 'clang', version: '17', flags: '',                   preset: 'avx' }
-          - { compiler: 'clang', version: '17', flags: '',                   preset: 'sse3' }
-          - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx512f' }
-          - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx_128' }
-          - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx2_128' }
-          - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx512vl_128' }
-          - { compiler: 'clang', version: '18', flags: '',                   preset: 'avx512vl_256' }
+          - { compiler: 'gcc',   version: '12', flags: 'force_no_instr_set', preset: 'dev-native' }
+          - { compiler: 'gcc',   version: '13', flags: 'enable_xtl_complex', preset: 'dev-native' }
+          - { compiler: 'gcc',   version: '14', flags: '',                   preset: 'dev-avx' }
+          - { compiler: 'gcc',   version: '14', flags: '',                   preset: 'dev-avx2' }
+          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'dev-avx512f' }
+          - { compiler: 'gcc',   version: '10', flags: '',                   preset: 'dev-avx512f' }
+          - { compiler: 'gcc',   version: '12', flags: 'i386',               preset: 'dev-native' }
+          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'dev-avx512pf' }
+          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'dev-avx512vbmi' }
+          - { compiler: 'gcc',   version: '14', flags: '',                   preset: 'dev-avx512vbmi2' }
+          - { compiler: 'gcc',   version: '13', flags: '',                   preset: 'dev-avx512vnni_avx512bw' }
+          - { compiler: 'clang', version: '16', flags: 'force_no_instr_set', preset: 'dev-native' }
+          - { compiler: 'clang', version: '16', flags: 'enable_xtl_complex', preset: 'dev-native' }
+          - { compiler: 'clang', version: '17', flags: '',                   preset: 'dev-avx' }
+          - { compiler: 'clang', version: '17', flags: '',                   preset: 'dev-sse3' }
+          - { compiler: 'clang', version: '18', flags: '',                   preset: 'dev-avx512f' }
+          - { compiler: 'clang', version: '18', flags: '',                   preset: 'dev-avx_128' }
+          - { compiler: 'clang', version: '18', flags: '',                   preset: 'dev-avx2_128' }
+          - { compiler: 'clang', version: '18', flags: '',                   preset: 'dev-avx512vl_128' }
+          - { compiler: 'clang', version: '18', flags: '',                   preset: 'dev-avx512vl_256' }
     steps:
     - name: Setup GCC compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
