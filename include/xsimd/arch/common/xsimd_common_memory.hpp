@@ -450,6 +450,29 @@ namespace xsimd
             return batch<T, A>::load_aligned(buffer.data());
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
+        {
+            // Scalar fallback: only active lanes are touched. Arches with
+            // hardware predicated loads should override this.
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<T, size> buffer_real;
+            alignas(A::alignment()) std::array<T, size> buffer_imag;
+            for (std::size_t i = 0; i < size; ++i)
+                if (mask.get(i))
+                {
+                    buffer_real[i] = mem[i].real();
+                    buffer_imag[i] = mem[i].imag();
+                }
+                else
+                {
+                    buffer_real[i] = T(0);
+                    buffer_imag[i] = T(0);
+                }
+            return batch<std::complex<T>, A>::load_aligned(buffer_real.data(), buffer_imag.data());
+        }
+
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE void
         store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, alignment mode, requires_arch<common>) noexcept
@@ -863,6 +886,18 @@ namespace xsimd
         XSIMD_INLINE void store_complex_stream(std::complex<T_out>* dst, batch<std::complex<T_in>, A> const& src, requires_arch<common>) noexcept
         {
             store_complex_aligned<A>(dst, src, A {});
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<std::complex<T>, size> buffer;
+            src.store_aligned(buffer.data());
+            for (std::size_t i = 0; i < size; ++i)
+                if (mask.get(i))
+                    mem[i] = buffer[i];
         }
 
         // transpose
