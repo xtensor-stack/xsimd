@@ -154,8 +154,12 @@
 #include "./xsimd_rvv.hpp"
 #endif
 
-#if XSIMD_WITH_LSX || XSIMD_WITH_LASX
+#if XSIMD_WITH_LSX
 #include "./xsimd_lsx.hpp"
+#endif
+
+#if XSIMD_WITH_LASX
+#include "./xsimd_lasx.hpp"
 #endif
 
 #if XSIMD_WITH_WASM

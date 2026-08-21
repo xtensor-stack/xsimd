@@ -11,8 +11,8 @@ jobs:
       fail-fast: false
       matrix:
         simd:
-          - { name: 'LSX', flags: '-mlsx' }
-          - { name: 'LASX', flags: '-mlasx' }
+          - { name: 'LSX', flags: '-mlsx -mno-lasx', lasx: 0, cpu: 'la464,lsx=on,lasx=off' }
+          - { name: 'LASX', flags: '-mlasx', lasx: 1, cpu: 'la464,lsx=on,lasx=on' }
     steps:
     - name: Setup compiler
       run: |
@@ -55,11 +55,11 @@ jobs:
         echo "XSIMD_TEST_CPU_ASSUME_SVE=0" >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_RVV=0" >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_LSX=1" >> "$GITHUB_ENV"
-        echo "XSIMD_TEST_CPU_ASSUME_LASX=1" >> "$GITHUB_ENV"
+        echo "XSIMD_TEST_CPU_ASSUME_LASX=${{ matrix.simd.lasx }}" >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_VSX=0" >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_VXE=0" >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"
     - name: Testing xsimd
       timeout-minutes: 15
-      run: qemu-loongarch64-static -L /usr/loongarch64-linux-gnu ./test/test_xsimd
+      run: qemu-loongarch64-static -cpu '${{ matrix.simd.cpu }}' -L /usr/loongarch64-linux-gnu ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build

@@ -34,6 +34,7 @@
 #include "./xsimd_neon64_register.hpp"
 #include "./xsimd_neon_register.hpp"
 #include "./xsimd_rvv_register.hpp"
+#include "./xsimd_lasx_register.hpp"
 #include "./xsimd_lsx_register.hpp"
 #include "./xsimd_sse2_register.hpp"
 #include "./xsimd_sse3_register.hpp"
