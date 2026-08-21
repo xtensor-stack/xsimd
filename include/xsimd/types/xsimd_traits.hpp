@@ -64,11 +64,6 @@ namespace xsimd
             static constexpr size_t size = 1;
         };
 
-#if XSIMD_CPP_VERSION < 201703L
-        template <class T>
-        constexpr size_t simd_traits_impl<T, false>::size;
-#endif
-
         template <class T>
         struct simd_traits_impl<T, true>
         {
@@ -76,11 +71,6 @@ namespace xsimd
             using bool_type = typename type::batch_bool_type;
             static constexpr size_t size = type::size;
         };
-
-#if XSIMD_CPP_VERSION < 201703L
-        template <class T>
-        constexpr size_t simd_traits_impl<T, true>::size;
-#endif
 
         template <class T, class A>
         struct static_check_supported_config_emitter
@@ -143,22 +133,12 @@ namespace xsimd
         static constexpr size_t size = simd_traits<type>::size;
     };
 
-#if XSIMD_CPP_VERSION < 201703L
-    template <class T>
-    constexpr size_t revert_simd_traits<T>::size;
-#endif
-
     template <class T>
     struct revert_simd_traits<batch<T>>
     {
         using type = T;
         static constexpr size_t size = batch<T>::size;
     };
-
-#if XSIMD_CPP_VERSION < 201703L
-    template <class T>
-    constexpr size_t revert_simd_traits<batch<T>>::size;
-#endif
 
     template <class T>
     using simd_type = typename simd_traits<T>::type;
@@ -264,17 +244,6 @@ namespace xsimd
         static constexpr bool is_complex = detail::is_complex_v<T>; ///< True if T is complex or a batch of complex values.
     };
 
-#if XSIMD_CPP_VERSION < 201703L
-    template <class T>
-    constexpr bool batch_traits<T>::is_batch;
-    template <class T>
-    constexpr bool batch_traits<T>::is_batch_bool;
-    template <class T>
-    constexpr bool batch_traits<T>::is_any_batch;
-    template <class T>
-    constexpr bool batch_traits<T>::is_complex;
-#endif
-
     template <class T, class A>
     struct batch_traits<batch<T, A>>
     {
@@ -287,17 +256,6 @@ namespace xsimd
         static constexpr bool is_complex = detail::is_complex_v<T>;
     };
 
-#if XSIMD_CPP_VERSION < 201703L
-    template <class T, class A>
-    constexpr bool batch_traits<batch<T, A>>::is_batch;
-    template <class T, class A>
-    constexpr bool batch_traits<batch<T, A>>::is_batch_bool;
-    template <class T, class A>
-    constexpr bool batch_traits<batch<T, A>>::is_any_batch;
-    template <class T, class A>
-    constexpr bool batch_traits<batch<T, A>>::is_complex;
-#endif
-
     template <class T, class A>
     struct batch_traits<batch_bool<T, A>>
     {
@@ -309,17 +267,6 @@ namespace xsimd
         static constexpr bool is_any_batch = true;
         static constexpr bool is_complex = false;
     };
-
-#if XSIMD_CPP_VERSION < 201703L
-    template <class T, class A>
-    constexpr bool batch_traits<batch_bool<T, A>>::is_batch;
-    template <class T, class A>
-    constexpr bool batch_traits<batch_bool<T, A>>::is_batch_bool;
-    template <class T, class A>
-    constexpr bool batch_traits<batch_bool<T, A>>::is_any_batch;
-    template <class T, class A>
-    constexpr bool batch_traits<batch_bool<T, A>>::is_complex;
-#endif
 
     /**
      * @ingroup batch_traits
