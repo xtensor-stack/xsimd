@@ -303,6 +303,57 @@ struct batch_int_test
         t.run();
     }
 
+    // 0, ~0, single bits, prefixes, suffixes and pseudo-random words: the
+    // patterns the bit ops actually branch on
+    static array_type bit_patterns(size_t seed)
+    {
+        constexpr size_t bits = sizeof(value_type) * CHAR_BIT;
+        using U = std::make_unsigned_t<value_type>;
+        array_type a;
+        for (size_t i = 0; i < size; ++i)
+        {
+            size_t k = seed * size + i;
+            size_t sh = k % bits;
+            U u;
+            switch (k % 6)
+            {
+            case 0:
+                u = U(0);
+                break;
+            case 1:
+                u = U(~U(0));
+                break;
+            case 2:
+                u = U(U(1) << sh);
+                break;
+            case 3:
+                u = U(~U(0)) << sh;
+                break;
+            case 4:
+                u = U(U(U(1) << sh) - U(1));
+                break;
+            default:
+                u = U(k * 0x9E3779B9u + 0x7F4A7C15u);
+                break;
+            }
+            a[i] = value_type(u);
+        }
+        return a;
+    }
+
+    void test_popcount() const
+    {
+        using U = std::make_unsigned_t<value_type>;
+        for (size_t s = 0; s < 6; ++s)
+        {
+            array_type in = bit_patterns(s), expected;
+            std::transform(in.cbegin(), in.cend(), expected.begin(), [](value_type v)
+                           { return value_type(xsimd::detail::popcount(U(v))); });
+            INFO("popcount, pattern " << s);
+            CHECK_BATCH_EQ(xsimd::popcount(batch_type::load_unaligned(in.data())), expected);
+        }
+    }
+
     void test_less_than_underflow() const
     {
         batch_type test_negative_compare = batch_type(5) - 6;
@@ -360,6 +411,11 @@ TEST_CASE_TEMPLATE("[batch int tests]", B, BATCH_INT_TYPES)
     SUBCASE("less_than_underflow")
     {
         Test.test_less_than_underflow();
+    }
+
+    SUBCASE("popcount")
+    {
+        Test.test_popcount();
     }
 }
 #endif

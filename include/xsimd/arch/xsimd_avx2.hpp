@@ -962,6 +962,38 @@ namespace xsimd
                                                { return batch<uint64_t, A>(_mm256_mul_epu32(a, b)); });
         }
 
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<avx2>) noexcept
+        {
+            // per-byte counts from a nibble lookup indexed by VPSHUFB, after
+            // Wojciech Muła, http://0x80.pl/articles/sse-popcount.html
+            __m256i const low_mask = _mm256_set1_epi8(0x0f);
+            __m256i const lo = _mm256_and_si256(self, low_mask);
+            __m256i const hi = _mm256_and_si256(_mm256_srli_epi16(self, 4), low_mask);
+            if constexpr (sizeof(T) == 8)
+            {
+                // tables biased by +4 and -4 turn the VPSADBW difference into the
+                // per-byte count, so one instruction adds the nibble counts and
+                // sums the eight bytes, after https://github.com/kimwalisch/libpopcnt
+                __m256i const lookup_lo = _mm256_broadcastsi128_si256(_mm_setr_epi8(4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8));
+                __m256i const lookup_hi = _mm256_broadcastsi128_si256(_mm_setr_epi8(4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0));
+                return _mm256_sad_epu8(_mm256_shuffle_epi8(lookup_lo, lo), _mm256_shuffle_epi8(lookup_hi, hi));
+            }
+            else
+            {
+                __m256i const lookup = _mm256_broadcastsi128_si256(_mm_setr_epi8(0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4));
+                __m256i const counts = _mm256_add_epi8(_mm256_shuffle_epi8(lookup, lo), _mm256_shuffle_epi8(lookup, hi));
+                // wider elements sum their byte counts
+                if constexpr (sizeof(T) == 1)
+                    return counts;
+                else if constexpr (sizeof(T) == 2)
+                    return _mm256_maddubs_epi16(counts, _mm256_set1_epi8(1));
+                else
+                    return _mm256_madd_epi16(_mm256_maddubs_epi16(counts, _mm256_set1_epi8(1)), _mm256_set1_epi16(1));
+            }
+        }
+
         // reduce_add
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<avx2>) noexcept

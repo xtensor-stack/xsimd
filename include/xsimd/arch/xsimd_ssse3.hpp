@@ -82,6 +82,38 @@ namespace xsimd
             return detail::extract_pair(self, other, i, std::make_index_sequence<size>());
         }
 
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<ssse3>) noexcept
+        {
+            // per-byte counts from a nibble lookup indexed by PSHUFB, after
+            // Wojciech Muła, http://0x80.pl/articles/sse-popcount.html
+            __m128i const low_mask = _mm_set1_epi8(0x0f);
+            __m128i const lo = _mm_and_si128(self, low_mask);
+            __m128i const hi = _mm_and_si128(_mm_srli_epi16(self, 4), low_mask);
+            if constexpr (sizeof(T) == 8)
+            {
+                // tables biased by +4 and -4 turn the PSADBW difference into the
+                // per-byte count, so one instruction adds the nibble counts and
+                // sums the eight bytes, after https://github.com/kimwalisch/libpopcnt
+                __m128i const lookup_lo = _mm_setr_epi8(4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8);
+                __m128i const lookup_hi = _mm_setr_epi8(4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0);
+                return _mm_sad_epu8(_mm_shuffle_epi8(lookup_lo, lo), _mm_shuffle_epi8(lookup_hi, hi));
+            }
+            else
+            {
+                __m128i const lookup = _mm_setr_epi8(0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4);
+                __m128i const counts = _mm_add_epi8(_mm_shuffle_epi8(lookup, lo), _mm_shuffle_epi8(lookup, hi));
+                // wider elements sum their byte counts
+                if constexpr (sizeof(T) == 1)
+                    return counts;
+                else if constexpr (sizeof(T) == 2)
+                    return _mm_maddubs_epi16(counts, _mm_set1_epi8(1));
+                else
+                    return _mm_madd_epi16(_mm_maddubs_epi16(counts, _mm_set1_epi8(1)), _mm_set1_epi16(1));
+            }
+        }
+
         // reduce_add
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE T reduce_add(batch<T, A> const& self, requires_arch<ssse3>) noexcept

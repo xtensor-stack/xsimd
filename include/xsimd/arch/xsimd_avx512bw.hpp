@@ -561,6 +561,49 @@ namespace xsimd
             return detail::compare_int_avx512bw<A, T, _MM_CMPINT_NE>(self, other);
         }
 
+        namespace detail
+        {
+            // per-byte counts from a nibble lookup indexed by VPSHUFB, after
+            // Wojciech Muła, http://0x80.pl/articles/sse-popcount.html
+            XSIMD_INLINE __m512i popcount_bytes(__m512i self) noexcept
+            {
+                __m512i const low_mask = _mm512_set1_epi8(0x0f);
+                __m512i const lookup = _mm512_broadcast_i32x4(_mm_setr_epi8(0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4));
+                __m512i const lo = _mm512_and_si512(self, low_mask);
+                __m512i const hi = _mm512_and_si512(_mm512_srli_epi16(self, 4), low_mask);
+                return _mm512_add_epi8(_mm512_shuffle_epi8(lookup, lo), _mm512_shuffle_epi8(lookup, hi));
+            }
+        }
+
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<avx512bw>) noexcept
+        {
+            if constexpr (sizeof(T) == 8)
+            {
+                __m512i const low_mask = _mm512_set1_epi8(0x0f);
+                __m512i const lo = _mm512_and_si512(self, low_mask);
+                __m512i const hi = _mm512_and_si512(_mm512_srli_epi16(self, 4), low_mask);
+                // tables biased by +4 and -4 turn the VPSADBW difference into the
+                // per-byte count, so one instruction adds the nibble counts and
+                // sums the eight bytes, after https://github.com/kimwalisch/libpopcnt
+                __m512i const lookup_lo = _mm512_broadcast_i32x4(_mm_setr_epi8(4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8));
+                __m512i const lookup_hi = _mm512_broadcast_i32x4(_mm_setr_epi8(4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0));
+                return _mm512_sad_epu8(_mm512_shuffle_epi8(lookup_lo, lo), _mm512_shuffle_epi8(lookup_hi, hi));
+            }
+            else
+            {
+                __m512i const counts = detail::popcount_bytes(self);
+                // wider elements sum their byte counts
+                if constexpr (sizeof(T) == 1)
+                    return counts;
+                else if constexpr (sizeof(T) == 2)
+                    return _mm512_maddubs_epi16(counts, _mm512_set1_epi8(1));
+                else
+                    return _mm512_madd_epi16(_mm512_maddubs_epi16(counts, _mm512_set1_epi8(1)), _mm512_set1_epi16(1));
+            }
+        }
+
         // sadd
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> sadd(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept

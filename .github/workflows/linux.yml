@@ -116,7 +116,8 @@ jobs:
           CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=icelake-server"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'avx512vnni' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
+          # knm enables avx5124vnniw, not avx512vnni: it selects the avx512pf arch
+          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=cascadelake"
         fi
         if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
           CXX_FLAGS="$CXX_FLAGS -m32"
