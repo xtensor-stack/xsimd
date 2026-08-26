@@ -94,24 +94,6 @@ namespace xsimd
             }
         }
 
-        // add
-        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
-        XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept
-        {
-            if constexpr (sizeof(T) == 1)
-            {
-                return _mm512_add_epi8(self, other);
-            }
-            else if constexpr (sizeof(T) == 2)
-            {
-                return _mm512_add_epi16(self, other);
-            }
-            else
-            {
-                return add(self, other, avx512dq {});
-            }
-        }
-
         // avgr
         template <class A, class T, class = std::enable_if_t<std::is_unsigned_v<T>>>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx512bw>) noexcept

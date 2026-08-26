@@ -10,13 +10,7 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ****************************************************************************/
 
-#include "./xsimd_arm_registers.hpp"
-#include "./xsimd_rvv_register.hpp"
-#include "./xsimd_vsx_register.hpp"
-#include "./xsimd_vxe_register.hpp"
-#include "./xsimd_wasm_register.hpp"
-#include "./xsimd_x86_registers.hpp"
-
-#if XSIMD_WITH_EMULATED
-#include "./xsimd_emulated_register.hpp"
-#endif
+#include "./xsimd_i8mm_neon64_register.hpp"
+#include "./xsimd_neon64_register.hpp"
+#include "./xsimd_neon_register.hpp"
+#include "./xsimd_sve_register.hpp"

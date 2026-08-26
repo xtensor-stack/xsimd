@@ -53,32 +53,6 @@ namespace xsimd
             return self;
         }
 
-        // add
-        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
-        XSIMD_INLINE batch<T, A> add(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept
-        {
-            if constexpr (sizeof(T) == 1)
-            {
-                return _mm256_add_epi8(self, other);
-            }
-            else if constexpr (sizeof(T) == 2)
-            {
-                return _mm256_add_epi16(self, other);
-            }
-            else if constexpr (sizeof(T) == 4)
-            {
-                return _mm256_add_epi32(self, other);
-            }
-            else if constexpr (sizeof(T) == 8)
-            {
-                return _mm256_add_epi64(self, other);
-            }
-            else
-            {
-                return add(self, other, avx {});
-            }
-        }
-
         // avgr
         template <class A, class T, class = std::enable_if_t<std::is_unsigned_v<T>>>
         XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept
@@ -348,9 +322,9 @@ namespace xsimd
                     __m256i cmp_is_negative = _mm256_cmpgt_epi8(_mm256_setzero_si256(), self);
                     __m256i res = _mm256_srai_epi16(self, other);
                     return _mm256_or_si256(
-                        detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                           { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2 {}); },
-                                           sign_mask, cmp_is_negative),
+                        detail::apply_on_halves([](auto s, auto o) noexcept
+                                                { return bitwise_and(s, o); },
+                                                batch<T, A>(sign_mask), batch<T, A>(cmp_is_negative)),
                         _mm256_andnot_si256(sign_mask, res));
                 }
                 else if constexpr (sizeof(T) == 2)
@@ -400,9 +374,9 @@ namespace xsimd
                     __m256i cmp_is_negative = _mm256_cmpgt_epi8(_mm256_setzero_si256(), self);
                     __m256i res = _mm256_srai_epi16(self, shift);
                     return _mm256_or_si256(
-                        detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                           { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2 {}); },
-                                           sign_mask, cmp_is_negative),
+                        detail::apply_on_halves([](auto s, auto o) noexcept
+                                                { return bitwise_and(s, o); },
+                                                batch<T, A>(sign_mask), batch<T, A>(cmp_is_negative)),
                         _mm256_andnot_si256(sign_mask, res));
                 }
                 else if constexpr (sizeof(T) == 2)
@@ -611,7 +585,7 @@ namespace xsimd
         {
             const batch<double, A> low(_mm256_i32gather_pd(src, _mm256_castsi256_si128(index.data), sizeof(double)));
             const batch<double, A> high(_mm256_i32gather_pd(src, _mm256_extractf128_si256(index.data, 1), sizeof(double)));
-            return detail::merge_sse(_mm256_cvtpd_ps(low.data), _mm256_cvtpd_ps(high.data));
+            return detail::merge_halves<float, A, sse4_2>(_mm256_cvtpd_ps(low.data), _mm256_cvtpd_ps(high.data));
         }
 
         template <class A, class V, detail::enable_sized_integral_t<V, 4> = 0>
@@ -621,7 +595,7 @@ namespace xsimd
         {
             const batch<double, A> low(_mm256_i32gather_pd(src, _mm256_castsi256_si128(index.data), sizeof(double)));
             const batch<double, A> high(_mm256_i32gather_pd(src, _mm256_extractf128_si256(index.data, 1), sizeof(double)));
-            return detail::merge_sse(_mm256_cvtpd_epi32(low.data), _mm256_cvtpd_epi32(high.data));
+            return detail::merge_halves<int32_t, A, sse4_2>(_mm256_cvtpd_epi32(low.data), _mm256_cvtpd_epi32(high.data));
         }
 
         // lt

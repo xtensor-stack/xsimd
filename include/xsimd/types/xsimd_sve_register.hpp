@@ -211,6 +211,23 @@ namespace xsimd
 #else
     using sve = detail::sve<0xFFFFFFFF>;
 #endif
+
+    namespace detail
+    {
+        template <typename T>
+        struct is_sve : std::false_type
+        {
+        };
+
+        template <size_t Width>
+        struct is_sve<sve<Width>> : std::true_type
+        {
+        };
+    }
+
+    template <typename T>
+    inline constexpr bool is_sve_v = detail::is_sve<T>::value;
+
 } // namespace xsimd
 
 #endif
