@@ -68,6 +68,8 @@ namespace xsimd
             ARCH_FIELD_EX(detail::rvv<512>, rvv512)
             ARCH_FIELD_EX(detail::rvv<256>, rvv256)
             ARCH_FIELD_EX(detail::rvv<128>, rvv128)
+            ARCH_FIELD(lsx)
+            ARCH_FIELD(lasx)
             ARCH_FIELD(wasm)
             ARCH_FIELD(vsx)
             ARCH_FIELD(vxe)
@@ -89,6 +91,9 @@ namespace xsimd
                 rvv128 = cpu.rvv() && (cpu.rvv_size_bytes() >= (128 / 8));
                 rvv256 = cpu.rvv() && (cpu.rvv_size_bytes() >= (256 / 8));
                 rvv512 = cpu.rvv() && (cpu.rvv_size_bytes() >= (512 / 8));
+
+                lsx = cpu.lsx();
+                lasx = cpu.lasx();
 
                 neon = cpu.neon();
                 neon64 = cpu.neon64();
