@@ -7,7 +7,7 @@
 
 #include "../../config/xsimd_config.hpp"
 
-#if XSIMD_CPP_VERSION > 202002L
+#if XSIMD_CPP_VERSION >= 202002L
 
 #include <version>
 
