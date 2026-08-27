@@ -51,20 +51,21 @@ The mathematical functions are a lightweight implementation of the algorithms or
 
 ## Requirements
 
-`xsimd` requires a C++17 compliant compiler. The following C++ compilers are supported:
+`xsimd` builds with any C++17 compliant compiler. Official support covers the
+compilers tested in the CI:
 
 Compiler                | Version
 ------------------------|-------------------------------
-Microsoft Visual Studio | MSVC 2015 update 2 and above
-g++                     | 4.9 and above
-clang                   | 4.0 and above
+Microsoft Visual Studio | MSVC 2022 and above
+g++                     | 10 and above
+clang                   | 16 and above
 
 The following SIMD instruction set extensions are supported:
 
 Architecture | Instruction set extensions
 -------------|-----------------------------------------------------
 x86          | SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2, FMA3+SSE, FMA3+AVX, FMA3+AVX2
-x86          | AVX512BW, AVX512CD, AVX512DQ, AVX512F, AVX512VL (gcc7 and higher)
+x86          | AVX512BW, AVX512CD, AVX512DQ, AVX512F, AVX512VL
 x86 AMD      | FMA4
 ARM          | NEON, NEON64, SVE128/256/512 (fixed vector size)
 WebAssembly  | WASM

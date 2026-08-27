@@ -55,7 +55,7 @@ The following SIMD instruction set extensions are supported:
 +==============+=========================================================+
 | x86          | SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, FMA3, AVX2 |
 +--------------+---------------------------------------------------------+
-| x86          | AVX512 (gcc7 and higher)                                |
+| x86          | AVX512                                                  |
 +--------------+---------------------------------------------------------+
 | x86 AMD      | same as above + FMA4                                    |
 +--------------+---------------------------------------------------------+
@@ -69,16 +69,17 @@ The following SIMD instruction set extensions are supported:
 +--------------+---------------------------------------------------------+
 
 
-`xsimd` requires a C++17 compliant compiler. The following C++ compilers are supported:
+`xsimd` builds with any C++17 compliant compiler. Official support covers the
+compilers tested in the CI:
 
 +-------------------------+-------------------------------+
 | Compiler                | Version                       |
 +=========================+===============================+
-| Microsoft Visual Studio | MSVC 2015 update 2 and above  |
+| Microsoft Visual Studio | MSVC 2022 and above           |
 +-------------------------+-------------------------------+
-| g++                     | 4.9 and above                 |
+| g++                     | 10 and above                  |
 +-------------------------+-------------------------------+
-| clang                   | 3.7 and above                 |
+| clang                   | 16 and above                  |
 +-------------------------+-------------------------------+
 
 Licensing
