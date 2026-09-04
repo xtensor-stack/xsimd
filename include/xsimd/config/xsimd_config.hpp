@@ -51,7 +51,7 @@
  *
  * Set to 1 if the target is the x86 architecture family.
  */
-#if defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)
+#if (defined(__x86_64__) || defined(__i386__) || defined(_M_AMD64) || defined(_M_IX86)) && !defined(_M_ARM64EC)
 #define XSIMD_TARGET_X86 1
 #else
 #define XSIMD_TARGET_X86 0
@@ -422,7 +422,7 @@
  *
  * Set to 1 if the target is in the ARM architecture family in 64 bits, to 0 otherwise
  */
-#if defined(__aarch64__) || defined(_M_ARM64)
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
 #define XSIMD_TARGET_ARM64 1
 #else
 #define XSIMD_TARGET_ARM64 0
