@@ -136,10 +136,15 @@ jobs:
       run: ./_build/test/test_xsimd
 
   build-windows-arm64:
-    name: 'MSVC arm64'
+    name: 'MSVC arm64 ${{ matrix.abi.name }}'
     defaults:
       run:
         shell: bash {0}
+    strategy:
+      matrix:
+        abi:
+          - { name: "native", cflags: "" }
+          - { name: "arm64ec", cflags: " /arm64EC" }
     runs-on: windows-11-arm
     steps:
     - name: Setup compiler
@@ -154,6 +159,9 @@ jobs:
       uses: actions/checkout@v6
     - name: Setup
       run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -G Ninja
+      env:
+        CFLAGS: ${{ matrix.abi.cflags }}
+        CXXFLAGS: ${{ matrix.abi.cflags }}
     - name: Build
       run: cmake --build _build
     - name: Testing xsimd
