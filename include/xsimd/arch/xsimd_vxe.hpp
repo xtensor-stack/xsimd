@@ -408,6 +408,15 @@ namespace xsimd
             return vec_mergeh(row[0].data, row[1].data) + vec_mergel(row[0].data, row[1].data);
         }
 
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<vxe>) noexcept
+        {
+            // VPOPCT counts the bits of each element in one instruction
+            using U = as_unsigned_integer_t<T>;
+            return bitwise_cast<T>(batch<U, A>(vec_popcnt(bitwise_cast<U>(self).data)));
+        }
+
         // reduce_add
         template <class A>
         XSIMD_INLINE float reduce_add(batch<float, A> const& self, requires_arch<vxe>) noexcept

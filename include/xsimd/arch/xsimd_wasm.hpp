@@ -1813,6 +1813,26 @@ namespace xsimd
         {
             return wasm_i64x2_shuffle(self, other, 0, 2);
         }
+
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<wasm>) noexcept
+        {
+            // i8x16.popcnt counts bytes only, and pairwise widening addition
+            // stops at 32-bit elements; a shift-and-add folds the 32-bit
+            // counts into 64-bit ones, a mask drops the stray high halves
+            v128_t counts = wasm_i8x16_popcnt(self);
+            if constexpr (sizeof(T) == 1)
+                return counts;
+            counts = wasm_u16x8_extadd_pairwise_u8x16(counts);
+            if constexpr (sizeof(T) == 2)
+                return counts;
+            counts = wasm_u32x4_extadd_pairwise_u16x8(counts);
+            if constexpr (sizeof(T) == 4)
+                return counts;
+            return wasm_v128_and(wasm_i64x2_add(counts, wasm_i64x2_shr(counts, 32)),
+                                 wasm_i64x2_splat(0xffffffff));
+        }
     }
 }
 
