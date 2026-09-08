@@ -1,13 +1,5 @@
 # RISC-V RVV cross-compilation build (Ubuntu apt qemu, multi-compiler matrix).
 #
-# vlen=128 is intentionally NOT covered here. Ubuntu's qemu-user-static
-# (8.2.x in noble, 9.x in plucky) hangs on the xsimd test_xsimd binary at
-# vlen=128 — see QEMU issue #2137 (RVV TCG slowdowns) for the underlying
-# emulator behaviour. Until ubuntu-latest ships qemu 11+, vlen=128 coverage
-# lives in cross-rvv-arch.yml, which runs inside an archlinux:latest
-# container with qemu 11. Vlens >= 256 run fast enough under the apt qemu
-# to stay within the test step's timeout.
-#
 # References:
 #   QEMU 11.0.0 release notes:  https://www.qemu.org/2026/04/22/qemu-11-0-0/
 #   QEMU RVV slowdowns issue:   https://gitlab.com/qemu-project/qemu/-/issues/2137
@@ -29,8 +21,15 @@ jobs:
           - { compiler: 'clang', version: '17', gcc_runtime: '14'}
           - { compiler: 'clang', version: '18', gcc_runtime: '14'}
         vector_bits:
+          - 128
           - 256
           - 512
+        exclude:
+          # Fails with a timeout, altough it works with clang. Also used to work
+          # with a more recent version of qemu, but now it's back to failing.
+          # See 8b8168722d1ab425186efd2cddb1e29aba8b9c02 for more details.
+          - sys: { compiler: 'gcc', gcc_runtime: '14'}
+            vector_bits: 128
     steps:
     - name: Setup GCC
       run: |
@@ -81,7 +80,7 @@ jobs:
         echo "XSIMD_TEST_CPU_ASSUME_SVE=0"    >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_RVV=1" >> "$GITHUB_ENV"
     - name: Testing xsimd
-      timeout-minutes: 15
+      timeout-minutes: 10
       run: >
         QEMU_CPU="rv64,zba=true,zbb=true,zbs=true,v=true,vlen=${{ matrix.vector_bits }},elen=64,vext_spec=v1.0"
         QEMU_LD_PREFIX="/usr/riscv64-linux-gnu"
