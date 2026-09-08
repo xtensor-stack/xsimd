@@ -110,23 +110,6 @@ namespace xsimd
         }
 
         /*************
-         * broadcast *
-         *************/
-
-        // Required to avoid ambiguous call
-        template <class A, class T>
-        XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<neon64>) noexcept
-        {
-            return broadcast<A>(val, neon {});
-        }
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> broadcast(double val, requires_arch<neon64>) noexcept
-        {
-            return vdupq_n_f64(val);
-        }
-
-        /*************
          * from_bool *
          *************/
 

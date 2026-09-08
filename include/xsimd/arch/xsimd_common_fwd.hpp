@@ -97,6 +97,10 @@ namespace xsimd
         XSIMD_INLINE void store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, alignment, requires_arch<common>) noexcept;
         template <class A, class T, class Mode>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept;
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> avg(batch<T, A> const& x, batch<T, A> const& y, requires_arch<common>) noexcept;
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> avgr(batch<T, A> const& x, batch<T, A> const& y, requires_arch<common>) noexcept;
 
         // Forward declarations for pack-level helpers
         namespace detail
