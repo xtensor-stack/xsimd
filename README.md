@@ -55,9 +55,9 @@ The mathematical functions are a lightweight implementation of the algorithms or
 
 Compiler                | Version
 ------------------------|-------------------------------
-Microsoft Visual Studio | MSVC 2015 update 2 and above
-g++                     | 4.9 and above
-clang                   | 4.0 and above
+Microsoft Visual Studio | MSVC 2017 version 15.7 and above
+g++                     | 7 and above
+clang                   | 5 and above
 
 The following SIMD instruction set extensions are supported:
 
