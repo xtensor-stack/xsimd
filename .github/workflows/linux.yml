@@ -99,7 +99,7 @@ jobs:
               -D CMAKE_CXX_COMPILER="${CXX}" \
               -D TARGET_ARCH="x86-64" \
               -D XSIMD_HARDEN_TRIVIAL_AUTO_VAR_INIT=ON \
-              "${CMAKE_EXTRA_ARGS}" \
+              ${CMAKE_EXTRA_ARGS} \
               -G Ninja
 
     - name: Build
