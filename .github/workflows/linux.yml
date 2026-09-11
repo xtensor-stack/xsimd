@@ -74,7 +74,7 @@ jobs:
         environment-file: environment.yml
 
     - name: Setup SDE
-      if: startswith(matrix.sys.preset, 'avx512')
+      if: contains(matrix.sys.preset, 'avx512')
       run: sh install_sde.sh
 
     - name: Configure build
