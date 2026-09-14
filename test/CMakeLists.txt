@@ -218,7 +218,10 @@ if (XSIMD_ENABLE_WERROR)
 endif()
 
 add_subdirectory(doc)
-add_subdirectory(architectures)
+OPTION(BUILD_ARCHITECTURE_TESTS "xsimd compilation tests for various -march targets" OFF)
+if(BUILD_ARCHITECTURE_TESTS)
+    add_subdirectory(architectures)
+endif()
 
 if(EMULATED_COMPILE_FLAGS)
     message(STATUS ${EMULATED_COMPILE_FLAGS})
