@@ -132,7 +132,6 @@ jobs:
 
         cmake -B _build \
               -DBUILD_TESTS=ON \
-              -DBUILD_BENCHMARK=ON \
               -DBUILD_EXAMPLES=ON \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_C_COMPILER=$CC \
