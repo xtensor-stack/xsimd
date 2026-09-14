@@ -128,7 +128,9 @@ jobs:
         fi
 
         # Cheap way of spotting uninitialized read
-        CXXFLAGS="$CXXFLAGS -ftrivial-auto-var-init=pattern"
+        if echo 'int main(){}' | $CXX -x c++ -ftrivial-auto-var-init=pattern -fsyntax-only - 2>/dev/null; then
+          CXXFLAGS="$CXXFLAGS -ftrivial-auto-var-init=pattern"
+        fi
 
         cmake -B _build \
               -DBUILD_TESTS=ON \
