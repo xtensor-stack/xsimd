@@ -42,18 +42,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
 
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC")
     endif()
-
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^ppc64"  OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "riscv64")
-        # Nothing specific
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "loongarch64")
-        # Nothing specific
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "powerpc")
-        # Nothing specific
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "s390x")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=z14 -mzvector")
-    elseif(NOT WIN32 AND NOT EMSCRIPTEN)
-    endif()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
