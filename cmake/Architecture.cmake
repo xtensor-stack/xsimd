@@ -112,7 +112,7 @@ function(xsimd_get_riscv64_arch_flags out_list arch riscv64_baseline)
     endif()
     # Single-letter extensions must precede the multi-letter ones.
     string(REGEX MATCH "^[^_]*" base "${riscv64_baseline}")
-    string(REGEX REPLACE "^[^_]*" "" extensions "${riscv64_baseline}")
+    string(REGEX MATCH "_.*" extensions "${riscv64_baseline}")
     set(
         ${out_list}
         "-march=${base}v${extensions}_zvl${vector_bits}b;-mrvv-vector-bits=zvl"
