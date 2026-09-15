@@ -38,8 +38,7 @@ jobs:
               -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
               -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_FLAGS="${{ matrix.target.flags }}" \
-              -DCMAKE_CXX_FLAGS="${{ matrix.target.flags }}" \
+              -DTARGET_ARCH=vxe \
               -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
     - name: Build
       run: cmake --build build/ --verbose -j1
