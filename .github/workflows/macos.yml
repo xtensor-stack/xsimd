@@ -10,7 +10,7 @@ jobs:
       matrix:
         sys:
           - { os: '14',       arch: 'native' }
-          - { os: '15',       arch: 'neon' }
+          - { os: '15',       arch: 'neon64' }
           - { os: '15-intel', arch: 'sse4.2' }
     runs-on: macos-${{ matrix.sys.os }}
     name: 'macos-${{ matrix.sys.os }} - ${{ matrix.sys.arch }}'

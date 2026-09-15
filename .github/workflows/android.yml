@@ -6,13 +6,14 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    name: 'android-${{ matrix.api }} - ${{ matrix.target.abi }} ${{ matrix.target.arch }}'
     strategy:
       matrix:
         target:
-          - armeabi-v7a
-          - arm64-v8a
-          - x86
-          - x86_64
+          - { abi: 'armeabi-v7a', arch: 'neon' }
+          - { abi: 'arm64-v8a',   arch: 'neon64' }
+          - { abi: 'x86',         arch: 'ssse3' }
+          - { abi: 'x86_64',      arch: 'sse4.2' }
         api:
           - 16
           - 18
@@ -21,14 +22,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Build script
-        env:
-          TARGET: ${{ matrix.target }}
-          API: ${{ matrix.api }}
         run: |
           NDK="$($ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed | sed -E 's/( +[|] +)/|/g;s/ +$//' | grep '^  ndk' | cut -d '|' -f 4 | sort | head -n1)"
           cmake -B _build \
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/$NDK/build/cmake/android.toolchain.cmake \
-                -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
-                -DANDROID_ABI=$ABI -DANDROID_PLATFORM=android-$API \
-                -DCMAKE_BUILD_TYPE=Release
+                -D CMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/$NDK/build/cmake/android.toolchain.cmake \
+                -D CMAKE_BUILD_TYPE=Release \
+                -D BUILD_TESTS=ON \
+                -D DOWNLOAD_DOCTEST=ON \
+                -D ANDROID_ABI="${{ matrix.target.abi }}" \
+                -D ANDROID_PLATFORM=android-${{ matrix.api }} \
+                -D TARGET_ARCH="${{ matrix.target.arch }}"
           cmake --build _build --verbose
