@@ -8,16 +8,23 @@ jobs:
   build:
     strategy:
       matrix:
-        os:
-          - 14
-          - 15
-          - 15-intel
-    runs-on: macos-${{ matrix.os }}
-    name: 'macos-${{ matrix.os }}'
+        sys:
+          - { os: '14',       arch: 'native' }
+          - { os: '15',       arch: 'neon' }
+          - { os: '15-intel', arch: 'sse4.2' }
+    runs-on: macos-${{ matrix.sys.os }}
+    name: 'macos-${{ matrix.sys.os }} - ${{ matrix.sys.arch }}'
     steps:
     - uses: actions/checkout@v6
     - name: Setup
-      run: cmake -B _build -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=ON -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+      run: |
+        cmake -B _build \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D BUILD_TESTS=ON \
+          -D DOWNLOAD_DOCTEST=ON \
+          -D BUILD_BENCHMARK=ON \
+          -D BUILD_EXAMPLES=ON \
+          -D TARGET_ARCH="${{ matrix.sys.arch }}"
     - name: Build
       run: cmake --build _build --verbose
     - name: Testing sequential
@@ -25,7 +32,7 @@ jobs:
     - name: Set CPU feature test expectations
       run: |
         echo "XSIMD_TEST_CPU_ASSUME_RVV=0" >> "$GITHUB_ENV"
-        if echo '${{ matrix.os }}' | grep -q intel; then
+        if echo '${{ matrix.sys.os }}' | grep -q intel; then
           echo "XSIMD_TEST_CPU_ASSUME_NEON64=0" >> "$GITHUB_ENV"
           echo "XSIMD_TEST_CPU_ASSUME_SSE4_2=1" >> "$GITHUB_ENV"
           echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=intel" >> "$GITHUB_ENV"
