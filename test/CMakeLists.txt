@@ -120,6 +120,7 @@ xsimd_target_set_arch(
     ARM32_BASELINE "armv7-a"
     ARM64_BASELINE "${XSIMD_ARM64_BASELINE}"
     LOONGARCH64_BASELINE "loongarch64"
+    PPC64_BASELINE "power8"
     RISCV64_BASELINE "rv64gc"
     S390X_BASELINE "z14"
     X86_32_BASELINE "i386"
