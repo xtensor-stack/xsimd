@@ -108,12 +108,17 @@ add_executable(test_xsimd ${XSIMD_TESTS})
 target_link_libraries(test_xsimd PRIVATE xsimd)
 # Enable SIMD flag and set low baseline to ensure we do not accidentally
 # rely on other features.
+if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    set(XSIMD_ARM64_BASELINE "armv8.0")
+else()
+    set(XSIMD_ARM64_BASELINE "armv8-a")
+endif()
 xsimd_target_set_arch(
     test_xsimd
     PRIVATE
     ARCH "${TARGET_ARCH}"
     ARM32_BASELINE "armv7-a"
-    ARM64_BASELINE "armv8-a"
+    ARM64_BASELINE "${XSIMD_ARM64_BASELINE}"
     RISCV64_BASELINE "rv64gc"
     X86_32_BASELINE "i386"
     X86_64_BASELINE "x86-64"
