@@ -20,6 +20,8 @@ function(xsimd_get_target out_var)
         set(${out_var} "riscv64" PARENT_SCOPE)
     elseif(proc MATCHES "^loongarch64")
         set(${out_var} "loongarch64" PARENT_SCOPE)
+    elseif(proc MATCHES "^s390x")
+        set(${out_var} "s390x" PARENT_SCOPE)
     elseif(proc MATCHES "^(x86|x64|x86_64|amd64|i[3-6]86)$")
         if(CMAKE_SIZEOF_VOID_P EQUAL 4)
             set(${out_var} "x86_32" PARENT_SCOPE)
@@ -136,6 +138,19 @@ function(xsimd_get_loongarch64_arch_flags out_list arch loongarch64_baseline)
         list(PREPEND flags "-march=${loongarch64_baseline}")
     endif()
     set(${out_list} ${flags} PARENT_SCOPE)
+endfunction()
+
+
+# Get the flag to compile with the desired xsimd arch on s390x.
+function(xsimd_get_s390x_arch_flags out_list arch s390x_baseline)
+    if(NOT arch STREQUAL "vxe")
+        message(FATAL_ERROR "Unknown xsimd architecture for s390x: ${arch}")
+    endif()
+    if(s390x_baseline STREQUAL "")
+        # Vector-enhancements facility 1 first appeared on z14.
+        set(s390x_baseline "z14")
+    endif()
+    set(${out_list} "-march=${s390x_baseline};-mzvector" PARENT_SCOPE)
 endfunction()
 
 
@@ -337,7 +352,15 @@ function(xsimd_target_set_arch target scope)
     # Names of option parameters (without arguments)
     set(options)
     # Names of named parameters with a single argument
-    set(one_value_args ARCH ARM32_BASELINE ARM64_BASELINE LOONGARCH64_BASELINE RISCV64_BASELINE X86_32_BASELINE X86_64_BASELINE)
+    set(
+        one_value_args
+        ARCH
+        ARM32_BASELINE ARM64_BASELINE
+        LOONGARCH64_BASELINE
+        RISCV64_BASELINE
+        S390X_BASELINE
+        X86_32_BASELINE X86_64_BASELINE
+    )
     # Names of named parameters with a multiple arguments
     set(multi_values_args)
     cmake_parse_arguments(ARG "${options}" "${one_value_args}" "${multi_values_args}" ${ARGN})
@@ -371,6 +394,8 @@ function(xsimd_target_set_arch target scope)
         xsimd_get_arm64_arch_flags(flags "${arch}" "${ARG_ARM64_BASELINE}")
     elseif(target_arch STREQUAL "loongarch64")
         xsimd_get_loongarch64_arch_flags(flags "${arch}" "${ARG_LOONGARCH64_BASELINE}")
+    elseif(target_arch STREQUAL "s390x")
+        xsimd_get_s390x_arch_flags(flags "${arch}" "${ARG_S390X_BASELINE}")
     elseif(target_arch STREQUAL "riscv64")
         xsimd_get_riscv64_arch_flags(flags "${arch}" "${ARG_RISCV64_BASELINE}")
     elseif(target_arch STREQUAL "x86_32")
