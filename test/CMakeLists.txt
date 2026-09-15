@@ -218,7 +218,7 @@ if (XSIMD_ENABLE_WERROR)
 endif()
 
 add_subdirectory(doc)
-OPTION(BUILD_ARCHITECTURE_TESTS "xsimd compilation tests for various -march targets" OFF)
+OPTION(BUILD_ARCHITECTURE_TESTS "xsimd compilation tests for various -march targets" ON)
 if(BUILD_ARCHITECTURE_TESTS)
     add_subdirectory(architectures)
 endif()
