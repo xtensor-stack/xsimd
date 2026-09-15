@@ -1726,12 +1726,12 @@ namespace xsimd
                                           { return ssub(batch<T, sse4_2>(s), batch<T, sse4_2>(o)); },
                                           self, other);
             }
-            else if (std::is_signed_v<T>)
+            else if constexpr (std::is_signed_v<T>)
             {
-                auto mask = (other >> (8 * sizeof(T) - 1));
+                auto other_is_negative = other < batch<T, A>(T(0));
                 auto self_overflow_branch = min(std::numeric_limits<T>::max() + other, self);
                 auto self_underflow_branch = max(std::numeric_limits<T>::min() + other, self);
-                return select(batch_bool<T, A>(mask.data), self_overflow_branch, self_underflow_branch) - other;
+                return select(other_is_negative, self_overflow_branch, self_underflow_branch) - other;
             }
             else
             {
