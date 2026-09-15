@@ -34,6 +34,7 @@ emcmake cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_STANDARD=17 \
     -DDOWNLOAD_DOCTEST=ON \
+    -DTARGET_ARCH=wasm \
     $SRC_DIR
 
 emmake make -j4

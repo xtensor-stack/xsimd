@@ -2,6 +2,12 @@ include(CheckCXXCompilerFlag)
 
 # Get the target architecture family.
 function(xsimd_get_target out_var)
+    # The Emscripten toolchain reports an x86 processor.
+    if(EMSCRIPTEN)
+        set(${out_var} "wasm32" PARENT_SCOPE)
+        return()
+    endif()
+
     if(MSVC AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
         set(proc "${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
     else()
@@ -140,6 +146,15 @@ function(xsimd_get_loongarch64_arch_flags out_list arch loongarch64_baseline)
         list(PREPEND flags "-march=${loongarch64_baseline}")
     endif()
     set(${out_list} ${flags} PARENT_SCOPE)
+endfunction()
+
+
+# Get the flag to compile with the desired xsimd arch on wasm32.
+function(xsimd_get_wasm32_arch_flags out_list arch)
+    if(NOT arch STREQUAL "wasm")
+        message(FATAL_ERROR "Unknown xsimd architecture for wasm32: ${arch}")
+    endif()
+    set(${out_list} "-msimd128" PARENT_SCOPE)
 endfunction()
 
 
@@ -409,6 +424,8 @@ function(xsimd_target_set_arch target scope)
         xsimd_get_arm64_arch_flags(flags "${arch}" "${ARG_ARM64_BASELINE}")
     elseif(target_arch STREQUAL "loongarch64")
         xsimd_get_loongarch64_arch_flags(flags "${arch}" "${ARG_LOONGARCH64_BASELINE}")
+    elseif(target_arch STREQUAL "wasm32")
+        xsimd_get_wasm32_arch_flags(flags "${arch}")
     elseif(target_arch STREQUAL "ppc64")
         xsimd_get_ppc64_arch_flags(flags "${arch}" "${ARG_PPC64_BASELINE}")
     elseif(target_arch STREQUAL "s390x")
