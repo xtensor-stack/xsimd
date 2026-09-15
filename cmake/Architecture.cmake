@@ -16,6 +16,8 @@ function(xsimd_get_target out_var)
         else()
             set(${out_var} "arm64" PARENT_SCOPE)
         endif()
+    elseif(proc MATCHES "^riscv64")
+        set(${out_var} "riscv64" PARENT_SCOPE)
     elseif(proc MATCHES "^(x86|x64|x86_64|amd64|i[3-6]86)$")
         if(CMAKE_SIZEOF_VOID_P EQUAL 4)
             set(${out_var} "x86_32" PARENT_SCOPE)
@@ -96,6 +98,26 @@ function(xsimd_get_arm64_arch_flags out_list arch arm64_baseline)
         xsimd_get_arm64_arch_flags_unix(flags "${arch}" "${arm64_baseline}")
     endif()
     set(${out_list} ${flags} PARENT_SCOPE)
+endfunction()
+
+
+# Get the flag to compile with the desired xsimd arch on riscv64.
+function(xsimd_get_riscv64_arch_flags out_list arch riscv64_baseline)
+    if(NOT arch MATCHES "rvv[-_]([0-9]+)")
+        message(FATAL_ERROR "Unknown xsimd architecture for riscv64: ${arch}")
+    endif()
+    set(vector_bits "${CMAKE_MATCH_1}")
+    if(riscv64_baseline STREQUAL "")
+        set(riscv64_baseline "rv64gc")
+    endif()
+    # Single-letter extensions must precede the multi-letter ones.
+    string(REGEX MATCH "^[^_]*" base "${riscv64_baseline}")
+    string(REGEX REPLACE "^[^_]*" "" extensions "${riscv64_baseline}")
+    set(
+        ${out_list}
+        "-march=${base}v${extensions}_zvl${vector_bits}b;-mrvv-vector-bits=zvl"
+        PARENT_SCOPE
+    )
 endfunction()
 
 
@@ -297,7 +319,7 @@ function(xsimd_target_set_arch target scope)
     # Names of option parameters (without arguments)
     set(options)
     # Names of named parameters with a single argument
-    set(one_value_args ARCH ARM32_BASELINE ARM64_BASELINE X86_32_BASELINE X86_64_BASELINE)
+    set(one_value_args ARCH ARM32_BASELINE ARM64_BASELINE RISCV64_BASELINE X86_32_BASELINE X86_64_BASELINE)
     # Names of named parameters with a multiple arguments
     set(multi_values_args)
     cmake_parse_arguments(ARG "${options}" "${one_value_args}" "${multi_values_args}" ${ARGN})
@@ -329,6 +351,8 @@ function(xsimd_target_set_arch target scope)
         xsimd_get_arm32_arch_flags(flags "${arch}" "${ARG_ARM32_BASELINE}")
     elseif(target_arch STREQUAL "arm64")
         xsimd_get_arm64_arch_flags(flags "${arch}" "${ARG_ARM64_BASELINE}")
+    elseif(target_arch STREQUAL "riscv64")
+        xsimd_get_riscv64_arch_flags(flags "${arch}" "${ARG_RISCV64_BASELINE}")
     elseif(target_arch STREQUAL "x86_32")
         xsimd_get_x86_32_arch_flags(flags "${arch}" "${ARG_X86_32_BASELINE}")
     elseif(target_arch STREQUAL "x86_64")
