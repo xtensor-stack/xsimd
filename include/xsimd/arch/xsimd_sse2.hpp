@@ -1577,6 +1577,39 @@ namespace xsimd
             return _mm_xor_pd(self, other);
         }
 
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<sse2>) noexcept
+        {
+            // SWAR fold to per-byte counts, after popcount64b from Hacker's
+            // Delight, vectorized as in Wojciech Muła's popcnt_SSE_bit_parallel,
+            // https://github.com/WojciechMula/sse-popcount. The byte shifts need
+            // no mask of their own, since every bit they leak across a byte
+            // boundary falls under one of the three masks the fold already
+            // applies.
+            __m128i const m1 = _mm_set1_epi8(0x55);
+            __m128i const m2 = _mm_set1_epi8(0x33);
+            __m128i const m4 = _mm_set1_epi8(0x0f);
+            __m128i x = _mm_sub_epi8(self, _mm_and_si128(_mm_srli_epi16(self, 1), m1));
+            x = _mm_add_epi8(_mm_and_si128(x, m2), _mm_and_si128(_mm_srli_epi16(x, 2), m2));
+            __m128i const counts = _mm_and_si128(_mm_add_epi8(x, _mm_srli_epi16(x, 4)), m4);
+            if constexpr (sizeof(T) == 1)
+                return counts;
+            // PSADBW sums the eight byte counts of a 64-bit element in one
+            // instruction, which the shift-and-mask fold needs nine to do
+            else if constexpr (sizeof(T) == 8)
+                return _mm_sad_epu8(counts, _mm_setzero_si128());
+            else
+            {
+                __m128i const pairs = _mm_and_si128(_mm_add_epi8(counts, _mm_srli_epi16(counts, 8)), _mm_set1_epi16(0xff));
+                if constexpr (sizeof(T) == 2)
+                    return pairs;
+                // PMADDWD adds the two halves of a 32-bit element in one instruction
+                else
+                    return _mm_madd_epi16(pairs, _mm_set1_epi16(1));
+            }
+        }
+
         // reciprocal
         template <class A>
         XSIMD_INLINE batch<float, A> reciprocal(batch<float, A> const& self,

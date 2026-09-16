@@ -13,6 +13,7 @@
 #define XSIMD_SCALAR_HPP
 
 #include "../config/xsimd_macros.hpp"
+#include "./common/xsimd_common_bit.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -406,6 +407,14 @@ namespace xsimd
     XSIMD_INLINE auto pos(T const& x) noexcept
     {
         return +x;
+    }
+
+    // returns T rather than int, so that the scalar and the batch overload agree
+    template <class T>
+    XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, T>
+    popcount(T x) noexcept
+    {
+        return T(detail::popcount(std::make_unsigned_t<T>(x)));
     }
 
     XSIMD_INLINE float reciprocal(float const& x) noexcept

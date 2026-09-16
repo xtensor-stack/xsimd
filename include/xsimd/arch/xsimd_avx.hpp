@@ -1411,6 +1411,15 @@ namespace xsimd
             return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(self.data), _mm256_castsi256_ps(other.data)));
         }
 
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<avx>) noexcept
+        {
+            return detail::fwd_to_sse([](__m128i s) noexcept
+                                      { return popcount(batch<T, ssse3>(s), ssse3 {}); },
+                                      self);
+        }
+
         // reciprocal
         template <class A>
         XSIMD_INLINE batch<float, A> reciprocal(batch<float, A> const& self,
