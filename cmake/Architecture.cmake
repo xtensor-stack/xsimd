@@ -387,6 +387,7 @@ function(xsimd_target_set_arch target scope)
         ARCH
         ARM32_BASELINE ARM64_BASELINE
         LOONGARCH64_BASELINE
+        PPC64_BASELINE
         RISCV64_BASELINE
         S390X_BASELINE
         X86_32_BASELINE X86_64_BASELINE
