@@ -17,6 +17,7 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     enable_testing()
 
     find_package(xsimd REQUIRED CONFIG)
+    include("${xsimd_DIR}/Architecture.cmake")
 endif ()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -32,28 +33,6 @@ string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
 OPTION(XSIMD_ENABLE_WERROR "Turn on -Werror" OFF)
 
-
-
-################
-# ARM SETTINGS #
-################
-
-OPTION(CROSS_COMPILE_ARM "cross compile for ARM targets" OFF)
-
-# Note: to compile on ARM (or cross compile), you may need to add the following:
-# -DTARGET_ARCH="armv8-a -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi"
-set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
-string(REGEX MATCH "emulated\\<[0-9]+\\>" TARGET_EMULATED ${TARGET_ARCH})
-
-if (TARGET_EMULATED)
-    message(STATUS "Using emulated target: ${TARGET_EMULATED}")
-    set(EMULATED_COMPILE_FLAGS -DXSIMD_DEFAULT_ARCH=${TARGET_ARCH};-DXSIMD_WITH_EMULATED=1)
-    unset(TARGET_ARCH CACHE)
-elseif (XSIMD_DEFAULT_ARCH)
-    message(STATUS "Forcing default arch to xsimd::${XSIMD_DEFAULT_ARCH}")
-    set(EMULATED_COMPILE_FLAGS -DXSIMD_DEFAULT_ARCH=${XSIMD_DEFAULT_ARCH})
-endif()
-
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     if (NOT WIN32 AND NOT ANDROID)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder")
@@ -61,54 +40,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshorten-64-to-32")
         endif()
 
-        if (NOT CROSS_COMPILE_ARM)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC")
-        endif()
-    endif()
-
-    if (ANDROID)
-        # Nothing to do here, we assume the cmake Android NDK toolchain sets the
-        # correct options for arm and neon.
-    elseif (CROSS_COMPILE_ARM)
-        # We're cross-compiling with clang++ on Azure Pipelines, this is all pretty specific and just for testing
-        set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
-        set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
-        set(CMAKE_THREAD_LIBS_INIT)
-
-        set(CMAKE_SYSTEM_PROCESSOR arm)
-        set(CMAKE_C_COMPILER_TARGET arm-linux-gnueabi)
-        set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabi)
-
-        set(ARM_ARCH_DIRECTORY "arm-linux-gnueabi" CACHE STRING "ARM arch header dir")
-        set(ARM_GCC_VER "4.7.3" CACHE STRING "ARM GCC header dir")
-        include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/${ARM_ARCH_DIRECTORY}/)
-        include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/c++/${ARM_GCC_VER}/)
-        include_directories(/usr/${ARM_ARCH_DIRECTORY}/include/)
-        if(NOT CMAKE_CXX_FLAGS MATCHES "-march")
-            message(STATUS "SETTING ARCH TO ${TARGET_ARCH}")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH}")
-        endif()
-        if(ARM_ARCH_DIRECTORY MATCHES "arm-linux-gnueabi")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon -mfloat-abi=softfp -target arm-linux-gnueabi")
-        else ()
-            # delegating to gcc here
-        endif()
-        message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-        message(STATUS "CMAKE_CXX_LINK_EXECUTABLE: ${CMAKE_CXX_LINK_EXECUTABLE}")
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^ppc64"  OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mcpu=${TARGET_ARCH} -mtune=${TARGET_ARCH}")
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "riscv64")
-        # Nothing specific
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "loongarch64")
-        # Nothing specific
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "powerpc")
-        # Nothing specific
-    elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "s390x")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=z14 -mzvector")
-    elseif(NOT WIN32 AND NOT EMSCRIPTEN)
-        if(TARGET_ARCH AND NOT CMAKE_CXX_FLAGS MATCHES "-march" AND NOT CMAKE_CXX_FLAGS MATCHES "-arch" AND NOT CMAKE_OSX_ARCHITECTURES)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${TARGET_ARCH}")
-        endif()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC")
     endif()
 endif()
 
@@ -170,8 +102,30 @@ if(NOT MSVC)
     list(APPEND XSIMD_TESTS test_gnu_source.cpp)
 endif()
 
+set(TARGET_ARCH "native" CACHE STRING "Target architecture arguments")
+
 add_executable(test_xsimd ${XSIMD_TESTS})
 target_link_libraries(test_xsimd PRIVATE xsimd)
+# Enable SIMD flag and set low baseline to ensure we do not accidentally
+# rely on other features.
+if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    set(XSIMD_ARM64_BASELINE "armv8.0")
+else()
+    set(XSIMD_ARM64_BASELINE "armv8-a")
+endif()
+xsimd_target_set_arch(
+    test_xsimd
+    PRIVATE
+    ARCH "${TARGET_ARCH}"
+    ARM32_BASELINE "armv7-a"
+    ARM64_BASELINE "${XSIMD_ARM64_BASELINE}"
+    LOONGARCH64_BASELINE "loongarch64"
+    PPC64_BASELINE "power8"
+    RISCV64_BASELINE "rv64gc"
+    S390X_BASELINE "z14"
+    X86_32_BASELINE "i386"
+    X86_64_BASELINE "x86-64"
+)
 
 option(DOWNLOAD_DOCTEST OFF)
 find_package(doctest QUIET)
@@ -209,11 +163,7 @@ endif()
 
 add_test(NAME test_xsimd COMMAND test_xsimd)
 
-if (CROSS_COMPILE_ARM)
-    add_custom_target(xtest COMMAND qemu-arm -L /usr/arm-linux-gnueabi/ test_xsimd DEPENDS test_xsimd)
-else()
-    add_custom_target(xtest COMMAND test_xsimd DEPENDS test_xsimd)
-endif()
+add_custom_target(xtest COMMAND test_xsimd DEPENDS test_xsimd)
 
 if (XSIMD_ENABLE_WERROR)
     target_compile_options(test_xsimd PRIVATE -Werror -Wall -DXSIMD_SKIP_ON_WERROR)
@@ -231,10 +181,13 @@ if(EMULATED_COMPILE_FLAGS)
 endif()
 
 if(EMSCRIPTEN)
-    set_target_properties(test_xsimd PROPERTIES LINK_FLAGS "-s MODULARIZE=1 -s EXPORT_NAME=test_xsimd_wasm -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -lembind")
+    set_target_properties(
+        test_xsimd
+        PROPERTIES
+          LINK_FLAGS "-s MODULARIZE=1 -s EXPORT_NAME=test_xsimd_wasm -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -lembind"
+    )
     target_compile_options(test_xsimd
         PUBLIC --std=c++17
-        PUBLIC "SHELL: -msimd128"
         PUBLIC "SHELL: -msse2"
     )
 endif()

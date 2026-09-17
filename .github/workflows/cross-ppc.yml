@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         target:
-          - { platform: 'ppc64le',     dir: 'powerpc64le-linux-gnu',   flags: '-maltivec -mvsx -mcpu=power10', full: 'OFF' }
-          - { platform: 'ppc64',     dir: 'powerpc64-linux-gnu',   flags: '-maltivec -mvsx -mcpu=power10', full: 'OFF' }
+          - { platform: 'ppc64le', dir: 'powerpc64le-linux-gnu', full: 'OFF' }
+          - { platform: 'ppc64',   dir: 'powerpc64-linux-gnu', full: 'OFF' }
         sys:
           - { compiler: 'gcc',   version: '12' }
           - { compiler: 'clang', version: '20', gcc_runtime: '12' }
@@ -50,8 +50,7 @@ jobs:
               -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
               -DBUILD_BENCHMARK=${{ matrix.target.full }} -DBUILD_EXAMPLES=${{ matrix.target.full }} \
               -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_FLAGS="${{ matrix.target.flags }}" \
-              -DCMAKE_CXX_FLAGS="${{ matrix.target.flags }}" \
+              -DTARGET_ARCH=vsx \
               -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
     - name: Build
       run: cmake --build build/ --verbose -j1

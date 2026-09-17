@@ -16,6 +16,9 @@ project(xsimd)
 OPTION(ENABLE_XTL_COMPLEX "enables support for xcomplex defined in xtl" OFF)
 OPTION(BUILD_TESTS "xsimd test suite" OFF)
 
+include (cmake/Hardening.cmake)
+include (cmake/Architecture.cmake)
+
 # Versioning
 # ==========
 
@@ -52,6 +55,19 @@ if(ENABLE_XTL_COMPLEX OR XSIMD_ENABLE_XTL_COMPLEX)
     target_compile_definitions(xsimd INTERFACE
         $<BUILD_INTERFACE:XSIMD_ENABLE_XTL_COMPLEX=1>
     )
+endif()
+
+# Dev options
+# ===========
+
+option(
+    XSIMD_HARDEN_TRIVIAL_AUTO_VAR_INIT
+    "Enable -ftrivial-auto-var-init hardening flag if supported"
+    OFF
+)
+
+if(XSIMD_HARDEN_TRIVIAL_AUTO_VAR_INIT)
+    xsimd_harden_trivial_auto_var_init(xsimd INTERFACE)
 endif()
 
 if(BUILD_TESTS)
@@ -107,6 +123,7 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Conf
                                  COMPATIBILITY SameMajorVersion)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+              ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Architecture.cmake
         DESTINATION ${XSIMD_CMAKECONFIG_INSTALL_DIR})
 install(EXPORT ${PROJECT_NAME}-targets
         FILE ${PROJECT_NAME}Targets.cmake

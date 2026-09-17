@@ -68,9 +68,7 @@ jobs:
         -DBUILD_TESTS=ON
         -DDOWNLOAD_DOCTEST=ON
         -DCMAKE_BUILD_TYPE=Release
-        -DTARGET_ARCH=generic
-        -DCMAKE_C_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
-        -DCMAKE_CXX_FLAGS="-march=rv64gcv_zvl${{ matrix.vector_bits }}b_zba_zbb_zbs -mrvv-vector-bits=zvl"
+        -DTARGET_ARCH=rvv_${{ matrix.vector_bits }}
         -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-riscv64-linux-gnu.cmake
     - name: Build
       run: cmake --build _build

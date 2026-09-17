@@ -10,30 +10,28 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - ${{ matrix.sys.flags }}'
+    name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - ${{ matrix.sys.arch }} ${{ join(matrix.sys.flags, '' '') }}'
     strategy:
       matrix:
         sys:
-          - { compiler: 'gcc',   version: '12', flags: 'force_no_instr_set' }
-          - { compiler: 'gcc',   version: '13', flags: 'enable_xtl_complex' }
-          - { compiler: 'gcc',   version: '14', flags: 'avx' }
-          - { compiler: 'gcc',   version: '14', flags: 'avx2' }
-          - { compiler: 'gcc',   version: '13', flags: 'avx512' }
-          - { compiler: 'gcc',   version: '10', flags: 'avx512' }
-          - { compiler: 'gcc',   version: '12', flags: 'i386' }
-          - { compiler: 'gcc',   version: '13', flags: 'avx512pf' }
-          - { compiler: 'gcc',   version: '13', flags: 'avx512vbmi' }
-          - { compiler: 'gcc',   version: '14', flags: 'avx512vbmi2' }
-          - { compiler: 'gcc',   version: '13', flags: 'avx512vnni' }
-          - { compiler: 'clang', version: '16', flags: 'force_no_instr_set' }
-          - { compiler: 'clang', version: '16', flags: 'enable_xtl_complex' }
-          - { compiler: 'clang', version: '17', flags: 'avx' }
-          - { compiler: 'clang', version: '17', flags: 'sse3' }
-          - { compiler: 'clang', version: '18', flags: 'avx512' }
-          - { compiler: 'clang', version: '18', flags: 'avx_128' }
-          - { compiler: 'clang', version: '18', flags: 'avx2_128' }
-          - { compiler: 'clang', version: '18', flags: 'avx512vl_128' }
-          - { compiler: 'clang', version: '18', flags: 'avx512vl_256' }
+          - { compiler: 'gcc',   version: '13', arch: 'native',              flags: ['xtl-complex'] }
+          - { compiler: 'gcc',   version: '14', arch: 'avx',                 flags: [] }
+          - { compiler: 'gcc',   version: '14', arch: 'avx2',                flags: [] }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512bw',            flags: [] }
+          - { compiler: 'gcc',   version: '10', arch: 'avx512bw',            flags: [] }
+          - { compiler: 'gcc',   version: '12', arch: 'native',              flags: ['32bits'] }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512pf',            flags: [] }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512vbmi',          flags: [] }
+          - { compiler: 'gcc',   version: '14', arch: 'avx512vbmi2',         flags: [] }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512vnni_avx512bw', flags: [] }
+          - { compiler: 'clang', version: '16', arch: 'native',              flags: ['xtl-complex'] }
+          - { compiler: 'clang', version: '17', arch: 'avx',                 flags: [] }
+          - { compiler: 'clang', version: '17', arch: 'sse3',                flags: [] }
+          - { compiler: 'clang', version: '18', arch: 'avx512bw',            flags: [] }
+          - { compiler: 'clang', version: '18', arch: 'avx_128',             flags: [] }
+          - { compiler: 'clang', version: '18', arch: 'avx2_128',            flags: [] }
+          - { compiler: 'clang', version: '18', arch: 'avx512vl_128',        flags: [] }
+          - { compiler: 'clang', version: '18', arch: 'avx512vl_256',        flags: [] }
     steps:
     - name: Setup compiler
       if: ${{ matrix.sys.compiler == 'gcc' }}
@@ -68,82 +66,34 @@ jobs:
       with:
         environment-file: environment.yml
     - name: Setup SDE
-      if: startswith(matrix.sys.flags, 'avx512')
+      if: startswith(matrix.sys.arch, 'avx512')
       run: sh install_sde.sh
     - name: Configure build
       env:
         CC: ${{ env.CC }}
         CXX: ${{ env.CXX }}
       run: |
-        if [[ '${{ matrix.sys.flags }}' == 'enable_xtl_complex' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_XTL_COMPLEX=ON"
+        CMAKE_ARGS=()
+        if [[ '${{ contains(matrix.sys.flags, 'xtl-complex') }}' == 'true' ]]; then
+          CMAKE_ARGS+=(-D ENABLE_XTL_COMPLEX=ON)
         fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx_128' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=sandybridge"
-          CXXFLAGS="$CXXFLAGS -DXSIMD_DEFAULT_ARCH=avx_128"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx2' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx2_128' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=haswell"
-          CXXFLAGS="$CXXFLAGS -DXSIMD_DEFAULT_ARCH=avx2_128"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'sse3' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=nocona"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx512' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx512vl_128' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
-          CXXFLAGS="$CXXFLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_128"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx512vl_256' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=skylake-avx512"
-          CXXFLAGS="$CXXFLAGS -DXSIMD_DEFAULT_ARCH=avx512vl_256"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx512pf' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knl"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=cannonlake"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx512vbmi2' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=icelake-server"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'avx512vnni' ]]; then
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DTARGET_ARCH=knm"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'i386' ]]; then
-          CXXFLAGS="$CXXFLAGS -m32"
-        fi
-        if [[ '${{ matrix.sys.flags }}' == 'force_no_instr_set' ]]; then
-          :
-        else
-          CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXSIMD_ENABLE_WERROR=ON"
+        if [[ '${{ contains(matrix.sys.flags, '32bits') }}' == 'true' ]]; then
+          CMAKE_ARGS+=(-D CMAKE_CXX_FLAGS=-m32)
         fi
 
-        # Cheap way of spotting uninitialized read
-        if echo 'int main(){}' | $CXX -x c++ -ftrivial-auto-var-init=pattern -fsyntax-only - 2>/dev/null; then
-          CXXFLAGS="$CXXFLAGS -ftrivial-auto-var-init=pattern"
-        fi
-
-        cmake -B _build \
-              -DBUILD_TESTS=ON \
-              -DBUILD_EXAMPLES=ON \
-              -DBUILD_ARCHITECTURE_TESTS=OFF \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_COMPILER=$CC \
-              -DCMAKE_CXX_COMPILER=$CXX \
-              $CMAKE_EXTRA_ARGS \
-              -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
-              -G Ninja
+        cmake -B build/ -G Ninja \
+          -D CMAKE_C_COMPILER=$CC \
+          -D CMAKE_CXX_COMPILER=$CXX \
+          -D CMAKE_BUILD_TYPE=Release \
+          -D BUILD_TESTS=ON \
+          -D BUILD_EXAMPLES=ON \
+          -D BUILD_ARCHITECTURE_TESTS=OFF \
+          -D XSIMD_ENABLE_WERROR=ON \
+          -D XSIMD_HARDEN_TRIVIAL_AUTO_VAR_INIT=ON \
+          -D TARGET_ARCH="${{ matrix.sys.arch }}" \
+          "${CMAKE_ARGS[@]}"
     - name: Build
-      run: cmake --build _build
+      run: cmake --build build/
     - name: Test
       run: |
         # Set CPU feature test expectations, 0 is explicit absence of the feature
@@ -151,8 +101,8 @@ jobs:
         export XSIMD_TEST_CPU_ASSUME_RVV="0"
         export XSIMD_TEST_CPU_ASSUME_VSX="0"
         export XSIMD_TEST_CPU_ASSUME_VXE="0"
-        cd _build/test
-        if echo '${{ matrix.sys.flags }}' | grep -q 'avx512' ; then
+        cd build/test
+        if echo '${{ matrix.sys.arch }}' | grep -q 'avx512' ; then
           # Running with emulation, must have AVX512, lower tier are checked by implications in tests
           export XSIMD_TEST_CPU_ASSUME_AVX512F="1"
           ../../sde-external-9.48.0-2024-11-25-lin/sde64 -tgl -- ./test_xsimd
@@ -182,14 +132,14 @@ jobs:
         environment-file: environment.yml
     - name: Configure build
       run: |
-        cmake -B _build \
-              -DBUILD_TESTS=ON \
-              -DBUILD_ARCHITECTURE_TESTS=ON \
-              -DBUILD_BENCHMARK=ON \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_COMPILER=$CC \
-              -DCMAKE_CXX_COMPILER=$CXX \
-              -DXSIMD_ENABLE_WERROR=ON \
-              -G Ninja
+        cmake -B build/ -G Ninja \
+              -D CMAKE_BUILD_TYPE=Release \
+              -D CMAKE_C_COMPILER=$CC \
+              -D CMAKE_CXX_COMPILER=$CXX \
+              -D BUILD_TESTS=ON \
+              -D BUILD_ARCHITECTURE_TESTS=ON \
+              -D BUILD_BENCHMARK=ON \
+              -D XSIMD_ENABLE_WERROR=ON \
+              -D XSIMD_HARDEN_TRIVIAL_AUTO_VAR_INIT=ON \
     - name: Build
-      run: cmake --build _build
+      run: cmake --build build/

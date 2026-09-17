@@ -34,9 +34,7 @@ jobs:
               -GNinja \
               -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
               -DCMAKE_BUILD_TYPE=Release \
-              -DTARGET_ARCH=generic \
-              -DCMAKE_C_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" \
-              -DCMAKE_CXX_FLAGS="-march=armv8-a+sve -msve-vector-bits=${{ matrix.vector_bits }}" \
+              -DTARGET_ARCH=sve_${{ matrix.vector_bits }} \
               -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/gcc-aarch64-linux-gnu.cmake
     - name: Build
       run: cmake --build _build
