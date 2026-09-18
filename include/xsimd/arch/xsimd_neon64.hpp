@@ -329,16 +329,6 @@ namespace xsimd
         }
 
         /*******
-         * mul *
-         *******/
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> mul(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
-        {
-            return vmulq_f64(lhs, rhs);
-        }
-
-        /*******
          * div *
          *******/
 

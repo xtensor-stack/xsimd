@@ -129,6 +129,24 @@ XSIMD_INLINE auto vdupq_n_batch(T a) {
 }
 
 template<class T, class A>
+XSIMD_INLINE constexpr bool vuzpq_is_supported() {
+    return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, float>;
+}
+
+template<class T, class A>
+XSIMD_INLINE auto vuzpq_batch(batch<T, A> a, batch<T, A> b) {
+    static_assert(vuzpq_is_supported<T, A>(), "vuzpq unsupported");
+    if constexpr(is_like_v<T, std::int8_t>) { return vuzpq_s8(a, b); }
+    else if constexpr(is_like_v<T, std::uint8_t>) { return vuzpq_u8(a, b); }
+    else if constexpr(is_like_v<T, std::int16_t>) { return vuzpq_s16(a, b); }
+    else if constexpr(is_like_v<T, std::uint16_t>) { return vuzpq_u16(a, b); }
+    else if constexpr(is_like_v<T, std::int32_t>) { return vuzpq_s32(a, b); }
+    else if constexpr(is_like_v<T, std::uint32_t>) { return vuzpq_u32(a, b); }
+    else if constexpr(is_like_v<T, float>) { return vuzpq_f32(a, b); }
+    else { static_assert(false, "unsupported type for vuzpq"); }
+}
+
+template<class T, class A>
 XSIMD_INLINE constexpr bool vandq_is_supported() {
     return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, std::int64_t, std::uint64_t>;
 }
@@ -324,22 +342,6 @@ XSIMD_INLINE auto vqsubq_batch(batch<T, A> a, batch<T, A> b) {
     else { static_assert(false, "unsupported type for vqsubq"); }
 }
 
-template<class T, class A>
-XSIMD_INLINE constexpr bool vmull_is_supported() {
-    return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t>;
-}
-
-template<class T, class A>
-XSIMD_INLINE auto vmull_batch(batch<T, A> a, batch<T, A> b) {
-    static_assert(vmull_is_supported<T, A>(), "vmull unsupported");
-    if constexpr(is_like_v<T, std::int8_t>) { return vmull_s8(a, b); }
-    else if constexpr(is_like_v<T, std::uint8_t>) { return vmull_u8(a, b); }
-    else if constexpr(is_like_v<T, std::int16_t>) { return vmull_s16(a, b); }
-    else if constexpr(is_like_v<T, std::uint16_t>) { return vmull_u16(a, b); }
-    else if constexpr(is_like_v<T, std::int32_t>) { return vmull_s32(a, b); }
-    else if constexpr(is_like_v<T, std::uint32_t>) { return vmull_u32(a, b); }
-    else { static_assert(false, "unsupported type for vmull"); }
-}
 
 template<class T, class A>
 XSIMD_INLINE constexpr bool vmulq_is_supported() {

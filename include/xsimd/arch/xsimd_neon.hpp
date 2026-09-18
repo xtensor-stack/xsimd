@@ -92,6 +92,16 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch_bool<T, A> eq(batch_bool<T, A> const& lhs, batch_bool<T, A> const& rhs, requires_arch<neon>) noexcept;
 
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> mul(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept;
+
+        template <class A, class T>
+        XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>>
+        mul_hilo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept;
+
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept;
+
         namespace detail
         {
             /**************************************
@@ -563,111 +573,95 @@ namespace xsimd
             }
         }
 
-        /*********
-         * mul_hi *
-         *********/
-
-        template <class A>
-        XSIMD_INLINE batch<int8_t, A> mul_hi(batch<int8_t, A> const& lhs, batch<int8_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            int16x8_t lo = vmull_s8(vget_low_s8(lhs), vget_low_s8(rhs));
-            int16x8_t hi = vmull_s8(vget_high_s8(lhs), vget_high_s8(rhs));
-            return vuzpq_s8(vreinterpretq_s8_s16(lo), vreinterpretq_s8_s16(hi)).val[1];
-        }
-        template <class A>
-        XSIMD_INLINE batch<uint8_t, A> mul_hi(batch<uint8_t, A> const& lhs, batch<uint8_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            uint16x8_t lo = vmull_u8(vget_low_u8(lhs), vget_low_u8(rhs));
-            uint16x8_t hi = vmull_u8(vget_high_u8(lhs), vget_high_u8(rhs));
-            return vuzpq_u8(vreinterpretq_u8_u16(lo), vreinterpretq_u8_u16(hi)).val[1];
-        }
-        template <class A>
-        XSIMD_INLINE batch<int16_t, A> mul_hi(batch<int16_t, A> const& lhs, batch<int16_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            int32x4_t lo = vmull_s16(vget_low_s16(lhs), vget_low_s16(rhs));
-            int32x4_t hi = vmull_s16(vget_high_s16(lhs), vget_high_s16(rhs));
-            return vuzpq_s16(vreinterpretq_s16_s32(lo), vreinterpretq_s16_s32(hi)).val[1];
-        }
-        template <class A>
-        XSIMD_INLINE batch<uint16_t, A> mul_hi(batch<uint16_t, A> const& lhs, batch<uint16_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            uint32x4_t lo = vmull_u16(vget_low_u16(lhs), vget_low_u16(rhs));
-            uint32x4_t hi = vmull_u16(vget_high_u16(lhs), vget_high_u16(rhs));
-            return vuzpq_u16(vreinterpretq_u16_u32(lo), vreinterpretq_u16_u32(hi)).val[1];
-        }
-        template <class A>
-        XSIMD_INLINE batch<int32_t, A> mul_hi(batch<int32_t, A> const& lhs, batch<int32_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            int64x2_t lo = vmull_s32(vget_low_s32(lhs), vget_low_s32(rhs));
-            int64x2_t hi = vmull_s32(vget_high_s32(lhs), vget_high_s32(rhs));
-            return vuzpq_s32(vreinterpretq_s32_s64(lo), vreinterpretq_s32_s64(hi)).val[1];
-        }
-        template <class A>
-        XSIMD_INLINE batch<uint32_t, A> mul_hi(batch<uint32_t, A> const& lhs, batch<uint32_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            uint64x2_t lo = vmull_u32(vget_low_u32(lhs), vget_low_u32(rhs));
-            uint64x2_t hi = vmull_u32(vget_high_u32(lhs), vget_high_u32(rhs));
-            return vuzpq_u32(vreinterpretq_u32_u64(lo), vreinterpretq_u32_u64(hi)).val[1];
-        }
-        // 64-bit intentionally falls through to the common scalar fallback
-
         /************
          * mul_hilo *
          ************/
 
-        template <class A>
-        XSIMD_INLINE std::pair<batch<int8_t, A>, batch<int8_t, A>>
-        mul_hilo(batch<int8_t, A> const& lhs, batch<int8_t, A> const& rhs, requires_arch<neon>) noexcept
+        // TODO manually move to intrinsct
+        namespace detail
         {
-            int16x8_t lo = vmull_s8(vget_low_s8(lhs), vget_low_s8(rhs));
-            int16x8_t hi = vmull_s8(vget_high_s8(lhs), vget_high_s8(rhs));
-            int8x16x2_t uzp = vuzpq_s8(vreinterpretq_s8_s16(lo), vreinterpretq_s8_s16(hi));
-            return { batch<int8_t, A>(uzp.val[1]), batch<int8_t, A>(uzp.val[0]) };
+            template <class T, class A>
+            XSIMD_INLINE constexpr bool vmull_is_supported()
+            {
+                return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t>;
+            }
+
+            template <class T, class A, class U>
+            XSIMD_INLINE auto vmull_batch(U a, U b)
+            {
+                static_assert(vmull_is_supported<T, A>(), "vmull unsupported");
+                if constexpr (is_like_v<T, std::int8_t>)
+                {
+                    return vmull_s8(a, b);
+                }
+                else if constexpr (is_like_v<T, std::uint8_t>)
+                {
+                    return vmull_u8(a, b);
+                }
+                else if constexpr (is_like_v<T, std::int16_t>)
+                {
+                    return vmull_s16(a, b);
+                }
+                else if constexpr (is_like_v<T, std::uint16_t>)
+                {
+                    return vmull_u16(a, b);
+                }
+                else if constexpr (is_like_v<T, std::int32_t>)
+                {
+                    return vmull_s32(a, b);
+                }
+                else if constexpr (is_like_v<T, std::uint32_t>)
+                {
+                    return vmull_u32(a, b);
+                }
+                else
+                {
+                    static_assert(false, "unsupported type for vmull");
+                }
+            }
         }
-        template <class A>
-        XSIMD_INLINE std::pair<batch<uint8_t, A>, batch<uint8_t, A>>
-        mul_hilo(batch<uint8_t, A> const& lhs, batch<uint8_t, A> const& rhs, requires_arch<neon>) noexcept
+
+        template <class A, class T>
+        XSIMD_INLINE std::pair<batch<T, A>, batch<T, A>> mul_hilo(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon>) noexcept
         {
-            uint16x8_t lo = vmull_u8(vget_low_u8(lhs), vget_low_u8(rhs));
-            uint16x8_t hi = vmull_u8(vget_high_u8(lhs), vget_high_u8(rhs));
-            uint8x16x2_t uzp = vuzpq_u8(vreinterpretq_u8_u16(lo), vreinterpretq_u8_u16(hi));
-            return { batch<uint8_t, A>(uzp.val[1]), batch<uint8_t, A>(uzp.val[0]) };
+            if constexpr (sizeof(T) == 8)
+            {
+                return mul_hilo(lhs, rhs, common {});
+            }
+            else
+            {
+                const auto lo_lhs = overload::vget_low_batch(lhs);
+                const auto lo_rhs = overload::vget_low_batch(rhs);
+                const auto lo_mul = detail::vmull_batch<T, A>(lo_lhs, lo_rhs);
+                const batch<T, A> lo = bitwise_cast<A, widen_t<T>, T>(lo_mul, {}, A {});
+
+                const auto hi_lhs = overload::vget_high_batch(lhs);
+                const auto hi_rhs = overload::vget_high_batch(rhs);
+                const auto hi_mul = detail::vmull_batch<T, A>(hi_lhs, hi_rhs);
+                const batch<T, A> hi = bitwise_cast<A, widen_t<T>, T>(hi_mul, {}, A {});
+
+                const auto uzp = overload::vuzpq_batch(lo, hi);
+                return { batch<T, A>(uzp.val[1]), batch<T, A>(uzp.val[0]) };
+            }
         }
-        template <class A>
-        XSIMD_INLINE std::pair<batch<int16_t, A>, batch<int16_t, A>>
-        mul_hilo(batch<int16_t, A> const& lhs, batch<int16_t, A> const& rhs, requires_arch<neon>) noexcept
+
+        /*********
+         * mul_hi *
+         *********/
+
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> mul_hi(batch<T, A> const& lhs, batch<T, A> const& rhs, requires_arch<neon> a) noexcept
         {
-            int32x4_t lo = vmull_s16(vget_low_s16(lhs), vget_low_s16(rhs));
-            int32x4_t hi = vmull_s16(vget_high_s16(lhs), vget_high_s16(rhs));
-            int16x8x2_t uzp = vuzpq_s16(vreinterpretq_s16_s32(lo), vreinterpretq_s16_s32(hi));
-            return { batch<int16_t, A>(uzp.val[1]), batch<int16_t, A>(uzp.val[0]) };
-        }
-        template <class A>
-        XSIMD_INLINE std::pair<batch<uint16_t, A>, batch<uint16_t, A>>
-        mul_hilo(batch<uint16_t, A> const& lhs, batch<uint16_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            uint32x4_t lo = vmull_u16(vget_low_u16(lhs), vget_low_u16(rhs));
-            uint32x4_t hi = vmull_u16(vget_high_u16(lhs), vget_high_u16(rhs));
-            uint16x8x2_t uzp = vuzpq_u16(vreinterpretq_u16_u32(lo), vreinterpretq_u16_u32(hi));
-            return { batch<uint16_t, A>(uzp.val[1]), batch<uint16_t, A>(uzp.val[0]) };
-        }
-        template <class A>
-        XSIMD_INLINE std::pair<batch<int32_t, A>, batch<int32_t, A>>
-        mul_hilo(batch<int32_t, A> const& lhs, batch<int32_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            int64x2_t lo = vmull_s32(vget_low_s32(lhs), vget_low_s32(rhs));
-            int64x2_t hi = vmull_s32(vget_high_s32(lhs), vget_high_s32(rhs));
-            int32x4x2_t uzp = vuzpq_s32(vreinterpretq_s32_s64(lo), vreinterpretq_s32_s64(hi));
-            return { batch<int32_t, A>(uzp.val[1]), batch<int32_t, A>(uzp.val[0]) };
-        }
-        template <class A>
-        XSIMD_INLINE std::pair<batch<uint32_t, A>, batch<uint32_t, A>>
-        mul_hilo(batch<uint32_t, A> const& lhs, batch<uint32_t, A> const& rhs, requires_arch<neon>) noexcept
-        {
-            uint64x2_t lo = vmull_u32(vget_low_u32(lhs), vget_low_u32(rhs));
-            uint64x2_t hi = vmull_u32(vget_high_u32(lhs), vget_high_u32(rhs));
-            uint32x4x2_t uzp = vuzpq_u32(vreinterpretq_u32_u64(lo), vreinterpretq_u32_u64(hi));
-            return { batch<uint32_t, A>(uzp.val[1]), batch<uint32_t, A>(uzp.val[0]) };
+            if constexpr (sizeof(T) == 8)
+            {
+                // common mul_hilo is itself implemented in terms of mul_hi, so the 64 bit
+                // path must not go back through the neon mul_hilo fallback.
+                return mul_hi(lhs, rhs, common {});
+            }
+            else
+            {
+                return mul_hilo(lhs, rhs, a).first;
+            }
         }
 
         /*******
