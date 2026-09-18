@@ -19,6 +19,28 @@
 namespace xsimd::overload {
 
 template<class T, class A>
+XSIMD_INLINE constexpr bool vld1q_is_supported() {
+    if constexpr(is_like_v<T, double>) { return std::is_base_of_v<neon64, A>; }
+    return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, std::int64_t, std::uint64_t, float>;
+}
+
+template<class T, class A>
+XSIMD_INLINE auto vld1q_batch(T* a) {
+    static_assert(vld1q_is_supported<T, A>(), "vld1q unsupported");
+    if constexpr(is_like_v<T, std::int8_t>) { return vld1q_s8(a); }
+    else if constexpr(is_like_v<T, std::uint8_t>) { return vld1q_u8(a); }
+    else if constexpr(is_like_v<T, std::int16_t>) { return vld1q_s16(a); }
+    else if constexpr(is_like_v<T, std::uint16_t>) { return vld1q_u16(a); }
+    else if constexpr(is_like_v<T, std::int32_t>) { return vld1q_s32(a); }
+    else if constexpr(is_like_v<T, std::uint32_t>) { return vld1q_u32(a); }
+    else if constexpr(is_like_v<T, std::int64_t>) { return vld1q_s64(a); }
+    else if constexpr(is_like_v<T, std::uint64_t>) { return vld1q_u64(a); }
+    else if constexpr(is_like_v<T, float>) { return vld1q_f32(a); }
+    else if constexpr(is_like_v<T, double>) { return vld1q_f64(a); }
+    else { static_assert(false, "unsupported type for vld1q"); }
+}
+
+template<class T, class A>
 XSIMD_INLINE constexpr bool vget_low_is_supported() {
     if constexpr(is_like_v<T, double>) { return std::is_base_of_v<neon64, A>; }
     return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, std::int64_t, std::uint64_t, float>;
@@ -85,24 +107,6 @@ XSIMD_INLINE auto vdupq_n_batch(T a) {
 }
 
 template<class T, class A>
-XSIMD_INLINE constexpr bool vrev64q_is_supported() {
-    return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, float>;
-}
-
-template<class T, class A>
-XSIMD_INLINE auto vrev64q_batch(batch<T, A> a) {
-    static_assert(vrev64q_is_supported<T, A>(), "vrev64q unsupported");
-    if constexpr(is_like_v<T, std::int8_t>) { return vrev64q_s8(a); }
-    else if constexpr(is_like_v<T, std::uint8_t>) { return vrev64q_u8(a); }
-    else if constexpr(is_like_v<T, std::int16_t>) { return vrev64q_s16(a); }
-    else if constexpr(is_like_v<T, std::uint16_t>) { return vrev64q_u16(a); }
-    else if constexpr(is_like_v<T, std::int32_t>) { return vrev64q_s32(a); }
-    else if constexpr(is_like_v<T, std::uint32_t>) { return vrev64q_u32(a); }
-    else if constexpr(is_like_v<T, float>) { return vrev64q_f32(a); }
-    else { static_assert(false, "unsupported type for vrev64q"); }
-}
-
-template<class T, class A>
 XSIMD_INLINE constexpr bool vandq_is_supported() {
     return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, std::int64_t, std::uint64_t>;
 }
@@ -119,6 +123,24 @@ XSIMD_INLINE auto vandq_batch(batch<T, A> a, batch<T, A> b) {
     else if constexpr(is_like_v<T, std::int64_t>) { return vandq_s64(a, b); }
     else if constexpr(is_like_v<T, std::uint64_t>) { return vandq_u64(a, b); }
     else { static_assert(false, "unsupported type for vandq"); }
+}
+
+template<class T, class A>
+XSIMD_INLINE constexpr bool vrev64q_is_supported() {
+    return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, float>;
+}
+
+template<class T, class A>
+XSIMD_INLINE auto vrev64q_batch(batch<T, A> a) {
+    static_assert(vrev64q_is_supported<T, A>(), "vrev64q unsupported");
+    if constexpr(is_like_v<T, std::int8_t>) { return vrev64q_s8(a); }
+    else if constexpr(is_like_v<T, std::uint8_t>) { return vrev64q_u8(a); }
+    else if constexpr(is_like_v<T, std::int16_t>) { return vrev64q_s16(a); }
+    else if constexpr(is_like_v<T, std::uint16_t>) { return vrev64q_u16(a); }
+    else if constexpr(is_like_v<T, std::int32_t>) { return vrev64q_s32(a); }
+    else if constexpr(is_like_v<T, std::uint32_t>) { return vrev64q_u32(a); }
+    else if constexpr(is_like_v<T, float>) { return vrev64q_f32(a); }
+    else { static_assert(false, "unsupported type for vrev64q"); }
 }
 
 template<class T, class A>
