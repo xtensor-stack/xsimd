@@ -49,6 +49,9 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE void store_unaligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept;
 
+        template <class T, class A>
+        XSIMD_INLINE void store(batch_bool<T, A> x, bool* mem, requires_arch<neon>) noexcept;
+
         template <class A, class T>
         XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<neon>) noexcept;
 
@@ -206,43 +209,10 @@ namespace xsimd
 #endif
         }
 
-        /* batch bool version */
-        template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon>) noexcept
-        {
-            if constexpr (sizeof(T) == 8)
-            {
-                return load_unaligned(mem, t, common {});
-            }
-            else
-            {
-                using uint = sized_uint_t<sizeof(T)>;
-                batch<uint, A> const zero = batch<uint, A> { 0 };
-                batch<uint, A> vmem;
-                if constexpr (sizeof(T) == 1)
-                {
-                    vmem = load_unaligned<A>((uint const*)mem, convert<uint> {}, A {});
-                }
-                else if constexpr (sizeof(T) == 2)
-                {
-                    vmem = vmovl_u8(vld1_u8((std::uint8_t*)mem));
-                }
-                else if constexpr (sizeof(T) == 4)
-                {
-                    auto tmp = vreinterpret_u8_u32(vset_lane_u32(*(uint*)mem, vdup_n_u32(0), 0));
-                    vmem = vmovl_u16(vget_low_u16(vmovl_u8(tmp)));
-                }
-                return { (zero - vmem).data };
-            }
-        }
+        /***************
+         * load masked *
+         ***************/
 
-        template <class A, class T>
-        XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon> r) noexcept
-        {
-            return load_unaligned(mem, t, r);
-        }
-
-        /* masked version */
         namespace detail
         {
             template <bool... Values>
@@ -278,6 +248,45 @@ namespace xsimd
             return detail::load_masked<Value, Values...>::template apply<0>(mem, batch<T, A>(T(0)));
         }
 
+        /*************
+         * load bool *
+         *************/
+
+        template <class A, class T>
+        XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon>) noexcept
+        {
+            if constexpr (sizeof(T) == 8)
+            {
+                return load_unaligned(mem, t, common {});
+            }
+            else
+            {
+                using uint = sized_uint_t<sizeof(T)>;
+                batch<uint, A> const zero = batch<uint, A> { 0 };
+                batch<uint, A> vmem;
+                if constexpr (sizeof(T) == 1)
+                {
+                    vmem = load_unaligned<A>((uint const*)mem, convert<uint> {}, A {});
+                }
+                else if constexpr (sizeof(T) == 2)
+                {
+                    vmem = vmovl_u8(vld1_u8((std::uint8_t*)mem));
+                }
+                else if constexpr (sizeof(T) == 4)
+                {
+                    auto tmp = vreinterpret_u8_u32(vset_lane_u32(*(uint*)mem, vdup_n_u32(0), 0));
+                    vmem = vmovl_u16(vget_low_u16(vmovl_u8(tmp)));
+                }
+                return { (zero - vmem).data };
+            }
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon> r) noexcept
+        {
+            return load_unaligned(mem, t, r);
+        }
+
         /*********
          * store *
          *********/
@@ -294,6 +303,51 @@ namespace xsimd
         XSIMD_INLINE void store_unaligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
         {
             store_aligned<A>(dst, src, A {});
+        }
+
+        /**************
+         * store bool *
+         **************/
+
+        template <class T, class A>
+        XSIMD_INLINE void store(batch_bool<T, A> x, bool* mem, requires_arch<neon>) noexcept
+        {
+            if constexpr (std::is_floating_point_v<T>)
+            {
+                using uint = sized_uint_t<sizeof(T)>;
+                return store(batch_bool<uint, A>(x.data), mem, A {});
+            }
+
+            constexpr std::size_t buffer_size = std::max<std::size_t>(batch_bool<T, A>::size, 8u);
+            alignas(A::alignment()) std::uint8_t buffer[buffer_size];
+
+            if constexpr (sizeof(T) == 1)
+            {
+                uint8x16_t val = vshrq_n_u8(x.data, 7);
+                vst1q_u8(buffer, val);
+            }
+            else if constexpr (sizeof(T) == 2)
+            {
+                uint16x8_t c = x.data;
+                uint8x8_t val = vshr_n_u8(vqmovn_u16(c), 7);
+                vst1_u8(buffer, val);
+            }
+            else if constexpr (sizeof(T) == 4)
+            {
+                uint32x4_t b = x.data;
+                uint16x8_t c = vcombine_u16(vqmovn_u32(b), vdup_n_u16(0));
+                uint8x8_t val = vshr_n_u8(vqmovn_u16(c), 7);
+                vst1_u8(buffer, val);
+            }
+            else if constexpr (sizeof(T) == 8)
+            {
+                uint64x2_t a = x.data;
+                uint32x4_t b = vcombine_u32(vqmovn_u64(a), vdup_n_u32(0));
+                uint16x8_t c = vcombine_u16(vqmovn_u32(b), vdup_n_u16(0));
+                uint8x8_t val = vshr_n_u8(vqmovn_u16(c), 7);
+                vst1_u8(buffer, val);
+            }
+            std::memcpy(mem, buffer, batch_bool<T, A>::size);
         }
 
         /****************
@@ -335,51 +389,6 @@ namespace xsimd
         XSIMD_INLINE void store_complex_unaligned(std::complex<float>* dst, batch<std::complex<float>, A> const& src, requires_arch<neon>) noexcept
         {
             store_complex_aligned(dst, src, A {});
-        }
-
-        /*********************
-         * store<batch_bool> *
-         *********************/
-        template <class T, class A, detail::enable_sized_t<T, 1> = 0>
-        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
-        {
-            uint8x16_t val = vshrq_n_u8(b.data, 7);
-            alignas(A::alignment()) uint8_t buffer[batch_bool<T, A>::size];
-            vst1q_u8(buffer, val);
-            memcpy(mem, buffer, sizeof(buffer));
-        }
-
-        template <class T, class A, detail::enable_sized_t<T, 2> = 0>
-        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
-        {
-            uint8x8_t val = vshr_n_u8(vqmovn_u16(b.data), 7);
-            alignas(A::alignment()) uint8_t buffer[batch_bool<T, A>::size];
-            vst1_u8(buffer, val);
-            memcpy(mem, buffer, sizeof(buffer));
-        }
-
-        template <class T, class A, detail::enable_sized_t<T, 4> = 0>
-        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
-        {
-            uint8x8_t val = vshr_n_u8(vqmovn_u16(vcombine_u16(vqmovn_u32(b.data), vdup_n_u16(0))), 7);
-            alignas(A::alignment()) uint8_t buffer[8];
-            vst1_u8(buffer, val);
-            memcpy(mem, buffer, batch_bool<T, A>::size);
-        }
-
-        template <class T, class A, detail::enable_sized_t<T, 8> = 0>
-        XSIMD_INLINE void store(batch_bool<T, A> b, bool* mem, requires_arch<neon>) noexcept
-        {
-            uint8x8_t val = vshr_n_u8(vqmovn_u16(vcombine_u16(vqmovn_u32(vcombine_u32(vqmovn_u64(b.data), vdup_n_u32(0))), vdup_n_u16(0))), 7);
-            alignas(A::alignment()) uint8_t buffer[8];
-            vst1_u8(buffer, val);
-            memcpy(mem, buffer, batch_bool<T, A>::size);
-        }
-
-        template <class A>
-        XSIMD_INLINE void store(batch_bool<float, A> b, bool* mem, requires_arch<neon>) noexcept
-        {
-            store(batch_bool<uint32_t, A>(b.data), mem, A {});
         }
 
         /*******
