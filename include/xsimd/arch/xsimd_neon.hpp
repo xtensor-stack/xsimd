@@ -44,6 +44,12 @@ namespace xsimd
         XSIMD_INLINE batch_bool<T, A> load_aligned(bool const* mem, batch_bool<T, A> t, requires_arch<neon> r) noexcept;
 
         template <class A, class T>
+        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept;
+
+        template <class A, class T>
+        XSIMD_INLINE void store_unaligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept;
+
+        template <class A, class T>
         XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<neon>) noexcept;
 
         template <class A, class T, class R>
@@ -276,58 +282,12 @@ namespace xsimd
          * store *
          *********/
 
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 1> = 0>
+        template <class A, class T>
         XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
         {
-            vst1q_u8((uint8_t*)dst, src);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 1> = 0>
-        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_s8((int8_t*)dst, src);
-        }
-
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 2> = 0>
-        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_u16((uint16_t*)dst, src);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 2> = 0>
-        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_s16((int16_t*)dst, src);
-        }
-
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 4> = 0>
-        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_u32((uint32_t*)dst, src);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 4> = 0>
-        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_s32((int32_t*)dst, src);
-        }
-
-        template <class A, class T, detail::enable_sized_unsigned_t<T, 8> = 0>
-        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_u64((uint64_t*)dst, src);
-        }
-
-        template <class A, class T, detail::enable_sized_signed_t<T, 8> = 0>
-        XSIMD_INLINE void store_aligned(T* dst, batch<T, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_s64((int64_t*)dst, src);
-        }
-
-        template <class A>
-        XSIMD_INLINE void store_aligned(float* dst, batch<float, A> const& src, requires_arch<neon>) noexcept
-        {
-            vst1q_f32(dst, src);
+            // Pointer type must match exactly sized integer types
+            using type = map_to_sized_type_t<T>;
+            return overload::vst1q_batch<type, A>((type*)dst, src.data);
         }
 
         template <class A, class T>

@@ -41,6 +41,28 @@ XSIMD_INLINE auto vld1q_batch(T* a) {
 }
 
 template<class T, class A>
+XSIMD_INLINE constexpr bool vst1q_is_supported() {
+    if constexpr(is_like_v<T, double>) { return std::is_base_of_v<neon64, A>; }
+    return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, std::int64_t, std::uint64_t, float>;
+}
+
+template<class T, class A>
+XSIMD_INLINE auto vst1q_batch(T* a, batch<T, A> b) {
+    static_assert(vst1q_is_supported<T, A>(), "vst1q unsupported");
+    if constexpr(is_like_v<T, std::int8_t>) { return vst1q_s8(a, b); }
+    else if constexpr(is_like_v<T, std::uint8_t>) { return vst1q_u8(a, b); }
+    else if constexpr(is_like_v<T, std::int16_t>) { return vst1q_s16(a, b); }
+    else if constexpr(is_like_v<T, std::uint16_t>) { return vst1q_u16(a, b); }
+    else if constexpr(is_like_v<T, std::int32_t>) { return vst1q_s32(a, b); }
+    else if constexpr(is_like_v<T, std::uint32_t>) { return vst1q_u32(a, b); }
+    else if constexpr(is_like_v<T, std::int64_t>) { return vst1q_s64(a, b); }
+    else if constexpr(is_like_v<T, std::uint64_t>) { return vst1q_u64(a, b); }
+    else if constexpr(is_like_v<T, float>) { return vst1q_f32(a, b); }
+    else if constexpr(is_like_v<T, double>) { return vst1q_f64(a, b); }
+    else { static_assert(false, "unsupported type for vst1q"); }
+}
+
+template<class T, class A>
 XSIMD_INLINE constexpr bool vget_low_is_supported() {
     if constexpr(is_like_v<T, double>) { return std::is_base_of_v<neon64, A>; }
     return is_like_any_v<T, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t, std::int32_t, std::uint32_t, std::int64_t, std::uint64_t, float>;
