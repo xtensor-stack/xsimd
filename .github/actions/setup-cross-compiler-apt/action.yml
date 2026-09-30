@@ -1,5 +1,5 @@
 name: Setup cross compiler (apt)
-description: Install a gcc or clang cross compiler from apt and register unversioned names used by the toolchain files
+description: Install a gcc or clang cross compiler from apt and export CMAKE_TOOLCHAIN_FILE
 inputs:
   compiler:
     description: gcc or clang
@@ -39,6 +39,16 @@ runs:
           echo "::error::gcc-runtime is required with clang"
           exit 1
         fi
+    - name: Setup toolchain file
+      shell: bash
+      env:
+        TOOLCHAIN_FILE: ${{ github.action_path }}/toolchains/${{ inputs.compiler }}-${{ inputs.target }}.cmake
+      run: |
+        if [[ ! -f "$TOOLCHAIN_FILE" ]]; then
+          echo "::error::No toolchain file for '$(basename "$TOOLCHAIN_FILE" .cmake)'"
+          exit 1
+        fi
+        echo "CMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE" >> "$GITHUB_ENV"
     - name: Setup gcc
       if: ${{ inputs.compiler == 'gcc' }}
       shell: bash

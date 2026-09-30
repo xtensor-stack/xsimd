@@ -32,15 +32,17 @@ jobs:
         sudo apt-get install ninja-build
     - name: Setup
       run: |
-        cmake -B _build \
-              -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON -DBUILD_BENCHMARK=${{ matrix.target.full }} \
-              -DBUILD_EXAMPLES=${{ matrix.target.full }} -DCMAKE_BUILD_TYPE=Release \
-              -DTARGET_ARCH=${{ matrix.target.xsimd_arch }} \
-              -DCMAKE_C_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" \
-              -DCMAKE_CXX_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" \
-              -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/${{ matrix.sys.compiler }}-${{ matrix.target.dir }}.cmake
+        cmake -B build/ \
+            -D CMAKE_BUILD_TYPE=Release \
+            -D CMAKE_C_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" \
+            -D CMAKE_CXX_FLAGS="-march=${{ matrix.target.arch }} ${{ matrix.target.flags }}" \
+            -D BUILD_TESTS=ON \
+            -D DOWNLOAD_DOCTEST=ON \
+            -D BUILD_BENCHMARK="${{ matrix.target.full }}" \
+            -D BUILD_EXAMPLES="${{ matrix.target.full }}" \
+            -D TARGET_ARCH="${{ matrix.target.xsimd_arch }}"
     - name: Build
-      run: cmake --build _build
+      run: cmake --build build/ --parallel
     - name: Testing xsimd
       run: ${{ steps.setup-compiler.outputs.qemu }} ./test/test_xsimd
-      working-directory: ${{ github.workspace }}/_build
+      working-directory: ${{ github.workspace }}/build/
