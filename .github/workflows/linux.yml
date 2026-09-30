@@ -33,34 +33,14 @@ jobs:
           - { compiler: 'clang', version: '18', arch: 'avx512vl_128',        flags: [] }
           - { compiler: 'clang', version: '18', arch: 'avx512vl_256',        flags: [] }
     steps:
-    - name: Setup compiler
-      if: ${{ matrix.sys.compiler == 'gcc' }}
-      run: |
-        GCC_VERSION=${{ matrix.sys.version }}
-        sudo apt-get update
-        sudo apt-get --no-install-suggests --no-install-recommends install g++-$GCC_VERSION
-        sudo dpkg --add-architecture i386
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get --no-install-suggests --no-install-recommends install gcc-$GCC_VERSION-multilib g++-$GCC_VERSION-multilib linux-libc-dev:i386
-        CC=gcc-$GCC_VERSION
-        echo "CC=$CC" >> $GITHUB_ENV
-        CXX=g++-$GCC_VERSION
-        echo "CXX=$CXX" >> $GITHUB_ENV
-    - name: Setup compiler
-      if: ${{ matrix.sys.compiler == 'clang' }}
-      run: |
-        LLVM_VERSION=${{ matrix.sys.version }}
-        sudo apt-get update || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install g++ g++-multilib || exit 1
-        sudo ln -s /usr/include/asm-generic /usr/include/asm
-        CC=clang-$LLVM_VERSION
-        echo "CC=$CC" >> $GITHUB_ENV
-        CXX=clang++-$LLVM_VERSION
-        echo "CXX=$CXX" >> $GITHUB_ENV
     - name: Checkout xsimd
       uses: actions/checkout@v6
+    - name: Setup compiler
+      uses: ./.github/actions/setup-compiler-apt
+      with:
+        compiler: ${{ matrix.sys.compiler }}
+        version: ${{ matrix.sys.version }}
+        i386: ${{ contains(matrix.sys.flags, '32bits') }}
     - name: Install mamba
       uses: mamba-org/setup-micromamba@v2
       with:
@@ -82,8 +62,8 @@ jobs:
         fi
 
         cmake -B build/ -G Ninja \
-          -D CMAKE_C_COMPILER=$CC \
-          -D CMAKE_CXX_COMPILER=$CXX \
+          -D CMAKE_C_COMPILER="$CC" \
+          -D CMAKE_CXX_COMPILER="$CXX" \
           -D CMAKE_BUILD_TYPE=Release \
           -D BUILD_TESTS=ON \
           -D BUILD_EXAMPLES=ON \
@@ -118,14 +98,13 @@ jobs:
     runs-on: ubuntu-latest
     name: 'clang 18 - architectures and benchmark'
     steps:
-    - name: Setup compiler
-      run: |
-        sudo apt-get update || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install clang-18 || exit 1
-        echo "CC=clang-18" >> $GITHUB_ENV
-        echo "CXX=clang++-18" >> $GITHUB_ENV
     - name: Checkout xsimd
       uses: actions/checkout@v6
+    - name: Setup compiler
+      uses: ./.github/actions/setup-compiler-apt
+      with:
+        compiler: clang
+        version: 18
     - name: Install mamba
       uses: mamba-org/setup-micromamba@v2
       with:
@@ -134,8 +113,8 @@ jobs:
       run: |
         cmake -B build/ -G Ninja \
               -D CMAKE_BUILD_TYPE=Release \
-              -D CMAKE_C_COMPILER=$CC \
-              -D CMAKE_CXX_COMPILER=$CXX \
+              -D CMAKE_C_COMPILER="$CC" \
+              -D CMAKE_CXX_COMPILER="$CXX" \
               -D BUILD_TESTS=ON \
               -D BUILD_ARCHITECTURE_TESTS=ON \
               -D BUILD_BENCHMARK=ON \

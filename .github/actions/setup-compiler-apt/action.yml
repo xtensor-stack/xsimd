@@ -1,0 +1,66 @@
+name: Setup compiler (apt)
+description: Install gcc or clang from apt and export CC/CXX
+inputs:
+  compiler:
+    description: gcc or clang
+    required: true
+  version:
+    description: Compiler major version
+    required: true
+  i386:
+    description: Also setup i386 (32-bit) compilation
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: Check inputs
+      shell: bash
+      env:
+        COMPILER: ${{ inputs.compiler }}
+        I386: ${{ inputs.i386 }}
+      run: |
+        if [[ "$COMPILER" != gcc && "$COMPILER" != clang ]]; then
+          echo "::error::Unsupported compiler '$COMPILER', expected gcc or clang"
+          exit 1
+        fi
+        if [[ "$I386" != true && "$I386" != false ]]; then
+          echo "::error::Invalid i386 '$I386', expected true or false"
+          exit 1
+        fi
+    - name: Setup gcc
+      if: ${{ inputs.compiler == 'gcc' }}
+      shell: bash
+      env:
+        GCC_VERSION: ${{ inputs.version }}
+      run: |
+        sudo apt-get update
+        sudo apt-get --no-install-suggests --no-install-recommends install g++-$GCC_VERSION
+        echo "CC=gcc-$GCC_VERSION" >> $GITHUB_ENV
+        echo "CXX=g++-$GCC_VERSION" >> $GITHUB_ENV
+    - name: Setup gcc i386
+      if: ${{ inputs.compiler == 'gcc' && inputs.i386 == 'true' }}
+      shell: bash
+      env:
+        GCC_VERSION: ${{ inputs.version }}
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get --no-install-suggests --no-install-recommends install gcc-$GCC_VERSION-multilib g++-$GCC_VERSION-multilib linux-libc-dev:i386
+    - name: Setup clang
+      if: ${{ inputs.compiler == 'clang' }}
+      shell: bash
+      env:
+        LLVM_VERSION: ${{ inputs.version }}
+      run: |
+        sudo apt-get update || exit 1
+        sudo apt-get --no-install-suggests --no-install-recommends install clang-$LLVM_VERSION || exit 1
+        echo "CC=clang-$LLVM_VERSION" >> $GITHUB_ENV
+        echo "CXX=clang++-$LLVM_VERSION" >> $GITHUB_ENV
+    - name: Setup clang i386
+      if: ${{ inputs.compiler == 'clang' && inputs.i386 == 'true' }}
+      shell: bash
+      run: |
+        sudo apt-get --no-install-suggests --no-install-recommends install g++ g++-multilib || exit 1
+        sudo ln -s /usr/include/asm-generic /usr/include/asm
