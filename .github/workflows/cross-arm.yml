@@ -17,23 +17,19 @@ jobs:
           - { compiler: 'gcc',   version: '10' }
           - { compiler: 'gcc',   version: '14' }
     steps:
+    - name: Checkout xsimd
+      uses: actions/checkout@v6
     - name: Setup compiler
-      if: ${{ matrix.sys.compiler == 'gcc' }}
-      run: |
-        sudo apt-get update || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install g++-${{ matrix.sys.version }}-${{ matrix.target.dir }} g++-${{ matrix.sys.version }}-multilib || exit 1
-        sudo update-alternatives --remove-all ${{ matrix.target.dir }}-gcc || true
-        sudo update-alternatives --remove-all ${{ matrix.target.dir }}-g++ || true
-        sudo update-alternatives --install /usr/bin/${{ matrix.target.dir }}-gcc ${{ matrix.target.dir }}-gcc /usr/bin/${{ matrix.target.dir }}-gcc-${{ matrix.sys.version }} 20
-        sudo update-alternatives --install /usr/bin/${{ matrix.target.dir }}-g++ ${{ matrix.target.dir }}-g++ /usr/bin/${{ matrix.target.dir }}-g++-${{ matrix.sys.version }} 20
-    - name: Setup QEMU
-      run: |
-        sudo apt-get --no-install-suggests --no-install-recommends install qemu-user
+      id: setup-compiler
+      uses: ./.github/actions/setup-cross-compiler-apt
+      with:
+        compiler: ${{ matrix.sys.compiler }}
+        version: ${{ matrix.sys.version }}
+        target: ${{ matrix.target.dir }}
+        qemu: 'true'
     - name: Setup Ninja
       run: |
         sudo apt-get install ninja-build
-    - name: Checkout xsimd
-      uses: actions/checkout@v6
     - name: Setup
       run: |
         cmake -B _build \
@@ -46,5 +42,5 @@ jobs:
     - name: Build
       run: cmake --build _build
     - name: Testing xsimd
-      run: qemu-${{ matrix.target.arch == 'armv8-a' && 'aarch64' || 'arm' }} -L /usr/${{ matrix.target.dir}}/ ./test/test_xsimd
+      run: ${{ steps.setup-compiler.outputs.qemu }} ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build
