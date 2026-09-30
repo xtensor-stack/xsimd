@@ -167,6 +167,8 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: arm64
+        # MSVC 19.51 miscompiles the float log1p kernel on neon64
+        toolset: 14.44
     - name: Setup Ninja
       run: |
         python3 -m pip install --upgrade pip setuptools wheel
