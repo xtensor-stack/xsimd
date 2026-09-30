@@ -29,12 +29,15 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mtune=native")
     endif()
     if(NOT CMAKE_CXX_COMPILER_ID MATCHES Clang) # We are using clang-cl
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+        find_package(OpenMP COMPONENTS CXX)
     endif()
 endif()
 
 add_executable(mandelbrot mandelbrot.cpp)
 target_link_libraries(mandelbrot PRIVATE xsimd)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(mandelbrot PRIVATE OpenMP::OpenMP_CXX)
+endif()
 set_property(TARGET mandelbrot PROPERTY CXX_STANDARD 17)
 if(ENABLE_XTL_COMPLEX)
     target_link_libraries(mandelbrot PRIVATE xtl)
