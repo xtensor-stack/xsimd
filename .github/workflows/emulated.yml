@@ -39,6 +39,6 @@ jobs:
           -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
           -GNinja
     - name: Build
-      run: ninja -C _build
+      run: ninja -j1 -C _build
     - name: Test
       run: ninja -C _build xtest
