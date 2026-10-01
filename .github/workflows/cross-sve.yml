@@ -14,28 +14,26 @@ jobs:
           - 256
           - 512
     steps:
+    - name: Checkout xsimd
+      uses: actions/checkout@v6
     - name: Setup compiler
-      run: |
-        sudo apt-get update || exit 1
-        sudo apt-get --no-install-suggests --no-install-recommends install g++-10-aarch64-linux-gnu || exit 1
-        sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-10 20
-        sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-10 20
-    - name: Setup QEMU
-      run: |
-        sudo apt-get --no-install-suggests --no-install-recommends install qemu-user
+      id: setup-compiler
+      uses: ./.github/actions/setup-cross-compiler-apt
+      with:
+        compiler: gcc
+        version: '10'
+        target: aarch64-linux-gnu
+        qemu: 'true'
     - name: Setup Ninja
       run: |
         sudo apt-get install ninja-build
-    - name: Checkout xsimd
-      uses: actions/checkout@v6
     - name: Setup
       run: |
         cmake -B _build \
               -GNinja \
               -DBUILD_TESTS=ON -DDOWNLOAD_DOCTEST=ON \
               -DCMAKE_BUILD_TYPE=Release \
-              -DTARGET_ARCH=sve_${{ matrix.vector_bits }} \
-              -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/gcc-aarch64-linux-gnu.cmake
+              -DTARGET_ARCH=sve_${{ matrix.vector_bits }}
     - name: Build
       run: cmake --build _build
     - name: Set CPU feature test expectations
@@ -46,5 +44,5 @@ jobs:
         echo "XSIMD_TEST_CPU_ASSUME_SVE=1"    >> "$GITHUB_ENV"
         echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"
     - name: Testing xsimd
-      run: qemu-aarch64 --cpu max,sve${{ matrix.vector_bits }}=on -L /usr/aarch64-linux-gnu/ ./test/test_xsimd
+      run: ${{ steps.setup-compiler.outputs.qemu }} --cpu max,sve${{ matrix.vector_bits }}=on ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build
