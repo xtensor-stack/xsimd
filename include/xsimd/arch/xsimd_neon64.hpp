@@ -110,23 +110,6 @@ namespace xsimd
         }
 
         /*************
-         * broadcast *
-         *************/
-
-        // Required to avoid ambiguous call
-        template <class A, class T>
-        XSIMD_INLINE batch<T, A> broadcast(T val, requires_arch<neon64>) noexcept
-        {
-            return broadcast<A>(val, neon {});
-        }
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> broadcast(double val, requires_arch<neon64>) noexcept
-        {
-            return vdupq_n_f64(val);
-        }
-
-        /*************
          * from_bool *
          *************/
 
@@ -136,43 +119,6 @@ namespace xsimd
             return vreinterpretq_f64_u64(vandq_u64(arg, vreinterpretq_u64_f64(vdupq_n_f64(1.))));
         }
 
-        /********
-         * load *
-         ********/
-#if defined(__clang__) || defined(__GNUC__)
-#define xsimd_aligned_load(inst, type, expr) inst((type)__builtin_assume_aligned(expr, 16))
-#else
-#define xsimd_aligned_load(inst, type, expr) inst((type)expr)
-#endif
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> load_aligned(double const* src, convert<double>, requires_arch<neon64>) noexcept
-        {
-            return xsimd_aligned_load(vld1q_f64, double*, src);
-        }
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> load_unaligned(double const* src, convert<double>, requires_arch<neon64>) noexcept
-        {
-            return vld1q_f64(src);
-        }
-#undef xsimd_aligned_load
-
-        /*********
-         * store *
-         *********/
-
-        template <class A>
-        XSIMD_INLINE void store_aligned(double* dst, batch<double, A> const& src, requires_arch<neon64>) noexcept
-        {
-            vst1q_f64(dst, src);
-        }
-
-        template <class A>
-        XSIMD_INLINE void store_unaligned(double* dst, batch<double, A> const& src, requires_arch<neon64>) noexcept
-        {
-            return store_aligned<A>(dst, src, A {});
-        }
 
         /****************
          * store_stream *
@@ -256,16 +202,6 @@ namespace xsimd
             return result;
         }
 #endif
-
-        /*********************
-         * store<batch_bool> *
-         *********************/
-
-        template <class A>
-        XSIMD_INLINE void store(batch_bool<double, A> b, bool* mem, requires_arch<neon>) noexcept
-        {
-            store(batch_bool<uint64_t, A>(b.data), mem, A {});
-        }
 
         /****************
          * load_complex *
@@ -390,16 +326,6 @@ namespace xsimd
         XSIMD_INLINE batch<double, A> ssub(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
         {
             return sub(lhs, rhs, neon64 {});
-        }
-
-        /*******
-         * mul *
-         *******/
-
-        template <class A>
-        XSIMD_INLINE batch<double, A> mul(batch<double, A> const& lhs, batch<double, A> const& rhs, requires_arch<neon64>) noexcept
-        {
-            return vmulq_f64(lhs, rhs);
         }
 
         /*******
