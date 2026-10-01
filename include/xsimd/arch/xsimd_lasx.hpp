@@ -1106,7 +1106,29 @@ namespace xsimd
         XSIMD_INLINE std::enable_if_t<std::is_arithmetic_v<T>, batch<T, A>>
         swizzle(batch<T, A> const& self, batch_constant<ITy, A, Is...> mask, requires_arch<lasx>) noexcept
         {
-            return swizzle(self, mask.as_batch(), lasx {});
+            if constexpr (detail::is_identity(mask))
+                return self;
+            else if constexpr (sizeof(T) == 1
+                               && (!detail::is_cross_lane(mask)
+                                   || detail::is_only_from_lo(mask)
+                                   || detail::is_only_from_hi(mask)))
+            {
+                constexpr auto lane_mask = mask % std::integral_constant<ITy, (16 / sizeof(T))>();
+                auto const self_int = detail::lasx_to_int(self);
+
+                __m256i src;
+                if constexpr (!detail::is_cross_lane(mask))
+                    src = self_int;
+                else if constexpr (detail::is_only_from_lo(mask))
+                    src = __lasx_xvpermi_q(self_int, self_int, 0x00);
+                else
+                    src = __lasx_xvpermi_q(self_int, self_int, 0x11);
+
+                return detail::lasx_from_int<T, A>(
+                    __lasx_xvshuf_b(src, src, detail::lasx_to_int(lane_mask.as_batch())));
+            }
+            else
+                return swizzle(self, mask.as_batch(), lasx {});
         }
     }
 }
