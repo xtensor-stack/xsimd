@@ -14,6 +14,7 @@
 
 #include "./common/xsimd_common_arithmetic.hpp"
 #include "./common/xsimd_common_bit.hpp"
+#include "./common/xsimd_common_bitwise.hpp"
 #include "./common/xsimd_common_cast.hpp"
 #include "./common/xsimd_common_complex.hpp"
 #include "./common/xsimd_common_logical.hpp"

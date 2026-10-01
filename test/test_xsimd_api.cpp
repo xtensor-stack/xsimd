@@ -413,6 +413,38 @@ struct xsimd_api_integral_types_functions
         CHECK_EQ(extract(xsimd::mod(T(val0), T(val1))), val0 % val1);
     }
 
+    // independent oracle: one shift per bit, so the check cannot pass by
+    // agreeing with the SWAR fold or the lookup tables it is testing
+    static value_type naive_popcount(value_type v)
+    {
+        using U = std::make_unsigned_t<value_type>;
+        int n = 0;
+        for (U u(v); u; u = U(u >> 1))
+            n += int(u & U(1));
+        return value_type(n);
+    }
+
+    void test_popcount()
+    {
+        constexpr int bits = std::numeric_limits<value_type>::digits + std::numeric_limits<value_type>::is_signed;
+        using U = std::make_unsigned_t<value_type>;
+        for (int i = 0; i < bits; ++i)
+        {
+            value_type const single = value_type(U(U(1) << i));
+            value_type const prefix = value_type(U(U(~U(0)) << i));
+            value_type const suffix = value_type(U(~U(U(~U(0)) << i)));
+            INFO("popcount, bit " << i);
+            CHECK_EQ(extract(xsimd::popcount(T(single))), naive_popcount(single));
+            CHECK_EQ(extract(xsimd::popcount(T(prefix))), naive_popcount(prefix));
+            CHECK_EQ(extract(xsimd::popcount(T(suffix))), naive_popcount(suffix));
+        }
+        for (value_type v : { value_type(0), value_type(U(~U(0))), value_type(0x5a), value_type(0x3c) })
+        {
+            INFO("popcount, value " << int64_t(v));
+            CHECK_EQ(extract(xsimd::popcount(T(v))), naive_popcount(v));
+        }
+    }
+
     void test_rotl()
     {
         constexpr auto N = std::numeric_limits<value_type>::digits + std::numeric_limits<value_type>::is_signed;
@@ -477,6 +509,11 @@ TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
     SUBCASE("mod")
     {
         Test.test_mod();
+    }
+
+    SUBCASE("popcount")
+    {
+        Test.test_popcount();
     }
 
     SUBCASE("rotl")

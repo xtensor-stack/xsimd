@@ -14,6 +14,15 @@
 
 #include "test_utils.hpp"
 
+// std::popcount is constexpr and the backport in xsimd_common_bit.hpp is not,
+// so this fails to compile if the C++20 build stops reaching the standard one.
+#if XSIMD_CPP_VERSION >= 202002L
+#include <version>
+#if __cpp_lib_bitops >= 201907L
+static_assert(xsimd::detail::popcount(0xffu) == 8, "C++20 must use std::popcount");
+#endif
+#endif
+
 template <class T>
 struct bit_test
 {
