@@ -14,27 +14,19 @@ jobs:
           - { arch: 'lsx', lasx: 0, cpu: 'la464,lsx=on,lasx=off' }
           - { arch: 'lasx', lasx: 1, cpu: 'la464,lsx=on,lasx=on' }
     steps:
+    - name: Checkout xsimd
+      uses: actions/checkout@v6
     - name: Setup compiler
-      run: |
-        sudo apt-get -y -qq update
-        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install \
-          gcc-14-loongarch64-linux-gnu \
-          g++-14-loongarch64-linux-gnu
-        sudo update-alternatives --install /usr/bin/loongarch64-linux-gnu-gcc \
-          loongarch64-linux-gnu-gcc /usr/bin/loongarch64-linux-gnu-gcc-14 20
-        sudo update-alternatives --install /usr/bin/loongarch64-linux-gnu-g++ \
-          loongarch64-linux-gnu-g++ /usr/bin/loongarch64-linux-gnu-g++-14 20
-        loongarch64-linux-gnu-g++ --version
-    - name: Setup QEMU
-      run: |
-        sudo apt-get -y -qq update
-        sudo apt-get -y -qq --no-install-suggests --no-install-recommends install qemu-user-static
-        qemu-loongarch64-static --version
+      id: setup-compiler
+      uses: ./.github/actions/setup-cross-compiler-apt
+      with:
+        compiler: gcc
+        version: '14'
+        target: loongarch64-linux-gnu
+        qemu: 'true'
     - name: Setup Ninja
       run: |
         sudo apt-get -y -qq install ninja-build
-    - name: Checkout xsimd
-      uses: actions/checkout@v6
     - name: Setup
       run: >-
         cmake -S . -B _build
@@ -43,7 +35,6 @@ jobs:
         -DDOWNLOAD_DOCTEST=ON
         -DCMAKE_BUILD_TYPE=Release
         -DTARGET_ARCH=${{ matrix.simd.arch }}
-        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/.github/toolchains/gcc-loongarch64-linux-gnu.cmake
     - name: Build
       run: cmake --build _build
     - name: Set CPU feature test expectations
@@ -59,5 +50,5 @@ jobs:
         echo "XSIMD_TEST_CPU_ASSUME_MANUFACTURER=unknown" >> "$GITHUB_ENV"
     - name: Testing xsimd
       timeout-minutes: 15
-      run: qemu-loongarch64-static -cpu '${{ matrix.simd.cpu }}' -L /usr/loongarch64-linux-gnu ./test/test_xsimd
+      run: ${{ steps.setup-compiler.outputs.qemu }} -cpu '${{ matrix.simd.cpu }}' ./test/test_xsimd
       working-directory: ${{ github.workspace }}/_build

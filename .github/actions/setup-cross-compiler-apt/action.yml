@@ -1,0 +1,96 @@
+name: Setup cross compiler (apt)
+description: Install a gcc or clang cross compiler from apt and export CMAKE_TOOLCHAIN_FILE
+inputs:
+  compiler:
+    description: gcc or clang
+    required: true
+  version:
+    description: Compiler major version
+    required: true
+  target:
+    description: Target triple (e.g. aarch64-linux-gnu)
+    required: true
+  gcc-runtime:
+    description: GCC version providing the target sysroot and runtime, required for clang
+    required: false
+    default: ''
+  qemu:
+    description: Also install qemu user emulation for the target
+    required: false
+    default: 'false'
+outputs:
+  qemu:
+    description: qemu executable for the target, empty if not installed
+    value: ${{ steps.qemu.outputs.qemu }}
+runs:
+  using: composite
+  steps:
+    - name: Check inputs
+      shell: bash
+      env:
+        COMPILER: ${{ inputs.compiler }}
+        GCC_RUNTIME: ${{ inputs.gcc-runtime }}
+      run: |
+        if [[ "$COMPILER" != gcc && "$COMPILER" != clang ]]; then
+          echo "::error::Unsupported compiler '$COMPILER', expected gcc or clang"
+          exit 1
+        fi
+        if [[ "$COMPILER" == clang && -z "$GCC_RUNTIME" ]]; then
+          echo "::error::gcc-runtime is required with clang"
+          exit 1
+        fi
+    - name: Setup toolchain file
+      shell: bash
+      env:
+        TOOLCHAIN_FILE: ${{ github.action_path }}/toolchains/${{ inputs.compiler }}-${{ inputs.target }}.cmake
+      run: |
+        if [[ ! -f "$TOOLCHAIN_FILE" ]]; then
+          echo "::error::No toolchain file for '$(basename "$TOOLCHAIN_FILE" .cmake)'"
+          exit 1
+        fi
+        echo "CMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE" >> "$GITHUB_ENV"
+    - name: Setup gcc
+      if: ${{ inputs.compiler == 'gcc' }}
+      shell: bash
+      env:
+        GCC_VERSION: ${{ inputs.version }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        sudo apt-get update
+        sudo apt-get -y --no-install-suggests --no-install-recommends install "g++-$GCC_VERSION-$TARGET"
+        sudo update-alternatives --remove-all "$TARGET-gcc" || true
+        sudo update-alternatives --remove-all "$TARGET-g++" || true
+        sudo update-alternatives --install "/usr/bin/$TARGET-gcc" "$TARGET-gcc" "/usr/bin/$TARGET-gcc-$GCC_VERSION" 20
+        sudo update-alternatives --install "/usr/bin/$TARGET-g++" "$TARGET-g++" "/usr/bin/$TARGET-g++-$GCC_VERSION" 20
+    - name: Setup clang
+      if: ${{ inputs.compiler == 'clang' }}
+      shell: bash
+      env:
+        LLVM_VERSION: ${{ inputs.version }}
+        GCC_RUNTIME: ${{ inputs.gcc-runtime }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        sudo apt-get update
+        sudo apt-get -y --no-install-suggests --no-install-recommends install "g++-$GCC_RUNTIME-$TARGET" "clang-$LLVM_VERSION"
+        sudo update-alternatives --remove-all clang || true
+        sudo update-alternatives --remove-all clang++ || true
+        sudo update-alternatives --install /usr/bin/clang clang "/usr/bin/clang-$LLVM_VERSION" 20
+        sudo update-alternatives --install /usr/bin/clang++ clang++ "/usr/bin/clang++-$LLVM_VERSION" 20
+    - name: Setup qemu
+      id: qemu
+      if: ${{ inputs.qemu == 'true' }}
+      shell: bash
+      env:
+        TARGET: ${{ inputs.target }}
+      run: |
+        case "${TARGET%%-*}" in
+          arm*) arch=arm ;;
+          powerpc64le) arch=ppc64le ;;
+          powerpc64) arch=ppc64 ;;
+          powerpc) arch=ppc ;;
+          *) arch="${TARGET%%-*}" ;;
+        esac
+        sudo apt-get -y --no-install-suggests --no-install-recommends install qemu-user
+        "qemu-$arch" --version
+        echo "qemu=qemu-$arch" >> "$GITHUB_OUTPUT"
+        echo "QEMU_LD_PREFIX=/usr/$TARGET" >> "$GITHUB_ENV"
