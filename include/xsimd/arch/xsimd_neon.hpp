@@ -518,7 +518,9 @@ namespace xsimd
         template <class A, class T, detail::enable_sized_t<T, 4> = 0>
         XSIMD_INLINE batch_bool<T, A> load_unaligned(bool const* mem, batch_bool<T, A>, requires_arch<neon>) noexcept
         {
-            uint8x8_t tmp = vreinterpret_u8_u32(vset_lane_u32(*(unsigned int*)mem, vdup_n_u32(0), 0));
+            uint32_t bits;
+            std::memcpy(&bits, mem, sizeof(bits));
+            uint8x8_t tmp = vreinterpret_u8_u32(vset_lane_u32(bits, vdup_n_u32(0), 0));
             auto const vmem = batch<uint32_t, A>(vmovl_u16(vget_low_u16(vmovl_u8(tmp))));
             auto const zero = batch<uint32_t, A> { 0 };
             return { (zero - vmem).data };
