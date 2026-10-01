@@ -14,6 +14,10 @@
 
 #include <doctest/doctest.h>
 
+#include <array>
+#include <type_traits>
+#include <utility>
+
 template <class T>
 struct scalar_type
 {
@@ -517,6 +521,67 @@ TEST_CASE_TEMPLATE("[xsimd api | ssub at type minimum]", B, INTEGRAL_TYPES)
         // lo == 0 for unsigned types.
         CHECK_EQ(extract(xsimd::ssub(B(value_type(5)), B(lo))), value_type(5));
     }
+}
+
+// Rotating a negative value must reintroduce the bits shifted out, not copies
+// of the sign bit. The expected values are computed on the unsigned type.
+TEST_CASE_TEMPLATE("[xsimd api | rotations of the sign bit]", B, INTEGRAL_TYPES)
+{
+    using value_type = typename scalar_type<B>::type;
+    using U = std::make_unsigned_t<value_type>;
+    constexpr int bits = sizeof(value_type) * 8;
+    auto ref_rotl = [](U u, int n)
+    { return static_cast<value_type>(static_cast<U>(static_cast<U>(u << n) | static_cast<U>(u >> (bits - n)))); };
+    auto ref_rotr = [](U u, int n)
+    { return static_cast<value_type>(static_cast<U>(static_cast<U>(u >> n) | static_cast<U>(u << (bits - n)))); };
+
+    // 1 followed by zeros, and a pattern with the sign bit and the low bit set
+    U const inputs[] = { static_cast<U>(U(1) << (bits - 1)), static_cast<U>((U(1) << (bits - 1)) | U(1)) };
+    for (U u : inputs)
+    {
+        value_type const v = static_cast<value_type>(u);
+        CHECK_EQ(extract(xsimd::rotl(B(v), B(value_type(1)))), ref_rotl(u, 1));
+        CHECK_EQ(extract(xsimd::rotl(B(v), 3)), ref_rotl(u, 3));
+        CHECK_EQ(extract(xsimd::rotl<1>(B(v))), ref_rotl(u, 1));
+        CHECK_EQ(extract(xsimd::rotl<bits - 1>(B(v))), ref_rotl(u, bits - 1));
+        CHECK_EQ(extract(xsimd::rotr(B(v), B(value_type(1)))), ref_rotr(u, 1));
+        CHECK_EQ(extract(xsimd::rotr(B(v), 3)), ref_rotr(u, 3));
+        CHECK_EQ(extract(xsimd::rotr<1>(B(v))), ref_rotr(u, 1));
+        CHECK_EQ(extract(xsimd::rotr<bits - 1>(B(v))), ref_rotr(u, bits - 1));
+    }
+}
+
+// The 8-bit fixed right shift is built from a 16-bit shift and a mask that
+// removes the bits coming from the neighbouring byte.
+template <class T, size_t... Shifts>
+void check_fixed_rshift_8bit(std::index_sequence<Shifts...>)
+{
+    using B = xsimd::batch<T>;
+    std::array<T, B::size> in, out;
+    for (int base = 0; base < 256; ++base)
+    {
+        for (size_t i = 0; i < B::size; ++i)
+        {
+            in[i] = static_cast<T>(base + 37 * i);
+        }
+        B const v = B::load_unaligned(in.data());
+        auto check = [&](auto shift_tag)
+        {
+            constexpr size_t shift = decltype(shift_tag)::value;
+            xsimd::bitwise_rshift<shift>(v).store_unaligned(out.data());
+            for (size_t i = 0; i < B::size; ++i)
+            {
+                CHECK_EQ(out[i], static_cast<T>(in[i] >> shift));
+            }
+        };
+        (check(std::integral_constant<size_t, Shifts> {}), ...);
+    }
+}
+
+TEST_CASE("[xsimd api | fixed right shift of 8-bit integers]")
+{
+    check_fixed_rshift_8bit<uint8_t>(std::make_index_sequence<8> {});
+    check_fixed_rshift_8bit<int8_t>(std::make_index_sequence<8> {});
 }
 
 /*

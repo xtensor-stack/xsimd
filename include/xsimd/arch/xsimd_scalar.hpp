@@ -418,12 +418,18 @@ namespace xsimd
         return 1. / x;
     }
 
+    // Rotations go through the unsigned type: an arithmetic right shift of a
+    // negative value would fill the vacated bits with the sign instead of the
+    // bits shifted out on the left.
     template <class T0, class T1>
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T0> && std::is_integral_v<T1>, T0>
     rotl(T0 x, T1 shift) noexcept
     {
-        constexpr auto bits = std::numeric_limits<T0>::digits + std::numeric_limits<T0>::is_signed;
-        return (x << shift) | (x >> (bits - shift));
+        using U = std::make_unsigned_t<T0>;
+        constexpr unsigned bits = sizeof(T0) * 8;
+        auto const u = static_cast<U>(x);
+        auto const s = static_cast<unsigned>(shift) & (bits - 1);
+        return static_cast<T0>(static_cast<U>(u << s) | static_cast<U>(u >> ((bits - s) & (bits - 1))));
     }
     template <size_t count, class T>
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, T>
@@ -431,15 +437,18 @@ namespace xsimd
     {
         constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
         static_assert(count < bits, "Count must be less than the number of bits in T");
-        return (x << count) | (x >> (bits - count));
+        return rotl(x, count);
     }
 
     template <class T0, class T1>
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T0> && std::is_integral_v<T1>, T0>
     rotr(T0 x, T1 shift) noexcept
     {
-        constexpr auto bits = std::numeric_limits<T0>::digits + std::numeric_limits<T0>::is_signed;
-        return (x >> shift) | (x << (bits - shift));
+        using U = std::make_unsigned_t<T0>;
+        constexpr unsigned bits = sizeof(T0) * 8;
+        auto const u = static_cast<U>(x);
+        auto const s = static_cast<unsigned>(shift) & (bits - 1);
+        return static_cast<T0>(static_cast<U>(u >> s) | static_cast<U>(u << ((bits - s) & (bits - 1))));
     }
     template <size_t count, class T>
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, T>
@@ -447,7 +456,7 @@ namespace xsimd
     {
         constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
         static_assert(count < bits, "Count must be less than the number of bits in T");
-        return (x >> count) | (x << (bits - count));
+        return rotr(x, count);
     }
 
     template <class T>
