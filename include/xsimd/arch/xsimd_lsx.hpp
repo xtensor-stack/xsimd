@@ -999,7 +999,10 @@ namespace xsimd
         XSIMD_INLINE std::enable_if_t<std::is_arithmetic_v<T>, batch<T, A>>
         swizzle(batch<T, A> const& self, batch_constant<ITy, A, Is...> mask, requires_arch<lsx>) noexcept
         {
-            return swizzle(self, mask.as_batch(), lsx {});
+            if constexpr (detail::is_identity(mask))
+                return self;
+            else
+                return swizzle(self, mask.as_batch(), lsx {});
         }
     }
 }
