@@ -425,11 +425,18 @@ namespace xsimd
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T0> && std::is_integral_v<T1>, T0>
     rotl(T0 x, T1 shift) noexcept
     {
-        using U = std::make_unsigned_t<T0>;
-        constexpr unsigned bits = sizeof(T0) * 8;
-        auto const u = static_cast<U>(x);
-        auto const s = static_cast<unsigned>(shift) & (bits - 1);
-        return static_cast<T0>(static_cast<U>(u << s) | static_cast<U>(u >> ((bits - s) & (bits - 1))));
+        if constexpr (std::is_same_v<std::remove_cv_t<T0>, bool>)
+        {
+            return x;
+        }
+        else
+        {
+            using U = std::make_unsigned_t<T0>;
+            constexpr unsigned bits = sizeof(T0) * 8;
+            auto const u = static_cast<U>(x);
+            auto const s = static_cast<unsigned>(shift) & (bits - 1);
+            return static_cast<T0>(static_cast<U>(u << s) | static_cast<U>(u >> ((bits - s) & (bits - 1))));
+        }
     }
     template <size_t count, class T>
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, T>
@@ -444,11 +451,18 @@ namespace xsimd
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T0> && std::is_integral_v<T1>, T0>
     rotr(T0 x, T1 shift) noexcept
     {
-        using U = std::make_unsigned_t<T0>;
-        constexpr unsigned bits = sizeof(T0) * 8;
-        auto const u = static_cast<U>(x);
-        auto const s = static_cast<unsigned>(shift) & (bits - 1);
-        return static_cast<T0>(static_cast<U>(u >> s) | static_cast<U>(u << ((bits - s) & (bits - 1))));
+        if constexpr (std::is_same_v<std::remove_cv_t<T0>, bool>)
+        {
+            return x;
+        }
+        else
+        {
+            using U = std::make_unsigned_t<T0>;
+            constexpr unsigned bits = sizeof(T0) * 8;
+            auto const u = static_cast<U>(x);
+            auto const s = static_cast<unsigned>(shift) & (bits - 1);
+            return static_cast<T0>(static_cast<U>(u >> s) | static_cast<U>(u << ((bits - s) & (bits - 1))));
+        }
     }
     template <size_t count, class T>
     XSIMD_INLINE std::enable_if_t<std::is_integral_v<T>, T>

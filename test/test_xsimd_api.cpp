@@ -531,15 +531,27 @@ TEST_CASE_TEMPLATE("[xsimd api | rotations of the sign bit]", B, INTEGRAL_TYPES)
     using U = std::make_unsigned_t<value_type>;
     constexpr int bits = sizeof(value_type) * 8;
     auto ref_rotl = [](U u, int n)
-    { return static_cast<value_type>(static_cast<U>(static_cast<U>(u << n) | static_cast<U>(u >> (bits - n)))); };
+    {
+        constexpr int width = sizeof(value_type) * 8;
+        return static_cast<value_type>(static_cast<U>(static_cast<U>(u << n) | static_cast<U>(u >> (width - n))));
+    };
     auto ref_rotr = [](U u, int n)
-    { return static_cast<value_type>(static_cast<U>(static_cast<U>(u >> n) | static_cast<U>(u << (bits - n)))); };
+    {
+        constexpr int width = sizeof(value_type) * 8;
+        return static_cast<value_type>(static_cast<U>(static_cast<U>(u >> n) | static_cast<U>(u << (width - n))));
+    };
 
     // 1 followed by zeros, and a pattern with the sign bit and the low bit set
     U const inputs[] = { static_cast<U>(U(1) << (bits - 1)), static_cast<U>((U(1) << (bits - 1)) | U(1)) };
     for (U u : inputs)
     {
         value_type const v = static_cast<value_type>(u);
+        CHECK_EQ(extract(xsimd::rotl<0>(B(v))), v);
+        CHECK_EQ(extract(xsimd::rotr<0>(B(v))), v);
+        if constexpr (!std::is_integral_v<B>)
+        {
+            CHECK_EQ(extract(xsimd::bitwise_rshift<0>(B(v))), v);
+        }
         CHECK_EQ(extract(xsimd::rotl(B(v), B(value_type(1)))), ref_rotl(u, 1));
         CHECK_EQ(extract(xsimd::rotl(B(v), 3)), ref_rotl(u, 3));
         CHECK_EQ(extract(xsimd::rotl<1>(B(v))), ref_rotl(u, 1));
@@ -551,6 +563,20 @@ TEST_CASE_TEMPLATE("[xsimd api | rotations of the sign bit]", B, INTEGRAL_TYPES)
     }
 }
 
+TEST_CASE("[xsimd api | boolean rotations]")
+{
+    for (bool value : { false, true })
+    {
+        CHECK_EQ(xsimd::rotl<0>(value), value);
+        CHECK_EQ(xsimd::rotr<0>(value), value);
+        CHECK_EQ(xsimd::rotl(value, 0), value);
+        CHECK_EQ(xsimd::rotr(value, 0), value);
+        CHECK_EQ(xsimd::rotl<const bool>(value, 0), value);
+        CHECK_EQ(xsimd::rotr<const bool>(value, 0), value);
+    }
+}
+
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
 // The 8-bit fixed right shift is built from a 16-bit shift and a mask that
 // removes the bits coming from the neighbouring byte.
 template <class T, size_t... Shifts>
@@ -583,6 +609,7 @@ TEST_CASE("[xsimd api | fixed right shift of 8-bit integers]")
     check_fixed_rshift_8bit<uint8_t>(std::make_index_sequence<8> {});
     check_fixed_rshift_8bit<int8_t>(std::make_index_sequence<8> {});
 }
+#endif
 
 /*
  * Functions that apply on floating points types only

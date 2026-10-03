@@ -508,7 +508,14 @@ namespace xsimd
     XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::bitwise_rshift<shift, A>(x, A {});
+        if constexpr (shift == 0)
+        {
+            return x;
+        }
+        else
+        {
+            return kernel::bitwise_rshift<shift, A>(x, A {});
+        }
     }
 
     /**
