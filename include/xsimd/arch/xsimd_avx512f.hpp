@@ -1885,10 +1885,20 @@ namespace xsimd
         }
 
         // neg
-        template <class A, class T>
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
             return 0 - self;
+        }
+        template <class A>
+        XSIMD_INLINE batch<float, A> neg(batch<float, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_castsi512_ps(_mm512_xor_si512(_mm512_castps_si512(self), _mm512_set1_epi32(0x80000000)));
+        }
+        template <class A>
+        XSIMD_INLINE batch<double, A> neg(batch<double, A> const& self, requires_arch<avx512f>) noexcept
+        {
+            return _mm512_castsi512_pd(_mm512_xor_si512(_mm512_castpd_si512(self), _mm512_set1_epi64(0x8000000000000000)));
         }
 
         // neq
