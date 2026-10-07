@@ -1368,7 +1368,7 @@ namespace xsimd
             return 0 - self;
         }
         template <class A>
-        batch<float, A> neg(batch<float, A> const& self, requires_arch<avx>)
+        XSIMD_INLINE batch<float, A> neg(batch<float, A> const& self, requires_arch<avx>) noexcept
         {
             return _mm256_xor_ps(self, _mm256_castsi256_ps(_mm256_set1_epi32(0x80000000)));
         }
