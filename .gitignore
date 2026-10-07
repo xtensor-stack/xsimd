@@ -47,3 +47,7 @@ docs/build/
 
 # CLion / IDEA
 .idea/
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
