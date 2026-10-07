@@ -14,6 +14,8 @@
 
 #include <doctest/doctest.h>
 
+#include <cmath>
+
 template <class T>
 struct scalar_type
 {
@@ -780,6 +782,15 @@ struct xsimd_api_float_types_functions
         value_type val(3.1);
         CHECK_EQ(extract(xsimd::nearbyint_as_int(T(val))), long(std::nearbyint(val)));
     }
+#ifndef __FAST_MATH__
+    void test_neg_signed_zero()
+    {
+        value_type pos_zero(0.0);
+        value_type neg_zero(-0.0);
+        CHECK(std::signbit(extract(xsimd::neg(T(pos_zero)))));
+        CHECK_FALSE(std::signbit(extract(xsimd::neg(T(neg_zero)))));
+    }
+#endif
     void test_nextafter()
     {
         value_type val0(3);
@@ -1064,6 +1075,13 @@ TEST_CASE_TEMPLATE("[xsimd api | float types functions]", B, FLOAT_TYPES)
     {
         Test.test_nearbyint_as_int();
     }
+
+#ifndef __FAST_MATH__
+    SUBCASE("neg_signed_zero")
+    {
+        Test.test_neg_signed_zero();
+    }
+#endif
 
     SUBCASE("nextafter")
     {

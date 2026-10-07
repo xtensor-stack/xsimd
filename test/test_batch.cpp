@@ -246,6 +246,23 @@ struct batch_test
             INFO("-batch");
             CHECK_BATCH_EQ(res, expected);
         }
+#ifndef __FAST_MATH__
+        // -batch at signed zero, which CHECK_BATCH_EQ cannot see: it compares
+        // with ==, and +0 == -0.
+        if constexpr (std::is_floating_point_v<value_type>)
+        {
+            value_type pos_zero(0.0);
+            value_type neg_zero(-0.0);
+            batch_type pos_res = -batch_type(pos_zero);
+            batch_type neg_res = -batch_type(neg_zero);
+            INFO("-batch (signed zero)");
+            for (size_t i = 0; i < size; ++i)
+            {
+                CHECK(std::signbit(pos_res.get(i)));
+                CHECK_FALSE(std::signbit(neg_res.get(i)));
+            }
+        }
+#endif
         // batch + batch
         {
             array_type expected;
