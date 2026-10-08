@@ -14,7 +14,10 @@
 
 #include <doctest/doctest.h>
 
+#include <array>
 #include <cmath>
+#include <type_traits>
+#include <utility>
 
 template <class T>
 struct scalar_type
@@ -520,6 +523,180 @@ TEST_CASE_TEMPLATE("[xsimd api | ssub at type minimum]", B, INTEGRAL_TYPES)
         CHECK_EQ(extract(xsimd::ssub(B(value_type(5)), B(lo))), value_type(5));
     }
 }
+
+template <class B>
+struct lane_count : std::integral_constant<size_t, 1>
+{
+};
+template <class T, class A>
+struct lane_count<xsimd::batch<T, A>> : std::integral_constant<size_t, xsimd::batch<T, A>::size>
+{
+};
+
+template <class B>
+B load_lanes(typename scalar_type<B>::type const* data)
+{
+    if constexpr (std::is_integral_v<B>)
+    {
+        return *data;
+    }
+    else
+    {
+        return B::load_unaligned(data);
+    }
+}
+
+template <class T>
+T lane(T const& value, size_t) { return value; }
+
+template <class T, class A>
+T lane(xsimd::batch<T, A> const& value, size_t i) { return value.get(i); }
+
+// Rotating a negative value must reintroduce the bits shifted out, not copies
+// of the sign bit. The expected values are computed on the unsigned type, for
+// every lane. A count is reduced modulo the number of bits, so counts of 0 and
+// of the lane width or more are checked as well.
+TEST_CASE_TEMPLATE("[xsimd api | rotations of the sign bit]", B, INTEGRAL_TYPES)
+{
+    using value_type = typename scalar_type<B>::type;
+    using U = std::make_unsigned_t<value_type>;
+    constexpr int bits = sizeof(value_type) * 8;
+    constexpr size_t lanes = lane_count<B>::value;
+    auto ref_rotl = [](U u, int n)
+    {
+        constexpr int width = sizeof(value_type) * 8;
+        n %= width;
+        return n == 0 ? static_cast<value_type>(u) : static_cast<value_type>(static_cast<U>(static_cast<U>(u << n) | static_cast<U>(u >> (width - n))));
+    };
+    auto ref_rotr = [](U u, int n)
+    {
+        constexpr int width = sizeof(value_type) * 8;
+        n %= width;
+        return n == 0 ? static_cast<value_type>(u) : static_cast<value_type>(static_cast<U>(static_cast<U>(u >> n) | static_cast<U>(u << (width - n))));
+    };
+
+    // 1 followed by zeros, a pattern with the sign bit and the low bit set,
+    // and a positive pattern. Lane 0 holds the pattern itself, the other
+    // lanes hold different values derived from it.
+    U const patterns[] = { static_cast<U>(U(1) << (bits - 1)), static_cast<U>((U(1) << (bits - 1)) | U(1)), static_cast<U>(0x6B) };
+    int const counts[] = { 0, 1, bits - 1, bits, bits + 1, 2 * bits + 3 };
+    for (U pattern : patterns)
+    {
+        std::array<value_type, lanes> in, shifts;
+        for (size_t i = 0; i < lanes; ++i)
+        {
+            in[i] = static_cast<value_type>(static_cast<U>(pattern ^ static_cast<U>(static_cast<U>(i) * static_cast<U>(0x9E37))));
+            shifts[i] = static_cast<value_type>(counts[(i + pattern) % 6]);
+        }
+        B const v = load_lanes<B>(in.data());
+
+        auto check = [&](B const& left, B const& right, auto left_count, auto right_count)
+        {
+            for (size_t i = 0; i < lanes; ++i)
+            {
+                CHECK_EQ(lane(left, i), ref_rotl(static_cast<U>(in[i]), left_count(i)));
+                CHECK_EQ(lane(right, i), ref_rotr(static_cast<U>(in[i]), right_count(i)));
+            }
+        };
+
+        // fixed counts
+        auto check_fixed = [&](auto count)
+        {
+            constexpr int k = decltype(count)::value;
+            auto const same = [](size_t)
+            { return k; };
+            check(xsimd::rotl<k>(v), xsimd::rotr<k>(v), same, same);
+        };
+        check_fixed(std::integral_constant<int, 0>());
+        check_fixed(std::integral_constant<int, 1>());
+        check_fixed(std::integral_constant<int, bits - 1>());
+        if constexpr (!std::is_integral_v<B>)
+        {
+            CHECK_EQ(extract(xsimd::bitwise_rshift<0>(v)), in[0]);
+        }
+
+        // the same count in every lane
+        for (int k : { 0, 1, 3, bits - 1, bits, bits + 1, 2 * bits + 3 })
+        {
+            auto const same = [k](size_t)
+            { return k; };
+            check(xsimd::rotl(v, k), xsimd::rotr(v, k), same, same);
+        }
+
+        // a different count in every lane
+        B const by = load_lanes<B>(shifts.data());
+        auto const per_lane = [&](size_t i)
+        { return static_cast<int>(shifts[i]); };
+        check(xsimd::rotl(v, by), xsimd::rotr(v, by), per_lane, per_lane);
+    }
+}
+
+TEST_CASE("[xsimd api | boolean rotations]")
+{
+    for (bool value : { false, true })
+    {
+        CHECK_EQ(xsimd::rotl<0>(value), value);
+        CHECK_EQ(xsimd::rotr<0>(value), value);
+        CHECK_EQ(xsimd::rotl(value, 0), value);
+        CHECK_EQ(xsimd::rotr(value, 0), value);
+        CHECK_EQ(xsimd::rotl<const bool>(value, 0), value);
+        CHECK_EQ(xsimd::rotr<const bool>(value, 0), value);
+    }
+}
+
+#ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
+TEST_CASE_TEMPLATE("[xsimd api | fixed shifts by zero]", T, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t)
+{
+    using B = xsimd::batch<T>;
+    using U = std::make_unsigned_t<T>;
+    std::array<T, B::size> in, left, right;
+    for (size_t i = 0; i < B::size; ++i)
+    {
+        in[i] = static_cast<T>(i % 2 ? U(i + 1) : ~U(i + 1));
+    }
+    B const v = B::load_unaligned(in.data());
+    xsimd::bitwise_lshift<0>(v).store_unaligned(left.data());
+    xsimd::bitwise_rshift<0>(v).store_unaligned(right.data());
+    for (size_t i = 0; i < B::size; ++i)
+    {
+        CHECK_EQ(left[i], in[i]);
+        CHECK_EQ(right[i], in[i]);
+    }
+}
+
+// The 8-bit fixed right shift is built from a 16-bit shift and a mask that
+// removes the bits coming from the neighbouring byte.
+template <class T, size_t... Shifts>
+void check_fixed_rshift_8bit(std::index_sequence<Shifts...>)
+{
+    using B = xsimd::batch<T>;
+    std::array<T, B::size> in, out;
+    for (int base = 0; base < 256; ++base)
+    {
+        for (size_t i = 0; i < B::size; ++i)
+        {
+            in[i] = static_cast<T>(base + 37 * i);
+        }
+        B const v = B::load_unaligned(in.data());
+        auto check = [&](auto shift_tag)
+        {
+            constexpr size_t shift = decltype(shift_tag)::value;
+            xsimd::bitwise_rshift<shift>(v).store_unaligned(out.data());
+            for (size_t i = 0; i < B::size; ++i)
+            {
+                CHECK_EQ(out[i], static_cast<T>(in[i] >> shift));
+            }
+        };
+        (check(std::integral_constant<size_t, Shifts> {}), ...);
+    }
+}
+
+TEST_CASE("[xsimd api | fixed right shift of 8-bit integers]")
+{
+    check_fixed_rshift_8bit<uint8_t>(std::make_index_sequence<8> {});
+    check_fixed_rshift_8bit<int8_t>(std::make_index_sequence<8> {});
+}
+#endif
 
 /*
  * Functions that apply on floating points types only

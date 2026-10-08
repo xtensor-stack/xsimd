@@ -396,14 +396,12 @@ namespace xsimd
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    __m256i sign_mask = _mm256_set1_epi16((0xFF00 >> shift) & 0x00FF);
-                    __m256i cmp_is_negative = _mm256_cmpgt_epi8(_mm256_setzero_si256(), self);
-                    __m256i res = _mm256_srai_epi16(self, shift);
-                    return _mm256_or_si256(
-                        detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                           { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2 {}); },
-                                           sign_mask, cmp_is_negative),
-                        _mm256_andnot_si256(sign_mask, res));
+                    // Shift 16-bit lanes, remove neighbouring bits, then sign-extend each byte.
+                    constexpr uint8_t keep = static_cast<uint8_t>(0xFFu >> shift);
+                    constexpr uint8_t sign = static_cast<uint8_t>(0x80u >> shift);
+                    __m256i shifted = _mm256_and_si256(_mm256_srli_epi16(self, static_cast<int>(shift)), _mm256_set1_epi8(static_cast<char>(keep)));
+                    __m256i sign_bit = _mm256_set1_epi8(static_cast<char>(sign));
+                    return _mm256_sub_epi8(_mm256_xor_si256(shifted, sign_bit), sign_bit);
                 }
                 else if constexpr (sizeof(T) == 2)
                 {
@@ -422,10 +420,9 @@ namespace xsimd
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    // 8-bit left shift via 16-bit shift + mask
+                    // 8-bit right shift via 16-bit shift + mask of the bits that stay in the byte
                     const __m256i shifted = _mm256_srli_epi16(self, shift);
-                    // TODO(C++17): without `if constexpr ` we must ensure the compile-time shift does not overflow
-                    constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? ((1u << shift) - 1u) : 0);
+                    constexpr uint8_t mask8 = static_cast<uint8_t>(0xFFu >> shift);
                     const __m256i mask = _mm256_set1_epi8(mask8);
                     return _mm256_and_si256(shifted, mask);
                 }
