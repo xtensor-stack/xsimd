@@ -326,7 +326,7 @@ namespace xsimd
         template <class A, class T>
         XSIMD_INLINE batch<T, A> neg(batch<T, A> const& self, requires_arch<vxe>) noexcept
         {
-            return (typename batch<T, A>::register_type) { 0 } - self.data;
+            return -self.data;
         }
 
         // add
