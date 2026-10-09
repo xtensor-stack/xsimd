@@ -500,12 +500,13 @@ namespace xsimd
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    // 8-bit arithmetic right shift via 16-bit shift + sign-extension handling.
-                    __m128i shifted = _mm_srai_epi16(self, static_cast<int>(shift));
-                    __m128i sign_mask = _mm_set1_epi16(static_cast<short>(0xFF00 >> shift));
-                    __m128i cmp_negative = _mm_cmpgt_epi8(_mm_setzero_si128(), self);
-                    return _mm_or_si128(_mm_and_si128(sign_mask, cmp_negative),
-                                        _mm_andnot_si128(sign_mask, shifted));
+                    // 8-bit arithmetic right shift: logical shift on 16-bit lanes, drop the
+                    // bits that came from the neighbouring byte, then sign-extend.
+                    constexpr uint8_t keep = static_cast<uint8_t>(0xFFu >> shift);
+                    constexpr uint8_t sign = static_cast<uint8_t>(0x80u >> shift);
+                    __m128i shifted = _mm_and_si128(_mm_srli_epi16(self, static_cast<int>(shift)), _mm_set1_epi8(static_cast<char>(keep)));
+                    __m128i sign_bit = _mm_set1_epi8(static_cast<char>(sign));
+                    return _mm_sub_epi8(_mm_xor_si128(shifted, sign_bit), sign_bit);
                 }
                 else if constexpr (sizeof(T) == 2)
                 {
@@ -522,10 +523,9 @@ namespace xsimd
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    // 8-bit left shift via 16-bit shift + mask
+                    // 8-bit right shift via 16-bit shift + mask of the bits that stay in the byte
                     __m128i shifted = _mm_srli_epi16(self, static_cast<int>(shift));
-                    // TODO(C++17): without `if constexpr ` we must ensure the compile-time shift does not overflow
-                    constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? ((1u << shift) - 1u) : 0);
+                    constexpr uint8_t mask8 = static_cast<uint8_t>(0xFFu >> shift);
                     const __m128i mask = _mm_set1_epi8(mask8);
                     return _mm_and_si128(shifted, mask);
                 }
