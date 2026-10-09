@@ -14,6 +14,17 @@
 
 #include "test_utils.hpp"
 
+// std::popcount is constexpr and so are __builtin_popcount and
+// __builtin_popcountll on GCC and Clang, so the backport popcount is a
+// constant expression on the MSVC and fallback paths too wherever a builtin
+// is available.
+#if XSIMD_CPP_VERSION >= 202002L
+#include <version>
+#endif
+#if (XSIMD_CPP_VERSION >= 202002L && __cpp_lib_bitops >= 201907L) || defined(__GNUC__) || defined(__clang__)
+static_assert(xsimd::detail::popcount(0xffu) == 8, "popcount must be usable in a constant expression");
+#endif
+
 template <class T>
 struct bit_test
 {
@@ -22,26 +33,23 @@ struct bit_test
 
     void test_popcount()
     {
-        // Zero
-        CHECK_EQ(xsimd::detail::popcount(T(0)), 0);
+        auto check = [&](T v, int ref)
+        {
+            INFO("popcount(0x" << std::hex << (unsigned long long)v << std::dec << ")");
+            CHECK_EQ(xsimd::detail::popcount(v), ref);
+#if !(XSIMD_CPP_VERSION >= 202002L && __cpp_lib_bitops >= 201907L)
+            // Run the portable fallback directly: on a compiler with a
+            // builtin the dispatch never reaches it.
+            CHECK_EQ(xsimd::detail::popcount_swar(v), ref);
+#endif
+        };
 
-        // All bits set
-        CHECK_EQ(xsimd::detail::popcount(T(~T(0))), bits::value);
-
-        // Single bit patterns - all should have popcount of 1
+        check(T(0), 0);
+        check(T(~T(0)), bits::value);
         for (int i = 0; i < bits::value; ++i)
         {
-            T value = T(T(1) << i);
-            INFO("popcount(1 << " << i << ")");
-            CHECK_EQ(xsimd::detail::popcount(value), 1);
-        }
-
-        // Powers of 2 minus 1 - known popcounts
-        for (int i = 1; i < bits::value; ++i)
-        {
-            T value = T((T(1) << i) - 1);
-            INFO("popcount((1 << " << i << ") - 1)");
-            CHECK_EQ(xsimd::detail::popcount(value), i);
+            check(T(T(1) << i), 1);
+            check(T(T(~T(0)) >> i), bits::value - i);
         }
 
         // Alternating patterns
@@ -54,17 +62,15 @@ struct bit_test
                 pattern_aa |= T(0xAA) << (i * 8);
                 pattern_55 |= T(0x55) << (i * 8);
             }
-            INFO("popcount(0xAA...)");
-            CHECK_EQ(xsimd::detail::popcount(pattern_aa), bits::value / 2);
-            INFO("popcount(0x55...)");
-            CHECK_EQ(xsimd::detail::popcount(pattern_55), bits::value / 2);
+            check(pattern_aa, bits::value / 2);
+            check(pattern_55, bits::value / 2);
         }
 
         // Specific test cases
-        CHECK_EQ(xsimd::detail::popcount(T(1)), 1);
-        CHECK_EQ(xsimd::detail::popcount(T(3)), 2);
-        CHECK_EQ(xsimd::detail::popcount(T(7)), 3);
-        CHECK_EQ(xsimd::detail::popcount(T(15)), 4);
+        check(T(1), 1);
+        check(T(3), 2);
+        check(T(7), 3);
+        check(T(15), 4);
     }
 
     void test_countl_zero()

@@ -1947,6 +1947,21 @@ namespace xsimd
     }
 
     /**
+     * @ingroup batch_bitwise
+     *
+     * Counts the bits set in each element of \c x.
+     * @param x batch of unsigned integer values.
+     * @return per slot population count.
+     */
+    template <class T, class A>
+    XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& x) noexcept
+    {
+        static_assert(std::is_unsigned_v<T> && !std::is_same_v<T, bool>, "popcount requires an unsigned integral type");
+        detail::static_check_supported_config<T, A>();
+        return kernel::popcount<A>(x, A {});
+    }
+
+    /**
      * @ingroup batch_arithmetic
      *
      * No-op on \c x.

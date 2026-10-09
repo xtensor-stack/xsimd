@@ -41,11 +41,14 @@ bool extract(xsimd::batch_bool<T, A> const& batch) { return batch.get(0); }
 #define INTEGRAL_TYPES_HEAD char, unsigned char, signed char, short, unsigned short, int, unsigned int, long, unsigned long
 #ifdef XSIMD_NO_SUPPORTED_ARCHITECTURE
 #define INTEGRAL_TYPES_TAIL
+#define UNSIGNED_TYPES
 #else
 #define INTEGRAL_TYPES_TAIL , xsimd::batch<char>, xsimd::batch<unsigned char>, xsimd::batch<signed char>, xsimd::batch<short>, xsimd::batch<unsigned short>, xsimd::batch<int>, xsimd::batch<unsigned int>, xsimd::batch<long>, xsimd::batch<unsigned long>
+#define UNSIGNED_TYPES , xsimd::batch<unsigned char>, xsimd::batch<unsigned short>, xsimd::batch<unsigned int>, xsimd::batch<unsigned long>
 #endif
 
 #define INTEGRAL_TYPES INTEGRAL_TYPES_HEAD INTEGRAL_TYPES_TAIL
+#define UNSIGNED_INTEGRAL_TYPES unsigned char, unsigned short, unsigned int, unsigned long UNSIGNED_TYPES
 
 //
 
@@ -413,6 +416,42 @@ struct xsimd_api_integral_types_functions
         CHECK_EQ(extract(xsimd::mod(T(val0), T(val1))), val0 % val1);
     }
 
+    void test_popcount()
+    {
+        constexpr int bits = std::numeric_limits<value_type>::digits + std::numeric_limits<value_type>::is_signed;
+        using U = std::make_unsigned_t<value_type>;
+
+        // Check every lane of the result, not just lane 0, against the scalar
+        // xsimd::popcount on the broadcast input.
+        auto check = [&](value_type v)
+        {
+            INFO("popcount, value " << int64_t(v));
+            if constexpr (std::is_integral_v<T>)
+            {
+                CHECK_EQ(xsimd::popcount(xsimd::batch<value_type>(v)).get(0), xsimd::popcount(v));
+            }
+            else
+            {
+                auto got = xsimd::popcount(T(v));
+                std::array<value_type, T::size> lanes;
+                got.store_unaligned(lanes.data());
+                for (std::size_t l = 0; l < lanes.size(); ++l)
+                    CHECK_EQ(lanes[l], xsimd::popcount(v));
+            }
+        };
+
+        for (int i = 0; i < bits; ++i)
+        {
+            check(value_type(U(U(1) << i)));
+            check(value_type(U(U(~U(0)) << i)));
+            check(value_type(U(~U(U(~U(0)) << i))));
+        }
+        check(value_type(0));
+        check(value_type(U(~U(0))));
+        check(value_type(0x5a));
+        check(value_type(0x3c));
+    }
+
     void test_rotl()
     {
         constexpr auto N = std::numeric_limits<value_type>::digits + std::numeric_limits<value_type>::is_signed;
@@ -497,6 +536,19 @@ TEST_CASE_TEMPLATE("[xsimd api | integral types functions]", B, INTEGRAL_TYPES)
     SUBCASE("ssub")
     {
         Test.test_ssub();
+    }
+}
+
+// The batch popcount API accepts unsigned types only, much like std::popcount.
+TEST_CASE_TEMPLATE("[xsimd api | unsigned integral types functions]", B, UNSIGNED_INTEGRAL_TYPES)
+{
+    using test_type = xsimd_api_integral_types_functions<B>;
+
+    test_type Test;
+
+    SUBCASE("popcount")
+    {
+        Test.test_popcount();
     }
 }
 

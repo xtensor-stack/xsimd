@@ -15,9 +15,15 @@
 #include "test_utils.hpp"
 
 #include <climits>
+#include <type_traits>
 
 namespace xsimd
 {
+    static_assert(std::is_same_v<decltype(xsimd::popcount(batch<uint8_t> { })), batch<uint8_t>>, "popcount on uint8_t batch returns batch<uint8_t>");
+    static_assert(std::is_same_v<decltype(xsimd::popcount(batch<uint16_t> { })), batch<uint16_t>>, "popcount on uint16_t batch returns batch<uint16_t>");
+    static_assert(std::is_same_v<decltype(xsimd::popcount(batch<uint32_t> { })), batch<uint32_t>>, "popcount on uint32_t batch returns batch<uint32_t>");
+    static_assert(std::is_same_v<decltype(xsimd::popcount(batch<uint64_t> { })), batch<uint64_t>>, "popcount on uint64_t batch returns batch<uint64_t>");
+
     template <class T, std::size_t N = T::size>
     struct test_int_min_max
     {
@@ -303,6 +309,102 @@ struct batch_int_test
         t.run();
     }
 
+    // 0, ~0, single bits, prefixes, suffixes and pseudo-random words
+    static array_type bit_patterns(size_t seed)
+    {
+        constexpr size_t bits = sizeof(value_type) * CHAR_BIT;
+        using U = std::make_unsigned_t<value_type>;
+        array_type a;
+        for (size_t i = 0; i < size; ++i)
+        {
+            size_t k = seed * size + i;
+            size_t sh = k % bits;
+            U u;
+            switch (k % 6)
+            {
+            case 0:
+                u = U(0);
+                break;
+            case 1:
+                u = U(~U(0));
+                break;
+            case 2:
+                u = U(U(1) << sh);
+                break;
+            case 3:
+                u = U(~U(0)) << sh;
+                break;
+            case 4:
+                u = U(U(U(1) << sh) - U(1));
+                break;
+            default:
+                u = U(k * 0x9E3779B9u + 0x7F4A7C15u);
+                break;
+            }
+            a[i] = value_type(u);
+        }
+        return a;
+    }
+
+    // independent oracle: one shift per bit, so the check cannot pass by
+    // agreeing with the SWAR fold or the lookup tables it is testing
+    static value_type naive_popcount(value_type v)
+    {
+        using U = std::make_unsigned_t<value_type>;
+        int n = 0;
+        for (U u(v); u; u = U(u >> 1))
+            n += int(u & U(1));
+        return value_type(n);
+    }
+
+    void test_popcount() const
+    {
+        for (size_t s = 0; s < 6; ++s)
+        {
+            array_type in = bit_patterns(s), expected;
+            std::transform(in.cbegin(), in.cend(), expected.begin(), naive_popcount);
+            INFO("popcount, pattern " << s);
+            batch_type const in_batch = batch_type::load_unaligned(in.data());
+            CHECK_BATCH_EQ(xsimd::popcount(in_batch), expected);
+            // run the common SWAR kernel directly, so arch overrides cannot hide it
+            INFO("popcount common kernel, pattern " << s);
+            CHECK_BATCH_EQ((xsimd::kernel::popcount<typename B::arch_type>(in_batch, xsimd::kernel::requires_arch<xsimd::common> {})), expected);
+        }
+
+        // one isolated bit per bit position, lanes mixed with 0 and ~0
+        constexpr size_t bits = sizeof(value_type) * CHAR_BIT;
+        using U = std::make_unsigned_t<value_type>;
+        for (size_t b = 0; b < bits; ++b)
+        {
+            for (size_t r = 0; r < 3; ++r)
+            {
+                array_type in, expected;
+                U const lane[3] = { U(U(1) << b), U(0), U(~U(0)) };
+                for (size_t i = 0; i < size; ++i)
+                    in[i] = value_type(lane[(i + r) % 3]);
+                std::transform(in.cbegin(), in.cend(), expected.begin(), naive_popcount);
+                INFO("popcount, bit " << b << ", lane offset " << r);
+                batch_type const in_batch = batch_type::load_unaligned(in.data());
+                CHECK_BATCH_EQ(xsimd::popcount(in_batch), expected);
+                INFO("popcount common kernel, bit " << b << ", lane offset " << r);
+                CHECK_BATCH_EQ((xsimd::kernel::popcount<typename B::arch_type>(in_batch, xsimd::kernel::requires_arch<xsimd::common> {})), expected);
+            }
+        }
+
+        // every lane holds the same value with bits - k bits set: a count
+        // spilling across a lane boundary raises a neighbour above bits - k
+        for (size_t k = 0; k < bits; ++k)
+        {
+            array_type in, expected;
+            for (size_t i = 0; i < size; ++i)
+                in[i] = value_type(U(U(~U(0)) >> k));
+            std::transform(in.cbegin(), in.cend(), expected.begin(), naive_popcount);
+            INFO("popcount, all lanes to " << bits - k << " bits");
+            batch_type const in_batch = batch_type::load_unaligned(in.data());
+            CHECK_BATCH_EQ(xsimd::popcount(in_batch), expected);
+        }
+    }
+
     void test_less_than_underflow() const
     {
         batch_type test_negative_compare = batch_type(5) - 6;
@@ -360,6 +462,15 @@ TEST_CASE_TEMPLATE("[batch int tests]", B, BATCH_INT_TYPES)
     SUBCASE("less_than_underflow")
     {
         Test.test_less_than_underflow();
+    }
+
+    // popcount is defined on unsigned types only, much like std::popcount.
+    if constexpr (std::is_unsigned_v<typename B::value_type>)
+    {
+        SUBCASE("popcount")
+        {
+            Test.test_popcount();
+        }
     }
 }
 #endif
