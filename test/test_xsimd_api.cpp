@@ -610,9 +610,17 @@ TEST_CASE_TEMPLATE("[xsimd api | rotations of the sign bit]", B, INTEGRAL_TYPES)
         check_fixed(std::integral_constant<int, 0>());
         check_fixed(std::integral_constant<int, 1>());
         check_fixed(std::integral_constant<int, bits - 1>());
+        // A rotation by 0 ORs the two shifts together, so a shift by 0 that
+        // returned zero would not show above. Check both of them directly.
         if constexpr (!std::is_integral_v<B>)
         {
-            CHECK_EQ(extract(xsimd::bitwise_rshift<0>(v)), in[0]);
+            auto const left = xsimd::bitwise_lshift<0>(v);
+            auto const right = xsimd::bitwise_rshift<0>(v);
+            for (size_t i = 0; i < lanes; ++i)
+            {
+                CHECK_EQ(lane(left, i), in[i]);
+                CHECK_EQ(lane(right, i), in[i]);
+            }
         }
 
         // the same count in every lane
@@ -645,25 +653,6 @@ TEST_CASE("[xsimd api | boolean rotations]")
 }
 
 #ifndef XSIMD_NO_SUPPORTED_ARCHITECTURE
-TEST_CASE_TEMPLATE("[xsimd api | fixed shifts by zero]", T, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t)
-{
-    using B = xsimd::batch<T>;
-    using U = std::make_unsigned_t<T>;
-    std::array<T, B::size> in, left, right;
-    for (size_t i = 0; i < B::size; ++i)
-    {
-        in[i] = static_cast<T>(i % 2 ? U(i + 1) : ~U(i + 1));
-    }
-    B const v = B::load_unaligned(in.data());
-    xsimd::bitwise_lshift<0>(v).store_unaligned(left.data());
-    xsimd::bitwise_rshift<0>(v).store_unaligned(right.data());
-    for (size_t i = 0; i < B::size; ++i)
-    {
-        CHECK_EQ(left[i], in[i]);
-        CHECK_EQ(right[i], in[i]);
-    }
-}
-
 // The 8-bit fixed right shift is built from a 16-bit shift and a mask that
 // removes the bits coming from the neighbouring byte.
 template <class T, size_t... Shifts>
