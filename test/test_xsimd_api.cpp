@@ -603,7 +603,7 @@ TEST_CASE_TEMPLATE("[xsimd api | rotations of the sign bit]", B, INTEGRAL_TYPES)
         auto check_fixed = [&](auto count)
         {
             constexpr int k = decltype(count)::value;
-            auto const same = [](size_t)
+            auto const same = [&](size_t)
             { return k; };
             check(xsimd::rotl<k>(v), xsimd::rotr<k>(v), same, same);
         };
