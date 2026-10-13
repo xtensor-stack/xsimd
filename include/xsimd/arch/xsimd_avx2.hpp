@@ -487,28 +487,27 @@ namespace xsimd
             return _mm256_xor_si256(self, other);
         }
 
-        // complex_low
-        template <class A>
-        XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
-        {
-            __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 1, 1, 0));
-            __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(1, 2, 0, 0));
-            return _mm256_blend_pd(tmp0, tmp1, 10);
-        }
-
-        // complex_high
-        template <class A>
-        XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
-        {
-            __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 3, 1, 2));
-            __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(3, 2, 2, 0));
-            return _mm256_blend_pd(tmp0, tmp1, 10);
-        }
-
-        // fast_cast
         namespace detail
         {
+            // complex_low
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
+            {
+                __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 1, 1, 0));
+                __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(1, 2, 0, 0));
+                return _mm256_blend_pd(tmp0, tmp1, 10);
+            }
 
+            // complex_high
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
+            {
+                __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 3, 1, 2));
+                __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(3, 2, 2, 0));
+                return _mm256_blend_pd(tmp0, tmp1, 10);
+            }
+
+            // fast_cast
             template <class A>
             XSIMD_INLINE batch<double, A> fast_cast(batch<uint64_t, A> const& x, batch<double, A> const&, requires_arch<avx2>) noexcept
             {
@@ -656,29 +655,31 @@ namespace xsimd
                 return lt(self, other, avx {});
             }
         }
-
-        // load_complex
-        template <class A>
-        XSIMD_INLINE batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<avx2>) noexcept
+        namespace detail
         {
-            using batch_type = batch<float, A>;
-            batch_type real = _mm256_castpd_ps(
-                _mm256_permute4x64_pd(
-                    _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0))),
-                    _MM_SHUFFLE(3, 1, 2, 0)));
-            batch_type imag = _mm256_castpd_ps(
-                _mm256_permute4x64_pd(
-                    _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))),
-                    _MM_SHUFFLE(3, 1, 2, 0)));
-            return { real, imag };
-        }
-        template <class A>
-        XSIMD_INLINE batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<avx2>) noexcept
-        {
-            using batch_type = batch<double, A>;
-            batch_type real = _mm256_permute4x64_pd(_mm256_unpacklo_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
-            batch_type imag = _mm256_permute4x64_pd(_mm256_unpackhi_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
-            return { real, imag };
+            // load_complex
+            template <class A>
+            XSIMD_INLINE batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<avx2>) noexcept
+            {
+                using batch_type = batch<float, A>;
+                batch_type real = _mm256_castpd_ps(
+                    _mm256_permute4x64_pd(
+                        _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0))),
+                        _MM_SHUFFLE(3, 1, 2, 0)));
+                batch_type imag = _mm256_castpd_ps(
+                    _mm256_permute4x64_pd(
+                        _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))),
+                        _MM_SHUFFLE(3, 1, 2, 0)));
+                return { real, imag };
+            }
+            template <class A>
+            XSIMD_INLINE batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<avx2>) noexcept
+            {
+                using batch_type = batch<double, A>;
+                batch_type real = _mm256_permute4x64_pd(_mm256_unpacklo_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
+                batch_type imag = _mm256_permute4x64_pd(_mm256_unpackhi_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
+                return { real, imag };
+            }
         }
 
         // load_unaligned<batch_bool>
