@@ -330,33 +330,69 @@ namespace xsimd
         }
 
         // rotl
+        // Rotations go through the unsigned type: an arithmetic right shift of a
+        // negative value would fill the vacated bits with the sign instead of
+        // the bits shifted out on the left. The runtime count is reduced modulo
+        // the number of bits, so a count of 0 never shifts by a full lane width.
         template <class A, class T, class STy>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, STy other, requires_arch<common>) noexcept
         {
+            using U = std::make_unsigned_t<T>;
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
-            return (self << other) | (self >> (bits - other));
+            constexpr auto mask = bits - 1;
+            auto const u = bitwise_cast<U>(self);
+            if constexpr (std::is_integral_v<STy>)
+            {
+                auto const s = other & mask;
+                return bitwise_cast<T>((u << s) | (u >> ((bits - s) & mask)));
+            }
+            else
+            {
+                auto const m = batch<U, A>(mask);
+                auto const o = bitwise_cast<U>(other) & m;
+                return bitwise_cast<T>((u << o) | (u >> ((batch<U, A>(bits) - o) & m)));
+            }
         }
+        // A count of 0 reaches bitwise_lshift<0> and bitwise_rshift<0>, which
+        // return their argument.
         template <size_t count, class A, class T>
         XSIMD_INLINE batch<T, A> rotl(batch<T, A> const& self, requires_arch<common>) noexcept
         {
+            using U = std::make_unsigned_t<T>;
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
             static_assert(count < bits, "Count amount must be less than the number of bits in T");
-            return bitwise_lshift<count>(self) | bitwise_rshift<bits - count>(self);
+            auto const u = bitwise_cast<U>(self);
+            return bitwise_cast<T>(bitwise_lshift<count>(u) | bitwise_rshift<(bits - count) % bits>(u));
         }
 
         // rotr
         template <class A, class T, class STy>
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, STy other, requires_arch<common>) noexcept
         {
+            using U = std::make_unsigned_t<T>;
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
-            return (self >> other) | (self << (bits - other));
+            constexpr auto mask = bits - 1;
+            auto const u = bitwise_cast<U>(self);
+            if constexpr (std::is_integral_v<STy>)
+            {
+                auto const s = other & mask;
+                return bitwise_cast<T>((u >> s) | (u << ((bits - s) & mask)));
+            }
+            else
+            {
+                auto const m = batch<U, A>(mask);
+                auto const o = bitwise_cast<U>(other) & m;
+                return bitwise_cast<T>((u >> o) | (u << ((batch<U, A>(bits) - o) & m)));
+            }
         }
         template <size_t count, class A, class T>
         XSIMD_INLINE batch<T, A> rotr(batch<T, A> const& self, requires_arch<common>) noexcept
         {
+            using U = std::make_unsigned_t<T>;
             constexpr auto bits = std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
             static_assert(count < bits, "Count must be less than the number of bits in T");
-            return bitwise_rshift<count>(self) | bitwise_lshift<bits - count>(self);
+            auto const u = bitwise_cast<U>(self);
+            return bitwise_cast<T>(bitwise_rshift<count>(u) | bitwise_lshift<(bits - count) % bits>(u));
         }
 
         // sadd
