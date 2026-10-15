@@ -1229,6 +1229,36 @@ namespace xsimd
         }
 
         // store_complex_masked
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<float>* mem, batch<std::complex<float>, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<sse2>) noexcept
+        {
+            const auto k = mask.mask();
+            batch<float, A> c0 = detail::complex_low(src, A {});
+            batch<float, A> c1 = detail::complex_high(src, A {});
+            auto* p = reinterpret_cast<__m64*>(mem);
+            if (k & 1)
+                _mm_storel_pi(p, c0);
+            if (k & 2)
+                _mm_storeh_pi(p + 1, c0);
+            if (k & 4)
+                _mm_storel_pi(p + 2, c1);
+            if (k & 8)
+                _mm_storeh_pi(p + 3, c1);
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<double>* mem, batch<std::complex<double>, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<sse2>) noexcept
+        {
+            const auto k = mask.mask();
+            auto* p = reinterpret_cast<double*>(mem);
+            if (k & 1)
+                _mm_storeu_pd(p, detail::complex_low(src, A {}));
+            if (k & 2)
+                _mm_storeu_pd(p + 2, detail::complex_high(src, A {}));
+        }
+
         template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE void
         store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<sse2>) noexcept
@@ -1253,6 +1283,42 @@ namespace xsimd
         }
 
         // load_complex_masked
+        template <class A, class Mode>
+        XSIMD_INLINE batch<std::complex<float>, A>
+        load_complex_masked(std::complex<float> const* mem, batch_bool<float, A> mask, Mode, requires_arch<sse2>) noexcept
+        {
+            const auto k = mask.mask();
+            batch<float, A> c0 = _mm_setzero_ps();
+            batch<float, A> c1 = _mm_setzero_ps();
+            auto const* p = reinterpret_cast<__m64 const*>(mem);
+            if (k & 1)
+                c0 = _mm_loadl_pi(c0, p);
+            if (k & 2)
+                c0 = _mm_loadh_pi(c0, p + 1);
+            if (k & 4)
+                c1 = _mm_loadl_pi(c1, p + 2);
+            if (k & 8)
+                c1 = _mm_loadh_pi(c1, p + 3);
+
+            return detail::load_complex(c0, c1, A {});
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE batch<std::complex<double>, A>
+        load_complex_masked(std::complex<double> const* mem, batch_bool<double, A> mask, Mode, requires_arch<sse2>) noexcept
+        {
+            const auto k = mask.mask();
+            batch<double, A> c0 = _mm_setzero_pd();
+            batch<double, A> c1 = _mm_setzero_pd();
+            auto const* p = reinterpret_cast<double const*>(mem);
+            if (k & 1)
+                c0 = _mm_loadu_pd(p);
+            if (k & 2)
+                c1 = _mm_loadu_pd(p + 2);
+
+            return detail::load_complex(c0, c1, A {});
+        }
+
         template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE batch<std::complex<T>, A>
         load_complex_masked(std::complex<T> const* mem, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<sse2>) noexcept
