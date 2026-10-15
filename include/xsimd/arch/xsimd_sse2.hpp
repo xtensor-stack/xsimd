@@ -1228,6 +1228,14 @@ namespace xsimd
             }
         }
 
+        // store_complex_masked
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<sse2>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, mask, mode);
+        }
+
         // load_complex
         namespace detail
         {
@@ -1242,6 +1250,14 @@ namespace xsimd
             {
                 return { _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0)), _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1)) };
             }
+        }
+
+        // load_complex_masked
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<sse2>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, mask, mode);
         }
 
         // le

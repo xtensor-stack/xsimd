@@ -890,6 +890,39 @@ namespace xsimd
             store_complex_aligned<A>(dst, src, A {});
         }
 
+        namespace detail
+        {
+            // Real lane i of a chunk belongs to complex lane First + i / 2.
+            template <std::size_t First, bool... Values>
+            struct complex_chunk_mask
+            {
+                static constexpr bool get(std::size_t i, std::size_t) noexcept
+                {
+                    return std::array<bool, sizeof...(Values)> { { Values... } }[First + i / 2];
+                }
+            };
+
+            template <class A, class T, bool... Values, class Mode>
+            XSIMD_INLINE batch<std::complex<T>, A>
+            load_complex_masked_chunks(std::complex<T> const* mem, batch_bool_constant<T, A, Values...>, Mode mode) noexcept
+            {
+                using real_batch = batch<T, A>;
+                constexpr std::size_t half = real_batch::size / 2;
+                const real_batch c0 = real_batch::load(reinterpret_cast<T const*>(mem), make_batch_bool_constant<T, complex_chunk_mask<0, Values...>, A>(), mode);
+                const real_batch c1 = real_batch::load(reinterpret_cast<T const*>(mem + half), make_batch_bool_constant<T, complex_chunk_mask<half, Values...>, A>(), mode);
+                return load_complex(c0, c1, A {});
+            }
+
+            template <class A, class T, bool... Values, class Mode>
+            XSIMD_INLINE void
+            store_complex_masked_chunks(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...>, Mode mode) noexcept
+            {
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                complex_low(src, A {}).store(reinterpret_cast<T*>(mem), make_batch_bool_constant<T, complex_chunk_mask<0, Values...>, A>(), mode);
+                complex_high(src, A {}).store(reinterpret_cast<T*>(mem + half), make_batch_bool_constant<T, complex_chunk_mask<half, Values...>, A>(), mode);
+            }
+        }
+
         template <class A, class T, class Mode>
         XSIMD_INLINE void
         store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
