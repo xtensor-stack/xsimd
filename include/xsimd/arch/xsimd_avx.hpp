@@ -1025,6 +1025,13 @@ namespace xsimd
             return _mm256_maskload_pd(mem, _mm256_castpd_si256(mask));
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, detail::zip_complex_mask_vector(mask), mode);
+        }
+
         template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE batch<std::complex<T>, A>
         load_complex_masked(std::complex<T> const* mem, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<avx>) noexcept
@@ -1206,6 +1213,13 @@ namespace xsimd
             {
                 _mm256_maskstore_pd(reinterpret_cast<double*>(mem), __m256i(mask), bitwise_cast<double>(src));
             }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, detail::zip_complex_mask_vector(mask), mode);
         }
 
         template <class A, class T, bool... Values, class Mode>

@@ -914,6 +914,14 @@ namespace xsimd
                 bitwise_cast<U>(complex_high(src, A {})).store(reinterpret_cast<U*>(mem + half), masks[1], mode);
             }
 
+            template <class A, class T>
+            XSIMD_INLINE std::array<batch_bool<T, A>, 2> zip_complex_mask_vector(batch_bool<T, A> mask) noexcept
+            {
+                const batch<T, A> bits(mask.to_native());
+                return { batch_bool<T, A>(zip_lo(bits, bits).to_native()),
+                         batch_bool<T, A>(zip_hi(bits, bits).to_native()) };
+            }
+
             // Duplicate input bit k into output bits 2k and 2k+1.
             inline constexpr std::array<std::uint8_t, 16> duplicate_bits_lut = {
                 0x00, 0x03, 0x0c, 0x0f, 0x30, 0x33, 0x3c, 0x3f,

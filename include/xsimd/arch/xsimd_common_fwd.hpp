@@ -108,6 +108,8 @@ namespace xsimd
         namespace detail
         {
             template <class A, class T>
+            XSIMD_INLINE std::array<batch_bool<T, A>, 2> zip_complex_mask_vector(batch_bool<T, A> mask) noexcept;
+            template <class A, class T>
             XSIMD_INLINE std::array<batch_bool<double, A>, 2> zip_complex_mask_kmask(batch_bool<T, A> mask) noexcept;
             template <class A, class T, class U, class Mode>
             XSIMD_INLINE batch<std::complex<T>, A> load_complex_masked_chunks(std::complex<T> const* mem, std::array<batch_bool<U, A>, 2> masks, Mode mode) noexcept;
