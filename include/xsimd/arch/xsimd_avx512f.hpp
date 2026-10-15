@@ -1004,6 +1004,13 @@ namespace xsimd
             }
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, detail::zip_complex_mask_kmask(mask), mode);
+        }
+
         template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE void
         store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<avx512f>) noexcept
@@ -1640,6 +1647,13 @@ namespace xsimd
                 auto imag = _mm512_permutex2var_pd(hi, imag_idx, lo);
                 return { real, imag };
             }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, detail::zip_complex_mask_kmask(mask), mode);
         }
 
         template <class A, class T, bool... Values, class Mode>

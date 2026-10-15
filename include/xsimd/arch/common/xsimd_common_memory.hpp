@@ -13,12 +13,14 @@
 #define XSIMD_COMMON_MEMORY_HPP
 
 #include "../../types/xsimd_batch_constant.hpp"
+#include "../../utils/bits.hpp"
 #include "../../utils/xsimd_type_traits.hpp"
 #include "./xsimd_common_details.hpp"
 
 #include <algorithm>
 #include <array>
 #include <complex>
+#include <cstdint>
 
 namespace xsimd
 {
@@ -892,6 +894,50 @@ namespace xsimd
 
         namespace detail
         {
+            template <class A, class T, class U, class Mode>
+            XSIMD_INLINE batch<std::complex<T>, A>
+            load_complex_masked_chunks(std::complex<T> const* mem, std::array<batch_bool<U, A>, 2> masks, Mode mode) noexcept
+            {
+                using real_batch = batch<U, A>;
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                const real_batch c0 = real_batch::load(reinterpret_cast<U const*>(mem), masks[0], mode);
+                const real_batch c1 = real_batch::load(reinterpret_cast<U const*>(mem + half), masks[1], mode);
+                return load_complex(bitwise_cast<T>(c0), bitwise_cast<T>(c1), A {});
+            }
+
+            template <class A, class T, class U, class Mode>
+            XSIMD_INLINE void
+            store_complex_masked_chunks(std::complex<T>* mem, batch<std::complex<T>, A> const& src, std::array<batch_bool<U, A>, 2> masks, Mode mode) noexcept
+            {
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                bitwise_cast<U>(complex_low(src, A {})).store(reinterpret_cast<U*>(mem), masks[0], mode);
+                bitwise_cast<U>(complex_high(src, A {})).store(reinterpret_cast<U*>(mem + half), masks[1], mode);
+            }
+
+            // Duplicate input bit k into output bits 2k and 2k+1.
+            inline constexpr std::array<std::uint8_t, 16> duplicate_bits_lut = {
+                0x00, 0x03, 0x0c, 0x0f, 0x30, 0x33, 0x3c, 0x3f,
+                0xc0, 0xc3, 0xcc, 0xcf, 0xf0, 0xf3, 0xfc, 0xff
+            };
+
+            // Masks for the two chunks, viewed as 64-bit lanes: one lane holds a whole
+            // complex<float>, two lanes hold a complex<double>.
+            template <class A, class T>
+            XSIMD_INLINE std::array<batch_bool<double, A>, 2> zip_complex_mask_kmask(batch_bool<T, A> mask) noexcept
+            {
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                constexpr std::uint64_t low_bits = ::xsimd::utils::make_low_mask(static_cast<std::uint64_t>(half));
+                const std::uint64_t bits = mask.mask();
+                std::uint64_t lo = bits & low_bits;
+                std::uint64_t hi = (bits >> half) & low_bits;
+                if constexpr (std::is_same_v<T, double>)
+                {
+                    lo = duplicate_bits_lut[lo];
+                    hi = duplicate_bits_lut[hi];
+                }
+                return { batch_bool<double, A>::from_mask(lo), batch_bool<double, A>::from_mask(hi) };
+            }
+
             // Real lane i of a chunk belongs to complex lane First + i / 2.
             template <std::size_t First, bool... Values>
             struct complex_chunk_mask
