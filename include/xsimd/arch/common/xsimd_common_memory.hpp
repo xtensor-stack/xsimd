@@ -370,23 +370,13 @@ namespace xsimd
         //      tag, no `enable_if` on `A`;
         //  (b) base overloads use the `requires_arch<common>` tag only; a generic
         //      `requires_arch<A>` here ties with an arch's own overload (gcc-10 ambiguity);
-        //  (c) capability decisions go through arch-agnostic traits (see below).
+        //  (c) preserve the memory element type through dispatch.
         namespace detail
         {
-            // True when an integer access can borrow the same-width float `vmaskmov*` path
-            // (integral type, same-size float exists, arch has that float register);
-            // otherwise the scalar-buffer fallback is used. Names no architecture.
-            template <class A, class T_in, class T_out>
-            using masked_memory_uses_fp_bitcast = std::integral_constant<bool,
-                                                                         std::is_same_v<T_in, T_out>
-                                                                             && std::is_integral_v<T_out>
-                                                                             && !std::is_void_v<sized_fp_t<sizeof(T_out)>>
-                                                                             && types::has_simd_register_v<sized_fp_t<sizeof(T_out)>, A>>;
-
             // Scalar-buffer fallback: materialize masked-off lanes as zero, then load.
             template <class A, class T_in, class T_out, bool... Values, class alignment>
             XSIMD_INLINE batch<T_out, A>
-            load_masked_common(T_in const* mem, batch_bool_constant<T_out, A, Values...>, convert<T_out>, alignment, std::false_type /* uses_fp_bitcast */) noexcept
+            load_masked_common(T_in const* mem, batch_bool_constant<T_out, A, Values...>, convert<T_out>, alignment) noexcept
             {
                 constexpr std::size_t size = batch<T_out, A>::size;
                 alignas(A::alignment()) std::array<T_out, size> buffer {};
@@ -398,20 +388,9 @@ namespace xsimd
                 return batch<T_out, A>::load(buffer.data(), aligned_mode {});
             }
 
-            // Integer-via-float path: reinterpret to the same-width float type, reuse the
-            // floating-point masked load (e.g. `vmaskmovps`), then bitcast the result back.
-            template <class A, class T, bool... Values, class Mode>
-            XSIMD_INLINE batch<T, A>
-            load_masked_common(T const* mem, batch_bool_constant<T, A, Values...>, convert<T>, Mode, std::true_type /* uses_fp_bitcast */) noexcept
-            {
-                using fp_t = sized_fp_t<sizeof(T)>;
-                const auto f = ::xsimd::kernel::load_masked<A>(reinterpret_cast<const fp_t*>(mem), batch_bool_constant<fp_t, A, Values...> {}, convert<fp_t> {}, Mode {}, A {});
-                return bitwise_cast<T>(f);
-            }
-
             template <class A, class T_in, class T_out, bool... Values, class alignment>
             XSIMD_INLINE void
-            store_masked_common(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment, std::false_type /* uses_fp_bitcast */) noexcept
+            store_masked_common(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment) noexcept
             {
                 constexpr std::size_t size = batch<T_in, A>::size;
                 constexpr bool mask[size] = { Values... };
@@ -422,21 +401,13 @@ namespace xsimd
                         mem[i] = static_cast<T_out>(src.get(i));
                     }
             }
-
-            template <class A, class T, bool... Values, class Mode>
-            XSIMD_INLINE void
-            store_masked_common(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...>, Mode, std::true_type /* uses_fp_bitcast */) noexcept
-            {
-                using fp_t = sized_fp_t<sizeof(T)>;
-                ::xsimd::kernel::store_masked<A>(reinterpret_cast<fp_t*>(mem), bitwise_cast<fp_t>(src), batch_bool_constant<fp_t, A, Values...> {}, Mode {}, A {});
-            }
         }
 
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE batch<T_out, A>
         load_masked(T_in const* mem, batch_bool_constant<T_out, A, Values...> mask, convert<T_out> cvt, alignment mode, requires_arch<common>) noexcept
         {
-            return detail::load_masked_common(mem, mask, cvt, mode, detail::masked_memory_uses_fp_bitcast<A, T_in, T_out> {});
+            return detail::load_masked_common(mem, mask, cvt, mode);
         }
 
         template <class A, class T, class Mode>
@@ -481,7 +452,7 @@ namespace xsimd
         XSIMD_INLINE void
         store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, alignment mode, requires_arch<common>) noexcept
         {
-            detail::store_masked_common(mem, src, mask, mode, detail::masked_memory_uses_fp_bitcast<A, T_in, T_out> {});
+            detail::store_masked_common(mem, src, mask, mode);
         }
 
         template <class A, class T, class Mode>

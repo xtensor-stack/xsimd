@@ -960,18 +960,6 @@ namespace xsimd
         namespace detail
         {
             template <class A>
-            XSIMD_INLINE batch<float, A> maskload(float const* mem, batch<as_integer_t<float>, A> const& mask) noexcept
-            {
-                return _mm256_maskload_ps(mem, mask);
-            }
-
-            template <class A>
-            XSIMD_INLINE batch<double, A> maskload(double const* mem, batch<as_integer_t<double>, A> const& mask) noexcept
-            {
-                return _mm256_maskload_pd(mem, mask);
-            }
-
-            template <class A>
             XSIMD_INLINE batch<float, A> zero_extend(batch<float, A> const& hi) noexcept
             {
                 return _mm256_insertf128_ps(_mm256_setzero_ps(), hi, 1);
@@ -1007,6 +995,18 @@ namespace xsimd
             XSIMD_INLINE batch<double, A> zero_extend_lo(batch<double, SrcA> const& lo) noexcept
             {
                 return _mm256_zextpd128_pd256(lo);
+            }
+
+            template <class A, class T, class SrcA, class = std::enable_if_t<std::is_integral_v<T>>>
+            XSIMD_INLINE batch<T, A> zero_extend(batch<T, SrcA> const& hi) noexcept
+            {
+                return ::xsimd::bitwise_cast<T>(zero_extend<A>(::xsimd::bitwise_cast<float>(hi)));
+            }
+
+            template <class A, class T, class SrcA, class = std::enable_if_t<std::is_integral_v<T>>>
+            XSIMD_INLINE batch<T, A> zero_extend_lo(batch<T, SrcA> const& lo) noexcept
+            {
+                return ::xsimd::bitwise_cast<T>(zero_extend_lo<A>(::xsimd::bitwise_cast<float>(lo)));
             }
         }
 
@@ -1054,8 +1054,8 @@ namespace xsimd
             }
         }
 
-        // load_masked (single overload for float/double)
-        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point_v<T>>>
+        // load_masked (shared 4/8-byte arithmetic overload)
+        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx>) noexcept
         {
             constexpr size_t half_size = batch<T, A>::size / 2;
@@ -1104,7 +1104,7 @@ namespace xsimd
             else
             {
                 // crossing 128-bit boundary → use 256-bit masked load
-                return detail::maskload<A>(mem, mask.as_batch());
+                return load_masked<A>(mem, mask.as_batch_bool(), convert<T> {}, Mode {}, avx {});
             }
         }
 
@@ -1130,8 +1130,39 @@ namespace xsimd
             }
         }
 
+        // Runtime-mask store (float/double).
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(float* mem, batch<float, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            detail::maskstore(mem, mask, src);
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_masked(double* mem, batch<double, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            detail::maskstore(mem, mask, src);
+        }
+
+        // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
+        template <class A, class T, class Mode>
+        XSIMD_INLINE std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8), void>
+        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx>) noexcept
+        {
+            if constexpr (sizeof(T) == 4)
+            {
+                _mm256_maskstore_ps(reinterpret_cast<float*>(mem), __m256i(mask), bitwise_cast<float>(src));
+            }
+            else
+            {
+                _mm256_maskstore_pd(reinterpret_cast<double*>(mem), __m256i(mask), bitwise_cast<double>(src));
+            }
+        }
+
+        // Runtime stores must be visible before this overload delegates to them.
         template <class A, class T, bool... Values, class Mode,
-                  typename = std::enable_if_t<std::is_floating_point_v<T> && detail::uses_vector_mask_v<T, A>>>
+                  typename = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8) && detail::uses_vector_mask_v<T, A>>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx>) noexcept
         {
             constexpr size_t half_size = batch<T, A>::size / 2;
@@ -1181,37 +1212,7 @@ namespace xsimd
             }
             else
             {
-                detail::maskstore(mem, mask.as_batch_bool(), src);
-            }
-        }
-
-        // Runtime-mask store (float/double).
-        template <class A, class Mode>
-        XSIMD_INLINE void
-        store_masked(float* mem, batch<float, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<avx>) noexcept
-        {
-            detail::maskstore(mem, mask, src);
-        }
-
-        template <class A, class Mode>
-        XSIMD_INLINE void
-        store_masked(double* mem, batch<double, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<avx>) noexcept
-        {
-            detail::maskstore(mem, mask, src);
-        }
-
-        // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
-        template <class A, class T, class Mode>
-        XSIMD_INLINE std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8), void>
-        store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx>) noexcept
-        {
-            if constexpr (sizeof(T) == 4)
-            {
-                _mm256_maskstore_ps(reinterpret_cast<float*>(mem), __m256i(mask), bitwise_cast<float>(src));
-            }
-            else
-            {
-                _mm256_maskstore_pd(reinterpret_cast<double*>(mem), __m256i(mask), bitwise_cast<double>(src));
+                store_masked<A>(mem, src, mask.as_batch_bool(), Mode {}, avx {});
             }
         }
 
@@ -1231,24 +1232,19 @@ namespace xsimd
 
         namespace detail
         {
-            // Reinterpret a constant-mask 4/8-byte load/store as same-width float
-            // and run DstArch's kernel, which lowers prefix/suffix shapes to plain
-            // moves. Shared by the int/EVEX 128- and 256-bit archs.
+            // Delegate constant-mask 4/8-byte loads/stores without changing
+            // the memory element type. Shared by int/EVEX 128- and 256-bit archs.
             template <class DstArch, class A, class T, bool... V, class Mode>
             XSIMD_INLINE batch<T, A> plain_move_load(T const* mem, batch_bool_constant<T, A, V...>, convert<T>, Mode) noexcept
             {
                 static_assert(sizeof(T) == 4 || sizeof(T) == 8, "plain-move delegation only supports 4/8-byte lanes");
-                using F = std::conditional_t<sizeof(T) == 4, float, double>;
-                // same-width float has the same lane count, so the V... mask pack and the
-                // memory reinterpret line up one-to-one; wrong here would load the wrong lanes
-                static_assert(batch<F, A>::size == batch<T, A>::size, "same-width float must preserve lane count");
                 static_assert(sizeof...(V) == batch<T, A>::size, "mask pack width must match the batch");
                 // the plain-move path emits aligned moves in aligned/stream mode, which fault
                 // on a misaligned pointer (the old vmaskmov tolerated it)
                 assert((std::is_same_v<Mode, unaligned_mode> || ::xsimd::is_aligned<A>(mem)) && "aligned/stream masked load needs an aligned pointer");
                 // qualify: an unqualified call resolves to detail::load_masked (a different
                 // helper) under MSVC's two-phase lookup; we want the kernel-level overload
-                return bitwise_cast<T>(batch<F, A>(::xsimd::kernel::load_masked(reinterpret_cast<F const*>(mem), batch_bool_constant<F, A, V...> {}, convert<F> {}, Mode {}, DstArch {})));
+                return ::xsimd::kernel::load_masked(mem, batch_bool_constant<T, A, V...> {}, convert<T> {}, Mode {}, DstArch {});
             }
 
             // Re-tag to DstArch so the vector-mask store kernel is used (the AVX
@@ -1257,14 +1253,11 @@ namespace xsimd
             XSIMD_INLINE void plain_move_store(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, V...>, Mode) noexcept
             {
                 static_assert(sizeof(T) == 4 || sizeof(T) == 8, "plain-move delegation only supports 4/8-byte lanes");
-                using F = std::conditional_t<sizeof(T) == 4, float, double>;
-                static_assert(batch<F, A>::size == batch<T, A>::size, "same-width float must preserve lane count");
                 static_assert(sizeof...(V) == batch<T, A>::size, "mask pack width must match the batch");
                 assert((std::is_same_v<Mode, unaligned_mode> || ::xsimd::is_aligned<A>(mem)) && "aligned/stream masked store needs an aligned pointer");
-                const auto fsrc = bitwise_cast<F>(src);
                 // qualify: an unqualified call resolves to detail::store_masked (a different
                 // helper) under MSVC's two-phase lookup; we want the kernel-level overload
-                ::xsimd::kernel::store_masked(reinterpret_cast<F*>(mem), batch<F, DstArch>(fsrc.data), batch_bool_constant<F, DstArch, V...> {}, Mode {}, DstArch {});
+                ::xsimd::kernel::store_masked(mem, batch<T, DstArch>(src.data), batch_bool_constant<T, DstArch, V...> {}, Mode {}, DstArch {});
             }
         }
 
