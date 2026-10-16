@@ -2275,8 +2275,8 @@ namespace xsimd
             __m128d d = _mm_sub_pd(d0, t2n);
             d = _mm_sub_pd(d, _mm_and_pd(_mm_cmpgt_pd(d, v), _mm_set1_pd(1.))); // floor(|self|)
             d = _mm_andnot_pd(signmask, d); // roundTowardNegative makes 2^52 - 2^52 negative
-            __m128d small = _mm_cmplt_pd(v, t2n);
-            return _mm_or_pd(s, _mm_or_pd(_mm_and_pd(small, d), _mm_andnot_pd(small, v)));
+            __m128d is_small = _mm_cmplt_pd(v, t2n);
+            return _mm_or_pd(s, _mm_or_pd(_mm_and_pd(is_small, d), _mm_andnot_pd(is_small, v)));
         }
 
         // zip_hi
