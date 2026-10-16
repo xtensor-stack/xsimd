@@ -17,6 +17,7 @@
 #include "./utils/shifts.hpp"
 
 #include <complex>
+#include <cstring>
 #include <limits>
 #include <type_traits>
 
@@ -1102,6 +1103,23 @@ namespace xsimd
 
         namespace detail
         {
+            // Keep the caller's pointer type and preserve all bits without scalar
+            // floating-point evaluation, which could quiet signaling NaNs on x87.
+            template <class T>
+            XSIMD_INLINE __m128 load_low_32_bits(T const* mem) noexcept
+            {
+                int32_t bits;
+                std::memcpy(&bits, mem, sizeof(bits));
+                return _mm_castsi128_ps(_mm_cvtsi32_si128(bits));
+            }
+
+            template <class T>
+            XSIMD_INLINE void store_low_32_bits(T* mem, __m128 src) noexcept
+            {
+                const int32_t bits = _mm_cvtsi128_si32(_mm_castps_si128(src));
+                std::memcpy(mem, &bits, sizeof(bits));
+            }
+
             // Plain moves store-forward; vmaskmov never does on Intel and its
             // stores are microcoded on AMD. So wider archs delegate the masks
             // that lower to plain moves here rather than taking their runtime path.
@@ -1113,97 +1131,66 @@ namespace xsimd
             }
         }
 
-        // load_masked
-        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_integral_v<T>>>
+        template <class A, class T, bool... Values, class Mode>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<sse2>) noexcept
         {
             if constexpr (sizeof(T) == 2 && mask.prefix() == 1)
             {
-                return _mm_loadu_si16(mem);
+                uint16_t value;
+                std::memcpy(&value, mem, sizeof(value));
+                return ::xsimd::bitwise_cast<T>(batch<int32_t, A>(_mm_cvtsi32_si128(value)));
             }
-            else if constexpr (sizeof(T) == 4 && mask.prefix() == 1)
+            else if constexpr ((sizeof(T) == 4 && mask.prefix() == 1)
+                               || (sizeof(T) == 2 && mask.prefix() == 2))
             {
-                return _mm_loadu_si32(mem);
+                return ::xsimd::bitwise_cast<T>(batch<float, A>(detail::load_low_32_bits(mem)));
             }
-            else if constexpr (sizeof(T) == 8 && mask.prefix() == 1)
+            else if constexpr ((sizeof(T) == 8 && mask.prefix() == 1)
+                               || (sizeof(T) == 4 && mask.prefix() == 2))
             {
-                return _mm_loadu_si64(mem);
+                return ::xsimd::bitwise_cast<T>(batch<int32_t, A>(_mm_loadl_epi64(reinterpret_cast<__m128i const*>(mem))));
             }
-            else if constexpr (sizeof(T) == 2 && mask.prefix() == 2)
+            else if constexpr ((sizeof(T) == 4 && mask.suffix() == 2)
+                               || (sizeof(T) == 8 && mask.suffix() == 1))
             {
-                return _mm_loadu_si32(mem);
+                const __m128 hi = _mm_loadh_pi(_mm_setzero_ps(),
+                                               reinterpret_cast<__m64 const*>(mem + batch<T, A>::size / 2));
+                return ::xsimd::bitwise_cast<T>(batch<float, A>(hi));
             }
-            else if constexpr (sizeof(T) == 4 && mask.prefix() == 2)
+            else if constexpr (sizeof(T) == 4 && mask.prefix() == 3)
             {
-                return _mm_loadu_si64(mem);
+                const __m128 lo = _mm_castsi128_ps(_mm_loadl_epi64(reinterpret_cast<__m128i const*>(mem)));
+                const __m128 bits = _mm_shuffle_ps(lo, detail::load_low_32_bits(mem + 2), _MM_SHUFFLE(3, 0, 1, 0));
+                return ::xsimd::bitwise_cast<T>(batch<float, A>(bits));
             }
             else
             {
                 return load_masked<A>(mem, mask, convert<T> {}, Mode {}, common {});
             }
         }
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<float, A> load_masked(float const* mem, batch_bool_constant<float, A, Values...> mask, convert<float>, Mode, requires_arch<sse2>) noexcept
-        {
-            if constexpr (mask.prefix() == 1)
-            {
-                return _mm_load_ss(mem);
-            }
-            else if constexpr (mask.prefix() == 2)
-            {
-                return _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem));
-            }
-            else if constexpr (mask.suffix() == 2)
-            {
-                return _mm_loadh_pi(_mm_setzero_ps(), reinterpret_cast<__m64 const*>(mem + 2));
-            }
-            else if constexpr (mask.prefix() == 3)
-            {
-                __m128 const lo2 = _mm_castsi128_ps(_mm_loadl_epi64(reinterpret_cast<__m128i const*>(mem)));
-                return _mm_shuffle_ps(lo2, _mm_load_ss(mem + 2), _MM_SHUFFLE(3, 0, 1, 0));
-            }
-            else
-            {
-                return load_masked<A>(mem, mask, convert<float> {}, Mode {}, common {});
-            }
-        }
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE batch<double, A> load_masked(double const* mem, batch_bool_constant<double, A, Values...> mask, convert<double>, Mode, requires_arch<sse2>) noexcept
-        {
-            if constexpr (mask.prefix() == 1)
-            {
-                return _mm_load_sd(mem);
-            }
-            else if constexpr (mask.suffix() == 1)
-            {
-                return _mm_loadh_pd(_mm_setzero_pd(), mem + 1);
-            }
-            else
-            {
-                return load_masked<A>(mem, mask, convert<double> {}, Mode {}, common {});
-            }
-        }
 
-        // store_masked
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(float* mem, batch<float, A> const& src, batch_bool_constant<float, A, Values...> mask, Mode, requires_arch<sse2>) noexcept
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<sse2>) noexcept
         {
-            if constexpr (mask.prefix() == 1)
+            const __m128 bits = ::xsimd::bitwise_cast<float>(src);
+            if constexpr (sizeof(T) == 4 && mask.prefix() == 1)
             {
-                _mm_store_ss(mem, src);
+                detail::store_low_32_bits(mem, bits);
             }
-            else if constexpr (mask.prefix() == 2)
+            else if constexpr ((sizeof(T) == 4 && mask.prefix() == 2)
+                               || (sizeof(T) == 8 && mask.prefix() == 1))
             {
-                _mm_storel_pi(reinterpret_cast<__m64*>(mem), src);
+                _mm_storel_pi(reinterpret_cast<__m64*>(mem), bits);
             }
-            else if constexpr (mask.suffix() == 2)
+            else if constexpr ((sizeof(T) == 4 && mask.suffix() == 2)
+                               || (sizeof(T) == 8 && mask.suffix() == 1))
             {
-                _mm_storeh_pi(reinterpret_cast<__m64*>(mem + 2), src);
+                _mm_storeh_pi(reinterpret_cast<__m64*>(mem + batch<T, A>::size / 2), bits);
             }
-            else if constexpr (mask.prefix() == 3)
+            else if constexpr (sizeof(T) == 4 && mask.prefix() == 3)
             {
-                _mm_storel_pi(reinterpret_cast<__m64*>(mem), src);
-                _mm_store_ss(mem + 2, _mm_movehl_ps(src, src));
+                _mm_storel_pi(reinterpret_cast<__m64*>(mem), bits);
+                detail::store_low_32_bits(mem + 2, _mm_movehl_ps(bits, bits));
             }
             else
             {
@@ -1211,21 +1198,42 @@ namespace xsimd
             }
         }
 
-        template <class A, bool... Values, class Mode>
-        XSIMD_INLINE void store_masked(double* mem, batch<double, A> const& src, batch_bool_constant<double, A, Values...> mask, Mode, requires_arch<sse2>) noexcept
+        // store_complex_masked
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<float>* mem, batch<std::complex<float>, A> const& src, batch_bool<float, A> mask, Mode, requires_arch<sse2>) noexcept
         {
-            if constexpr (mask.prefix() == 1)
-            {
-                _mm_store_sd(mem, src);
-            }
-            else if constexpr (mask.suffix() == 1)
-            {
-                _mm_storeh_pd(mem + 1, src);
-            }
-            else
-            {
-                store_masked<A>(mem, src, mask, Mode {}, common {});
-            }
+            const auto k = mask.mask();
+            batch<float, A> c0 = detail::complex_low(src, A {});
+            batch<float, A> c1 = detail::complex_high(src, A {});
+            auto* p = reinterpret_cast<__m64*>(mem);
+            if (k & 1)
+                _mm_storel_pi(p, c0);
+            if (k & 2)
+                _mm_storeh_pi(p + 1, c0);
+            if (k & 4)
+                _mm_storel_pi(p + 2, c1);
+            if (k & 8)
+                _mm_storeh_pi(p + 3, c1);
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<double>* mem, batch<std::complex<double>, A> const& src, batch_bool<double, A> mask, Mode, requires_arch<sse2>) noexcept
+        {
+            const auto k = mask.mask();
+            auto* p = reinterpret_cast<double*>(mem);
+            if (k & 1)
+                _mm_storeu_pd(p, detail::complex_low(src, A {}));
+            if (k & 2)
+                _mm_storeu_pd(p + 2, detail::complex_high(src, A {}));
+        }
+
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<sse2>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, mask, mode);
         }
 
         // load_complex
@@ -1242,6 +1250,50 @@ namespace xsimd
             {
                 return { _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(0, 0)), _mm_shuffle_pd(hi, lo, _MM_SHUFFLE2(1, 1)) };
             }
+        }
+
+        // load_complex_masked
+        template <class A, class Mode>
+        XSIMD_INLINE batch<std::complex<float>, A>
+        load_complex_masked(std::complex<float> const* mem, batch_bool<float, A> mask, Mode, requires_arch<sse2>) noexcept
+        {
+            const auto k = mask.mask();
+            batch<float, A> c0 = _mm_setzero_ps();
+            batch<float, A> c1 = _mm_setzero_ps();
+            auto const* p = reinterpret_cast<__m64 const*>(mem);
+            if (k & 1)
+                c0 = _mm_loadl_pi(c0, p);
+            if (k & 2)
+                c0 = _mm_loadh_pi(c0, p + 1);
+            if (k & 4)
+                c1 = _mm_loadl_pi(c1, p + 2);
+            if (k & 8)
+                c1 = _mm_loadh_pi(c1, p + 3);
+
+            return detail::load_complex(c0, c1, A {});
+        }
+
+        template <class A, class Mode>
+        XSIMD_INLINE batch<std::complex<double>, A>
+        load_complex_masked(std::complex<double> const* mem, batch_bool<double, A> mask, Mode, requires_arch<sse2>) noexcept
+        {
+            const auto k = mask.mask();
+            batch<double, A> c0 = _mm_setzero_pd();
+            batch<double, A> c1 = _mm_setzero_pd();
+            auto const* p = reinterpret_cast<double const*>(mem);
+            if (k & 1)
+                c0 = _mm_loadu_pd(p);
+            if (k & 2)
+                c1 = _mm_loadu_pd(p + 2);
+
+            return detail::load_complex(c0, c1, A {});
+        }
+
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<sse2>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, mask, mode);
         }
 
         // le
