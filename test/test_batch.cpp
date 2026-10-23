@@ -1070,6 +1070,22 @@ struct batch_test
             INFO("reduce_min");
             CHECK_SCALAR_EQ(res, expected);
         }
+        // reduce_max / reduce_min with the extremum at each position
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            array_type data;
+            data.fill(value_type(1));
+            {
+                data[i] = std::numeric_limits<value_type>::max();
+                INFO("reduce_max, extremum at index ", i);
+                CHECK_SCALAR_EQ(reduce_max(batch_type::load_unaligned(data.data())), data[i]);
+            }
+            {
+                data[i] = std::numeric_limits<value_type>::lowest();
+                INFO("reduce_min, extremum at index ", i);
+                CHECK_SCALAR_EQ(reduce_min(batch_type::load_unaligned(data.data())), data[i]);
+            }
+        }
         // reduce_mul
         {
             value_type expected = std::accumulate(lhs.cbegin(), lhs.cend(), value_type(1), std::multiplies<value_type>());

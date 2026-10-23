@@ -1962,25 +1962,19 @@ namespace xsimd
         }
 
         // reduce_max
-        template <class A, class T, class = std::enable_if_t<(sizeof(T) == 1)>>
+        template <class A, class T, class = std::enable_if_t<(sizeof(T) <= 2)>>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
-            constexpr batch_constant<uint64_t, A, 5, 6, 7, 8, 0, 0, 0, 0> mask;
-            batch<T, A> step = _mm512_permutexvar_epi64(mask.as_batch(), self);
-            batch<T, A> acc = max(self, step);
-            __m256i low = _mm512_castsi512_si256(acc);
-            return reduce_max(batch<T, avx2>(low));
+            batch<T, avx2> low(detail::lower_half(self)), high(detail::upper_half(self));
+            return reduce_max(max(low, high));
         }
 
         // reduce_min
-        template <class A, class T, class = std::enable_if_t<(sizeof(T) == 1)>>
+        template <class A, class T, class = std::enable_if_t<(sizeof(T) <= 2)>>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
-            constexpr batch_constant<uint64_t, A, 5, 6, 7, 8, 0, 0, 0, 0> mask;
-            batch<T, A> step = _mm512_permutexvar_epi64(mask.as_batch(), self);
-            batch<T, A> acc = min(self, step);
-            __m256i low = _mm512_castsi512_si256(acc);
-            return reduce_min(batch<T, avx2>(low));
+            batch<T, avx2> low(detail::lower_half(self)), high(detail::upper_half(self));
+            return reduce_min(min(low, high));
         }
 
         // reduce_mul
