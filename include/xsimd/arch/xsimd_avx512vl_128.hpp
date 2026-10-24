@@ -17,6 +17,7 @@
 #include "../types/xsimd_batch_constant.hpp"
 #include "../utils/bits.hpp"
 
+#include <complex>
 #include <type_traits>
 
 namespace xsimd
@@ -30,7 +31,7 @@ namespace xsimd
             // Defined in xsimd_avx512f.hpp. This header is included before it so
             // that avx512f.hpp's masked load/store forwarder can resolve the
             // avx512vl_128 overloads below by ordinary lookup; forward-declare
-            // the two helpers it borrows from there.
+            // the helpers it borrows from there.
             XSIMD_INLINE uint32_t morton(uint16_t x, uint16_t y) noexcept;
             template <size_t N>
             XSIMD_INLINE unsigned char tobitset(unsigned char unpacked[N]);
@@ -347,6 +348,20 @@ namespace xsimd
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx512vl_128>) noexcept
         {
             detail::maskstore128(mem, src, mask.mask(), Mode {});
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx512vl_128>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, detail::zip_complex_mask_kmask(mask), mode);
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx512vl_128>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, detail::zip_complex_mask_kmask(mask), mode);
         }
 
         // gather
