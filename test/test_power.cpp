@@ -86,17 +86,26 @@ struct power_test
             // Test with FE_INVALID...
             unsigned mask = _MM_GET_EXCEPTION_MASK();
             _MM_SET_EXCEPTION_MASK(mask & ~_MM_MASK_INVALID);
+            std::vector<value_type> computed(nb_input);
             for (size_t i = 0; i < nb_input; i += size)
             {
-                batch_type zlhs_in, rhs_in, out, ref;
+                batch_type zlhs_in, rhs_in, out;
                 detail::load_batch(zlhs_in, zlhs_input, i);
                 detail::load_batch(rhs_in, rhs_input, i);
                 out = pow(zlhs_in, rhs_in);
+                detail::store_batch(out, computed, i);
+            }
+            _MM_SET_EXCEPTION_MASK(mask);
+            // Compare after the restore: the comparison raises FE_INVALID on
+            // inf/NaN lanes and would trap with the exception unmasked.
+            for (size_t i = 0; i < nb_input; i += size)
+            {
+                batch_type ref, out;
                 detail::load_batch(ref, expected, i);
+                detail::load_batch(out, computed, i);
                 INFO("0 ^ x with exception");
                 CHECK_BATCH_EQ(ref, out);
             }
-            _MM_SET_EXCEPTION_MASK(mask);
 #endif
         }
 #ifndef __FAST_MATH__
