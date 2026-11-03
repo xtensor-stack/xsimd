@@ -9,29 +9,32 @@ defaults:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.sys.os || 'ubuntu-26.04' }}
     name: '${{ matrix.sys.compiler }} ${{ matrix.sys.version }} - ${{ matrix.sys.arch }} ${{ join(matrix.sys.flags, '' '') }}'
     strategy:
       matrix:
         sys:
           - { compiler: 'gcc',   version: '13', arch: 'native',              flags: ['xtl-complex'] }
-          - { compiler: 'gcc',   version: '14', arch: 'avx',                 flags: [] }
-          - { compiler: 'gcc',   version: '14', arch: 'avx2',                flags: [] }
-          - { compiler: 'gcc',   version: '13', arch: 'avx512bw',            flags: [] }
-          - { compiler: 'gcc',   version: '10', arch: 'avx512bw',            flags: [] }
+          - { compiler: 'gcc',   version: '14', arch: 'avx' }
+          - { compiler: 'gcc',   version: '14', arch: 'avx2' }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512bw' }
           - { compiler: 'gcc',   version: '12', arch: 'native',              flags: ['32bits'] }
-          - { compiler: 'gcc',   version: '13', arch: 'avx512pf',            flags: [] }
-          - { compiler: 'gcc',   version: '13', arch: 'avx512vbmi',          flags: [] }
-          - { compiler: 'gcc',   version: '14', arch: 'avx512vbmi2',         flags: [] }
-          - { compiler: 'gcc',   version: '13', arch: 'avx512vnni_avx512bw', flags: [] }
-          - { compiler: 'clang', version: '16', arch: 'native',              flags: ['xtl-complex'] }
-          - { compiler: 'clang', version: '17', arch: 'avx',                 flags: [] }
-          - { compiler: 'clang', version: '17', arch: 'sse3',                flags: [] }
-          - { compiler: 'clang', version: '18', arch: 'avx512bw',            flags: [] }
-          - { compiler: 'clang', version: '18', arch: 'avx_128',             flags: [] }
-          - { compiler: 'clang', version: '18', arch: 'avx2_128',            flags: [] }
-          - { compiler: 'clang', version: '18', arch: 'avx512vl_128',        flags: [] }
-          - { compiler: 'clang', version: '18', arch: 'avx512vl_256',        flags: [] }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512pf' }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512vbmi' }
+          - { compiler: 'gcc',   version: '14', arch: 'avx512vbmi2' }
+          - { compiler: 'gcc',   version: '13', arch: 'avx512vnni_avx512bw' }
+          - { compiler: 'gcc',   version: '16', arch: 'avx2' }
+          - { compiler: 'clang', version: '17', arch: 'avx' }
+          - { compiler: 'clang', version: '17', arch: 'sse3' }
+          - { compiler: 'clang', version: '18', arch: 'avx512bw' }
+          - { compiler: 'clang', version: '18', arch: 'avx_128' }
+          - { compiler: 'clang', version: '18', arch: 'avx2_128' }
+          - { compiler: 'clang', version: '18', arch: 'avx512vl_128' }
+          - { compiler: 'clang', version: '18', arch: 'avx512vl_256' }
+          - { compiler: 'clang', version: '22', arch: 'avx2' }
+          # g++-10 and clang-16 are not shipped by Ubuntu 26.04
+          - { compiler: 'gcc',   version: '10', arch: 'avx512bw',            os: 'ubuntu-24.04' }
+          - { compiler: 'clang', version: '16', arch: 'native',              flags: ['xtl-complex'], os: 'ubuntu-24.04' }
     steps:
     - name: Checkout xsimd
       uses: actions/checkout@v6
@@ -95,7 +98,7 @@ jobs:
         fi
 
   build-extra:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'clang 18 - architectures and benchmark'
     steps:
     - name: Checkout xsimd

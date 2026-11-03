@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.sys.runner || 'ubuntu-26.04' }}
     name: '${{ matrix.target.arch }}, ${{ matrix.sys.compiler }} ${{ matrix.sys.version }}'
     strategy:
       matrix:
@@ -14,8 +14,14 @@ jobs:
           - { arch: 'armv7-a', xsimd_arch: 'generic', dir: 'arm-linux-gnueabihf', flags: '-mfpu=vfpv3-d16', full: 'OFF' } # no neon
           - { arch: 'armv8-a', xsimd_arch: 'neon64',  dir: 'aarch64-linux-gnu',   flags: '', full: 'ON' }
         sys:
-          - { compiler: 'gcc',   version: '10' }
           - { compiler: 'gcc',   version: '14' }
+          # gcc-10 is not shipped by Ubuntu 26.04
+          - { compiler: 'gcc',   version: '10', runner: 'ubuntu-24.04' }
+        include:
+          - target: { arch: 'armv7-a', xsimd_arch: 'neon',   dir: 'arm-linux-gnueabihf', flags: '-mfpu=neon', full: 'ON' }
+            sys: { compiler: 'gcc', version: '16' }
+          - target: { arch: 'armv8-a', xsimd_arch: 'neon64', dir: 'aarch64-linux-gnu',   flags: '', full: 'ON' }
+            sys: { compiler: 'gcc', version: '16' }
     steps:
     - name: Checkout xsimd
       uses: actions/checkout@v6
