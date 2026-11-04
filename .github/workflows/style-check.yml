@@ -6,7 +6,7 @@ concurrency:
 jobs:
   formatting-check:
     name: Format check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
     - uses: actions/checkout@v6
     - run: sudo apt install clang-format
@@ -16,7 +16,7 @@ jobs:
         ! grep -q '^diff ' diff.patch
 
   inlining-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: Check inline keyword usage
     steps:
     - uses: actions/checkout@v6
@@ -24,7 +24,7 @@ jobs:
     - run: sh ./test/check_inline_specifier.sh .
 
   include-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: Check unused standard includes
     steps:
     - uses: actions/checkout@v6
@@ -33,7 +33,7 @@ jobs:
 
   clang-tidy-check:
     name: Clang-tidy check (x86_64)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v6
     - run: sudo apt install clang-tidy

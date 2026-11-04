@@ -6,7 +6,8 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # ppc64 + clang 20 stays on 24.04: Ubuntu 26.04 clang defaults powerpc64 to IEEE long double, the gcc-12 cross sysroot is IBM (link error).
+    runs-on: ${{ (matrix.sys.compiler == 'clang' && matrix.target.platform == 'ppc64') && 'ubuntu-24.04' || 'ubuntu-26.04' }}
     name: '${{ matrix.target.platform }}, ${{ matrix.sys.compiler }} ${{ matrix.sys.version }}'
     strategy:
       matrix:
