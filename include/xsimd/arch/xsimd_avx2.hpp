@@ -742,8 +742,9 @@ namespace xsimd
             }
             else if constexpr (sizeof(T) == 2)
             {
-                uint64_t mask8 = 0xFFFFFFFF & (uint64_t)_mm256_movemask_epi8(self);
-                return detail::mask_lut(mask8) | (detail::mask_lut(mask8 >> 8) << 4) | (detail::mask_lut(mask8 >> 16) << 8) | (detail::mask_lut(mask8 >> 24) << 12);
+                __m256i sign_bits = _mm256_packs_epi16(self, _mm256_setzero_si256());
+                __m256i compressed = _mm256_permute4x64_epi64(sign_bits, _MM_SHUFFLE(3, 1, 2, 0));
+                return static_cast<uint64_t>(_mm_movemask_epi8(_mm256_castsi256_si128(compressed)));
             }
             else
             {
