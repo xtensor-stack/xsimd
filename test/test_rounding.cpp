@@ -14,6 +14,8 @@
 
 #include "test_utils.hpp"
 
+#include <cfenv>
+
 template <class B>
 struct rounding_test
 {
@@ -167,4 +169,60 @@ TEST_CASE_TEMPLATE("[rounding]", B, BATCH_FLOAT_TYPES)
     rounding_test<B> Test;
     Test.test_rounding_functions();
 }
+
+#ifndef __FAST_MATH__
+TEST_CASE_TEMPLATE("[rounding] current rounding mode", B, BATCH_FLOAT_TYPES)
+{
+    using value_type = typename B::value_type;
+    struct rounding_mode_guard
+    {
+        int saved = std::fegetround();
+        ~rounding_mode_guard() { std::fesetround(saved); }
+    } guard;
+
+    const std::array<value_type, 16> input = {
+        0., -0., 0.25, -0.25, 0.5, -0.5, 1.25, -1.25,
+        1.75, -1.75, 2.5, -2.5, 3.5, -3.5, 2., -2.
+    };
+    const std::array<int, 4> modes = { FE_TONEAREST, FE_DOWNWARD, FE_UPWARD, FE_TOWARDZERO };
+    const value_type expected[][16] = {
+        { 0., -0., 0., -0., 0., -0., 1., -1., 2., -2., 2., -2., 4., -4., 2., -2. },
+        { 0., -0., 0., -1., 0., -1., 1., -2., 1., -2., 2., -3., 3., -4., 2., -2. },
+        { 0., -0., 1., -0., 1., -0., 2., -1., 2., -1., 3., -2., 4., -3., 2., -2. },
+        { 0., -0., 0., -0., 0., -0., 1., -1., 1., -1., 2., -2., 3., -3., 2., -2. }
+    };
+
+    for (size_t mode = 0; mode < modes.size(); ++mode)
+    {
+        if (std::fesetround(modes[mode]) != 0)
+        {
+            continue;
+        }
+        REQUIRE(std::fegetround() == modes[mode]);
+        for (size_t offset = 0; offset < input.size(); offset += B::size)
+        {
+            std::array<value_type, B::size> values, nearby, rounded;
+            for (size_t lane = 0; lane < B::size; ++lane)
+            {
+                // Reload after changing the mode so arithmetic cannot be hoisted.
+                volatile value_type value = input[(offset + lane) % input.size()];
+                values[lane] = value;
+            }
+            B batch = B::load_unaligned(values.data());
+            xsimd::nearbyint(batch).store_unaligned(nearby.data());
+            xsimd::rint(batch).store_unaligned(rounded.data());
+            for (size_t lane = 0; lane < B::size; ++lane)
+            {
+                CAPTURE(modes[mode]);
+                CAPTURE(values[lane]);
+                value_type reference = expected[mode][(offset + lane) % input.size()];
+                CHECK(nearby[lane] == reference);
+                CHECK(rounded[lane] == reference);
+                CHECK(std::signbit(nearby[lane]) == std::signbit(reference));
+                CHECK(std::signbit(rounded[lane]) == std::signbit(reference));
+            }
+        }
+    }
+}
+#endif
 #endif

@@ -1906,10 +1906,11 @@ namespace xsimd
                 batch_type s = bitofsign(self);
                 batch_type v = self ^ s;
                 batch_type t2n = constants::twotonmb<batch_type>();
-                batch_type d0 = v + t2n;
-                detail::reassociation_barrier(d0, "prevent collapsing (v + 2^n) - 2^n back to v");
-                batch_type d = d0 - t2n;
-                return s ^ select(v < t2n, d, v);
+                batch_type signed_t2n = t2n | s;
+                batch_type d0 = self + signed_t2n;
+                detail::reassociation_barrier(d0, "prevent collapsing (x + c) - c back to x");
+                batch_type d = copysign(d0 - signed_t2n, self);
+                return select(v < t2n, d, self);
             }
         }
         template <class A>
