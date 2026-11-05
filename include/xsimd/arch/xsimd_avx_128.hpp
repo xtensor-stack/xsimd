@@ -105,7 +105,7 @@ namespace xsimd
 
         // Masks that lower to plain moves go to sse2; the rest gain nothing on a
         // single register, so take the runtime path.
-        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point_v<T>>>
+        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool_constant<T, A, Values...> mask, convert<T>, Mode, requires_arch<avx_128>) noexcept
         {
             if constexpr (detail::lowers_to_plain_moves(mask))
@@ -132,6 +132,13 @@ namespace xsimd
             return _mm_maskload_pd(mem, _mm_castpd_si128(mask));
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx_128>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, detail::zip_complex_mask_vector(mask), mode);
+        }
+
         // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
         template <class A, class T, class Mode>
         XSIMD_INLINE std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8), batch<T, A>>
@@ -144,19 +151,6 @@ namespace xsimd
             else
             {
                 return bitwise_cast<T>(batch<double, A>(_mm_maskload_pd(reinterpret_cast<double const*>(mem), __m128i(mask))));
-            }
-        }
-
-        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_floating_point_v<T>>>
-        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
-        {
-            if constexpr (detail::lowers_to_plain_moves(mask))
-            {
-                store_masked(mem, src, mask, Mode {}, sse2 {});
-            }
-            else
-            {
-                store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx_128 {});
             }
         }
 
@@ -174,6 +168,13 @@ namespace xsimd
             _mm_maskstore_pd(mem, _mm_castpd_si128(mask), src);
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx_128>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, detail::zip_complex_mask_vector(mask), mode);
+        }
+
         // 4/8-byte ints: bitcast to same-width float, reuse the vmaskmov path.
         template <class A, class T, class Mode>
         XSIMD_INLINE std::enable_if_t<std::is_integral_v<T> && (sizeof(T) == 4 || sizeof(T) == 8), void>
@@ -186,6 +187,19 @@ namespace xsimd
             else
             {
                 _mm_maskstore_pd(reinterpret_cast<double*>(mem), __m128i(mask), bitwise_cast<double>(src));
+            }
+        }
+
+        template <class A, class T, bool... Values, class Mode, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode, requires_arch<avx_128>) noexcept
+        {
+            if constexpr (detail::lowers_to_plain_moves(mask))
+            {
+                store_masked(mem, src, mask, Mode {}, sse2 {});
+            }
+            else
+            {
+                store_masked(mem, src, mask.as_batch_bool(), Mode {}, avx_128 {});
             }
         }
 

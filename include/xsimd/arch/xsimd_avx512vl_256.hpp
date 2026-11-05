@@ -17,6 +17,7 @@
 #include "../types/xsimd_batch_constant.hpp"
 #include "../utils/bits.hpp"
 
+#include <complex>
 #include <type_traits>
 
 namespace xsimd
@@ -30,7 +31,7 @@ namespace xsimd
             // Defined in xsimd_avx512f.hpp. This header is included before it so
             // that avx512f.hpp's masked load/store forwarder can resolve the
             // avx512vl_256 overloads below by ordinary lookup; forward-declare
-            // the two helpers it borrows from there.
+            // the helpers it borrows from there.
             XSIMD_INLINE uint32_t morton(uint16_t x, uint16_t y) noexcept;
             template <size_t N>
             XSIMD_INLINE unsigned char tobitset(unsigned char unpacked[N]);
@@ -332,6 +333,13 @@ namespace xsimd
             return detail::maskload256(mem, mask.mask(), Mode {});
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx512vl_256>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, detail::zip_complex_mask_kmask(mask), mode);
+        }
+
         template <class A, class T, bool... V, class Mode,
                   typename = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, V...> mask, Mode, requires_arch<avx512vl_256>) noexcept
@@ -355,6 +363,13 @@ namespace xsimd
         XSIMD_INLINE void store_masked(T* mem, batch<T, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<avx512vl_256>) noexcept
         {
             detail::maskstore256(mem, src, mask.mask(), Mode {});
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx512vl_256>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, detail::zip_complex_mask_kmask(mask), mode);
         }
 
         // gather
