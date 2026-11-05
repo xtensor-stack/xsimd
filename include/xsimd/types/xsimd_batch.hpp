@@ -542,7 +542,7 @@ namespace xsimd
         [[nodiscard]] static XSIMD_INLINE batch load(U const* mem, unaligned_mode) noexcept;
         // Compile-time mask overloads
         template <class U, bool... Values, class Mode = aligned_mode>
-        [[nodiscard]] static XSIMD_INLINE batch load(U const* mem, batch_bool_constant<value_type, A, Values...> mask, Mode = {}) noexcept;
+        [[nodiscard]] static XSIMD_INLINE batch load(U const* mem, batch_bool_constant<T, A, Values...> mask, Mode = {}) noexcept;
         template <class Mode = aligned_mode>
         [[nodiscard]] static XSIMD_INLINE batch load(value_type const* mem, batch_bool<T, A> mask, Mode = {}) noexcept;
         template <class U>
@@ -553,7 +553,7 @@ namespace xsimd
         XSIMD_INLINE void store(U* mem, unaligned_mode) const noexcept;
         // Compile-time mask overloads
         template <class U, bool... Values, class Mode = aligned_mode>
-        XSIMD_INLINE void store(U* mem, batch_bool_constant<value_type, A, Values...> mask, Mode = {}) const noexcept;
+        XSIMD_INLINE void store(U* mem, batch_bool_constant<T, A, Values...> mask, Mode = {}) const noexcept;
         template <class Mode = aligned_mode>
         XSIMD_INLINE void store(value_type* mem, batch_bool<T, A> mask, Mode = {}) const noexcept;
         template <class U>
@@ -1490,20 +1490,33 @@ namespace xsimd
     // Compile-time mask overloads for complex store
     template <class T, class A>
     template <class U, bool... Values, class Mode>
-    XSIMD_INLINE void batch<std::complex<T>, A>::store(U* mem, batch_bool_constant<value_type, A, Values...> mask, Mode mode) const noexcept
+    XSIMD_INLINE void batch<std::complex<T>, A>::store(U* mem, batch_bool_constant<T, A, Values...> mask, Mode mode) const noexcept
     {
-        kernel::store_masked<A>(mem, *this, mask, mode, A {});
+        detail::static_check_supported_config<T, A>();
+        static_assert(std::is_same_v<Mode, aligned_mode> || std::is_same_v<Mode, unaligned_mode>,
+                      "supported store mode");
+        if constexpr (mask.all())
+        {
+            store(mem, mode);
+        }
+        else if constexpr (mask.none())
+        {
+            return;
+        }
+        else
+        {
+            kernel::store_complex_masked<A>(mem, *this, mask, mode, A {});
+        }
     }
 
     template <class T, class A>
     template <class Mode>
-    XSIMD_INLINE void batch<std::complex<T>, A>::store(value_type* mem, batch_bool<T, A> mask, Mode) const noexcept
+    XSIMD_INLINE void batch<std::complex<T>, A>::store(value_type* mem, batch_bool<T, A> mask, Mode mode) const noexcept
     {
-        alignas(A::alignment()) std::array<value_type, size> buffer;
-        store_aligned(buffer.data());
-        for (std::size_t i = 0; i < size; ++i)
-            if (mask.get(i))
-                mem[i] = buffer[i];
+        detail::static_check_supported_config<T, A>();
+        static_assert(std::is_same_v<Mode, aligned_mode> || std::is_same_v<Mode, unaligned_mode>,
+                      "supported store mode");
+        kernel::store_complex_masked<A>(mem, *this, mask, mode, A {});
     }
 
     template <class T, class A>
@@ -1538,20 +1551,34 @@ namespace xsimd
     template <class T, class A>
     template <class U, bool... Values, class Mode>
     XSIMD_INLINE batch<std::complex<T>, A> batch<std::complex<T>, A>::load(U const* mem,
-                                                                           batch_bool_constant<value_type, A, Values...> mask,
+                                                                           batch_bool_constant<T, A, Values...> mask,
                                                                            Mode mode) noexcept
     {
-        return kernel::load_masked<A>(mem, mask, kernel::convert<value_type> {}, mode, A {});
+        detail::static_check_supported_config<T, A>();
+        static_assert(std::is_same_v<Mode, aligned_mode> || std::is_same_v<Mode, unaligned_mode>,
+                      "supported load mode");
+        if constexpr (mask.all())
+        {
+            return load(mem, mode);
+        }
+        else if constexpr (mask.none())
+        {
+            return broadcast<T>(0);
+        }
+        else
+        {
+            return kernel::load_complex_masked<A>(mem, mask, mode, A {});
+        }
     }
 
     template <class T, class A>
     template <class Mode>
-    XSIMD_INLINE batch<std::complex<T>, A> batch<std::complex<T>, A>::load(value_type const* mem, batch_bool<T, A> mask, Mode) noexcept
+    XSIMD_INLINE batch<std::complex<T>, A> batch<std::complex<T>, A>::load(value_type const* mem, batch_bool<T, A> mask, Mode mode) noexcept
     {
-        alignas(A::alignment()) std::array<value_type, size> buffer {};
-        for (std::size_t i = 0; i < size; ++i)
-            buffer[i] = mask.get(i) ? mem[i] : value_type(0);
-        return load_aligned(buffer.data());
+        detail::static_check_supported_config<T, A>();
+        static_assert(std::is_same_v<Mode, aligned_mode> || std::is_same_v<Mode, unaligned_mode>,
+                      "supported load mode");
+        return kernel::load_complex_masked<A>(mem, mask, mode, A {});
     }
 
     template <class T, class A>
