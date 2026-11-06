@@ -1873,7 +1873,8 @@ namespace xsimd
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
-            batch_type u = 1 + self;
+            // Translate only the real part to preserve the sign of an imaginary zero.
+            batch_type u(real_batch(1.) + self.real(), self.imag());
             batch_type logu = log(u);
             return select(u == batch_type(1.),
                           self,

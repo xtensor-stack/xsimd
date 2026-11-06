@@ -140,16 +140,48 @@ struct complex_exponential_test
 
     void test_log1p()
     {
+        const real_value_type zero(0);
+        const auto below = std::nextafter(real_value_type(-1), real_value_type(-2));
+        vector_type inputs = log_input;
+        inputs.insert(inputs.end(), {
+                                        value_type(-4, zero), value_type(-4, -zero),
+                                        value_type(-2, zero), value_type(-2, -zero),
+                                        value_type(below, zero), value_type(below, -zero),
+                                        value_type(-2, real_value_type(0.5)), value_type(-2, real_value_type(-0.5)),
+                                        value_type(real_value_type(-0.5), real_value_type(0.25)), value_type(real_value_type(-0.5), real_value_type(-0.25)),
+                                        value_type(2, 1), value_type(2, -1),
+                                        value_type(zero, zero), value_type(zero, -zero)
+                                    });
+        inputs.resize((inputs.size() + size - 1) / size * size, value_type(zero, zero));
+        expected.resize(inputs.size());
         std::transform(log_input.cbegin(), log_input.cend(), expected.begin(),
                        [](const value_type& v)
                        { using xsimd::log1p; return log1p(v); });
-        for (size_t i = 0; i < nb_input; i += size)
+        std::transform(inputs.cbegin() + nb_input, inputs.cend(), expected.begin() + nb_input,
+                       [](const value_type& v)
+                       { return std::log(value_type(real_value_type(1) + v.real(), v.imag())); });
+        for (size_t i = 0; i < inputs.size(); i += size)
         {
             batch_type in, out, ref;
-            detail::load_batch(in, log_input, i);
+            detail::load_batch(in, inputs, i);
             out = log1p(in);
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
+#ifndef __FAST_MATH__
+            if (i >= nb_input)
+            {
+                std::array<value_type, size> results;
+                out.store_unaligned(results.data());
+                for (size_t lane = 0; lane < size; ++lane)
+                {
+                    if (expected[i + lane].imag() == zero)
+                    {
+                        CHECK_EQ(results[lane].imag(), zero);
+                        CHECK_EQ(std::signbit(results[lane].imag()), std::signbit(expected[i + lane].imag()));
+                    }
+                }
+            }
+#endif
         }
     }
 
