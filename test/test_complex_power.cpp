@@ -160,6 +160,7 @@ struct complex_power_test
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
         }
+        test_sqrt_real_axis(true, true);
     }
 
     void test_sqrt_pn()
@@ -175,6 +176,7 @@ struct complex_power_test
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
         }
+        test_sqrt_real_axis(false, true);
     }
 
     void test_sqrt_np()
@@ -190,6 +192,7 @@ struct complex_power_test
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
         }
+        test_sqrt_real_axis(true, false);
     }
 
     void test_sqrt_pp()
@@ -204,6 +207,50 @@ struct complex_power_test
             out = sqrt(in);
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
+        }
+        test_sqrt_real_axis(false, false);
+    }
+
+    void test_sqrt_real_axis(bool negative_real, bool negative_imag)
+    {
+        const real_value_type zero(0);
+        const std::array<real_value_type, 5> real_parts = {
+            zero, std::numeric_limits<real_value_type>::denorm_min(),
+            real_value_type(1), real_value_type(4), std::numeric_limits<real_value_type>::max()
+        };
+        std::array<value_type, size> inputs, results;
+        std::array<real_value_type, size> magnitudes;
+
+        for (size_t start = 0; start < real_parts.size(); start += size)
+        {
+            for (size_t lane = 0; lane < size; ++lane)
+            {
+                const auto x = real_parts[(start + lane) % real_parts.size()];
+                const bool negative_y = negative_imag != ((start + lane) % 2 != 0);
+                inputs[lane] = value_type(negative_real ? -x : x, negative_y ? -zero : zero);
+            }
+
+            const auto batch_inputs = batch_type::load_unaligned(inputs.data());
+            xsimd::sqrt(batch_inputs).store_unaligned(results.data());
+            // Preserve the real backend's rounding and underflow behavior.
+            xsimd::sqrt(xsimd::abs(batch_inputs.real())).store_unaligned(magnitudes.data());
+
+            for (size_t lane = 0; lane < size; ++lane)
+            {
+                const auto x = inputs[lane].real();
+                const auto y = inputs[lane].imag();
+                const auto magnitude = magnitudes[lane];
+                const value_type ref = x < zero
+                    ? value_type(zero, std::copysign(magnitude, y))
+                    : value_type(magnitude, y);
+                CHECK_EQ(results[lane].real(), ref.real());
+                CHECK_EQ(std::abs(results[lane].imag()), std::abs(ref.imag()));
+#ifndef __FAST_MATH__
+                // Fast-math does not preserve the side of the real-axis branch cut.
+                CHECK_EQ(std::signbit(results[lane].real()), std::signbit(ref.real()));
+                CHECK_EQ(std::signbit(results[lane].imag()), std::signbit(ref.imag()));
+#endif
+            }
         }
     }
 };

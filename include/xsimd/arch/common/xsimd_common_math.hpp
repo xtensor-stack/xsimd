@@ -2323,9 +2323,9 @@ namespace xsimd
             real_batch ze(0.);
 
             return select(y == ze,
-                          select(x == ze,
-                                 batch_type(ze, ze),
-                                 select(x < ze, batch_type(ze, sqrt_x), batch_type(sqrt_x, ze))),
+                          select(x < ze,
+                                 batch_type(ze, copysign(sqrt_x, y)),
+                                 batch_type(sqrt_x, y)),
                           select(x == ze,
                                  select(y > ze, batch_type(sqrt_hy, sqrt_hy), batch_type(sqrt_hy, -sqrt_hy)),
                                  resg));
