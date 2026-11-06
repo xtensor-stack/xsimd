@@ -172,4 +172,56 @@ TEST_CASE_TEMPLATE("[complex hyperbolic]", B, BATCH_COMPLEX_TYPES)
         Test.test_atanh();
     }
 }
+
+#ifndef __FAST_MATH__
+TEST_CASE_TEMPLATE("[complex tanh real overflow]", B, BATCH_COMPLEX_TYPES)
+{
+    using value_type = typename B::value_type;
+    using real_type = typename value_type::value_type;
+    const real_type large = std::is_same<real_type, float>::value ? real_type(45) : real_type(356);
+    const real_type largest = std::numeric_limits<real_type>::max();
+    const std::array<value_type, 12> samples = { {
+        { -large, real_type(1) },
+        { large, real_type(-1) },
+        { -large, real_type(0) },
+        { large, -real_type(0) },
+        { -largest, real_type(1) },
+        { largest, real_type(-1) },
+        { -largest, -real_type(0) },
+        { largest, real_type(0) },
+        { real_type(1), real_type(-1) },
+        { real_type(-1), real_type(1) },
+        { large, real_type(1) },
+        { -large, real_type(-1) },
+    } };
+
+    for (size_t offset = 0; offset < samples.size(); offset += B::size)
+    {
+        std::array<value_type, B::size> input, output;
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            input[lane] = samples[(offset + lane) % samples.size()];
+        }
+        xsimd::tanh(B::load_unaligned(input.data())).store_unaligned(output.data());
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const value_type expected = std::tanh(input[lane]);
+            const real_type actual_parts[] = { output[lane].real(), output[lane].imag() };
+            const real_type expected_parts[] = { expected.real(), expected.imag() };
+            for (size_t part = 0; part < 2; ++part)
+            {
+                CHECK(std::isfinite(actual_parts[part]));
+                if (expected_parts[part] == real_type(0))
+                {
+                    CHECK(actual_parts[part] == real_type(0));
+                }
+                else
+                {
+                    CHECK(actual_parts[part] == doctest::Approx(expected_parts[part]).epsilon(64 * std::numeric_limits<real_type>::epsilon()));
+                }
+            }
+        }
+    }
+}
+#endif
 #endif

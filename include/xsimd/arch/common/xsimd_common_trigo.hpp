@@ -986,7 +986,11 @@ namespace xsimd
             auto y = z.imag();
             real_batch two(2);
             auto d = cosh(two * x) + cos(two * y);
-            return { sinh(two * x) / d, sin(two * y) / d };
+            auto real_part = sinh(two * x) / d;
+#ifndef __FAST_MATH__
+            real_part = select(isinf(d), copysign(real_batch(1), x), real_part);
+#endif
+            return { real_part, sin(two * y) / d };
         }
 
     }
