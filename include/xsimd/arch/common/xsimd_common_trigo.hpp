@@ -870,7 +870,7 @@ namespace xsimd
             return batch_type(wreal, real_batch(1.)), batch_type(wreal, wimag / d);
 #else
             batch_type winf(constants::infinity<real_batch>(), constants::infinity<real_batch>());
-            batch_type wres = select(isinf(wimag), batch_type(wreal, real_batch(1.)), batch_type(wreal, wimag / d));
+            batch_type wres = select(isinf(wimag), batch_type(wreal, copysign(real_batch(1.), wimag)), batch_type(wreal, wimag / d));
             return select(d == real_batch(0.), winf, wres);
 #endif
         }
