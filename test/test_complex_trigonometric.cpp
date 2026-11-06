@@ -50,6 +50,23 @@ struct complex_trigonometric_test
             atan_input[i] = value_type(real_value_type(-9.5) + i * real_value_type(20.) / nb_input,
                                        real_value_type(-9.) + i * real_value_type(21.) / nb_input);
         }
+        // Mix real-axis branch cuts (including values just outside [-1, 1]) with non-real inputs.
+        const auto outside = std::nextafter(real_value_type(1), real_value_type(2));
+        size_t index = 0;
+        for (real_value_type re : { real_value_type(-4), real_value_type(-2), -outside,
+                                   real_value_type(-1), real_value_type(-0.5), real_value_type(-0.),
+                                   real_value_type(0.), real_value_type(0.5), real_value_type(1),
+                                   outside, real_value_type(2), real_value_type(4) })
+        {
+            for (real_value_type im : { real_value_type(0.), real_value_type(-0.) })
+            {
+                ainput[2 * index++] = value_type(re, im);
+            }
+        }
+        ainput[1] = value_type(-2, -1);
+        ainput[3] = value_type(2, 1);
+        ainput[5] = value_type(real_value_type(-0.5), real_value_type(0.5));
+        ainput[7] = value_type(real_value_type(0.5), real_value_type(-0.5));
         expected.resize(nb_input);
     }
 
@@ -122,7 +139,7 @@ struct complex_trigonometric_test
             detail::load_batch(in, ainput, i);
             out = asin(in);
             detail::load_batch(ref, expected, i);
-            CHECK_BATCH_EQ(ref, out);
+            check_inverse_trig(ref, out);
         }
     }
 
@@ -137,7 +154,7 @@ struct complex_trigonometric_test
             detail::load_batch(in, ainput, i);
             out = acos(in);
             detail::load_batch(ref, expected, i);
-            CHECK_BATCH_EQ(ref, out);
+            check_inverse_trig(ref, out);
         }
     }
 
@@ -157,6 +174,26 @@ struct complex_trigonometric_test
     }
 
 private:
+    void check_inverse_trig(const batch_type& ref, const batch_type& out)
+    {
+        CHECK_BATCH_EQ(ref, out);
+#ifndef __FAST_MATH__
+        // Fast math does not preserve signed zeros.
+        for (size_t lane = 0; lane < size; ++lane)
+        {
+            for (auto values : { std::make_pair(ref.get(lane).real(), out.get(lane).real()),
+                                 std::make_pair(ref.get(lane).imag(), out.get(lane).imag()) })
+            {
+                if (values.first == real_value_type(0))
+                {
+                    CHECK_EQ(values.second, values.first);
+                    CHECK_EQ(std::signbit(values.second), std::signbit(values.first));
+                }
+            }
+        }
+#endif
+    }
+
     void test_tan_impl()
     {
         std::transform(input.cbegin(), input.cend(), expected.begin(),
