@@ -194,4 +194,94 @@ TEST_CASE_TEMPLATE("[trigonometric]", B, BATCH_FLOAT_TYPES)
         Test.test_reciprocal_functions();
     }
 }
+#ifndef __FAST_MATH__
+TEST_CASE_TEMPLATE("[atan2 signed zero pairs]", B, BATCH_FLOAT_TYPES)
+{
+    using value_type = typename B::value_type;
+    const value_type zero(0);
+    const std::array<std::pair<value_type, value_type>, 20> samples = {
+        std::pair { zero, zero }, std::pair { -zero, zero },
+        std::pair { zero, -zero }, std::pair { -zero, -zero },
+        std::pair { zero, value_type(1) }, std::pair { -zero, value_type(1) },
+        std::pair { zero, value_type(-1) }, std::pair { -zero, value_type(-1) },
+        std::pair { value_type(1), zero }, std::pair { value_type(-1), zero },
+        std::pair { value_type(1), -zero }, std::pair { value_type(-1), -zero },
+        std::pair { value_type(1), value_type(1) }, std::pair { value_type(-1), value_type(1) },
+        std::pair { value_type(1), value_type(-1) }, std::pair { value_type(-1), value_type(-1) },
+        std::pair { value_type(3), value_type(4) }, std::pair { value_type(-3), value_type(4) },
+        std::pair { value_type(3), value_type(-4) }, std::pair { value_type(-3), value_type(-4) }
+    };
+    std::array<value_type, B::size> ys, xs, results;
+    const auto tolerance = value_type(64) * std::numeric_limits<value_type>::epsilon();
+    for (size_t start = 0; start < samples.size(); ++start)
+    {
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const auto sample = samples[(start + lane) % samples.size()];
+            ys[lane] = sample.first;
+            xs[lane] = sample.second;
+        }
+        xsimd::atan2(B::load_unaligned(ys.data()), B::load_unaligned(xs.data())).store_unaligned(results.data());
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const auto expected = std::atan2(ys[lane], xs[lane]);
+            CHECK_EQ(results[lane], doctest::Approx(expected).epsilon(tolerance).scale(1));
+            CHECK_EQ(std::signbit(results[lane]), std::signbit(expected));
+            if (expected == zero)
+            {
+                CHECK_EQ(results[lane], expected);
+            }
+        }
+    }
+}
+#if !defined(XSIMD_NO_INFINITIES) && !defined(XSIMD_NO_NANS)
+TEST_CASE_TEMPLATE("[atan2 infinite argument pairs]", B, BATCH_FLOAT_TYPES)
+{
+    using value_type = typename B::value_type;
+    const value_type zero(0);
+    const auto inf = std::numeric_limits<value_type>::infinity();
+    const auto nan = std::numeric_limits<value_type>::quiet_NaN();
+    const std::array<std::pair<value_type, value_type>, 20> samples = {
+        std::pair { inf, inf }, std::pair { -inf, inf },
+        std::pair { inf, -inf }, std::pair { -inf, -inf },
+        std::pair { inf, value_type(1) }, std::pair { -inf, value_type(1) },
+        std::pair { inf, value_type(-1) }, std::pair { -inf, value_type(-1) },
+        std::pair { value_type(1), inf }, std::pair { value_type(-1), inf },
+        std::pair { value_type(1), -inf }, std::pair { value_type(-1), -inf },
+        std::pair { zero, inf }, std::pair { -zero, inf },
+        std::pair { zero, -inf }, std::pair { -zero, -inf },
+        std::pair { nan, value_type(1) }, std::pair { value_type(1), nan },
+        std::pair { value_type(1), value_type(1) }, std::pair { value_type(-1), value_type(-1) }
+    };
+    std::array<value_type, B::size> ys, xs, results;
+    const auto tolerance = value_type(64) * std::numeric_limits<value_type>::epsilon();
+    for (size_t start = 0; start < samples.size(); ++start)
+    {
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const auto sample = samples[(start + lane) % samples.size()];
+            ys[lane] = sample.first;
+            xs[lane] = sample.second;
+        }
+        xsimd::atan2(B::load_unaligned(ys.data()), B::load_unaligned(xs.data())).store_unaligned(results.data());
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const auto expected = std::atan2(ys[lane], xs[lane]);
+            if (std::isnan(expected))
+            {
+                CHECK(std::isnan(results[lane]));
+                continue;
+            }
+            CHECK(std::isfinite(results[lane]));
+            CHECK_EQ(results[lane], doctest::Approx(expected).epsilon(tolerance).scale(1));
+            CHECK_EQ(std::signbit(results[lane]), std::signbit(expected));
+            if (expected == zero)
+            {
+                CHECK_EQ(results[lane], zero);
+            }
+        }
+    }
+}
+#endif
+#endif
 #endif

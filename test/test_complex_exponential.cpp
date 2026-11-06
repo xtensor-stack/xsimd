@@ -213,4 +213,38 @@ TEST_CASE_TEMPLATE("[complex exponential]", B, BATCH_COMPLEX_TYPES)
         Test.test_sign();
     }
 }
+#ifndef __FAST_MATH__
+TEST_CASE_TEMPLATE("[complex log zero angle]", B, BATCH_COMPLEX_TYPES)
+{
+    using value_type = typename B::value_type;
+    using real_type = typename value_type::value_type;
+    const real_type zero(0);
+    const std::array<value_type, 4> samples = {
+        value_type(zero, zero), value_type(zero, -zero),
+        value_type(-zero, zero), value_type(-zero, -zero)
+    };
+    std::array<value_type, B::size> inputs;
+    std::array<value_type, B::size> results;
+    for (size_t start = 0; start < samples.size(); ++start)
+    {
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            inputs[lane] = samples[(start + lane) % samples.size()];
+        }
+        xsimd::log(B::load_unaligned(inputs.data())).store_unaligned(results.data());
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const auto expected = std::log(inputs[lane]);
+            CHECK(std::isinf(results[lane].real()));
+            CHECK(std::signbit(results[lane].real()));
+            CHECK_EQ(results[lane].imag(), doctest::Approx(expected.imag()).epsilon(real_type(4) * std::numeric_limits<real_type>::epsilon()));
+            CHECK_EQ(std::signbit(results[lane].imag()), std::signbit(expected.imag()));
+            if (expected.imag() == zero)
+            {
+                CHECK_EQ(results[lane].imag(), zero);
+            }
+        }
+    }
+}
+#endif
 #endif
