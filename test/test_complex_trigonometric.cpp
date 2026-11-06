@@ -108,6 +108,43 @@ struct complex_trigonometric_test
 
     void test_tan()
     {
+#ifndef __FAST_MATH__
+        const real_value_type large = std::is_same_v<real_value_type, float> ? real_value_type(45) : real_value_type(356);
+        const real_value_type largest = std::numeric_limits<real_value_type>::max();
+#endif
+        const vector_type samples = {
+            { real_value_type(1), real_value_type(-1) },
+            { real_value_type(-1), real_value_type(1) },
+            { real_value_type(1), real_value_type(-20) },
+            { real_value_type(-1), real_value_type(20) },
+#ifndef __FAST_MATH__
+            // Fast-math omits recovery when sinh(2 * imag(z)) overflows.
+            { real_value_type(1), -large },
+            { real_value_type(-1), large },
+            { real_value_type(0), -large },
+            { -real_value_type(0), large },
+            { real_value_type(1), -largest },
+            { real_value_type(-1), largest },
+            { -real_value_type(0), -largest },
+            { real_value_type(0), largest },
+            { real_value_type(1), large },
+            { real_value_type(-1), -large },
+#endif
+        };
+        for (size_t offset = 0; offset < samples.size(); offset += size)
+        {
+            std::array<value_type, size> values, reference;
+            for (size_t lane = 0; lane < size; ++lane)
+            {
+                values[lane] = samples[(offset + lane) % samples.size()];
+                reference[lane] = std::tan(values[lane]);
+            }
+            const batch_type out = tan(batch_type::load_unaligned(values.data()));
+            const batch_type ref = batch_type::load_unaligned(reference.data());
+            const real_batch_type tolerance(64 * std::numeric_limits<real_value_type>::epsilon());
+            CHECK(xsimd::all(xsimd::abs(out.real() - ref.real()) <= tolerance));
+            CHECK(xsimd::all(xsimd::abs(out.imag() - ref.imag()) <= tolerance));
+        }
         test_conditional_tan<real_value_type>();
     }
 
