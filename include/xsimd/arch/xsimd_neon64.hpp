@@ -14,6 +14,7 @@
 
 #include "../types/xsimd_neon64_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "./utils/compress_expand_lut.hpp"
 #include "./xsimd_neon.hpp"
 
 #include <cassert>
@@ -778,6 +779,32 @@ namespace xsimd
         XSIMD_INLINE size_t count(batch_bool<T, A> const& self, requires_arch<neon64>) noexcept
         {
             return vaddvq_u64(vshrq_n_u64(self, 63));
+        }
+
+        /************
+         * compress *
+         ************/
+
+        // One table lookup with a precomputed byte permutation; tbl zeroes the
+        // bytes whose index is out of range.
+        template <class A, class T, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> compress(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<neon64>) noexcept
+        {
+            auto const& lut = utils::byte_shuffle_lut_v<batch<T, A>::size>;
+            uint8x16_t idx = vld1q_u8(lut.compress[mask.mask()]);
+            return bitwise_cast<T>(batch<uint8_t, A>(vqtbl1q_u8(bitwise_cast<uint8_t>(self), idx)));
+        }
+
+        /**********
+         * expand *
+         **********/
+
+        template <class A, class T, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> expand(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<neon64>) noexcept
+        {
+            auto const& lut = utils::byte_shuffle_lut_v<batch<T, A>::size>;
+            uint8x16_t idx = vld1q_u8(lut.expand[mask.mask()]);
+            return bitwise_cast<T>(batch<uint8_t, A>(vqtbl1q_u8(bitwise_cast<uint8_t>(self), idx)));
         }
 
         /*******
