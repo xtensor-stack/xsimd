@@ -1297,7 +1297,35 @@ namespace xsimd
             }
         }
 
-        // swizzle (dynamic mask) on 8 and 16 bits; see avx for 32 and 64 bits versions
+        // swizzle (dynamic indices)
+        template <class A>
+        XSIMD_INLINE batch<float, A> swizzle(batch<float, A> const& self, batch<uint32_t, A> indices, requires_arch<avx2>) noexcept
+        {
+            return _mm256_permutevar8x32_ps(self, indices);
+        }
+
+        template <class A, typename T, detail::enable_sized_integral_t<T, 4> = 0>
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint32_t, A> const& indices, requires_arch<avx2>) noexcept
+        {
+            return _mm256_permutevar8x32_epi32(self, indices);
+        }
+
+        template <class A, typename T, detail::enable_sized_integral_t<T, 8> = 0>
+        XSIMD_INLINE batch<T, A> swizzle(batch<T, A> const& self, batch<uint64_t, A> const& indices, requires_arch<avx2>) noexcept
+        {
+            // A 64 bits index i selects the 32 bits pair (2i, 2i + 1).
+            __m256i lo = _mm256_shuffle_epi32(indices, _MM_SHUFFLE(2, 2, 0, 0));
+            __m256i expanded_indices = _mm256_add_epi32(_mm256_add_epi32(lo, lo), _mm256_setr_epi32(0, 1, 0, 1, 0, 1, 0, 1));
+            return _mm256_permutevar8x32_epi32(self, expanded_indices);
+        }
+
+        template <class A>
+        XSIMD_INLINE batch<double, A> swizzle(batch<double, A> const& self, batch<uint64_t, A> indices, requires_arch<avx2> req) noexcept
+        {
+            return bitwise_cast<double>(swizzle(bitwise_cast<uint64_t>(self), indices, req));
+        }
+
+        // swizzle (dynamic mask) on 8 and 16 bits
         template <class A>
         XSIMD_INLINE batch<uint8_t, A> swizzle(batch<uint8_t, A> const& self, batch<uint8_t, A> mask, requires_arch<avx2>) noexcept
         {

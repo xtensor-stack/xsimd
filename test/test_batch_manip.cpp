@@ -15,6 +15,9 @@
 
 #include "test_utils.hpp"
 
+#include <algorithm>
+#include <random>
+
 // Compile time tests for include/xsimd/arch/common/xsimd_common_swizzle.hpp
 namespace xsimd
 {
@@ -297,6 +300,40 @@ struct swizzle_test
                        b_expect);
     }
 
+    void dynamic_duplicates()
+    {
+        using idx_t = typename xsimd::as_index<value_type>::type;
+        using idx_batch_type = xsimd::batch<idx_t, arch_type>;
+        const vec_t lhs = make_lhs();
+        const auto b_lhs = batch_type::load_unaligned(lhs.data());
+        std::array<idx_t, N> idx;
+        vec_t expect;
+        auto check = [&]()
+        {
+            std::transform(idx.cbegin(), idx.cend(), expect.begin(), [&](idx_t i)
+                           { return lhs[i]; });
+            auto idx_batch = idx_batch_type::load_unaligned(idx.data());
+            CAPTURE(idx_batch);
+            CHECK_BATCH_EQ(xsimd::swizzle(b_lhs, idx_batch), batch_type::load_unaligned(expect.data()));
+        };
+
+        for (std::size_t s = 0; s < N; ++s)
+        {
+            idx.fill(static_cast<idx_t>(s));
+            check();
+        }
+
+        // The standard fixes the mt19937 output, so every platform tests the same cases.
+        // For N <= 4, 2048 draws cover all N^N index vectors.
+        std::mt19937 generator;
+        for (int r = 0; r < 2048; ++r)
+        {
+            std::generate(idx.begin(), idx.end(), [&]()
+                          { return static_cast<idx_t>(generator() % N); });
+            check();
+        }
+    }
+
     void rotate_right()
     {
         vec_t lhs = make_lhs(), expect;
@@ -341,6 +378,7 @@ TEST_CASE_TEMPLATE("[swizzle]", B, BATCH_SWIZZLE_TYPES)
     XSIMD_SWIZZLE_PATTERN_CASE(EvenThenOdd);
     XSIMD_SWIZZLE_PATTERN_CASE(OddThenEven);
     XSIMD_SWIZZLE_PATTERN_CASE(InterleavePairs);
+    SUBCASE("dynamic_duplicates") { swizzle_test<B>().dynamic_duplicates(); }
     // Rotation checks:
     SUBCASE("rotate_left") { swizzle_test<B>().rotate_left(); }
     SUBCASE("rotate_left_inv") { swizzle_test<B>().rotate_left_inv(); }
