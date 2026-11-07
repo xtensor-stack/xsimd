@@ -297,6 +297,59 @@ struct swizzle_test
                        b_expect);
     }
 
+    // Runtime index vectors with repeated indices: every single-lane broadcast,
+    // then all N^N patterns when N <= 4, pseudo-random ones otherwise.
+    void dynamic_duplicates()
+    {
+        using idx_t = typename xsimd::as_index<value_type>::type;
+        using idx_batch_type = xsimd::batch<idx_t, arch_type>;
+        const vec_t lhs = make_lhs();
+        const auto b_lhs = batch_type::load_unaligned(lhs.data());
+        std::array<idx_t, N> idx;
+        vec_t expect;
+        auto check = [&]()
+        {
+            for (std::size_t i = 0; i < N; ++i)
+                expect[i] = lhs[idx[i]];
+            auto idx_batch = idx_batch_type::load_unaligned(idx.data());
+            CAPTURE(idx_batch);
+            CHECK_BATCH_EQ(xsimd::swizzle(b_lhs, idx_batch), batch_type::load_unaligned(expect.data()));
+        };
+
+        for (std::size_t s = 0; s < N; ++s)
+        {
+            idx.fill(static_cast<idx_t>(s));
+            check();
+        }
+
+        if constexpr (N <= 4)
+        {
+            std::size_t count = 1;
+            for (std::size_t i = 0; i < N; ++i)
+                count *= N;
+            for (std::size_t c = 0; c < count; ++c)
+            {
+                std::size_t digits = c;
+                for (std::size_t i = 0; i < N; ++i, digits /= N)
+                    idx[i] = static_cast<idx_t>(digits % N);
+                check();
+            }
+        }
+        else
+        {
+            uint32_t state = 1;
+            for (int r = 0; r < 256; ++r)
+            {
+                for (std::size_t i = 0; i < N; ++i)
+                {
+                    state = state * 1664525u + 1013904223u;
+                    idx[i] = static_cast<idx_t>((state >> 16) % N);
+                }
+                check();
+            }
+        }
+    }
+
     void rotate_right()
     {
         vec_t lhs = make_lhs(), expect;
@@ -341,6 +394,8 @@ TEST_CASE_TEMPLATE("[swizzle]", B, BATCH_SWIZZLE_TYPES)
     XSIMD_SWIZZLE_PATTERN_CASE(EvenThenOdd);
     XSIMD_SWIZZLE_PATTERN_CASE(OddThenEven);
     XSIMD_SWIZZLE_PATTERN_CASE(InterleavePairs);
+    // Runtime index vectors with duplicates:
+    SUBCASE("dynamic_duplicates") { swizzle_test<B>().dynamic_duplicates(); }
     // Rotation checks:
     SUBCASE("rotate_left") { swizzle_test<B>().rotate_left(); }
     SUBCASE("rotate_left_inv") { swizzle_test<B>().rotate_left_inv(); }
