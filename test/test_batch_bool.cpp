@@ -16,6 +16,7 @@
 
 #include <array>
 #include <functional>
+#include <random>
 #include <type_traits>
 #include <vector>
 
@@ -739,6 +740,38 @@ struct batch_bool_test
         CHECK_EQ(batch_bool_type::from_mask(bool_g.interspersed.mask()).mask(), bool_g.interspersed.mask());
     }
 
+    // Every mask when there are at most 8 lanes; otherwise every single lane
+    // mask and pseudo-random ones. Checked independently of mask().
+    void test_from_mask() const
+    {
+        auto check = [](uint64_t bits)
+        {
+            bool_array_type lanes;
+            batch_bool_type::from_mask(bits).store_unaligned(lanes.data());
+            bool ok = true;
+            for (size_t i = 0; i < size; ++i)
+                ok = ok && lanes[i] == (((bits >> i) & 1) != 0);
+            CAPTURE(bits);
+            CHECK_UNARY(ok);
+        };
+
+        if constexpr (size <= 8)
+        {
+            for (uint64_t bits = 0; bits < (uint64_t(1) << size); ++bits)
+                check(bits);
+        }
+        else
+        {
+            for (size_t i = 0; i < size; ++i)
+                check(uint64_t(1) << i);
+            // The engine is default seeded, so a failure reproduces.
+            std::default_random_engine generator;
+            std::uniform_int_distribution<uint64_t> distribution;
+            for (int r = 0; r < 256; ++r)
+                check(distribution(generator) >> (64 - size));
+        }
+    }
+
     void test_count() const
     {
         auto bool_g = xsimd::get_bool<batch_bool_type> {};
@@ -913,6 +946,8 @@ TEST_CASE_TEMPLATE("[xsimd batch bool]", B, BATCH_TYPES)
     SUBCASE("update operations") { Test.test_update_operations(); }
 
     SUBCASE("mask") { Test.test_mask(); }
+
+    SUBCASE("from_mask") { Test.test_from_mask(); }
 
     SUBCASE("count") { Test.test_count(); }
 
