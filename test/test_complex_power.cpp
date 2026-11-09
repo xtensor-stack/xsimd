@@ -244,7 +244,7 @@ struct complex_power_test
                     ? value_type(zero, std::copysign(magnitude, y))
                     : value_type(magnitude, y);
                 CHECK_EQ(results[lane].real(), ref.real());
-                CHECK_EQ(std::abs(results[lane].imag()), std::abs(ref.imag()));
+                CHECK_EQ(results[lane].imag(), ref.imag());
 #ifndef __FAST_MATH__
                 // Fast-math does not preserve the side of the real-axis branch cut.
                 CHECK_EQ(std::signbit(results[lane].real()), std::signbit(ref.real()));
