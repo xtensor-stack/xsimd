@@ -59,7 +59,6 @@ struct load_store_test
 {
     using batch_type = B;
     using value_type = typename B::value_type;
-    using batch_bool_type = typename B::batch_bool_type;
     using index_type = typename xsimd::as_integer_t<batch_type>;
     template <class T>
     using allocator = xsimd::default_allocator<T, typename B::arch_type>;
@@ -81,99 +80,6 @@ struct load_store_test
 #if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
     using double_vector_type = std::vector<double, allocator<double>>;
 #endif
-
-    struct mask_none
-    {
-        static constexpr bool get(std::size_t, std::size_t) noexcept { return false; }
-    };
-
-    struct mask_first
-    {
-        static constexpr bool get(std::size_t index, std::size_t) noexcept { return index == 0; }
-    };
-
-    struct mask_first_half
-    {
-        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index < (size / 2); }
-    };
-
-    struct mask_last_half
-    {
-        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index >= (size / 2); }
-    };
-
-    struct mask_even
-    {
-        static constexpr bool get(std::size_t index, std::size_t) noexcept { return (index % 2) == 0; }
-    };
-
-    struct mask_odd
-    {
-        static constexpr bool get(std::size_t index, std::size_t) noexcept { return (index % 2) == 1; }
-    };
-
-    struct mask_pseudo_random
-    {
-        static constexpr bool get(std::size_t index, std::size_t size) noexcept
-        {
-            return ((index * 7) + 3) % size < (size > 2 ? size / 3 : std::size_t(1));
-        }
-    };
-
-    struct mask_all
-    {
-        static constexpr bool get(std::size_t, std::size_t) noexcept { return true; }
-    };
-
-    struct mask_all_but_last
-    {
-        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index + 1 < size; }
-    };
-
-    struct mask_all_but_first
-    {
-        static constexpr bool get(std::size_t index, std::size_t) noexcept { return index != 0; }
-    };
-
-    struct mask_last
-    {
-        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index + 1 == size; }
-    };
-
-    template <class Generator>
-    static batch_bool_type make_runtime_mask() noexcept
-    {
-        uint64_t bits = 0;
-        for (std::size_t i = 0; i < size; ++i)
-        {
-            if (Generator::get(i, size))
-            {
-                bits |= uint64_t(1) << i;
-            }
-        }
-        return batch_bool_type::from_mask(bits);
-    }
-
-    struct compile_time_mask
-    {
-        static constexpr const char* tag = "";
-        template <class Generator>
-        static auto make() noexcept
-            -> decltype(xsimd::make_batch_bool_constant<value_type, Generator, typename batch_type::arch_type>())
-        {
-            return xsimd::make_batch_bool_constant<value_type, Generator, typename batch_type::arch_type>();
-        }
-    };
-
-    struct runtime_mask
-    {
-        static constexpr const char* tag = " runtime";
-        template <class Generator>
-        static batch_bool_type make() noexcept
-        {
-            return make_runtime_mask<Generator>();
-        }
-    };
 
     int8_vector_type i8_vec;
     uint8_vector_type ui8_vec;
@@ -430,154 +336,6 @@ private:
 
         stream_load_if_same(v.data(), b, expected, name,
                             std::integral_constant<bool, std::is_same_v<typename V::value_type, value_type>> {});
-
-        run_mask_tests(v, name, b, expected, std::is_same<typename V::value_type, value_type> {});
-    }
-
-    template <class V>
-    void run_mask_tests(const V& v, const std::string& name, batch_type& b, const array_type& expected, std::true_type)
-    {
-        run_load_mask_patterns<compile_time_mask>(v, name, b, expected);
-        run_load_mask_patterns<runtime_mask>(v, name, b, expected);
-    }
-
-    template <class MaskKind, class V>
-    void run_load_mask_patterns(const V& v, const std::string& name, batch_type& b, const array_type& expected)
-    {
-        const std::string p = std::string(MaskKind::tag) + " masked";
-        run_load_mask_pattern<MaskKind, mask_none>(v, name, b, expected, p + " none");
-        run_load_mask_pattern<MaskKind, mask_first>(v, name, b, expected, p + " first element");
-        run_load_mask_pattern<MaskKind, mask_first_half>(v, name, b, expected, p + " first half");
-        run_load_mask_pattern<MaskKind, mask_last_half>(v, name, b, expected, p + " last half");
-        run_load_mask_pattern<MaskKind, mask_even>(v, name, b, expected, p + " even elements");
-        run_load_mask_pattern<MaskKind, mask_odd>(v, name, b, expected, p + " odd elements");
-        run_load_mask_pattern<MaskKind, mask_last>(v, name, b, expected, p + " last element");
-        run_load_mask_pattern<MaskKind, mask_all_but_last>(v, name, b, expected, p + " all but last");
-        run_load_mask_pattern<MaskKind, mask_all_but_first>(v, name, b, expected, p + " all but first");
-        run_load_mask_pattern<MaskKind, mask_pseudo_random>(v, name, b, expected, p + " pseudo random");
-        run_load_mask_pattern<MaskKind, mask_all>(v, name, b, expected, p + " all elements");
-    }
-
-    template <class V>
-    void run_mask_tests(const V&, const std::string&, batch_type&, const array_type&, std::false_type)
-    {
-    }
-
-    template <class MaskKind, class Generator, class V>
-    void run_load_mask_pattern(const V& v, const std::string& name, batch_type& b, const array_type& expected, const std::string& label)
-    {
-        const auto mask = MaskKind::template make<Generator>();
-        array_type expected_masked { 0 };
-
-        for (std::size_t i = 0; i < size; ++i)
-        {
-            const bool active = Generator::get(i, size);
-            expected_masked[i] = active ? expected[i] : value_type();
-        }
-
-        b = xsimd::load(v.data(), mask, xsimd::aligned_mode());
-        INFO(name, label + " aligned");
-        CHECK_BATCH_EQ(b, expected_masked);
-        b = xsimd::load(v.data(), mask, xsimd::unaligned_mode());
-        INFO(name, label + " unaligned");
-        CHECK_BATCH_EQ(b, expected_masked);
-    }
-
-    template <class MaskKind, class Generator, class V>
-    void run_store_mask_pattern(const V& v, const std::string& name, batch_type& b, V& res, V& expected_masked, const std::string& label)
-    {
-        const auto mask = MaskKind::template make<Generator>();
-        for (std::size_t i = 0; i < size; ++i)
-        {
-            expected_masked[i] = Generator::get(i, size) ? v[i] : value_type();
-        }
-        std::fill(res.begin(), res.end(), value_type());
-        b.store(res.data(), mask, xsimd::aligned_mode());
-        INFO(name, label + " aligned");
-        CHECK_VECTOR_EQ(res, expected_masked);
-        std::fill(res.begin(), res.end(), value_type());
-        b.store(res.data(), mask, xsimd::unaligned_mode());
-        INFO(name, label + " unaligned");
-        CHECK_VECTOR_EQ(res, expected_masked);
-    }
-
-    template <class V>
-    void run_store_mask_tests(const V& v, const std::string& name, batch_type& b, V& res, V& expected_masked, std::true_type)
-    {
-        run_store_mask_patterns<compile_time_mask>(v, name, b, res, expected_masked);
-        run_store_mask_patterns<runtime_mask>(v, name, b, res, expected_masked);
-    }
-
-    template <class MaskKind, class V>
-    void run_store_mask_patterns(const V& v, const std::string& name, batch_type& b, V& res, V& expected_masked)
-    {
-        const std::string p = std::string(MaskKind::tag) + " masked";
-        run_store_mask_pattern<MaskKind, mask_first>(v, name, b, res, expected_masked, p + " first element");
-        run_store_mask_pattern<MaskKind, mask_first_half>(v, name, b, res, expected_masked, p + " first half");
-        run_store_mask_pattern<MaskKind, mask_last_half>(v, name, b, res, expected_masked, p + " last half");
-        run_store_mask_pattern<MaskKind, mask_even>(v, name, b, res, expected_masked, p + " even elements");
-        run_store_mask_pattern<MaskKind, mask_odd>(v, name, b, res, expected_masked, p + " odd elements");
-        run_store_mask_pattern<MaskKind, mask_last>(v, name, b, res, expected_masked, p + " last element");
-        run_store_mask_pattern<MaskKind, mask_all_but_last>(v, name, b, res, expected_masked, p + " all but last");
-        run_store_mask_pattern<MaskKind, mask_all_but_first>(v, name, b, res, expected_masked, p + " all but first");
-        run_store_mask_pattern<MaskKind, mask_pseudo_random>(v, name, b, res, expected_masked, p + " pseudo random");
-        run_store_mask_pattern<MaskKind, mask_all>(v, name, b, res, expected_masked, p + " all elements");
-    }
-
-    template <class V>
-    void run_store_mask_tests(const V&, const std::string&, batch_type&, V&, V&, std::false_type)
-    {
-    }
-
-    template <class V>
-    void run_store_mask_section(const V& v,
-                                const std::string& name,
-                                batch_type& b,
-                                V& res,
-                                V& expected_masked,
-                                std::true_type)
-    {
-        static constexpr auto sentinel = static_cast<value_type>(37);
-        V sentinel_expected(size, sentinel);
-
-        auto zero_mask = xsimd::make_batch_bool_constant<value_type, mask_none, typename batch_type::arch_type>();
-        auto runtime_zero_mask = make_runtime_mask<mask_none>();
-        std::fill(res.begin(), res.end(), sentinel);
-        b.store(res.data(), zero_mask, xsimd::aligned_mode());
-        INFO(name, " masked none aligned store");
-        CHECK_VECTOR_EQ(res, sentinel_expected);
-
-        V scratch(res.size() + size);
-        std::fill(scratch.begin(), scratch.end(), sentinel);
-        auto* scratch_ptr = scratch.data() + 1;
-        b.store(scratch_ptr, zero_mask, xsimd::unaligned_mode());
-        INFO(name, " masked none unaligned store");
-
-        V scratch_slice(res.size());
-        std::copy(scratch_ptr, scratch_ptr + scratch_slice.size(), scratch_slice.begin());
-        CHECK_VECTOR_EQ(scratch_slice, sentinel_expected);
-        CHECK(std::all_of(scratch.begin(), scratch.end(), [](const value_type v)
-                          { return v == sentinel; }));
-
-        std::fill(res.begin(), res.end(), sentinel);
-        xsimd::store(res.data(), b, runtime_zero_mask, xsimd::aligned_mode());
-        INFO(name, " runtime masked none aligned store");
-        CHECK_VECTOR_EQ(res, sentinel_expected);
-
-        std::fill(scratch.begin(), scratch.end(), sentinel);
-        xsimd::store(scratch_ptr, b, runtime_zero_mask, xsimd::unaligned_mode());
-        INFO(name, " runtime masked none unaligned store");
-        std::copy(scratch_ptr, scratch_ptr + scratch_slice.size(), scratch_slice.begin());
-        CHECK_VECTOR_EQ(scratch_slice, sentinel_expected);
-        CHECK(std::all_of(scratch.begin(), scratch.end(), [](const value_type v)
-                          { return v == sentinel; }));
-
-        run_store_mask_tests(v, name, b, res, expected_masked, std::true_type {});
-    }
-
-    template <class V>
-    void run_store_mask_section(const V&, const std::string&, batch_type&, V&, V&, std::false_type)
-    {
     }
 
     struct test_load_char
@@ -623,10 +381,6 @@ private:
 
         stream_store_if_same(res, b, v, name,
                              std::integral_constant<bool, std::is_same_v<typename V::value_type, value_type>> {});
-
-        V expected_masked(size);
-
-        run_store_mask_section(v, name, b, res, expected_masked, std::is_same<typename V::value_type, value_type> {});
     }
 
     template <class V>
@@ -707,34 +461,153 @@ TEST_CASE_TEMPLATE("[load store]", B, BATCH_TYPES)
     SUBCASE("masked") { Test.test_masked(); }
 }
 
-TEST_CASE_TEMPLATE("store_masked respects Mode", B, BATCH_TYPES)
+template <class B>
+struct masked_load_store_test
 {
-    using T = typename B::value_type;
-    using A = typename B::arch_type;
-    constexpr std::size_t N = B::size;
+    using value_type = typename B::value_type;
+    using arch_type = typename B::arch_type;
+    using mask_type = typename B::batch_bool_type;
+    using mask_value_type = typename mask_type::operand_type;
+    static constexpr std::size_t size = B::size;
+    using storage_type = std::array<value_type, size + 2>;
 
-    // Unaligned-mode + unaligned pointer: must not fault.
-    alignas(A::alignment()) T big[2 * N + 1] = {};
-    T* unaligned_ptr = big + 1; // sizeof(T)-aligned only
-
-    struct AllTrue
+    struct mask_none
     {
-        static constexpr bool get(std::size_t, std::size_t) { return true; }
+        static constexpr bool get(std::size_t, std::size_t) noexcept { return false; }
     };
-    auto cst_mask = xsimd::make_batch_bool_constant<T, AllTrue, A>();
 
-    B v(T(7));
-    v.store(unaligned_ptr, cst_mask, xsimd::unaligned_mode {});
-    for (std::size_t i = 0; i < N; ++i)
-        CHECK_EQ(unaligned_ptr[i], T(7));
+    struct mask_first
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return index == 0; }
+    };
 
-    // Overload resolution: store_masked with same-typed mask must compile.
-    // If C3 regresses, this becomes a compile error.
-    auto signed_cst_mask = xsimd::make_batch_bool_constant<T, AllTrue, A>();
-    alignas(A::alignment()) T aligned_buf[N] = {};
-    v.store(aligned_buf, signed_cst_mask, xsimd::aligned_mode {});
-    for (std::size_t i = 0; i < N; ++i)
-        CHECK_EQ(aligned_buf[i], T(7));
+    struct mask_first_half
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index < (size / 2); }
+    };
+
+    struct mask_last_half
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index >= (size / 2); }
+    };
+
+    struct mask_even
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return (index % 2) == 0; }
+    };
+
+    struct mask_odd
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return (index % 2) == 1; }
+    };
+
+    struct mask_pseudo_random
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept
+        {
+            return ((index * 7) + 3) % size < (size > 2 ? size / 3 : std::size_t(1));
+        }
+    };
+
+    struct mask_all
+    {
+        static constexpr bool get(std::size_t, std::size_t) noexcept { return true; }
+    };
+
+    struct mask_all_but_last
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index + 1 < size; }
+    };
+
+    struct mask_all_but_first
+    {
+        static constexpr bool get(std::size_t index, std::size_t) noexcept { return index != 0; }
+    };
+
+    struct mask_last
+    {
+        static constexpr bool get(std::size_t index, std::size_t size) noexcept { return index + 1 == size; }
+    };
+
+    static value_type make_value(int i)
+    {
+        if constexpr (xsimd::is_batch_complex<B>::value)
+            return value_type(mask_value_type(i + 1), mask_value_type(-2 * i - 3));
+        else
+            return value_type(i + 1);
+    }
+
+    template <class Generator, class Mask, class Mode>
+    void check(Mask mask, Mode mode, std::size_t offset) const
+    {
+        INFO("offset = ", offset, ", runtime mask = ", xsimd::is_batch_bool<Mask>::value);
+        alignas(arch_type::alignment()) storage_type input;
+        alignas(arch_type::alignment()) storage_type output;
+        for (std::size_t i = 0; i < input.size(); ++i)
+            input[i] = make_value(static_cast<int>(i));
+
+        const value_type sentinel = make_value(100);
+        const B source = B::load_unaligned(input.data() + offset);
+        auto check_results = [&](const auto& loaded)
+        {
+            static_assert(std::is_same_v<std::decay_t<decltype(loaded)>, B>,
+                          "masked load preserves batch type");
+            for (std::size_t i = 0; i < size; ++i)
+            {
+                const value_type expected = Generator::get(i, size) ? input[i + offset] : value_type {};
+                CHECK_EQ(loaded.get(i), expected);
+            }
+            for (std::size_t i = 0; i < output.size(); ++i)
+            {
+                const bool active = i >= offset && i < offset + size && Generator::get(i - offset, size);
+                CHECK_EQ(output[i], active ? input[i] : sentinel);
+            }
+        };
+
+        output.fill(sentinel);
+        xsimd::store(output.data() + offset, source, mask, mode);
+        check_results(xsimd::load(input.data() + offset, mask, mode));
+
+        if (offset == 0)
+        {
+            INFO("default mode");
+            output.fill(sentinel);
+            xsimd::store(output.data(), source, mask);
+            check_results(xsimd::load(input.data(), mask));
+        }
+    }
+
+    template <class Generator>
+    void check_pattern(const char* name) const
+    {
+        INFO(std::string(name));
+        constexpr auto constant_mask = xsimd::make_batch_bool_constant<mask_value_type, Generator, arch_type>();
+        const auto runtime_mask = constant_mask.as_batch_bool();
+        check<Generator>(constant_mask, xsimd::aligned_mode {}, 0);
+        check<Generator>(constant_mask, xsimd::unaligned_mode {}, 1);
+        check<Generator>(runtime_mask, xsimd::aligned_mode {}, 0);
+        check<Generator>(runtime_mask, xsimd::unaligned_mode {}, 1);
+    }
+
+    void run() const
+    {
+        check_pattern<mask_none>("none");
+        check_pattern<mask_all>("all");
+        check_pattern<mask_first>("first element");
+        check_pattern<mask_last>("last element");
+        check_pattern<mask_first_half>("first half");
+        check_pattern<mask_last_half>("last half");
+        check_pattern<mask_even>("even elements");
+        check_pattern<mask_odd>("odd elements");
+        check_pattern<mask_all_but_first>("all but first");
+        check_pattern<mask_all_but_last>("all but last");
+        check_pattern<mask_pseudo_random>("pseudo random");
+    }
+};
+
+TEST_CASE_TEMPLATE("[masked load store]", B, BATCH_TYPES, BATCH_COMPLEX_TYPES)
+{
+    masked_load_store_test<B> {}.run();
 }
 
 #endif

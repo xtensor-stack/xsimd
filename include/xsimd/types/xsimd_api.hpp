@@ -410,7 +410,14 @@ namespace xsimd
     XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::bitwise_lshift<shift, A>(x, A {});
+        if constexpr (shift == 0)
+        {
+            return x;
+        }
+        else
+        {
+            return kernel::bitwise_lshift<shift, A>(x, A {});
+        }
     }
     template <class T, class A>
     XSIMD_INLINE batch<T, A> bitwise_lshift(batch<T, A> const& x, batch<T, A> const& shift) noexcept
@@ -508,7 +515,14 @@ namespace xsimd
     XSIMD_INLINE batch<T, A> bitwise_rshift(batch<T, A> const& x) noexcept
     {
         detail::static_check_supported_config<T, A>();
-        return kernel::bitwise_rshift<shift, A>(x, A {});
+        if constexpr (shift == 0)
+        {
+            return x;
+        }
+        else
+        {
+            return kernel::bitwise_rshift<shift, A>(x, A {});
+        }
     }
 
     /**
@@ -1551,6 +1565,16 @@ namespace xsimd
         return batch<T, A>::load(ptr, mask, aligned_mode {});
     }
 
+    /// \overload
+    template <class T, class A = default_arch, bool... Values>
+    XSIMD_INLINE batch<std::complex<T>, A> load(std::complex<T> const* ptr,
+                                                batch_bool_constant<T, A, Values...> const& mask,
+                                                aligned_mode = {}) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return batch<std::complex<T>, A>::load(ptr, mask, aligned_mode {});
+    }
+
     /**
      * @ingroup batch_data_transfer
      *
@@ -1575,6 +1599,26 @@ namespace xsimd
     /**
      * @ingroup batch_data_transfer
      *
+     * Creates a complex batch from the buffer \c ptr using a runtime mask.
+     * The mask is a \c batch_bool of the underlying real type, with one lane
+     * per complex element. Elements corresponding to \c false in the mask are
+     * not accessed in memory and are zero-initialized in the resulting batch.
+     * @param ptr the memory buffer to read
+     * @param mask runtime selection mask for the elements to load
+     * @return a new batch instance
+     */
+    template <class T, class A = default_arch>
+    XSIMD_INLINE batch<std::complex<T>, A> load(std::complex<T> const* ptr,
+                                                batch_bool<T, A> mask,
+                                                aligned_mode = {}) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return batch<std::complex<T>, A>::load(ptr, mask, aligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
      * Creates a batch from the buffer \c ptr using a mask. Elements
      * corresponding to \c false in the mask are not accessed in memory and are
      * zero-initialized in the resulting batch.
@@ -1593,6 +1637,16 @@ namespace xsimd
     }
 
     /// \overload
+    template <class T, class A = default_arch, bool... Values>
+    XSIMD_INLINE batch<std::complex<T>, A> load(std::complex<T> const* ptr,
+                                                batch_bool_constant<T, A, Values...> const& mask,
+                                                unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return batch<std::complex<T>, A>::load(ptr, mask, unaligned_mode {});
+    }
+
+    /// \overload
     template <class T, class A = default_arch>
     XSIMD_INLINE batch<T, A> load(T const* ptr,
                                   batch_bool<T, A> mask,
@@ -1600,6 +1654,16 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         return batch<T, A>::load(ptr, mask, unaligned_mode {});
+    }
+
+    /// \overload
+    template <class T, class A = default_arch>
+    XSIMD_INLINE batch<std::complex<T>, A> load(std::complex<T> const* ptr,
+                                                batch_bool<T, A> mask,
+                                                unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        return batch<std::complex<T>, A>::load(ptr, mask, unaligned_mode {});
     }
 
     /**
@@ -2209,7 +2273,8 @@ namespace xsimd
      * @ingroup batch_bitwise
      *
      * Perform a bitwise shift to the left, reintroducing the shifted out bits
-     * to the right
+     * to the right. The shift is reduced modulo the number of bits of an
+     * element.
      * @param x batch to rotate
      * @param shift scalar amount to shift
      * @return rotated \c x.
@@ -2237,7 +2302,8 @@ namespace xsimd
      * @ingroup batch_bitwise
      *
      * Perform a bitwise shift to the right, reintroducing the shifted out bits
-     * to the left.
+     * to the left. The shift is reduced modulo the number of bits of an
+     * element.
      * @param x batch to rotate
      * @param shift scalar amount to shift
      * @return rotated \c x.
@@ -2743,6 +2809,39 @@ namespace xsimd
         val.store(mem, mask, aligned_mode {});
     }
 
+    /// \overload
+    template <class T, class A = default_arch, bool... Values>
+    XSIMD_INLINE void store(std::complex<T>* mem,
+                            batch<std::complex<T>, A> const& val,
+                            batch_bool_constant<T, A, Values...> const& mask,
+                            aligned_mode = {}) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        val.store(mem, mask, aligned_mode {});
+    }
+
+    /**
+     * @ingroup batch_data_transfer
+     *
+     * Copy selected elements of complex batch \c val to the buffer \c mem
+     * using a runtime mask. The mask is a \c batch_bool of the underlying real
+     * type, with one lane per complex element. Elements corresponding to
+     * \c false in the mask are not written and leave the contents of \c mem
+     * untouched.
+     * @param mem the memory buffer to write to
+     * @param val the batch to copy from
+     * @param mask runtime selection mask for the elements to store
+     */
+    template <class T, class A = default_arch>
+    XSIMD_INLINE void store(std::complex<T>* mem,
+                            batch<std::complex<T>, A> const& val,
+                            batch_bool<T, A> mask,
+                            aligned_mode = {}) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        val.store(mem, mask, aligned_mode {});
+    }
+
     /**
      * @ingroup batch_data_transfer
      *
@@ -2786,9 +2885,31 @@ namespace xsimd
     }
 
     /// \overload
+    template <class T, class A = default_arch, bool... Values>
+    XSIMD_INLINE void store(std::complex<T>* mem,
+                            batch<std::complex<T>, A> const& val,
+                            batch_bool_constant<T, A, Values...> const& mask,
+                            unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        val.store(mem, mask, unaligned_mode {});
+    }
+
+    /// \overload
     template <class T, class A = default_arch>
     XSIMD_INLINE void store(T* mem,
                             batch<T, A> const& val,
+                            batch_bool<T, A> mask,
+                            unaligned_mode) noexcept
+    {
+        detail::static_check_supported_config<T, A>();
+        val.store(mem, mask, unaligned_mode {});
+    }
+
+    /// \overload
+    template <class T, class A = default_arch>
+    XSIMD_INLINE void store(std::complex<T>* mem,
+                            batch<std::complex<T>, A> const& val,
                             batch_bool<T, A> mask,
                             unaligned_mode) noexcept
     {

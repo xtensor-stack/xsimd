@@ -3570,6 +3570,42 @@ namespace xsimd
             return ((mask_lo >> 63) | (mask_hi << 1)) & 0x3;
         }
 
+        /*************
+         * from_mask *
+         *************/
+
+        // Broadcast the mask to every lane, then let vtst turn the bit of each
+        // lane into a full lane.
+        template <class A, class T, detail::enable_sized_t<T, 1> = 0>
+        XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<neon>) noexcept
+        {
+            static constexpr uint8_t lane_bits[16] = { 1, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8, 16, 32, 64, 128 };
+            // Lanes 0 to 7 test the low byte of the mask, lanes 8 to 15 the next one.
+            uint8x16_t bytes = vcombine_u8(vdup_n_u8(static_cast<uint8_t>(mask)), vdup_n_u8(static_cast<uint8_t>(mask >> 8)));
+            return vtstq_u8(bytes, vld1q_u8(lane_bits));
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 2> = 0>
+        XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<neon>) noexcept
+        {
+            static constexpr uint16_t lane_bits[8] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+            return vtstq_u16(vdupq_n_u16(static_cast<uint16_t>(mask)), vld1q_u16(lane_bits));
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 4> = 0>
+        XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<neon>) noexcept
+        {
+            static constexpr uint32_t lane_bits[4] = { 1, 2, 4, 8 };
+            return vtstq_u32(vdupq_n_u32(static_cast<uint32_t>(mask)), vld1q_u32(lane_bits));
+        }
+
+        template <class A, class T, detail::enable_sized_t<T, 8> = 0>
+        XSIMD_INLINE batch_bool<T, A> from_mask(batch_bool<T, A> const&, uint64_t mask, requires_arch<neon>) noexcept
+        {
+            static constexpr uint32_t lane_bits[4] = { 1, 1, 2, 2 };
+            return vreinterpretq_u64_u32(vtstq_u32(vdupq_n_u32(static_cast<uint32_t>(mask)), vld1q_u32(lane_bits)));
+        }
+
         /*********
          * count *
          *********/

@@ -9,7 +9,8 @@ jobs:
     strategy:
       matrix:
         sys:
-          - { os: '14',       arch: 'native' }
+          # macos-14 runner images are retired as of 2026-11-02
+          - { os: '15',       arch: 'native' }
           - { os: '15',       arch: 'neon64' }
           - { os: '15-intel', arch: 'sse4.2' }
     runs-on: macos-${{ matrix.sys.os }}

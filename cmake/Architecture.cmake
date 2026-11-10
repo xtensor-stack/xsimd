@@ -58,10 +58,11 @@ endfunction()
 
 # Get flags for native build.
 function(xsimd_get_native_arch_flags out_list)
-    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-        message(WARNING "Native not supported on MSVC, not setting any flag")
-    else()
+    check_cxx_compiler_flag("-march=native" XSIMD_COMPILER_SUPPORTS_MARCH_NATIVE)
+    if(XSIMD_COMPILER_SUPPORTS_MARCH_NATIVE)
         set(${out_list} "-march=native" PARENT_SCOPE)
+    else()
+        message(STATUS "-march=native not supported by this compiler, not setting any flag")
     endif()
 endfunction()
 

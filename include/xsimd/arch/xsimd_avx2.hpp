@@ -396,14 +396,12 @@ namespace xsimd
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    __m256i sign_mask = _mm256_set1_epi16((0xFF00 >> shift) & 0x00FF);
-                    __m256i cmp_is_negative = _mm256_cmpgt_epi8(_mm256_setzero_si256(), self);
-                    __m256i res = _mm256_srai_epi16(self, shift);
-                    return _mm256_or_si256(
-                        detail::fwd_to_sse([](__m128i s, __m128i o) noexcept
-                                           { return bitwise_and(batch<T, sse4_2>(s), batch<T, sse4_2>(o), sse4_2 {}); },
-                                           sign_mask, cmp_is_negative),
-                        _mm256_andnot_si256(sign_mask, res));
+                    // Shift 16-bit lanes, remove neighbouring bits, then sign-extend each byte.
+                    constexpr uint8_t keep = static_cast<uint8_t>(0xFFu >> shift);
+                    constexpr uint8_t sign = static_cast<uint8_t>(0x80u >> shift);
+                    __m256i shifted = _mm256_and_si256(_mm256_srli_epi16(self, static_cast<int>(shift)), _mm256_set1_epi8(static_cast<char>(keep)));
+                    __m256i sign_bit = _mm256_set1_epi8(static_cast<char>(sign));
+                    return _mm256_sub_epi8(_mm256_xor_si256(shifted, sign_bit), sign_bit);
                 }
                 else if constexpr (sizeof(T) == 2)
                 {
@@ -422,10 +420,9 @@ namespace xsimd
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    // 8-bit left shift via 16-bit shift + mask
+                    // 8-bit right shift via 16-bit shift + mask of the bits that stay in the byte
                     const __m256i shifted = _mm256_srli_epi16(self, shift);
-                    // TODO(C++17): without `if constexpr ` we must ensure the compile-time shift does not overflow
-                    constexpr uint8_t mask8 = static_cast<uint8_t>(sizeof(T) == 1 ? ((1u << shift) - 1u) : 0);
+                    constexpr uint8_t mask8 = static_cast<uint8_t>(0xFFu >> shift);
                     const __m256i mask = _mm256_set1_epi8(mask8);
                     return _mm256_and_si256(shifted, mask);
                 }
@@ -487,28 +484,27 @@ namespace xsimd
             return _mm256_xor_si256(self, other);
         }
 
-        // complex_low
-        template <class A>
-        XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
-        {
-            __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 1, 1, 0));
-            __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(1, 2, 0, 0));
-            return _mm256_blend_pd(tmp0, tmp1, 10);
-        }
-
-        // complex_high
-        template <class A>
-        XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
-        {
-            __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 3, 1, 2));
-            __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(3, 2, 2, 0));
-            return _mm256_blend_pd(tmp0, tmp1, 10);
-        }
-
-        // fast_cast
         namespace detail
         {
+            // complex_low
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_low(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
+            {
+                __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 1, 1, 0));
+                __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(1, 2, 0, 0));
+                return _mm256_blend_pd(tmp0, tmp1, 10);
+            }
 
+            // complex_high
+            template <class A>
+            XSIMD_INLINE batch<double, A> complex_high(batch<std::complex<double>, A> const& self, requires_arch<avx2>) noexcept
+            {
+                __m256d tmp0 = _mm256_permute4x64_pd(self.real(), _MM_SHUFFLE(3, 3, 1, 2));
+                __m256d tmp1 = _mm256_permute4x64_pd(self.imag(), _MM_SHUFFLE(3, 2, 2, 0));
+                return _mm256_blend_pd(tmp0, tmp1, 10);
+            }
+
+            // fast_cast
             template <class A>
             XSIMD_INLINE batch<double, A> fast_cast(batch<uint64_t, A> const& x, batch<double, A> const&, requires_arch<avx2>) noexcept
             {
@@ -656,29 +652,31 @@ namespace xsimd
                 return lt(self, other, avx {});
             }
         }
-
-        // load_complex
-        template <class A>
-        XSIMD_INLINE batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<avx2>) noexcept
+        namespace detail
         {
-            using batch_type = batch<float, A>;
-            batch_type real = _mm256_castpd_ps(
-                _mm256_permute4x64_pd(
-                    _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0))),
-                    _MM_SHUFFLE(3, 1, 2, 0)));
-            batch_type imag = _mm256_castpd_ps(
-                _mm256_permute4x64_pd(
-                    _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))),
-                    _MM_SHUFFLE(3, 1, 2, 0)));
-            return { real, imag };
-        }
-        template <class A>
-        XSIMD_INLINE batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<avx2>) noexcept
-        {
-            using batch_type = batch<double, A>;
-            batch_type real = _mm256_permute4x64_pd(_mm256_unpacklo_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
-            batch_type imag = _mm256_permute4x64_pd(_mm256_unpackhi_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
-            return { real, imag };
+            // load_complex
+            template <class A>
+            XSIMD_INLINE batch<std::complex<float>, A> load_complex(batch<float, A> const& hi, batch<float, A> const& lo, requires_arch<avx2>) noexcept
+            {
+                using batch_type = batch<float, A>;
+                batch_type real = _mm256_castpd_ps(
+                    _mm256_permute4x64_pd(
+                        _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(2, 0, 2, 0))),
+                        _MM_SHUFFLE(3, 1, 2, 0)));
+                batch_type imag = _mm256_castpd_ps(
+                    _mm256_permute4x64_pd(
+                        _mm256_castps_pd(_mm256_shuffle_ps(hi, lo, _MM_SHUFFLE(3, 1, 3, 1))),
+                        _MM_SHUFFLE(3, 1, 2, 0)));
+                return { real, imag };
+            }
+            template <class A>
+            XSIMD_INLINE batch<std::complex<double>, A> load_complex(batch<double, A> const& hi, batch<double, A> const& lo, requires_arch<avx2>) noexcept
+            {
+                using batch_type = batch<double, A>;
+                batch_type real = _mm256_permute4x64_pd(_mm256_unpacklo_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
+                batch_type imag = _mm256_permute4x64_pd(_mm256_unpackhi_pd(hi, lo), _MM_SHUFFLE(3, 1, 2, 0));
+                return { real, imag };
+            }
         }
 
         // load_unaligned<batch_bool>
@@ -744,8 +742,9 @@ namespace xsimd
             }
             else if constexpr (sizeof(T) == 2)
             {
-                uint64_t mask8 = 0xFFFFFFFF & (uint64_t)_mm256_movemask_epi8(self);
-                return detail::mask_lut(mask8) | (detail::mask_lut(mask8 >> 8) << 4) | (detail::mask_lut(mask8 >> 16) << 8) | (detail::mask_lut(mask8 >> 24) << 12);
+                __m256i sign_bits = _mm256_packs_epi16(self, _mm256_setzero_si256());
+                __m256i compressed = _mm256_permute4x64_epi64(sign_bits, _MM_SHUFFLE(3, 1, 2, 0));
+                return static_cast<uint64_t>(_mm_movemask_epi8(_mm256_castsi256_si128(compressed)));
             }
             else
             {

@@ -111,8 +111,15 @@
  * @ingroup xsimd_config_macro
  *
  * Set to 1 if SSE3 is available at compile-time, to 0 otherwise.
+ *
+ * It can be set manually only with MSVC because MSVC doesn't define
+ * __SSE3__ even when SSE3 is enabled.
  */
-#ifdef __SSE3__
+#ifdef XSIMD_WITH_SSE3
+#if !defined(_MSC_VER) || defined(__clang__)
+#error "XSIMD_WITH_SSE3 can be set manually only with MSVC"
+#endif
+#elif defined(__SSE3__)
 #define XSIMD_WITH_SSE3 1
 #else
 #define XSIMD_WITH_SSE3 0
@@ -122,8 +129,15 @@
  * @ingroup xsimd_config_macro
  *
  * Set to 1 if SSSE3 is available at compile-time, to 0 otherwise.
+ *
+ * It can be set manually only with MSVC because MSVC doesn't define
+ * __SSSE3__ even when SSSE3 is enabled.
  */
-#ifdef __SSSE3__
+#ifdef XSIMD_WITH_SSSE3
+#if !defined(_MSC_VER) || defined(__clang__)
+#error "XSIMD_WITH_SSSE3 can be set manually only with MSVC"
+#endif
+#elif defined(__SSSE3__)
 #define XSIMD_WITH_SSSE3 1
 #else
 #define XSIMD_WITH_SSSE3 0
@@ -133,8 +147,15 @@
  * @ingroup xsimd_config_macro
  *
  * Set to 1 if SSE4.1 is available at compile-time, to 0 otherwise.
+ *
+ * It can be set manually only with MSVC because MSVC doesn't define
+ * __SSE4_1__ even when SSE4.1 is enabled.
  */
-#ifdef __SSE4_1__
+#ifdef XSIMD_WITH_SSE4_1
+#if !defined(_MSC_VER) || defined(__clang__)
+#error "XSIMD_WITH_SSE4_1 can be set manually only with MSVC"
+#endif
+#elif defined(__SSE4_1__)
 #define XSIMD_WITH_SSE4_1 1
 #else
 #define XSIMD_WITH_SSE4_1 0
@@ -144,8 +165,15 @@
  * @ingroup xsimd_config_macro
  *
  * Set to 1 if SSE4.2 is available at compile-time, to 0 otherwise.
+ *
+ * It can be set manually only with MSVC because MSVC doesn't define
+ * __SSE4_2__ even when SSE4.2 is enabled.
  */
-#ifdef __SSE4_2__
+#ifdef XSIMD_WITH_SSE4_2
+#if !defined(_MSC_VER) || defined(__clang__)
+#error "XSIMD_WITH_SSE4_2 can be set manually only with MSVC"
+#endif
+#elif defined(__SSE4_2__)
 #define XSIMD_WITH_SSE4_2 1
 #else
 #define XSIMD_WITH_SSE4_2 0

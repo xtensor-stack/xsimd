@@ -16,6 +16,8 @@
 #include "../config/xsimd_macros.hpp"
 #include "../types/xsimd_common_arch.hpp"
 
+#include <array>
+#include <complex>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
@@ -105,6 +107,20 @@ namespace xsimd
         // Forward declarations for pack-level helpers
         namespace detail
         {
+            template <class A, class T>
+            XSIMD_INLINE std::array<batch_bool<T, A>, 2> zip_complex_mask_vector(batch_bool<T, A> mask) noexcept;
+            template <class A, class T>
+            XSIMD_INLINE std::array<batch_bool<double, A>, 2> zip_complex_mask_kmask(batch_bool<T, A> mask) noexcept;
+            template <class A, class T, class U, class Mode>
+            XSIMD_INLINE batch<std::complex<T>, A> load_complex_masked_chunks(std::complex<T> const* mem, std::array<batch_bool<U, A>, 2> masks, Mode mode) noexcept;
+            template <class A, class T, class U, class Mode>
+            XSIMD_INLINE void store_complex_masked_chunks(std::complex<T>* mem, batch<std::complex<T>, A> const& src, std::array<batch_bool<U, A>, 2> masks, Mode mode) noexcept;
+
+            template <class A, class T, bool... Values, class Mode>
+            XSIMD_INLINE batch<std::complex<T>, A> load_complex_masked_chunks(std::complex<T> const* mem, batch_bool_constant<T, A, Values...>, Mode) noexcept;
+            template <class A, class T, bool... Values, class Mode>
+            XSIMD_INLINE void store_complex_masked_chunks(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...>, Mode) noexcept;
+
             template <class T>
             XSIMD_INLINE void reassociation_barrier(T& x, const char*) noexcept;
             template <class T, class A>

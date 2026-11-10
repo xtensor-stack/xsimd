@@ -1003,6 +1003,21 @@ namespace xsimd
                 return _mm512_permutex2var_pd(self.real(), idx, self.imag());
             }
         }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, detail::zip_complex_mask_kmask(mask), mode);
+        }
+
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            detail::store_complex_masked_chunks(mem, src, mask, mode);
+        }
+
         // incr_if
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> decr_if(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx512f>) noexcept
@@ -1634,6 +1649,20 @@ namespace xsimd
             }
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, detail::zip_complex_mask_kmask(mask), mode);
+        }
+
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool_constant<T, A, Values...> mask, Mode mode, requires_arch<avx512f>) noexcept
+        {
+            return detail::load_complex_masked_chunks(mem, mask, mode);
+        }
+
         // load_unaligned
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch<T, A> load_unaligned(T const* mem, convert<T>, requires_arch<avx512f>) noexcept
@@ -1962,25 +1991,19 @@ namespace xsimd
         }
 
         // reduce_max
-        template <class A, class T, class = std::enable_if_t<(sizeof(T) == 1)>>
+        template <class A, class T, class = std::enable_if_t<(sizeof(T) <= 2)>>
         XSIMD_INLINE T reduce_max(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
-            constexpr batch_constant<uint64_t, A, 5, 6, 7, 8, 0, 0, 0, 0> mask;
-            batch<T, A> step = _mm512_permutexvar_epi64(mask.as_batch(), self);
-            batch<T, A> acc = max(self, step);
-            __m256i low = _mm512_castsi512_si256(acc);
-            return reduce_max(batch<T, avx2>(low));
+            batch<T, avx2> low(detail::lower_half(self)), high(detail::upper_half(self));
+            return reduce_max(max(low, high));
         }
 
         // reduce_min
-        template <class A, class T, class = std::enable_if_t<(sizeof(T) == 1)>>
+        template <class A, class T, class = std::enable_if_t<(sizeof(T) <= 2)>>
         XSIMD_INLINE T reduce_min(batch<T, A> const& self, requires_arch<avx512f>) noexcept
         {
-            constexpr batch_constant<uint64_t, A, 5, 6, 7, 8, 0, 0, 0, 0> mask;
-            batch<T, A> step = _mm512_permutexvar_epi64(mask.as_batch(), self);
-            batch<T, A> acc = min(self, step);
-            __m256i low = _mm512_castsi512_si256(acc);
-            return reduce_min(batch<T, avx2>(low));
+            batch<T, avx2> low(detail::lower_half(self)), high(detail::upper_half(self));
+            return reduce_min(min(low, high));
         }
 
         // reduce_mul

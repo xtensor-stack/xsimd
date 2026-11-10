@@ -5,14 +5,17 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-latest
-    name: 'Arm SVE${{ matrix.vector_bits }}'
+    runs-on: ${{ matrix.sys.runner }}
+    name: 'Arm SVE${{ matrix.vector_bits }}, gcc ${{ matrix.sys.version }}'
     strategy:
       matrix:
         vector_bits:
           - 128
           - 256
           - 512
+        sys:
+          - { version: '10', runner: 'ubuntu-24.04' }
+          - { version: '16', runner: 'ubuntu-26.04' }
     steps:
     - name: Checkout xsimd
       uses: actions/checkout@v6
@@ -21,7 +24,7 @@ jobs:
       uses: ./.github/actions/setup-cross-compiler-apt
       with:
         compiler: gcc
-        version: '10'
+        version: ${{ matrix.sys.version }}
         target: aarch64-linux-gnu
         qemu: 'true'
     - name: Setup Ninja

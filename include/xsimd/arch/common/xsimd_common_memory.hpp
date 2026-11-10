@@ -13,12 +13,14 @@
 #define XSIMD_COMMON_MEMORY_HPP
 
 #include "../../types/xsimd_batch_constant.hpp"
+#include "../../utils/bits.hpp"
 #include "../../utils/xsimd_type_traits.hpp"
 #include "./xsimd_common_details.hpp"
 
 #include <algorithm>
 #include <array>
 #include <complex>
+#include <cstdint>
 
 namespace xsimd
 {
@@ -368,23 +370,13 @@ namespace xsimd
         //      tag, no `enable_if` on `A`;
         //  (b) base overloads use the `requires_arch<common>` tag only; a generic
         //      `requires_arch<A>` here ties with an arch's own overload (gcc-10 ambiguity);
-        //  (c) capability decisions go through arch-agnostic traits (see below).
+        //  (c) preserve the memory element type through dispatch.
         namespace detail
         {
-            // True when an integer access can borrow the same-width float `vmaskmov*` path
-            // (integral type, same-size float exists, arch has that float register);
-            // otherwise the scalar-buffer fallback is used. Names no architecture.
-            template <class A, class T_in, class T_out>
-            using masked_memory_uses_fp_bitcast = std::integral_constant<bool,
-                                                                         std::is_same_v<T_in, T_out>
-                                                                             && std::is_integral_v<T_out>
-                                                                             && !std::is_void_v<sized_fp_t<sizeof(T_out)>>
-                                                                             && types::has_simd_register_v<sized_fp_t<sizeof(T_out)>, A>>;
-
             // Scalar-buffer fallback: materialize masked-off lanes as zero, then load.
             template <class A, class T_in, class T_out, bool... Values, class alignment>
             XSIMD_INLINE batch<T_out, A>
-            load_masked_common(T_in const* mem, batch_bool_constant<T_out, A, Values...>, convert<T_out>, alignment, std::false_type /* uses_fp_bitcast */) noexcept
+            load_masked_common(T_in const* mem, batch_bool_constant<T_out, A, Values...>, convert<T_out>, alignment) noexcept
             {
                 constexpr std::size_t size = batch<T_out, A>::size;
                 alignas(A::alignment()) std::array<T_out, size> buffer {};
@@ -396,20 +388,9 @@ namespace xsimd
                 return batch<T_out, A>::load(buffer.data(), aligned_mode {});
             }
 
-            // Integer-via-float path: reinterpret to the same-width float type, reuse the
-            // floating-point masked load (e.g. `vmaskmovps`), then bitcast the result back.
-            template <class A, class T, bool... Values, class Mode>
-            XSIMD_INLINE batch<T, A>
-            load_masked_common(T const* mem, batch_bool_constant<T, A, Values...>, convert<T>, Mode, std::true_type /* uses_fp_bitcast */) noexcept
-            {
-                using fp_t = sized_fp_t<sizeof(T)>;
-                const auto f = ::xsimd::kernel::load_masked<A>(reinterpret_cast<const fp_t*>(mem), batch_bool_constant<fp_t, A, Values...> {}, convert<fp_t> {}, Mode {}, A {});
-                return bitwise_cast<T>(f);
-            }
-
             template <class A, class T_in, class T_out, bool... Values, class alignment>
             XSIMD_INLINE void
-            store_masked_common(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment, std::false_type /* uses_fp_bitcast */) noexcept
+            store_masked_common(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...>, alignment) noexcept
             {
                 constexpr std::size_t size = batch<T_in, A>::size;
                 constexpr bool mask[size] = { Values... };
@@ -420,21 +401,13 @@ namespace xsimd
                         mem[i] = static_cast<T_out>(src.get(i));
                     }
             }
-
-            template <class A, class T, bool... Values, class Mode>
-            XSIMD_INLINE void
-            store_masked_common(T* mem, batch<T, A> const& src, batch_bool_constant<T, A, Values...>, Mode, std::true_type /* uses_fp_bitcast */) noexcept
-            {
-                using fp_t = sized_fp_t<sizeof(T)>;
-                ::xsimd::kernel::store_masked<A>(reinterpret_cast<fp_t*>(mem), bitwise_cast<fp_t>(src), batch_bool_constant<fp_t, A, Values...> {}, Mode {}, A {});
-            }
         }
 
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE batch<T_out, A>
         load_masked(T_in const* mem, batch_bool_constant<T_out, A, Values...> mask, convert<T_out> cvt, alignment mode, requires_arch<common>) noexcept
         {
-            return detail::load_masked_common(mem, mask, cvt, mode, detail::masked_memory_uses_fp_bitcast<A, T_in, T_out> {});
+            return detail::load_masked_common(mem, mask, cvt, mode);
         }
 
         template <class A, class T, class Mode>
@@ -450,11 +423,36 @@ namespace xsimd
             return batch<T, A>::load_aligned(buffer.data());
         }
 
+        template <class A, class T, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
+        {
+            // Scalar fallback: only active lanes are touched. Arches with
+            // hardware predicated loads should override this.
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<std::complex<T>, size> buffer;
+            for (std::size_t i = 0; i < size; ++i)
+                buffer[i] = mask.get(i) ? mem[i] : std::complex<T>(0);
+            return batch<std::complex<T>, A>::load_aligned(buffer.data());
+        }
+
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE batch<std::complex<T>, A>
+        load_complex_masked(std::complex<T> const* mem, batch_bool_constant<T, A, Values...>, Mode, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<std::complex<T>, size> buffer;
+            constexpr bool mask[size] = { Values... };
+            for (std::size_t i = 0; i < size; ++i)
+                buffer[i] = mask[i] ? mem[i] : std::complex<T>(0);
+            return batch<std::complex<T>, A>::load_aligned(buffer.data());
+        }
+
         template <class A, class T_in, class T_out, bool... Values, class alignment>
         XSIMD_INLINE void
         store_masked(T_out* mem, batch<T_in, A> const& src, batch_bool_constant<T_in, A, Values...> mask, alignment mode, requires_arch<common>) noexcept
         {
-            detail::store_masked_common(mem, src, mask, mode, detail::masked_memory_uses_fp_bitcast<A, T_in, T_out> {});
+            detail::store_masked_common(mem, src, mask, mode);
         }
 
         template <class A, class T, class Mode>
@@ -863,6 +861,116 @@ namespace xsimd
         XSIMD_INLINE void store_complex_stream(std::complex<T_out>* dst, batch<std::complex<T_in>, A> const& src, requires_arch<common>) noexcept
         {
             store_complex_aligned<A>(dst, src, A {});
+        }
+
+        namespace detail
+        {
+            template <class A, class T, class U, class Mode>
+            XSIMD_INLINE batch<std::complex<T>, A>
+            load_complex_masked_chunks(std::complex<T> const* mem, std::array<batch_bool<U, A>, 2> masks, Mode mode) noexcept
+            {
+                using real_batch = batch<U, A>;
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                const real_batch c0 = real_batch::load(reinterpret_cast<U const*>(mem), masks[0], mode);
+                const real_batch c1 = real_batch::load(reinterpret_cast<U const*>(mem + half), masks[1], mode);
+                return load_complex(bitwise_cast<T>(c0), bitwise_cast<T>(c1), A {});
+            }
+
+            template <class A, class T, class U, class Mode>
+            XSIMD_INLINE void
+            store_complex_masked_chunks(std::complex<T>* mem, batch<std::complex<T>, A> const& src, std::array<batch_bool<U, A>, 2> masks, Mode mode) noexcept
+            {
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                bitwise_cast<U>(complex_low(src, A {})).store(reinterpret_cast<U*>(mem), masks[0], mode);
+                bitwise_cast<U>(complex_high(src, A {})).store(reinterpret_cast<U*>(mem + half), masks[1], mode);
+            }
+
+            template <class A, class T>
+            XSIMD_INLINE std::array<batch_bool<T, A>, 2> zip_complex_mask_vector(batch_bool<T, A> mask) noexcept
+            {
+                const batch<T, A> bits(mask.to_native());
+                return { batch_bool<T, A>(zip_lo(bits, bits).to_native()),
+                         batch_bool<T, A>(zip_hi(bits, bits).to_native()) };
+            }
+
+            // Duplicate input bit k into output bits 2k and 2k+1.
+            inline constexpr std::array<std::uint8_t, 16> duplicate_bits_lut = {
+                0x00, 0x03, 0x0c, 0x0f, 0x30, 0x33, 0x3c, 0x3f,
+                0xc0, 0xc3, 0xcc, 0xcf, 0xf0, 0xf3, 0xfc, 0xff
+            };
+
+            // Masks for the two chunks, viewed as 64-bit lanes: one lane holds a whole
+            // complex<float>, two lanes hold a complex<double>.
+            template <class A, class T>
+            XSIMD_INLINE std::array<batch_bool<double, A>, 2> zip_complex_mask_kmask(batch_bool<T, A> mask) noexcept
+            {
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                constexpr std::uint64_t low_bits = ::xsimd::utils::make_low_mask(static_cast<std::uint64_t>(half));
+                const std::uint64_t bits = mask.mask();
+                std::uint64_t lo = bits & low_bits;
+                std::uint64_t hi = (bits >> half) & low_bits;
+                if constexpr (std::is_same_v<T, double>)
+                {
+                    lo = duplicate_bits_lut[lo];
+                    hi = duplicate_bits_lut[hi];
+                }
+                return { batch_bool<double, A>::from_mask(lo), batch_bool<double, A>::from_mask(hi) };
+            }
+
+            // Real lane i of a chunk belongs to complex lane First + i / 2.
+            template <std::size_t First, bool... Values>
+            struct complex_chunk_mask
+            {
+                static constexpr bool get(std::size_t i, std::size_t) noexcept
+                {
+                    return std::array<bool, sizeof...(Values)> { { Values... } }[First + i / 2];
+                }
+            };
+
+            template <class A, class T, bool... Values, class Mode>
+            XSIMD_INLINE batch<std::complex<T>, A>
+            load_complex_masked_chunks(std::complex<T> const* mem, batch_bool_constant<T, A, Values...>, Mode mode) noexcept
+            {
+                using real_batch = batch<T, A>;
+                constexpr std::size_t half = real_batch::size / 2;
+                const real_batch c0 = real_batch::load(reinterpret_cast<T const*>(mem), make_batch_bool_constant<T, complex_chunk_mask<0, Values...>, A>(), mode);
+                const real_batch c1 = real_batch::load(reinterpret_cast<T const*>(mem + half), make_batch_bool_constant<T, complex_chunk_mask<half, Values...>, A>(), mode);
+                return load_complex(c0, c1, A {});
+            }
+
+            template <class A, class T, bool... Values, class Mode>
+            XSIMD_INLINE void
+            store_complex_masked_chunks(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...>, Mode mode) noexcept
+            {
+                constexpr std::size_t half = batch<T, A>::size / 2;
+                complex_low(src, A {}).store(reinterpret_cast<T*>(mem), make_batch_bool_constant<T, complex_chunk_mask<0, Values...>, A>(), mode);
+                complex_high(src, A {}).store(reinterpret_cast<T*>(mem + half), make_batch_bool_constant<T, complex_chunk_mask<half, Values...>, A>(), mode);
+            }
+        }
+
+        template <class A, class T, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool<T, A> mask, Mode, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<std::complex<T>, size> buffer;
+            src.store_aligned(buffer.data());
+            for (std::size_t i = 0; i < size; ++i)
+                if (mask.get(i))
+                    mem[i] = buffer[i];
+        }
+
+        template <class A, class T, bool... Values, class Mode>
+        XSIMD_INLINE void
+        store_complex_masked(std::complex<T>* mem, batch<std::complex<T>, A> const& src, batch_bool_constant<T, A, Values...>, Mode, requires_arch<common>) noexcept
+        {
+            constexpr std::size_t size = batch<T, A>::size;
+            alignas(A::alignment()) std::array<std::complex<T>, size> buffer;
+            constexpr bool mask[size] = { Values... };
+            src.store_aligned(buffer.data());
+            for (std::size_t i = 0; i < size; ++i)
+                if (mask[i])
+                    mem[i] = buffer[i];
         }
 
         // transpose

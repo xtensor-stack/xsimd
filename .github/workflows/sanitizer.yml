@@ -8,18 +8,22 @@ defaults:
     shell: bash -l {0}
 jobs:
   build:
-    runs-on: ubuntu-latest
-    name: 'sanitizer - ${{ matrix.flags }}'
+    runs-on: ${{ matrix.llvm.os }}
+    name: 'sanitizer - ${{ matrix.flags }} - llvm-${{ matrix.llvm.version }}'
     strategy:
       matrix:
         flags:
           - sanitize=address
           - sanitize=undefined
           - fast-math -fsanitize=undefined
-        llvm-version: [20]
+        llvm:
+          - version: 20
+            os: ubuntu-24.04
+          - version: 22
+            os: ubuntu-26.04
     env:
-      CC: clang-${{ matrix.llvm-version }}
-      CXX: clang++-${{ matrix.llvm-version }}
+      CC: clang-${{ matrix.llvm.version }}
+      CXX: clang++-${{ matrix.llvm.version }}
     steps:
     - name: Checkout xsimd
       uses: actions/checkout@v6
@@ -27,7 +31,7 @@ jobs:
       run: |
           wget https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
-          sudo ./llvm.sh ${{ matrix.llvm-version }}
+          sudo ./llvm.sh ${{ matrix.llvm.version }}
     - name: Configure build
       run: |
         cmake -B_build \

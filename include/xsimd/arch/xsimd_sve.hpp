@@ -106,6 +106,14 @@ namespace xsimd
         template <class A, class T, class Mode, detail::enable_arithmetic_t<T> = 0>
         XSIMD_INLINE batch<T, A> load_masked(T const* mem, batch_bool<T, A> mask, convert<T>, Mode, requires_arch<sve>) noexcept
         {
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ == 16 && __GNUC_MINOR__ < 2
+            // GCC 16.0/16.1 bug (fixed in 16.2): with a compile time mask, masked-off
+            // lanes can come back as garbage instead of zero. The empty asm hides
+            // the mask from the optimizer, so GCC emits a real masked load.
+            //   Bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=125148
+            //   Fix: https://gcc.gnu.org/g:a6ee91793b9f4d28ccd3fcc6f607f646d305a39e
+            __asm__("" : "+Upa"(mask.data));
+#endif
             return svld1(mask, reinterpret_cast<map_to_sized_type_t<T> const*>(mem));
         }
 

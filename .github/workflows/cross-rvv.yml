@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'RISC-V RVV${{ matrix.vector_bits }}'
     strategy:
       fail-fast: false
