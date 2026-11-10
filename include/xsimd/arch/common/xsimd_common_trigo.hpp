@@ -80,8 +80,7 @@ namespace xsimd
         {
             using batch_type = batch<std::complex<T>, A>;
             batch_type w = acos(z);
-            w = batch_type(-w.imag(), w.real());
-            return w;
+            return batch_type(abs(w.imag()), copysign(w.real(), z.imag()));
         }
 
         // asin
@@ -141,8 +140,9 @@ namespace xsimd
 
             return select(y == real_batch(0.),
                           select(fabs(x) > real_batch(1.),
-                                 batch_type(constants::pio2<real_batch>(), real_batch(0.)),
-                                 batch_type(asin(x), real_batch(0.))),
+                                 batch_type(copysign(constants::pio2<real_batch>(), x),
+                                            copysign(acosh(max(fabs(x), real_batch(1.))), y)),
+                                 batch_type(asin(x), y)),
                           resg);
         }
 
