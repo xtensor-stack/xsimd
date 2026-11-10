@@ -1873,7 +1873,9 @@ namespace xsimd
         {
             using batch_type = batch<std::complex<T>, A>;
             using real_batch = typename batch_type::real_batch;
-            batch_type u = 1 + self;
+            // Scalar and complex broadcasts add a positive zero to the imaginary part.
+            // Translate the real part directly to preserve an imaginary negative zero.
+            batch_type u(real_batch(1.) + self.real(), self.imag());
             batch_type logu = log(u);
             return select(u == batch_type(1.),
                           self,

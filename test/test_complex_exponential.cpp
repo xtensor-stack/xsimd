@@ -151,6 +151,39 @@ struct complex_exponential_test
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
         }
+
+        using R = real_value_type;
+        const R zero(0);
+        const R below = std::nextafter(R(-1), R(-2));
+        const R re[] = { -R(4), -R(2), below, -R(0.5), -zero, zero, R(0.5), R(2) };
+        const R im[] = { -R(1), -R(0.5), -R(0.25), -zero, zero, R(0.25), R(0.5), R(1) };
+        vector_type inputs;
+        inputs.reserve(64 + size);
+        for (R real : re)
+        {
+            for (R imag : im)
+            {
+                inputs.push_back(value_type(real, imag));
+            }
+        }
+        while (inputs.size() % size != 0)
+        {
+            inputs.push_back(inputs.front());
+        }
+        for (size_t i = 0; i < inputs.size(); i += size)
+        {
+            batch_type in, out, ref;
+            detail::load_batch(in, inputs, i);
+            out = log1p(in);
+            vector_type scalar(size);
+            for (size_t lane = 0; lane < size; ++lane)
+            {
+                const value_type& z = inputs[i + lane];
+                scalar[lane] = std::log(value_type(R(1) + z.real(), z.imag()));
+            }
+            detail::load_batch(ref, scalar, 0);
+            CHECK_BATCH_EQ(ref, out);
+        }
     }
 
     void test_sign()
