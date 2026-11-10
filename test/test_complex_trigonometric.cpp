@@ -124,6 +124,10 @@ struct complex_trigonometric_test
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
         }
+        check_real_axis([](const batch_type& z)
+                        { return asin(z); },
+                        [](const value_type& v)
+                        { return std::asin(v); });
     }
 
     void test_acos()
@@ -139,6 +143,10 @@ struct complex_trigonometric_test
             detail::load_batch(ref, expected, i);
             CHECK_BATCH_EQ(ref, out);
         }
+        check_real_axis([](const batch_type& z)
+                        { return acos(z); },
+                        [](const value_type& v)
+                        { return std::acos(v); });
     }
 
     void test_atan()
@@ -157,6 +165,42 @@ struct complex_trigonometric_test
     }
 
 private:
+    template <class BatchFn, class ScalarFn>
+    void check_real_axis(BatchFn batch_fn, ScalarFn scalar_fn)
+    {
+        using R = real_value_type;
+        const R zero(0);
+        const R outside = std::nextafter(R(1), R(2));
+        const R re[] = { -R(4), -outside, -R(1), -zero, zero, R(1), outside, R(4) };
+        const R im[] = { -R(2), -R(1), -R(0.5), -zero, zero, R(0.5), R(1), R(2) };
+        vector_type inputs;
+        inputs.reserve(64 + size);
+        for (R real : re)
+        {
+            for (R imag : im)
+            {
+                inputs.push_back(value_type(real, imag));
+            }
+        }
+        while (inputs.size() % size != 0)
+        {
+            inputs.push_back(inputs.front());
+        }
+        for (size_t i = 0; i < inputs.size(); i += size)
+        {
+            batch_type in, out, ref;
+            detail::load_batch(in, inputs, i);
+            out = batch_fn(in);
+            vector_type scalar(size);
+            for (size_t lane = 0; lane < size; ++lane)
+            {
+                scalar[lane] = scalar_fn(inputs[i + lane]);
+            }
+            detail::load_batch(ref, scalar, 0);
+            CHECK_BATCH_EQ(ref, out);
+        }
+    }
+
     void test_tan_impl()
     {
         std::transform(input.cbegin(), input.cend(), expected.begin(),
