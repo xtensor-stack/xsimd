@@ -852,6 +852,20 @@ namespace xsimd
             return __lsx_vfcmp_cun_d(self.data, self.data);
         }
 
+        // popcount
+        template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
+        XSIMD_INLINE batch<T, A> popcount(batch<T, A> const& self, requires_arch<lsx>) noexcept
+        {
+            if constexpr (sizeof(T) == 1)
+                return __lsx_vpcnt_b(self.data);
+            else if constexpr (sizeof(T) == 2)
+                return __lsx_vpcnt_h(self.data);
+            else if constexpr (sizeof(T) == 4)
+                return __lsx_vpcnt_w(self.data);
+            else
+                return __lsx_vpcnt_d(self.data);
+        }
+
         // select
         template <class A, class T>
         XSIMD_INLINE batch<T, A> select(batch_bool<T, A> const& cond, batch<T, A> const& true_br, batch<T, A> const& false_br, requires_arch<lsx>) noexcept
