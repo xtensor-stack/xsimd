@@ -23,4 +23,11 @@ jobs:
         ls $PWD/../_install/share/cmake/xsimd
         cmake . -DCMAKE_PREFIX_PATH=$PWD/../_install/share/cmake/xsimd
         cmake --build .
+    - name: Check FetchContent
+      run: |
+        cmake -S ${{ github.workspace }}/.github/cmake-test-fetchcontent \
+          -B _fetchcontent_build \
+          -D FETCHCONTENT_SOURCE_DIR_XSIMD=${{ github.workspace }}
+        cmake --build _fetchcontent_build
+        ./_fetchcontent_build/app
 
