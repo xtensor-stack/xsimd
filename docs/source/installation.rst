@@ -87,3 +87,18 @@ as forward other xsimd requirements (minimum C++ version for instance).
 
     find_package(xsimd REQUIRED)
     target_link_libraries(myproject PRIVATE xsimd)
+
+Using FetchContent
+~~~~~~~~~~~~~~~~~~
+
+CMake can download `xsimd` at configure time with `FetchContent <https://cmake.org/cmake/help/latest/module/FetchContent.html>`_. The recipe below is the ``CMakeLists.txt`` of ``.github/cmake-test-fetchcontent``. CI builds it on every pull request:
+
+.. literalinclude:: ../../.github/cmake-test-fetchcontent/CMakeLists.txt
+    :language: cmake
+
+The ``xsimd`` target requires C++17. The program in ``main.cpp`` uses ``xsimd::batch``. From the ``.github/cmake-test-fetchcontent`` directory, build the recipe with:
+
+.. code:: bash
+
+    cmake -B build/
+    cmake --build build/
