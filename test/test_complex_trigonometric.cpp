@@ -108,6 +108,40 @@ struct complex_trigonometric_test
 
     void test_tan()
     {
+#ifndef __FAST_MATH__
+        // Fast-math drops overflow recovery and does not match std::tan.
+        using R = real_value_type;
+        const R zero(0);
+        const R huge = std::is_same_v<R, float> ? R(45) : R(356);
+        const R re[] = { -R(2), -R(1), -R(0.5), -zero, zero, R(0.5), R(1), R(2) };
+        const R im[] = { -huge, -R(20), -R(1), -zero, zero, R(1), R(20), huge };
+        vector_type inputs;
+        inputs.reserve(64 + size);
+        for (R real : re)
+        {
+            for (R imag : im)
+            {
+                inputs.push_back(value_type(real, imag));
+            }
+        }
+        while (inputs.size() % size != 0)
+        {
+            inputs.push_back(inputs.front());
+        }
+        for (size_t i = 0; i < inputs.size(); i += size)
+        {
+            batch_type in, out, ref;
+            detail::load_batch(in, inputs, i);
+            out = tan(in);
+            vector_type scalar(size);
+            for (size_t lane = 0; lane < size; ++lane)
+            {
+                scalar[lane] = std::tan(inputs[i + lane]);
+            }
+            detail::load_batch(ref, scalar, 0);
+            CHECK_BATCH_EQ(ref, out);
+        }
+#endif
         test_conditional_tan<real_value_type>();
     }
 
