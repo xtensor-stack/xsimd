@@ -1908,7 +1908,7 @@ namespace xsimd
                 batch_type t2n = constants::twotonmb<batch_type>();
                 batch_type signed_t2n = t2n | s;
                 batch_type d0 = self + signed_t2n;
-                detail::reassociation_barrier(d0, "prevent collapsing (x + c) - c back to x");
+                detail::reassociation_barrier(d0, "prevent collapsing (self + signed_t2n) - signed_t2n back to self");
                 batch_type d = copysign(d0 - signed_t2n, self);
                 return select(v < t2n, d, self);
             }

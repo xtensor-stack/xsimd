@@ -180,12 +180,18 @@ TEST_CASE_TEMPLATE("[rounding] current rounding mode", B, BATCH_FLOAT_TYPES)
         ~rounding_mode_guard() { std::fesetround(saved); }
     } guard;
 
-    const std::array<value_type, 16> input = {
+    constexpr size_t rounding_cases = 16;
+    const value_type large = std::ldexp(value_type(1), std::numeric_limits<value_type>::digits);
+    const value_type max_value = (std::numeric_limits<value_type>::max)();
+    const value_type inf = std::numeric_limits<value_type>::infinity();
+    const value_type nan = std::numeric_limits<value_type>::quiet_NaN();
+    const std::array<value_type, rounding_cases + 8> input = {
         0., -0., 0.25, -0.25, 0.5, -0.5, 1.25, -1.25,
-        1.75, -1.75, 2.5, -2.5, 3.5, -3.5, 2., -2.
+        1.75, -1.75, 2.5, -2.5, 3.5, -3.5, 2., -2.,
+        large, -large, max_value, -max_value, inf, -inf, nan, -nan
     };
     const std::array<int, 4> modes = { FE_TONEAREST, FE_DOWNWARD, FE_UPWARD, FE_TOWARDZERO };
-    const value_type expected[][16] = {
+    const value_type expected[][rounding_cases] = {
         { 0., -0., 0., -0., 0., -0., 1., -1., 2., -2., 2., -2., 4., -4., 2., -2. },
         { 0., -0., 0., -1., 0., -1., 1., -2., 1., -2., 2., -3., 3., -4., 2., -2. },
         { 0., -0., 1., -0., 1., -0., 2., -1., 2., -1., 3., -2., 4., -3., 2., -2. },
@@ -215,11 +221,20 @@ TEST_CASE_TEMPLATE("[rounding] current rounding mode", B, BATCH_FLOAT_TYPES)
             {
                 CAPTURE(modes[mode]);
                 CAPTURE(values[lane]);
-                value_type reference = expected[mode][(offset + lane) % input.size()];
-                CHECK(nearby[lane] == reference);
-                CHECK(rounded[lane] == reference);
-                CHECK(std::signbit(nearby[lane]) == std::signbit(reference));
-                CHECK(std::signbit(rounded[lane]) == std::signbit(reference));
+                const size_t input_index = (offset + lane) % input.size();
+                value_type reference = input_index < rounding_cases ? expected[mode][input_index] : input[input_index];
+                if (std::isnan(reference))
+                {
+                    CHECK(std::isnan(nearby[lane]));
+                    CHECK(std::isnan(rounded[lane]));
+                }
+                else
+                {
+                    CHECK(nearby[lane] == reference);
+                    CHECK(rounded[lane] == reference);
+                    CHECK(std::signbit(nearby[lane]) == std::signbit(reference));
+                    CHECK(std::signbit(rounded[lane]) == std::signbit(reference));
+                }
             }
         }
     }
