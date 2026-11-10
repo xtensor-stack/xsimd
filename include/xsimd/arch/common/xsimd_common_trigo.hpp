@@ -358,11 +358,22 @@ namespace xsimd
             const batch_type q = abs(self / other);
             const batch_type q_p = abs(other / self);
 #else
-            const batch_type q = abs(self / other);
+            const auto both_zero = (self == batch_type(0.)) && (other == batch_type(0.));
+            auto use_unit_ratio = both_zero;
+#ifndef XSIMD_NO_INFINITIES
+            use_unit_ratio = use_unit_ratio || (isinf(self) && isinf(other));
+#endif
+            const batch_type q = abs(select(use_unit_ratio, batch_type(1.), self)
+                                     / select(use_unit_ratio, batch_type(1.), other));
             const batch_type q_p = 1. / q;
 #endif
             const batch_type z = detail::kernel_atan(q, q_p);
-            return select(other > batch_type(0.), z, constants::pi<batch_type>() - z) * signnz(self);
+            batch_type result = select(other > batch_type(0.), z, constants::pi<batch_type>() - z) * signnz(self);
+#ifndef __FAST_MATH__
+            const auto zero_angle = select(signnz(other) < batch_type(0.), constants::pi<batch_type>(), batch_type(0.));
+            result = select(both_zero, copysign(zero_angle, self), result);
+#endif
+            return result;
         }
 
         // cos

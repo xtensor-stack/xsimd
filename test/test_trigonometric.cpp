@@ -179,6 +179,52 @@ struct trigonometric_test
             }
         }
     }
+    void test_atan2_pairs()
+    {
+#ifndef __FAST_MATH__
+        // Fast-math omits zero and infinity recovery and returns NaN.
+        const value_type spec(0);
+        const value_type nspec = -spec;
+        const value_type big = std::numeric_limits<value_type>::infinity();
+#else
+        const value_type spec(0.5);
+        const value_type nspec = -spec;
+        const value_type big(8);
+#endif
+        const value_type ys[] = { -big, -value_type(3), -value_type(1), nspec, spec, value_type(1), value_type(3), big };
+        const value_type xs[] = { -big, -value_type(4), -value_type(1), nspec, spec, value_type(1), value_type(4), big };
+        vector_type y_values;
+        vector_type x_values;
+        y_values.reserve(64 + size);
+        x_values.reserve(64 + size);
+        for (value_type y : ys)
+        {
+            for (value_type x : xs)
+            {
+                y_values.push_back(y);
+                x_values.push_back(x);
+            }
+        }
+        while (y_values.size() % size != 0)
+        {
+            y_values.push_back(y_values.front());
+            x_values.push_back(x_values.front());
+        }
+        for (size_t i = 0; i < y_values.size(); i += size)
+        {
+            batch_type yb, xb, out, ref;
+            detail::load_batch(yb, y_values, i);
+            detail::load_batch(xb, x_values, i);
+            out = atan2(yb, xb);
+            vector_type scalar(size);
+            for (size_t lane = 0; lane < size; ++lane)
+            {
+                scalar[lane] = std::atan2(y_values[i + lane], x_values[i + lane]);
+            }
+            detail::load_batch(ref, scalar, 0);
+            CHECK_BATCH_EQ(ref, out);
+        }
+    }
 };
 
 TEST_CASE_TEMPLATE("[trigonometric]", B, BATCH_FLOAT_TYPES)
@@ -187,6 +233,11 @@ TEST_CASE_TEMPLATE("[trigonometric]", B, BATCH_FLOAT_TYPES)
     SUBCASE("trigonometric")
     {
         Test.test_trigonometric_functions();
+    }
+
+    SUBCASE("atan2 pairs")
+    {
+        Test.test_atan2_pairs();
     }
 
     SUBCASE("reciprocal")
