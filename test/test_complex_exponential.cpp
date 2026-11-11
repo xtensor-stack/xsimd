@@ -213,4 +213,15 @@ TEST_CASE_TEMPLATE("[complex exponential]", B, BATCH_COMPLEX_TYPES)
         Test.test_sign();
     }
 }
+
+TEST_CASE_TEMPLATE("[complex exponential issue 1432]", B, BATCH_COMPLEX_TYPES)
+{
+    using value_type = typename B::value_type;
+    for (const auto& z : detail::issue_1432_inputs<B>())
+    {
+        const B expected(std::log(value_type(1 + z.real(), z.imag())));
+        const B actual = log1p(B(z));
+        CHECK_BATCH_EQ(expected, actual);
+    }
+}
 #endif

@@ -468,6 +468,40 @@ namespace detail
         }                                                                   \
     } while (0)
 
+// Checks xsimd::f against std::f on every element of inputs, each broadcast to a whole batch of type B.
+#define CHECK_AGAINST_STD(B, f, inputs)          \
+    do                                           \
+    {                                            \
+        for (const auto& input : inputs)         \
+        {                                        \
+            const B expected(std::f(input));     \
+            const B actual = xsimd::f(B(input)); \
+            CHECK_BATCH_EQ(expected, actual);    \
+        }                                        \
+    } while (0)
+
+namespace detail
+{
+    // Inputs from https://github.com/xtensor-stack/xsimd/issues/1432
+    template <class B>
+    std::vector<typename B::value_type> issue_1432_inputs()
+    {
+        using value_type = typename B::value_type;
+        using real_value_type = typename value_type::value_type;
+        const real_value_type re[] = { -400, -100, -42.4117, -4, -2, -1, -0., 0., 1, 1.5707, 1.57076, 2, 45, 356, 633.708, 700, 10000 };
+        const real_value_type im[] = { -500, -356, -100, -45, -10.9958, -3, -1, -0., 0., 1, 2, 5, 800 };
+        std::vector<value_type> inputs;
+        for (const real_value_type x : re)
+        {
+            for (const real_value_type y : im)
+            {
+                inputs.emplace_back(x, y);
+            }
+        }
+        return inputs;
+    }
+}
+
 /***********************
  * Testing types lists *
  ***********************/

@@ -46,13 +46,70 @@ namespace xsimd
             x = select(self < batch_type(-0.5), constants::pi<batch_type>() - x, x);
             return select(x_larger_05, x, constants::pio2<batch_type>() - x);
         }
+        namespace detail
+        {
+            // For z = x + iy, returns Re sqrt(1 - z^2) as the real part and |Im asin(z)| as the imaginary part.
+            // With p = sqrt(1 + z) and q = sqrt(1 - z):
+            //   Re sqrt(1 - z^2) = Re(q * p),  |Im asin(z)| = asinh(Im(conj(q) p))
+            // as in Julia's asin(z::Complex): https://github.com/JuliaLang/julia/blob/master/base/complex.jl
+            template <class A, class T>
+            XSIMD_INLINE batch<std::complex<T>, A> asin_kernel(const batch<std::complex<T>, A>& z) noexcept
+            {
+                using batch_type = batch<std::complex<T>, A>;
+                using real_batch = typename batch_type::real_batch;
+                const real_batch one(1.);
+                const real_batch half(0.5);
+                const real_batch x = abs(z.real());
+                const real_batch y = abs(z.imag());
+                const real_batch hy = half * y; // y / 2
+                const real_batch xm1 = x - one; // x - 1
+                const real_batch xp1 = x + one; // x + 1
+
+                // p = sqrt(1 + z) = a + bi, and q = sqrt(1 - z) with a bigger part c and a smaller part d:
+                //   a = sqrt(((1 + x) + sqrt((1 + x)^2 + y^2)) / 2),  b = y / (2a)
+                //   c = sqrt((sqrt((1 - x)^2 + y^2) + |1 - x|) / 2),  d = y / (2c)
+                // 1 + x >= 1, so nothing cancels in a and a >= 1. Using |1 - x| instead of 1 - x adds two
+                // non-negative terms, so nothing cancels in c. For x <= 1, q = c - di (c is the real part); for x > 1,
+                // c and d swap places: q = d - ci.
+                // s = sqrt((1 - x)^2 + y^2). At x = 1 it is y, taken directly: hypot squares y, and y^2 underflows
+                // for tiny y.
+                const real_batch s = select(xm1 == real_batch(0.), y, hypot(xm1, y));
+                const real_batch a = sqrt(half * (hypot(xp1, y) + xp1));
+                const real_batch b = hy / a;
+                const real_batch c = sqrt(half * (s + abs(xm1)));
+                const real_batch d = hy / max(c, constants::smallestposval<real_batch>()); // c is 0 at z = +-1
+                const auto inside = x <= one;
+
+                // Re sqrt(1 - z^2) = Re(q * p).
+                //   x <= 1: (c - di)(a + bi) has real part ac + bd.  x > 1: (d - ci)(a + bi) has real part ad + bc.
+                real_batch re = select(inside, fma(a, c, b * d), fma(a, d, b * c));
+
+                // |Im asin(z)| = asinh(Im(conj(q) p)).
+                //   x <= 1: (c + di)(a + bi) has imaginary part ad + bc.  x > 1: (d + ci)(a + bi) has imaginary part ac + bd.
+                const real_batch sh = select(inside, fma(a, d, b * c), fma(a, c, b * d));
+                real_batch v = asinh(sh);
+
+                // For huge x or y, (1 +- x)^2 + y^2 overflows. There Re sqrt(1 - z^2) = y and
+                // |Im asin(z)| = log(2 sqrt(x^2 + y^2)) up to rounding, as in FreeBSD's casinh:
+                // https://github.com/freebsd/freebsd-src/blob/main/lib/msun/src/catrig.c
+                const auto y_larger = x < y;
+                const real_batch m = select(y_larger, y, x); // max(|x|, |y|)
+                const auto huge = m >= constants::oneotwoeps<real_batch>();
+                if (any(huge))
+                {
+                    const real_batch r = select(y_larger, x / y, y / x); // min(|x|, |y|) / max(|x|, |y|)
+                    re = select(huge, y, re); // Re sqrt(1 - z^2) = |y|
+                    v = select(huge, log(m) + constants::log_2<real_batch>() + half * log1p(r * r), v); // log(2 sqrt(x^2 + y^2)) = log(m) + log(2) + log(1 + r^2) / 2
+                }
+                return { re, v };
+            }
+        }
         template <class A, class T>
         XSIMD_INLINE batch<std::complex<T>, A> acos(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
-            using real_batch = typename batch_type::real_batch;
-            batch_type tmp = asin(z);
-            return { constants::pio2<real_batch>() - tmp.real(), -tmp.imag() };
+            const batch_type w = detail::asin_kernel(z); // (Re sqrt(1 - z^2), |Im asin(z)|)
+            return { atan2(w.real(), z.real()), copysign(w.imag(), -z.imag()) };
         }
 
         // acosh
@@ -79,9 +136,8 @@ namespace xsimd
         XSIMD_INLINE batch<std::complex<T>, A> acosh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
-            batch_type w = acos(z);
-            w = batch_type(-w.imag(), w.real());
-            return w;
+            const batch_type w = acos(z);
+            return { abs(w.imag()), copysign(w.real(), z.imag()) };
         }
 
         // asin
@@ -130,20 +186,8 @@ namespace xsimd
         XSIMD_INLINE batch<std::complex<T>, A> asin(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
-            using real_batch = typename batch_type::real_batch;
-            real_batch x = z.real();
-            real_batch y = z.imag();
-
-            batch_type ct(-y, x);
-            batch_type zz(real_batch(1.) - (x - y) * (x + y), -2 * x * y);
-            zz = log(ct + sqrt(zz));
-            batch_type resg(zz.imag(), -zz.real());
-
-            return select(y == real_batch(0.),
-                          select(fabs(x) > real_batch(1.),
-                                 batch_type(constants::pio2<real_batch>(), real_batch(0.)),
-                                 batch_type(asin(x), real_batch(0.))),
-                          resg);
+            const batch_type w = detail::asin_kernel(z);
+            return { atan2(z.real(), w.real()), copysign(w.imag(), z.imag()) };
         }
 
         // asinh
@@ -354,15 +398,14 @@ namespace xsimd
         XSIMD_INLINE batch<T, A> atan2(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
+            const batch_type q = select(self == batch_type(0.), batch_type(0.), abs(self / other)); // atan2(+-0, +-0): 0 / 0 would be NaN
 #ifdef __FAST_MATH__
-            const batch_type q = abs(self / other);
             const batch_type q_p = abs(other / self);
 #else
-            const batch_type q = abs(self / other);
             const batch_type q_p = 1. / q;
 #endif
             const batch_type z = detail::kernel_atan(q, q_p);
-            return select(other > batch_type(0.), z, constants::pi<batch_type>() - z) * signnz(self);
+            return select(signnz(other) > batch_type(0.), z, constants::pi<batch_type>() - z) * signnz(self);
         }
 
         // cos
@@ -858,21 +901,13 @@ namespace xsimd
             const batch_type y = detail::tan_eval(xr, test);
             return y ^ bitofsign(self);
         }
+
         template <class A, class T>
         XSIMD_INLINE batch<std::complex<T>, A> tan(batch<std::complex<T>, A> const& z, requires_arch<common>) noexcept
         {
             using batch_type = batch<std::complex<T>, A>;
-            using real_batch = typename batch_type::real_batch;
-            real_batch d = cos(2 * z.real()) + cosh(2 * z.imag());
-            real_batch wreal = sin(2 * z.real()) / d;
-            real_batch wimag = sinh(2 * z.imag());
-#ifdef __FAST_MATH__
-            return batch_type(wreal, real_batch(1.)), batch_type(wreal, wimag / d);
-#else
-            batch_type winf(constants::infinity<real_batch>(), constants::infinity<real_batch>());
-            batch_type wres = select(isinf(wimag), batch_type(wreal, real_batch(1.)), batch_type(wreal, wimag / d));
-            return select(d == real_batch(0.), winf, wres);
-#endif
+            const batch_type w = tanh(batch_type(-z.imag(), z.real()));
+            return { w.imag(), -w.real() };
         }
 
         // tanh
@@ -978,15 +1013,46 @@ namespace xsimd
             batch_type r = fma(batch_type(-2.), one / (one + exp(x + x)), one);
             return select(test, z, r) ^ bts;
         }
+        // With z = x + iy,
+        //   tanh(z) = ((1 + tan(y)^2) sinh(x) cosh(x) + i tan(y)) / (1 + (1 + tan(y)^2) sinh(x)^2)
+        // as in FreeBSD's ctanh: https://github.com/freebsd/freebsd-src/blob/main/lib/msun/src/s_ctanh.c
+        // It is (sinh(2x) + i sin(2y)) / (cosh(2x) + cos(2y)) with numerator and denominator divided by
+        // 2 cos(y)^2. For |x| >= 11 (float) or 22 (double) it rounds to
+        //   tanh(z) = sign(x) + i tan(y) / ((1 + tan(y)^2) sinh(x)^2)
+        //
+        // In the code, with x = Re z and y = Im z:
+        //   t = tan(y),  beta = 1 + t^2,  s = sinh(|x|),  c = cosh(|x|) = sqrt(1 + s^2)
+        //   tanh(z) = sign(x) beta s c / (1 + beta s^2) + i t / (1 + beta s^2)
+        //   tanh(z) = sign(x) + i t / (beta s^2)   for |x| >= 11 (float) or 22 (double)
         template <class A, class T>
         XSIMD_INLINE batch<std::complex<T>, A> tanh(const batch<std::complex<T>, A>& z, requires_arch<common>) noexcept
         {
-            using real_batch = typename batch<std::complex<T>, A>::real_batch;
-            auto x = z.real();
-            auto y = z.imag();
-            real_batch two(2);
-            auto d = cosh(two * x) + cos(two * y);
-            return { sinh(two * x) / d, sin(two * y) / d };
+            using batch_type = batch<std::complex<T>, A>;
+            using real_batch = typename batch_type::real_batch;
+            const real_batch one(1.);
+            const real_batch x = z.real();
+            const real_batch ax = abs(x);
+
+            // t and beta = 1 / cos(y)^2 >= 1.
+            const real_batch t = tan(z.imag());
+            const real_batch beta = fma(t, t, one);
+
+            // s and c. |x| is capped so that s stays finite: with -ffast-math, sinh of a large |x| is
+            // garbage instead of inf, and 1 / inf is NaN.
+            const real_batch cap(std::is_same_v<T, float> ? T(64) : T(512));
+            const real_batch s = sinh(select(ax > cap, cap, ax));
+            const real_batch c = sqrt(fma(s, s, one));
+
+            // Main formula. All terms are >= 0 and the denominator is >= 1: no cancellation, no division by 0.
+            const real_batch inv = one / fma(beta * s, s, one);
+            const real_batch re = beta * s * c * inv;
+            const real_batch im = t * inv;
+
+            // Large |x|. There 1 + beta s^2 rounds to beta s^2 and c / s rounds to 1, so re = sign(x) and
+            // im = t / (beta s^2), computed as (t / beta) (1 / s) (1 / s) because s^2 can overflow.
+            const auto large = ax >= real_batch(std::is_same_v<T, float> ? T(11) : T(22));
+            const real_batch inv_s = one / s;
+            return { copysign(select(large, one, re), x), select(large, (t / beta) * inv_s * inv_s, im) };
         }
 
     }

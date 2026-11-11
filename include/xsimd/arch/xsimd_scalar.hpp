@@ -701,7 +701,9 @@ namespace xsimd
         {
             using T = typename C::value_type;
             C u = C(1.) + val;
-            return u == C(1.) ? val : (u.real() <= T(0.) ? log(u) : log(u) * val / (u - C(1.)));
+            C res = u == C(1.) ? val : (u.real() <= T(0.) ? log(u) : log(u) * val / (u - C(1.)));
+            // Im(log(1 + z)) has the sign of Im(z), which the operations above lose for an imaginary -0.
+            return C(res.real(), std::copysign(res.imag(), val.imag()));
         }
     }
 
