@@ -1875,11 +1875,13 @@ namespace xsimd
             using real_batch = typename batch_type::real_batch;
             batch_type u = 1 + self;
             batch_type logu = log(u);
-            return select(u == batch_type(1.),
-                          self,
-                          select(u.real() <= real_batch(0.),
-                                 logu,
-                                 logu * self / (u - batch_type(1.))));
+            batch_type res = select(u == batch_type(1.),
+                                    self,
+                                    select(u.real() <= real_batch(0.),
+                                           logu,
+                                           logu * self / (u - batch_type(1.))));
+            // Im(log(1 + z)) = arg(1 + z) has the sign of Im(z). Restore it.
+            return { res.real(), copysign(res.imag(), self.imag()) };
         }
 
         // mod

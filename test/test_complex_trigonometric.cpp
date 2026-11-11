@@ -229,4 +229,40 @@ TEST_CASE_TEMPLATE("[complex trigonometric]", B, BATCH_COMPLEX_TYPES)
         Test.test_atan();
     }
 }
+
+// Complex functions from xsimd_common_trigo.hpp on the inputs of issue 1432, compared with std.
+TEST_CASE_TEMPLATE("[complex trigonometric issue 1432]", B, BATCH_COMPLEX_TYPES)
+{
+    const auto inputs = detail::issue_1432_inputs<B>();
+
+    SUBCASE("asin")
+    {
+        CHECK_AGAINST_STD(B, asin, inputs);
+    }
+
+    SUBCASE("acos")
+    {
+        CHECK_AGAINST_STD(B, acos, inputs);
+    }
+
+    SUBCASE("tan")
+    {
+        CHECK_AGAINST_STD(B, tan, inputs);
+    }
+
+    SUBCASE("asinh")
+    {
+        CHECK_AGAINST_STD(B, asinh, inputs);
+    }
+
+    SUBCASE("acosh")
+    {
+        CHECK_AGAINST_STD(B, acosh, inputs);
+    }
+
+    SUBCASE("tanh")
+    {
+        CHECK_AGAINST_STD(B, tanh, inputs);
+    }
+}
 #endif

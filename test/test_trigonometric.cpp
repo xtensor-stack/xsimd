@@ -178,6 +178,19 @@ struct trigonometric_test
                 CHECK_BATCH_EQ(ref, out);
             }
         }
+        // atan2 with both arguments zero: 0, +-pi as in std, not NaN
+        {
+            const value_type zeros[] = { value_type(0.), value_type(-0.) };
+            for (const value_type x : zeros)
+            {
+                for (const value_type y : zeros)
+                {
+                    const batch_type ref(std::atan2(x, y));
+                    const batch_type out = atan2(batch_type(x), batch_type(y));
+                    CHECK_BATCH_EQ(ref, out);
+                }
+            }
+        }
     }
 };
 
