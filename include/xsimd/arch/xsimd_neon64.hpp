@@ -1375,7 +1375,8 @@ namespace xsimd
             using index_type = batch<uint8_t, A>;
             return vreinterpretq_u16_u8(swizzle(batch_type(vreinterpretq_u8_u16(self)),
                                                 index_type(vreinterpretq_u8_u16(idx * 0x0202 + 0x0100)),
-                                                neon64 {}));
+                                                neon64 {})
+                                            .data);
         }
 
         template <class A>
@@ -1395,7 +1396,8 @@ namespace xsimd
             using index_type = batch<uint8_t, A>;
             return vreinterpretq_u32_u8(swizzle(batch_type(vreinterpretq_u8_u32(self)),
                                                 index_type(vreinterpretq_u8_u32(idx * 0x04040404 + 0x03020100)),
-                                                neon64 {}));
+                                                neon64 {})
+                                            .data);
         }
 
         template <class A>
@@ -1415,7 +1417,8 @@ namespace xsimd
             using index_type = batch<uint8_t, A>;
             return vreinterpretq_u64_u8(swizzle(batch_type(vreinterpretq_u8_u64(self)),
                                                 index_type(vreinterpretq_u8_u64(idx * 0x0808080808080808ull + 0x0706050403020100ull)),
-                                                neon64 {}));
+                                                neon64 {})
+                                            .data);
         }
 
         template <class A>
@@ -1517,7 +1520,7 @@ namespace xsimd
                                                 requires_arch<neon64>) noexcept
         {
             using batch_type = batch<uint8_t, A>;
-            return vreinterpretq_u16_u8(swizzle<A>(batch_type(vreinterpretq_u8_u16(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_u16_u8(swizzle<A>(batch_type(vreinterpretq_u8_u16(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint16_t V0, uint16_t V1, uint16_t V2, uint16_t V3, uint16_t V4, uint16_t V5, uint16_t V6, uint16_t V7>
@@ -1526,7 +1529,7 @@ namespace xsimd
                                                requires_arch<neon64>) noexcept
         {
             using batch_type = batch<int8_t, A>;
-            return vreinterpretq_s16_s8(swizzle<A>(batch_type(vreinterpretq_s8_s16(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_s16_s8(swizzle<A>(batch_type(vreinterpretq_s8_s16(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
@@ -1535,7 +1538,7 @@ namespace xsimd
                                                 requires_arch<neon64>) noexcept
         {
             using batch_type = batch<uint8_t, A>;
-            return vreinterpretq_u32_u8(swizzle<A>(batch_type(vreinterpretq_u8_u32(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_u32_u8(swizzle<A>(batch_type(vreinterpretq_u8_u32(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
@@ -1544,7 +1547,7 @@ namespace xsimd
                                                requires_arch<neon64>) noexcept
         {
             using batch_type = batch<int8_t, A>;
-            return vreinterpretq_s32_s8(swizzle<A>(batch_type(vreinterpretq_s8_s32(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_s32_s8(swizzle<A>(batch_type(vreinterpretq_s8_s32(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint64_t V0, uint64_t V1>
@@ -1553,7 +1556,7 @@ namespace xsimd
                                                 requires_arch<neon64>) noexcept
         {
             using batch_type = batch<uint8_t, A>;
-            return vreinterpretq_u64_u8(swizzle<A>(batch_type(vreinterpretq_u8_u64(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_u64_u8(swizzle<A>(batch_type(vreinterpretq_u8_u64(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint64_t V0, uint64_t V1>
@@ -1562,7 +1565,7 @@ namespace xsimd
                                                requires_arch<neon64>) noexcept
         {
             using batch_type = batch<int8_t, A>;
-            return vreinterpretq_s64_s8(swizzle<A>(batch_type(vreinterpretq_s8_s64(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_s64_s8(swizzle<A>(batch_type(vreinterpretq_s8_s64(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
@@ -1571,7 +1574,7 @@ namespace xsimd
                                              requires_arch<neon64>) noexcept
         {
             using batch_type = batch<uint8_t, A>;
-            return vreinterpretq_f32_u8(swizzle<A>(batch_type(vreinterpretq_u8_f32(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_f32_u8(swizzle<A>(batch_type(vreinterpretq_u8_f32(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint64_t V0, uint64_t V1>
@@ -1580,7 +1583,7 @@ namespace xsimd
                                               requires_arch<neon64>) noexcept
         {
             using batch_type = batch<uint8_t, A>;
-            return vreinterpretq_f64_u8(swizzle<A>(batch_type(vreinterpretq_u8_f64(self)), detail::burst_index<uint8_t>(idx), A()));
+            return vreinterpretq_f64_u8(swizzle<A>(batch_type(vreinterpretq_u8_f64(self)), detail::burst_index<uint8_t>(idx), A()).data);
         }
 
         template <class A, uint32_t V0, uint32_t V1, uint32_t V2, uint32_t V3>
