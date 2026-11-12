@@ -51,7 +51,8 @@ namespace xsimd
             // For z = x + iy, returns Re sqrt(1 - z^2) as the real part and |Im asin(z)| as the imaginary part.
             // With p = sqrt(1 + z) and q = sqrt(1 - z):
             //   Re sqrt(1 - z^2) = Re(q * p),  |Im asin(z)| = asinh(Im(conj(q) p))
-            // as in Julia's asin(z::Complex): https://github.com/JuliaLang/julia/blob/master/base/complex.jl
+            // from W. Kahan, "Branch Cuts for Complex Elementary Functions, or Much Ado About Nothing's Sign Bit",
+            // in The State of the Art in Numerical Analysis, A. Iserles and M. J. D. Powell (eds.), 1987, pp. 165-211.
             template <class A, class T>
             XSIMD_INLINE batch<std::complex<T>, A> asin_kernel(const batch<std::complex<T>, A>& z) noexcept
             {
@@ -90,8 +91,9 @@ namespace xsimd
                 real_batch v = asinh(sh);
 
                 // For huge x or y, (1 +- x)^2 + y^2 overflows. There Re sqrt(1 - z^2) = y and
-                // |Im asin(z)| = log(2 sqrt(x^2 + y^2)) up to rounding, as in FreeBSD's casinh:
-                // https://github.com/freebsd/freebsd-src/blob/main/lib/msun/src/catrig.c
+                // |Im asin(z)| = log(2 sqrt(x^2 + y^2)) up to rounding, as in T. E. Hull, T. F. Fairgrieve and
+                // P. T. P. Tang, "Implementing the Complex Arcsine and Arccosine Functions Using Exception Handling",
+                // ACM Trans. Math. Software 23(3), 1997, pp. 299-335.
                 const auto y_larger = x < y;
                 const real_batch m = select(y_larger, y, x); // max(|x|, |y|)
                 const auto huge = m >= constants::oneotwoeps<real_batch>();
@@ -1015,7 +1017,7 @@ namespace xsimd
         }
         // With z = x + iy,
         //   tanh(z) = ((1 + tan(y)^2) sinh(x) cosh(x) + i tan(y)) / (1 + (1 + tan(y)^2) sinh(x)^2)
-        // as in FreeBSD's ctanh: https://github.com/freebsd/freebsd-src/blob/main/lib/msun/src/s_ctanh.c
+        // from W. Kahan, "Branch Cuts for Complex Elementary Functions, or Much Ado About Nothing's Sign Bit" (1987).
         // It is (sinh(2x) + i sin(2y)) / (cosh(2x) + cos(2y)) with numerator and denominator divided by
         // 2 cos(y)^2. For |x| >= 11 (float) or 22 (double) it rounds to
         //   tanh(z) = sign(x) + i tan(y) / ((1 + tan(y)^2) sinh(x)^2)

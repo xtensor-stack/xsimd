@@ -214,14 +214,26 @@ TEST_CASE_TEMPLATE("[complex exponential]", B, BATCH_COMPLEX_TYPES)
     }
 }
 
+// Cases of issue 1432 that the fix changed, as in test_complex_trigonometric.cpp.
 TEST_CASE_TEMPLATE("[complex exponential issue 1432]", B, BATCH_COMPLEX_TYPES)
 {
-    using value_type = typename B::value_type;
-    for (const auto& z : detail::issue_1432_inputs<B>())
-    {
-        const B expected(std::log(value_type(1 + z.real(), z.imag())));
-        const B actual = log1p(B(z));
-        CHECK_BATCH_EQ(expected, actual);
-    }
+    using xsimd::constants::log_2;
+    using xsimd::constants::pi;
+
+    std::vector<std::complex<double>> inputs = {
+        { 1, -0. }, // imaginary part -0
+        { -2, -0. }, // the -0 sets the sign of Im log1p(z)
+    };
+    std::vector<std::complex<double>> expected = {
+        { log_2<double>(), -0. },
+        { 0., -pi<double>() },
+    };
+    std::vector<double> cond = { 1, 1 };
+#ifndef __FAST_MATH__ // no infinities with fast-math
+    inputs.push_back({ -1, 0. });
+    expected.push_back({ -std::numeric_limits<double>::infinity(), 0. });
+    cond.push_back(1);
+#endif
+    CHECK_COMPLEX_CASES(B, log1p, inputs, expected, cond);
 }
 #endif
