@@ -468,39 +468,47 @@ namespace detail
         }                                                                   \
     } while (0)
 
-// Checks xsimd::f against std::f on every element of inputs, each broadcast to a whole batch of type B.
-#define CHECK_AGAINST_STD(B, f, inputs)          \
-    do                                           \
-    {                                            \
-        for (const auto& input : inputs)         \
-        {                                        \
-            const B expected(std::f(input));     \
-            const B actual = xsimd::f(B(input)); \
-            CHECK_BATCH_EQ(expected, actual);    \
-        }                                        \
-    } while (0)
-
 namespace detail
 {
-    // Inputs from https://github.com/xtensor-stack/xsimd/issues/1432
-    template <class B>
-    std::vector<typename B::value_type> issue_1432_inputs()
+    template <class B, class F>
+    void check_complex_cases(const char* name, const std::vector<std::complex<double>>& inputs,
+                             const std::vector<std::complex<double>>& expected, const std::vector<double>& cond, F f)
     {
-        using value_type = typename B::value_type;
-        using real_value_type = typename value_type::value_type;
-        const real_value_type re[] = { -400, -100, -42.4117, -4, -2, -1, -0., 0., 1, 1.5707, 1.57076, 2, 45, 356, 633.708, 700, 10000 };
-        const real_value_type im[] = { -500, -356, -100, -45, -10.9958, -3, -1, -0., 0., 1, 2, 5, 800 };
-        std::vector<value_type> inputs;
-        for (const real_value_type x : re)
+        using T = typename B::value_type::value_type;
+        const bool sizes_match = expected.size() == inputs.size() && cond.size() == inputs.size();
+        if (!sizes_match)
         {
-            for (const real_value_type y : im)
+            FAIL_CHECK(name << ": inputs, expected and cond must have the same size");
+            return;
+        }
+        for (size_t k = 0; k < inputs.size(); ++k)
+        {
+            const std::complex<double> z = inputs[k];
+            const std::complex<double> e = expected[k];
+            const auto r = f(B(typename B::value_type(T(z.real()), T(z.imag())))).get(0);
+            const std::complex<double> out(r.real(), r.imag());
+            const double allowed = 4 * cond[k] * std::numeric_limits<T>::epsilon() * std::abs(e);
+#ifdef __FAST_MATH__
+            const bool ok = std::abs(out - e) <= allowed; // no infinite values with fast-math
+#else
+            bool ok = std::isinf(e.real()) || std::isinf(e.imag()) ? out == e : std::abs(out - e) <= allowed;
+            // zeros must have the right sign (fast-math ignores it)
+            ok = ok && (e.real() != 0 || std::signbit(out.real()) == std::signbit(e.real()));
+            ok = ok && (e.imag() != 0 || std::signbit(out.imag()) == std::signbit(e.imag()));
+#endif
+            if (!ok)
             {
-                inputs.emplace_back(x, y);
+                std::ostringstream msg;
+                msg << std::setprecision(std::numeric_limits<double>::max_digits10) << name << z << " = " << out << ", expected " << e;
+                FAIL_CHECK(msg.str());
             }
         }
-        return inputs;
     }
 }
+
+// Checks xsimd::f at inputs against expected, within cond (see detail::check_complex_cases), for the value type of B.
+#define CHECK_COMPLEX_CASES(B, f, inputs, expected, cond) \
+    ::detail::check_complex_cases<B>(#f, inputs, expected, cond, [](const B& z) { return xsimd::f(z); })
 
 /***********************
  * Testing types lists *

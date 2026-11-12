@@ -230,39 +230,115 @@ TEST_CASE_TEMPLATE("[complex trigonometric]", B, BATCH_COMPLEX_TYPES)
     }
 }
 
-// Complex functions from xsimd_common_trigo.hpp on the inputs of issue 1432, compared with std.
+// Cases of issue 1432 that the fix changed: each gave a wrong value or a wrong sign of zero before it. The expected
+// values are the exact f(z) rounded to double; cond is max(1, |z f'(z) / f(z)|) (see detail::check_complex_cases).
 TEST_CASE_TEMPLATE("[complex trigonometric issue 1432]", B, BATCH_COMPLEX_TYPES)
 {
-    const auto inputs = detail::issue_1432_inputs<B>();
+    using xsimd::constants::pi;
+    using xsimd::constants::pio2;
 
     SUBCASE("asin")
     {
-        CHECK_AGAINST_STD(B, asin, inputs);
+        const std::vector<std::complex<double>> inputs = {
+            { -2, -0. }, // the -0 sets the sign of Im asin(z)
+            { -0., -0. }, // signed zeros
+            { 1, 800 }, // large imaginary part
+            { 10000, 1 }, // large real part
+        };
+        const std::vector<std::complex<double>> expected = {
+            { -pio2<double>(), -1.3169578969248168 },
+            { -0., -0. },
+            { 0.0012499983724006398, 7.377760080100202 },
+            { 1.57069632679473, 9.903487555036127 },
+        };
+        const std::vector<double> cond = { 1, 1, 1, 1 };
+        CHECK_COMPLEX_CASES(B, asin, inputs, expected, cond);
     }
 
     SUBCASE("acos")
     {
-        CHECK_AGAINST_STD(B, acos, inputs);
+        const std::vector<std::complex<double>> inputs = {
+            { -2, -0. }, // the -0 sets the sign of Im acos(z)
+            { 0., -0. }, // signed zeros
+            { 1, 800 }, // large imaginary part
+            { 10000, 1 }, // large real part
+        };
+        const std::vector<std::complex<double>> expected = {
+            { pi<double>(), 1.3169578969248168 },
+            { pio2<double>(), 0. },
+            { 1.569546328422496, -7.377760080100202 },
+            { 0.00010000000016666667, -9.903487555036127 },
+        };
+        const std::vector<double> cond = { 1, 1, 1, 1 };
+        CHECK_COMPLEX_CASES(B, acos, inputs, expected, cond);
     }
 
     SUBCASE("tan")
     {
-        CHECK_AGAINST_STD(B, tan, inputs);
+        const std::vector<std::complex<double>> inputs = {
+            { 1.5707f, 0. }, // near the pole pi/2 = 1.570796
+            { 2, -500 }, // large imaginary part
+        };
+        const std::vector<std::complex<double>> expected = {
+            { 10386.654119664716, 0. },
+            { -0., -1. },
+        };
+        const std::vector<double> cond = { 1.63e4, 1 };
+        CHECK_COMPLEX_CASES(B, tan, inputs, expected, cond);
     }
 
     SUBCASE("asinh")
     {
-        CHECK_AGAINST_STD(B, asinh, inputs);
+        const std::vector<std::complex<double>> inputs = {
+            { -0., -3 }, // the -0 sets the sign of Re asinh(z)
+            { -0., -0. }, // signed zeros
+            { 2, 0. }, // real axis
+            { 1, -500 }, // large imaginary part
+            { 10000, 1 }, // large real part
+        };
+        const std::vector<std::complex<double>> expected = {
+            { -1.762747174039086, -pio2<double>() },
+            { -0., -0. },
+            { 1.4436354751788103, 0. },
+            { 6.907756278988637, -1.5687963254615769 },
+            { 9.903487560036128, 9.999999916666668e-05 },
+        };
+        const std::vector<double> cond = { 1, 1, 1, 1, 1 };
+        CHECK_COMPLEX_CASES(B, asinh, inputs, expected, cond);
     }
 
     SUBCASE("acosh")
     {
-        CHECK_AGAINST_STD(B, acosh, inputs);
+        const std::vector<std::complex<double>> inputs = {
+            { -4, -3 }, // x < 0, y < 0
+            { -2, 0. }, // the +0 sets the sign of Im acosh(z)
+            { 1, -0. }, // signed zeros
+            { 1, 800 }, // large imaginary part
+            { 10000, 1 }, // large real part
+        };
+        const std::vector<std::complex<double>> expected = {
+            { 2.2999140408792695, -2.488413180146375 },
+            { 1.3169578969248168, pi<double>() },
+            { 0., -0. },
+            { 7.377760080100202, 1.569546328422496 },
+            { 9.903487555036127, 0.00010000000016666667 },
+        };
+        const std::vector<double> cond = { 1, 1, 1, 1, 1 };
+        CHECK_COMPLEX_CASES(B, acosh, inputs, expected, cond);
     }
 
     SUBCASE("tanh")
     {
-        CHECK_AGAINST_STD(B, tanh, inputs);
+        const std::vector<std::complex<double>> inputs = {
+            { -400, 2 }, // large real part
+            { 0., -10.9958f }, // near the pole -7 pi/2 i = -10.995574 i
+        };
+        const std::vector<std::complex<double>> expected = {
+            { -1., -0. },
+            { 0., 4430.056602996832 },
+        };
+        const std::vector<double> cond = { 1, 4.87e4 };
+        CHECK_COMPLEX_CASES(B, tanh, inputs, expected, cond);
     }
 }
 #endif
