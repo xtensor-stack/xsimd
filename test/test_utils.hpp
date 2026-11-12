@@ -152,6 +152,11 @@ namespace detail
     template <class T>
     T safe_division(const T& lhs, const T& rhs)
     {
+#if defined(__clang__) && !defined(__FAST_MATH__)
+        // Comparisons also run with FE_INVALID unmasked in the power tests.
+        // Do not speculate a division past the zero-denominator guard.
+#pragma clang fp exceptions(strict)
+#endif
         if (rhs == T(0))
         {
             return (std::numeric_limits<T>::max)();

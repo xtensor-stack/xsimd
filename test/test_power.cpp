@@ -49,6 +49,10 @@ struct power_test
 
     void test_power_functions()
     {
+#if defined(__clang__) && !defined(__FAST_MATH__)
+        // This test deliberately unmasks floating-point exceptions below.
+#pragma clang fp exceptions(strict)
+#endif
         // pow
         {
             std::transform(lhs_input.cbegin(), lhs_input.cend(), rhs_input.cbegin(), expected.begin(),
