@@ -1215,7 +1215,7 @@ namespace xsimd
     template <class T, class A>
     template <class... Ts>
     XSIMD_INLINE batch_bool<T, A>::batch_bool(bool val0, bool val1, Ts... vals) noexcept
-        : batch_bool(kernel::set<A>(batch_bool {}, A {}, val0, val1, static_cast<bool>(vals)...))
+        : batch_bool(make_register(std::index_sequence<> {}, val0, val1, static_cast<bool>(vals)...))
     {
         static_assert(sizeof...(Ts) + 2 == size, "The constructor requires as many arguments as batch elements.");
     }
@@ -1387,7 +1387,8 @@ namespace xsimd
     template <class... V>
     XSIMD_INLINE auto batch_bool<T, A>::make_register(std::index_sequence<>, V... v) noexcept -> register_type
     {
-        return kernel::set<A>(batch_bool<T, A>(), A {}, v...).data;
+        // no explicit template argument here: kernel::set<A> would instantiate unrelated register types
+        return kernel::set(batch_bool<T, A>(), A {}, v...).data;
     }
 
     /*******************************

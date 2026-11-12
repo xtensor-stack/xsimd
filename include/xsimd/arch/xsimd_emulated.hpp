@@ -697,7 +697,8 @@ namespace xsimd
             return { typename batch<T, emulated<N>>::register_type { static_cast<T>(values)... } };
         }
 
-        template <class A, class T, size_t N, class... Values>
+        // no A parameter: callers pass no explicit template argument, so deduction stays constrained
+        template <class T, size_t N, class... Values>
         XSIMD_INLINE batch_bool<T, emulated<N>> set(batch_bool<T, emulated<N>> const&, requires_arch<emulated<N>>, Values... values) noexcept
         {
             static_assert(sizeof...(Values) == batch<T, emulated<N>>::size, "consistent init");
