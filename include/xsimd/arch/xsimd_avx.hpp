@@ -465,6 +465,21 @@ namespace xsimd
             return _mm256_ceil_pd(self);
         }
 
+        // compress
+        // The ssse3 kernel only handles 16 bytes registers.
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> compress(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx>) noexcept
+        {
+            return compress(self, mask, common {});
+        }
+
+        // expand
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> expand(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx>) noexcept
+        {
+            return expand(self, mask, common {});
+        }
+
         namespace detail
         {
             // On clang, _mm256_extractf128_ps is built upon build_shufflevector

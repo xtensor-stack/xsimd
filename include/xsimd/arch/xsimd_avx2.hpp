@@ -14,6 +14,7 @@
 
 #include "../types/xsimd_avx2_register.hpp"
 #include "../types/xsimd_batch_constant.hpp"
+#include "./utils/compress_expand_lut.hpp"
 #include "./utils/shifts.hpp"
 
 #include <complex>
@@ -537,6 +538,29 @@ namespace xsimd
             }
         }
 
+        // compress
+        namespace detail
+        {
+            // Spread the eight 4 bits indices of a dword_shuffle_lut row over the
+            // 32 bits slots of a register. vpermd only reads the low 3 bits of
+            // each slot, so the upper bits need no masking.
+            XSIMD_INLINE __m256i unpack_dword_indices(uint32_t row) noexcept
+            {
+                return _mm256_srlv_epi32(_mm256_set1_epi32(static_cast<int>(row)), _mm256_setr_epi32(0, 4, 8, 12, 16, 20, 24, 28));
+            }
+        }
+
+        template <class A, class T, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> compress(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx2>) noexcept
+        {
+            auto const& lut = utils::dword_shuffle_lut_v<batch<T, A>::size>;
+            __m256i idx = detail::unpack_dword_indices(lut.compress[mask.mask()]);
+            __m256i packed = _mm256_permutevar8x32_epi32(bitwise_cast<uint32_t>(self), idx);
+            // Bit 3 of an index is set for the slots that receive an element, zero the others.
+            __m256i used = _mm256_srai_epi32(_mm256_slli_epi32(idx, 28), 31);
+            return bitwise_cast<T>(batch<uint32_t, A>(_mm256_and_si256(packed, used)));
+        }
+
         // eq
         template <class A, class T, class = std::enable_if_t<std::is_integral_v<T>>>
         XSIMD_INLINE batch_bool<T, A> eq(batch<T, A> const& self, batch<T, A> const& other, requires_arch<avx2>) noexcept
@@ -561,6 +585,18 @@ namespace xsimd
             {
                 return eq(self, other, avx {});
             }
+        }
+
+        // expand
+        template <class A, class T, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> expand(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<avx2>) noexcept
+        {
+            auto const& lut = utils::dword_shuffle_lut_v<batch<T, A>::size>;
+            __m256i idx = detail::unpack_dword_indices(lut.expand[mask.mask()]);
+            __m256i spread = _mm256_permutevar8x32_epi32(bitwise_cast<uint32_t>(self), idx);
+            // Zero the slots that receive no element.
+            __m256i used = bitwise_cast<uint32_t>(batch<T, A>(mask.data));
+            return bitwise_cast<T>(batch<uint32_t, A>(_mm256_and_si256(spread, used)));
         }
 
         // gather
