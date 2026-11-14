@@ -580,6 +580,13 @@ namespace xsimd
             return _mm256_i64gather_epi64(reinterpret_cast<const long long int*>(src), index, sizeof(T));
         }
 
+        template <class A, class IndexArch, std::enable_if_t<std::is_base_of_v<sse2, IndexArch>, int> = 0>
+        XSIMD_INLINE batch<int64_t, A> gather(batch<int64_t, A> const&, int64_t const* src,
+                                              batch<int32_t, IndexArch> const& index, requires_arch<avx2>) noexcept
+        {
+            return _mm256_i32gather_epi64(reinterpret_cast<const long long int*>(src), index, sizeof(int64_t));
+        }
+
         template <class A, class U,
                   detail::enable_sized_integral_t<U, 4> = 0>
         XSIMD_INLINE batch<float, A> gather(batch<float, A> const&, float const* src,
