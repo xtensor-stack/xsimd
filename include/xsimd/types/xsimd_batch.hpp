@@ -296,6 +296,12 @@ namespace xsimd
 
         template <class U, class V>
         [[nodiscard]] static XSIMD_INLINE batch gather(U const* src, batch<V, arch_type> const& index) noexcept;
+        template <class IndexArch,
+                  std::enable_if_t<std::is_base_of_v<avx2, A> && std::is_same_v<T, int64_t>
+                                       && std::is_base_of_v<sse2, IndexArch>,
+                                   int>
+                  = 0>
+        [[nodiscard]] static XSIMD_INLINE batch gather(T const* src, batch<int32_t, IndexArch> const& index) noexcept;
         template <class U, class V>
         XSIMD_INLINE void scatter(U* dst, batch<V, arch_type> const& index) const noexcept;
 
@@ -916,6 +922,14 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         static_assert(std::is_convertible_v<T, U>, "Can't convert from src to this batch's type!");
+        return kernel::gather(batch {}, src, index, A {});
+    }
+
+    /** Gather four 64-bit integers on AVX2 using four signed 32-bit element offsets. */
+    template <class T, class A>
+    template <class IndexArch, std::enable_if_t<std::is_base_of_v<avx2, A> && std::is_same_v<T, int64_t> && std::is_base_of_v<sse2, IndexArch>, int>>
+    XSIMD_INLINE batch<T, A> batch<T, A>::gather(T const* src, batch<int32_t, IndexArch> const& index) noexcept
+    {
         return kernel::gather(batch {}, src, index, A {});
     }
 

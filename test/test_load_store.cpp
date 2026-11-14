@@ -461,6 +461,20 @@ TEST_CASE_TEMPLATE("[load store]", B, BATCH_TYPES)
     SUBCASE("masked") { Test.test_masked(); }
 }
 
+#if XSIMD_WITH_AVX2
+TEST_CASE_TEMPLATE("AVX2 gather int64_t with int32_t indices", IndexArch, xsimd::sse2, xsimd::avx2_128)
+{
+    using values_type = xsimd::batch<int64_t, xsimd::avx2>;
+    using indices_type = xsimd::batch<int32_t, IndexArch>;
+    const int64_t values[] = { 0x100000001, -2, 3, -0x200000004, 5, 0x300000006 };
+    const int64_t* base = values + 3;
+    const int32_t offsets[] = { -3, 2, 0, 2 };
+    const auto result = values_type::gather(base, indices_type::load_unaligned(offsets));
+    for (std::size_t i = 0; i < values_type::size; ++i)
+        CHECK_EQ(result.get(i), base[offsets[i]]);
+}
+#endif
+
 template <class B>
 struct masked_load_store_test
 {
