@@ -9,11 +9,68 @@
  * The full license is in the file LICENSE, distributed with this software. *
  ***************************************************************************/
 
+#include "test_utils.hpp"
+
 #include "xsimd/utils/bits.hpp"
 
 #include <doctest/doctest.h>
 
+#include <array>
+#include <cfenv>
+#include <cstddef>
 #include <cstdint>
+#include <limits>
+
+namespace
+{
+    template <class T>
+    void guarded_divisions(const T* lhs, const T* rhs, T* out, std::size_t count)
+    {
+        for (std::size_t i = 0; i < count; ++i)
+        {
+            out[i] = detail::safe_division(lhs[i], rhs[i]);
+        }
+    }
+}
+
+TEST_CASE_TEMPLATE("[utils::safe_division] guarded zero denominators", T, float, double)
+{
+    constexpr std::size_t count = 1024;
+    std::array<T, count> lhs, rhs, out;
+    for (std::size_t i = 0; i < count; ++i)
+    {
+        lhs[i] = i % 3 == 0 ? T(0) : T(1);
+        rhs[i] = i % 3 == 2 ? T(2) : T(0);
+    }
+    // Keep the loop inputs unknown to the optimizer without disabling vectorization.
+    void (*volatile evaluate)(const T*, const T*, T*, std::size_t) = guarded_divisions<T>;
+#if !defined(__FAST_MATH__) && !defined(__wasm__) && defined(FE_INVALID) && defined(FE_DIVBYZERO)
+    std::fenv_t saved;
+    const bool fenv_available = std::feholdexcept(&saved) == 0;
+#endif
+    evaluate(lhs.data(), rhs.data(), out.data(), count);
+#if !defined(__FAST_MATH__) && !defined(__wasm__) && defined(FE_INVALID) && defined(FE_DIVBYZERO)
+    const int raised = fenv_available ? std::fetestexcept(FE_INVALID | FE_DIVBYZERO) : 0;
+    const int restored = fenv_available ? std::fesetenv(&saved) : 0;
+    WARN_MESSAGE(fenv_available, "Floating-point exception flags are unavailable");
+    if (fenv_available)
+    {
+        CHECK_EQ(restored, 0);
+        CHECK_EQ(raised, 0);
+    }
+#endif
+    for (std::size_t i = 0; i < count; ++i)
+    {
+#ifdef __FAST_MATH__
+        if (i % 3 == 2)
+        {
+            CHECK_SCALAR_EQ(out[i], T(0.5));
+            continue;
+        }
+#endif
+        CHECK_EQ(out[i], i % 3 == 2 ? T(0.5) : (std::numeric_limits<T>::max)());
+    }
+}
 
 TEST_CASE("[utils::make_bit_mask] single bit")
 {
