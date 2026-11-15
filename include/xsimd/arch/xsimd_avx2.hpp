@@ -572,12 +572,23 @@ namespace xsimd
             return _mm256_i32gather_epi32(reinterpret_cast<const int*>(src), index, sizeof(T));
         }
 
-        template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_sized_integral_t<U, 8> = 0>
+        template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_integral_t<U> = 0>
         XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                         kernel::requires_arch<avx2>) noexcept
         {
-            // scatter for this one is AVX512F+AVX512VL
-            return _mm256_i64gather_epi64(reinterpret_cast<const long long int*>(src), index, sizeof(T));
+            if constexpr (sizeof(U) == 4)
+            {
+                // vpgatherdq reads 4 int32 offsets: the low half of the index register
+                const __m128i narrow = _mm256_castsi256_si128(index);
+                if constexpr (std::is_signed_v<U>)
+                    return _mm256_i32gather_epi64(reinterpret_cast<const long long int*>(src), narrow, sizeof(T));
+                else
+                    return _mm256_i64gather_epi64(reinterpret_cast<const long long int*>(src), _mm256_cvtepu32_epi64(narrow), sizeof(T));
+            }
+            else
+            {
+                return _mm256_i64gather_epi64(reinterpret_cast<const long long int*>(src), index, sizeof(T));
+            }
         }
 
         template <class A, class U,

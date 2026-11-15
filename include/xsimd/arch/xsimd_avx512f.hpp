@@ -1190,11 +1190,23 @@ namespace xsimd
             return _mm512_i32gather_epi32(index, static_cast<const void*>(src), sizeof(T));
         }
 
-        template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_sized_integral_t<U, 8> = 0>
+        template <class T, class A, class U, detail::enable_sized_integral_t<T, 8> = 0, detail::enable_integral_t<U> = 0>
         XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index,
                                         kernel::requires_arch<avx512f>) noexcept
         {
-            return _mm512_i64gather_epi64(index, static_cast<const void*>(src), sizeof(T));
+            if constexpr (sizeof(U) == 4)
+            {
+                // vpgatherdq reads 8 int32 offsets: the low half of the index register
+                const __m256i narrow = _mm512_castsi512_si256(index);
+                if constexpr (std::is_signed_v<U>)
+                    return _mm512_i32gather_epi64(narrow, static_cast<const void*>(src), sizeof(T));
+                else
+                    return _mm512_i64gather_epi64(_mm512_cvtepu32_epi64(narrow), static_cast<const void*>(src), sizeof(T));
+            }
+            else
+            {
+                return _mm512_i64gather_epi64(index, static_cast<const void*>(src), sizeof(T));
+            }
         }
 
         template <class A, class U, detail::enable_sized_integral_t<U, 4> = 0>

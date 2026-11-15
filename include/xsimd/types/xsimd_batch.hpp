@@ -907,6 +907,9 @@ namespace xsimd
     /**
      * Create a new batch gathering elements starting at address \c src and
      * offset by each element in \c index.
+     * When gathering 64-bit integers of type \c T using 32-bit integer indices,
+     * only the first \c size offsets are used, in lane order. Constructing
+     * \c index with \c load_unaligned requires a full batch of readable indices.
      * If \c T is not of the same size as \c U, a \c static_cast is performed
      * at element gather time.
      */
@@ -916,6 +919,9 @@ namespace xsimd
     {
         detail::static_check_supported_config<T, A>();
         static_assert(std::is_convertible_v<T, U>, "Can't convert from src to this batch's type!");
+        static_assert(batch<V, A>::size == size
+                          || (std::is_same_v<T, U> && std::is_integral_v<T> && sizeof(T) == 8 && std::is_integral_v<V> && sizeof(V) == 4),
+                      "gather requires one offset per result lane or 32-bit integer offsets for 64-bit integer elements");
         return kernel::gather(batch {}, src, index, A {});
     }
 
