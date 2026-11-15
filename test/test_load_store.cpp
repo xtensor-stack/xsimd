@@ -15,6 +15,7 @@
 #include "test_utils.hpp"
 
 #include <algorithm>
+#include <numeric>
 #include <random>
 #include <type_traits>
 
@@ -178,6 +179,13 @@ struct load_store_test
 #if !XSIMD_WITH_NEON || XSIMD_WITH_NEON64
         test_gather_impl(d_vec, "gather double");
 #endif
+        if constexpr (sizeof(value_type) == 8 && std::is_integral_v<value_type>)
+        {
+            test_gather_indexed<int64_t>("int64_t");
+            test_gather_indexed<uint64_t>("uint64_t");
+            test_gather_indexed<int32_t>("int32_t");
+            test_gather_indexed<uint32_t>("uint32_t");
+        }
     }
 
     void test_scatter()
@@ -400,6 +408,22 @@ private:
         b = batch_type::gather(v.data(), index);
         INFO(name, " (in reverse order)");
         CHECK_BATCH_EQ(b, expected);
+    }
+
+    template <class V>
+    void test_gather_indexed(const std::string& index_name)
+    {
+        using indices = xsimd::batch<V, typename B::arch_type>;
+        array_type data;
+        std::iota(data.begin(), data.end(), value_type(0x100000001LL));
+        std::reverse_copy(data.cbegin(), data.cend(), expected.begin());
+        std::array<V, indices::size> offsets {};
+        const V origin = std::is_signed_v<V> ? V(size - 1) : V(0);
+        for (std::size_t i = 0; i < size; ++i)
+            offsets[i] = V(size - 1 - i) - origin;
+        INFO("gather 64-bit integers with ", index_name);
+        const auto result = batch_type::gather(data.data() + origin, indices::load_unaligned(offsets.data()));
+        CHECK_BATCH_EQ(result, expected);
     }
 
     template <class V>

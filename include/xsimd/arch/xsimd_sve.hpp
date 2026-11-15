@@ -204,10 +204,15 @@ namespace xsimd
         }
 
         // gather
-        template <class A, class T, class U, detail_sve::enable_sg_t<T, U> = 0>
+        template <class A, class T, class U,
+                  std::enable_if_t<(sizeof(T) == 4 || sizeof(T) == 8), int> = 0>
         XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index, kernel::requires_arch<sve>) noexcept
         {
-            return svld1_gather_index(detail_sve::ptrue<T>(), src, index.data);
+            const auto* base = reinterpret_cast<map_to_sized_type_t<T> const*>(src);
+            if constexpr (sizeof(T) == sizeof(U))
+                return svld1_gather_index(detail_sve::ptrue<T>(), base, index.data);
+            else
+                return svld1_gather_index(detail_sve::ptrue<T>(), base, svunpklo(index.data));
         }
 
         /********************
