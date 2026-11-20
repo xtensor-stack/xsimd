@@ -2038,13 +2038,19 @@ namespace xsimd
         {
             using batch_type = batch<T, A>;
             const auto zero = batch_type(0.);
-            auto negself = self < zero;
-            auto iszeropowpos = self == zero && other >= zero;
-            auto adj_self = select(iszeropowpos, batch_type(1), abs(self));
-            batch_type z = exp(other * log(adj_self));
-            z = select(iszeropowpos, zero, z);
-            z = select(is_odd(other) && negself, -z, z);
-            auto invalid = negself && !(is_flint(other) || isinf(other));
+            const auto one = batch_type(1.);
+            const auto infinite_exponent = isinf(other);
+            const auto unit_result = other == zero || self == one || (self == -one && infinite_exponent);
+            // Evaluate lanes that must return 1 as 1^0 to avoid invalid products.
+            const auto base = select(unit_result, one, self);
+            const auto exponent = select(unit_result, zero, other);
+            const auto negative_base = base < zero;
+            const auto zero_to_positive = base == zero && exponent > zero;
+            const auto abs_base = select(zero_to_positive, one, abs(base));
+            batch_type z = exp(exponent * log(abs_base));
+            z = select(zero_to_positive, zero, z);
+            z = select(is_odd(exponent) && negative_base, -z, z);
+            const auto invalid = negative_base && !(is_flint(exponent) || infinite_exponent);
             return select(invalid, constants::nan<batch_type>(), z);
         }
 

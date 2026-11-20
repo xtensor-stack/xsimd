@@ -181,4 +181,63 @@ TEST_CASE_TEMPLATE("[power]", B, BATCH_FLOAT_TYPES)
     power_test<B> Test;
     Test.test_power_functions();
 }
+
+TEST_CASE_TEMPLATE("[power] special cases", B, BATCH_FLOAT_TYPES)
+{
+    using value_type = typename B::value_type;
+    struct test_case
+    {
+        value_type base;
+        value_type exponent;
+        value_type expected;
+    };
+#ifndef __FAST_MATH__
+    const auto nan = std::numeric_limits<value_type>::quiet_NaN();
+    const auto inf = std::numeric_limits<value_type>::infinity();
+#endif
+    const test_case cases[] = {
+        { 0, 0, 1 },
+        { 0, 2, 0 },
+        { 0, -0., 1 },
+        { -1, 3, -1 },
+        { -0., 0, 1 },
+        { 2, 3, 8 },
+        { 2, 0, 1 },
+        { 1, 2, 1 },
+#ifndef __FAST_MATH__
+        { nan, 0, 1 },
+        { inf, 0, 1 },
+        { -inf, -0., 1 },
+        { 1, nan, 1 },
+        { 1, inf, 1 },
+        { 1, -inf, 1 },
+        { -1, inf, 1 },
+        { -1, -inf, 1 },
+        { -1, nan, nan },
+        { -1, 0.5, nan },
+#endif
+    };
+    constexpr size_t case_count = sizeof(cases) / sizeof(cases[0]);
+    for (size_t i = 0; i < case_count; i += B::size)
+    {
+        std::array<value_type, B::size> bases, exponents, expected;
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const auto& c = cases[(i + lane) % case_count];
+            bases[lane] = c.base;
+            exponents[lane] = c.exponent;
+            expected[lane] = c.expected;
+        }
+        const auto actual = xsimd::pow(B::load_unaligned(bases.data()), B::load_unaligned(exponents.data()));
+        for (size_t lane = 0; lane < B::size; ++lane)
+        {
+            const auto result = actual.get(lane);
+            CAPTURE(bases[lane]);
+            CAPTURE(exponents[lane]);
+            CAPTURE(expected[lane]);
+            CAPTURE(result);
+            CHECK(detail::expect_scalar_near(expected[lane], result));
+        }
+    }
+}
 #endif
