@@ -108,7 +108,14 @@ struct power_test
             }
 #endif
         }
+        CHECK(xsimd::all(pow(batch_type(0), batch_type(0)) == batch_type(1)));
 #ifndef __FAST_MATH__
+        const auto nan = std::numeric_limits<value_type>::quiet_NaN();
+        const auto inf = std::numeric_limits<value_type>::infinity();
+        CHECK(xsimd::all(pow(batch_type(nan), batch_type(0)) == batch_type(1)));
+        CHECK(xsimd::all(pow(batch_type(1), batch_type(nan)) == batch_type(1)));
+        CHECK(xsimd::all(pow(batch_type(-1), batch_type(inf)) == batch_type(1)));
+
         // pow 0^-x
         {
             std::transform(zero_input.cbegin(), zero_input.cend(), rhs_input.cbegin(), expected.begin(),

@@ -2034,17 +2034,25 @@ namespace xsimd
          * ====================================================
          */
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
+        XSIMD_INLINE batch<T, A> pow(batch<T, A> base, batch<T, A> exponent, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const auto zero = batch_type(0.);
-            auto negself = self < zero;
-            auto iszeropowpos = self == zero && other >= zero;
-            auto adj_self = select(iszeropowpos, batch_type(1), abs(self));
-            batch_type z = exp(other * log(adj_self));
-            z = select(iszeropowpos, zero, z);
-            z = select(is_odd(other) && negself, -z, z);
-            auto invalid = negself && !(is_flint(other) || isinf(other));
+            const auto one = batch_type(1.);
+            const auto infinite_exponent = isinf(exponent);
+            // x^(+/-0), 1^y, and (-1)^(+/-inf) all evaluate to 1.
+            const auto unit_result = exponent == zero || base == one || (base == -one && infinite_exponent);
+            if (any(unit_result))
+            {
+                base = select(unit_result, one, base);
+                exponent = select(unit_result, zero, exponent);
+            }
+            const auto zero_to_positive = base == zero && exponent > zero;
+            const auto magnitude = select(zero_to_positive, one, abs(base));
+            auto z = select(zero_to_positive, zero, exp(exponent * log(magnitude)));
+            const auto negative_base = base < zero;
+            z = select(is_odd(exponent) && negative_base, -z, z);
+            const auto invalid = negative_base && !(is_flint(exponent) || infinite_exponent);
             return select(invalid, constants::nan<batch_type>(), z);
         }
 
