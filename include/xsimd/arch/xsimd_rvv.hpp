@@ -553,15 +553,29 @@ namespace xsimd
         }
 
         // gather
-        template <class A, class T, class U, detail_rvv::rvv_enable_sg_t<T, U> = 0>
+        template <class A, class T, class U, std::enable_if_t<sizeof(T) == 4 || sizeof(T) == 8, int> = 0>
         XSIMD_INLINE batch<T, A> gather(batch<T, A> const&, T const* src, batch<U, A> const& index, kernel::requires_arch<rvv>) noexcept
         {
-            using UU = as_unsigned_integer_t<U>;
-            const auto uindex = detail_rvv::rvv_to_unsigned_batch(index);
-            auto const* base = reinterpret_cast<map_to_sized_type_t<T> const*>(src);
-            // or rvvluxei
-            const auto bi = detail_rvv::rvvmul_splat(uindex, sizeof(T));
-            return detail_rvv::rvvloxei(base, bi);
+            if constexpr (sizeof(T) == 8 && sizeof(U) == 4)
+            {
+                // 64-bit lanes with 32-bit offsets: widen the low size offsets
+                using indices = batch<widen_t<U>, A>;
+                const auto wide = [&]()
+                {
+                    if constexpr (std::is_signed_v<U>)
+                        return __riscv_vsext_vf2_i64m1(__riscv_vlmul_trunc_i32mf2(index.data), indices::size);
+                    else
+                        return __riscv_vzext_vf2_u64m1(__riscv_vlmul_trunc_u32mf2(index.data), indices::size);
+                }();
+                return batch<T, A>::gather(src, indices(typename indices::register_type(wide)));
+            }
+            else
+            {
+                const auto uindex = detail_rvv::rvv_to_unsigned_batch(index);
+                auto const* base = reinterpret_cast<map_to_sized_type_t<T> const*>(src);
+                const auto bi = detail_rvv::rvvmul_splat(uindex, sizeof(T));
+                return detail_rvv::rvvloxei(base, bi);
+            }
         }
 
         /**************

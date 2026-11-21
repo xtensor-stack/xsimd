@@ -161,10 +161,7 @@ namespace xsimd
         gather(batch<T, A> const&, T const* src, batch<V, A> const& index,
                kernel::requires_arch<common>) noexcept
         {
-            static_assert(batch<T, A>::size == batch<V, A>::size,
-                          "Index and destination sizes must match");
-
-            return detail::gather<batch<V, A>::size - 1, T, A>(src, index, {});
+            return detail::gather<batch<T, A>::size - 1, T, A>(src, index, {});
         }
 
         // Gather with runtime indexes and mismatched strides.
