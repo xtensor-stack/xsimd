@@ -2040,9 +2040,13 @@ namespace xsimd
             const auto zero = batch_type(0.);
             const auto one = batch_type(1.);
             const auto infinite_exponent = isinf(exponent);
+            // x^(+/-0), 1^y, and (-1)^(+/-inf) all evaluate to 1.
             const auto unit_result = exponent == zero || base == one || (base == -one && infinite_exponent);
-            base = select(unit_result, one, base);
-            exponent = select(unit_result, zero, exponent);
+            if (any(unit_result))
+            {
+                base = select(unit_result, one, base);
+                exponent = select(unit_result, zero, exponent);
+            }
             const auto zero_to_positive = base == zero && exponent > zero;
             const auto magnitude = select(zero_to_positive, one, abs(base));
             auto z = select(zero_to_positive, zero, exp(exponent * log(magnitude)));
