@@ -123,6 +123,8 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: amd64
+        # The MSVC 14.52 STL needs Clang 22; the image bundles Clang 20
+        toolset: 14.44
     - name: Check clang-cl
       run: |
         command -v clang-cl
