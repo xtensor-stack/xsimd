@@ -2034,17 +2034,29 @@ namespace xsimd
          * ====================================================
          */
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> pow(batch<T, A> const& self, batch<T, A> const& other, requires_arch<common>) noexcept
+        XSIMD_INLINE batch<T, A> pow(batch<T, A> const& base, batch<T, A> const& exponent, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const auto zero = batch_type(0.);
-            auto negself = self < zero;
-            auto iszeropowpos = self == zero && other >= zero;
-            auto adj_self = select(iszeropowpos, batch_type(1), abs(self));
-            batch_type z = exp(other * log(adj_self));
-            z = select(iszeropowpos, zero, z);
-            z = select(is_odd(other) && negself, -z, z);
-            auto invalid = negself && !(is_flint(other) || isinf(other));
+            const auto one = batch_type(1.);
+            const auto infinite_exponent = isinf(exponent);
+            // x^(+/-0), 1^y, and (-1)^(+/-inf) all evaluate to 1.
+            const auto unit_result = exponent == zero || base == one || (base == -one && infinite_exponent);
+            const auto zero_pow_positive = base == zero && exponent > zero;
+            const auto log_arg = select(zero_pow_positive, one, abs(base));
+            // Compute exp(0) for unit results to avoid invalid conversions on WASM.
+            const auto exp_arg = select(unit_result, zero, exponent * log(log_arg));
+            auto z = select(zero_pow_positive, zero, exp(exp_arg));
+            const auto negative_base = base < zero;
+            // y is odd iff |y| - 2*trunc(|y|/2) == 1. Avoid subtracting one,
+            // which can round large even exponents to an even integer.
+            const auto abs_exponent = abs(exponent);
+            const auto half_trunc = trunc(abs_exponent * T(0.5));
+            const auto rem = abs_exponent - (half_trunc + half_trunc);
+            const auto odd_exponent = rem == one;
+            const auto int_exponent = (rem == zero) || odd_exponent;
+            z = select(odd_exponent && negative_base, -z, z);
+            const auto invalid = negative_base && !(int_exponent || infinite_exponent);
             return select(invalid, constants::nan<batch_type>(), z);
         }
 
