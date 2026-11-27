@@ -282,12 +282,45 @@ TEST_CASE_TEMPLATE("[slide]", B, BATCH_INT_TYPES)
     }
 }
 
+// Calls f(mask, bits) for every lane mask of a batch with N lanes when N <= 8,
+// and for pseudo-random lane masks otherwise.
+template <size_t N, class F>
+void for_each_lane_mask(F&& f)
+{
+    std::array<bool, N> mask;
+    if constexpr (N <= 8)
+    {
+        for (uint64_t bits = 0; bits < (uint64_t(1) << N); ++bits)
+        {
+            for (size_t i = 0; i < N; ++i)
+                mask[i] = ((bits >> i) & 1) != 0;
+            f(mask, bits);
+        }
+    }
+    else
+    {
+        uint32_t state = 1;
+        for (int r = 0; r < 256; ++r)
+        {
+            uint64_t bits = 0;
+            for (size_t i = 0; i < N; ++i)
+            {
+                state = state * 1664525u + 1013904223u;
+                mask[i] = ((state >> 16) & 1) != 0;
+                bits |= uint64_t(mask[i]) << (i % 64);
+            }
+            f(mask, bits);
+        }
+    }
+}
+
 template <class B>
 struct compress_test
 {
     using batch_type = B;
     using value_type = typename B::value_type;
     using mask_batch_type = typename B::batch_bool_type;
+    using uint_type = xsimd::as_unsigned_integer_t<value_type>;
 
     static constexpr size_t size = B::size;
     std::array<value_type, size> input;
@@ -296,9 +329,11 @@ struct compress_test
 
     compress_test()
     {
+        // Non-zero inputs, with low order bits set for floating point types
+        // as well, so that an element leaking into a zeroed slot is noticed.
         for (size_t i = 0; i < size; ++i)
         {
-            input[i] = static_cast<value_type>(i);
+            input[i] = static_cast<value_type>(i + 1) + static_cast<value_type>(std::is_floating_point_v<value_type> ? 0.1 : 0);
         }
     }
 
@@ -334,7 +369,7 @@ struct compress_test
             mask[i] = i % 2 == 0;
 
         for (size_t i = 0; i < size; ++i)
-            expected[i] = i < size / 2 ? input[2 * i] : 0;
+            expected[i] = i < (size + 1) / 2 ? input[2 * i] : 0;
 
         auto b = xsimd::compress(
             batch_type::load_unaligned(input.data()),
@@ -348,12 +383,33 @@ struct compress_test
             mask[i] = i % 3 == 0;
 
         for (size_t i = 0; i < size; ++i)
-            expected[i] = i < size / 3 ? input[3 * i] : 0;
+            expected[i] = i < (size + 2) / 3 ? input[3 * i] : 0;
 
         auto b = xsimd::compress(
             batch_type::load_unaligned(input.data()),
             mask_batch_type::load_unaligned(mask.data()));
         CHECK_BATCH_EQ(b, expected);
+    }
+
+    void all_masks()
+    {
+        auto check = [&](std::array<bool, size> const& m, uint64_t bits)
+        {
+            std::fill(expected.begin(), expected.end(), value_type(0));
+            for (size_t i = 0, j = 0; i < size; ++i)
+                if (m[i])
+                    expected[j++] = input[i];
+
+            CAPTURE(bits);
+            auto b = xsimd::compress(
+                batch_type::load_unaligned(input.data()),
+                mask_batch_type::load_unaligned(m.data()));
+            // Only data movement: compare bit patterns, so that a tiny floating
+            // point value leaking into a zeroed slot is not taken for zero.
+            CHECK_BATCH_EQ(xsimd::bitwise_cast<uint_type>(b),
+                           xsimd::bitwise_cast<uint_type>(batch_type::load_unaligned(expected.data())));
+        };
+        for_each_lane_mask<size>(check);
     }
 };
 
@@ -370,14 +426,18 @@ TEST_CASE_TEMPLATE("[compress]", B, XSIMD_COMPRESS_TYPES)
     {
         Test.full();
     }
-    // SUBCASE("interleave")
-    //{
-    //      Test.interleave();
-    // }
-    // SUBCASE("common")
-    //{
-    //      Test.common();
-    // }
+    SUBCASE("interleave")
+    {
+        Test.interleave();
+    }
+    SUBCASE("common")
+    {
+        Test.common();
+    }
+    SUBCASE("all_masks")
+    {
+        Test.all_masks();
+    }
 }
 
 template <class B>
@@ -386,6 +446,7 @@ struct expand_test
     using batch_type = B;
     using value_type = typename B::value_type;
     using mask_batch_type = typename B::batch_bool_type;
+    using uint_type = xsimd::as_unsigned_integer_t<value_type>;
 
     static constexpr size_t size = B::size;
     std::array<value_type, size> input;
@@ -394,9 +455,11 @@ struct expand_test
 
     expand_test()
     {
+        // Non-zero inputs, with low order bits set for floating point types
+        // as well, so that an element leaking into a zeroed slot is noticed.
         for (size_t i = 0; i < size; ++i)
         {
-            input[i] = static_cast<value_type>(i);
+            input[i] = static_cast<value_type>(i + 1) + static_cast<value_type>(std::is_floating_point_v<value_type> ? 0.1 : 0);
         }
     }
 
@@ -452,6 +515,25 @@ struct expand_test
             batch_type::load_unaligned(input.data()),
             mask_batch_type::load_unaligned(mask.data()));
         CHECK_BATCH_EQ(b, expected);
+    }
+
+    void all_masks()
+    {
+        auto check = [&](std::array<bool, size> const& m, uint64_t bits)
+        {
+            for (size_t i = 0, j = 0; i < size; ++i)
+                expected[i] = m[i] ? input[j++] : 0;
+
+            CAPTURE(bits);
+            auto b = xsimd::expand(
+                batch_type::load_unaligned(input.data()),
+                mask_batch_type::load_unaligned(m.data()));
+            // Only data movement: compare bit patterns, so that a tiny floating
+            // point value leaking into a zeroed slot is not taken for zero.
+            CHECK_BATCH_EQ(xsimd::bitwise_cast<uint_type>(b),
+                           xsimd::bitwise_cast<uint_type>(batch_type::load_unaligned(expected.data())));
+        };
+        for_each_lane_mask<size>(check);
     }
 };
 
@@ -475,6 +557,10 @@ TEST_CASE_TEMPLATE("[expand]", B, XSIMD_EXPAND_TYPES)
     SUBCASE("common")
     {
         Test.common();
+    }
+    SUBCASE("all_masks")
+    {
+        Test.all_masks();
     }
 }
 

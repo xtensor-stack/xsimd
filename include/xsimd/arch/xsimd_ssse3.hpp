@@ -14,6 +14,7 @@
 
 #include "../types/xsimd_ssse3_register.hpp"
 #include "../types/xsimd_utils.hpp"
+#include "./utils/compress_expand_lut.hpp"
 
 #include <cstddef>
 #include <type_traits>
@@ -50,6 +51,26 @@ namespace xsimd
                 assert(false && "unsupported arch/op combination");
                 return {};
             }
+        }
+
+        // compress
+        // One byte shuffle with a precomputed permutation; pshufb zeroes the
+        // bytes whose index has its most significant bit set.
+        template <class A, class T, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> compress(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<ssse3>) noexcept
+        {
+            auto const& lut = utils::byte_shuffle_lut_v<batch<T, A>::size>;
+            __m128i idx = _mm_load_si128(reinterpret_cast<__m128i const*>(lut.compress[mask.mask()]));
+            return bitwise_cast<T>(batch<uint8_t, A>(_mm_shuffle_epi8(bitwise_cast<uint8_t>(self), idx)));
+        }
+
+        // expand
+        template <class A, class T, class = std::enable_if_t<std::is_arithmetic_v<T> && (sizeof(T) == 4 || sizeof(T) == 8)>>
+        XSIMD_INLINE batch<T, A> expand(batch<T, A> const& self, batch_bool<T, A> const& mask, requires_arch<ssse3>) noexcept
+        {
+            auto const& lut = utils::byte_shuffle_lut_v<batch<T, A>::size>;
+            __m128i idx = _mm_load_si128(reinterpret_cast<__m128i const*>(lut.expand[mask.mask()]));
+            return bitwise_cast<T>(batch<uint8_t, A>(_mm_shuffle_epi8(bitwise_cast<uint8_t>(self), idx)));
         }
 
         // extract_pair
