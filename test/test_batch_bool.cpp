@@ -1002,4 +1002,20 @@ TEST_CASE_TEMPLATE("batch_bool mask hygiene", B, BATCH_TYPES)
     }
 }
 
+#if XSIMD_WITH_EMULATED
+TEST_CASE("emulated batch_bool construction")
+{
+    using M = xsimd::batch_bool<float, xsimd::emulated<96>>;
+
+    M const all_true(true);
+    CHECK(all_true.get(0));
+    CHECK(all_true.get(M::size - 1));
+
+    M const lanes(true, false, true);
+    CHECK(lanes.get(0));
+    CHECK_FALSE(lanes.get(1));
+    CHECK(lanes.get(2));
+}
+#endif
+
 #endif
