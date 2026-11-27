@@ -408,12 +408,12 @@ namespace xsimd
         template <class A>
         XSIMD_INLINE batch<float, A> nearbyint(batch<float, A> const& self, requires_arch<sse4_1>) noexcept
         {
-            return _mm_round_ps(self, _MM_FROUND_TO_NEAREST_INT);
+            return _mm_round_ps(self, _MM_FROUND_CUR_DIRECTION);
         }
         template <class A>
         XSIMD_INLINE batch<double, A> nearbyint(batch<double, A> const& self, requires_arch<sse4_1>) noexcept
         {
-            return _mm_round_pd(self, _MM_FROUND_TO_NEAREST_INT);
+            return _mm_round_pd(self, _MM_FROUND_CUR_DIRECTION);
         }
 
         // select
