@@ -2034,7 +2034,7 @@ namespace xsimd
          * ====================================================
          */
         template <class A, class T>
-        XSIMD_INLINE batch<T, A> pow(batch<T, A> const& base, batch<T, A> const& exponent, requires_arch<common>) noexcept
+        XSIMD_INLINE batch<T, A> pow_generic(batch<T, A> const& base, batch<T, A> const& exponent, requires_arch<common>) noexcept
         {
             using batch_type = batch<T, A>;
             const auto zero = batch_type(0.);
@@ -2058,6 +2058,27 @@ namespace xsimd
             z = select(odd_exponent && negative_base, -z, z);
             const auto invalid = negative_base && !(int_exponent || infinite_exponent);
             return select(invalid, constants::nan<batch_type>(), z);
+        }
+
+        template <class A, class T>
+        XSIMD_INLINE batch<T, A> pow(batch<T, A> const& base, batch<T, A> const& exponent, requires_arch<common>) noexcept
+        {
+            using batch_type = batch<T, A>;
+            const auto cube_exponent = exponent == batch_type(3);
+            const auto small_exponent = exponent == batch_type(2) || cube_exponent;
+            if (any(small_exponent))
+            {
+                // x^2 and x^3 avoid the rounding in exp(y * log(x)).
+                const auto factor = select(small_exponent, base, batch_type(1));
+                const auto result = factor * factor * select(cube_exponent, factor, batch_type(1));
+                if (all(small_exponent))
+                {
+                    return result;
+                }
+                const auto other_exponent = select(small_exponent, batch_type(0), exponent);
+                return select(small_exponent, result, pow_generic(base, other_exponent, common {}));
+            }
+            return pow_generic(base, exponent, common {});
         }
 
         template <class A, class T>

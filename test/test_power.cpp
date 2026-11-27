@@ -109,9 +109,23 @@ struct power_test
 #endif
         }
         CHECK(xsimd::all(pow(batch_type(0), batch_type(0)) == batch_type(1)));
+        // Squares and cubes avoid the logarithm/exponential rounding.
+        for (const auto& c : { std::array<value_type, 3> { 3, 2, 9 }, { 4, 2, 16 }, { 5, 2, 25 }, { 2, 3, 8 }, { 7, 3, 343 }, { 10, 2, 100 } })
+        {
+            CHECK(xsimd::all(pow(batch_type(c[0]), batch_type(c[1])) == batch_type(c[2])));
+        }
+        const auto mixed_base = xsimd::insert(batch_type(16), value_type(-7), xsimd::index<0>());
+        const auto mixed_exponent = xsimd::insert(batch_type(0.5), value_type(3), xsimd::index<0>());
+        const auto mixed_result = pow(mixed_base, mixed_exponent);
+        CHECK(mixed_result.get(0) == value_type(-343));
+        CHECK_BATCH_EQ(xsimd::insert(batch_type(4), value_type(-343), xsimd::index<0>()), mixed_result);
 #ifndef __FAST_MATH__
         const auto nan = std::numeric_limits<value_type>::quiet_NaN();
         const auto inf = std::numeric_limits<value_type>::infinity();
+        CHECK(std::signbit(pow(batch_type(-value_type(0)), batch_type(3)).get(0)));
+        CHECK(xsimd::all(pow(batch_type(-inf), batch_type(2)) == batch_type(inf)));
+        CHECK(xsimd::all(xsimd::isnan(pow(batch_type(nan), batch_type(3)))));
+        CHECK(std::isnan(pow(xsimd::insert(batch_type(16), nan, xsimd::index<0>()), mixed_exponent).get(0)));
         CHECK(xsimd::all(pow(batch_type(nan), batch_type(0)) == batch_type(1)));
         CHECK(xsimd::all(pow(batch_type(1), batch_type(nan)) == batch_type(1)));
         CHECK(xsimd::all(pow(batch_type(-1), batch_type(inf)) == batch_type(1)));
